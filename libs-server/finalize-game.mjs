@@ -37,13 +37,13 @@ if (!process.env.DEBUG) {
  * - Market results processing
  * - Optional: Seasonlog and careerlog aggregate updates
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.esbid - Game identifier
  * @param {number} params.year - Season year
  * @param {number} params.week - Week number
  * @param {string} params.seas_type - Season type (PRE, REG, POST)
  * @param {boolean} params.update_aggregates - If true, also update seasonlogs and careerlogs (default: false)
- * @returns {Promise<Object>} - Processing results
+ * @returns {Promise<object>} - Processing results
  */
 export const finalize_game = async ({
   esbid,

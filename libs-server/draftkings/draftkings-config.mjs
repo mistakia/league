@@ -2,7 +2,7 @@ import db from '#db'
 
 /**
  * Get DraftKings configuration from the database
- * @returns {Promise<Object>} DraftKings configuration object
+ * @returns {Promise<object>} DraftKings configuration object
  */
 export const get_draftkings_config = async () => {
   const config_row = await db('config')

@@ -127,7 +127,7 @@ const group_by_division = (teams) => {
 }
 
 /**
- * @param {Array} teams - ordered array of { uid, division }; the order is the
+ * @param {object[]} teams - ordered array of { uid, division }; the order is the
  *   draw result and fully determines the schedule
  * @returns {Array<Array<{ home: Object, away: Object }>>} one entry per
  *   Qualifying Season week

@@ -55,8 +55,8 @@ const at_large_comparators = {
  *   - ranking the bye candidates: bye_selection_method
  *   - taking an at-large berth: at_large_selection_method
  *
- * @param {Object} params
- * @param {Array} params.teams - flat objects with tid, division, and the stat keys
+ * @param {object} params
+ * @param {object[]} params.teams - flat objects with tid, division, and the stat keys
  *   the comparators read
  * @param {number} params.playoff_team_count - size of the playoff field
  * @param {number} params.bye_count - how many top seeds skip the first round

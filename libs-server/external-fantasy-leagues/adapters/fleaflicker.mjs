@@ -36,7 +36,7 @@ export default class FleaflickerAdapter extends BaseAdapter {
 
   /**
    * Authenticate with Fleaflicker (no authentication required - API is public)
-   * @param {Object} credentials - Not used for Fleaflicker
+   * @param {object} credentials - Not used for Fleaflicker
    * @returns {Promise<boolean>} Always returns true
    */
   async authenticate(credentials = {}) {

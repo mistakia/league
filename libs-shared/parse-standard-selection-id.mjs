@@ -4,7 +4,7 @@
  * Format: {event_identifier}|MARKET:{market_type}|{subject}|SEL:{selection_type}|LINE:{line}
  *
  * @param {string} selection_id - The selection ID to parse
- * @returns {Object} Parsed components
+ * @returns {object} Parsed components
  * @returns {string} [result.esbid] - Event Sports Business ID for game events
  * @returns {number} [result.year] - Season year for non-game events
  * @returns {string} [result.seas_type] - Season type: REG, POST, PRE

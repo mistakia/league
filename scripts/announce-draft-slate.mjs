@@ -86,12 +86,12 @@ const MAX_NAMED_ALREADY_OPEN = 6
  * window is not a thing that happens tomorrow and printing a past time in a
  * schedule reads as an error.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.season_year
  * @param {import('dayjs').Dayjs} args.slate_date - Any instant on the day the slots fall on.
- * @param {Array} args.slots - `{ pick_string, name, abbreviation, window_open_at }`, in pick order.
- * @param {Array} args.already_open - Same shape, for picks passable before this publication.
- * @param {Object|null} args.on_clock - `{ name, pick_string, pass_window }`, or null.
+ * @param {object[]} args.slots - `{ pick_string, name, abbreviation, window_open_at }`, in pick order.
+ * @param {object[]} args.already_open - Same shape, for picks passable before this publication.
+ * @param {object|null} args.on_clock - `{ name, pick_string, pass_window }`, or null.
  * @returns {string}
  */
 export const build_slate_message = (args) => {

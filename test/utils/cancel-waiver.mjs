@@ -3,12 +3,12 @@ import server from '#api'
 
 /**
  * Cancels a waiver claim via API
- * @param {Object} options
+ * @param {object} options
  * @param {number} options.waiverId - Waiver ID to cancel
  * @param {number} options.teamId - Team ID
  * @param {number} options.leagueId - League ID
  * @param {string} options.token - Authorization token
- * @returns {Promise<Object>} Cancelled waiver response
+ * @returns {Promise<object>} Cancelled waiver response
  */
 export default async function cancel_waiver({
   waiverId,

@@ -22,12 +22,12 @@ const log = debug('simulation:compute-actuals-optimal-lineup')
  * Compute the optimal starting lineup for a team in a given week using
  * realized fantasy points.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.lid - League ID
  * @param {number} params.tid - Fantasy team ID
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {Object} params.league_format_record - Full league_formats row.
+ * @param {object} params.league_format_record - Full league_formats row.
  *   Required by getOptimizerPositionConstraints (slot counts) and to
  *   resolve the scoring_format_id that keys scoring_format_player_gamelogs.
  * @returns {Promise<{starter_pids: string[], total_points: number}>}
@@ -95,12 +95,12 @@ export async function compute_actuals_optimal_lineup({
 /**
  * Compute optimal lineups for multiple teams in a given week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.lid
  * @param {number[]} params.team_ids
  * @param {number} params.week
  * @param {number} params.year
- * @param {Object} params.league_format_record
+ * @param {object} params.league_format_record
  * @returns {Promise<Map<number, string[]>>} Map of tid -> starter_pids
  */
 export async function compute_actuals_optimal_lineups_for_teams({

@@ -12,11 +12,11 @@ const log = debug('simulation:load-player-variance')
 /**
  * Load player variance data for distribution fitting.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Year for variance data (typically prior year)
  * @param {string} params.scoring_format_id - Scoring format hash
- * @returns {Promise<Map>} Map of pid -> { mean_points, std_points, coefficient_of_variation, games_played }
+ * @returns {Promise<Map<string, object>>} Map of pid -> { mean_points, std_points, coefficient_of_variation, games_played }
  */
 export async function load_player_variance({
   player_ids,
@@ -114,10 +114,10 @@ export async function load_player_variance({
 /**
  * Load archetypes for players.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Year of archetype data
- * @returns {Promise<Map>} Map of pid -> archetype string
+ * @returns {Promise<Map<string, string>>} Map of pid -> archetype string
  */
 export async function load_player_archetypes({ player_ids, year }) {
   if (!player_ids.length) {

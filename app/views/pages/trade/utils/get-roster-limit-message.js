@@ -1,6 +1,6 @@
 /**
  * Generate user-friendly roster limit error message based on validation details
- * @param {Object} validation_details - Validation details with needs_active_releases, needs_ps_releases, and counts
+ * @param {object} validation_details - Validation details with needs_active_releases, needs_ps_releases, and counts
  * @returns {string} Formatted error message indicating which players need to be released
  */
 export function get_roster_limit_message(validation_details) {

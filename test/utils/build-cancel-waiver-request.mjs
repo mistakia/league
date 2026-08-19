@@ -4,12 +4,12 @@ import server from '#api'
 /**
  * Builds a cancel waiver request (doesn't execute it)
  * Useful for error tests that need to test validation
- * @param {Object} options
+ * @param {object} options
  * @param {number} options.waiverId - Waiver ID to cancel
  * @param {number} options.leagueId - League ID
  * @param {string} [options.token] - Authorization token (optional)
- * @param {Object} [options.body] - Request body (teamId, leagueId)
- * @returns {Object} Chai request object (not executed)
+ * @param {object} [options.body] - Request body (teamId, leagueId)
+ * @returns {object} Chai request object (not executed)
  */
 export default function build_cancel_waiver_request({
   waiverId,

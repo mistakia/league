@@ -8,7 +8,7 @@
 /**
  * Creates a new mock localStorage instance
  *
- * @returns {Object} localStorage-compatible mock object
+ * @returns {object} localStorage-compatible mock object
  */
 export const createMockLocalStorage = () => {
   let store = {}
@@ -71,7 +71,7 @@ export const createMockLocalStorage = () => {
  * Setup global localStorage mock for tests
  * Attaches the mock to the global object so it can be used by the code under test
  *
- * @returns {Object} The created localStorage mock
+ * @returns {object} The created localStorage mock
  */
 export const setupLocalStorageMock = () => {
   global.localStorage = createMockLocalStorage()

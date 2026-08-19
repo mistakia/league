@@ -38,14 +38,14 @@ const log = debug('simulation:playoff-weeks')
  * Run correlated playoff simulation using the full simulation engine.
  * This function loads all necessary data and runs run_simulation() with correlations.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Team IDs to simulate
  * @param {number[]} params.weeks - Weeks to simulate (only weeks that need simulation, not locked weeks)
  * @param {number} params.year - NFL year
  * @param {number} params.n_simulations - Number of simulations
- * @param {Map} [params.locked_week_scores] - Map of week -> Map<tid, points> for completed weeks
- * @returns {Promise<Object>} { raw_team_scores: Map<tid, number[]>, week_results: Object[] }
+ * @param {Map<number, Map<number, number>>} [params.locked_week_scores] - Map of week -> Map<tid, points> for completed weeks
+ * @returns {Promise<object>} { raw_team_scores: Map<tid, number[]>, week_results: Object[] }
  */
 export async function simulate_playoff_weeks_correlated({
   league_id,

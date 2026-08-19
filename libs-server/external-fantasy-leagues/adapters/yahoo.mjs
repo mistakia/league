@@ -32,7 +32,7 @@ export default class YahooAdapter extends BaseAdapter {
 
   /**
    * Authenticate with Yahoo using OAuth2 flow
-   * @param {Object} credentials - Yahoo OAuth credentials
+   * @param {object} credentials - Yahoo OAuth credentials
    * @param {string} credentials.client_id - Yahoo app client ID
    * @param {string} credentials.client_secret - Yahoo app client secret
    * @param {string} [credentials.access_token] - Existing access token

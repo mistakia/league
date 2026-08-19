@@ -3,7 +3,7 @@
 //
 // WHY THESE ARE WORSE THAN NO ANNOTATION. Capital `Object` is the TypeScript
 // `Object` interface, which declares `hasOwnProperty`, `toString` and four more
-// -- and nothing else. So `@param {Object} params` followed by
+// -- and nothing else. So `@param {object} params` followed by
 // `params.player_id` is not an under-specified annotation, it is a GUARANTEED
 // error at every property read, on a tag that reads to a human as
 // documentation. `Array`, `Map`, `Set` and `Promise` are generics missing their

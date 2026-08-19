@@ -124,7 +124,7 @@ const INVALID_PENALTY_NAMES = new Set([
 
 /**
  * Extract penalty type from play description
- * @param {Object} params
+ * @param {object} params
  * @param {string} [params.desc] - Play description text (NGS/NFL v1 source)
  * @param {string} [params.play_description_nflfastr] - nflfastr play description (preferred, more complete)
  * @returns {string|null} Extracted penalty type or null if not found
@@ -175,7 +175,7 @@ const has_unit_designation = (penalty_type) => {
 
 /**
  * Normalize penalty type to canonical name with unit designation
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.raw_penalty_type - Raw penalty type name
  * @param {string} [params.penalty_team] - Team that committed the penalty
  * @param {string} [params.off_team] - Team on offense during the play
@@ -235,7 +235,7 @@ export const normalize_penalty_type = ({
 
 /**
  * Extract and normalize penalty type in one step
- * @param {Object} params
+ * @param {object} params
  * @param {string} [params.desc] - Play description text (NGS/NFL v1 source)
  * @param {string} [params.play_description_nflfastr] - nflfastr play description (preferred, more complete)
  * @param {string} [params.penalty_team] - Team that committed the penalty

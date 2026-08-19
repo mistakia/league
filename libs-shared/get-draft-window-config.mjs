@@ -20,7 +20,7 @@
  * still read — two SPA predicates branch on it — and dropping it is
  * `user:task/league/retire-draft-type-and-conform-draft-window-naming.md`.
  *
- * @param {Object} draft_settings
+ * @param {object} draft_settings
  * @param {Date|string} draft_settings.draft_start - When the draft opens; a Date
  *   on the server, an ISO string once through JSON.
  * @param {number} [draft_settings.draft_pick_interval] - Hours between slots.
@@ -41,7 +41,7 @@
  *
  * @param {Date|string} [draft_settings.resumed_at] - The league's LATEST resume.
  *
- * @returns {Object} Window-calculation arguments, ready to spread.
+ * @returns {object} Window-calculation arguments, ready to spread.
  */
 import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
 

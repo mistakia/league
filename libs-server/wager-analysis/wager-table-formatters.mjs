@@ -106,7 +106,7 @@ export const create_wager_summary_table = (
  * Dynamically generates columns for all observed counts (e.g., 1, 2, 3, 4, 5...).
  * This provides full visibility into near-miss patterns across all wagers.
  *
- * @param {Object} wager_summary - Summary object containing lost_by_legs counts
+ * @param {object} wager_summary - Summary object containing lost_by_legs counts
  * @returns {Table} Console table with dynamic columns for each lost leg count
  */
 export const create_lost_by_legs_table = (wager_summary) => {

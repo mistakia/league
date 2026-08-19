@@ -28,7 +28,7 @@ import { admission_vote_statuses } from '#libs-shared/constants/admission-vote-c
  * display stability; ranking WITHIN a tie is the Commissioner's own
  * determination, not this ORDER BY's.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.admission_vote_id
  * @returns {Promise<Array<{admission_vote_candidate_id: number, candidate_name: string, points_total: number}>>}
  *   Empty while the vote is open, or where no such vote exists.

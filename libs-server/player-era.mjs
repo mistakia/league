@@ -99,7 +99,7 @@ const birth_year_of = (player) => {
 }
 
 /**
- * @param {Object} player - a `player` row carrying `date_of_birth`, or failing
+ * @param {object} player - a `player` row carrying `date_of_birth`, or failing
  *   that `nfl_draft_year` and `draft_round`. A row carrying neither is not
  *   falsifiable and passes.
  * @param {number} season_year - the season of the game the stat belongs to.

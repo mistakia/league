@@ -4,10 +4,10 @@ import { current_season } from '#constants'
 /**
  * Get playoff week configuration from the seasons table
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.lid - League ID
  * @param {number} [params.year] - Season year (defaults to current season)
- * @returns {Promise<Object>} Playoff week configuration
+ * @returns {Promise<object>} Playoff week configuration
  *   - wildcard_week: First playoff week (wildcard round)
  *   - championship_weeks: Array of championship round weeks
  *   - final_week: Final week of the season (last championship week)

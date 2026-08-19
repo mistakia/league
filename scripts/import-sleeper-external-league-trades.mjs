@@ -158,7 +158,7 @@ const mark_league_unavailable_for_chain_walk = async (external_league_id) =>
 
 /**
  * Import every completed trade from one Sleeper league-season.
- * @returns {Promise<Object>} Per-league import counts
+ * @returns {Promise<object>} Per-league import counts
  */
 export const import_sleeper_league_trades = async ({
   external_league_id,

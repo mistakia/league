@@ -31,7 +31,7 @@ import { current_season } from '#constants'
  *
  * See user:text/league/projection-history-system.md for the full semantic.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year
  * @returns {number} first week to recompute, inclusive
  */

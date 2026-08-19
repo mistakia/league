@@ -13,11 +13,11 @@ const log = debug('simulation:calculate-position-ranks')
  * Load position ranks for a set of players.
  * Ranks are calculated based on season-to-date stats within each NFL team.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - NFL year
  * @param {number} params.week - Current NFL week (ranks through this week)
- * @returns {Promise<Map>} Map of pid -> position_rank (e.g., 'WR1', 'RB2', 'TE1')
+ * @returns {Promise<Map<string, string>>} Map of pid -> position_rank (e.g., 'WR1', 'RB2', 'TE1')
  */
 export async function load_position_ranks({ player_ids, year, week }) {
   if (!player_ids.length) {
@@ -225,7 +225,7 @@ async function calculate_opportunity_share_ranks({ player_ids, year, week }) {
 /**
  * Get position rank for a single player.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.player_id - Player ID
  * @param {number} params.year - NFL year
  * @param {number} params.week - Current week

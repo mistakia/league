@@ -63,7 +63,7 @@ export const build_espn_cookie_header = ({ espn_s2, swid }) => {
  * Build an HTTP client authenticated with the given ESPN cookie pair. Pure (no
  * network): the cookie is carried in the client's request headers.
  * @param {{ espn_s2: string, swid: string }} cookies
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.base_url] - base URL for the client
  * @returns {AuthenticatedApiClient}
  */
@@ -123,7 +123,7 @@ const run_cloak_browser = (cb_args) => {
  * Opens the profile headless, exports the cookie jar, and closes it — value-free
  * throughout. No account password is handled: the session was established by the
  * attended re-auth (scripts/espn-signin.mjs).
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.profile] - CloakBrowser profile name (default `espn`)
  * @returns {{ espn_s2: string, swid: string }}
  * @throws {EspnReauthRequiredError} if the profile has no live session
@@ -159,7 +159,7 @@ export const derive_espn_cookies = ({ profile = ESPN_PROFILE } = {}) => {
  * Preferred interface: the fresh cookie is carried in the client's request
  * headers, so callers make authenticated requests without ever handling the raw
  * s2/swid values.
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.base_url] - base URL for the client
  * @param {string} [options.profile] - CloakBrowser profile name
  * @param {{ espn_s2: string, swid: string }} [options.cookies] - pre-derived cookies (skips profile read)
@@ -179,7 +179,7 @@ export const get_espn_authenticated_client = ({
  * mode-0600 file for callers that need the raw value out-of-band. The header is
  * written to disk only — never returned in the clear or logged.
  * @param {string} file_path - destination path (created/overwritten with mode 0600)
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.profile] - CloakBrowser profile name
  * @param {{ espn_s2: string, swid: string }} [options.cookies] - pre-derived cookies (skips profile read)
  * @returns {{ file_path: string, byte_length: number }} non-sensitive metadata

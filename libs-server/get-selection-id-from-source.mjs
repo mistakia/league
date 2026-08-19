@@ -15,7 +15,7 @@ const team_market_types = new Set([
  * Looks up selection details from database and formats using standard format.
  * Used by wager import scripts (DraftKings, Fanatics) that store source IDs.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.source_id - Book identifier (e.g., 'DRAFTKINGS', 'FANATICS')
  * @param {string} params.source_market_id - Book's market ID
  * @param {string} params.source_selection_id - Book's selection ID

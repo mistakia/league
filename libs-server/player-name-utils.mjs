@@ -21,7 +21,7 @@ let nickname_sets_loading = null
  * Load nickname sets from CSV file.
  * Results are cached for subsequent calls.
  *
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {boolean} [options.force_reload=false] - Force reload from file even if cached
  * @returns {Promise<Array<Array<string>>>} Array of nickname sets
  */
@@ -119,7 +119,7 @@ export const is_nicknames_sync = (name1, name2, sets) => {
  *
  * @param {string} fname1 - First name 1
  * @param {string} fname2 - First name 2
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {Array<Array<string>>} [options.nickname_sets] - Pre-loaded nickname sets
  * @returns {Promise<boolean>} True if first names match
  */
@@ -173,7 +173,7 @@ export const last_names_match = (lname1, lname2) => {
  *
  * @param {string} full_name1 - Full name 1 (e.g., "Patrick Mahomes")
  * @param {string} full_name2 - Full name 2 (e.g., "Pat Mahomes")
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {Array<Array<string>>} [options.nickname_sets] - Pre-loaded nickname sets
  * @returns {Promise<boolean>} True if names likely refer to same player
  */

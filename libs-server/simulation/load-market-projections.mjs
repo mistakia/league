@@ -53,7 +53,7 @@ const convert_odds_to_probability = (odds_decimal) => {
  *   P(exactly 2) = P(2+) - P(3+)
  *   E[TD] = 1*(P(1+)-P(2+)) + 2*(P(2+)-P(3+)) + 3*P(3+) = P(1+) + P(2+) + P(3+)
  *
- * @param {Object} odds - Object with odds for each threshold
+ * @param {object} odds - Object with odds for each threshold
  * @param {number} odds.one_plus - Decimal odds for 1+ TD
  * @param {number} [odds.two_plus] - Decimal odds for 2+ TD (optional)
  * @param {number} [odds.three_plus] - Decimal odds for 3+ TD (optional)
@@ -93,12 +93,12 @@ const is_anytime_td_eligible = (position) => {
 /**
  * Load player prop market lines and convert to fantasy projections.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs to load projections for
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {Object} params.league - League settings for calculating fantasy points
- * @returns {Promise<Map>} Map of pid -> { projection, stats, source, market_types }
+ * @param {object} params.league - League settings for calculating fantasy points
+ * @returns {Promise<Map<string, object>>} Map of pid -> { projection, stats, source, market_types }
  */
 export async function load_market_projections({
   player_ids,

@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Load all JSON test cases from the data-view-queries directory (async version)
- * @returns {Promise<Array>} Promise resolving to array of test case objects with filename property added
+ * @returns {Promise<object[]>} Promise resolving to array of test case objects with filename property added
  */
 export const load_data_view_test_queries = async () => {
   const test_dir = path.join(__dirname, '..', 'test', 'data-view-queries')
@@ -34,7 +34,7 @@ export const load_data_view_test_queries = async () => {
 
 /**
  * Load all JSON test cases from the data-view-queries directory (sync version)
- * @returns {Array} Array of test case objects with filename property added
+ * @returns {object[]} Array of test case objects with filename property added
  */
 export const load_data_view_test_queries_sync = () => {
   const test_dir = path.join(__dirname, '..', 'test', 'data-view-queries')

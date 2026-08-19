@@ -1,11 +1,11 @@
 /**
  * Calculate live projection by combining accumulated points with projected remaining output.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.accumulated_points - Points accumulated so far from play-by-play
  * @param {number} params.full_game_projection - Full game projection (pre-game estimate)
  * @param {number} params.game_progress - Game progress as percentage (0-1)
- * @returns {Object} Live projection result
+ * @returns {object} Live projection result
  * @returns {number} result.projected_total - Total projected points (accumulated + remaining)
  * @returns {number} result.remaining_projection - Projected points for remainder of game
  * @returns {number} result.accumulated_points - Points accumulated so far

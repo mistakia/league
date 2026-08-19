@@ -5,8 +5,8 @@
  * If the current day has no status, walks backward from the previous day to find
  * the most recent practice status.
  *
- * @param {Object} params - The parameters object
- * @param {Object} params.practice - Practice object with day-of-week properties
+ * @param {object} params - The parameters object
+ * @param {object} params.practice - Practice object with day-of-week properties
  * @param {string|null} params.practice.monday_practice_status - Monday practice status (FP, LP, DNP or legacy FULL, LIMITED; or null)
  * @param {string|null} params.practice.tuesday_practice_status - Tuesday practice status
  * @param {string|null} params.practice.wednesday_practice_status - Wednesday practice status

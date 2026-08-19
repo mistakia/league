@@ -21,7 +21,7 @@ const log = debug('simulation:calculate-optimal-lineup')
  * Load all rostered players for a team (active roster only, not practice squad/IR).
  * Falls back to fallback_week if no roster data exists for the requested week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - NFL week
@@ -73,12 +73,12 @@ export async function load_full_team_roster({
 /**
  * Calculate optimal starting lineup for a team in a given week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @returns {Promise<Object>} { starter_pids, total_points, all_roster_pids }
+ * @returns {Promise<object>} { starter_pids, total_points, all_roster_pids }
  */
 export async function calculate_optimal_lineup({
   league_id,
@@ -156,7 +156,7 @@ export async function calculate_optimal_lineup({
 /**
  * Calculate optimal lineups for multiple teams in a given week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Array of fantasy team IDs
  * @param {number} params.week - NFL week

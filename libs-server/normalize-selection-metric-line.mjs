@@ -9,7 +9,7 @@
  * 1. Pure "N+" format (DraftKings): "100+", "250+"
  * 2. Embedded "N+" format (FanDuel): "Player Name 100+ Yards", "3+ Passing Touchdowns"
  *
- * @param {Object} params - Named parameters
+ * @param {object} params - Named parameters
  * @param {number|string|null|undefined} params.raw_value - The raw line value from the sportsbook API
  * @param {string} params.selection_name - The selection name/label (e.g., "3+", "Aaron Jones Over")
  * @returns {number|null} - The normalized line value, or null if input is null/undefined

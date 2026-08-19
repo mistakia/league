@@ -4,13 +4,13 @@ import isReserveEligible from './is-reserve-eligible.mjs'
 /**
  * Validate that a player can be assigned to a specific slot
  *
- * @param {Object} params - The parameters object
- * @param {Object} params.player - Player object with roster_status, game_designation, primary_position, etc.
+ * @param {object} params - The parameters object
+ * @param {object} params.player - Player object with roster_status, game_designation, primary_position, etc.
  * @param {number} params.slot - Target slot constant
- * @param {Object} params.roster - Roster object for space validation
+ * @param {object} params.roster - Roster object for space validation
  * @param {number} params.week - Current week number
  * @param {boolean} params.is_regular_season - Whether it's regular season
- * @returns {Object} Validation result { valid: boolean, error: string | null, requires_release: boolean }
+ * @returns {object} Validation result { valid: boolean, error: string | null, requires_release: boolean }
  */
 export default function validate_trade_slot_assignment({
   player,

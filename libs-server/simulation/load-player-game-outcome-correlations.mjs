@@ -7,11 +7,11 @@ const log = debug('simulation:load-player-game-outcome-correlations')
 /**
  * Load player-specific game outcome correlations.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs to load correlations for
  * @param {number} params.year - Year for correlation data
  * @param {string} [params.outcome_type='game_script'] - Type of outcome correlation
- * @returns {Promise<Map>} Map of pid -> { correlation, confidence, leading_fantasy_points_per_game, trailing_fantasy_points_per_game }
+ * @returns {Promise<Map<string, object>>} Map of pid -> { correlation, confidence, leading_fantasy_points_per_game, trailing_fantasy_points_per_game }
  */
 export async function load_player_game_outcome_correlations({
   player_ids,

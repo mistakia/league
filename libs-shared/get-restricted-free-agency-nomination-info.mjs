@@ -18,12 +18,12 @@ import {
  * Every window boundary is derived from the league's window configuration, so
  * this returns the same schedule the announce and processing scripts act on.
  *
- * @param {Object} params
- * @param {Object} params.league - League with restricted_free_agency_period_start and window settings
- * @param {Array} params.teams - Teams with team_id and draft_order
+ * @param {object} params
+ * @param {object} params.league - League with restricted_free_agency_period_start and window settings
+ * @param {object[]} params.teams - Teams with team_id and draft_order
  * @param {Number} [params.current_timestamp] - Current timestamp in seconds
  * @param {Number} [params.nomination_warning_hours=48] - Hours before a deadline to flag it as approaching
- * @returns {Object|null} Schedule, current window, and upcoming nominations
+ * @returns {object|null} Schedule, current window, and upcoming nominations
  */
 const get_restricted_free_agency_nomination_info = ({
   league,

@@ -14,10 +14,10 @@
  * 2025 derived rows. Keeping the predicate in the ON clause makes a missing
  * format degrade to null points rather than a vanished row.
  *
- * @param {Object} params
- * @param {Object} params.query - Knex query builder rooted at `player_gamelogs`
- * @param {Object} params.league - League with scoring_format_id / league_format_id
- * @returns {Object} The same query builder, for chaining
+ * @param {object} params
+ * @param {object} params.query - Knex query builder rooted at `player_gamelogs`
+ * @param {object} params.league - League with scoring_format_id / league_format_id
+ * @returns {object} The same query builder, for chaining
  */
 export default function attach_format_gamelog_columns({ query, league }) {
   return query

@@ -28,8 +28,8 @@ import db from '#db'
  * importers and misreport it as one.
  *
  * @param {string} table - Target table name, for the qualified column reference
- * @param {Array} rows - The rows being inserted, for the column set
- * @returns {Object} knex merge object mapping every column to its update value
+ * @param {NflPlaysRow[]} rows - The rows being inserted, for the column set
+ * @returns {object} knex merge object mapping every column to its update value
  */
 export const build_plays_merge = (table, rows) => {
   const columns = new Set()

@@ -88,7 +88,7 @@ const initialize_cli = () => {
 
 /**
  * Format player information for display
- * @param {Object} player - Player object with first_name, last_name, primary_position, and optional pid
+ * @param {object} player - Player object with first_name, last_name, primary_position, and optional pid
  * @returns {string} Formatted player display string
  */
 const format_player_display = (player) =>
@@ -97,8 +97,8 @@ const format_player_display = (player) =>
 /**
  * Search for players by name with exact match priority
  * @param {string} search_term - Name to search for
- * @param {Array} players - Array of player objects to search through
- * @returns {Array} Array of matching players, exact matches first
+ * @param {object[]} players - Array of player objects to search through
+ * @returns {object[]} Array of matching players, exact matches first
  */
 const search_players_by_name = (search_term, players) => {
   const formatted_search = format_player_name(search_term)

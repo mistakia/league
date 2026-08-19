@@ -54,7 +54,7 @@ export { DRAFT_TIMEZONE, DEFAULT_PICK_INTERVAL_HOURS }
  * picks made during the day leave the queue and everything behind them comes
  * up. So the next day's board is knowable the night before.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
  * @param {number} args.pick_number - 1-based pick number to calculate the window for.
  * @param {number} [args.pick_interval_hours=1] - Hours between slots.
@@ -66,7 +66,7 @@ export { DRAFT_TIMEZONE, DEFAULT_PICK_INTERVAL_HOURS }
  * at each caller. `draft_start_timestamp` stays epoch seconds because this
  * function does arithmetic on it.
  *
- * @param {Array} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
+ * @param {object[]} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
  *   selection_timestamp }` rows in any order. Omit pre-draft, in which case
  *   every pick is outstanding and pick N takes the (N-1)th slot. Passing a
  *   PARTIAL board mis-indexes the slate and places windows too early.
@@ -172,7 +172,7 @@ export default function getDraftWindow({
  * null. Asking for the second outstanding pick asks the question the caller
  * actually has.
  *
- * @param {Object} args - The same window arguments, minus `pick_number`.
+ * @param {object} args - The same window arguments, minus `pick_number`.
  * @returns {import('dayjs').Dayjs|null} Null when no publication governs, or
  *   when fewer than two picks are outstanding — the last pick on the board
  *   cannot be passed by anyone.

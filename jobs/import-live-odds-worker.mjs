@@ -109,9 +109,9 @@ const last_import_times = {}
 
 /**
  * Wrap an async function with a timeout
- * @param {Promise} promise - The promise to wrap
+ * @param {Promise<unknown>} promise - The promise to wrap
  * @param {number} timeout_ms - Timeout in milliseconds
- * @returns {Promise} - Resolves with result or rejects with timeout error
+ * @returns {Promise<unknown>} - Resolves with result or rejects with timeout error
  */
 const with_timeout = (promise, timeout_ms) => {
   return new Promise((resolve, reject) => {
@@ -207,7 +207,7 @@ const import_bookmaker = async (bookmaker_key) => {
 
 /**
  * Run a single loop iteration - check and import all due bookmakers
- * @returns {Promise<Object>} - Results of the iteration
+ * @returns {Promise<object>} - Results of the iteration
  */
 const run_import_iteration = async () => {
   const results = {

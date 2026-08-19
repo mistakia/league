@@ -11,7 +11,7 @@ const log = debug('data-preloader')
  * Data is structured for direct consumption by settlement handlers.
  *
  * @param {Array<string>} esbids - Game IDs to load data for
- * @returns {Object} Serializable data object containing all required game data
+ * @returns {object} Serializable data object containing all required game data
  */
 export const preload_game_data = async (esbids) => {
   if (!esbids || esbids.length === 0) {

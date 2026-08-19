@@ -38,7 +38,7 @@ const lookup_url_in_database = async (hash) => {
 /**
  * Parse URL parameters into plays view table state
  * @param {string} full_url - The full URL with query parameters
- * @returns {Object} - Table state configuration object
+ * @returns {object} - Table state configuration object
  */
 const parse_url_to_table_state = (full_url) => {
   const url_obj = new URL(full_url)
@@ -94,7 +94,7 @@ export const is_plays_view_url = (full_url) => {
 
 /**
  * Main function to debug plays view URLs
- * @param {Object} options - Command options
+ * @param {object} options - Command options
  * @param {string} options.short_url - The short URL to debug
  * @param {boolean} options.beautify - Whether to beautify the SQL output
  * @param {boolean} options.debug_mode - Whether to enable debug logging

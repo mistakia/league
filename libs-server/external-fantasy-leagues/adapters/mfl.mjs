@@ -36,7 +36,7 @@ export default class MflAdapter extends BaseAdapter {
 
   /**
    * Authenticate with MFL using API key or username/password
-   * @param {Object} credentials - MFL credentials
+   * @param {object} credentials - MFL credentials
    * @param {string} [credentials.api_key] - MFL API key (preferred)
    * @param {string} [credentials.username] - MFL username (alternative)
    * @param {string} [credentials.password] - MFL password (alternative)

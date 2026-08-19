@@ -24,7 +24,7 @@ const ORIGINAL_TEAM_MIN_BOOST_DOLLARS = 2
  * player was traded and a bid against the previous holder was later cancelled.
  *
  * @param {string|number} leagueId - The league ID to check
- * @returns {Promise<Array>} Array of restricted free agency bids ready to be processed
+ * @returns {Promise<object[]>} Array of restricted free agency bids ready to be processed
  */
 export default async function get_top_restricted_free_agency_bids(leagueId) {
   const nominations_by_pid = await get_restricted_free_agency_nominations({

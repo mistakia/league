@@ -101,7 +101,7 @@ const build_unknown_format = ({
  * - Week: SEAS:{year}|SEAS_TYPE:{seas_type}|WEEK:{week}
  * - Day: SEAS:{year}|SEAS_TYPE:{seas_type}|WEEK:{week}|DAY:{day}
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} [params.esbid] - Event Sports Business ID for game events
  * @param {number} [params.year] - Season year for non-game events
  * @param {string} [params.seas_type] - Season type: REG, POST, PRE
@@ -114,7 +114,7 @@ const build_unknown_format = ({
  * @param {number|string} [params.line] - Numeric line value (signed for spreads)
  * @param {boolean} [params.safe] - If true, return UNKNOWN format instead of throwing on errors
  * @param {string} [params.source_id] - Book identifier for UNKNOWN format (required if safe=true)
- * @param {Object} [params.raw_data] - Additional raw data to include in UNKNOWN format
+ * @param {object} [params.raw_data] - Additional raw data to include in UNKNOWN format
  * @returns {string} Formatted selection ID, or UNKNOWN format if safe=true and validation fails
  * @throws {Error} If validation fails and safe is not true
  */

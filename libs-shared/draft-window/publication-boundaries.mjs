@@ -57,7 +57,7 @@ const resolve_now = (until) =>
  * does publish. Under a strict `>` a one-second coincidence would black out a
  * further whole day for no reason anybody could explain to a manager.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.draft_start_timestamp - Unix seconds the draft opens.
  * @param {{start_hour: number, end_hour: number}} args.band
  * @param {Date|string} [args.resumed_at] - The league's LATEST resume.
@@ -125,7 +125,7 @@ export function list_publication_boundaries({
  * resume is its initial publication, so the lead-up between the resume and
  * that close is already governed by it.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.draft_start_timestamp - Unix seconds the draft opens.
  * @param {Date|string} [args.resumed_at] - The league's LATEST resume, timestamptz.
  * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's now.
@@ -164,7 +164,7 @@ export function get_publication_boundary({
  * next slate is published at this instant. Strictly after, because a boundary
  * landing exactly on now has already published.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's now.
  * @param {number} [args.daily_window_start_hour]
  * @param {number} [args.daily_window_end_hour]

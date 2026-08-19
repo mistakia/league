@@ -24,10 +24,10 @@ debug.enable('analyze-fanduel-wagers')
  * Update the count of wagers lost by a specific number of legs.
  * Creates a new object to maintain immutability in the reducer.
  *
- * @param {Object} lost_by_legs - Current counts object {1: count, 2: count, ...}
+ * @param {object} lost_by_legs - Current counts object {1: count, 2: count, ...}
  * @param {boolean} is_lost - Whether the wager was lost
  * @param {number} lost_legs - Number of losing selections in the wager
- * @returns {Object} Updated counts object
+ * @returns {object} Updated counts object
  */
 const update_lost_by_legs_count = (lost_by_legs, is_lost, lost_legs) => {
   const updated = { ...lost_by_legs }

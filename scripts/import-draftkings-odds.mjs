@@ -247,9 +247,9 @@ const preload_player_cache = async () => {
 /**
  * Writes output files to tmp directory
  * @param {number} timestamp - Timestamp for file naming
- * @param {Array} all_markets - Raw markets data
- * @param {Array} formatted_markets - Formatted markets data
- * @param {Array} failed_requests - Failed requests data
+ * @param {object[]} all_markets - Raw markets data
+ * @param {object[]} formatted_markets - Formatted markets data
+ * @param {object[]} failed_requests - Failed requests data
  */
 const write_output_files = async (
   timestamp,
@@ -277,7 +277,7 @@ const write_output_files = async (
 
 /**
  * Inserts markets into database
- * @param {Array} formatted_markets - Formatted markets to insert
+ * @param {object[]} formatted_markets - Formatted markets to insert
  */
 const insert_markets_to_database = async (formatted_markets) => {
   console.time('draftkings-database-insertion')

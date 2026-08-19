@@ -12,10 +12,10 @@ const log = debug('selection-result-writer')
  * metric_result_value is stored per-selection to support multi-selection markets
  * (e.g., ANYTIME_TOUCHDOWN) where each player has a different actual result.
  *
- * @param {Object} params - Named parameters
- * @param {Array} params.updates - Array of result updates with metric_value
+ * @param {object} params - Named parameters
+ * @param {object[]} params.updates - Array of result updates with metric_value
  * @param {boolean} params.dry_run - Preview mode, skip actual writes
- * @returns {Object} Object with selection_count written
+ * @returns {object} Object with selection_count written
  */
 export const write_selection_results_to_db = async ({
   updates,

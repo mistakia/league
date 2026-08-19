@@ -6,7 +6,7 @@ const log = debug('format-sql')
 /**
  * Format SQL query using prettier with SQL plugin
  * @param {string} sql - The SQL query to format
- * @param {Object} options - Formatting options
+ * @param {object} options - Formatting options
  * @param {string} options.parser - Parser to use (default: 'sql', alternatives: 'babel')
  * @param {string} options.language - SQL dialect/language (e.g., 'postgresql', 'mysql', 'sqlite')
  * @param {string} options.keywordCase - Case for SQL keywords (default: 'upper')

@@ -38,9 +38,9 @@ const CHANGELOG_TABLES = {
 /**
  * Record one or more changelog entries.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.table - one of the four `{table}_changelog` tables
- * @param {Object|Object[]} params.rows - a single row or a batch. Each row
+ * @param {object|object[]} params.rows - a single row or a batch. Each row
  *   MUST carry the table's entity key(s), a `column_name`, and a `source`.
  *   `previous_value`, `new_value`, and `reason` are optional (default null).
  *   `changed_at` is an optional JS `Date` (defaults to now) — callers with a

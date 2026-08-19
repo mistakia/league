@@ -1,7 +1,7 @@
 /**
  * Determines the final practice day of the week based on game day
  *
- * @param {Object} options
+ * @param {object} options
  * @param {string|null} options.game_day - Game day string from nfl_games.day (e.g., "THU", "SUN", "MN")
  * @returns {number|null} Day of week number (0=Sunday, 1=Monday, ..., 6=Saturday) or null if unavailable
  */

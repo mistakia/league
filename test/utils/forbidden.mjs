@@ -3,7 +3,7 @@ chai.should()
 
 /**
  * Assert that a request returns a 403 Forbidden status
- * @param {Promise} request - The request promise
+ * @param {Promise<object>} request - The request promise
  * @param {string} expectedError - Optional expected error message pattern
  */
 export default async function (request, expectedError = null) {

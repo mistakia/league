@@ -22,7 +22,7 @@ debug.enable('generate-league-season-teams')
  * - League settings (cap, faab) from league_settings_year or previous year
  * - Draft order determined by previous year's final standings
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.lid - League ID
  * @param {number} [params.year] - Target year to create teams for (defaults to current season)
  * @param {number} [params.league_settings_year] - Year to read league settings from (cap, faab).

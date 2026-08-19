@@ -30,9 +30,9 @@ const DEFAULT_SYNC_COMPONENTS = {
 
 /**
  * Parse sync components from database (handles string or object)
- * @param {string|Object} sync_components - Sync components from database
+ * @param {string|object} sync_components - Sync components from database
  * @param {string} context_id - ID for logging context (connection_id, etc.)
- * @returns {Object} Parsed sync components or defaults
+ * @returns {object} Parsed sync components or defaults
  */
 function parse_sync_components(sync_components, context_id = null) {
   if (!sync_components) {
@@ -55,7 +55,7 @@ function parse_sync_components(sync_components, context_id = null) {
 /**
  * Validate platform support
  * @param {string} platform - Platform name
- * @param {Object} res - Express response object
+ * @param {object} res - Express response object
  * @returns {boolean} True if supported, false if response was sent
  */
 function validate_platform(platform, res) {

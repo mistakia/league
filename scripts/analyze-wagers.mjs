@@ -41,8 +41,8 @@ const log = debug('analyze-wagers')
  * @param {number} [params.wagers_limit] - Limit number of wagers displayed
  * @param {boolean} [params.hide_wagers] - Hide individual wager tables
  * @param {number} [params.wagers_lost_leg_limit] - Filter by lost leg count
- * @param {Array} [params.include_selections] - Include only these selections
- * @param {Array} [params.exclude_selections] - Exclude these selections
+ * @param {string[]} [params.include_selections] - Include only these selections
+ * @param {string[]} [params.exclude_selections] - Exclude these selections
  * @param {string} [params.sort_by] - Sort wagers by field ('odds', etc.)
  * @param {boolean} [params.show_wager_roi] - Show ROI columns
  * @param {boolean} [params.show_only_open_round_robins] - Show only open round robins

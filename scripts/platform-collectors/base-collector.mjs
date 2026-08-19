@@ -235,7 +235,7 @@ export class BaseCollector {
    * @param {object} options - Collection options
    * @param {number} options.week - Optional week number for transactions
    * @param {number} options.season_year - Optional season year
-   * @returns {Promise<Map>} Map of normalized response types (file-safe names) to fixture data
+   * @returns {Promise<Map<string, object>>} Map of normalized response types (file-safe names) to fixture data
    */
   async collect_all_league_responses(league_id, options = {}) {
     console.log(

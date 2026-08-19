@@ -96,7 +96,7 @@ export class SchemaValidator {
   /**
    * Get or compile validator for a specific schema
    * @param {string} schema_name - Name of the schema
-   * @returns {Promise<Function>} Compiled validator function
+   * @returns {Promise<(data: object) => boolean>} Compiled validator function
    */
   async get_validator(schema_name) {
     if (this.compiled_validators.has(schema_name)) {
@@ -236,7 +236,7 @@ export class SchemaValidator {
   /**
    * Validate multiple data items with batch processing
    * @param {string} format_type - Type of format to validate against
-   * @param {Array} data_array - Array of data objects to validate
+   * @param {object[]} data_array - Array of data objects to validate
    * @returns {Promise<object>} Batch validation results
    */
   async validate_batch(format_type, data_array) {

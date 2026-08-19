@@ -12,8 +12,8 @@ const log = debug('play-enrichment:qb-play')
  * - qb_kneel: RUSH plays with "kneel" in description
  * - qb_spike: PASS plays with "spike" in description
  *
- * @param {Array} plays - Array of play objects with play_description and play_type_nfl fields
- * @returns {Array} Plays with qb_kneel and qb_spike fields populated
+ * @param {object[]} plays - Array of play objects with play_description and play_type_nfl fields
+ * @returns {object[]} Plays with qb_kneel and qb_spike fields populated
  */
 export const enrich_qb_plays = (plays) => {
   let qb_kneel_count = 0

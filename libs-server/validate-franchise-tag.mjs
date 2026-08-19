@@ -4,7 +4,7 @@ import { current_season, transaction_types } from '#constants'
 /**
  * Validates that a player has not been franchise tagged for three consecutive years
  *
- * @param {Object} params - Function parameters
+ * @param {object} params - Function parameters
  * @param {string|number} params.pid - Player ID
  * @param {string|number} params.tid - Team ID
  * @param {number} [params.year] - Year to check (defaults to current season year)

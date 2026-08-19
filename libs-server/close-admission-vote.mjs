@@ -32,7 +32,7 @@ import {
  * early. It deliberately widens nothing, because the transcription refusal in
  * the submit route keys on `closes_at` rather than on this act.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.admission_vote_id
  * @param {Date} [args.closed_at] - When the vote closed. Defaults to now.
  * @returns {Promise<{closed_at: Date, decision_due_at: Date, points_by_candidate: Map<number, number>}>}

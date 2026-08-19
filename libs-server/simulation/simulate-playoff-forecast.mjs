@@ -22,11 +22,11 @@ const SIMULATIONS = 10000
  * Uses player-level correlation simulation.
  * Incorporates actual results for completed weeks.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} [params.year] - NFL year
  * @param {number} [params.n_simulations=10000] - Number of simulations
- * @returns {Promise<Object>} Forecast results keyed by team ID
+ * @returns {Promise<object>} Forecast results keyed by team ID
  */
 export async function simulate_wildcard_forecast({
   league_id,
@@ -285,11 +285,11 @@ export async function simulate_wildcard_forecast({
  * Uses player-level correlation simulation.
  * Incorporates actual results for completed weeks.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} [params.year] - NFL year
  * @param {number} [params.n_simulations=10000] - Number of simulations
- * @returns {Promise<Object>} Forecast results keyed by team ID
+ * @returns {Promise<object>} Forecast results keyed by team ID
  */
 export async function simulate_championship_forecast({
   league_id,

@@ -1,7 +1,7 @@
 /**
  * Calculate game progress as a percentage (0-1) based on quarter and game clock.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.quarter - Current quarter (1-5, where 5 is overtime)
  * @param {string} params.game_clock - Game clock in MM:SS format (e.g., "12:30")
  * @param {boolean} [params.is_final=false] - Whether the game has ended

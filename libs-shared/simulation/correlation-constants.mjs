@@ -414,7 +414,7 @@ export function normalize_position_rank(position_rank) {
  * Get default correlation between two positions.
  * Normalizes bare positions (WR, RB, TE) to ranked positions (WR3, RB2, TE1) internally.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.position_rank_a - Position rank of first player (e.g., 'QB', 'WR1') or bare position (e.g., 'WR')
  * @param {string} params.position_rank_b - Position rank of second player
  * @param {string} params.relationship_type - 'same_team' or 'cross_team_same_game'
@@ -454,7 +454,7 @@ export function get_default_correlation({
 /**
  * Apply archetype adjustments to a default correlation.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.base_correlation - The default position-based correlation
  * @param {string} params.archetype_a - Archetype of first player (or null)
  * @param {string} params.archetype_b - Archetype of second player (or null)

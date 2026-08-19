@@ -9,9 +9,9 @@ const log = debug('play-enrichment:team-assignment')
  * defending (defense_nfl_team) based on the play's possession_nfl_team and the
  * game's home/visitor teams.
  *
- * @param {Array} plays - Array of play objects with esbid and possession_nfl_team
- * @param {Map|Object} games_map - Map or object of game data keyed by esbid with h (home) and v (visitor) properties
- * @returns {Array} Plays with offense_nfl_team and defense_nfl_team fields populated
+ * @param {object[]} plays - Array of play objects with esbid and possession_nfl_team
+ * @param {Map<number, object>|object} games_map - Map or object of game data keyed by esbid with h (home) and v (visitor) properties
+ * @returns {object[]} Plays with offense_nfl_team and defense_nfl_team fields populated
  */
 export const enrich_team_assignments = (plays, games_map) => {
   let enriched_count = 0

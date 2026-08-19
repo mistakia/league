@@ -54,7 +54,7 @@ export async function load_player_info({ player_ids }) {
  *
  * @param {object} params
  * @param {string} params.scoring_format_id - Scoring format hash
- * @returns {Promise<Object>} Scoring format configuration
+ * @returns {Promise<object>} Scoring format configuration
  */
 export async function load_scoring_format({ scoring_format_id }) {
   const scoring_format = await db('league_scoring_formats')
@@ -300,7 +300,7 @@ export async function load_player_points_with_game_status({
  * @param {number[]} params.team_ids - Team IDs to load
  * @param {number[]} params.weeks - Weeks to check
  * @param {number} params.year - NFL year
- * @returns {Promise<Object>} { actual_points: Map<week, Map<tid, points>>, weeks_with_results: number[] }
+ * @returns {Promise<object>} { actual_points: Map<week, Map<tid, points>>, weeks_with_results: number[] }
  */
 export async function load_actual_playoff_points({
   league_id,

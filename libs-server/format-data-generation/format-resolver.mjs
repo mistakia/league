@@ -10,7 +10,7 @@ import {
 
 /**
  * Resolve format hash from various input types (hash, league ID, or named format)
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} [params.hash] - Direct format hash
  * @param {number} [params.lid] - League ID
  * @param {string} [params.format] - Named format

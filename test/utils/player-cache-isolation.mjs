@@ -30,7 +30,7 @@ const restore_player_cache = (saved) => {
  * Wrap a describe block so anything it does to the player_cache singleton is
  * undone. Call at the top of the block; it registers its own before/after.
  *
- * @returns {Function} a `reload({...})` helper that forces a preload with the
+ * @returns {(options: object) => Promise<unknown>} a `reload({...})` helper that forces a preload with the
  *   given options, since `preload_active_players` is otherwise a no-op once the
  *   cache is initialized.
  */

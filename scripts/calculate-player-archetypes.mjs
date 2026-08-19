@@ -103,7 +103,7 @@ function get_rb_archetype(target_ratio) {
  * Calculate player archetypes from historical gamelogs.
  * Single-archetype design: each player gets exactly one archetype per year.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - Year to calculate archetypes for
  * @returns {Promise<number>} Number of archetype records inserted
  */

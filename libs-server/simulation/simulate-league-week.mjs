@@ -41,14 +41,14 @@ const log = debug('simulation:simulate-league-week')
 /**
  * Simulate all fantasy matchups for a league in a given week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
  * @param {number} [params.n_simulations=10000] - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {boolean} [params.use_actual_results=true] - Use actual points for completed games
- * @returns {Promise<Object>} League-wide simulation results
+ * @returns {Promise<object>} League-wide simulation results
  */
 export async function simulate_league_week({
   league_id,
@@ -344,7 +344,7 @@ export async function simulate_league_week({
 /**
  * Save simulation results to the matchups table.
  *
- * @param {Object[]} matchup_results - Array of matchup simulation results
+ * @param {object[]} matchup_results - Array of matchup simulation results
  * @returns {Promise<number>} Number of matchups updated
  */
 export async function save_matchup_probabilities(matchup_results) {

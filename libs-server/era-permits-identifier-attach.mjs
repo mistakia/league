@@ -30,8 +30,8 @@ import { player_could_have_played } from './player-era.mjs'
  * with no usable birth date (the `0000-00-00` sentinel or null), which is also
  * the population that no birth-date-anchored sweep can reach.
  *
- * @param {Object} params
- * @param {Object} params.player_row - the candidate row the name match returned
+ * @param {object} params
+ * @param {object} params.player_row - the candidate row the name match returned
  * @param {number[]} params.season_years - every season the incoming identifier
  *   is observed in. The EARLIEST is what falsifies: a row that could not have
  *   played in the first observed season cannot own the identifier.

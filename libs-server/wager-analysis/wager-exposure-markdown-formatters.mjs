@@ -88,7 +88,7 @@ const format_performance_summary = (wager_summary, props_summary) => {
  * Dynamically generates columns for all observed counts (e.g., 1, 2, 3, 4, 5...).
  * This provides full visibility into near-miss patterns across all wagers.
  *
- * @param {Object} wager_summary - Summary object containing lost_by_legs counts
+ * @param {object} wager_summary - Summary object containing lost_by_legs counts
  * @returns {string} Markdown formatted table
  */
 const format_wagers_lost_by_selections = (wager_summary) => {

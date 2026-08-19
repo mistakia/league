@@ -25,7 +25,7 @@ export const DEFAULT_DAILY_WINDOW_END_HOUR = 16
  * would derive no slots at all, so it is widened to the whole day rather than
  * left to strand the caller with a board nobody can ever be passed on.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} [args.daily_window_start_hour]
  * @param {number} [args.daily_window_end_hour]
  * @param {boolean} [args.warn=false] - Log when falling back. `getDraftWindow`

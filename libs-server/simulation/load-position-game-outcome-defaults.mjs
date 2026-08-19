@@ -7,10 +7,10 @@ const log = debug('simulation:load-position-game-outcome-defaults')
 /**
  * Load position/archetype default correlations for game outcomes.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - Year for default data
  * @param {string} [params.outcome_type='game_script'] - Type of outcome correlation
- * @returns {Promise<Map>} Map of 'pos' or 'pos:archetype' -> default_correlation
+ * @returns {Promise<Map<string, number>>} Map of 'pos' or 'pos:archetype' -> default_correlation
  */
 export async function load_position_game_outcome_defaults({
   year,
@@ -60,8 +60,8 @@ export async function load_position_game_outcome_defaults({
 /**
  * Get the default correlation for a player based on position and archetype.
  *
- * @param {Object} params
- * @param {Map} params.defaults_map - Map from load_position_game_outcome_defaults
+ * @param {object} params
+ * @param {Map<string, number>} params.defaults_map - Map from load_position_game_outcome_defaults
  * @param {string} params.pos - Player position
  * @param {string} [params.archetype] - Player archetype (optional)
  * @returns {number|null} Default correlation or null if not found

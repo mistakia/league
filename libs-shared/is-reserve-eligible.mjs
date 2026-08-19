@@ -9,8 +9,8 @@ import get_most_recent_practice_status from './get-most-recent-practice-status.m
 /**
  * Determines if a final practice report exists
  *
- * @param {Object} params - The parameters object
- * @param {Object|null} params.practice - Practice object with day fields and status fields
+ * @param {object} params - The parameters object
+ * @param {object|null} params.practice - Practice object with day fields and status fields
  * @param {string|null} params.game_day - Game day string (e.g., "SUN", "MN", "THU")
  * @param {Date} params.current_date - The current date
  * @returns {boolean} True if final practice report exists, false otherwise

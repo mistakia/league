@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Execute a script with arguments
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.script_name - Name of the script to execute
  * @param {string[]} [params.args=[]] - Arguments to pass to the script
  * @returns {Promise<void>}
@@ -47,7 +47,7 @@ export const execute_script = ({ script_name, args = [] }) => {
 
 /**
  * Check if a script file exists
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.script_name - Name of the script to check
  * @returns {Promise<boolean>}
  */
@@ -64,7 +64,7 @@ export const script_exists = async ({ script_name }) => {
 
 /**
  * Prepare script arguments by replacing placeholders with actual values
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string[]} params.args - Original arguments with placeholders
  * @param {string} params.format_hash - Format hash to use for placeholders
  * @returns {string[]} Processed arguments with placeholders replaced

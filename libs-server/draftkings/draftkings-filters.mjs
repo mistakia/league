@@ -12,8 +12,8 @@ const log = debug('import-draft-kings')
 
 /**
  * Parses command line filters and returns category and subcategory filters
- * @param {Object} argv - Command line arguments
- * @returns {Object} - Object with category_filter and subcategory_filter
+ * @param {object} argv - Command line arguments
+ * @returns {object} - Object with category_filter and subcategory_filter
  */
 export const parse_filters = async (argv) => {
   let category_filter = null
@@ -49,8 +49,8 @@ export const parse_filters = async (argv) => {
 
 /**
  * Applies tracking-based filtering
- * @param {Object} argv - Command line arguments
- * @returns {Object} - Object with category_filter and subcategory_filter
+ * @param {object} argv - Command line arguments
+ * @returns {object} - Object with category_filter and subcategory_filter
  */
 const apply_tracking_filter = async (argv) => {
   log(`Using tracking filter: ${argv.useTracking}`)

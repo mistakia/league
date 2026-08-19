@@ -38,7 +38,7 @@ const initialize_cli = () => {
  * - Player career game counts
  * - Player snaps
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.week - Week number (defaults to target week)
  * @param {boolean} [params.skip_aggregates=false] - Skip aggregate processing (seasonlogs/careerlogs).
  *   Use when processing multiple weeks - run aggregates once at the end instead.

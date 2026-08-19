@@ -93,7 +93,7 @@ export function resolve_pick_interval_hours(pick_interval_hours) {
  * Always at least one hour, since `resolve_daily_window` guarantees
  * `start_hour < end_hour`.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {{start_hour: number, end_hour: number}} args.band
  * @param {number} args.interval - Hours between slots.
  * @returns {number[]}
@@ -116,7 +116,7 @@ export function resolve_slot_hours({ band, interval }) {
  * otherwise. Each further index is one slot later, rolling onto the next day
  * once the day's slots are spent.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {import('dayjs').Dayjs} args.from - The instant to seat the queue from.
  * @param {number} args.index - Position in the queue, 0-based.
  * @param {{start_hour: number, end_hour: number}} args.band

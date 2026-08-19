@@ -27,7 +27,7 @@ if (!process.env.DEBUG) {
  * `rookie_draft_completed_at` was populated for exactly one season and picks
  * from 2021 were still reading as tradeable five years later.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.lid - League id.
  * @param {number} args.year - Draft year to close.
  * @param {Date} [args.completed_at] - When the draft closed. Ignored when the

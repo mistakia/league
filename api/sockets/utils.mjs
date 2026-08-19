@@ -19,7 +19,7 @@ export function generate_client_id() {
  * Safely handles closed connections and errors
  * @param {WebSocket} ws - WebSocket connection
  * @param {string} type - Message type
- * @param {Object} payload - Message payload
+ * @param {object} payload - Message payload
  * @returns {boolean} True if message was sent, false otherwise
  */
 export function send_websocket_message(ws, type, payload) {
@@ -50,7 +50,7 @@ export function send_websocket_message(ws, type, payload) {
 
 /**
  * Validate required fields in a payload
- * @param {Object} payload - Payload to validate
+ * @param {object} payload - Payload to validate
  * @param {string[]} required_fields - Array of required field names
  * @returns {{valid: boolean, missing: string[]}} Validation result
  */
@@ -66,7 +66,7 @@ export function validate_required_fields(payload, required_fields) {
  * Create a standardized error response payload
  * @param {string} error_message - Error message
  * @param {string} context - Error context/operation
- * @returns {Object} Error payload
+ * @returns {object} Error payload
  */
 export function create_error_payload(error_message, context) {
   return {

@@ -20,14 +20,14 @@ const SIMULATIONS = 10000
  * Simulate season forecast for a league.
  * Calculates playoff/division/bye/championship odds for all teams.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} [params.year] - NFL year (defaults to current)
  * @param {number} [params.week] - Override week for historical testing
  * @param {number} [params.n_simulations=10000] - Number of Monte Carlo iterations
  * @param {string} [params.force_win_tid] - Force this team to win current matchup
  * @param {string} [params.force_loss_tid] - Force this team to lose current matchup
- * @returns {Promise<Object>} Forecast results keyed by team ID
+ * @returns {Promise<object>} Forecast results keyed by team ID
  */
 export async function simulate_season_forecast({
   league_id,

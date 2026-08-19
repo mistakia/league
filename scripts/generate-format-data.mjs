@@ -28,7 +28,7 @@ debug.enable(SCRIPT_CONFIG.log_name)
 
 /**
  * Generate core format definitions
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 const generate_core_formats = async (options) => {
   console.log(`\n${'='.repeat(80)}`)
@@ -55,7 +55,7 @@ const generate_core_formats = async (options) => {
 
 /**
  * Generate data for all formats
- * @param {Object} [options={}] - Options object
+ * @param {object} [options={}] - Options object
  */
 const generate_all_formats = async (options = {}) => {
   const {
@@ -209,7 +209,7 @@ const initialize_cli = () => {
 
 /**
  * Parse command line arguments and return options
- * @returns {Object} Parsed arguments with action and options
+ * @returns {object} Parsed arguments with action and options
  */
 const parse_args = () => {
   const argv = initialize_cli()

@@ -29,7 +29,7 @@ const ADMINISTRATIVE_PLAY_TYPES_NFL = [
  * A row whose type is administrative but which nonetheless records a pass or a
  * rush is a mislabeled real play (the feed carries a handful) and is kept.
  *
- * @param {Object} play - Play object carrying play_type_nfl and play_type
+ * @param {object} play - Play object carrying play_type_nfl and play_type
  * @returns {boolean} True if the play is administrative
  */
 export const is_administrative_play = (play) => {
@@ -47,8 +47,8 @@ export const is_administrative_play = (play) => {
 /**
  * Groups play_stats by play for efficient lookup
  *
- * @param {Array} play_stats - Array of play stat objects with esbid and play_id
- * @returns {Map} Map keyed by "${esbid}-${play_id}" with array of play_stats as values
+ * @param {object[]} play_stats - Array of play stat objects with esbid and play_id
+ * @returns {Map<string, object[]>} Map keyed by "${esbid}-${play_id}" with array of play_stats as values
  */
 export const group_play_stats_by_play = (play_stats) => {
   const grouped = new Map()

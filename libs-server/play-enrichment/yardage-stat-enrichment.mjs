@@ -17,9 +17,9 @@ const log = debug('play-enrichment:yardage-stats')
  * Also enriches completion status (comp), touchdowns (td, rush_td, pass_td),
  * and other play outcome fields from playStats.
  *
- * @param {Array} plays - Array of play objects with esbid and play_id
- * @param {Array} play_stats - Array of play stat objects from NFL API
- * @returns {Array} Plays with yardage and outcome fields populated
+ * @param {object[]} plays - Array of play objects with esbid and play_id
+ * @param {object[]} play_stats - Array of play stat objects from NFL API
+ * @returns {object[]} Plays with yardage and outcome fields populated
  */
 export const enrich_yardage_stats = (plays, play_stats) => {
   if (!play_stats || play_stats.length === 0) {

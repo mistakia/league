@@ -19,7 +19,7 @@ import db from '#db'
  * be ranked, and the three refusals around a transcribed ballot -- belongs to
  * the caller, which is api/routes/admission-votes.mjs.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.admission_vote_id
  * @param {number} args.team_id
  * @param {Array<number>} args.ranked_candidate_ids - In preference order; the

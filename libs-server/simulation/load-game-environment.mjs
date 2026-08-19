@@ -18,11 +18,11 @@ const SOURCE_PREFERENCE = [
 /**
  * Load game environment data (totals, spreads) from prop markets.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[]} params.esbids - Array of game ESBIDs to load environment for
  * @param {number} [params.week] - NFL week (alternative to esbids)
  * @param {number} [params.year] - NFL year (alternative to esbids)
- * @returns {Promise<Map>} Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
+ * @returns {Promise<Map<number, object>>} Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
  */
 export async function load_game_environment({ esbids, week, year }) {
   let game_filter_esbids = esbids

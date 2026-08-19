@@ -40,16 +40,16 @@ export { simulate_championship } from './simulate-championship.mjs'
 /**
  * Simulate a fantasy matchup between teams.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Array of fantasy team IDs (2 or more)
  * @param {number} params.week - NFL week to simulate
  * @param {number} params.year - NFL year
  * @param {number} [params.n_simulations=10000] - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
- * @param {Map} [params.roster_overrides] - Optional Map of team_id -> player_ids[] to override loaded rosters
+ * @param {Map<number, string[]>} [params.roster_overrides] - Optional Map of team_id -> player_ids[] to override loaded rosters
  * @param {boolean} [params.use_actual_results=true] - Use actual points for completed games
- * @returns {Promise<Object>} Simulation results
+ * @returns {Promise<object>} Simulation results
  */
 export async function simulate_matchup({
   league_id,

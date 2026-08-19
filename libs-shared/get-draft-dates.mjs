@@ -24,7 +24,7 @@ const WAIVER_HOURS_AFTER_COMPLETION = 24
  * publication — so a derived end would move every midnight, which is not
  * something a hard cutoff may do.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {Date|string} [args.rookie_draft_end_at] - The hard cutoff, timestamptz.
  *   Null only for a league with no draft configured, whose callers all guard on
  *   `draft_start` first; a season that HAS a `draft_start` is guaranteed to

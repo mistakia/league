@@ -49,7 +49,7 @@ const initialize_cli = () => {
  * Parse clock time string and calculate time-related fields
  * @param {string} clockTime - Clock time in format "MM:SS" or "M:SS"
  * @param {number} quarter - Quarter number (1-4 for regulation, 5+ for OT)
- * @returns {Object} Time-related fields: seconds_remaining_quarter, seconds_remaining_half, seconds_remaining_game
+ * @returns {object} Time-related fields: seconds_remaining_quarter, seconds_remaining_half, seconds_remaining_game
  */
 const parse_clock_time = (clockTime, quarter) => {
   const time_fields = {

@@ -11,10 +11,10 @@ const HIGH_EXPOSURE_THRESHOLD = 8
  * For each key selection, tracks how many wagers lost by 1/2/3 legs contain it.
  *
  * @param {object} params
- * @param {Array} params.unique_selections - All unique selections with enriched data
- * @param {Array} params.filtered_wagers - All wagers to analyze
+ * @param {object[]} params.unique_selections - All unique selections with enriched data
+ * @param {object[]} params.filtered_wagers - All wagers to analyze
  * @param {number} params.total_wagers - Total number of wagers
- * @returns {Array} Array of key selections with near-miss counts
+ * @returns {object[]} Array of key selections with near-miss counts
  */
 export const calculate_key_selections = ({
   unique_selections,

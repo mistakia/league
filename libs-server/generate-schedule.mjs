@@ -14,7 +14,7 @@ import db from '#db'
  * that fails validation leaves the existing matchups untouched rather than
  * emptying the table.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.lid
  * @param {number[]} params.team_order - every team uid in the league, once each
  */

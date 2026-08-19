@@ -13,8 +13,8 @@ const log = debug('play-enrichment:play-type')
  * Prioritizes play_type_ngs if available, falls back to play_type_nfl.
  * Converts source-specific play types to standardized play_type enum.
  *
- * @param {Array} plays - Array of play objects with play_type_ngs and/or play_type_nfl
- * @returns {Array} Plays with play_type field populated
+ * @param {object[]} plays - Array of play objects with play_type_ngs and/or play_type_nfl
+ * @returns {object[]} Plays with play_type field populated
  */
 export const enrich_play_types = (plays) => {
   let enriched_count = 0

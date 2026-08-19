@@ -75,7 +75,7 @@ const initialize_cli = () => {
 /**
  * Update market settlement status for markets where all selections are settled
  *
- * @param {Object} options - Processing options
+ * @param {object} options - Processing options
  * @param {number} options.year - Filter by year
  * @param {number} options.week - Filter by week (requires joining with nfl_games)
  * @param {string} options.seas_type - Filter by season type (requires joining with nfl_games)

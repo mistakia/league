@@ -24,7 +24,7 @@ dayjs.extend(timezone)
  * Returned in the draft timezone, because callers compare its hour of day
  * against the daily window band.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {Date|string} [args.paused_at] - When the league's open pause began.
  * @param {import('dayjs').Dayjs} args.now - The caller's wall clock, already in
  *   the draft timezone.

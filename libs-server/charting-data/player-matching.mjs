@@ -76,7 +76,7 @@ async function _query_player_by_last_name_and_jersey({
 }
 
 /**
- * @param {Object} params
+ * @param {object} params
  * @param {number} [params.season_year] - the season the charting row belongs
  *   to. Supply it. Without it this falls back to matching a historical row
  *   against the player's team TODAY, which is the defect described below.

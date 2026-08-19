@@ -3,11 +3,11 @@ import fixTeam from './fix-team.mjs'
 /**
  * Calculate DST fantasy point delta for a single play
  *
- * @param {Object} params
- * @param {Object} params.play - The play object containing playStats and play metadata
+ * @param {object} params
+ * @param {object} params.play - The play object containing playStats and play metadata
  * @param {string} params.dst_team - The DST team abbreviation
- * @param {Object} params.dst_running_totals - Running totals for threshold stats { dya, dpa }
- * @returns {Object} Delta stats object with total and individual stat deltas
+ * @param {object} params.dst_running_totals - Running totals for threshold stats { dya, dpa }
+ * @returns {object} Delta stats object with total and individual stat deltas
  */
 const calculate_dst_delta_from_play = ({
   play,

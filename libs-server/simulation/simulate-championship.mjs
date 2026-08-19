@@ -42,7 +42,7 @@ const log = debug('simulation:simulate-championship')
 /**
  * Simulate a multi-week championship round.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Array of fantasy team IDs (typically 4)
  * @param {number[]} params.weeks - Array of NFL weeks in ascending order (e.g., [16, 17])
@@ -50,8 +50,8 @@ const log = debug('simulation:simulate-championship')
  * @param {number} [params.n_simulations=10000] - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {boolean} [params.use_actual_results=true] - Use actual points for completed games
- * @param {Map} [params.roster_overrides_by_week] - Optional Map of week -> Map of team_id -> player_ids[] to override rosters per week
- * @returns {Promise<Object>} Championship simulation results
+ * @param {Map<number, Map<number, string[]>>} [params.roster_overrides_by_week] - Optional Map of week -> Map of team_id -> player_ids[] to override rosters per week
+ * @returns {Promise<object>} Championship simulation results
  */
 export async function simulate_championship({
   league_id,

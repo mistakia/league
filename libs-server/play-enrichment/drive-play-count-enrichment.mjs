@@ -24,7 +24,7 @@ const log = debug('drive-play-count-enrichment')
  * (3 offensive plays followed by a punt) results in drive_play_count = 3.
  * This aligns with DST scoring logic in calculate-dst-stats-from-plays.mjs.
  *
- * @param {Object} play - Play object to evaluate
+ * @param {object} play - Play object to evaluate
  * @returns {boolean} True if play should be counted
  */
 const should_count_play = (play) => {
@@ -89,8 +89,8 @@ const should_count_play = (play) => {
  * GAME_START, etc.) receive null for drive_play_count since they don't
  * belong to any meaningful drive.
  *
- * @param {Array} plays - Array of play objects to enrich
- * @returns {Array} Plays with drive_play_count added
+ * @param {object[]} plays - Array of play objects to enrich
+ * @returns {object[]} Plays with drive_play_count added
  */
 export const enrich_drive_play_counts = (plays) => {
   log(`Starting drive play count enrichment for ${plays.length} plays`)

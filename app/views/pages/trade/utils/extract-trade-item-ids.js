@@ -1,7 +1,7 @@
 /**
  * Extract player IDs and pick IDs from trade items array
- * @param {Array} items - Array of trade items with type and id properties
- * @returns {Object} Object with player_ids and pick_ids arrays
+ * @param {object[]} items - Array of trade items with type and id properties
+ * @returns {object} Object with player_ids and pick_ids arrays
  */
 export function extract_trade_item_ids(items) {
   const players = items.filter((item) => item.type === 'player')

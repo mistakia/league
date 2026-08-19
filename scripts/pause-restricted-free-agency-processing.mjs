@@ -46,7 +46,7 @@ const format_et = (value) => dayjs(value).tz(league_timezone).format(ET_FORMAT)
  * stated as that moment.
  *
  * @param {string} until - `12h` / `90m` / `2d`, or anything dayjs can parse
- * @returns {Object} dayjs instance
+ * @returns {object} dayjs instance
  */
 const resolve_pause_until = (until) => {
   const relative_match = String(until).match(/^(\d+)\s*(m|h|d)$/i)

@@ -440,7 +440,7 @@ export default class Roster {
 
   /**
    * Validate if a player can be assigned to a specific slot
-   * @param {Object} player - Player object with primary_position property
+   * @param {object} player - Player object with primary_position property
    * @param {number} target_slot - Slot constant to validate
    * @returns {boolean} True if player can be assigned to the slot
    */
@@ -495,7 +495,7 @@ export default class Roster {
 
   /**
    * Get all available slots for a player based on position and roster space
-   * @param {Object} player - Player object with primary_position property
+   * @param {object} player - Player object with primary_position property
    * @returns {Array<number>} Array of valid slot constants
    */
   get_available_slots_for_player(player) {

@@ -10,10 +10,10 @@ import isReserveEligible from './is-reserve-eligible.mjs'
  * 3. Signed PS players (PS/PSP) → PS (unprotected, requires space validation)
  * 4. All others → BENCH (active roster)
  *
- * @param {Object} params - The parameters object
- * @param {Object} params.player - Player object with roster_status, game_designation, etc.
+ * @param {object} params - The parameters object
+ * @param {object} params.player - Player object with roster_status, game_designation, etc.
  * @param {number} params.current_slot - Player's current slot
- * @param {Object} params.roster - Roster object for space validation
+ * @param {object} params.roster - Roster object for space validation
  * @param {number} params.week - Current week number
  * @param {boolean} params.is_regular_season - Whether it's regular season
  * @returns {number} The recommended slot constant

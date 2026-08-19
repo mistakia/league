@@ -38,12 +38,12 @@ const normalize = (value) => {
  *   ORDER BY pid, week, observed_at DESC;
  * ...then discard rows where `removed` is true.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.league_format_id
  * @param {number} params.year
- * @param {Array<Object>} params.value_rows - { pid, week, projected_points_added, market_salary }
+ * @param {Array<object>} params.value_rows - { pid, week, projected_points_added, market_salary }
  * @param {Date} [params.observed_at] - observation instant, defaults to now
- * @returns {Promise<Object>} { observed, changed, tombstoned }
+ * @returns {Promise<object>} { observed, changed, tombstoned }
  */
 export default async function record_league_format_projection_value_history({
   league_format_id,

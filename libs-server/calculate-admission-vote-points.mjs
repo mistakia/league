@@ -24,7 +24,7 @@
  * does, Section 10(b) says in terms what it is worth, and scoring it at zero is
  * that answer rather than an exception that would strand a whole tally.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {Array<{admission_vote_candidate_id: number, preference_rank: number}>} args.preferences
  *   Every preference row in the vote, across every Team's ballot.
  * @param {number} args.maximum_ranked_candidates - The number of Candidates in

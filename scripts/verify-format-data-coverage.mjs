@@ -76,7 +76,7 @@ const get_covered_season_years = async ({
  * Pure detection -- no signal emission, no process exit -- so it can be
  * exercised directly from a test or an ad-hoc check.
  *
- * @returns {Promise<Object>} expected_season_years, total_format_count, gaps
+ * @returns {Promise<object>} expected_season_years, total_format_count, gaps
  */
 export const find_format_data_coverage_gaps = async () => {
   const expected_season_years = await get_expected_season_years()

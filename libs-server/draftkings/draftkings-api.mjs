@@ -115,10 +115,10 @@ export const get_websocket_connection = ({ authorization } = {}) =>
 /**
  * Calculate combined parlay odds for multiple selections using DraftKings calculateBets API
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.selection_ids - Array of selection IDs from prop_market_selections_index.source_selection_id
  * @param {string} [params.odds_style='american'] - Odds format: 'american' or 'decimal'
- * @returns {Promise<Object>} API response with selections, bets (including YourBet parlay), and returnRoundingMode
+ * @returns {Promise<object>} API response with selections, bets (including YourBet parlay), and returnRoundingMode
  *
  * @example
  * const result = await calculate_parlay_odds({

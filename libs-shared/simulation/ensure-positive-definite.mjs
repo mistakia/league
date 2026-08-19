@@ -89,7 +89,7 @@ export function normalize_correlation_matrix(matrix) {
  * Ensure a correlation matrix is positive semi-definite.
  * Uses a single-pass algorithm: diagonal regularization + eigenvalue clipping + identity fallback.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[][]} params.matrix - Input correlation matrix
  * @param {number} [params.epsilon] - Regularization strength (shrinkage toward identity)
  * @param {number} [params.min_eigenvalue] - Minimum eigenvalue after clipping
