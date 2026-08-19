@@ -16,10 +16,13 @@ export default function (team) {
       return 'NFC'
 
     case 'ARIZONA CARDINALS':
+    case 'PHOENIX CARDINALS':
     case 'CARDINALS':
     case 'ARI':
     case 'ARZ':
     case 'AZ':
+    case 'PHO':
+    case 'PHOENIX':
     case 'ARI CARDINALS':
       return 'ARI'
 
@@ -187,11 +190,14 @@ export default function (team) {
 
     case 'LAS VEGAS RAIDERS':
     case 'OAKLAND RAIDERS':
+    case 'LOS ANGELES RAIDERS':
     case 'RAIDERS':
     case 'OAK':
     case 'LV':
     case 'LVR':
+    case 'RAI':
     case 'LV RAIDERS':
+    case 'LA RAIDERS':
       return 'LV'
 
     case 'PHILADELPHIA EAGLES':

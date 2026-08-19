@@ -27,6 +27,32 @@ describe('LIBS-SHARED fixTeam', function () {
     })
   })
 
+  describe('historical PFR draft-page codes', function () {
+    it('maps PHO (Phoenix Cardinals) to the Cardinals canonical', () => {
+      expect(fixTeam('PHO')).to.equal('ARI')
+      expect(fixTeam('pho')).to.equal('ARI')
+      expect(fixTeam('PHOENIX CARDINALS')).to.equal('ARI')
+      expect(fixTeam('PHOENIX')).to.equal('ARI')
+    })
+
+    it('maps RAI (LA Raiders) to the Raiders canonical', () => {
+      expect(fixTeam('RAI')).to.equal('LV')
+      expect(fixTeam('rai')).to.equal('LV')
+      expect(fixTeam('LOS ANGELES RAIDERS')).to.equal('LV')
+      expect(fixTeam('LA RAIDERS')).to.equal('LV')
+    })
+  })
+
+  it('rejects CRD, the PFR franchise slug no 1990-2026 draft page uses', () => {
+    // Source-grounded negative control: `crd` is PFR's internal franchise
+    // identifier for the Cardinals (see active_nfl_teams in
+    // private/libs-server/pro-football-reference.mjs), which reads as a
+    // plausible draft-page code but never appears on one -- the pages use PHO
+    // (1990-93) then ARI (1994+). Only codes actually present on the source
+    // pages belong in the mapping.
+    expect(() => fixTeam('CRD')).to.throw('Invalid team: CRD')
+  })
+
   it('maps every canonical abbreviation to itself', () => {
     const canonical = [
       'ARI',

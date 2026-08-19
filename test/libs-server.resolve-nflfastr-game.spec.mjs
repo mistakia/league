@@ -48,13 +48,17 @@ describe('libs-server resolve-nflfastr-game', function () {
       expect(safe_fix_team('SD')).to.equal('LAC')
       expect(safe_fix_team('STL')).to.equal('LA')
       expect(safe_fix_team('OAK')).to.equal('LV')
+      expect(safe_fix_team('PHO')).to.equal('ARI')
+      expect(safe_fix_team('RAI')).to.equal('LV')
     })
 
-    // fixTeam throws on PHO, which is live in nfl_games. A resolver that threw
-    // would take down the import for a franchise that relocated in 1994.
+    // fixTeam once threw on PHO (live in nfl_games for the Phoenix Cardinals),
+    // and this guard exists so a resolver never throws on a legacy row. PHO now
+    // resolves through fixTeam; the degradation path still matters for codes
+    // fixTeam genuinely rejects.
     it('degrades rather than throwing on an abbreviation fixTeam rejects', () => {
-      expect(() => safe_fix_team('PHO')).to.not.throw()
-      expect(safe_fix_team('PHO')).to.equal('PHO')
+      expect(() => safe_fix_team('XYZ')).to.not.throw()
+      expect(safe_fix_team('XYZ')).to.equal('XYZ')
     })
 
     it('returns null for an absent team', () => {

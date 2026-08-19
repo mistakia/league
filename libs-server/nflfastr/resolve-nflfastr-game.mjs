@@ -7,10 +7,11 @@ const log = debug('resolve-nflfastr-game')
 
 /**
  * fixTeam throws on abbreviations it does not know, and nfl_games carries some
- * it does not -- PHO (Phoenix Cardinals) is live in the table. A resolver that
- * throws on a legacy row would take down the whole import for a franchise that
- * relocated thirty years ago, so normalization degrades to the raw uppercase
- * abbreviation instead.
+ * it does not -- the historical relocation codes (PHO/RAI now resolve through
+ * fix-team.mjs, but other legacy spellings can still be live in the table). A
+ * resolver that throws on a legacy row would take down the whole import for a
+ * franchise that relocated decades ago, so normalization degrades to the raw
+ * uppercase abbreviation instead.
  */
 export const safe_fix_team = (team) => {
   if (!team) return null

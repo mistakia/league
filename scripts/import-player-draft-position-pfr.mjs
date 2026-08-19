@@ -125,7 +125,8 @@ const import_player_draft_position_pfr = async ({
     const html_len = page_result.html ? page_result.html.length : 0
     const message = `PFR draft scrape for ${year} parsed 0 rows (HTML ${html_len} bytes). Likely the Cloudflare challenge went unsolved; check the pfr-cloakbrowser profile's clearance state and the parse selector.`
     if (year <= current_season.year) {
-      const emitted = signal_log.error(new Error(message), {
+      const error = new Error(message)
+      const emitted = signal_log.error(error, {
         severity: 'high',
         context: {
           year,
@@ -136,7 +137,10 @@ const import_player_draft_position_pfr = async ({
       if (emitted?.promise) {
         await emitted.promise
       }
-      throw new Error(message)
+      // main() signals any failure not already signaled at its detection site;
+      // this one was, so mark it to keep the signal single-source.
+      error.signal_emitted = true
+      throw error
     } else {
       log(`zero-row outcome accepted for future year ${year}: ${message}`)
     }
@@ -220,9 +224,9 @@ const import_player_draft_position_pfr = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
-    const argv = initialize_cli()
     await import_player_draft_position_pfr({
       year: argv.year,
       ignore_cache: argv.ignore_cache,
@@ -231,9 +235,24 @@ const main = async () => {
   } catch (err) {
     error = err
     log(error)
+    // A run-level failure that was not already signaled at its detection site
+    // (the zero-row oracle signals then rethrows) lands a log_error-grade
+    // signal here, and the process exits non-zero so a caller looping over
+    // years can tell "imported" (0) apart from "failed to import" (1).
+    // Recurrences of the same (service, fingerprint) collapse into the open
+    // signal row, so the emit is single-source either way.
+    if (!error?.signal_emitted) {
+      const emitted = signal_log.error(error, {
+        severity: 'high',
+        context: { year: argv.year }
+      })
+      if (emitted?.promise) {
+        await emitted.promise
+      }
+    }
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
