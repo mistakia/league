@@ -1,3 +1,4 @@
+// @ts-check
 import season_dates from '#libs-shared/season-dates.mjs'
 import Season from '#libs-shared/season.mjs'
 
@@ -59,4 +60,13 @@ export const nfl_weeks = [
 export const game_days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
 export const nfl_quarters = [1, 2, 3, 4, 5]
 export const nfl_downs = [1, 2, 3, 4]
+// Pinned to the DATABASE vocabulary (`public.season_type`) rather than merely
+// agreeing with it by hand. This list and the DDL enum are two spellings of one
+// vocabulary, and `nfl_week_id` is a persisted literal built from the token, so
+// a drift between them produces predicates that never match rather than an
+// error. The annotation makes that drift fail here, at the definition.
+//
+// Type-only, so it erases: `libs-shared` is isomorphic and this adds nothing to
+// the SPA bundle.
+/** @type {readonly import('#db/schema-types.js').SeasonType[]} */
 export const nfl_season_types = ['PRE', 'REG', 'POST']

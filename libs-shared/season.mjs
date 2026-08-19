@@ -29,7 +29,14 @@ export default class Season {
     regularSeasonFinalWeek,
     wildcardWeek,
     superBowlByeWeeks = 1,
-    now
+    // Optional, and defaulted so it READS optional. `now` pins the clock for a
+    // test or a replay; absent it, the `now` getter below falls back to the
+    // live Eastern-time clock, which is what every production caller wants and
+    // what `season-dates.mjs` (the sole such caller) relies on. Without the
+    // default, a destructured parameter with no initializer is a REQUIRED
+    // member of the inferred shape, so a checked caller passing the real
+    // season dates was reported as missing a property the class never wanted.
+    now = null
   }) {
     // Super Bowl
     this.offseason = dayjs.unix(offseason).utc().utcOffset(-5)

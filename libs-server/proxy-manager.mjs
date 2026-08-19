@@ -1,3 +1,4 @@
+// @ts-check
 import { ProxyAgent, fetch as undiciFetch } from 'undici'
 import debug from 'debug'
 
@@ -5,6 +6,59 @@ import db from '#db'
 import { create_logger } from '#libs-shared/log.mjs'
 
 const log = debug('proxy-manager')
+
+/**
+ * A parsed proxy connection, before the pool adds its bookkeeping.
+ *
+ * `connection_string` carries the CREDENTIAL for an authenticated proxy, so it
+ * must never reach a log line or an error message -- `proxy_display_label`
+ * exists for that and renders the routing half only.
+ *
+ * @typedef {object} ProxyConfig
+ * @property {string} host
+ * @property {string} port
+ * @property {string} [username]
+ * @property {string} [password]
+ * @property {'http'} protocol
+ * @property {string} connection_string
+ */
+
+/**
+ * A pool entry: a parsed proxy plus the pool's own health bookkeeping.
+ *
+ * @typedef {ProxyConfig & { failed: boolean, last_used: number }} ProxyPoolEntry
+ */
+
+/**
+ * What `get_working_proxy` hands back, and what every consumer destructures.
+ *
+ * It is the pool entry widened with the two fields that identify WHICH entry of
+ * WHICH pool was selected -- `key` is what `mark_proxy_failed` matches on and
+ * `pool_name` is what a caller reports. Typing the selection separately from
+ * the entry is what keeps a consumer from reading a bookkeeping field
+ * (`failed`, `last_used`) as though it described the request it just made.
+ *
+ * @typedef {ProxyPoolEntry & { key: string, pool_name: string }} SelectedProxy
+ */
+
+/**
+ * The two selection modes a pool row may declare.
+ *
+ * @typedef {'round_robin' | 'sticky'} ProxySelectionMode
+ */
+
+/**
+ * The body-reading methods of `Response`, as a closed set.
+ *
+ * `fetch_with_retry` invokes this as a COMPUTED method name --
+ * `response[response_type]()` -- which is the census's interpolated-key class:
+ * there is no literal to grep, and a misspelled value is not a wrong result but
+ * a `TypeError: response.jsonn is not a function` at the end of a successful
+ * request, after the retries and the proxy work are all spent. Naming the set
+ * makes the typo a type error at the call site instead.
+ *
+ * @typedef {'json' | 'text' | 'arrayBuffer' | 'blob' | 'formData' | 'bytes'} ResponseBodyMethod
+ */
 
 // Abortable sleep. A plain setTimeout cannot be interrupted, so an overall
 // import deadline (passed down as an AbortSignal) could not cut short the
@@ -30,34 +84,44 @@ const sleep = (ms, signal) =>
 // Parse proxy strings into proxy URLs
 // Format: host:port or host:port:username:password
 // Uses http:// protocol for proxy connection (standard for HTTP proxies)
+/**
+ * @param {string} proxy_str
+ * @returns {ProxyConfig}
+ */
 const parse_proxy_string = (proxy_str) => {
   const parts = proxy_str.split(':')
 
   const [host, port, username, password] = parts
+  // Built in ONE literal each rather than assigned onto a partial object after
+  // the fact. The two-step form left an intermediate value that satisfied no
+  // declared shape, so nothing could state that a proxy config always carries a
+  // connection string -- which is the field every consumer dials.
   if (username && password) {
-    const proxy_config = {
+    return {
       host,
       port,
       username,
       password,
-      protocol: 'http'
+      protocol: 'http',
+      connection_string: `http://${username}:${password}@${host}:${port}`
     }
-    proxy_config.connection_string = `http://${username}:${password}@${host}:${port}`
-    return proxy_config
   }
-  const proxy_config = {
+  return {
     host,
     port,
-    protocol: 'http'
+    protocol: 'http',
+    connection_string: `http://${host}:${port}`
   }
-  proxy_config.connection_string = `http://${host}:${port}`
-  return proxy_config
 }
 
 // A proxy key is `host:port:username`, and the username is a credential — vendor
 // proxies encode the session/auth configuration into it. Never interpolate a key
 // into a log line or an error message: those reach stderr, the job logs, and any
 // error surface that renders the message. This renders the routing half only.
+/**
+ * @param {string} proxy_key
+ * @returns {string} The `host:port` half, never the credential.
+ */
 const proxy_display_label = (proxy_key) =>
   typeof proxy_key === 'string'
     ? proxy_key.split(':').slice(0, 2).join(':')
@@ -76,6 +140,10 @@ const DEFAULT_SELECTION = 'round_robin'
 
 // ProxyPool manages a single pool of proxies under a declared selection mode
 class ProxyPool {
+  /**
+   * @param {string} name
+   * @param {{ selection?: ProxySelectionMode }} [options]
+   */
   constructor(name, { selection = DEFAULT_SELECTION } = {}) {
     // Reject an unknown mode rather than coercing it. Every other failure path
     // in this module is fail-OPEN and log-only -- an unresolved pool silently
@@ -98,6 +166,10 @@ class ProxyPool {
     this.base_delay = 60000 // 1 minute base delay
   }
 
+  /**
+   * @param {string} proxy_str
+   * @returns {void}
+   */
   add_proxy(proxy_str) {
     const proxy_config = parse_proxy_string(proxy_str)
     const key = proxy_str.split(':').slice(0, 3).join(':')
@@ -126,6 +198,11 @@ class ProxyPool {
     return Array.from(this.proxies.values()).every((p) => p.failed)
   }
 
+  /**
+   * @param {AbortSignal} [signal]
+   * @returns {Promise<SelectedProxy|null>} null when the pool is empty or every
+   *   entry is failed after the backoff.
+   */
   async get_working_proxy(signal) {
     if (this.proxies.size === 0) {
       log(`[${this.name}] No proxies available`)
@@ -197,6 +274,13 @@ class ProxyPool {
     return null
   }
 
+  /**
+   * Matched on `connection_string` rather than on the key, because a caller
+   * holds the config it fetched with and not the pool's key for it.
+   *
+   * @param {{ connection_string: string }} proxy_config
+   * @returns {void}
+   */
   mark_proxy_failed(proxy_config) {
     for (const [key, proxy] of this.proxies.entries()) {
       if (proxy.connection_string === proxy_config.connection_string) {
@@ -209,6 +293,9 @@ class ProxyPool {
     }
   }
 
+  /**
+   * @returns {{ total: number, failed: number, working: number }}
+   */
   get_stats() {
     const total = this.proxies.size
     const failed = Array.from(this.proxies.values()).filter(
@@ -479,6 +566,33 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
 }
 
 // Unified fetch with retry - supports both proxied and non-proxied requests
+/**
+ * @param {object} [options]
+ * @param {string} [options.url] - REQUIRED in practice; a falsy value throws
+ *   `url is required`. Optional in the type only because the parameter keeps
+ *   its `= {}` default, which is what turns a no-argument call into that named
+ *   error instead of a bare destructuring TypeError. The runtime check is the
+ *   enforcement here, and it is loud -- the silent shapes are what this file's
+ *   other annotations are aimed at.
+ * @param {string} [options.method]
+ * @param {Record<string, string>} [options.headers]
+ * @param {string | Buffer | URLSearchParams} [options.body]
+ * @param {number} [options.max_retries=3]
+ * @param {number} [options.initial_delay=1000]
+ * @param {number} [options.max_delay=10000]
+ * @param {boolean} [options.use_proxy=false]
+ * @param {boolean} [options.requires_proxy=false] - Fail CLOSED rather than
+ *   falling back to direct egress. See the block comment at the resolution site.
+ * @param {string} [options.proxy_pool='default']
+ * @param {ResponseBodyMethod} [options.response_type] - Absent returns the raw
+ *   `Response`; otherwise the named body method is invoked and its result
+ *   returned.
+ * @param {number} [options.timeout_ms=30000] - Per-ATTEMPT, not overall.
+ * @param {AbortSignal} [options.signal] - A caller's overall deadline, combined
+ *   with the per-attempt timeout so whichever fires first aborts.
+ * @returns {Promise<any>} The parsed body when `response_type` is given, else
+ *   the `Response`.
+ */
 export async function fetch_with_retry({
   url,
   method,
