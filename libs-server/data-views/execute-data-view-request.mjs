@@ -249,6 +249,8 @@ const release_slot = () => {
  * @param {Function} [opts.signal_emitter] - seam for the slow-query emitter
  * @param {Function} [opts.signal_resolver] - seam for the self-resolve arm
  * @param {Function} [opts.cache_get] - seam for the admission cache re-check
+ * @param {boolean} [opts.skip_cache] - bypass the admission re-check and cache
+ *   write (the /debug route must keep its bypass-cache contract)
  * @param {number} [opts.heartbeat_interval_ms] - seam for a short interval in tests
  * @param {number} [opts.emission_threshold_ms] - seam for the 5s emission threshold
  */
@@ -266,6 +268,7 @@ export async function execute_data_view_request({
   signal_emitter = emit_signal,
   signal_resolver = resolve_signal,
   cache_get = (key) => redis_cache.get(key),
+  skip_cache = false,
   heartbeat_interval_ms = DATA_VIEW_HEARTBEAT_INTERVAL_MS,
   emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS
 }) {
@@ -315,8 +318,9 @@ export async function execute_data_view_request({
 
     // Re-check the cache at admission: a concurrent execution of the same view
     // may have populated it while this request waited, so a same-view duplicate
-    // returns the finished first execution's rows instead of re-running.
-    const cached = await cache_get(cache_key)
+    // returns the finished first execution's rows instead of re-running. The
+    // /debug route and ignore_cache exports pass skip_cache to bypass this.
+    const cached = skip_cache ? null : await cache_get(cache_key)
     if (cached) {
       admission.counters.cache_hits++
       admission.counters.completed++
@@ -374,7 +378,7 @@ export async function execute_data_view_request({
     const total_ms = Date.now() - request_started_at
     const result_row_count = (data_view_results || []).length
 
-    if (data_view_results && data_view_results.length) {
+    if (!skip_cache && data_view_results && data_view_results.length) {
       const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
       await redis_cache.set(
         cache_key,

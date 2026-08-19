@@ -2,13 +2,13 @@ import express from 'express'
 import crypto from 'crypto'
 import {
   validators,
-  get_data_view_results,
   get_data_view_results_query,
   resolve_table_state_from_short_url,
   format_sql,
   redis_cache
 } from '#libs-server'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
+import { execute_data_view_request } from '#libs-server/data-views/execute-data-view-request.mjs'
 import get_param_option_counts, {
   collect_other_params
 } from '#libs-server/data-views/get-param-option-counts.mjs'
@@ -1014,38 +1014,25 @@ router.post('/search/?', async (req, res) => {
       return res.send(cached_rows)
     }
 
-    const { data_view_results, data_view_metadata } =
-      await get_data_view_results({
+    // Shared executor: one admission and timeout policy across every path. The
+    // executor owns the cache write (warm keys return above); the timeout is
+    // derived from auth here too, so a signed-in /search gets the same 5-minute
+    // budget the socket gives it instead of the global 40s default.
+    const { data_view_results } = await execute_data_view_request({
+      request_id: null,
+      params: {
         where,
         columns,
         sort,
         offset,
         prefix_columns,
         row_axes,
-        row_grain,
-        user_id
-      })
-
-    if (data_view_results && data_view_results.length) {
-      const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
-      // Cache the canonical { data_view_results, data_view_metadata } shape so
-      // the websocket socket and export route (which read cache_value.data_view_results
-      // under this same key) never see a bare array and emit result: undefined.
-      await redis_cache.set(
-        cache_key,
-        {
-          data_view_results,
-          data_view_metadata
-        },
-        Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
-      )
-      if (data_view_metadata.cache_expire_at) {
-        await redis_cache.expire_at(
-          cache_key,
-          data_view_metadata.cache_expire_at
-        )
-      }
-    }
+        row_grain
+      },
+      user_id,
+      path: 'search',
+      cache_key
+    })
 
     res.send(data_view_results)
   } catch (error) {
@@ -1162,8 +1149,21 @@ router.post('/debug/?', async (req, res) => {
     let results = null
     let execute_ms = null
     if (execute) {
+      // Through the shared executor for admission + instrumentation, but with
+      // skip_cache -- this route deliberately bypasses redis, and the executor's
+      // admission re-check and write must not defeat that contract.
       const execute_started_at = Date.now()
-      const { data_view_results } = await get_data_view_results(table_state)
+      const { data_view_results } = await execute_data_view_request({
+        request_id: null,
+        params: table_state,
+        user_id: table_state.user_id,
+        path: 'debug',
+        cache_key: `/data-views/debug/${get_data_view_hash({
+          ...table_state,
+          user_id: table_state.user_id
+        })}`,
+        skip_cache: true
+      })
       execute_ms = Date.now() - execute_started_at
       results = data_view_results
     }
@@ -1312,51 +1312,36 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     })}`
 
     let data_view_results
-    let data_view_metadata
 
     if (!ignore_cache) {
       const cache_value = await redis_cache.get(cache_key)
       if (cache_value && cache_value.data_view_results) {
         data_view_results = cache_value.data_view_results
-        data_view_metadata = cache_value.data_view_metadata
       }
     }
 
     if (!data_view_results) {
-      // If not cached or ignore_cache is true, get the results
-      const result = await get_data_view_results({
-        where: table_state.where,
-        columns: table_state.columns,
-        sort: table_state.sort,
-        offset: table_state.offset,
-        prefix_columns: table_state.prefix_columns,
-        row_axes: table_state.row_axes,
-        row_grain: table_state.row_grain,
-        limit,
-        user_id
+      // If not cached or ignore_cache is true, run through the shared executor.
+      // The executor owns the cache write; ignore_cache is carried through as
+      // skip_cache so the executor's admission re-check does not defeat it.
+      const result = await execute_data_view_request({
+        request_id: null,
+        params: {
+          where: table_state.where,
+          columns: table_state.columns,
+          sort: table_state.sort,
+          offset: table_state.offset,
+          prefix_columns: table_state.prefix_columns,
+          row_axes: table_state.row_axes,
+          row_grain: table_state.row_grain,
+          limit
+        },
+        user_id,
+        path: 'export',
+        cache_key,
+        skip_cache: ignore_cache
       })
       data_view_results = result.data_view_results
-      data_view_metadata = result.data_view_metadata
-
-      // Cache the unformatted results
-      if (data_view_results && data_view_results.length && !limit) {
-        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
-        await redis_cache.set(
-          cache_key,
-          {
-            data_view_results,
-            data_view_metadata
-          },
-          Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
-        )
-
-        if (data_view_metadata.cache_expire_at) {
-          await redis_cache.expire_at(
-            cache_key,
-            data_view_metadata.cache_expire_at
-          )
-        }
-      }
     }
 
     // Format the results based on export_format

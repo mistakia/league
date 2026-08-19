@@ -2314,6 +2314,12 @@ export const get_data_view_results_query = async ({
 // the generated SQL before the column is added.
 const TOTAL_COUNT_KEY = '__data_view_total_count__'
 
+// Named once so the per-query budget is visible in one place. The VALUE is
+// deliberately unchanged here -- choosing a new work_mem belongs with the
+// query-shape work, where it can be decided against shapes that work has
+// actually changed. temp_file_limit, not work_mem, is what bounds blast radius.
+const DATA_VIEW_WORK_MEM = '1GB'
+
 // Split the reserved total-count column off the rows and strip it, so no
 // consumer -- the HTTP route, the websocket socket, the CSV export -- ever sees
 // it. An empty result set yields no rows to read the count from, in which case
@@ -2381,12 +2387,14 @@ export default async function ({
       .toString()
   }
 
-  const session_settings = timeout
-    ? `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
-    : `SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
+  const session_settings = `SET LOCAL statement_timeout = ${timeout || 40000}; SET LOCAL work_mem = ${DATA_VIEW_WORK_MEM};`
   // Each `SET LOCAL` produces its own result object ahead of the query's, so
-  // the row set is the last one: index 3 with a statement_timeout, 2 without.
-  const rows_index = timeout ? 3 : 2
+  // the row set is the last one: index 2 (statement_timeout, then work_mem).
+  // The executor always passes a timeout, so there is no no-timeout arm; the
+  // `|| 40000` is a defensive fallback that keeps a null timeout from emitting
+  // invalid SQL. `SET LOCAL jit = off` was deleted with this extraction: jit is
+  // off server-side since 2026-08-13, making the per-statement override a no-op.
+  const rows_index = 2
 
   const response = await db.raw(
     `${session_settings} ${execution_query_string};`
