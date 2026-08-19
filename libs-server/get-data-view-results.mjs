@@ -2387,7 +2387,11 @@ export default async function ({
       .toString()
   }
 
-  const session_settings = `SET LOCAL statement_timeout = ${timeout || 40000}; SET LOCAL work_mem = ${DATA_VIEW_WORK_MEM};`
+  // work_mem takes a quoted string literal -- the constant holds the VALUE
+  // (`1GB`), so the quotes belong here at the interpolation site. Emitting it
+  // bare yields `work_mem = 1GB`, which Postgres rejects as trailing junk after
+  // a numeric literal and which fails every cache-miss execution.
+  const session_settings = `SET LOCAL statement_timeout = ${timeout || 40000}; SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}';`
   // Each `SET LOCAL` produces its own result object ahead of the query's, so
   // the row set is the last one: index 2 (statement_timeout, then work_mem).
   // The executor always passes a timeout, so there is no no-timeout arm; the
