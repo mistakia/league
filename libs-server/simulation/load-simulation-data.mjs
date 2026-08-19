@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Load simulation data from database.
  * Database queries and data loading for simulation.
@@ -24,9 +25,9 @@ export {
 /**
  * Load player info (position, current team) for a set of player IDs.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
- * @returns {Promise<Map>} Map of pid -> { position, nfl_team }
+ * @returns {Promise<Map<string, { position: string, nfl_team: string }>>}
  */
 export async function load_player_info({ player_ids }) {
   if (!player_ids.length) {
@@ -51,7 +52,7 @@ export async function load_player_info({ player_ids }) {
 /**
  * Load scoring format by hash.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.scoring_format_id - Scoring format hash
  * @returns {Promise<Object>} Scoring format configuration
  */
@@ -71,11 +72,11 @@ export async function load_scoring_format({ scoring_format_id }) {
  * Load actual fantasy points for players from completed games.
  * Uses pre-calculated points from scoring_format_player_gamelogs.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number[]} params.esbids - Array of completed game esbids
  * @param {string} params.scoring_format_id - Scoring format hash
- * @returns {Promise<Map>} Map of pid -> actual_points
+ * @returns {Promise<Map<string, number>>} pid -> actual points
  */
 export async function load_actual_player_points({
   player_ids,
@@ -98,7 +99,13 @@ export async function load_actual_player_points({
 
   const points_map = new Map()
   for (const row of rows) {
-    points_map.set(row.pid, parseFloat(row.points))
+    // No parseFloat: db/index.mjs registers a NUMERIC type parser, so `points`
+    // arrives as a number and the parse was a stringify-and-reparse round trip.
+    // The null skip is the part that matters -- parseFloat(null) is NaN, and a
+    // NaN in this map reads downstream as a real score and poisons every total
+    // it reaches, where an absent pid correctly reads as "no actual points".
+    if (row.points === null) continue
+    points_map.set(row.pid, row.points)
   }
 
   log(`Loaded actual points for ${points_map.size} players`)
@@ -111,12 +118,12 @@ export async function load_actual_player_points({
  * Merges market projections with traditional projections (market takes precedence)
  * to match what the simulation uses.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
  * @param {string} params.scoring_format_id - Scoring format hash
- * @returns {Promise<Map>} Map of pid -> { points, is_actual, source }
+ * @returns {Promise<Map<string, { points: number, is_actual: boolean, source: string }>>}
  */
 export async function load_player_points_with_game_status({
   player_ids,
@@ -185,7 +192,10 @@ export async function load_player_points_with_game_status({
       .select('pid', 'points')
 
     for (const row of actual_rows) {
-      actual_points_map.set(row.pid, parseFloat(row.points))
+      // Same as load_actual_player_points above: already a number, and a null
+      // must not enter the map as NaN.
+      if (row.points === null) continue
+      actual_points_map.set(row.pid, row.points)
     }
   }
 
@@ -285,7 +295,7 @@ export async function load_player_points_with_game_status({
  * Load actual playoff points from the playoffs table.
  * Returns a map of week -> Map<tid, points> for weeks that have actual results.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Team IDs to load
  * @param {number[]} params.weeks - Weeks to check
@@ -308,9 +318,11 @@ export async function load_actual_playoff_points({
   const weeks_with_results = new Set()
 
   for (const entry of playoff_entries) {
-    const points = parseFloat(entry.points)
-    // Only count as having results if points > 0 (game actually played)
-    if (points > 0) {
+    const points = entry.points
+    // Only count as having results if points > 0 (game actually played).
+    // The null test is exactly what the old `parseFloat(null)` bought: NaN > 0
+    // is false, and so is null > 0 once the comparison is written out.
+    if (points !== null && points > 0) {
       if (!actual_points.has(entry.week)) {
         actual_points.set(entry.week, new Map())
       }

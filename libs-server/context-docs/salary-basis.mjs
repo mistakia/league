@@ -1,3 +1,4 @@
+// @ts-check
 import is_before_extension_deadline from '#libs-shared/is-before-extension-deadline.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
@@ -10,6 +11,10 @@ import { format_date_et } from './markdown.mjs'
  * as-recorded basis once it closes; this mirrors that single decision into a
  * column label, a prose note, and a machine-readable value. Every doc that
  * prints a salary renders from this, so the four surfaces cannot drift.
+ *
+ * @param {object} params
+ * @param {NonNullable<Awaited<ReturnType<import('../get-league.mjs').default>>>} params.league
+ * @param {number} params.year
  */
 export function resolve_salary_basis({ league, year }) {
   const before_deadline = is_before_extension_deadline({ league })

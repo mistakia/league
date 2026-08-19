@@ -1,5 +1,12 @@
+// @ts-check
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 
+/**
+ * @param {object} args
+ * @param {Record<string, any>} args.params - raw query params off the request,
+ *   so the values are whatever the wire carried: a string, an array of strings,
+ *   or absent. The narrowing below is what turns that into a seas_type list.
+ */
 export default ({ params }) => {
   const seas_type = Array.isArray(params.seas_type)
     ? params.seas_type

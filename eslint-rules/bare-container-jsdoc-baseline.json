@@ -1,7 +1,7 @@
 {
   "description": "Per-file allowance for eslint-rules/no-bare-container-jsdoc. Occurrences beyond a file allowance are errors; a file absent here is allowed zero. Allowances only move DOWN -- --check fails on any entry that allows more than the file contains.",
   "generated_by": "node eslint-rules/generate-bare-container-jsdoc-baseline.mjs",
-  "total_occurrences": 1175,
+  "total_occurrences": 1160,
   "allowances": {
     "api/routes/leagues/external.mjs": 3,
     "api/sockets/external-league-import.mjs": 13,
@@ -104,9 +104,8 @@
     "libs-server/simulation/load-player-variance.mjs": 4,
     "libs-server/simulation/load-position-game-outcome-defaults.mjs": 4,
     "libs-server/simulation/load-projection-data.mjs": 9,
-    "libs-server/simulation/load-simulation-data.mjs": 10,
+    "libs-server/simulation/load-simulation-data.mjs": 2,
     "libs-server/simulation/load-team-rosters.mjs": 9,
-    "libs-server/simulation/merge-player-projections.mjs": 7,
     "libs-server/simulation/simulate-championship.mjs": 3,
     "libs-server/simulation/simulate-league-week.mjs": 3,
     "libs-server/simulation/simulate-matchup.mjs": 3,

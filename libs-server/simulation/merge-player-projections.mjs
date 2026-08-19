@@ -10,14 +10,22 @@ import { merge_market_stats_with_traditional } from './load-simulation-data.mjs'
  * Market stats override traditional stats where available, with traditional
  * stats filling in gaps (e.g., yards, receptions when only TD odds exist).
  *
- * @param {Object} params
+ * Every tag here used to be a bare container name, with the real shapes written
+ * in the prose beside them -- so the information existed and nothing checked it.
+ * They are the same shapes, now stated where the checker can read them.
+ *
+ * @param {object} params
  * @param {string[]} params.player_ids - Player IDs to merge projections for
- * @param {Map} params.traditional_projections - Pre-calculated traditional projections (pid -> points)
- * @param {Map} params.traditional_stats - Traditional projection stats (pid -> stats object)
- * @param {Map} params.market_projections - Market-derived projections (pid -> market data)
- * @param {Map} params.player_info - Player info map (pid -> { position, nfl_team })
- * @param {Object} params.league_settings - League scoring settings for point calculation
- * @returns {Object} { projections: Map<pid, points>, market_merged_count, traditional_only_count }
+ * @param {Map<string, number>} params.traditional_projections - Pre-calculated traditional projections (pid -> points)
+ * @param {Map<string, any>} params.traditional_stats - Traditional projection stats (pid -> stats object)
+ * @param {Map<string, any>} params.market_projections - Market-derived projections (pid -> market data)
+ * @param {Map<string, { position: string, nfl_team?: string }>} params.player_info - Player info map
+ * @param {import('#db/schema-types.js').LeagueScoringFormatsRow} [params.league_settings] - League
+ *   scoring settings for point calculation. OPTIONAL because it comes from a
+ *   `.first()` on league_scoring_formats and its only caller guards that lookup
+ *   for the market-projection load ONLY -- this call sits outside that guard, so
+ *   a league with no scoring-format row reaches here with nothing.
+ * @returns {{ projections: Map<string, number>, market_merged_count: number, traditional_only_count: number }}
  */
 export function merge_player_projections({
   player_ids,

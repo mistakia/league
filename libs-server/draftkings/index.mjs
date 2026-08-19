@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * DraftKings odds import and processing utilities
  *
