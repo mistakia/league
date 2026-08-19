@@ -52,9 +52,10 @@ export const compute_group_key = ({
     measure_source: column_def.measure_source ?? null,
     period,
     identity_id,
-    pid_columns: column_def.pid_columns
-      ? [...column_def.pid_columns].sort()
-      : null,
+    // ORDER-SENSITIVE, for the same reason `generate_table_alias` is: the batch
+    // materializes ONE scan grouped by ONE subject-id expression, so two
+    // columns whose role lists differ only in order must not share it.
+    pid_columns: column_def.pid_columns ? [...column_def.pid_columns] : null,
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
