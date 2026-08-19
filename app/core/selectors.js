@@ -2745,7 +2745,7 @@ export function get_player_game_state(
 
   // Game exists but no plays yet
   const now = Date.now()
-  if (game.timestamp && now >= game.timestamp) {
+  if (game.kickoff_at && now >= new Date(game.kickoff_at).getTime()) {
     return 'live'
   }
 

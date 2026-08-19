@@ -548,7 +548,7 @@ export function* export_rosters() {
         player: player_map.get('short_name'),
         playerid: player_map.get('pid'),
         pos: player_map.get('primary_position'),
-        last_transaction_timestamp: rosterPlayer.timestamp,
+        last_transaction_timestamp: rosterPlayer.occurred_at,
         last_transaction_type:
           transaction_type_display_names[rosterPlayer.type],
         slot: roster_slot_display_names[rosterPlayer.slot],
