@@ -227,17 +227,18 @@ const get_select_string = ({
       ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
-    if (column_definition.has_numerator_denominator) {
-      // Percentage columns (completion %, INT %, share %, ...) scale by 100 and
-      // round to match their season render; ratio columns (Y/A, aDOT, YAC/C,
-      // ...) keep the raw pooled quotient. The double-SUM here sums per-year
-      // bigint sub-totals, which Postgres promotes to numeric, so the ratio
-      // quotient is not subject to integer-division truncation.
-      const num_sum = `SUM(${inner_table}.${select_as}_numerator)`
-      const den_sum = `NULLIF(SUM(${inner_table}.${select_as}_denominator), 0)`
-      const rate_expr = column_definition.is_percentage
-        ? `ROUND(100.0 * ${num_sum} / ${den_sum}, 2)`
-        : `${num_sum} / ${den_sum}`
+    if (column_definition.range_offset_select) {
+      // A measure carrying a combine reduces the offset window by summing each
+      // ACCUMULATOR the CTE projected and applying the combine after -- never by
+      // summing the per-year combined value, which is the sum-of-ratios class
+      // this contract makes unrepresentable. The expression comes from the
+      // column's own measure declaration through combine.mjs, so the scale, the
+      // zero-denominator answer and the rounding are the season render's, at a
+      // coarser grain. It replaces a hand-written copy that disagreed with the
+      // other four on both the cast and the rounding.
+      const rate_expr = column_definition.range_offset_select({
+        table_name: inner_table
+      })
       final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =

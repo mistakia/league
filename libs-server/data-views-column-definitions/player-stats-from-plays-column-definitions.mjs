@@ -18,12 +18,13 @@ import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.
 // must materialize into distinct CTEs rather than batching into one).
 const play_by_play_filter_param_keys = Object.keys(nfl_plays_column_params)
 
-const should_use_main_where = ({ params, has_numerator_denominator }) => {
+const should_recombine_in_main = ({ params, is_combined }) => {
   // Equal-endpoint offsets ([k,k]) are a single-year shift, NOT a range: the
   // CTE stays collapsed and the source join correlates the single year. Only a
-  // genuine multi-year range (is_year_offset_range) reduces num/den in the
-  // main SELECT. See year-offset-range.mjs for the canonical predicate.
-  return is_year_offset_range(params) && has_numerator_denominator
+  // genuine multi-year range (is_year_offset_range) recombines the
+  // accumulators in the main SELECT. See year-offset-range.mjs for the
+  // canonical predicate.
+  return is_year_offset_range(params) && is_combined
 }
 
 const plays_source = {
@@ -67,17 +68,6 @@ const player_stat_from_plays = ({
   pid_columns,
   with_select_string,
   stat_name,
-  numerator_select,
-  denominator_select,
-  has_numerator_denominator = false,
-  // Distinguishes a percentage rate (×100 scaling, e.g. completion %) from a
-  // plain ratio (×1, e.g. Y/A, aDOT). The season render bakes `100.0 *` in by
-  // hand for percentages and omits it for ratios; the generic year-offset
-  // paths (main_where here, and the correlated subquery in select-string.mjs)
-  // cannot tell them apart from has_numerator_denominator alone, so this flag
-  // threads the distinction through. A consistency invariant below fails fast
-  // if the flag disagrees with the season render's scaling.
-  is_percentage = false,
   measure = null,
   measure_expr = null,
   supports_periods = [
@@ -102,15 +92,17 @@ const player_stat_from_plays = ({
     'player_rush_play'
   ]
 }) => {
-  // Measure-first contract: a rate-capable single-aggregate column declares an
-  // explicit `measure: { accumulators, combine }`; derive_measure produces the
-  // season render, numerator measure_expr, period aggregate, supports_output,
-  // and decimals rounding from it. Non-rate columns (averages, compound ratios,
-  // numerator/denominator ratios) declare no measure, keep their raw
-  // with_select_string, and pass supports_periods: [].
+  // Measure-first contract: a column declares an explicit
+  // `measure: { accumulators, combine }`, and derive_measure produces the
+  // season render, the offset-window recombination, the numerator measure_expr,
+  // the period aggregate, supports_output and the rounding from it. A ratio is
+  // a two-accumulator measure whose combine divides; it is not a second
+  // vocabulary. The remaining with_select_string columns are the ones no
+  // accumulator set expresses.
   const derived = measure
     ? derive_measure({ stat_name, measure, supports_periods })
     : null
+  const is_combined = Boolean(derived?.is_combined)
 
   // Fail-fast invariant (scoped to this factory): a column advertising any
   // denominator period MUST declare a measure; a column left on a raw
@@ -124,29 +116,14 @@ const player_stat_from_plays = ({
   }
 
   // The season render is the deriver's with_select for measure columns, else
-  // the raw string (carve-outs and numerator/denominator ratios).
+  // the raw string (the remaining carve-outs).
   const season_select = derived ? derived.with_select : with_select_string
 
-  // Fail-fast invariant: for numerator/denominator columns, the is_percentage
-  // flag MUST agree with the season render's scaling. A percentage column bakes
-  // `100.0 *` into its with_select_string; a ratio column does not. If they
-  // disagree, the year-offset paths would mis-scale by 100x (the latent bug
-  // this flag fixes), so catch the misclassification at module load.
-  if (has_numerator_denominator) {
-    const season_has_percentage_scale = /100\.0\s*\*/.test(
-      String(season_select)
-    )
-    if (season_has_percentage_scale !== Boolean(is_percentage)) {
-      throw new Error(
-        `player_stat_from_plays: '${stat_name}' is_percentage=${Boolean(
-          is_percentage
-        )} disagrees with its season render (${
-          season_has_percentage_scale ? 'has' : 'lacks'
-        } 100.0 * scaling) -- set is_percentage to match the with_select_string`
-      )
-    }
-  }
-
+  // No is_percentage flag and no invariant policing it. A percentage column
+  // writes its own scale inside the one combine that produces its value, so
+  // there is nothing for a second declaration to disagree with -- the flag
+  // existed only because the value lived in a string the flag had to be
+  // asserted to match.
   const final_supports_output = derived ? derived.supports_output : null
   // An explicit table-qualified measure_expr override (e.g.
   // player_receiving_yards_from_plays) wins over the deriver's default.
@@ -156,9 +133,12 @@ const player_stat_from_plays = ({
   const final_decimals = derived ? derived.decimals : null
   // Mirror `add_player_stats_play_by_play_with_statement` filtering against
   // the aggregator-rate / aggregator-count CTE so cross-period totals match
-  // legacy parity. Measure columns only -- columns with hand-supplied
-  // `apply_filters` (e.g. fantasy points) keep their own bypass.
-  const final_apply_filters = derived
+  // legacy parity. Gated on the column being AGGREGATOR-SERVEABLE rather than
+  // merely measure-bearing: both this hook and the `consumes_params_extra` it
+  // ships with are read only on the output-aggregator path, so a combined
+  // measure -- which advertises no aggregation until the per-period reducer
+  // lands -- would carry two fields nothing can reach.
+  const final_apply_filters = final_supports_output
     ? ({ query, params }) => {
         const defaults = get_play_by_play_default_params({ params })
         const filtered_params = { ...defaults }
@@ -177,55 +157,34 @@ const player_stat_from_plays = ({
       generate_table_alias({ type: 'play_by_play', params, pid_columns }),
     column_name: stat_name,
     with_select: ({ params = {} }) => {
-      if (is_year_offset_range(params) && has_numerator_denominator) {
-        return [
-          `${numerator_select} as ${stat_name}_numerator`,
-          `${denominator_select} as ${stat_name}_denominator`
-        ]
+      // In a multi-year range the CTE carries the ACCUMULATORS, so the outer
+      // query can combine after summing them. Anywhere else it carries the
+      // combined value directly.
+      if (should_recombine_in_main({ params, is_combined })) {
+        return derived.accumulator_selects
       }
       return [`${season_select} as ${stat_name}`]
     },
-    has_numerator_denominator,
-    // Surfaced on the column definition so the generic year-offset correlated
-    // subquery path in select-string.mjs can scale percentages by 100 and
-    // leave ratios at 1, consistently with main_where above.
-    is_percentage,
+    // Consumed by select-string.mjs's year-offset correlated subquery. One
+    // expression, from the column's own combine, at the window's grain.
+    ...(is_combined ? { range_offset_select: derived.recombine } : {}),
     with_where: ({ params }) => {
-      if (should_use_main_where({ params, has_numerator_denominator })) {
-        return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
+      if (should_recombine_in_main({ params, is_combined })) {
+        return null // the WITH statement carries accumulators, not a value
       }
       return season_select
     },
     main_where: ({ params, table_name }) => {
-      if (should_use_main_where({ params, has_numerator_denominator })) {
-        // LIVE year-offset numerator/denominator assembly. Percentage columns
-        // scale by 100 (matching their season render); ratio columns do not,
-        // and must cast to decimal so the bigint/bigint quotient is not
-        // truncated by integer division.
-        //
-        // An undefined ratio is NULL, not zero: a player with no targets did
-        // not have a 0% catch rate. The NULLIF is the whole guard -- the
-        // zero-substituting CASE this used to carry made the filter path
-        // disagree with the display path, which emits NULL.
-        const num_sum = `SUM(${table_name}.${stat_name}_numerator)`
-        const den_sum = `SUM(${table_name}.${stat_name}_denominator)`
-        return is_percentage
-          ? `ROUND(100.0 * ${num_sum} / NULLIF(${den_sum}, 0), 2)`
-          : `ROUND(${num_sum}::decimal / NULLIF(${den_sum}, 0), 2)`
+      if (should_recombine_in_main({ params, is_combined })) {
+        return derived.recombine({ table_name })
       }
       return null
     },
     main_where_group_by: ({ params, table_name }) => {
-      if (should_use_main_where({ params, has_numerator_denominator })) {
-        const group_by = []
-        if (has_numerator_denominator) {
-          group_by.push(`SUM(${table_name}.${stat_name}_numerator)`)
-          group_by.push(`SUM(${table_name}.${stat_name}_denominator)`)
-        } else {
-          group_by.push(`${table_name}.${stat_name}`)
-        }
-
-        return group_by
+      if (should_recombine_in_main({ params, is_combined })) {
+        return Object.keys(measure.accumulators).map(
+          (name) => `SUM(${table_name}.${stat_name}_${name})`
+        )
       }
       return []
     },
@@ -250,176 +209,175 @@ const player_stat_from_plays = ({
   }
 }
 
+// A share is an ordinary two-accumulator measure over a cohort-expanded scan:
+// one accumulator scoped to the subject, one to the whole team. Only the SCAN
+// is bespoke here -- the arithmetic goes through the same accumulator/combine
+// modules every other column uses. The cohort expansion moves to the
+// fact-source registry in a later step, at which point this factory goes away.
 const create_team_share_stat = ({
   column_name,
   pid_columns,
+  measure = null,
   with_select_string,
-  numerator_select,
-  denominator_select,
-  has_numerator_denominator = false,
-  // Team shares are percentages (their season render bakes in `100.0 *`), so
-  // this defaults true. Threaded through main_where and onto the column
-  // definition so the year-offset paths scale consistently with the season
-  // render -- see the matching flag in player_stat_from_plays.
-  is_percentage = true,
   with_select_string_year_offset_range,
   main_select_string_year_offset_range
-}) => ({
-  with: ({
-    query,
-    with_table_name,
-    params,
-    having_clauses = [],
-    row_axes = [],
-    data_view_options = {}
-  }) => {
-    const { seas_type } = get_play_by_play_default_params({ params })
+}) => {
+  const derived = measure
+    ? derive_measure({ stat_name: column_name, measure, supports_periods: [] })
+    : null
+  const is_combined = Boolean(derived?.is_combined)
+  const season_select = derived ? derived.with_select : with_select_string
+  return {
+    with: ({
+      query,
+      with_table_name,
+      params,
+      having_clauses = [],
+      row_axes = [],
+      data_view_options = {}
+    }) => {
+      const { seas_type } = get_play_by_play_default_params({ params })
 
-    const with_query = db('nfl_plays')
-      .select('pg.pid')
-      .join('player_gamelogs as pg', function () {
-        this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
-          'nfl_plays.offense_nfl_team',
-          '=',
-          'pg.nfl_team'
-        )
-      })
-      .whereNot('play_type', 'NOPL')
-      .where(function () {
-        for (const pid_column of pid_columns) {
-          this.orWhereNotNull(pid_column)
-        }
-      })
-      .groupBy('pg.pid')
-
-    if (is_year_offset_range(params)) {
-      if (has_numerator_denominator) {
-        with_query.select(
-          db.raw(`${numerator_select} as ${column_name}_numerator`)
-        )
-        with_query.select(
-          db.raw(`${denominator_select} as ${column_name}_denominator`)
-        )
-      } else if (with_select_string_year_offset_range) {
-        with_query.select(db.raw(with_select_string_year_offset_range))
-      }
-    } else {
-      with_query.select(db.raw(`${with_select_string} as ${column_name}`))
-    }
-
-    for (const row_axis of row_axes) {
-      if (data_views_constants.row_axis_params.includes(row_axis)) {
-        const column_param_definition = nfl_plays_column_params[row_axis]
-        const table_name =
-          (column_param_definition && column_param_definition.table) ||
-          'nfl_plays'
-        // Grain axis stays 'year' in the row-axis vocabulary; the physical
-        // column is season_year post-rename, so alias it back to 'year' at
-        // this CTE boundary.
-        const physical_row_axis = row_axis === 'year' ? 'season_year' : row_axis
-        const row_axis_statement =
-          row_axis === 'year'
-            ? `${table_name}.${physical_row_axis} as year`
-            : `${table_name}.${physical_row_axis}`
-        with_query.select(row_axis_statement)
-        with_query.groupBy(`${table_name}.${physical_row_axis}`)
-      }
-    }
-
-    // Handle career_year
-    if (params.career_year) {
-      with_query.join('player_seasonlogs', function () {
-        this.on('nfl_plays.season_year', '=', 'player_seasonlogs.season_year')
-          .andOn('nfl_plays.season_type', '=', 'player_seasonlogs.season_type')
-          .andOn('pg.pid', '=', 'player_seasonlogs.pid')
-      })
-      with_query.whereBetween('player_seasonlogs.career_year', [
-        Math.min(params.career_year[0], params.career_year[1]),
-        Math.max(params.career_year[0], params.career_year[1])
-      ])
-    }
-
-    // Handle career_game
-    if (params.career_game) {
-      with_query.whereBetween('pg.career_game', [
-        Math.min(params.career_game[0], params.career_game[1]),
-        Math.max(params.career_game[0], params.career_game[1])
-      ])
-    }
-
-    // Remove career_year and career_game from params before applying other filters
-    const filtered_params = { ...params, seas_type }
-    delete filtered_params.career_year
-    delete filtered_params.career_game
-
-    apply_play_by_play_column_params_to_query({
-      query: with_query,
-      params: filtered_params,
-      query_context: data_view_options.query_context
-    })
-
-    const unique_having_clauses = new Set(having_clauses)
-    for (const having_clause of unique_having_clauses) {
-      with_query.havingRaw(having_clause)
-    }
-
-    const view_scope_emitted =
-      data_view_options.query_context &&
-      data_view_options.query_context.nfl_week_ids &&
-      data_view_options.query_context.nfl_week_ids.length
-    const effective_years = get_effective_years({ params, data_view_options })
-    if (effective_years.length) {
-      // pg.season_year (player_gamelogs) is always safe to push -- apply_play_by_play
-      // does not reach player_gamelogs. Skip nfl_plays.season_year when nfl_week_id is
-      // set OR when view scope has already emitted year, to avoid a duplicate.
-      if (!params.nfl_week_id && !view_scope_emitted) {
-        with_query.whereIn('nfl_plays.season_year', effective_years)
-      }
-      with_query.whereIn('pg.season_year', effective_years)
-    }
-
-    // MATERIALIZED required: predicates are pushed at construction time; planner
-    // predicate push-into-CTE is not needed and would let the planner inline the
-    // CTE into a nested-loop that re-executes it per outer row.
-    query.withMaterialized(with_table_name, with_query)
-  },
-  column_name,
-  use_having: true,
-  table_alias: ({ params }) =>
-    generate_table_alias({ type: column_name, params, pid_columns }),
-  source: plays_source,
-  has_numerator_denominator,
-  is_percentage,
-  main_select_string_year_offset_range,
-  with_where: ({ params }) => {
-    if (is_year_offset_range(params) && has_numerator_denominator) {
-      // No where clause in the WITH statement when using year_offset range with numerator/denominator
-      return null
-    }
-    return with_select_string
-  },
-  main_where: ({ params, table_name, data_view_options }) => {
-    if (is_year_offset_range(params)) {
-      if (has_numerator_denominator) {
-        // An undefined ratio is NULL, not zero -- see the matching comment in
-        // player_stat_from_plays's main_where. The NULLIF is the whole guard.
-        const num_sum = `SUM(${table_name}.${column_name}_numerator)`
-        const den_sum = `SUM(${table_name}.${column_name}_denominator)`
-        return is_percentage
-          ? `ROUND(100.0 * ${num_sum} / NULLIF(${den_sum}, 0), 2)`
-          : `ROUND(${num_sum}::decimal / NULLIF(${den_sum}, 0), 2)`
-      } else if (main_select_string_year_offset_range) {
-        return main_select_string_year_offset_range({
-          table_name,
-          params,
-          data_view_options
+      const with_query = db('nfl_plays')
+        .select('pg.pid')
+        .join('player_gamelogs as pg', function () {
+          this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
+            'nfl_plays.offense_nfl_team',
+            '=',
+            'pg.nfl_team'
+          )
         })
+        .whereNot('play_type', 'NOPL')
+        .where(function () {
+          for (const pid_column of pid_columns) {
+            this.orWhereNotNull(pid_column)
+          }
+        })
+        .groupBy('pg.pid')
+
+      if (is_year_offset_range(params)) {
+        if (is_combined) {
+          for (const accumulator_select of derived.accumulator_selects) {
+            with_query.select(db.raw(accumulator_select))
+          }
+        } else if (with_select_string_year_offset_range) {
+          with_query.select(db.raw(with_select_string_year_offset_range))
+        }
+      } else {
+        with_query.select(db.raw(`${season_select} as ${column_name}`))
       }
-    }
-    return null
-  },
-  get_cache_info: get_cache_info_for_fields_from_plays
-})
+
+      for (const row_axis of row_axes) {
+        if (data_views_constants.row_axis_params.includes(row_axis)) {
+          const column_param_definition = nfl_plays_column_params[row_axis]
+          const table_name =
+            (column_param_definition && column_param_definition.table) ||
+            'nfl_plays'
+          // Grain axis stays 'year' in the row-axis vocabulary; the physical
+          // column is season_year post-rename, so alias it back to 'year' at
+          // this CTE boundary.
+          const physical_row_axis =
+            row_axis === 'year' ? 'season_year' : row_axis
+          const row_axis_statement =
+            row_axis === 'year'
+              ? `${table_name}.${physical_row_axis} as year`
+              : `${table_name}.${physical_row_axis}`
+          with_query.select(row_axis_statement)
+          with_query.groupBy(`${table_name}.${physical_row_axis}`)
+        }
+      }
+
+      // Handle career_year
+      if (params.career_year) {
+        with_query.join('player_seasonlogs', function () {
+          this.on('nfl_plays.season_year', '=', 'player_seasonlogs.season_year')
+            .andOn(
+              'nfl_plays.season_type',
+              '=',
+              'player_seasonlogs.season_type'
+            )
+            .andOn('pg.pid', '=', 'player_seasonlogs.pid')
+        })
+        with_query.whereBetween('player_seasonlogs.career_year', [
+          Math.min(params.career_year[0], params.career_year[1]),
+          Math.max(params.career_year[0], params.career_year[1])
+        ])
+      }
+
+      // Handle career_game
+      if (params.career_game) {
+        with_query.whereBetween('pg.career_game', [
+          Math.min(params.career_game[0], params.career_game[1]),
+          Math.max(params.career_game[0], params.career_game[1])
+        ])
+      }
+
+      // Remove career_year and career_game from params before applying other filters
+      const filtered_params = { ...params, seas_type }
+      delete filtered_params.career_year
+      delete filtered_params.career_game
+
+      apply_play_by_play_column_params_to_query({
+        query: with_query,
+        params: filtered_params,
+        query_context: data_view_options.query_context
+      })
+
+      const unique_having_clauses = new Set(having_clauses)
+      for (const having_clause of unique_having_clauses) {
+        with_query.havingRaw(having_clause)
+      }
+
+      const view_scope_emitted =
+        data_view_options.query_context &&
+        data_view_options.query_context.nfl_week_ids &&
+        data_view_options.query_context.nfl_week_ids.length
+      const effective_years = get_effective_years({ params, data_view_options })
+      if (effective_years.length) {
+        // pg.season_year (player_gamelogs) is always safe to push -- apply_play_by_play
+        // does not reach player_gamelogs. Skip nfl_plays.season_year when nfl_week_id is
+        // set OR when view scope has already emitted year, to avoid a duplicate.
+        if (!params.nfl_week_id && !view_scope_emitted) {
+          with_query.whereIn('nfl_plays.season_year', effective_years)
+        }
+        with_query.whereIn('pg.season_year', effective_years)
+      }
+
+      // MATERIALIZED required: predicates are pushed at construction time; planner
+      // predicate push-into-CTE is not needed and would let the planner inline the
+      // CTE into a nested-loop that re-executes it per outer row.
+      query.withMaterialized(with_table_name, with_query)
+    },
+    column_name,
+    use_having: true,
+    table_alias: ({ params }) =>
+      generate_table_alias({ type: column_name, params, pid_columns }),
+    source: plays_source,
+    main_select_string_year_offset_range,
+    ...(is_combined ? { range_offset_select: derived.recombine } : {}),
+    with_where: ({ params }) => {
+      if (is_year_offset_range(params) && is_combined) {
+        return null // the WITH statement carries accumulators, not a value
+      }
+      return season_select
+    },
+    main_where: ({ params, table_name, data_view_options }) => {
+      if (is_year_offset_range(params)) {
+        if (is_combined) {
+          return derived.recombine({ table_name })
+        } else if (main_select_string_year_offset_range) {
+          return main_select_string_year_offset_range({
+            table_name,
+            params,
+            data_view_options
+          })
+        }
+      }
+      return null
+    },
+    get_cache_info: get_cache_info_for_fields_from_plays
+  }
+}
 
 export default {
   player_pass_yards_from_plays: player_stat_from_plays({
@@ -517,25 +475,50 @@ export default {
   }),
   player_pass_completion_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) / SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'pass_comp_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
     {
       pid_columns: ['passer_pid'],
-      with_select_string: `AVG(completion_percentage_over_expected)`,
       stat_name: 'pass_comp_pct_over_expected_from_plays',
       // CPOE is a per-dropback mean; a range year_offset must pool the summed
       // completion_percentage_over_expected over the summed qualifying-dropback count, not SUM the per-season
       // averages.
-      numerator_select: `SUM(completion_percentage_over_expected)`,
-      denominator_select: `SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
+      measure: {
+        accumulators: {
+          numerator: {
+            aggregate: 'sum',
+            expr: `completion_percentage_over_expected`
+          },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({ numerator: a.numerator, denominator: a.denominator }),
+        decimals: null
+      },
       supports_periods: []
     }
   ),
@@ -546,43 +529,96 @@ export default {
     // can pool across a multi-year year_offset range via numerator/denominator
     // instead of summing per-season means; rounded to 2 decimals to match the
     // sibling percentage columns.
-    with_select_string: `CASE WHEN SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(completion_probability) / NULLIF(SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE NULL END`,
     stat_name: 'expected_pass_comp_pct_from_plays',
-    numerator_select: `SUM(completion_probability)`,
-    denominator_select: `SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `completion_probability` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_touchdown = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_touchdown = true THEN 1 ELSE 0 END) / SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'pass_td_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_touchdown = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_interception = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_interception = true THEN 1 ELSE 0 END) / SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'pass_int_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_interception = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_interception = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
     {
       pid_columns: ['passer_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN is_interception_worthy = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_interception_worthy = true THEN 1 ELSE 0 END) / SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 2) ELSE NULL END`,
       stat_name: 'pass_int_worthy_pct_from_plays',
-      numerator_select: `SUM(CASE WHEN is_interception_worthy = true THEN 1 ELSE 0 END)`,
-      denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
-      is_percentage: true,
+      measure: {
+        accumulators: {
+          numerator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_interception_worthy = true THEN 1 ELSE 0 END`
+          },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({
+            numerator: a.numerator,
+            denominator: a.denominator,
+            scale: '100.0'
+          }),
+        decimals: 2
+      },
       supports_periods: []
     }
   ),
@@ -597,29 +633,53 @@ export default {
   player_pass_yards_after_catch_per_completion_from_plays:
     player_stat_from_plays({
       pid_columns: ['passer_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_catch)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
       stat_name: 'pass_yds_after_catch_per_comp_from_plays',
-      numerator_select: `SUM(yards_after_catch)`,
-      denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
+      measure: {
+        accumulators: {
+          numerator: { aggregate: 'sum', expr: `yards_after_catch` },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({ numerator: a.numerator, denominator: a.denominator }),
+        decimals: 2
+      },
       supports_periods: []
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yards)::decimal / SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'pass_yds_per_att_from_plays',
-    numerator_select: `SUM(pass_yards)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `pass_yards` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(depth_of_target)::decimal / SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'pass_depth_per_att_from_plays',
-    numerator_select: `SUM(depth_of_target)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `depth_of_target` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
@@ -632,22 +692,37 @@ export default {
   }),
   player_completed_air_yards_per_completion_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(depth_of_target)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'comp_air_yds_per_comp_from_plays',
-    numerator_select: `SUM(depth_of_target)`,
-    denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `depth_of_target` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
-
   // completed air yards / total air yards (a unitless ratio, not a percentage)
   player_passing_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(depth_of_target) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN depth_of_target ELSE 0 END)::decimal / NULLIF(SUM(depth_of_target), 0), 4) AS decimal) ELSE NULL END`,
     stat_name: 'pass_air_conv_ratio_from_plays',
-    numerator_select: `SUM(CASE WHEN is_completion = true THEN depth_of_target ELSE 0 END)`,
-    denominator_select: `SUM(depth_of_target)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN depth_of_target ELSE 0 END`
+        },
+        denominator: { aggregate: 'sum', expr: `depth_of_target` }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 4
+    },
     supports_periods: []
   }),
   player_sacked_from_plays: player_stat_from_plays({
@@ -678,54 +753,127 @@ export default {
   }),
   player_sacked_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_sack = true THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'sacked_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_sack = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_sack = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_qb_hit = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'qb_hit_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_qb_hit = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_qb_hit = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_qb_pressure = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'qb_press_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_qb_pressure = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_qb_pressure = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_qb_hurry = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'qb_hurry_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_qb_hurry = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_qb_hurry = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
-
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
   // sacks included in calculation because passer_pid is set on all attempts or sacks
   player_pass_net_yards_per_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND((SUM(pass_yards) - SUM(CASE WHEN is_sack = true THEN yards_gained ELSE 0 END))::decimal / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'pass_net_yds_per_att_from_plays',
-    numerator_select: `SUM(pass_yards) - SUM(CASE WHEN is_sack = true THEN yards_gained ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    // Three accumulators rather than two: the numerator is a difference, and
+    // each term of it accumulates on its own so the offset window sums the
+    // terms and subtracts after.
+    measure: {
+      accumulators: {
+        pass_yards: { aggregate: 'sum', expr: `pass_yards` },
+        sack_yards: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_sack = true THEN yards_gained ELSE 0 END`
+        },
+        dropbacks: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: `(${a.pass_yards} - ${a.sack_yards})`,
+          denominator: a.dropbacks
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
 
@@ -752,11 +900,19 @@ export default {
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(rush_yards)::decimal / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'rush_yds_per_att_from_plays',
-    numerator_select: `SUM(rush_yards)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `rush_yards` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
@@ -775,7 +931,6 @@ export default {
   player_average_box_defenders_per_rush_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['ball_carrier_pid'],
-      with_select_string: `CAST(ROUND(AVG(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal)`,
       stat_name: 'average_box_defenders_per_rush_att_from_plays',
       // The numerator/denominator pair must decompose the SEASON RENDER's AVG,
       // not the column's NAME. AVG(box_defenders) is SUM(box_defenders) over
@@ -789,9 +944,21 @@ export default {
       // 6.760 for 2022-2024 REG, and reproduced on seeded data at 1.83 against
       // a true 7.33 by
       // test/data-view-queries/player-box-defenders-range-offset-pooled-result-equivalence.json.
-      numerator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE 0 END)`,
-      denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL AND box_defenders IS NOT NULL THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
+      measure: {
+        accumulators: {
+          numerator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE 0 END`
+          },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN ball_carrier_pid IS NOT NULL AND box_defenders IS NOT NULL THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({ numerator: a.numerator, denominator: a.denominator }),
+        decimals: 2
+      },
       supports_periods: []
     }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
@@ -833,21 +1000,43 @@ export default {
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['ball_carrier_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_any_contact)::decimal / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
       stat_name: 'rush_yds_after_contact_per_att_from_plays',
-      numerator_select: `SUM(yards_after_any_contact)`,
-      denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
+      measure: {
+        accumulators: {
+          numerator: { aggregate: 'sum', expr: `yards_after_any_contact` },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({ numerator: a.numerator, denominator: a.denominator }),
+        decimals: 2
+      },
       supports_periods: []
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'rush_first_down_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_first_down = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
@@ -908,38 +1097,98 @@ export default {
   player_rush_attempts_share_from_plays: create_team_share_stat({
     column_name: 'rush_att_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
-    with_select_string:
-      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2)',
-    numerator_select: `COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
   player_rush_yards_share_from_plays: create_team_share_stat({
     column_name: 'rush_yds_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
-    with_select_string:
-      'CASE WHEN SUM(nfl_plays.rush_yards) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN nfl_plays.rush_yards ELSE 0 END) / NULLIF(SUM(nfl_plays.rush_yards), 0), 2) ELSE NULL END',
-    numerator_select: `SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN nfl_plays.rush_yards ELSE 0 END)`,
-    denominator_select: `SUM(nfl_plays.rush_yards)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN nfl_plays.rush_yards ELSE 0 END`
+        },
+        denominator: { aggregate: 'sum', expr: `nfl_plays.rush_yards` }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
   player_rush_first_down_share_from_plays: create_team_share_stat({
     column_name: 'rush_first_down_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
-    with_select_string:
-      'CASE WHEN SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END), 0), 2) ELSE NULL END',
-    numerator_select: `SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
 
   player_opportunity_share_from_plays: create_team_share_stat({
     column_name: 'opportunity_share_from_plays',
     pid_columns: ['ball_carrier_pid', 'target_pid'],
-    with_select_string: `ROUND(100.0 * (COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END) + COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END)) / NULLIF(SUM(CASE WHEN nfl_plays.ball_carrier_pid IS NOT NULL OR nfl_plays.target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2)`,
-    numerator_select: `COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END) + COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END)`,
-    denominator_select: `SUM(CASE WHEN nfl_plays.ball_carrier_pid IS NOT NULL OR nfl_plays.target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true
+    // The subject's opportunities are carries plus targets, so each counts as
+    // its own accumulator and the combine adds them after the window sums each.
+    measure: {
+      accumulators: {
+        carries: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        targets: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        team_opportunities: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.ball_carrier_pid IS NOT NULL OR nfl_plays.target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: `(${a.carries} + ${a.targets})`,
+          denominator: a.team_opportunities,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
 
   player_fumbles_from_plays: player_stat_from_plays({
@@ -972,32 +1221,74 @@ export default {
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'fumble_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yards > 0 THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'positive_rush_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN rush_yards > 0 THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN rush_yards > 0 THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'succ_rush_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_successful_play = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
@@ -1012,11 +1303,19 @@ export default {
   }),
   player_broken_tackles_per_rush_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(missed_or_broken_tackle)::decimal / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'broken_tackles_per_rush_att_from_plays',
-    numerator_select: `SUM(missed_or_broken_tackle)`,
-    denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `missed_or_broken_tackle` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_receptions_from_plays: player_stat_from_plays({
@@ -1127,21 +1426,43 @@ export default {
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN depth_of_target >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'deep_trg_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN depth_of_target >= 20 THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN depth_of_target >= 20 THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(depth_of_target)::decimal / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'air_yds_per_trg_from_plays',
-    numerator_select: `SUM(depth_of_target)`,
-    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `depth_of_target` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_air_yards_from_plays: player_stat_from_plays({
@@ -1167,35 +1488,74 @@ export default {
   }),
   player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE NULL END`,
     stat_name: 'recv_first_down_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_first_down = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
 
   player_air_yards_share_from_plays: create_team_share_stat({
     column_name: 'air_yds_share_from_plays',
     pid_columns: ['target_pid'],
-    with_select_string:
-      'CASE WHEN SUM(nfl_plays.depth_of_target) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0), 2) ELSE NULL END',
     // A share is a ratio, not additive: a range year_offset must recombine the
     // summed player air yards over the summed team air yards, not SUM the
     // per-season share percentages. Mirrors player_target_share_from_plays.
-    numerator_select: `SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END)`,
-    denominator_select: `SUM(nfl_plays.depth_of_target)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END`
+        },
+        denominator: { aggregate: 'sum', expr: `nfl_plays.depth_of_target` }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
   player_target_share_from_plays: create_team_share_stat({
     column_name: 'trg_share_from_plays',
     pid_columns: ['target_pid'],
-    with_select_string:
-      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2)',
-    numerator_select: `COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END)`,
-    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
   player_weighted_opportunity_rating_from_plays: create_team_share_stat({
     column_name: 'weighted_opp_rating_from_plays',
@@ -1224,11 +1584,25 @@ export default {
   player_receiving_first_down_share_from_plays: create_team_share_stat({
     column_name: 'recv_first_down_share_from_plays',
     pid_columns: ['target_pid'],
-    with_select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END), 0), 2)',
-    numerator_select: `SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    }
   }),
   player_receiving_yards_after_catch_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1247,20 +1621,39 @@ export default {
   // receiving yards / air yards (a unitless ratio, not a percentage)
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(depth_of_target) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / NULLIF(SUM(depth_of_target), 0), 4) AS decimal) ELSE NULL END`,
     stat_name: 'rec_air_conv_ratio_from_plays',
-    numerator_select: `SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)`,
-    denominator_select: `SUM(depth_of_target)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END`
+        },
+        denominator: { aggregate: 'sum', expr: `depth_of_target` }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 4
+    },
     supports_periods: []
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'rec_yds_per_rec_from_plays',
-    numerator_select: `SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
@@ -1269,21 +1662,43 @@ export default {
     // byte-identical to player_receiving_yards_per_reception_from_plays above,
     // so the two columns emitted the same number on both the season render and
     // the year-offset range.
-    with_select_string: `CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
     stat_name: 'rec_yds_per_trg_from_plays',
-    numerator_select: `SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: 2
+    },
     supports_periods: []
   }),
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
       pid_columns: ['target_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE NULL END`,
       stat_name: 'rec_yds_after_catch_per_rec_from_plays',
-      numerator_select: `SUM(CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END)`,
-      denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
+      measure: {
+        accumulators: {
+          numerator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END`
+          },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({ numerator: a.numerator, denominator: a.denominator }),
+        decimals: 2
+      },
       supports_periods: []
     }),
 
@@ -1306,28 +1721,56 @@ export default {
   }),
   player_successful_passing_play_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE NULL END`,
     stat_name: 'successful_passing_play_pct_from_plays',
     // Pool numerator/denominator across a multi-year year_offset range instead
     // of summing per-season percentages (the latent SUM-of-percentages bug).
-    numerator_select: `SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
-    is_percentage: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_successful_play = true THEN 1 ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({
+          numerator: a.numerator,
+          denominator: a.denominator,
+          scale: '100.0'
+        }),
+      decimals: 2
+    },
     supports_periods: []
   }),
 
   player_successful_rushing_and_receiving_play_percentage_from_plays:
     player_stat_from_plays({
       pid_columns: ['ball_carrier_pid', 'target_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE NULL END`,
       stat_name: 'successful_rushing_and_receiving_play_pct_from_plays',
       // Pool numerator/denominator across a multi-year year_offset range instead
       // of summing per-season percentages (the latent SUM-of-percentages bug).
-      numerator_select: `SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END)`,
-      denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
-      has_numerator_denominator: true,
-      is_percentage: true,
+      measure: {
+        accumulators: {
+          numerator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN is_successful_play = true THEN 1 ELSE 0 END`
+          },
+          denominator: {
+            aggregate: 'sum',
+            expr: `CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END`
+          }
+        },
+        combine: (a, { divide }) =>
+          divide({
+            numerator: a.numerator,
+            denominator: a.denominator,
+            scale: '100.0'
+          }),
+        decimals: 2
+      },
       supports_periods: []
     }),
 
@@ -1384,14 +1827,25 @@ export default {
 
   player_time_to_throw_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
-    with_select_string: `AVG(CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN time_to_throw ELSE NULL END)`,
     stat_name: 'time_to_throw_from_plays',
     // Time-to-throw is a per-dropback mean; a range year_offset must pool the
     // summed time over the summed qualifying-dropback count, not SUM the
     // per-season averages.
-    numerator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN time_to_throw ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
-    has_numerator_denominator: true,
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN time_to_throw ELSE 0 END`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
+        }
+      },
+      combine: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator }),
+      decimals: null
+    },
     supports_periods: []
   })
 }

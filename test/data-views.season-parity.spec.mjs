@@ -14,14 +14,25 @@ const current_dir = path.dirname(fileURLToPath(import.meta.url))
 
 // Golden snapshot of the season (no-output) render -- the with_select array
 // produced with empty params -- for every column in the player-stats and
-// team-stats from-plays factories. Captured pre-migration (after Phase A, which
-// left the factories untouched). The measure-first migration regenerates these
-// strings from the explicit `measure` declaration instead of the raw
-// with_select_string; this spec is the BLOCKING gate that the regeneration is
-// byte-for-byte identical, catching a misclassified column kind silently
-// altering the season render or a carve-out string drifting. Covers every
-// aggregate shape: SUM, SUM(CASE), ROUND(SUM), COUNT(*), COUNT(CASE), AVG,
-// CAST(ROUND(AVG)), compound-ratio CASE, and COUNT(DISTINCT).
+// team-stats from-plays factories. It is the gate on the season render moving,
+// so a misclassified accumulator or a drifting carve-out string fails here
+// rather than in production. Covers SUM, SUM(CASE), ROUND(SUM), COUNT(*),
+// COUNT(CASE), COUNT(DISTINCT), the guarded-division combine, and the
+// remaining raw carve-outs.
+//
+// It is BLIND to the eight create_team_share_stat columns, which define no
+// with_select and are stored here as null -- their season render is built
+// inside the share CTE, so read the query goldens for those.
+//
+// Two regenerations are recorded rather than assumed. The additive conversion
+// (ce27846ef) moved NOTHING: all 59 columns rendered byte-identically. The
+// ratio conversion moved exactly the 34 player numerator/denominator columns,
+// each from a hand-written CASE/CAST form to the one guarded division
+// combine.mjs emits -- and five of those (pass touchdown, interception and
+// interception-worthy percentage, and the two successful-play percentages)
+// were guarding on their NUMERATOR, so they rendered blank for a subject with
+// a real denominator and no events. That is a value change, covered by
+// test/data-view-queries/player-pass-touchdown-percentage-zero-numerator-result-equivalence.json.
 const golden = JSON.parse(
   fs.readFileSync(
     path.join(current_dir, 'fixtures/data-views-season-render-golden.json'),
