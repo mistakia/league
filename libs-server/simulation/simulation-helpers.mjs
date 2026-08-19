@@ -106,7 +106,10 @@ export function categorize_players_by_game_status({
 
   for (const pid of player_ids) {
     const info = player_info.get(pid)
-    const game = schedule[info?.nfl_team]
+    // A pid with no info row has no team and therefore no game. Indexing on
+    // `undefined` would have looked up the literal key "undefined", which
+    // misses on every real schedule and so reads as "no game" by luck.
+    const game = info ? schedule[info.nfl_team] : undefined
 
     // Only use actual results for games that are truly final
     // (have FINAL status or scores recorded)
@@ -222,12 +225,17 @@ export function build_game_schedule(players, schedule) {
       const game = schedule[player.nfl_team]
       if (game) {
         game_schedule[player.nfl_team] = game
-        // Also add opponent team for cross-team correlation detection
-        if (!teams_seen.has(game.opponent)) {
-          game_schedule[game.opponent] = schedule[game.opponent]
-        }
         teams_seen.add(player.nfl_team)
-        teams_seen.add(game.opponent)
+        // Also add opponent team for cross-team correlation detection.
+        // `opponent` is optional on ScheduleGame, and with none there is no
+        // cross-team pair to correlate -- the unguarded form wrote a literal
+        // "undefined" key into the schedule and then read it back as a team.
+        if (game.opponent) {
+          if (!teams_seen.has(game.opponent)) {
+            game_schedule[game.opponent] = schedule[game.opponent]
+          }
+          teams_seen.add(game.opponent)
+        }
       }
     }
   }

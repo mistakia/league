@@ -32,13 +32,28 @@ export default async function get_super_priority_status({
     return eligibility
   }
 
+  const { original_tid, poaching_tid } = eligibility
+
+  // knex throws `Undefined binding(s) detected` on an undefined value in an
+  // object-form where, so the two ids the queries below key on are checked
+  // rather than assumed. `null` is fine and stays -- it binds as `is null`.
+  // Reaching here with either UNDEFINED would mean the eligible branch of
+  // calculate_super_priority_from_source returned an incomplete shape, which
+  // is a bug worth surfacing as a refusal rather than as a query that throws
+  // from inside knex with no mention of this function.
+  if (original_tid === undefined || poaching_tid === undefined) {
+    throw new Error(
+      `super priority eligibility for pid ${pid} in league ${lid} is missing original_tid or poaching_tid`
+    )
+  }
+
   // Check super_priority table for cached/indexed data (for performance)
   const super_priority_record = await db('super_priority')
     .where({
       pid,
       lid,
-      original_tid: eligibility.original_tid,
-      poaching_tid: eligibility.poaching_tid
+      original_tid,
+      poaching_tid
     })
     .where('eligible', 1)
     .where('claimed', 0)
@@ -49,8 +64,8 @@ export default async function get_super_priority_status({
     .where({
       pid,
       lid,
-      original_tid: eligibility.original_tid,
-      poaching_tid: eligibility.poaching_tid
+      original_tid,
+      poaching_tid
     })
     .where('claimed', 1)
     .first()

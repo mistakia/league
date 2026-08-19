@@ -688,7 +688,18 @@ export const resolve_scoring_config = (config) => {
   return resolved
 }
 
+// The `stat` filter runs AFTER the map rather than alongside the group test.
+// Narrowing inside a filter over the entries does not carry through to the
+// mapped result, so the combined form returned `(string | undefined)[]` -- and
+// every consumer that used those names as computed keys
+// (`{ ...o, [key]: 0 }`) then failed on a member the filter had already
+// excluded. Same output, stated in a shape the checker can follow.
 export const stat_names_for_group = (group) =>
   scoring_registry
-    .filter((entry) => entry.group === group && entry.stat)
+    .filter((entry) => entry.group === group)
     .map((entry) => entry.stat)
+    // Two filters, not one: TypeScript infers a type predicate only from a
+    // body that is purely a type test, so folding the emptiness check into the
+    // same expression left the result `(string | undefined)[]` again.
+    .filter((stat) => typeof stat === 'string')
+    .filter((stat) => stat.length > 0)

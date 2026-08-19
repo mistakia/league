@@ -44,12 +44,23 @@
     // the flag off for it; the real number across the first six opted-in files
     // was 47 diagnostics, all genuine and all fixed.
     "noImplicitAny": true,
-    // Still off. Turning it on is a separate, much larger tier: every nullable
-    // column in the generated row types is already declared `| null`, so the
-    // information is recorded and enabling it later is a config change rather
-    // than a re-annotation. Doing it now would bury the seam findings under
-    // null-guard noise on code that is not otherwise being touched.
-    "strictNullChecks": false
+    // ON, and turned on when it was CHEAP rather than when it was comfortable.
+    // Two earlier revisions of this file called it "a separate, much larger
+    // tier" -- an estimate, and inverted by measurement: the cost was 39
+    // diagnostics across 12 files, because `checkJs: false` bounds it to the
+    // adopted set exactly the way it bounds noImplicitAny. That number only
+    // grows with every future adoption, so deferring it was buying a larger
+    // bill later.
+    //
+    // 11 of the 39 were one producer (clean_string widening its return past
+    // what its argument could be) and 3 more were another (a filter whose
+    // narrowing did not survive the map after it). What is left is genuine:
+    // a nullable `team.division` interpolated into a `division_${...}_name`
+    // key that resolved to nothing and fell through to a fallback by accident,
+    // an unguarded extension deadline whose null would have made `now < null`
+    // false and reset a league's protections a season early, and a `require_auth`
+    // that returned a bare boolean so no caller's `req.auth` was ever narrowed.
+    "strictNullChecks": true
   },
   "include": [
     // GENERATED, and listed EXPLICITLY because every other pattern here ends in

@@ -92,7 +92,12 @@ const KNOWN_VIOLATION_BASELINE = {
  * diverge exactly when one drive_sequence value spans both halves, which is what
  * makes the drive key address two drives at once.
  *
- * @param {Array<{ esbid: number, quarter: number, drive_sequence: number | null }>} rows
+ * `quarter` is nullable, matching the column and matching what the body already
+ * does with it (`if (row.quarter === null ...) continue`). Declaring it
+ * non-null claimed a guarantee the caller's query cannot make and the function
+ * does not need.
+ *
+ * @param {Array<{ esbid: number, quarter: number | null, drive_sequence: number | null }>} rows
  * @returns {{
  *   games_checked: number,
  *   violations: Violation[],

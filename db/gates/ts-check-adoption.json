@@ -6,6 +6,7 @@
     "api/routes/leagues/trade-review.mjs",
     "db/checks/registry.mjs",
     "db/index.mjs",
+    "libs-server/clean-string.mjs",
     "libs-server/context-docs/generate-league-context.mjs",
     "libs-server/context-docs/generate-league-rosters-csv.mjs",
     "libs-server/data-views/derive-column-row-grains.mjs",

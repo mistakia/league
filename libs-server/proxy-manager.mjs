@@ -97,7 +97,7 @@ const sleep = (ms, signal) =>
     }, ms)
     const on_abort = () => {
       clearTimeout(timer)
-      reject(signal.reason ?? new Error('Aborted'))
+      reject(signal?.reason ?? new Error('Aborted'))
     }
     signal?.addEventListener('abort', on_abort, { once: true })
   })
@@ -616,6 +616,13 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
       }
     }
   }
+
+  // Unreachable: `retries` starts at 0 against a `max_retries` of 3, so the
+  // loop body always runs, and every path through it either returns a response
+  // or throws. It is here because falling out of the loop would hand the caller
+  // `undefined` where the signature promises a response -- a failure that would
+  // surface as `undefined.status` somewhere else entirely.
+  throw new Error('fetch_with_proxy exhausted its retry loop without a result')
 }
 
 // Unified fetch with retry - supports both proxied and non-proxied requests

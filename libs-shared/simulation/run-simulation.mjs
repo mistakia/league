@@ -377,6 +377,10 @@ export function run_simulation({
   // Add locked players to distributions (constant values)
   locked_players.forEach((player) => {
     const actual_points = locked_scores.get(player.pid)
+    // locked_players is derived from locked_scores, so a miss is unreachable.
+    // It skips rather than defaulting to 0 because a zero would be
+    // indistinguishable in the output from a real zero-point performance.
+    if (actual_points === undefined) return
     player_score_distributions.set(
       player.pid,
       create_constant_distribution(actual_points)
@@ -528,6 +532,10 @@ function create_locked_only_results({
     win_probabilities.set(team.team_id, is_winner ? win_credit : 0)
 
     const total = locked_team_totals.get(team.team_id)
+    // Same reasoning as the locked_players loop below: the totals map is built
+    // from this same team set, so a miss is unreachable, and skipping keeps a
+    // gap out of the distribution rather than entering it as a real zero.
+    if (total === undefined) return
     score_distributions.set(
       team.team_id,
       create_constant_distribution(total, { include_percentiles: true })
@@ -536,6 +544,10 @@ function create_locked_only_results({
 
   locked_players.forEach((player) => {
     const actual_points = locked_scores.get(player.pid)
+    // locked_players is derived from locked_scores, so a miss is unreachable.
+    // It skips rather than defaulting to 0 because a zero would be
+    // indistinguishable in the output from a real zero-point performance.
+    if (actual_points === undefined) return
     player_score_distributions.set(
       player.pid,
       create_constant_distribution(actual_points)

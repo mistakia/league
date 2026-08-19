@@ -162,7 +162,10 @@ export const get_nfl_week_identifiers_for_year = ({
   for (const st of types) {
     const max = get_max_weeks_for_season_type({ seas_type: st, year })
     if (!max) continue
-    const min = st === 'REG' ? 1 : WEEK_RANGES[st].min
+    // WEEK_RANGES is a Partial over the vocabulary on purpose -- REG is absent
+    // because its length is era-dependent. Every other type is fixed-length and
+    // starts at week 1, so the miss falls back rather than throwing.
+    const min = st === 'REG' ? 1 : (WEEK_RANGES[st]?.min ?? 1)
     for (let w = min; w <= max; w++) {
       identifiers.push(
         format_nfl_week_identifier({ year, seas_type: st, week: w })
@@ -471,7 +474,7 @@ export const is_full_year_seas_type_coverage = ({ nfl_weeks }) => {
     const min =
       seas_type === 'REG'
         ? 1
-        : WEEK_RANGES[/** @type {SeasonType} */ (seas_type)].min
+        : (WEEK_RANGES[/** @type {SeasonType} */ (seas_type)]?.min ?? 1)
     const weeks = new Set(groups[key])
     const expected_size = max - min + 1
     if (weeks.size !== expected_size) return false

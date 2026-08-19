@@ -339,6 +339,21 @@ const production_while_held = ({ assets, tid }) => {
   }
 }
 
+/**
+ * Annotated at the PRODUCER, which is the whole point. An unannotated
+ * destructured parameter infers its type from the DEFAULT, so `tid = null`
+ * inferred `null` and every correct caller passing a number read as an error --
+ * the noise class this tier keeps producing, and one that a cast at each call
+ * site would silence while leaving the next caller to rediscover it.
+ *
+ * @param {object} params
+ * @param {number} params.lid
+ * @param {number | null} [params.tid]
+ * @param {number | null} [params.trade_id]
+ * @param {number | null} [params.year]
+ * @param {boolean} [params.offseason]
+ * @param {number} [params.min_age_days]
+ */
 const grade_trades = async ({
   lid,
   tid = null,

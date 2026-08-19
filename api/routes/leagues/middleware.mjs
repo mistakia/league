@@ -21,7 +21,14 @@ const PAUSE_ROUTE_PATH = /^\/pause\/?$/
  *   express-jwt and is absent on the pre-guard routers, which is the whole
  *   reason this helper exists.
  * @param {Response} res
- * @returns {boolean} True if authenticated, false if response was sent
+ * @returns {req is Request & { auth: { userId: number } }} True if
+ *   authenticated, false if response was sent.
+ *
+ *   A TYPE PREDICATE rather than a plain boolean, because a boolean narrows
+ *   nothing: after `if (!require_auth(req, res)) return`, every caller's
+ *   `req.auth.userId` still read as possibly-undefined, and the alternative was
+ *   a non-null assertion at each of them asserting the same fact this function
+ *   already establishes. The narrowing is now the function's declared job.
  */
 export function require_auth(req, res) {
   if (!req.auth) {

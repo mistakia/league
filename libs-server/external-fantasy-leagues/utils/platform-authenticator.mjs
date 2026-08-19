@@ -13,7 +13,10 @@ const log = debug('external:auth')
  * @property {boolean} success
  * @property {string} auth_type
  * @property {string} platform
- * @property {Record<string, string> | null} credentials
+ * @property {Record<string, string | undefined> | null} credentials - the
+ *   members are OPTIONAL because the per-platform credential typedefs below all
+ *   declare theirs that way; a bag assembled from them genuinely carries
+ *   `undefined` for anything the caller did not supply.
  * @property {number | null} expires_at
  * @property {boolean} public_leagues
  * @property {boolean} private_leagues
@@ -71,7 +74,8 @@ export class PlatformAuthenticator {
    * @param {object} options - Authentication result options
    * @param {string} options.platform - Platform identifier
    * @param {string} options.auth_type - Authentication type
-   * @param {Record<string, string>|null} options.credentials - Credentials object or null
+   * @param {Record<string, string | undefined>|null} options.credentials - Credentials
+   *   object or null; members are optional, matching AuthResult.credentials
    * @param {number|null} options.expires_at - Expiration timestamp or null
    * @param {boolean} options.public_leagues - Whether public leagues are accessible
    * @param {boolean} options.private_leagues - Whether private leagues are accessible
@@ -228,7 +232,9 @@ export class PlatformAuthenticator {
               client_id: credentials.client_id,
               client_secret: credentials.client_secret
             },
-            expires_at: token_info.expires_at,
+            // YahooTokenInfo.expires_at is optional -- absent means no
+            // known expiry, which is what null encodes on AuthResult.
+            expires_at: token_info.expires_at ?? null,
             public_leagues: false,
             private_leagues: true
           })
@@ -577,7 +583,10 @@ export class PlatformAuthenticator {
    * Clear authentication cache
    * @param {string} [platform] - Specific platform to clear, or all if not specified
    */
-  clear_cache(platform = null) {
+  // No `= null` default: the annotation says `[platform]`, i.e. absent, and a
+  // null default contradicted it for no gain -- the `if (platform)` below reads
+  // both the same way.
+  clear_cache(platform) {
     if (platform) {
       this.auth_cache.delete(platform)
       this.refresh_tokens.delete(platform)

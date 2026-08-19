@@ -25,7 +25,13 @@ const GAME_OUTCOME_THRESHOLDS = {
  * @param {string} params.pos - Player position
  * @param {string} [params.archetype] - Player archetype
  * @param {Map} params.player_correlations - Map of pid -> { correlation, confidence }
- * @param {Map} params.position_defaults - Map of 'pos' or 'pos:archetype' -> { default_correlation }
+ * @param {Map<string, { default_correlation: number }>} [params.position_defaults] - Map of
+ *   'pos' or 'pos:archetype' -> { default_correlation }. OPTIONAL: get_position_default
+ *   below opens with `if (!position_defaults) return 0`, so absence is a
+ *   supported input, and the bare required `{Map}` this said instead both
+ *   overclaimed (no caller must supply it) and covered nothing (a bare `Map`
+ *   is a generic missing its arguments, so every `.get(...)` read through it
+ *   resolved to `any`).
  * @returns {number} Effective correlation with game outcome
  */
 export function get_effective_game_outcome_correlation({
@@ -104,7 +110,13 @@ function get_position_default(pos, archetype, position_defaults) {
  * @param {Map} params.correlation_cache - Pre-loaded player-player correlations
  * @param {Map} params.archetypes - Map of pid -> archetype
  * @param {Map} params.game_outcome_correlations - Map of pid -> { correlation, confidence }
- * @param {Map} params.position_defaults - Map of 'pos' or 'pos:archetype' -> { default_correlation }
+ * @param {Map<string, { default_correlation: number }>} [params.position_defaults] - Map of
+ *   'pos' or 'pos:archetype' -> { default_correlation }. OPTIONAL: get_position_default
+ *   below opens with `if (!position_defaults) return 0`, so absence is a
+ *   supported input, and the bare required `{Map}` this said instead both
+ *   overclaimed (no caller must supply it) and covered nothing (a bare `Map`
+ *   is a generic missing its arguments, so every `.get(...)` read through it
+ *   resolved to `any`).
  * @param {number} [params.epsilon] - Regularization strength
  * @returns {{ matrix: number[][], player_indices: Map<string, number>, game_indices: Map<number, number>, n_players: number, n_games: number, used_fallback: boolean }}
  */

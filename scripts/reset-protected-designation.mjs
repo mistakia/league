@@ -221,6 +221,20 @@ const reset_protected_designations_for_due_leagues = async ({
   // event_timestamp contract downstream are both epoch seconds.
   for (const { lid, extension_deadline_at: ext_date_at } of eligible) {
     const extension_deadline_at = timestamptz_to_epoch(ext_date_at)
+
+    // Unreachable while the query above carries `.whereNotNull()`, and a guard
+    // rather than a cast for exactly that reason: if that clause is ever
+    // dropped, the failure is silent and DESTRUCTIVE in the wrong direction.
+    // `timestamptz_to_epoch(null)` returns null, `now < null` coerces to
+    // `now < 0` and is false, so the skip below does not fire and a league with
+    // no configured deadline gets its protected designations reset a full
+    // season early. Skipping is also what the comment on the query already
+    // claims the behavior is -- this is the code that makes the claim true.
+    if (extension_deadline_at === null) {
+      log(`league ${lid}: no extension_deadline_at configured; skipping`)
+      continue
+    }
+
     if (now < extension_deadline_at) {
       log(
         `league ${lid}: extension_deadline_at ${extension_deadline_at} not yet reached (now=${now}); skipping`

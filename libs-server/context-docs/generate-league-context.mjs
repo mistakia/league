@@ -32,7 +32,11 @@ const DEFAULT_BASE_URL = 'https://xo.football'
 /** @typedef {import('#db/schema-types.js').TeamsRow} TeamsRow */
 /** @typedef {import('#db/schema-types.js').TransactionsRow} TransactionsRow */
 /** @typedef {import('#db/schema-types.js').LeagueTeamSeasonlogsRow} LeagueTeamSeasonlogsRow */
-/** @typedef {Awaited<ReturnType<typeof getLeague>>} League */
+// NonNullable, because every consumer of this alias receives a league that
+// load_configured_league already threw for if it was absent. Aliasing the raw
+// return type instead carried getLeague's `| undefined` into eight parameter
+// positions that can never see it.
+/** @typedef {NonNullable<Awaited<ReturnType<typeof getLeague>>>} League */
 
 /**
  * Load the league and enforce the lifecycle guards shared by every generator:
@@ -79,8 +83,16 @@ function build_standings({ teams, seasonlogs, managers, league }) {
       ties: log?.regular_season_ties || 0,
       points_for: Number(log?.points_for || 0),
       points_against: Number(log?.points_against || 0),
+      // The null branch is explicit because the interpolated key is not
+      // total: a team with no division produced the key `division_null_name`,
+      // which no league carries, so the lookup missed and the expression fell
+      // through to the fallback below. That produced the right string by
+      // accident rather than by design, and the accident is the kind that
+      // stops working the moment someone adds a column with that name.
       division:
-        league[`division_${team.division}_name`] ||
+        (team.division === null
+          ? undefined
+          : league[`division_${team.division}_name`]) ||
         (team.division ? `Division ${team.division}` : '—')
     }
   })
@@ -120,7 +132,10 @@ export default async function generate_league_context({
     .limit(10)
   const transaction_players = await get_players({
     db,
-    pids: recent_transactions.map((t) => t.pid)
+    // transactions.pid is nullable, so the list is filtered rather than cast.
+    // A null pid names no player and would only add a `whereIn` member that
+    // matches nothing.
+    pids: recent_transactions.map((t) => t.pid).filter((pid) => pid !== null)
   })
   const team_name_by_tid = new Map(
     teams.map((team) => [team.team_id, team.name])
