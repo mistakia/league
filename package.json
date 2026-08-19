@@ -15,6 +15,7 @@
     "check:cluster": "node scripts/check-cluster-gates.mjs",
     "check:types": "node db/tools/generate-schema-types.mjs --check && node node_modules/typescript/bin/tsc --noEmit",
     "generate:schema-types": "node db/tools/generate-schema-types.mjs",
+    "measure:seams": "node db/tools/measure-cross-module-seams.mjs --coverage",
     "test:private": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit 'private/test/**/*.spec.mjs' --require test/global.mjs",
     "test:data-view-queries": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
     "test:external-league-live": "TZ=America/New_York NODE_ENV=test mocha --no-config --exit --timeout 60000 test/external-fantasy-leagues-live-vendor-contract.spec.mjs",
