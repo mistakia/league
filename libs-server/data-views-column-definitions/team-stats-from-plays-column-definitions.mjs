@@ -12,7 +12,7 @@ import {
   nfl_plays_team_column_params,
   nfl_plays_column_params
 } from '#libs-shared'
-import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
+import { derive_measure } from '#libs-server/data-views/measure/measure-contract.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
 // column's params. Declared as consumes_params_extra so the output-aggregator
@@ -139,7 +139,7 @@ const team_stat_from_plays = ({
     force_player_active || params?.limit_to_player_active_games || false
 
   // Measure-first contract: a rate-capable single-aggregate column declares an
-  // explicit `measure: { kind, expr, decimals }`; derive_measure produces the
+  // explicit `measure: { accumulators, combine }`; derive_measure produces the
   // season render, numerator measure_expr, period aggregate (sum or
   // count_distinct), supports_output, and decimals rounding from it. is_rate
   // numerator/denominator columns and AVG carve-outs declare no measure and
@@ -153,7 +153,7 @@ const team_stat_from_plays = ({
   // column MUST pass supports_periods: []. Throws at module load.
   if (!is_rate && !derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
-      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { kind, expr } or set supports_periods: []`
+      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine } or set supports_periods: []`
     )
   }
 
@@ -340,7 +340,10 @@ const team_stat_from_plays = ({
 //                                       saved entries onto the new id.
 const stat_specs = {
   team_pass_yards_from_plays: {
-    measure: { kind: 'additive', expr: `pass_yards` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `pass_yards` } },
+      combine: 'identity'
+    },
     stat_name: 'team_pass_yds_from_plays'
   },
   team_pass_rate_over_expected_from_plays: {
@@ -362,57 +365,99 @@ const stat_specs = {
   },
   team_pass_attempts_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_pass_att_from_plays'
   },
   team_pass_completions_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_pass_comp_from_plays'
   },
   team_pass_touchdowns_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_pass_td_from_plays'
   },
   team_pass_air_yards_from_plays: {
-    measure: { kind: 'additive', expr: `depth_of_target` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
+      combine: 'identity'
+    },
     stat_name: 'team_pass_air_yds_from_plays'
   },
   team_yards_after_catch_from_plays: {
-    measure: { kind: 'additive', expr: `yards_after_catch` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `yards_after_catch` } },
+      combine: 'identity'
+    },
     stat_name: 'team_yards_after_catch_from_plays'
   },
   team_rush_yards_from_plays: {
-    measure: { kind: 'additive', expr: `rush_yards` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `rush_yards` } },
+      combine: 'identity'
+    },
     stat_name: 'team_rush_yds_from_plays'
   },
   team_rush_attempts_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_rush_att_from_plays'
   },
   team_rush_touchdowns_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN is_rushing_touchdown = true THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_rushing_touchdown = true THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_rush_td_from_plays'
   },
   team_expected_points_added_from_plays: {
-    measure: { kind: 'additive', expr: `epa` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `epa` } },
+      combine: 'identity'
+    },
     stat_name: 'team_ep_added_from_plays'
   },
   team_win_percentage_added_from_plays: {
-    measure: { kind: 'additive', expr: `win_probability_added` },
+    measure: {
+      accumulators: {
+        value: { aggregate: 'sum', expr: `win_probability_added` }
+      },
+      combine: 'identity'
+    },
     stat_name: 'team_wp_added_from_plays'
   },
   team_success_rate_from_plays: {
@@ -443,7 +488,10 @@ const stat_specs = {
     supports_periods: []
   },
   team_play_count_from_plays: {
-    measure: { kind: 'additive', expr: `1` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `1` } },
+      combine: 'identity'
+    },
     stat_name: 'team_play_count_from_plays'
   },
   team_series_count_from_plays: {
@@ -452,31 +500,52 @@ const stat_specs = {
     // present in the season with-CTE too, so the qualified ref is valid in both
     // the season render and the numerator.
     measure: {
-      kind: 'distinct_count',
-      expr: `CONCAT(nfl_plays.esbid, '_', series_sequence)`
+      accumulators: {
+        value: {
+          aggregate: 'count_distinct',
+          expr: `CONCAT(nfl_plays.esbid, '_', series_sequence)`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_series_count_from_plays'
   },
   team_drive_count_from_plays: {
     measure: {
-      kind: 'distinct_count',
-      expr: `CONCAT(nfl_plays.esbid, '_', drive_sequence)`
+      accumulators: {
+        value: {
+          aggregate: 'count_distinct',
+          expr: `CONCAT(nfl_plays.esbid, '_', drive_sequence)`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_drive_count_from_plays'
   },
   team_offensive_play_count_from_plays: {
     measure: {
-      kind: 'additive',
-      expr: `CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END`
+      accumulators: {
+        value: {
+          aggregate: 'sum',
+          expr: `CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END`
+        }
+      },
+      combine: 'identity'
     },
     stat_name: 'team_offensive_play_count_from_plays'
   },
   team_yards_created_from_plays: {
-    measure: { kind: 'additive', expr: `yards_created` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `yards_created` } },
+      combine: 'identity'
+    },
     stat_name: 'team_yards_created_from_plays'
   },
   team_yards_blocked_from_plays: {
-    measure: { kind: 'additive', expr: `yards_blocked` },
+    measure: {
+      accumulators: { value: { aggregate: 'sum', expr: `yards_blocked` } },
+      combine: 'identity'
+    },
     stat_name: 'team_yards_blocked_from_plays'
   },
   team_series_conversion_rate_from_plays: {
