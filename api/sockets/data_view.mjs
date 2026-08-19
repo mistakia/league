@@ -157,11 +157,14 @@ class DataViewQueue {
 
       const { data_view_results, data_view_metadata } =
         await get_data_view_results({
-          timeout,
           ...params,
           calculate_total_count,
           // After the spread: `params` is the client's table state and must not
-          // be able to name its own viewer.
+          // be able to name its own viewer, nor its own deadline. `timeout`
+          // reaches Postgres as SET LOCAL statement_timeout verbatim, so a
+          // client-supplied one let an anonymous caller run for hours and hold
+          // the process-wide serial queue against every other user.
+          timeout,
           user_id: user_id || null
         })
 

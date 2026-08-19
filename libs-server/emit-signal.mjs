@@ -36,19 +36,16 @@ const post_to_signals_api = async ({ path, body, description }) => {
   try {
     token = sign_machine_token({ slug, key_path })
   } catch (err) {
-    log(
-      'machine token sign failed: %s; %s NOT sent: %s',
-      err.message,
-      path,
-      description
+    // Loud on stderr per user:guideline/auth/sign-machine-requests.md: a signer
+    // that cannot sign must never no-op silently.
+    console.error(
+      `[emit-signal] machine token sign failed: ${err.message}; ${path} NOT sent: ${description}`
     )
     return null
   }
   if (!token) {
-    log(
-      'machine token unavailable (missing key file); %s NOT sent: %s',
-      path,
-      description
+    console.error(
+      `[emit-signal] machine token unavailable (missing key file); ${path} NOT sent: ${description}`
     )
     return null
   }
@@ -63,12 +60,20 @@ const post_to_signals_api = async ({ path, body, description }) => {
       signal: AbortSignal.timeout(10000)
     })
     if (!response.ok) {
-      log('%s failed: %d %s', path, response.status, response.statusText)
+      // console.error, not log: this module's output IS the audit trail for
+      // whether a condition reached the queue, and the deployed server.mjs sets
+      // no DEBUG at all, so every `log` line here is dark in production. A
+      // signal that silently fails to send is indistinguishable from a healthy
+      // system -- the exact shape user:guideline/surface-pipeline-failures.md
+      // exists to prevent.
+      console.error(
+        `[emit-signal] ${path} failed: ${response.status} ${response.statusText}: ${description}`
+      )
       return null
     }
     return await response.json()
   } catch (err) {
-    log('%s threw: %s', path, err.message)
+    console.error(`[emit-signal] ${path} threw: ${err.message}: ${description}`)
     return null
   }
 }
@@ -119,7 +124,7 @@ export const resolve_signal = async ({ dedup_key, resolution_note }) => {
     log('resolve_signal called with no dedup_key')
     return null
   }
-  return post_to_signals_api({
+  const result = await post_to_signals_api({
     path: '/api/signals/resolve',
     description: dedup_key,
     body: {
@@ -127,6 +132,26 @@ export const resolve_signal = async ({ dedup_key, resolution_note }) => {
       resolution_note: resolution_note || 'auto-resolved'
     }
   })
+
+  // The HTTP resolve path answers 200 with `{ resolved: false }` on a scope
+  // miss -- the non-zero exit documented in user:text/base/signal-system.md is
+  // the `base signal close` CLI only. So a close that resolved NOTHING is
+  // indistinguishable from a successful one to a caller that ignores the body,
+  // and an open signal nobody can close reads as a stuck detector forever.
+  //
+  // `resolved: false` with an empty `other_scopes` is the ordinary healthy case
+  // (nothing was open, the condition never fired) and stays quiet. `resolved:
+  // false` WITH other_scopes is the real defect: the key is open somewhere this
+  // close cannot reach, which means emit and resolve disagree about host scope.
+  if (result && result.resolved === false && result.other_scopes?.length) {
+    console.error(
+      `[emit-signal] resolve matched nothing for ${dedup_key}, but it is open at another host scope: ${JSON.stringify(
+        result.other_scopes
+      )}. Emit and resolve disagree about scope; the open signal cannot self-close.`
+    )
+  }
+
+  return result
 }
 
 export default emit_signal
