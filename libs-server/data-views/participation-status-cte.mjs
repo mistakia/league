@@ -35,7 +35,7 @@ import {
 import {
   register_team_weeks_played_cte,
   TEAM_WEEKS_PLAYED_CTE
-} from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
+} from '#libs-server/data-views/period-denominator/per-game.mjs'
 
 // Register the three CTEs the participation signal reads. Idempotent via
 // query_context.registered_ctes, so calling this alongside the team-bridge

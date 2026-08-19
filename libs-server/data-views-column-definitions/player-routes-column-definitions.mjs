@@ -3,7 +3,7 @@ import {
   get_per_player_route_cte_table_name,
   add_per_player_route_cte,
   join_per_player_route_cte
-} from '#libs-server/data-views/rate-type/rate-type-per-player-route.mjs'
+} from '#libs-server/data-views/period-denominator/per-player-route.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 
 const apply_player_routes_attach = ({

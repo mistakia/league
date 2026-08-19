@@ -28,7 +28,7 @@ export const requires_team_stats_wrap = ({
   // regardless of year; the wrap's per-(pid, year) team reattribution is both
   // wrong and wasteful for it. Skip -- the plain team-grain join then
   // correlates on current_nfl_team via resolve_team_join_target. Mirrors the
-  // rate-type wrap gate in rate-type/per-team-play-wrap.mjs.
+  // rate-type wrap gate in period-denominator/per-team-play-wrap.mjs.
   if (get_team_attribution(params) === 'current') return false
 
   const identity_id = query_context.identity_id

@@ -11,8 +11,8 @@ import {
   resolve_team_join_target as passive_resolve_team_join_target,
   get_team_attribution
 } from '#libs-server/data-views/resolve-team-join-target.mjs'
-import { get_per_team_play_cte_table_name } from '#libs-server/data-views/rate-type/rate-type-per-team-play.mjs'
-import { requires_wrap } from '#libs-server/data-views/rate-type/per-team-play-wrap.mjs'
+import { get_per_team_play_cte_table_name } from '#libs-server/data-views/period-denominator/per-team-play.mjs'
+import { requires_wrap } from '#libs-server/data-views/period-denominator/per-team-play-wrap.mjs'
 import { consumed_params_signature } from '#libs-server/data-views/output-aggregator/consumed-params-signature.mjs'
 
 const expect = chai.expect

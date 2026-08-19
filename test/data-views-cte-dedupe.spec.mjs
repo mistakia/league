@@ -10,7 +10,7 @@ import { get_data_view_results_query } from '#libs-server'
 // per_team_pass_play rate-type columns), the bridge's `add_cte` must emit
 // the shared `player_year_teams` CTE at most once. Before the fix, the
 // per-team-play-wrap registration in
-// libs-server/data-views/rate-type/per-team-play-wrap.mjs called
+// libs-server/data-views/period-denominator/per-team-play-wrap.mjs called
 // `bridge.add_cte` once per column without guarding against re-emission, so
 // PostgreSQL rejected the WITH clause with 42712 (duplicate_alias).
 

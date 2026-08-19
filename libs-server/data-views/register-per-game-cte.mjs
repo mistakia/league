@@ -1,7 +1,7 @@
 import {
   get_per_game_cte_table_name,
   add_per_game_cte
-} from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
+} from '#libs-server/data-views/period-denominator/per-game.mjs'
 
 // Two-set guard: applied_output_ctes signals Tier-3 plugin ownership (also gates
 // join emission); registered_per_game_ctes prevents duplicate WITH injection.

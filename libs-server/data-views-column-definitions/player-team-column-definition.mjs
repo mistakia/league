@@ -1,7 +1,7 @@
 import {
   get_per_game_cte_table_name,
   join_per_game_cte
-} from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
+} from '#libs-server/data-views/period-denominator/per-game.mjs'
 import { register_per_game_cte } from '#libs-server/data-views/register-per-game-cte.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'

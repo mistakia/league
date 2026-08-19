@@ -2,7 +2,7 @@
 
 import * as chai from 'chai'
 
-import { emit_rate_outer_select } from '#libs-server/data-views/rate-type/emit-rate-outer-select.mjs'
+import { emit_rate_outer_select } from '#libs-server/data-views/period-denominator/emit-rate-outer-select.mjs'
 import aggregator_rate from '#libs-server/data-views/output-aggregator/aggregator-rate.mjs'
 
 const expect = chai.expect

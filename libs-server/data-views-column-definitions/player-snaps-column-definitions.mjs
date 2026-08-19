@@ -3,7 +3,7 @@ import {
   get_per_player_play_cte_table_name,
   add_per_player_play_cte,
   join_per_player_play_cte
-} from '#libs-server/data-views/rate-type/rate-type-per-player-play.mjs'
+} from '#libs-server/data-views/period-denominator/per-player-play.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 
 const apply_player_snaps_attach = ({

@@ -41,7 +41,7 @@ import validate_row_grain_compatibility from '#libs-server/data-views/validate-r
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
-import { flush_per_team_play_wraps } from '#libs-server/data-views/rate-type/per-team-play-wrap.mjs'
+import { flush_per_team_play_wraps } from '#libs-server/data-views/period-denominator/per-team-play-wrap.mjs'
 import { build_batched_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import {
   get_identity,

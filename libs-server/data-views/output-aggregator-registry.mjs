@@ -1,11 +1,11 @@
 import aggregator_count from './output-aggregator/aggregator-count.mjs'
 import aggregator_rate from './output-aggregator/aggregator-rate.mjs'
-import { numerator_via_cte } from './rate-type/emit-rate-outer-select.mjs'
-import plugin_per_game from './rate-type/rate-type-per-game.mjs'
-import plugin_per_team_play from './rate-type/rate-type-per-team-play.mjs'
-import plugin_per_player from './rate-type/rate-type-per-player.mjs'
-import plugin_per_player_play from './rate-type/rate-type-per-player-play.mjs'
-import plugin_per_player_route from './rate-type/rate-type-per-player-route.mjs'
+import { numerator_via_cte } from './period-denominator/emit-rate-outer-select.mjs'
+import plugin_per_game from './period-denominator/per-game.mjs'
+import plugin_per_team_play from './period-denominator/per-team-play.mjs'
+import plugin_per_player from './period-denominator/per-player.mjs'
+import plugin_per_player_play from './period-denominator/per-player-play.mjs'
+import plugin_per_player_route from './period-denominator/per-player-route.mjs'
 
 const COUNT_PERIODS = ['game', 'season']
 
@@ -28,7 +28,7 @@ const adapt = (plugin, dispatch_params) => ({
   // Optional hook: when defined and returning true for the current dispatch,
   // the standard aggregator_rate numerator path is skipped because the
   // plugin's own CTE materialization owns the numerator (e.g.
-  // rate-type-per-team-play's multi-year-no-split wrap CTE inlines its own
+  // per-team-play's multi-year-no-split wrap CTE inlines its own
   // (pid, year) numerator subquery).
   handles_numerator: plugin.handles_numerator
     ? (args) => plugin.handles_numerator({ ...args, dispatch_params })
