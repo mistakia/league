@@ -1,9 +1,41 @@
+// @ts-check
 import oddslib from '#libs-server/odds-conversions.mjs'
 
-// Helper to check if two props are equal
-// Note: We don't compare market_id because FanDuel can assign different market IDs
-// to the same selection (same player, threshold, and outcome). The selection_id
-// combined with event_id is sufficient to uniquely identify a prop.
+/**
+ * The decorated shapes this module works over. Neither is a raw table row:
+ * `placed_wagers` carries `selections` as opaque JSON and stores amounts under
+ * different names, so these describe what the wager-analysis pipeline has
+ * already built by the time it reaches here.
+ *
+ * @typedef {object} WagerSelection
+ * @property {number} event_id
+ * @property {number} selection_id
+ * @property {boolean} [is_lost]
+ * @property {boolean} [is_won]
+ * @property {number} [parsed_odds]
+ *
+ * @typedef {object} Wager
+ * @property {WagerSelection[]} selections
+ * @property {boolean} is_settled
+ * @property {boolean} [is_cashed_out]
+ * @property {number} [bonus_bet_amount]
+ * @property {number} [parsed_odds]
+ * @property {number} stake
+ * @property {number} [pandl]
+ * @property {number} [actual_return]
+ * @property {number} potential_win
+ */
+
+/**
+ * Helper to check if two props are equal.
+ *
+ * We don't compare market_id because FanDuel can assign different market IDs to
+ * the same selection (same player, threshold, and outcome). The selection_id
+ * combined with event_id is sufficient to uniquely identify a prop.
+ *
+ * @param {WagerSelection} prop_a
+ * @param {WagerSelection} prop_b
+ */
 const is_prop_equal = (prop_a, prop_b) =>
   prop_a.event_id === prop_b.event_id &&
   prop_a.selection_id === prop_b.selection_id
@@ -12,10 +44,10 @@ const is_prop_equal = (prop_a, prop_b) =>
  * Update the count of wagers lost by a specific number of legs.
  * Creates a new object to maintain immutability in the reducer.
  *
- * @param {Object} lost_by_legs - Current counts object {1: count, 2: count, ...}
+ * @param {Record<number, number>} lost_by_legs - Current counts, keyed by leg count
  * @param {boolean} is_lost - Whether the wager was lost
  * @param {number} lost_legs - Number of losing selections in the wager
- * @returns {Object} Updated counts object
+ * @returns {Record<number, number>} Updated counts object
  */
 const update_lost_by_legs_count = (lost_by_legs, is_lost, lost_legs) => {
   const updated = { ...lost_by_legs }
@@ -25,7 +57,10 @@ const update_lost_by_legs_count = (lost_by_legs, is_lost, lost_legs) => {
   return updated
 }
 
-// Calculate summary statistics for a collection of props
+/**
+ * Calculate summary statistics for a collection of props.
+ * @param {WagerSelection[]} props
+ */
 export const calculate_props_summary = (props) =>
   props.reduce(
     (accumulator, prop) => {
@@ -48,7 +83,10 @@ export const calculate_props_summary = (props) =>
     }
   )
 
-// Format metric result value for display
+/**
+ * Format metric result value for display.
+ * @param {number | null | undefined} value
+ */
 export const format_metric_result = (value) => {
   if (value === null || value === undefined) {
     return '-'
@@ -56,8 +94,11 @@ export const format_metric_result = (value) => {
   return Number(value).toFixed(1)
 }
 
-// Format threshold distance with appropriate sign
-export const format_threshold_distance = (distance, selection_type) => {
+/**
+ * Format threshold distance with appropriate sign.
+ * @param {number | null | undefined} distance
+ */
+export const format_threshold_distance = (distance) => {
   if (distance === null || distance === undefined) {
     return '-'
   }
@@ -65,7 +106,10 @@ export const format_threshold_distance = (distance, selection_type) => {
   return distance > 0 ? `+${formatted_distance}` : formatted_distance
 }
 
-// Convert American odds to fractional format for display (always X/1 format)
+/**
+ * Convert American odds to fractional format for display (always X/1 format).
+ * @param {number | null | undefined} american_odds
+ */
 export const format_american_odds_as_fractional = (american_odds) => {
   if (american_odds === null || american_odds === undefined) {
     return '-'
@@ -86,7 +130,13 @@ export const format_american_odds_as_fractional = (american_odds) => {
   }
 }
 
-// Calculate summary statistics for a collection of wagers
+/**
+ * Calculate summary statistics for a collection of wagers.
+ * @param {object} params
+ * @param {Wager[]} params.wagers
+ * @param {WagerSelection[]} [params.props] - Selections to exclude from the
+ *   lost-leg count, so a hypothetical can ask "what if these had hit".
+ */
 export const calculate_wager_summary = ({ wagers, props = [] }) =>
   wagers.reduce(
     (accumulator, wager) => {

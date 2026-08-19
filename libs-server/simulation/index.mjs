@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * libs-server/simulation index
  * Export all server-side simulation functions.

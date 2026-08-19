@@ -50,10 +50,7 @@ export const format_wager_search_markdown = (wagers, options = {}) => {
           ? Number(selection.selection_metric_line).toFixed(1)
           : '-'
       const actual = format_metric_result(selection.metric_result_value)
-      const diff = format_threshold_distance(
-        selection.distance_from_threshold,
-        selection.selection_type
-      )
+      const diff = format_threshold_distance(selection.distance_from_threshold)
       const result = selection.is_won
         ? 'WON'
         : selection.is_lost
@@ -98,7 +95,7 @@ export const format_near_misses_markdown = ({
           ? Number(prop.threshold).toFixed(1)
           : '-'
       const actual = format_metric_result(prop.actual)
-      const diff = format_threshold_distance(prop.diff, prop.selection_type)
+      const diff = format_threshold_distance(prop.diff)
 
       lines.push(
         `| ${prop.name} | ${prop.potential_roi_added.toFixed(2)}% | ${prop.potential_gain.toFixed(2)} | ${prop.potential_wins} | ${threshold} | ${actual} | ${diff} |`

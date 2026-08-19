@@ -170,10 +170,7 @@ export const create_unique_props_table = (
         ? Number(prop.selection_metric_line).toFixed(1)
         : '-'
     result.actual = format_metric_result(prop.metric_result_value)
-    result.diff = format_threshold_distance(
-      prop.distance_from_threshold,
-      prop.selection_type
-    )
+    result.diff = format_threshold_distance(prop.distance_from_threshold)
 
     return result
   })
@@ -220,10 +217,7 @@ export const create_event_exposure_table = (
           ? Number(prop.selection_metric_line).toFixed(1)
           : '-'
       row.actual = format_metric_result(prop.metric_result_value)
-      row.diff = format_threshold_distance(
-        prop.distance_from_threshold,
-        prop.selection_type
-      )
+      row.diff = format_threshold_distance(prop.distance_from_threshold)
 
       event_table.addRow(row)
     })
@@ -253,7 +247,7 @@ export const create_prop_combination_table = (props, title) => {
           ? Number(prop.threshold).toFixed(1)
           : '-'
       row.actual = format_metric_result(prop.actual)
-      row.diff = format_threshold_distance(prop.diff, prop.selection_type)
+      row.diff = format_threshold_distance(prop.diff)
     }
 
     table.addRow(row)
@@ -300,10 +294,7 @@ export const create_wager_table = (wager, options = {}) => {
           ? Number(selection.selection_metric_line).toFixed(1)
           : '-',
       actual: format_metric_result(selection.metric_result_value),
-      diff: format_threshold_distance(
-        selection.distance_from_threshold,
-        selection.selection_type
-      )
+      diff: format_threshold_distance(selection.distance_from_threshold)
     })
   }
   return wager_table

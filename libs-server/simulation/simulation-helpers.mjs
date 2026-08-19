@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Shared helper functions for simulation orchestrators.
  * These functions are used by both simulate-matchup.mjs and simulate-league-week.mjs.
@@ -11,12 +12,41 @@ import { getLeague } from '#libs-server'
 const log = debug('simulation:helpers')
 
 /**
+ * The vocabulary the simulation orchestrators pass between these helpers. The
+ * schedule is keyed by NFL team abbreviation, which is what makes a player's
+ * `nfl_team` enough to find their game.
+ *
+ * @typedef {object} PlayerInfo
+ * @property {string} position
+ * @property {string} nfl_team
+ *
+ * @typedef {object} ScheduleGame
+ * @property {number} esbid
+ * @property {boolean} [is_final]
+ * @property {boolean} [has_started]
+ * @property {string} [opponent]
+ *
+ * @typedef {Record<string, ScheduleGame>} Schedule
+ *
+ * @typedef {object} Roster
+ * @property {number} team_id
+ * @property {string[]} player_ids
+ *
+ * @typedef {object} SimulationPlayer
+ * @property {string} pid
+ * @property {string} nfl_team
+ * @property {string} position
+ * @property {number | string} position_rank
+ * @property {number} [team_id]
+ * @property {number | null} [esbid]
+ */
+
+/**
  * Load simulation context (league and scoring format).
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.year - NFL year
- * @returns {Promise<Object>} { league, scoring_format_id }
  */
 export async function load_simulation_context({ league_id, year }) {
   const league = await getLeague({ lid: league_id })
@@ -58,12 +88,11 @@ export async function load_simulation_context({ league_id, year }) {
  * For lineup decisions (analyze-lineup-decisions.mjs), we use a stricter lock
  * that includes has_started to prevent lineup changes once a game kicks off.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @param {Object} params.schedule - NFL schedule with game status
+ * @param {Map<string, PlayerInfo>} params.player_info
+ * @param {Schedule} params.schedule - NFL schedule with game status
  * @param {boolean} params.use_actual_results - Whether to use actual results for completed games
- * @returns {Object} { locked_player_ids, pending_player_ids, completed_esbids }
  */
 export function categorize_players_by_game_status({
   player_ids,
@@ -95,12 +124,12 @@ export function categorize_players_by_game_status({
 /**
  * Build player objects for simulation from rosters and player info.
  *
- * @param {Object} params
- * @param {Object[]} params.rosters - Array of { team_id, player_ids }
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @param {Map} params.position_ranks - Map of pid -> position_rank
- * @param {Object} [params.schedule] - NFL schedule object (optional, for setting esbid)
- * @returns {Object[]} Array of player objects for simulation
+ * @param {object} params
+ * @param {Roster[]} params.rosters
+ * @param {Map<string, PlayerInfo>} params.player_info
+ * @param {Map<string, number | string>} params.position_ranks - pid -> position_rank
+ * @param {Schedule} [params.schedule] - Optional, for setting esbid
+ * @returns {SimulationPlayer[]} Array of player objects for simulation
  */
 export function build_simulation_players({
   rosters,
@@ -142,10 +171,9 @@ export function build_simulation_players({
 /**
  * Map players to their NFL games based on schedule.
  *
- * @param {Object} params
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @param {Object} params.schedule - NFL schedule object
- * @returns {Object} { games_map: Map<esbid, { players, is_final }>, bye_player_ids: string[] }
+ * @param {object} params
+ * @param {Map<string, PlayerInfo>} params.player_info
+ * @param {Schedule} params.schedule - NFL schedule object
  */
 export function map_players_to_nfl_games({ player_info, schedule }) {
   const games_map = new Map()
@@ -180,11 +208,12 @@ export function map_players_to_nfl_games({ player_info, schedule }) {
  * Build pseudo-schedule for a single NFL game.
  * Creates the minimal schedule object needed for correlation matrix building.
  *
- * @param {Object[]} players - Players in the game with nfl_team
- * @param {Object} schedule - Full NFL schedule
- * @returns {Object} Single-game schedule object
+ * @param {SimulationPlayer[]} players - Players in the game with nfl_team
+ * @param {Schedule} schedule - Full NFL schedule
+ * @returns {Schedule} Single-game schedule object
  */
 export function build_game_schedule(players, schedule) {
+  /** @type {Schedule} */
   const game_schedule = {}
   const teams_seen = new Set()
 
@@ -209,11 +238,11 @@ export function build_game_schedule(players, schedule) {
 /**
  * Load all matchups for a league in a given week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @returns {Promise<Object[]>} Array of { matchup_id, home_team_id, away_team_id }
+ * @returns {Promise<Array<{ matchup_id: number, home_team_id: number, away_team_id: number }>>}
  */
 export async function load_league_matchups({ league_id, week, year }) {
   log(`Loading matchups for league ${league_id}, week ${week}`)
@@ -229,11 +258,10 @@ export async function load_league_matchups({ league_id, week, year }) {
 /**
  * Calculate matchup win/loss/tie counts from raw team scores.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[]} params.home_scores - Array of scores for home team
  * @param {number[]} params.away_scores - Array of scores for away team
  * @param {number} params.n_simulations - Number of simulations
- * @returns {Object} { home_wins, away_wins, ties }
  */
 export function calculate_matchup_outcomes({
   home_scores,
@@ -261,7 +289,6 @@ export function calculate_matchup_outcomes({
  * Calculate score statistics from an array of scores.
  *
  * @param {number[]} scores - Array of scores
- * @returns {Object} { mean, std }
  */
 export function calculate_score_stats(scores) {
   const n = scores.length

@@ -206,10 +206,7 @@ const format_notable_longshots = (unique_selections) => {
   for (const prop of sorted_longshots) {
     const threshold = format_threshold_value(prop.selection_metric_line)
     const actual = format_metric_result(prop.metric_result_value)
-    const diff = format_threshold_distance(
-      prop.distance_from_threshold,
-      prop.selection_type
-    )
+    const diff = format_threshold_distance(prop.distance_from_threshold)
 
     lines.push(
       format_table_row([
@@ -258,7 +255,7 @@ const format_near_miss_combinations = (one_prop, two_props, three_props) => {
     )) {
       const threshold = format_threshold_value(prop.threshold)
       const actual = format_metric_result(prop.actual)
-      const diff = format_threshold_distance(prop.diff, prop.selection_type)
+      const diff = format_threshold_distance(prop.diff)
 
       lines.push(
         format_table_row([
@@ -470,10 +467,7 @@ export const format_exposures_markdown = (
   for (const prop of sorted_selections) {
     const threshold = format_threshold_value(prop.selection_metric_line)
     const actual = format_metric_result(prop.metric_result_value)
-    const diff = format_threshold_distance(
-      prop.distance_from_threshold,
-      prop.selection_type
-    )
+    const diff = format_threshold_distance(prop.distance_from_threshold)
 
     lines.push(
       format_table_row([
@@ -530,10 +524,7 @@ export const format_key_selections_markdown = (key_selections) => {
   for (const selection of key_selections) {
     const threshold = format_threshold_value(selection.threshold)
     const actual = format_metric_result(selection.actual)
-    const diff = format_threshold_distance(
-      selection.diff,
-      selection.selection_type
-    )
+    const diff = format_threshold_distance(selection.diff)
 
     lines.push(
       format_table_row([

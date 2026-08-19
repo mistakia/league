@@ -1,9 +1,20 @@
+// @ts-check
 import debug from 'debug'
 
 import db from '#db'
 import { fixTeam, format_player_name } from '#libs-shared'
 import { player_nfl_status } from '#constants'
 import clean_string from './clean-string.mjs'
+
+/** @typedef {import('#db/schema-types.js').PlayerRow} PlayerRow */
+/** @typedef {import('#db/schema-types.js').PlayerAliasesRow} PlayerAliasesRow */
+
+/**
+ * @typedef {object} PlayerFilters
+ * @property {string[]} teams
+ * @property {boolean} ignore_free_agent
+ * @property {boolean} ignore_retired
+ */
 
 const log = debug('player-cache')
 
@@ -29,10 +40,10 @@ class PlayerCache {
 
   /**
    * Preloads players and their aliases into memory cache
-   * @param {Object} options - Configuration options
-   * @param {boolean} options.all_players - Load all players including retired/inactive (default: false)
-   * @param {boolean} options.include_otc_id_index - Build otc_player_id index (default: false)
-   * @param {boolean} options.include_name_draft_index - Build name+draft year index (default: false)
+   * @param {object} [options] - Configuration options
+   * @param {boolean} [options.all_players] - Load all players including retired/inactive (default: false)
+   * @param {boolean} [options.include_otc_id_index] - Build otc_player_id index (default: false)
+   * @param {boolean} [options.include_name_draft_index] - Build name+draft year index (default: false)
    * @throws {Error} If database query fails
    */
   async preload_active_players({
@@ -82,7 +93,7 @@ class PlayerCache {
 
   /**
    * Finds a player by various identifiers
-   * @param {Object} params - Search parameters
+   * @param {object} params - Search parameters
    * @param {string} params.name - Player name to search for
    * @param {string} params.gsis_player_id - GSIS ID to search for
    * @param {string} params.sportradar_player_id - Sportradar ID to search for
@@ -94,7 +105,7 @@ class PlayerCache {
    * @param {string[]} params.teams - Optional team abbreviations to filter by
    * @param {boolean} params.ignore_free_agent - Whether to exclude free agents (default: true)
    * @param {boolean} params.ignore_retired - Whether to exclude retired players (default: true)
-   * @returns {Object|null} Player object if found, null otherwise
+   * @returns {PlayerRow|null} Player object if found, null otherwise
    * @throws {Error} If cache not initialized
    */
   find_player({
@@ -240,7 +251,7 @@ class PlayerCache {
 
   /**
    * Returns cache statistics for monitoring
-   * @returns {Object} Cache statistics
+   * @returns {Record<string, number | boolean>} Cache statistics
    */
   get_cache_stats() {
     return {
@@ -260,7 +271,7 @@ class PlayerCache {
 
   /**
    * Fetches all players from database
-   * @returns {Promise<Array>} Array of all player objects with cleaned formatted names
+   * @returns {Promise<PlayerRow[]>} Array of all player objects with cleaned formatted names
    * @private
    */
   async _fetch_all_players() {
@@ -275,7 +286,7 @@ class PlayerCache {
 
   /**
    * Fetches all active players from database
-   * @returns {Promise<Array>} Array of active player objects with cleaned formatted names
+   * @returns {Promise<PlayerRow[]>} Array of active player objects with cleaned formatted names
    * @private
    */
   async _fetch_active_players() {
@@ -293,8 +304,8 @@ class PlayerCache {
 
   /**
    * Fetches aliases for given players
-   * @param {Array} players - Array of player objects
-   * @returns {Promise<Array>} Array of alias objects with cleaned formatted_alias
+   * @param {PlayerRow[]} players - Array of player objects
+   * @returns {Promise<PlayerAliasesRow[]>} Array of alias objects with cleaned formatted_alias
    * @private
    */
   async _fetch_player_aliases(players) {
@@ -313,7 +324,7 @@ class PlayerCache {
 
   /**
    * Checks if a player is considered active (not retired, not free agent)
-   * @param {Object} player - Player object
+   * @param {PlayerRow} player - Player object
    * @returns {boolean} True if player is active
    * @private
    */
@@ -345,7 +356,7 @@ class PlayerCache {
 
   /**
    * Builds player indexes from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_player_indexes(players) {
@@ -357,7 +368,7 @@ class PlayerCache {
 
   /**
    * Builds alias indexes from alias data
-   * @param {Array} aliases - Array of alias objects
+   * @param {PlayerAliasesRow[]} aliases - Array of alias objects
    * @private
    */
   _build_alias_indexes(aliases) {
@@ -372,7 +383,7 @@ class PlayerCache {
 
   /**
    * Builds GSISID index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_gsis_player_id_index(players) {
@@ -385,7 +396,7 @@ class PlayerCache {
 
   /**
    * Builds Sportradar ID index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_sportradar_player_id_index(players) {
@@ -401,7 +412,7 @@ class PlayerCache {
 
   /**
    * Builds ESPN ID index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_espn_player_id_index(players) {
@@ -417,7 +428,7 @@ class PlayerCache {
 
   /**
    * Builds DraftKings ID index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_draftkings_player_id_index(players) {
@@ -431,6 +442,10 @@ class PlayerCache {
     }
   }
 
+  /**
+   * @param {PlayerRow[]} players - Array of player objects
+   * @private
+   */
   _build_fantasylabs_player_id_index(players) {
     for (const player of players) {
       if (player.fantasylabs_player_id) {
@@ -444,7 +459,7 @@ class PlayerCache {
 
   /**
    * Builds OTC ID index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_otc_player_id_index(players) {
@@ -457,7 +472,7 @@ class PlayerCache {
 
   /**
    * Builds name + draft year composite index from player data
-   * @param {Array} players - Array of player objects
+   * @param {PlayerRow[]} players - Array of player objects
    * @private
    */
   _build_name_draft_index(players) {
@@ -471,7 +486,7 @@ class PlayerCache {
 
   /**
    * Adds a player to the formatted name index
-   * @param {Object} player - Player object
+   * @param {PlayerRow} player - Player object
    * @param {string} formatted_name - Formatted name to index by (defaults to player.formatted_name)
    * @private
    */
@@ -486,9 +501,9 @@ class PlayerCache {
 
   /**
    * Applies filters to a list of players
-   * @param {Array} players - Array of player objects
-   * @param {Object} filters - Filter options
-   * @returns {Array} Filtered array of players
+   * @param {PlayerRow[]} players - Array of player objects
+   * @param {PlayerFilters} filters - Filter options
+   * @returns {PlayerRow[]} Filtered array of players
    * @private
    */
   _apply_filters(players, { teams, ignore_free_agent, ignore_retired }) {
@@ -496,6 +511,7 @@ class PlayerCache {
 
     // Filter by teams if provided
     if (teams.length > 0) {
+      /** @type {string[]} */
       const formatted_teams = teams.map(fixTeam)
       filtered_players = filtered_players.filter((player) =>
         formatted_teams.includes(player.current_nfl_team)
@@ -520,10 +536,10 @@ class PlayerCache {
 
   /**
    * Selects the best match from filtered players
-   * @param {Array} players - Array of filtered player objects
+   * @param {PlayerRow[]} players - Array of filtered player objects
    * @param {string} formatted_name - Original formatted name searched for
-   * @param {Array} teams - Teams that were searched for
-   * @returns {Object|null} Best matching player or null
+   * @param {string[]} teams - Teams that were searched for
+   * @returns {PlayerRow|null} Best matching player or null
    * @private
    */
   _select_best_match(players, formatted_name, teams) {
@@ -562,8 +578,10 @@ class PlayerCache {
 // Create singleton instance
 const player_cache = new PlayerCache()
 
+/** @param {Parameters<PlayerCache['preload_active_players']>[0]} [options] */
 export const preload_active_players = (options) =>
   player_cache.preload_active_players(options)
+/** @param {Parameters<PlayerCache['find_player']>[0]} params */
 export const find_player = (params) => player_cache.find_player(params)
 export const get_cache_stats = () => player_cache.get_cache_stats()
 
