@@ -47,7 +47,11 @@ export const derive_supports_output = ({
 
   if (aggregations.length === 0) return null
 
-  const periods = [...new Set(Object.values(periods_by_aggregation).flat())]
+  // Partitions first, then denominator units, so the flat union reads in the
+  // order the period lists have always been declared in.
+  const periods = [
+    ...new Set([...partition_periods, ...denominator_unit_periods])
+  ]
 
   return { periods, aggregations, periods_by_aggregation }
 }
