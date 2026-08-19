@@ -35,16 +35,60 @@ const player_seasonlogs_source = {
   ]
 }
 
+// career_year is only materialized for seasons a player has actually appeared
+// in (the career-game-counts generator skips the upcoming season), so under a
+// current-season row the column renders blank before the season's first game.
+// When the query's year scope includes the current season, project the value a
+// player enters the season with: distinct seasons played before the current
+// year, plus one. Only emitted when the current season is in scope, so
+// past-year-only queries stay byte-identical. Cast the projection to smallint
+// so the emitted column keeps career_year's int2 type (node-pg would otherwise
+// surface a count's bigint as a string).
+const get_career_year_select_expression = ({
+  table_name,
+  params = {},
+  data_view_options = {}
+} = {}) => {
+  const year_range = data_view_options.year_range
+  const year_reference = data_view_options.query_context?.year_reference
+  const current_year_in_scope =
+    Array.isArray(year_range) && year_range.includes(current_season.year)
+  const column_year_is_current =
+    !current_year_in_scope &&
+    get_default_params({ params }).single_year === current_season.year
+  const row_year =
+    current_year_in_scope && year_reference
+      ? year_reference
+      : column_year_is_current
+        ? String(current_season.year)
+        : null
+  if (row_year === null) {
+    return `${table_name}.career_year`
+  }
+  const projected_career_year = `(SELECT (count(DISTINCT projected.season_year) + 1)::smallint FROM player_seasonlogs as projected WHERE projected.pid = player.pid AND projected.season_type = 'REG' AND projected.season_year < ${current_season.year})`
+  return `COALESCE(${table_name}.career_year, CASE WHEN ${row_year} = ${current_season.year} THEN ${projected_career_year} END)`
+}
+
 export default {
   player_career_year: {
     column_name: 'career_year',
     table_alias: player_seasonlogs_table_alias,
     source: player_seasonlogs_source,
-    main_select: ({ column_index, table_name }) => [
-      `${table_name}.career_year as career_year_${column_index}`
+    main_select: ({ column_index, table_name, params, data_view_options }) => [
+      `${get_career_year_select_expression({
+        table_name,
+        params,
+        data_view_options
+      })} as career_year_${column_index}`
     ],
     main_where: ({ table_name }) => `${table_name}.career_year`,
-    main_group_by: ({ table_name }) => [`${table_name}.career_year`],
+    main_group_by: ({ table_name, params, data_view_options }) => [
+      get_career_year_select_expression({
+        table_name,
+        params,
+        data_view_options
+      })
+    ],
     column_params: {
       year: single_year,
       seas_type
