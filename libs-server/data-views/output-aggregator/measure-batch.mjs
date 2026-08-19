@@ -19,22 +19,27 @@
 import crypto from 'crypto'
 
 import { consumed_params_signature } from './consumed-params-signature.mjs'
+import {
+  FACT_SOURCES,
+  resolve_fact_source
+} from '../measure/fact-source-registry.mjs'
 
 const h12 = (s) => crypto.createHash('md5').update(s).digest('hex').slice(0, 12)
 
-// Source families that may be batched. `plays_role_union` is excluded
-// because its inner UNION-ALL shape is per-column (role_attributions vary
-// per column-def); two role-union columns would not share a scan.
-const BATCHABLE_SOURCES = new Set([
-  'plays',
-  'gamelogs',
-  'snaps',
-  'plays_receiver',
-  undefined // back-compat: gamelogs default
-])
-
-export const is_batchable = ({ column_def }) =>
-  BATCHABLE_SOURCES.has(column_def.measure_source)
+// A `multi_role` source is excluded from batching because its inner UNION-ALL
+// shape is per-column (role_attributions vary per column-def), so two of them
+// would not share a scan. The set is derived from the fact-source registry
+// rather than listed, so a new source is batchable or not by its declared
+// attribution instead of by remembering to edit a list here. An unregistered
+// source stays unbatchable — `undefined` is the back-compat gamelogs default
+// and is registered by that fallback.
+export const is_batchable = ({ column_def }) => {
+  const { measure_source } = column_def
+  if (measure_source != null && !FACT_SOURCES[measure_source]) return false
+  return (
+    resolve_fact_source(measure_source).subject_attribution !== 'multi_role'
+  )
+}
 
 export const compute_group_key = ({
   column_def,
@@ -85,15 +90,12 @@ export const compute_measure_alias = ({ column_def, params, identity_id }) => {
   return `m_${h12(JSON.stringify({ column_id: column_def.column_id, expr, aggregate }))}`
 }
 
-const SOURCE_TABLES = {
-  plays: 'nfl_plays',
-  gamelogs: 'player_gamelogs',
-  snaps: 'nfl_snaps',
-  plays_receiver: 'nfl_plays_receiver'
-}
-
+// The table a measure's facts live in is the registry's answer, not a second
+// map kept in agreement by hand. Note this feeds `measure_expr`, whose rendered
+// SQL is hashed into every `m_<hash>` alias, so a change in what this RETURNS
+// churns every alias in every golden.
 export const resolve_source_table = (measure_source) =>
-  SOURCE_TABLES[measure_source] ?? 'player_gamelogs'
+  resolve_fact_source(measure_source).table
 
 export const compute_cte_name = ({ group_key, period }) =>
   `rate_${period}_${h12(group_key)}`
