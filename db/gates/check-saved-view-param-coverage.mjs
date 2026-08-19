@@ -58,12 +58,14 @@ const repo_root = path.join(__dirname, '..', '..')
 // Both persisted-view tables, because both resolve their params through
 // apply_play_by_play_column_params_to_query and so share the silent-skip defect.
 // user_plays_views (api/routes/plays.mjs -> libs-server/plays-view/
-// get-plays-view-results.mjs) is the one that is easy to forget: it holds 0 rows
-// today, and it has NO migration layer at all -- app/core/plays-view/
-// browser-storage.mjs sanitizes params but never rewrites them, so there is no
-// libs-shared/data-views-saved-view-migration.mjs equivalent to add a rule to.
-// Scanning it while it is empty costs one query and means the gate is already
-// correct on the day it stops being empty.
+// get-plays-view-results.mjs) holds 0 rows today. It now has the same read-time
+// migration layer user_data_views does -- migrate_plays_view_table_state in
+// libs-shared/data-views-saved-view-migration.mjs, reached from
+// app/core/plays-view/browser-storage.mjs, which is the one place a plays
+// view's table_state is read back into redux -- so an orphan reported here
+// gets the same remedy as one on user_data_views. Scanning it while it is
+// empty costs one query and means the gate is already correct on the day it
+// stops being empty.
 const SAVED_VIEW_TABLES = ['user_data_views', 'user_plays_views']
 
 const PARAM_CONSUMER_DIRECTORIES = [
@@ -283,9 +285,11 @@ const main = async () => {
             'rule to libs-shared/data-views-saved-view-migration.mjs for every key that\n' +
             'has a current equivalent; a key whose feature is genuinely gone can be\n' +
             'dropped there instead, but decide it explicitly rather than leaving it.\n' +
-            'An orphan reported in user_plays_views needs a different remedy: that\n' +
-            'table has no read-time migration layer, so one has to be built before a\n' +
-            'rule has anywhere to live.'
+            'user_plays_views takes the same remedy as user_data_views: the rule lands\n' +
+            'in the same file (migrate_plays_view_table_state), and it is a FRONTEND\n' +
+            'fix -- app/core/plays-view/browser-storage.mjs is where it is reached, and\n' +
+            'nothing is live for users until yarn build && yarn deploy:dist &&\n' +
+            'yarn deploy:sourcemaps ships it.'
         )
       } else {
         console.log('\nGATE OK: every persisted param key is recognised.')

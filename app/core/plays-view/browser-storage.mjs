@@ -1,5 +1,7 @@
 /* global localStorage */
 
+import { migrate_plays_view_table_state } from '#libs-shared/data-views-saved-view-migration.mjs'
+
 const local_storage_helper = {
   async getItem(key) {
     try {
@@ -128,13 +130,26 @@ const plays_view_browser_storage_load_view_history = async (view_id) => {
     if (!history || !Array.isArray(history)) {
       return []
     }
-    return history.map((snapshot) => {
+
+    let any_migrated = false
+    const migrated_history = history.map((snapshot) => {
       if (!snapshot || !snapshot.table_state) return snapshot
-      return {
-        ...snapshot,
-        table_state: sanitize_table_state(snapshot.table_state)
-      }
+      const sanitized = sanitize_table_state(snapshot.table_state)
+      // A key or column id a param registry change renamed silently drops the
+      // caller's filter on read (apply_play_by_play_column_params_to_query
+      // skips anything it does not recognise) unless it is rewritten here --
+      // the same hazard user_data_views is protected against.
+      const { table_state: migrated, changed } =
+        migrate_plays_view_table_state(sanitized)
+      if (changed) any_migrated = true
+      return { ...snapshot, table_state: migrated }
     })
+
+    if (any_migrated) {
+      local_storage_helper.setItem(storage_key, migrated_history)
+    }
+
+    return migrated_history
   } catch (error) {
     console.error('Error loading browser storage history:', error)
     return []

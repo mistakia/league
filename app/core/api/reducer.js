@@ -8,6 +8,7 @@ import { waiver_actions } from '@core/waivers/actions'
 import { player_actions } from '@core/players/actions'
 import { team_actions } from '@core/teams/actions'
 import { data_views_actions } from '@core/data-views/actions'
+import { plays_views_actions } from '@core/plays-view/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import { seasons_actions } from '@core/seasons/actions'
 import { play_actions } from '@core/plays/actions'
@@ -130,6 +131,9 @@ export function api_reducer(state = initialState, { payload, type }) {
 
     case data_views_actions.GET_DATA_VIEWS_FULFILLED:
       return state.setIn(['request_history', 'GET_DATA_VIEWS'], true)
+
+    case plays_views_actions.GET_PLAYS_VIEWS_FULFILLED:
+      return state.setIn(['request_history', 'GET_PLAYS_VIEWS'], true)
 
     case seasons_actions.GET_SEASON_PENDING:
       return state.setIn(

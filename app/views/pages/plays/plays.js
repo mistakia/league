@@ -38,11 +38,16 @@ export default function PlaysPage({
   const { view_id } = useParams()
 
   useEffect(() => {
-    load_plays_views()
+    // The saved-view list is owner-scoped and requires auth, so a logged-out
+    // visitor has nothing to list. A shared view still resolves for them
+    // through load_plays_view below, which fetches by view_id.
+    if (isLoggedIn) {
+      load_plays_views()
+    }
     if (view_id) {
       load_plays_view(view_id)
     }
-  }, [load_plays_views, load_plays_view, view_id])
+  }, [isLoggedIn, load_plays_views, load_plays_view, view_id])
 
   useEffect(() => {
     if (!view_id) {

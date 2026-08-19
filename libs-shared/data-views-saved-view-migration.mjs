@@ -902,10 +902,17 @@ const apply_rename_to_sort = ({ sort, rename_map }) => {
   return { sort: next, changed }
 }
 
-export const migrate_table_state = (table_state) => {
-  if (!table_state || typeof table_state !== 'object') {
-    return { changed: false, table_state }
-  }
+// Rewrites the param-carrying entries every table_state shares -- columns,
+// prefix_columns, where, sort -- via the single migrate_params pass above.
+// This is the part of the migration plays views need too: they resolve
+// play-filter params through the same apply_play_by_play_column_params_to_query
+// registry as the from-plays data-view columns, so a param key or column id
+// renamed here is exactly as live a saved-view hazard on user_plays_views as on
+// user_data_views. Split out from migrate_table_state so a plays-view caller
+// gets the column/param rewriting without the row_grain/splits/subjects
+// normalization below, which is a data-views-only concept plays views have no
+// field for.
+const migrate_column_entries_and_params = (table_state) => {
   let changed = false
   const next = { ...table_state }
   const rename_map = new Map()
@@ -945,6 +952,31 @@ export const migrate_table_state = (table_state) => {
     next.sort = sort_result.sort
     changed = true
   }
+
+  return { changed, table_state: next }
+}
+
+// Read-time migration for a plays view's table_state (user_plays_views and its
+// browser-storage undo history in app/core/plays-view/browser-storage.mjs).
+// Plays views persist columns/prefix_columns/where/sort/params the same shape
+// data-views does, minus row_grain/splits/subjects, which the plays-view schema
+// has never carried -- so this covers exactly the param-key and column-id
+// renames, none of the data-views-only normalization migrate_table_state also
+// does.
+export const migrate_plays_view_table_state = (table_state) => {
+  if (!table_state || typeof table_state !== 'object') {
+    return { changed: false, table_state }
+  }
+  return migrate_column_entries_and_params(table_state)
+}
+
+export const migrate_table_state = (table_state) => {
+  if (!table_state || typeof table_state !== 'object') {
+    return { changed: false, table_state }
+  }
+  const { changed: entries_changed, table_state: next } =
+    migrate_column_entries_and_params(table_state)
+  let changed = entries_changed
 
   if (Object.prototype.hasOwnProperty.call(next, 'splits')) {
     const legacy = next.splits

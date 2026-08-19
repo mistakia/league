@@ -177,14 +177,12 @@ export function* handle_delete_plays_view({ payload }) {
   yield call(api_delete_plays_view, { view_id })
 }
 
-export function* load_plays_views({ payload }) {
+export function* load_plays_views() {
   const request_history = yield select(get_request_history)
-  const { user_id, username } = payload
-  const key = `GET_PLAYS_VIEWS${user_id ? `_USER_ID_${user_id}` : username ? `_USERNAME_${username}` : ''}`
-  if (request_history[key]) {
+  if (request_history.has('GET_PLAYS_VIEWS')) {
     return
   }
-  yield call(api_get_plays_views, { user_id, username })
+  yield call(api_get_plays_views)
 }
 
 export function* load_plays_view({ payload }) {

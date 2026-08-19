@@ -449,12 +449,8 @@ export const api = {
     const url = `${API_URL}/plays/views/${view_id}`
     return { url, method: 'DELETE' }
   },
-  get_plays_views({ user_id, username }) {
-    let url = `${API_URL}/plays/views`
-    const params = new URLSearchParams()
-    if (user_id) params.append('user_id', user_id)
-    if (username) params.append('username', username)
-    if (params.toString()) url += `?${params.toString()}`
+  get_plays_views() {
+    const url = `${API_URL}/plays/views`
     return { url }
   },
   get_plays_view({ data_view_id }) {
