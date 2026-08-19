@@ -1542,7 +1542,10 @@ export function get_plays_for_player(state, { player_map, week }) {
   const playerTeam = player_map.get('team')
   if (player_map.get('primary_position') === 'DST') {
     return formatted.filter((p) => {
-      if (fixTeam(p.h) !== playerTeam && fixTeam(p.v) !== playerTeam) {
+      if (
+        fixTeam(p.home_nfl_team) !== playerTeam &&
+        fixTeam(p.away_nfl_team) !== playerTeam
+      ) {
         return false
       }
 
@@ -2947,9 +2950,9 @@ export function get_gamelog_for_player(
       : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
   const play = plays.find((p) => p.possession_nfl_team)
   const opp = play
-    ? fixTeam(play.possession_nfl_team) === fixTeam(play.h)
-      ? fixTeam(play.v)
-      : fixTeam(play.h)
+    ? fixTeam(play.possession_nfl_team) === fixTeam(play.home_nfl_team)
+      ? fixTeam(play.away_nfl_team)
+      : fixTeam(play.home_nfl_team)
     : null
 
   return process({
