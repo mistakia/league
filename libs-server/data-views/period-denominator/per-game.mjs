@@ -471,21 +471,6 @@ export const join_per_game_cte = ({
 
 // ---- output-aggregator plugin interface (identity-driven) -----------------
 
-export const consumes_params = [
-  'year',
-  'nfl_week_id',
-  'seas_type',
-  'year_offset',
-  'career_year',
-  'career_game',
-  'matchup_opponent_type',
-  'output_column_params'
-  // team_attribution is intentionally NOT listed: it does not affect the
-  // per_game denominator CTE (see get_per_game_cte_table_name) -- only the
-  // join target, resolved per-column at assembly time. Contrast per_team_play,
-  // whose CTE body differs by mode and so declares it.
-]
-
 export const get_cte_name = ({ params, identity_id }) => {
   const is_team = is_team_identity(identity_id)
   return get_per_game_cte_table_name({ params, is_team })
@@ -528,7 +513,6 @@ export const join_cte = ({
 export const emit_outer_select = emit_rate_outer_select
 
 export default {
-  consumes_params,
   get_cte_name,
   add_cte,
   join_cte,

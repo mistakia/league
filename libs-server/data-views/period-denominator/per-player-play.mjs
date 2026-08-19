@@ -202,14 +202,6 @@ export const join_per_player_play_cte = ({
 
 // ---- output-aggregator plugin interface (identity-driven) -----------------
 
-export const consumes_params = [
-  'year',
-  'nfl_week_id',
-  'seas_type',
-  'year_offset',
-  'output_column_params'
-]
-
 export const get_cte_name = ({ params, dispatch_params = {} }) => {
   return get_per_player_play_cte_table_name({
     params,
@@ -254,7 +246,6 @@ export const join_cte = ({ query_context, cte_name, params }) => {
 export const emit_outer_select = emit_rate_outer_select
 
 export default {
-  consumes_params,
   get_cte_name,
   add_cte,
   join_cte,

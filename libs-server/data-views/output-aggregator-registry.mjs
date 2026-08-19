@@ -19,7 +19,6 @@ const register = (period, aggregation, plugin) => {
 // Adapter binds a plugin instance to a fixed set of dispatch_params (captured
 // from the registration site) and exposes the plain plugin interface.
 const adapt = (plugin, dispatch_params) => ({
-  consumes_params: plugin.consumes_params,
   get_cte_name: (args) => plugin.get_cte_name({ ...args, dispatch_params }),
   add_cte: (args) => plugin.add_cte({ ...args, dispatch_params }),
   join_cte: (args) => plugin.join_cte({ ...args, dispatch_params }),

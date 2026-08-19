@@ -267,17 +267,6 @@ export const join_per_team_play_cte = ({
 
 // ---- output-aggregator plugin interface (identity-driven) -----------------
 
-export const consumes_params = [
-  'year',
-  'nfl_week_id',
-  'seas_type',
-  'year_offset',
-  'matchup_opponent_type',
-  'team_unit',
-  'output_column_params',
-  'team_attribution'
-]
-
 const resolve_team_unit = (column_def, dispatch_params) =>
   column_def?.team_unit ?? dispatch_params.team_unit ?? 'off'
 
@@ -427,7 +416,6 @@ export const handles_numerator = ({ query_context, params, identity_id }) =>
   requires_wrap({ query_context, params, identity_id })
 
 export default {
-  consumes_params,
   get_cte_name,
   add_cte,
   join_cte,

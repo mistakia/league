@@ -14,7 +14,9 @@ These are the live implementation, not a compat shim — the directory keeps its
 - `emit-rate-outer-select.mjs` -- shared outer-SELECT emission for the legacy rate path.
 - `per-team-play-wrap.mjs` -- the multi-year-no-split wrap that re-attributes per-year team volume.
 
-Dispatch lives one level up in `../output-aggregator-registry.mjs`, which resolves `(period, aggregation)` to a plugin exposing `consumes_params`, `get_cte_name`, `add_cte`, `join_cte`, and `emit_outer_select`. There is no `index.mjs` here.
+Dispatch lives one level up in `../output-aggregator-registry.mjs`, which resolves `(period, aggregation)` to a plugin exposing `get_cte_name`, `add_cte`, `join_cte`, and `emit_outer_select`. There is no `index.mjs` here.
+
+These plugins do NOT declare `consumes_params`. That is the `output-aggregator/` interface, where it feeds `consumed_params_signature` for the count and rate aggregators. Here each plugin names its own CTE by hashing the params it actually resolves — see `get_per_player_cte_table_name`, which folds in the play-level denominator params — so a `consumes_params` list would be inert. Five of them were, until 2026-08-19: declared, plumbed through the registry adapter, and read by nothing.
 
 ## Invariants for Authors
 
