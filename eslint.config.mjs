@@ -5,6 +5,17 @@ import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
 import noUnproxiedFetchWithRetry from './eslint-rules/no-unproxied-fetch-with-retry.mjs'
+import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
+
+// One `local` plugin holding every rule in eslint-rules/. Registering a second
+// plugin object under the same name in a second config block would silently
+// replace the first rather than merge with it.
+const local_rules = {
+  rules: {
+    ...noUnproxiedFetchWithRetry.rules,
+    ...noBareContainerJsdoc.rules
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -48,11 +59,12 @@ export default [
     },
 
     plugins: {
-      local: noUnproxiedFetchWithRetry
+      local: local_rules
     },
 
     rules: {
       'local/no-unproxied-fetch-with-retry': 'error',
+      'local/no-bare-container-jsdoc': 'error',
       camelcase: ['off'],
       curly: ['off'],
       indent: ['off'],
@@ -110,11 +122,12 @@ export default [
     },
 
     plugins: {
-      local: noUnproxiedFetchWithRetry
+      local: local_rules
     },
 
     rules: {
-      'local/no-unproxied-fetch-with-retry': 'error'
+      'local/no-unproxied-fetch-with-retry': 'error',
+      'local/no-bare-container-jsdoc': 'error'
     }
   }
 ]

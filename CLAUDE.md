@@ -22,7 +22,8 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 **Code Quality:**
 
-- `yarn lint` - Run ESLint
+- `yarn lint` - Run ESLint. Carries `local/no-bare-container-jsdoc`, which bans `@param {Object}` / `{Array}` / `{Map}` / `{Set}` / `{Function}` / `{Promise}` — capital `Object` is the TypeScript `Object` interface, so such a tag reads as documentation while guaranteeing an error at every property access through it. Lowercase `{object}` with `@param x.y` sub-tags is the correct idiom and is not flagged. It is a **ratchet**: `eslint-rules/bare-container-jsdoc-baseline.json` carries a per-file allowance for the 1,175 pre-existing occurrences, a file absent from it is allowed zero, and fixing a file means lowering its entry.
+- `yarn check:jsdoc-baseline` - The ratchet's downward half, in CI. Fails when a baseline entry allows MORE than the file contains — the slack a later regression would be reabsorbed into silently.
 - `yarn prettier` - Format code with Prettier. **The script is `prettier --write .` — it rewrites the WHOLE tree and ignores extra args, so `yarn prettier --check <file>` still reformats files you never touched (2026-08-15: dirtied two `scripts/social-cards/*.html` this way).** Scope with the direct binary: `npx prettier --check <files>` / `npx prettier --write <files>`.
 - `yarn test --reporter min` - Run all tests with Mocha
 - `yarn test --reporter min test/filename.spec.mjs` - Run specific test file

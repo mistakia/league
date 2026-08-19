@@ -33,7 +33,7 @@ import { LeaguePaused } from '#libs-shared/errors.mjs'
  * unique index on `resumed_at IS NULL`, so this returns a row or nothing and
  * never has to choose between two candidates.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.league_id
  * @param {Knex} [args.db]
  * @returns {Promise<LeaguePausesRow|null>} The open pause row, or null.
@@ -75,7 +75,7 @@ export const get_open_league_pause = async ({ league_id, db = default_db }) => {
  * consumer branching on which one it got is guessing about something the
  * column settles.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.league_id
  * @param {Knex} [args.db]
  * @returns {Promise<Date|null>} The latest `resumed_at`, or null.
@@ -106,7 +106,7 @@ export const get_latest_league_resume = async ({
  * reader above delegates here, so which resume voids the draft's publication
  * cannot come to mean different things on the two routes.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {Array<{league_id: number}>} args.leagues
  * @param {Knex} [args.db]
  * @returns {Promise<Record<number, LeaguePauseState>>} Keyed by league id.
@@ -160,7 +160,7 @@ export const get_pause_state_by_league_id = async ({
  * Callers that need to DECLINE rather than fail -- the cron processors -- catch
  * it and record a hold; see the class comment in `libs-shared/errors.mjs`.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number} args.league_id
  * @param {Knex} [args.db]
  * @throws {LeaguePaused}
