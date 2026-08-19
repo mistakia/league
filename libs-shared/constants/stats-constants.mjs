@@ -1,3 +1,4 @@
+// @ts-check
 import { stat_names_for_group } from '../scoring-columns.mjs'
 import { roster_slot_types } from './roster-constants.mjs'
 
@@ -505,17 +506,21 @@ export const fantasy_team_stats = [
   ...fantasy_positions.map((p) => `starter_points_${p.toLowerCase()}`)
 ]
 
-export const create_empty_fantasy_team_stats = () =>
-  fantasy_team_stats.reduce((o, key) => {
-    if (
-      [
-        'division_finish',
-        'regular_season_finish',
-        'post_season_finish',
-        'overall_finish'
-      ].includes(key)
-    ) {
-      return { ...o, [key]: null }
-    }
-    return { ...o, [key]: 0 }
-  }, {})
+// Finish placements have no meaningful zero -- an unplayed season is "no
+// placement", not "placed 0th" -- so they seed null while every other team stat
+// seeds 0.
+const fantasy_team_finish_stats = [
+  'division_finish',
+  'regular_season_finish',
+  'post_season_finish',
+  'overall_finish'
+]
+
+export const create_empty_fantasy_team_stats = () => {
+  /** @type {Record<string, number | null>} */
+  const stats = {}
+  for (const key of fantasy_team_stats) {
+    stats[key] = fantasy_team_finish_stats.includes(key) ? null : 0
+  }
+  return stats
+}

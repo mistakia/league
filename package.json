@@ -133,6 +133,7 @@
     "@mui/x-date-pickers": "^7.23.6",
     "@simonwep/pickr": "^1.9.1",
     "@types/debug": "^4.1.13",
+    "@types/pg": "^8.23.1",
     "babel-loader": "^9.2.1",
     "babel-plugin-dev-expression": "^0.2.3",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",

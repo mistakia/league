@@ -1,6 +1,44 @@
+// @ts-check
 import debug from 'debug'
 
 const log = debug('external:auth')
+
+/**
+ * The shape every `_authenticate_*` method returns and every adapter consumes.
+ * Declared once here rather than as a bare `Object` on each method, so a
+ * consumer reading `auth_result.credentials.access_token` is resolved against
+ * something real.
+ *
+ * @typedef {object} AuthResult
+ * @property {boolean} success
+ * @property {string} auth_type
+ * @property {string} platform
+ * @property {Record<string, string> | null} credentials
+ * @property {number | null} expires_at
+ * @property {boolean} public_leagues
+ * @property {boolean} private_leagues
+ */
+
+/**
+ * @typedef {AuthResult & { cached_at: number }} CachedAuthResult
+ */
+
+/**
+ * Per-platform credential vocabularies. Every field is optional because the
+ * caller supplies whichever subset it holds and each `_authenticate_*` method
+ * decides for itself what is sufficient; `PlatformCredentials` is the union the
+ * `authenticate` dispatcher accepts before it knows which platform it is.
+ *
+ * @typedef {{ espn_s2?: string, swid?: string, username?: string, password?: string }} EspnCredentials
+ * @typedef {{ client_id?: string, client_secret?: string, access_token?: string, refresh_token?: string }} YahooCredentials
+ * @typedef {{ api_key?: string, username?: string, password?: string }} MflCredentials
+ * @typedef {EspnCredentials & YahooCredentials & MflCredentials} PlatformCredentials
+ */
+
+/**
+ * @typedef {{ valid: boolean, expires_at?: number }} YahooTokenInfo
+ * @typedef {{ access_token: string, refresh_token: string, expires_at: number }} YahooTokens
+ */
 
 /**
  * Platform-specific authentication manager following ffscrapr patterns
@@ -30,14 +68,14 @@ export class PlatformAuthenticator {
   /**
    * Create standardized authentication result object
    * @private
-   * @param {Object} options - Authentication result options
+   * @param {object} options - Authentication result options
    * @param {string} options.platform - Platform identifier
    * @param {string} options.auth_type - Authentication type
-   * @param {Object|null} options.credentials - Credentials object or null
+   * @param {Record<string, string>|null} options.credentials - Credentials object or null
    * @param {number|null} options.expires_at - Expiration timestamp or null
    * @param {boolean} options.public_leagues - Whether public leagues are accessible
    * @param {boolean} options.private_leagues - Whether private leagues are accessible
-   * @returns {Object} Standardized authentication result
+   * @returns {AuthResult} Standardized authentication result
    */
   _create_auth_result({
     platform,
@@ -61,8 +99,8 @@ export class PlatformAuthenticator {
   /**
    * Authenticate with platform using platform-specific flow
    * @param {string} platform - Platform identifier (sleeper, espn, yahoo, mfl, fleaflicker)
-   * @param {Object} credentials - Platform-specific credentials
-   * @returns {Promise<Object>} Authentication result with tokens/cookies
+   * @param {PlatformCredentials} credentials - Platform-specific credentials
+   * @returns {Promise<AuthResult>} Authentication result with tokens/cookies
    */
   async authenticate(platform, credentials = {}) {
     let result
@@ -96,8 +134,8 @@ export class PlatformAuthenticator {
 
   /**
    * Sleeper authentication (no auth required)
-   * @param {Object} credentials - Not used
-   * @returns {Promise<Object>} Authentication result
+   * @param {PlatformCredentials} [credentials] - Not used
+   * @returns {Promise<AuthResult>} Authentication result
    */
   async _authenticate_sleeper(credentials) {
     return this._create_auth_result({
@@ -112,12 +150,8 @@ export class PlatformAuthenticator {
 
   /**
    * ESPN authentication using cookie-based approach
-   * @param {Object} credentials - ESPN credentials
-   * @param {string} [credentials.espn_s2] - ESPN s2 cookie (for private leagues)
-   * @param {string} [credentials.swid] - ESPN SWID cookie (for private leagues)
-   * @param {string} [credentials.username] - ESPN username (alternative login)
-   * @param {string} [credentials.password] - ESPN password (alternative login)
-   * @returns {Promise<Object>} Authentication result
+   * @param {EspnCredentials} credentials - ESPN credentials
+   * @returns {Promise<AuthResult>} Authentication result
    */
   async _authenticate_espn(credentials) {
     // If cookies provided, use them directly
@@ -168,12 +202,8 @@ export class PlatformAuthenticator {
 
   /**
    * Yahoo authentication using OAuth2 flow
-   * @param {Object} credentials - Yahoo OAuth credentials
-   * @param {string} credentials.client_id - Yahoo app client ID
-   * @param {string} credentials.client_secret - Yahoo app client secret
-   * @param {string} [credentials.access_token] - Existing access token
-   * @param {string} [credentials.refresh_token] - Refresh token
-   * @returns {Promise<Object>} Authentication result
+   * @param {YahooCredentials} credentials - Yahoo OAuth credentials
+   * @returns {Promise<AuthResult>} Authentication result
    */
   async _authenticate_yahoo(credentials) {
     if (!credentials.client_id || !credentials.client_secret) {
@@ -245,11 +275,8 @@ export class PlatformAuthenticator {
 
   /**
    * MFL authentication using API key
-   * @param {Object} credentials - MFL credentials
-   * @param {string} [credentials.api_key] - MFL API key
-   * @param {string} [credentials.username] - MFL username (alternative)
-   * @param {string} [credentials.password] - MFL password (alternative)
-   * @returns {Promise<Object>} Authentication result
+   * @param {MflCredentials} credentials - MFL credentials
+   * @returns {Promise<AuthResult>} Authentication result
    */
   async _authenticate_mfl(credentials) {
     // API key authentication (preferred)
@@ -307,8 +334,8 @@ export class PlatformAuthenticator {
 
   /**
    * Fleaflicker authentication (no auth required)
-   * @param {Object} credentials - Not used
-   * @returns {Promise<Object>} Authentication result
+   * @param {PlatformCredentials} [credentials] - Not used
+   * @returns {Promise<AuthResult>} Authentication result
    */
   async _authenticate_fleaflicker(credentials) {
     return this._create_auth_result({
@@ -325,7 +352,7 @@ export class PlatformAuthenticator {
    * ESPN cookie authentication via login flow
    * @param {string} username - ESPN username
    * @param {string} password - ESPN password
-   * @returns {Promise<Object>} ESPN cookies {espn_s2, swid}
+   * @returns {Promise<{ espn_s2: string, swid: string }>} ESPN cookies
    */
   async _get_espn_cookies_via_login(username, password) {
     // Step 1: Get API key
@@ -377,7 +404,7 @@ export class PlatformAuthenticator {
   /**
    * Validate Yahoo OAuth token
    * @param {string} access_token - Yahoo access token
-   * @returns {Promise<Object>} Token validation result
+   * @returns {Promise<YahooTokenInfo>} Token validation result
    */
   async _validate_yahoo_token(access_token) {
     try {
@@ -408,7 +435,7 @@ export class PlatformAuthenticator {
    * @param {string} refresh_token - Yahoo refresh token
    * @param {string} client_id - Yahoo client ID
    * @param {string} client_secret - Yahoo client secret
-   * @returns {Promise<Object>} New tokens
+   * @returns {Promise<YahooTokens>} New tokens
    */
   async _refresh_yahoo_token(refresh_token, client_id, client_secret) {
     const response = await fetch(
@@ -498,7 +525,7 @@ export class PlatformAuthenticator {
           TYPE: 'login',
           USERNAME: username,
           PASSWORD: password,
-          JSON: 1
+          JSON: '1'
         })
       }
     )
@@ -519,7 +546,7 @@ export class PlatformAuthenticator {
   /**
    * Get cached authentication for platform
    * @param {string} platform - Platform identifier
-   * @returns {Object|null} Cached auth data or null
+   * @returns {CachedAuthResult|null} Cached auth data or null
    */
   get_cached_auth(platform) {
     const cached = this.auth_cache.get(platform)
@@ -537,7 +564,7 @@ export class PlatformAuthenticator {
   /**
    * Cache authentication result
    * @param {string} platform - Platform identifier
-   * @param {Object} auth_result - Authentication result to cache
+   * @param {AuthResult} auth_result - Authentication result to cache
    */
   cache_auth(platform, auth_result) {
     this.auth_cache.set(platform, {
@@ -562,9 +589,10 @@ export class PlatformAuthenticator {
 
   /**
    * Get authentication status for all cached platforms
-   * @returns {Object} Authentication status by platform
+   * @returns {Record<string, object>} Authentication status by platform
    */
   get_auth_status() {
+    /** @type {Record<string, object>} */
     const status = {}
 
     for (const [platform, auth_data] of this.auth_cache.entries()) {

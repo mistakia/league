@@ -1,3 +1,4 @@
+// @ts-check
 import db from '#db'
 import {
   current_season,
@@ -8,6 +9,13 @@ import {
 } from '#constants'
 import { is_main } from '#libs-server'
 
+/**
+ * @param {object} params
+ * @param {string} params.pid
+ * @param {number} params.lid
+ * @param {number | null} [params.release_tid] - Restrict the transaction scan to
+ *   one team's releases; used when evaluating a release that has not landed yet.
+ */
 export default async function get_super_priority_status({
   pid,
   lid,
@@ -62,6 +70,12 @@ export default async function get_super_priority_status({
 }
 
 // Calculate super priority eligibility from authoritative source tables
+/**
+ * @param {object} params
+ * @param {string} params.pid
+ * @param {number} params.lid
+ * @param {number | null} [params.release_tid]
+ */
 async function calculate_super_priority_from_source({
   pid,
   lid,
@@ -298,7 +312,7 @@ async function calculate_super_priority_from_source({
 
   const weeks_rostered = await weeks_rostered_query.count('* as count')
 
-  if (weeks_rostered[0].count >= 4) {
+  if (Number(weeks_rostered[0].count) >= 4) {
     return {
       eligible: false,
       original_tid,
@@ -324,7 +338,7 @@ async function calculate_super_priority_from_source({
 
   const games_started = await games_started_query.count('* as count')
 
-  if (games_started[0].count >= 1) {
+  if (Number(games_started[0].count) >= 1) {
     return {
       eligible: false,
       original_tid,
@@ -346,7 +360,7 @@ async function calculate_super_priority_from_source({
 
 const main = async () => {
   const pid = process.argv[2]
-  const lid = process.argv[3] || 1
+  const lid = Number(process.argv[3]) || 1
 
   if (!pid) {
     console.log('Usage: node get-super-priority-status.mjs <pid> [lid]')

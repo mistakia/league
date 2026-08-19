@@ -1,3 +1,4 @@
+// @ts-check
 import pg from 'pg'
 import Knex from 'knex'
 import config from '#config'
@@ -32,8 +33,14 @@ const postgres_config = {
   ...config.postgres,
   pool: {
     ...(config.postgres.pool || {}),
+    /**
+     * @param {import('pg').Client} connection
+     * @param {(err: Error | null, connection: import('pg').Client) => void} done
+     */
     afterCreate: (connection, done) => {
-      connection.query('SELECT 1', (err) => done(err, connection))
+      connection.query('SELECT 1', (/** @type {Error | null} */ err) =>
+        done(err, connection)
+      )
     }
   }
 }

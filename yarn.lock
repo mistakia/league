@@ -2916,6 +2916,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/pg@npm:^8.23.1":
+  version: 8.23.1
+  resolution: "@types/pg@npm:8.23.1"
+  dependencies:
+    "@types/node": "npm:*"
+    pg-protocol: "npm:*"
+    pg-types: "npm:^2.2.0"
+  checksum: 10/c68a88f73e05dc17c20f819682b43fd17b5c80baf5651f391303fef462ce7ba58e9fde2ce0964016a9db0a60a8abb15817b765c2db9f4b4c2907255ab43c5a03
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:^15.7.14, @types/prop-types@npm:^15.7.15":
   version: 15.7.15
   resolution: "@types/prop-types@npm:15.7.15"
@@ -9154,6 +9165,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pg-protocol@npm:*":
+  version: 1.16.0
+  resolution: "pg-protocol@npm:1.16.0"
+  checksum: 10/fe826fccf317460d5f23b289e2d44a00c5fd46765e52c9eb14e3bda6ab44aef8a8906f7e2f07a2a3a9cc6087ebf9fbf2f430ee6bfdd1d24f870a17aa722e53eb
+  languageName: node
+  linkType: hard
+
 "pg-protocol@npm:^1.14.0":
   version: 1.14.0
   resolution: "pg-protocol@npm:1.14.0"
@@ -9161,7 +9179,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-types@npm:2.2.0":
+"pg-types@npm:2.2.0, pg-types@npm:^2.2.0":
   version: 2.2.0
   resolution: "pg-types@npm:2.2.0"
   dependencies:
@@ -10470,6 +10488,7 @@ __metadata:
     "@simonwep/pickr": "npm:^1.9.1"
     "@trashman/ed25519-blake2b": "npm:0.0.8"
     "@types/debug": "npm:^4.1.13"
+    "@types/pg": "npm:^8.23.1"
     ajv: "npm:^8.18.0"
     ajv-formats: "npm:^3.0.1"
     babel-loader: "npm:^9.2.1"

@@ -48,6 +48,9 @@ export const transaction_types = {
   TRADE_REVERSAL: 20
 }
 
+// Keyed by `transaction_types` value. Annotated so a checked consumer can index
+// it with a transaction type read off a row rather than a literal.
+/** @type {Record<number, string>} */
 export const transaction_type_display_names = {
   14: 'Signed',
   1: 'Released',
