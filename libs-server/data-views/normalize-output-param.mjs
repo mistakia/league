@@ -32,6 +32,10 @@ export const normalize_output_param = ({ column, row_axes = [] }) => {
   if (next_params.output) {
     const { period, aggregation } = next_params.output
     const has_week_row_axis = row_axes.includes('week')
+    // Row axes are coarse-to-fine and the FINEST one sets the row grain, so a
+    // ['year', 'week'] request is a week-grain row and takes the week rules
+    // below. Only a year axis with no week axis is year-grain.
+    const has_year_row_axis = row_axes.includes('year') && !has_week_row_axis
 
     if (has_week_row_axis && aggregation === 'rate' && period === 'game') {
       log(
@@ -48,6 +52,22 @@ export const normalize_output_param = ({ column, row_axes = [] }) => {
       throw new Error(
         `output={period:season,aggregation:count} is invalid under week row_axis (column ${column.column_id})`
       )
+    } else if (
+      has_year_row_axis &&
+      aggregation === 'count' &&
+      period === 'season'
+    ) {
+      // A partition aggregation needs the row to span several periods. Under a
+      // year row axis the season period IS the row, so a season count
+      // degenerates to a 0/1 indicator. Dropped rather than thrown, matching
+      // the game/rate-under-week case above: the request is degenerate, not
+      // incoherent, and a throw would 500 a saved view that renders today.
+      log(
+        `Dropping output={period:season,aggregation:count} under year row_axis for ${column.column_id}`
+      )
+      const { output: _drop, ...rest } = next_params
+      next_params = rest
+      mutated = true
     }
   }
 

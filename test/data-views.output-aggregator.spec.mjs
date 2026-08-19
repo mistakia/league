@@ -206,4 +206,61 @@ describe('data-views output aggregator', () => {
       expect(thrown.message).to.include('season')
     })
   })
+
+  describe('year row axis sanitization', () => {
+    it('silently drops a per-season count under a year row axis', async () => {
+      const sql = await build_sql({
+        column_id: 'player_receiving_yards_from_plays',
+        params: {
+          year: [2022, 2023],
+          output: {
+            period: 'season',
+            aggregation: 'count',
+            threshold: { op: '>=', value: 1 }
+          }
+        },
+        row_axes: ['year']
+      })
+
+      // A row IS a season here, so counting seasons clearing a threshold is a
+      // 0/1 indicator rather than a count. Dropped, not thrown -- see the
+      // matching disposition for a per-game rate on a per-week row above.
+      expect(sql).to.not.match(/count_season_[0-9a-f]+/)
+    })
+
+    it('keeps a per-game count under a year row axis', async () => {
+      const sql = await build_sql({
+        column_id: 'player_receiving_yards_from_plays',
+        params: { year: [2023], output: count_100_games },
+        row_axes: ['year']
+      })
+
+      // The game period is finer than the row, so the count is meaningful and
+      // the guard must not reach it.
+      expect(sql).to.match(/count_game_[0-9a-f]+/)
+    })
+  })
+
+  describe('season period key', () => {
+    it('keys a season period by the year alone, not by (year, season type)', async () => {
+      const sql = await build_sql({
+        column_id: 'player_receiving_yards_from_plays',
+        params: {
+          year: [2022, 2023],
+          output: {
+            period: 'season',
+            aggregation: 'count',
+            threshold: { op: '>=', value: 1 }
+          }
+        }
+      })
+
+      expect(sql).to.include('nfl_games.season_year AS period_key')
+      // season_type filters which games are in scope; it does not partition
+      // the span, so it must not appear in the key.
+      expect(sql).to.not.include(
+        "CONCAT(nfl_games.season_year, '_', nfl_games.season_type)"
+      )
+    })
+  })
 })

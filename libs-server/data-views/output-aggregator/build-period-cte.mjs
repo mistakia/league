@@ -13,8 +13,12 @@ import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid)"
-const season_period_key =
-  "CONCAT(nfl_games.season_year, '_', nfl_games.season_type)"
+// A season is partitioned by the YEAR alone. season_type filters which games
+// are in scope; it does not divide the span, so keying on it counted
+// (year, season type) PAIRS while COUNT_PERIOD_OPTIONS labelled them
+// "Seasons". It read correct only because seas_type defaults to ['REG'] -- a
+// request widening it to REG and POST doubled every count.
+const season_period_key = 'nfl_games.season_year'
 
 // `period='aggregate'` is the numerator-CTE grain used when a legacy
 // denominator plugin owns the rate division. The CTE collapses to (pid|
