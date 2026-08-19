@@ -32,9 +32,11 @@
 // column family of its own. Measured on production for 2024 REG, the expansion
 // materializes 1,096,224 rows against the 41,152 the unexpanded scan reads --
 // 26.6x, which is offensive-roster size per team play and exactly what the shape
-// predicts. The cost is NOT new: it is what `create_team_share_stat` emits in
-// production today. What the conversion adds is the option of paying it at
-// PERIOD grain, which only a `count` or `mean` request reaches.
+// predicts. The cost is NOT new: it is the scan the share columns already emit
+// at season grain, which `create_team_share_stat` emitted before that factory
+// was folded into the one from-plays factory. What the conversion adds is the
+// option of paying it at PERIOD grain, which only a `count` or `mean` request
+// reaches.
 
 export const SUBJECT_ATTRIBUTIONS = Object.freeze([
   'direct',

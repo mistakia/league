@@ -123,11 +123,12 @@ describe('data views fact source registry', function () {
       })
     })
 
-    it('emits the join create_team_share_stat already emits', function () {
-      // The conversion must not move the share's SCAN -- the fan-out it pays is
-      // the one production pays today. Compare the emitted join against the
-      // incumbent CTE's, written here verbatim so a drift in either shows up as
-      // a text difference rather than as a silently different denominator.
+    it('emits the join the season share scan emits', function () {
+      // The period scan must not diverge from the season one -- the fan-out it
+      // pays is the one production already pays. The incumbent join is written
+      // here verbatim, from the `create_team_share_stat` factory this registry
+      // entry replaced, so a drift in either shows up as a text difference
+      // rather than as a silently different denominator.
       const candidate = db('nfl_plays').select('pg.pid')
       FACT_SOURCES.plays_cohort.cohort_expansion.join(candidate)
 
