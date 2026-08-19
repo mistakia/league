@@ -141,6 +141,29 @@ jobs:
       - name: Dropped table consumer gate
         run: node db/gates/check-dropped-table-consumers.mjs
 
+      # The incremental //@ts-check tier. Two steps because they answer two
+      # different questions, and the second is the one a green first step cannot
+      # cover.
+      #
+      # check:types regenerates db/schema-types.d.ts from db/schema.postgres.sql
+      # and fails if the committed copy disagrees, then runs tsc over the files
+      # carrying the pragma. Both halves read only the checkout and node_modules
+      # -- no database, no base ref, no user-base ancestor, and no binary beyond
+      # node -- so this is CI-eligible on exactly gate 1's terms and cannot go
+      # red on a sibling's in-flight migration. Verified from a /tmp worktree
+      # with rg off PATH, which is the only place the two environment
+      # dependencies that reverted the last two CI wirings are both absent.
+      - name: Type check
+        run: yarn check:types
+
+      # The ratchet. tsc is STRUCTURALLY UNABLE to see a file that has been
+      # un-adopted: deleting one comment makes a type error disappear, and the
+      # step above still exits 0 (measured). This compares the committed
+      # adoption list against the tree in both directions so the covered set can
+      # only grow, and it carries four always-on negative controls.
+      - name: ts-check adoption ratchet
+        run: node db/gates/check-ts-check-ratchet.mjs
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update

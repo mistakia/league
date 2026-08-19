@@ -2,7 +2,7 @@
 //
 // Source: db/schema.postgres.sql
 // Regenerate: node db/tools/generate-schema-types.mjs
-// Gate: db/gates/check-schema-types-current.mjs
+// Currency gate: yarn check:types (runs this generator with --check)
 //
 // One row type per table, for the incremental `//@ts-check` tier. A checked
 // producer annotates its return as a row type (or a Pick of one) and every

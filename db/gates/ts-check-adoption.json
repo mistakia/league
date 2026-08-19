@@ -1,0 +1,19 @@
+{
+  "comment": "Files opted into the //@ts-check tier. Guarded by db/gates/check-ts-check-ratchet.mjs, which checks this list against the tree in BOTH directions: a file that loses its pragma fails, and a file that gains one fails until it is listed here. Adoption is a reviewed line, never a silent one.",
+  "files": [
+    "api/routes/leagues/careerlogs.mjs",
+    "api/routes/leagues/middleware.mjs",
+    "api/routes/leagues/trade-review.mjs",
+    "db/checks/registry.mjs",
+    "libs-server/context-docs/generate-league-rosters-csv.mjs",
+    "libs-server/data-views/derive-column-row-grains.mjs",
+    "libs-server/data-views/team-values-cte.mjs",
+    "libs-server/get-league.mjs",
+    "libs-server/league-pause.mjs",
+    "libs-server/proxy-manager.mjs",
+    "libs-server/resolve-canonical-player.mjs",
+    "libs-shared/constants/season-constants.mjs",
+    "libs-shared/nfl-week-identifier.mjs",
+    "libs-shared/output-column-param.mjs"
+  ]
+}

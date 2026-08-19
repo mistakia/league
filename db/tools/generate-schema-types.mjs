@@ -10,8 +10,8 @@
 // list this repo has already been bitten by -- and worse than an out-of-date
 // list, because a stale row type reports a LIVE column as a defect and a
 // dropped one as clean. So the schema file is the single source and this file
-// is regenerated from it; `db/gates/check-schema-types-current.mjs` fails when
-// the committed output disagrees with a fresh run.
+// is regenerated from it, and `--check` (which `yarn check:types` runs first,
+// ahead of tsc) fails when the committed output disagrees with a fresh run.
 //
 // Run: node db/tools/generate-schema-types.mjs [--check]
 
@@ -163,7 +163,9 @@ const render = ({ enums, tables }) => {
   lines.push('//')
   lines.push('// Source: db/schema.postgres.sql')
   lines.push('// Regenerate: node db/tools/generate-schema-types.mjs')
-  lines.push('// Gate: db/gates/check-schema-types-current.mjs')
+  lines.push(
+    '// Currency gate: yarn check:types (runs this generator with --check)'
+  )
   lines.push('//')
   lines.push(
     '// One row type per table, for the incremental `//@ts-check` tier. A checked'

@@ -198,6 +198,14 @@ const GATES = [
     oracle: 'each deliberately dropped table name has no surviving consumer'
   },
   {
+    id: 'ts-check-ratchet',
+    command: ['db/gates/check-ts-check-ratchet.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'the committed ts-check adoption list vs the tree, BOTH ways — a file that loses its pragma fails, and a file that gains one fails until it is listed; distinct from yarn check:types, which cannot see a file that has been un-adopted'
+  },
+  {
     id: 'plays-column-repoint',
     command: ['db/gates/check-plays-column-repoint.mjs'],
     requires: 'none',
