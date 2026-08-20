@@ -19,9 +19,11 @@ const expect = chai.expect
 // It is a silent wrong answer rather than an error -- the query is valid, the
 // rows are real, there are just six times too many of them -- so no gate in the
 // suite could see it. The one golden that exercises this shape
-// (keeptradecut-value-year-week-split.json) carries skip_query_match: true, which
-// means the harness logs its SQL diff for review and asserts nothing about it.
-// That is why this coverage is a spec and not a regenerated golden.
+// (keeptradecut-value-year-week-split.json) carried skip_query_match: true when
+// this spec was written, which meant the harness logged its SQL diff for review
+// and asserted nothing about it. That flag was dropped from every golden in
+// 08cd28937, but this coverage stays a spec rather than a regenerated golden:
+// a golden regenerated from buggy code agrees with the buggy code.
 //
 // get_week_range unions the `week` params across columns and where clauses,
 // exactly mirroring how get_year_range scopes the year axis, so a column that
