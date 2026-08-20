@@ -9,6 +9,11 @@ import {
   is_batchable
 } from './measure-batch.mjs'
 import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
+import {
+  register_per_period_summary,
+  summary_cte_name,
+  summary_column_alias
+} from './per-period-summary.mjs'
 
 export const consumes_params = ['year', 'nfl_week_id', 'seas_type']
 
@@ -49,7 +54,26 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
   return `count_${period}_${hash}`
 }
 
-export const add_cte = add_period_cte
+// The period CTE is materialized as before, and a SUMMARY over it is
+// registered in the same breath. Both are deferred: the period CTE flushes with
+// its measure batch, the summary after, because it selects from it.
+export const add_cte = async (args) => {
+  await add_period_cte(args)
+  const { query_context, column_def, params, cte_name, identity_id } = args
+  register_per_period_summary({
+    query_context,
+    period_cte_name: cte_name,
+    is_team: identity_id.startsWith('team'),
+    aggregation: 'count',
+    measure_alias: resolve_measure_alias({ column_def, params, identity_id }),
+    threshold: params?.output?.threshold ?? null
+  })
+}
+
+const resolve_measure_alias = ({ column_def, params, identity_id }) =>
+  is_batchable({ column_def })
+    ? compute_measure_alias({ column_def, params, identity_id })
+    : 'measure_total'
 
 const resolve_team_join_target = ({ query_context, params, source }) => {
   if (query_context.row_grain_id === 'team') return query_context.team_reference
@@ -91,22 +115,21 @@ export const join_cte = ({
         source: column_def?.source || null
       })
     : null
-  players_query.leftJoin(cte_name, function () {
+  // Join the SUMMARY, not the period CTE. The period CTE is at
+  // (subject, period_key, year) grain -- finer than the outer row, so joining
+  // it directly cross-multiplies against every other per-period column in the
+  // view. The summary is one row per (subject, year) and joins 1:1.
+  const summary_name = summary_cte_name({ period_cte_name: cte_name })
+  players_query.leftJoin(summary_name, function () {
     if (is_team) {
-      this.on(`${cte_name}.team_code`, '=', team_target)
+      this.on(`${summary_name}.team_code`, '=', team_target)
     } else {
-      this.on(`${cte_name}.pid`, '=', pid_reference)
+      this.on(`${summary_name}.pid`, '=', pid_reference)
     }
     if (row_axes.includes('year') && year_reference) {
-      this.andOn(`${cte_name}.year`, '=', year_reference)
+      this.andOn(`${summary_name}.year`, '=', year_reference)
     }
   })
-}
-
-const op_sql = (op) => {
-  const allowed = ['>=', '>', '<=', '<', '=', '<>']
-  if (!allowed.includes(op)) throw new Error(`Unsupported threshold op: ${op}`)
-  return op
 }
 
 export const emit_outer_select = ({
@@ -128,13 +151,19 @@ export const emit_outer_select = ({
     )
   }
   const alias = `${column_def.column_name}_${column_index}`
-  const op = op_sql(threshold.op)
-  const measure_alias = is_batchable({ column_def })
-    ? compute_measure_alias({ column_def, params, identity_id })
-    : 'measure_total'
+  // The counting happens in the summary CTE now, so this is a read of one
+  // already-reduced value. MAX picks it out of a group of one -- a CTE column
+  // is not functionally dependent on the outer GROUP BY the way a grouped
+  // primary key is, so the bare reference is a 42803.
+  const summary_name = summary_cte_name({ period_cte_name: cte_name })
+  const summary_alias = summary_column_alias({
+    aggregation: 'count',
+    measure_alias: resolve_measure_alias({ column_def, params, identity_id }),
+    threshold
+  })
   return {
-    sql: `COUNT(DISTINCT ${cte_name}.period_key) FILTER (WHERE ${cte_name}.${measure_alias} ${op} ?) AS ${alias}`,
-    bindings: [threshold.value]
+    sql: `MAX(${summary_name}.${summary_alias}) AS ${alias}`,
+    bindings: []
   }
 }
 

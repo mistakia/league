@@ -43,6 +43,7 @@ import { normalize_columns } from '#libs-server/data-views/normalize-output-para
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
 import { flush_per_team_play_wraps } from '#libs-server/data-views/period-denominator/per-team-play-wrap.mjs'
+import { flush_per_period_summaries } from '#libs-server/data-views/output-aggregator/per-period-summary.mjs'
 import { build_batched_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import {
   get_identity,
@@ -2006,6 +2007,11 @@ export const get_data_view_results_query = async ({
   // revision shares the batched numerator CTE; today each wrap inlines its
   // own (pid, year) numerator subquery and is order-independent.
   flush_per_team_play_wraps({ query_context })
+
+  // Reduce each per-period CTE to subject grain. MUST run after
+  // flush_measure_batches: a summary selects FROM its period CTE, and a
+  // non-recursive WITH requires the referenced CTE to be defined first.
+  flush_per_period_summaries({ query_context })
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
