@@ -14,7 +14,7 @@ const build = (measures) =>
   build_batched_period_cte({
     measure_source: 'plays',
     measure_predicate: null,
-    pid_columns: ['bc_pid'],
+    role_columns: ['bc_pid'],
     apply_filters: null,
     measures,
     period: 'game',
@@ -70,7 +70,7 @@ describe('data-views distinct-count numerator', () => {
       measure_source: 'plays',
       measure_expr: "CONCAT(esbid, '_', drive_sequence)",
       measure_predicate: null,
-      pid_columns: ['bc_pid'],
+      role_columns: ['bc_pid'],
       apply_filters: null,
       period: 'game',
       query_context: { row_axes: [] },

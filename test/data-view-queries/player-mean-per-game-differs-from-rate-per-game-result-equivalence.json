@@ -8,29 +8,19 @@
         "column_id": "player_receiving_yards_from_plays",
         "params": {
           "year": [2024],
-          "output": {
-            "period": "game",
-            "aggregation": "mean"
-          }
+          "output": { "period": "game", "aggregation": "mean" }
         }
       },
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
           "year": [2024],
-          "output": {
-            "period": "game",
-            "aggregation": "rate"
-          }
+          "output": { "period": "game", "aggregation": "rate" }
         }
       }
     ],
     "where": [
-      {
-        "column_id": "player_position",
-        "operator": "IN",
-        "value": ["MLB"]
-      }
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
     ]
   },
   "result_equivalence": {
@@ -49,13 +39,10 @@
       "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990603, 1, 2024, 3, to_timestamp(0), 'REG', 'PASS', 'TEST-MEAN-000951', true, 150)"
     ],
     "expected_rows": [
-      {
-        "rec_yds_from_plays_0": "120",
-        "rec_yds_from_plays_1": "90"
-      }
+      { "rec_yds_from_plays_0": "120", "rec_yds_from_plays_1": "90" }
     ],
     "compare_columns": ["rec_yds_from_plays_0", "rec_yds_from_plays_1"]
   },
   "tags": ["from_plays", "output-aggregator", "result-equivalence"],
-  "expected_query": "with \"t3d2efe2602a05b1642021b304ba51fb2\" as materialized (select \"player_gamelogs_year_2024\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2024.nfl_team) as teams from \"player_gamelogs_year_2024\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2024\".\"esbid\" where \"player_gamelogs_year_2024\".\"is_active\" = true and \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) group by \"player_gamelogs_year_2024\".\"pid\"), \"per_period_game_fad052e31e28\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid) AS period_key, nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.receiving_yards ELSE 0 END) AS m_2205f2f1663c from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid, CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid), \"nfl_games\".\"season_year\"), \"rate_aggregate_9818eb67c965\" as materialized (select nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.receiving_yards ELSE 0 END) AS m_2205f2f1663c from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid), \"per_period_summary_2cc8229f4b7d\" as materialized (select \"per_period_game_fad052e31e28\".\"pid\", \"per_period_game_fad052e31e28\".\"year\", AVG(per_period_game_fad052e31e28.m_2205f2f1663c) AS s_0a2b9691d0cf from \"per_period_game_fad052e31e28\" group by \"per_period_game_fad052e31e28\".\"pid\", \"per_period_game_fad052e31e28\".\"year\") select \"player\".\"pid\", player.first_name, player.last_name, MAX(per_period_summary_2cc8229f4b7d.s_0a2b9691d0cf) AS rec_yds_from_plays_0, CAST(MAX(rate_aggregate_9818eb67c965.m_2205f2f1663c) AS DECIMAL) / NULLIF(CAST(MAX(t3d2efe2602a05b1642021b304ba51fb2.rate_type_total_count) AS DECIMAL), 0) AS rec_yds_from_plays_1, \"player\".\"primary_position\" from \"player\" left join \"per_period_summary_2cc8229f4b7d\" on \"per_period_summary_2cc8229f4b7d\".\"pid\" = \"player\".\"pid\" left join \"t3d2efe2602a05b1642021b304ba51fb2\" on \"t3d2efe2602a05b1642021b304ba51fb2\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_9818eb67c965\" on \"rate_aggregate_9818eb67c965\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+  "expected_query": "with \"t3d2efe2602a05b1642021b304ba51fb2\" as materialized (select \"player_gamelogs_year_2024\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2024.nfl_team) as teams from \"player_gamelogs_year_2024\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2024\".\"esbid\" where \"player_gamelogs_year_2024\".\"is_active\" = true and \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) group by \"player_gamelogs_year_2024\".\"pid\"), \"per_period_game_5c294cddf160\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid) AS period_key, nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.receiving_yards ELSE 0 END) AS m_2205f2f1663c from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid, CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid), \"nfl_games\".\"season_year\"), \"rate_aggregate_d683a7b1356d\" as materialized (select nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.receiving_yards ELSE 0 END) AS m_2205f2f1663c from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid), \"per_period_summary_61d3781f15ad\" as materialized (select \"per_period_game_5c294cddf160\".\"pid\", \"per_period_game_5c294cddf160\".\"year\", AVG(per_period_game_5c294cddf160.m_2205f2f1663c) AS s_0a2b9691d0cf from \"per_period_game_5c294cddf160\" group by \"per_period_game_5c294cddf160\".\"pid\", \"per_period_game_5c294cddf160\".\"year\") select \"player\".\"pid\", player.first_name, player.last_name, MAX(per_period_summary_61d3781f15ad.s_0a2b9691d0cf) AS rec_yds_from_plays_0, CAST(MAX(rate_aggregate_d683a7b1356d.m_2205f2f1663c) AS DECIMAL) / NULLIF(CAST(MAX(t3d2efe2602a05b1642021b304ba51fb2.rate_type_total_count) AS DECIMAL), 0) AS rec_yds_from_plays_1, \"player\".\"primary_position\" from \"player\" left join \"per_period_summary_61d3781f15ad\" on \"per_period_summary_61d3781f15ad\".\"pid\" = \"player\".\"pid\" left join \"t3d2efe2602a05b1642021b304ba51fb2\" on \"t3d2efe2602a05b1642021b304ba51fb2\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_d683a7b1356d\" on \"rate_aggregate_d683a7b1356d\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
 }

@@ -1,7 +1,7 @@
 // Coalesces co-locatable measures into a single materialized CTE.
 //
 // Two measures share a CTE iff their group_key matches: same measure_source,
-// same period, same identity, same pid_columns, same measure_predicate, same
+// same period, same identity, same role_columns, same measure_predicate, same
 // apply_filters body, same team_unit, same consumed-params subset.
 //
 // Each measure in a batch contributes one `SUM(<measure_expr>) AS m_<hash>`
@@ -56,7 +56,7 @@ export const compute_group_key = ({
     // ORDER-SENSITIVE, for the same reason `generate_table_alias` is: the batch
     // materializes ONE scan grouped by ONE subject-id expression, so two
     // columns whose role lists differ only in order must not share it.
-    pid_columns: column_def.pid_columns ? [...column_def.pid_columns] : null,
+    role_columns: column_def.role_columns ? [...column_def.role_columns] : null,
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,

@@ -154,7 +154,7 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
-    pid_columns: column_def.pid_columns,
+    role_columns: column_def.role_columns,
     apply_filters: column_def.apply_filters
       ? ({ query }) => column_def.apply_filters({ query, params, identity_id })
       : null,

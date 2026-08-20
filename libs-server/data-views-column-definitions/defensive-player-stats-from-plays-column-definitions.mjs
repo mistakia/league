@@ -5,9 +5,13 @@ import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-pl
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 
-const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
-  if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
-    throw new Error('pid_columns must be a non-empty array')
+const defensive_player_table_alias = ({ role_columns, params = {} } = {}) => {
+  if (
+    !role_columns ||
+    !Array.isArray(role_columns) ||
+    role_columns.length === 0
+  ) {
+    throw new Error('role_columns must be a non-empty array')
   }
 
   const key = get_stats_column_param_key({ params })
@@ -16,7 +20,7 @@ const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   // Arm order does not change a defensive count, so this family could hash as a
   // set and be correct today -- one rule across both factories is what stops
   // the next role list from rediscovering the shared-CTE mis-attribution.
-  const pid_columns_string = pid_columns.join('_')
+  const pid_columns_string = role_columns.join('_')
   return get_table_hash(`defensive_player_stats_${pid_columns_string}_${key}`)
 }
 
@@ -49,22 +53,22 @@ const defensive_plays_source = {
 // it per role). The legacy `select_string` form aggregates over the WITH
 // CTE's synthetic pid_column rows; the role_union path produces equivalent
 // counts per period.
-const defensive_role_attributions = ({ pid_columns }) =>
-  pid_columns.map((pid_column) => ({
+const defensive_role_attributions = ({ role_columns }) =>
+  role_columns.map((pid_column) => ({
     pid_column,
     measure_expr: '1'
   }))
 
 const defensive_player_stat_from_plays = ({
-  pid_columns,
+  role_columns,
   select_string,
   stat_name
 }) => ({
   table_alias: ({ params }) =>
-    defensive_player_table_alias({ pid_columns, params }),
+    defensive_player_table_alias({ role_columns, params }),
   column_name: stat_name,
   measure_source: 'plays_role_union',
-  role_attributions: () => defensive_role_attributions({ pid_columns }),
+  role_attributions: () => defensive_role_attributions({ role_columns }),
   supports_output: {
     periods: [
       'game',
@@ -86,7 +90,7 @@ const defensive_player_stat_from_plays = ({
   with_where: () => select_string,
   main_where: () => null,
   source: defensive_plays_source,
-  pid_columns,
+  role_columns,
   use_having: true,
   with: add_defensive_play_by_play_with_statement,
   get_cache_info: get_cache_info_for_fields_from_plays,
@@ -95,7 +99,7 @@ const defensive_player_stat_from_plays = ({
 
 export default {
   player_solo_tackles_from_plays: defensive_player_stat_from_plays({
-    pid_columns: [
+    role_columns: [
       'solo_tackle_1_pid',
       'solo_tackle_2_pid',
       'solo_tackle_3_pid'
@@ -104,7 +108,7 @@ export default {
     stat_name: 'solo_tackles_from_plays'
   }),
   player_tackle_assists_from_plays: defensive_player_stat_from_plays({
-    pid_columns: [
+    role_columns: [
       'tackle_assist_1_pid',
       'tackle_assist_2_pid',
       'tackle_assist_3_pid',
@@ -114,7 +118,7 @@ export default {
     stat_name: 'tackle_assists_from_plays'
   }),
   player_combined_tackles_from_plays: defensive_player_stat_from_plays({
-    pid_columns: [
+    role_columns: [
       'solo_tackle_1_pid',
       'solo_tackle_2_pid',
       'solo_tackle_3_pid',

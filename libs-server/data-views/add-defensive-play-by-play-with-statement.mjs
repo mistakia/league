@@ -11,7 +11,7 @@ export const add_defensive_play_by_play_with_statement = ({
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  pid_columns = [],
+  role_columns = [],
   row_axes = [],
   data_view_options = {}
 }) => {
@@ -19,8 +19,8 @@ export const add_defensive_play_by_play_with_statement = ({
     throw new Error('with_table_name is required')
   }
 
-  if (!pid_columns.length) {
-    throw new Error('pid_columns is required')
+  if (!role_columns.length) {
+    throw new Error('role_columns is required')
   }
 
   // nfl_week_id is always projected because get_play_by_play_default_params
@@ -92,15 +92,15 @@ export const add_defensive_play_by_play_with_statement = ({
       this.from('nfl_plays')
       this.select(
         db.raw(
-          `${pid_columns[0]} as pid, '${pid_columns[0]}' as pid_column, ${select_columns_array.join(', ')}`
+          `${role_columns[0]} as pid, '${role_columns[0]}' as pid_column, ${select_columns_array.join(', ')}`
         )
       )
-      this.whereNotNull(pid_columns[0])
+      this.whereNotNull(role_columns[0])
       if (effective_years.length) {
         this.whereIn('nfl_plays.season_year', effective_years)
       }
 
-      for (const pid_column of pid_columns.slice(1)) {
+      for (const pid_column of role_columns.slice(1)) {
         this.unionAll(function () {
           this.select(
             db.raw(
