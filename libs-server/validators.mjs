@@ -89,7 +89,12 @@ const output_param_schema = {
   optional: true,
   props: {
     period: { type: 'string' },
-    aggregation: { type: 'string', enum: ['rate', 'count'] },
+    // `sum` is deliberately absent: it is the wire value for NO aggregation and
+    // reaches here as an absent `output` rather than as a value. `mean` joins
+    // `rate` and `count` with the per-period summary -- it divides by periods
+    // CARRYING measure rows where `rate` divides by a denominator unit, so the
+    // two are different measures and both are legal on one column.
+    aggregation: { type: 'string', enum: ['rate', 'count', 'mean'] },
     threshold: output_threshold_schema
   },
   custom(value, errors) {

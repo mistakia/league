@@ -44,10 +44,11 @@ import { derive_supports_output } from './capability.mjs'
 
 const INTEGRAL_AGGREGATES = new Set(['count', 'count_distinct'])
 
-// The aggregations the output-aggregator registry can actually serve today.
-// `mean` joins this list when it is registered; capability derivation itself
-// already offers it, so advertising is gated here rather than there.
-const SERVEABLE_AGGREGATIONS = ['rate', 'count']
+// The aggregations the output-aggregator registry can actually serve. `mean` is
+// registered over the partition vocabulary as of the per-period summary, so all
+// three are live; capability derivation offers what is SEMANTICALLY legal and
+// this list is what is REACHABLE, which is why they are separate.
+const SERVEABLE_AGGREGATIONS = ['rate', 'count', 'mean']
 
 const assert_measure = ({ stat_name, measure }) => {
   if (!measure || typeof measure !== 'object') {
@@ -140,15 +141,19 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
     : null
 
   // Capability is what the wire can be ASKED for, so it advertises only what
-  // the output aggregator can serve. Every plugin consumes a single
-  // `measure_expr` (`measure-batch.mjs` throws without one), which a combined
-  // measure does not have -- its value is a function of several accumulators
-  // and only exists after the per-period reducer evaluates the combine at
-  // period grain. So a combined measure advertises nothing until that reducer
-  // lands. This is the SERVEABLE_AGGREGATIONS rule above at the measure level,
-  // NOT the measure-shape exclusion the operator reversed: `rate` and `mean`
-  // both stay semantically legal on a combined measure (see capability.mjs),
-  // and the moment the reducer can evaluate one they are offered.
+  // the output aggregator can serve. Every path from here consumes a single
+  // `measure_expr` -- `measure-batch.mjs` throws without one, and the period
+  // CTE projects `SUM(<measure_expr>)` per period -- which a combined measure
+  // does not have. Its value is a function of SEVERAL accumulators and exists
+  // only once the combine is evaluated at period grain, over each accumulator's
+  // per-period sum. The per-period summary reduces ACROSS periods and does not
+  // supply that; the period CTE has to project the combined value itself.
+  //
+  // So a combined measure still advertises nothing, and this is the
+  // SERVEABLE_AGGREGATIONS rule above at the measure level -- NOT the
+  // measure-shape exclusion the operator reversed. `rate` and `mean` are both
+  // semantically legal on a combined measure (see capability.mjs), and they are
+  // offered the moment the period CTE can evaluate one.
   const supports_output = is_combined
     ? null
     : (() => {
