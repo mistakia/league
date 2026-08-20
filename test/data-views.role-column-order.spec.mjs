@@ -31,15 +31,15 @@ const columns_with_role_columns = Object.entries(data_views_column_definitions)
   .filter(
     ([, definition]) =>
       definition &&
-      Array.isArray(definition.pid_columns) &&
-      definition.pid_columns.length > 1 &&
+      Array.isArray(definition.role_columns) &&
+      definition.role_columns.length > 1 &&
       typeof definition.table_alias === 'function'
   )
   .map(([column_id, definition]) => ({ column_id, definition }))
 
 describe('data views role column order', function () {
   it('found multi-role columns to check', function () {
-    // A floor, so a registry refactor that stops exposing pid_columns cannot
+    // A floor, so a registry refactor that stops exposing role_columns cannot
     // report compliance over an empty set.
     expect(columns_with_role_columns.length).to.be.at.least(5)
   })
@@ -47,15 +47,15 @@ describe('data views role column order', function () {
   it('leaves every declared role order byte-identical after table_alias', function () {
     const moved = []
     for (const { column_id, definition } of columns_with_role_columns) {
-      const declared = [...definition.pid_columns]
+      const declared = [...definition.role_columns]
       definition.table_alias({ params: {} })
       // A second call, since the first sort makes an already-sorted array look
       // stable and would hide the mutation on every column but the divergent
       // ones.
       definition.table_alias({ params: { year: [2024] } })
-      if (definition.pid_columns.join(',') !== declared.join(',')) {
+      if (definition.role_columns.join(',') !== declared.join(',')) {
         moved.push(
-          `${column_id}: ${declared.join(',')} -> ${definition.pid_columns.join(',')}`
+          `${column_id}: ${declared.join(',')} -> ${definition.role_columns.join(',')}`
         )
       }
     }
@@ -73,13 +73,13 @@ describe('data views role column order', function () {
       data_views_column_definitions.player_total_expected_points_added_from_plays
 
     expect(
-      [...opportunities.pid_columns].sort().join(','),
+      [...opportunities.role_columns].sort().join(','),
       'the pair must still share a role SET, or this asserts nothing'
-    ).to.equal([...expected_points_added.pid_columns].sort().join(','))
+    ).to.equal([...expected_points_added.role_columns].sort().join(','))
     expect(
-      opportunities.pid_columns.join(','),
+      opportunities.role_columns.join(','),
       'the pair must still differ in ORDER, or this asserts nothing'
-    ).to.not.equal(expected_points_added.pid_columns.join(','))
+    ).to.not.equal(expected_points_added.role_columns.join(','))
 
     expect(opportunities.table_alias({ params: {} })).to.not.equal(
       expected_points_added.table_alias({ params: {} })

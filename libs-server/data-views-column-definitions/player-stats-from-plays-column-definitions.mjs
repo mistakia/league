@@ -38,13 +38,17 @@ const plays_source = {
   attach: apply_plays_join
 }
 
-const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
+const generate_table_alias = ({ type, params = {}, role_columns } = {}) => {
   if (!type) {
     throw new Error('type is required')
   }
 
-  if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
-    throw new Error('pid_columns must be a non-empty array')
+  if (
+    !role_columns ||
+    !Array.isArray(role_columns) ||
+    role_columns.length === 0
+  ) {
+    throw new Error('role_columns must be a non-empty array')
   }
 
   const key = get_stats_column_param_key({ params })
@@ -59,12 +63,12 @@ const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   // `player_total_expected_points_added_from_plays` (passer-first) were that
   // pair. Sorting the DECLARATIONS instead would have been the wrong repair: it
   // silently re-credits every pass opportunity to the quarterback.
-  const pid_columns_string = pid_columns.join('_')
+  const pid_columns_string = role_columns.join('_')
   return get_table_hash(`${type}_${pid_columns_string}_${key}`)
 }
 
 const player_stat_from_plays = ({
-  pid_columns,
+  role_columns,
   stat_name,
   measure = null,
   measure_expr = null,
@@ -162,7 +166,7 @@ const player_stat_from_plays = ({
     // from-plays CTE name in the registry -- invalidating every cached
     // from-plays result to express something no reader was confused about.
     table_alias: ({ params }) =>
-      generate_table_alias({ type: alias_type, params, pid_columns }),
+      generate_table_alias({ type: alias_type, params, role_columns }),
     column_name: stat_name,
     with_select: ({ params = {} }) => {
       // In a multi-year range the CTE carries the ACCUMULATORS, so the outer
@@ -206,7 +210,7 @@ const player_stat_from_plays = ({
       }
       return []
     },
-    pid_columns,
+    role_columns,
     with: (args) =>
       add_player_stats_play_by_play_with_statement({ ...args, fact_source }),
     source: plays_source,
@@ -238,7 +242,7 @@ const player_stat_from_plays = ({
 
 export default {
   player_pass_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `pass_yards` } },
       combine_accumulators: 'identity'
@@ -246,7 +250,7 @@ export default {
     stat_name: 'pass_yds_from_plays'
   }),
   player_pass_attempts_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -261,12 +265,12 @@ export default {
   // TODO prevent from applying rate_type to this
   // TODO set the `qb_pid` for each play
   // player_pass_rate_over_expected_from_plays: player_stat_from_plays({
-  //   pid_columns: ['qb_pid'],
+  //   role_columns: ['qb_pid'],
   //   with_select_string: `AVG(pass_over_expected)`,
   //   stat_name: 'pass_rate_over_expected_from_plays'
   // }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -279,7 +283,7 @@ export default {
     stat_name: 'pass_tds_from_plays'
   }),
   player_pass_interceptions_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -292,7 +296,7 @@ export default {
     stat_name: 'pass_ints_from_plays'
   }),
   player_pass_completions_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -305,7 +309,7 @@ export default {
     stat_name: 'pass_comps_from_plays'
   }),
   player_pass_first_downs_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -318,7 +322,7 @@ export default {
     stat_name: 'pass_first_downs_from_plays'
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -331,7 +335,7 @@ export default {
     stat_name: 'drop_pass_yds_from_plays'
   }),
   player_pass_completion_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_comp_pct_from_plays',
     measure: {
       accumulators: {
@@ -355,7 +359,7 @@ export default {
   }),
   player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
     {
-      pid_columns: ['passer_pid'],
+      role_columns: ['passer_pid'],
       stat_name: 'pass_comp_pct_over_expected_from_plays',
       // CPOE is a per-dropback mean; a range year_offset must pool the summed
       // completion_percentage_over_expected over the summed qualifying-dropback count, not SUM the per-season
@@ -378,7 +382,7 @@ export default {
     }
   ),
   player_expected_completion_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     // Expected completion % = mean completion probability x 100. Expressed as
     // SUM(completion_probability)/COUNT(completion_probability) x 100 (mathematically identical to AVG(completion_probability) * 100) so it
     // can pool across a multi-year year_offset range via numerator/denominator
@@ -403,7 +407,7 @@ export default {
     }
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_td_pct_from_plays',
     measure: {
       accumulators: {
@@ -426,7 +430,7 @@ export default {
     }
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_int_pct_from_plays',
     measure: {
       accumulators: {
@@ -450,7 +454,7 @@ export default {
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
     {
-      pid_columns: ['passer_pid'],
+      role_columns: ['passer_pid'],
       stat_name: 'pass_int_worthy_pct_from_plays',
       measure: {
         accumulators: {
@@ -474,7 +478,7 @@ export default {
     }
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_after_catch` } },
       combine_accumulators: 'identity'
@@ -483,7 +487,7 @@ export default {
   }),
   player_pass_yards_after_catch_per_completion_from_plays:
     player_stat_from_plays({
-      pid_columns: ['passer_pid'],
+      role_columns: ['passer_pid'],
       stat_name: 'pass_yds_after_catch_per_comp_from_plays',
       measure: {
         accumulators: {
@@ -499,7 +503,7 @@ export default {
       }
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_yds_per_att_from_plays',
     measure: {
       accumulators: {
@@ -515,7 +519,7 @@ export default {
     }
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_depth_per_att_from_plays',
     measure: {
       accumulators: {
@@ -531,7 +535,7 @@ export default {
     }
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
       combine_accumulators: 'identity'
@@ -539,7 +543,7 @@ export default {
     stat_name: 'pass_air_yds_from_plays'
   }),
   player_completed_air_yards_per_completion_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'comp_air_yds_per_comp_from_plays',
     measure: {
       accumulators: {
@@ -556,7 +560,7 @@ export default {
   }),
   // completed air yards / total air yards (a unitless ratio, not a percentage)
   player_passing_air_conversion_ratio_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_air_conv_ratio_from_plays',
     measure: {
       accumulators: {
@@ -572,7 +576,7 @@ export default {
     }
   }),
   player_sacked_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -585,7 +589,7 @@ export default {
     stat_name: 'sacked_from_plays'
   }),
   player_sacked_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -598,7 +602,7 @@ export default {
     stat_name: 'sacked_yds_from_plays'
   }),
   player_sacked_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'sacked_pct_from_plays',
     measure: {
       accumulators: {
@@ -621,7 +625,7 @@ export default {
     }
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'qb_hit_pct_from_plays',
     measure: {
       accumulators: {
@@ -644,7 +648,7 @@ export default {
     }
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'qb_press_pct_from_plays',
     measure: {
       accumulators: {
@@ -667,7 +671,7 @@ export default {
     }
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'qb_hurry_pct_from_plays',
     measure: {
       accumulators: {
@@ -692,7 +696,7 @@ export default {
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
   // sacks included in calculation because passer_pid is set on all attempts or sacks
   player_pass_net_yards_per_attempt_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'pass_net_yds_per_att_from_plays',
     // Three accumulators rather than two: the numerator is a difference, and
     // each term of it accumulates on its own so the offset window sums the
@@ -719,7 +723,7 @@ export default {
   }),
 
   player_rush_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `rush_yards` } },
       combine_accumulators: 'identity'
@@ -727,7 +731,7 @@ export default {
     stat_name: 'rush_yds_from_plays'
   }),
   player_rush_touchdowns_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         value: {
@@ -740,7 +744,7 @@ export default {
     stat_name: 'rush_tds_from_plays'
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'rush_yds_per_att_from_plays',
     measure: {
       accumulators: {
@@ -756,7 +760,7 @@ export default {
     }
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         value: {
@@ -770,7 +774,7 @@ export default {
   }),
   player_average_box_defenders_per_rush_attempt_from_plays:
     player_stat_from_plays({
-      pid_columns: ['ball_carrier_pid'],
+      role_columns: ['ball_carrier_pid'],
       stat_name: 'average_box_defenders_per_rush_att_from_plays',
       // The numerator/denominator pair must decompose the SEASON RENDER's AVG,
       // not the column's NAME. AVG(box_defenders) is SUM(box_defenders) over
@@ -801,7 +805,7 @@ export default {
       }
     }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         value: {
@@ -814,7 +818,7 @@ export default {
     stat_name: 'rush_first_downs_from_plays'
   }),
   player_positive_rush_attempts_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         value: {
@@ -827,7 +831,7 @@ export default {
     stat_name: 'positive_rush_atts_from_plays'
   }),
   player_rush_yards_after_contact_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         value: { aggregate: 'sum', expr: `yards_after_any_contact` }
@@ -838,7 +842,7 @@ export default {
   }),
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
-      pid_columns: ['ball_carrier_pid'],
+      role_columns: ['ball_carrier_pid'],
       stat_name: 'rush_yds_after_contact_per_att_from_plays',
       measure: {
         accumulators: {
@@ -854,7 +858,7 @@ export default {
       }
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'rush_first_down_pct_from_plays',
     measure: {
       accumulators: {
@@ -877,7 +881,7 @@ export default {
     }
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -891,7 +895,7 @@ export default {
     stat_name: 'weighted_opportunity_from_plays'
   }),
   player_high_value_touches_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -904,7 +908,7 @@ export default {
     stat_name: 'high_value_touches_from_plays'
   }),
   player_touches_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -918,7 +922,7 @@ export default {
   }),
 
   player_opportunities_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid', 'passer_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid', 'passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -934,7 +938,7 @@ export default {
   player_rush_attempts_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'rush_att_share_from_plays',
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         numerator: {
@@ -958,7 +962,7 @@ export default {
   player_rush_yards_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'rush_yds_share_from_plays',
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         numerator: {
@@ -979,7 +983,7 @@ export default {
   player_rush_first_down_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'rush_first_down_share_from_plays',
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
         numerator: {
@@ -1004,7 +1008,7 @@ export default {
   player_opportunity_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'opportunity_share_from_plays',
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     // The subject's opportunities are carries plus targets, so each counts as
     // its own accumulator and the combine adds them after the window sums each.
     measure: {
@@ -1033,7 +1037,7 @@ export default {
   }),
 
   player_fumbles_from_plays: player_stat_from_plays({
-    pid_columns: ['fumble_lost_pid'],
+    role_columns: ['fumble_lost_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1047,7 +1051,7 @@ export default {
   }),
 
   player_fumbles_lost_from_plays: player_stat_from_plays({
-    pid_columns: ['fumble_lost_pid'],
+    role_columns: ['fumble_lost_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1061,7 +1065,7 @@ export default {
   }),
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'fumble_pct_from_plays',
     measure: {
       accumulators: {
@@ -1084,7 +1088,7 @@ export default {
     }
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'positive_rush_pct_from_plays',
     measure: {
       accumulators: {
@@ -1107,7 +1111,7 @@ export default {
     }
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'succ_rush_pct_from_plays',
     measure: {
       accumulators: {
@@ -1130,7 +1134,7 @@ export default {
     }
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: {
         value: { aggregate: 'sum', expr: `missed_or_broken_tackle` }
@@ -1140,7 +1144,7 @@ export default {
     stat_name: 'broken_tackles_from_plays'
   }),
   player_broken_tackles_per_rush_attempt_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     stat_name: 'broken_tackles_per_rush_att_from_plays',
     measure: {
       accumulators: {
@@ -1156,7 +1160,7 @@ export default {
     }
   }),
   player_receptions_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1169,7 +1173,7 @@ export default {
     stat_name: 'recs_from_plays'
   }),
   player_receiving_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1184,7 +1188,7 @@ export default {
       `CASE WHEN ${table_name}.is_completion = true THEN ${table_name}.receiving_yards ELSE 0 END`
   }),
   player_receiving_touchdowns_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1197,7 +1201,7 @@ export default {
     stat_name: 'rec_tds_from_plays'
   }),
   player_receiving_or_rushing_touchdowns_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid', 'ball_carrier_pid'],
+    role_columns: ['target_pid', 'ball_carrier_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1210,7 +1214,7 @@ export default {
     stat_name: 'rec_or_rush_tds_from_plays'
   }),
   player_drops_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1223,7 +1227,7 @@ export default {
     stat_name: 'drops_from_plays'
   }),
   player_dropped_receiving_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1236,7 +1240,7 @@ export default {
     stat_name: 'drop_rec_yds_from_plays'
   }),
   player_targets_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1249,7 +1253,7 @@ export default {
     stat_name: 'trg_from_plays'
   }),
   player_deep_targets_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1262,7 +1266,7 @@ export default {
     stat_name: 'deep_trg_from_plays'
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     stat_name: 'deep_trg_pct_from_plays',
     measure: {
       accumulators: {
@@ -1285,7 +1289,7 @@ export default {
     }
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     stat_name: 'air_yds_per_trg_from_plays',
     measure: {
       accumulators: {
@@ -1301,7 +1305,7 @@ export default {
     }
   }),
   player_air_yards_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
       combine_accumulators: 'identity'
@@ -1309,7 +1313,7 @@ export default {
     stat_name: 'air_yds_from_plays'
   }),
   player_receiving_first_down_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1322,7 +1326,7 @@ export default {
     stat_name: 'recv_first_down_from_plays'
   }),
   player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     stat_name: 'recv_first_down_pct_from_plays',
     measure: {
       accumulators: {
@@ -1348,7 +1352,7 @@ export default {
   player_air_yards_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'air_yds_share_from_plays',
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     // A share is a ratio, not additive: a range year_offset must recombine the
     // summed player air yards over the summed team air yards, not SUM the
     // per-season share percentages. Mirrors player_target_share_from_plays.
@@ -1372,7 +1376,7 @@ export default {
   player_target_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'trg_share_from_plays',
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         numerator: {
@@ -1396,7 +1400,7 @@ export default {
   player_weighted_opportunity_rating_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'weighted_opp_rating_from_plays',
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     // WOPR is the column that broke the two-slot numerator/denominator
     // contract: it is a WEIGHTED SUM OF TWO RATIOS, which one numerator and one
     // denominator cannot express, so it escaped into three independently
@@ -1454,7 +1458,7 @@ export default {
   player_receiving_first_down_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
     stat_name: 'recv_first_down_share_from_plays',
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         numerator: {
@@ -1476,7 +1480,7 @@ export default {
     }
   }),
   player_receiving_yards_after_catch_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1491,7 +1495,7 @@ export default {
 
   // receiving yards / air yards (a unitless ratio, not a percentage)
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     stat_name: 'rec_air_conv_ratio_from_plays',
     measure: {
       accumulators: {
@@ -1507,7 +1511,7 @@ export default {
     }
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     stat_name: 'rec_yds_per_rec_from_plays',
     measure: {
       accumulators: {
@@ -1526,7 +1530,7 @@ export default {
     }
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
-    pid_columns: ['target_pid'],
+    role_columns: ['target_pid'],
     // Divides by TARGETS. Until 2026-08-19 every expression here was
     // byte-identical to player_receiving_yards_per_reception_from_plays above,
     // so the two columns emitted the same number on both the season render and
@@ -1550,7 +1554,7 @@ export default {
   }),
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
-      pid_columns: ['target_pid'],
+      role_columns: ['target_pid'],
       stat_name: 'rec_yds_after_catch_per_rec_from_plays',
       measure: {
         accumulators: {
@@ -1570,7 +1574,7 @@ export default {
     }),
 
   player_yards_created_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid', 'target_pid'],
+    role_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_created` } },
       combine_accumulators: 'identity'
@@ -1579,7 +1583,7 @@ export default {
   }),
 
   player_yards_blocked_from_plays: player_stat_from_plays({
-    pid_columns: ['ball_carrier_pid'],
+    role_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_blocked` } },
       combine_accumulators: 'identity'
@@ -1587,7 +1591,7 @@ export default {
     stat_name: 'yards_blocked_from_plays'
   }),
   player_successful_passing_play_percentage_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'successful_passing_play_pct_from_plays',
     // Pool numerator/denominator across a multi-year year_offset range instead
     // of summing per-season percentages (the latent SUM-of-percentages bug).
@@ -1614,7 +1618,7 @@ export default {
 
   player_successful_rushing_and_receiving_play_percentage_from_plays:
     player_stat_from_plays({
-      pid_columns: ['ball_carrier_pid', 'target_pid'],
+      role_columns: ['ball_carrier_pid', 'target_pid'],
       stat_name: 'successful_rushing_and_receiving_play_pct_from_plays',
       // Pool numerator/denominator across a multi-year year_offset range instead
       // of summing per-season percentages (the latent SUM-of-percentages bug).
@@ -1640,7 +1644,7 @@ export default {
     }),
 
   player_total_expected_points_added_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid', 'ball_carrier_pid', 'target_pid'],
+    role_columns: ['passer_pid', 'ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `epa` } },
       combine_accumulators: 'identity'
@@ -1649,7 +1653,7 @@ export default {
   }),
 
   player_passing_expected_points_added_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `epa` } },
       combine_accumulators: 'identity'
@@ -1659,7 +1663,7 @@ export default {
 
   player_rushing_and_receiving_expected_points_added_from_plays:
     player_stat_from_plays({
-      pid_columns: ['ball_carrier_pid', 'target_pid'],
+      role_columns: ['ball_carrier_pid', 'target_pid'],
       measure: {
         accumulators: { value: { aggregate: 'sum', expr: `epa` } },
         combine_accumulators: 'identity'
@@ -1668,7 +1672,7 @@ export default {
     }),
 
   player_quarterback_epa_from_plays: player_stat_from_plays({
-    pid_columns: ['qb_pid'],
+    role_columns: ['qb_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `quarterback_epa` } },
       combine_accumulators: 'identity'
@@ -1677,7 +1681,7 @@ export default {
   }),
 
   player_quarterback_pressures_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     measure: {
       accumulators: {
         value: {
@@ -1691,7 +1695,7 @@ export default {
   }),
 
   player_time_to_throw_from_plays: player_stat_from_plays({
-    pid_columns: ['passer_pid'],
+    role_columns: ['passer_pid'],
     stat_name: 'time_to_throw_from_plays',
     // Time-to-throw is a per-dropback mean; a range year_offset must pool the
     // summed time over the summed qualifying-dropback count, not SUM the

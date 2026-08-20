@@ -1076,7 +1076,7 @@ const add_clauses_for_table = async ({
       })
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
-  let pid_columns = null
+  let role_columns = null
   let join_func = null
   let with_func = null
 
@@ -1158,7 +1158,7 @@ const add_clauses_for_table = async ({
 
     if (column_definition.with) {
       with_func = column_definition.with
-      pid_columns = column_definition.pid_columns
+      role_columns = column_definition.role_columns
 
       const with_select_result = get_with_select_string({
         column_id,
@@ -1222,7 +1222,7 @@ const add_clauses_for_table = async ({
 
     if (!where_handled_by_aggregator && column_definition.with) {
       with_func = column_definition.with
-      pid_columns = column_definition.pid_columns
+      role_columns = column_definition.role_columns
       legacy_column_ids.add(where_clause.column_id)
 
       const with_filter_string = get_with_where_string({
@@ -1336,7 +1336,7 @@ const add_clauses_for_table = async ({
       where_clauses: with_where_clause_strings,
       select_strings: with_select_strings,
       row_axes,
-      pid_columns,
+      role_columns,
       select_column_names,
       combined_columns,
       data_view_options

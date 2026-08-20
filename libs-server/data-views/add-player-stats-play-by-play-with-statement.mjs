@@ -33,7 +33,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  pid_columns,
+  role_columns,
   row_axes = [],
   data_view_options = {},
   fact_source = FACT_SOURCES.plays
@@ -47,12 +47,12 @@ export const add_player_stats_play_by_play_with_statement = ({
   const is_cohort = fact_source.subject_attribution === 'cohort_member'
   const cohort_expansion = fact_source.cohort_expansion
 
-  const ordered_pid_columns_string = pid_columns.includes('fumble_lost_pid')
+  const ordered_pid_columns_string = role_columns.includes('fumble_lost_pid')
     ? [
         'fumble_lost_pid',
-        ...pid_columns.filter((col) => col !== 'fumble_lost_pid')
+        ...role_columns.filter((col) => col !== 'fumble_lost_pid')
       ].join(', ')
-    : pid_columns.join(', ')
+    : role_columns.join(', ')
 
   const subject_id = is_cohort
     ? subject_id_expression({ fact_source }).expression
@@ -69,7 +69,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   if (is_cohort) {
     cohort_expansion.join(with_query)
     with_query.where(function () {
-      for (const pid_column of pid_columns) {
+      for (const pid_column of role_columns) {
         this.orWhereNotNull(pid_column)
       }
     })
@@ -108,7 +108,7 @@ export const add_player_stats_play_by_play_with_statement = ({
         if (is_cohort) {
           this.on(subject_id, '=', 'player_seasonlogs.pid')
         } else {
-          for (const pid_column of pid_columns) {
+          for (const pid_column of role_columns) {
             this.orOn(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
           }
         }
@@ -134,7 +134,7 @@ export const add_player_stats_play_by_play_with_statement = ({
     } else {
       with_query.join('player_gamelogs', function () {
         this.on(function () {
-          for (const pid_column of pid_columns) {
+          for (const pid_column of role_columns) {
             this.orOn(`nfl_plays.${pid_column}`, '=', 'player_gamelogs.pid')
           }
         }).andOn('nfl_plays.esbid', '=', 'player_gamelogs.esbid')

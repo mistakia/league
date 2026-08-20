@@ -69,7 +69,7 @@ export const build_period_cte = ({
   measure_predicate,
   role_attributions,
   game_conditional_expr,
-  pid_columns,
+  role_columns,
   apply_filters,
   period,
   query_context,
@@ -93,7 +93,7 @@ export const build_period_cte = ({
   return build_batched_period_cte({
     measure_source,
     measure_predicate,
-    pid_columns,
+    role_columns,
     apply_filters,
     measures: [
       accumulator_selects
@@ -303,7 +303,7 @@ const build_role_union_period_cte = ({
 export const build_batched_period_cte = ({
   measure_source,
   measure_predicate,
-  pid_columns,
+  role_columns,
   apply_filters,
   measures,
   period,
@@ -356,13 +356,15 @@ export const build_batched_period_cte = ({
   // The subject-id expression and whether reaching it needs the `player` join
   // are both properties of the fact source, so the registry answers them. A
   // `single_role` source names no subject of its own and takes the column's
-  // declared role columns, coalesced in their declared order -- which is the
-  // sorted order, since a declaration is required to be sorted and the alias
-  // hash sorts it too.
+  // declared role columns, coalesced in their DECLARED order. Declarations are
+  // deliberately NOT sorted: the COALESCE order decides which player a fact is
+  // credited to, and over 2023+ `passer_pid` and `target_pid` are both non-null
+  // and different on 60,547 plays. The table alias and the batch key hash the
+  // same declared order so the two conventions cannot disagree.
   const { expression: pid_expr, requires_player_join: extra_player_join } =
     subject_id_expression({
       fact_source: source,
-      role_columns: pid_columns
+      role_columns
     })
 
   const sub = db(source_table)
@@ -542,7 +544,7 @@ export const add_period_cte = async ({
       measure_predicate: column_def.measure_predicate
         ? column_def.measure_predicate({ params, identity_id })
         : null,
-      pid_columns: column_def.pid_columns,
+      role_columns: column_def.role_columns,
       apply_filters: column_def.apply_filters
         ? ({ query }) =>
             column_def.apply_filters({ query, params, identity_id })
@@ -586,7 +588,7 @@ export const add_period_cte = async ({
       ? column_def.measure_predicate({ params, identity_id })
       : null,
     role_attributions,
-    pid_columns: column_def.pid_columns,
+    role_columns: column_def.role_columns,
     apply_filters: column_def.apply_filters
       ? ({ query }) => column_def.apply_filters({ query, params, identity_id })
       : null,
