@@ -104,20 +104,10 @@ const apply_team_stats_join = ({
 }
 
 const team_stat_from_plays = ({
-  select_string,
   stat_name,
   force_player_active = false,
   measure = null,
-  measure_expr = null,
-  supports_periods = [
-    'team_half',
-    'team_quarter',
-    'team_play',
-    'team_pass_play',
-    'team_rush_play',
-    'team_drive',
-    'team_series'
-  ]
+  measure_expr = null
 }) => {
   // Player-identity variant always limits to the player's active games.
   // For team variant, the legacy `params.limit_to_player_active_games`
@@ -134,19 +124,24 @@ const team_stat_from_plays = ({
   // four `is_rate` columns and the two AVG carve-outs are two-accumulator
   // measures like every other ratio in the registry.
   const derived = measure
-    ? derive_measure({ stat_name, measure, supports_periods })
+    ? derive_measure({ stat_name, measure, subject_grain: 'team' })
     : null
 
-  // Fail-fast invariant (scoped to this factory): a column advertising any
-  // denominator period MUST declare a measure; a column left on a raw
-  // select_string MUST pass supports_periods: []. Throws at module load.
-  if (!derived && supports_periods && supports_periods.length > 0) {
+  // Fail-fast invariant (scoped to this factory): EVERY column declares a
+  // measure. It used to be the weaker "a column advertising periods must
+  // declare one", because a column could opt out with `supports_periods: []`
+  // and stay on a raw select_string. There is no opt-out left -- the
+  // denominator vocabulary is derived from the subject grain, and every column
+  // in this factory carries accumulators -- so the invariant is the strong
+  // form, which is what makes the silent-rate-drop class structurally
+  // impossible rather than merely declared against.
+  if (!derived) {
     throw new Error(
-      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine_accumulators } or set supports_periods: []`
+      `team_stat_from_plays: '${stat_name}' declares no measure -- declare measure: { accumulators, combine_accumulators }`
     )
   }
 
-  const season_select = derived ? derived.with_select : select_string
+  const season_select = derived.with_select
   // The `force_player_active` variant advertises NOTHING, and that is a repair
   // rather than a restriction. Its value is a TEAM statistic pooled over the
   // games one PLAYER was active for, which only the `_player_team_stats` CTE
@@ -297,7 +292,6 @@ const team_stat_from_plays = ({
       return `${table_name}${table_suffix}.week`
     },
     use_having: true,
-    supports_periods,
     ...(final_supports_output
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),

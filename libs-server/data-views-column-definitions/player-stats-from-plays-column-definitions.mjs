@@ -65,31 +65,9 @@ const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
 
 const player_stat_from_plays = ({
   pid_columns,
-  with_select_string,
   stat_name,
   measure = null,
   measure_expr = null,
-  supports_periods = [
-    'team_half',
-    'team_quarter',
-    'team_play',
-    'team_pass_play',
-    'team_rush_play',
-    'team_drive',
-    'team_series',
-
-    'player_rush_attempt',
-    'player_pass_attempt',
-    'player_target',
-    'player_catchable_target',
-    'player_catchable_deep_target',
-    'player_reception',
-
-    'player_play',
-    'player_route',
-    'player_pass_play',
-    'player_rush_play'
-  ],
   // Which fact source the scan reads, by registry name. `plays` names the
   // subject on the play; `plays_cohort` expands each team play across the
   // players who appeared in that game, which is what a share measures against.
@@ -112,27 +90,30 @@ const player_stat_from_plays = ({
   // season render, the offset-window recombination, the numerator measure_expr,
   // the period aggregate, supports_output and the rounding from it. A ratio is
   // a two-accumulator measure whose combine divides; it is not a second
-  // vocabulary. The remaining with_select_string columns are the ones no
-  // accumulator set expresses.
+  // vocabulary. There are no raw-string carve-outs left: every column in this
+  // factory declares accumulators, which is what the invariant below enforces.
   const derived = measure
-    ? derive_measure({ stat_name, measure, supports_periods })
+    ? derive_measure({ stat_name, measure, subject_grain: 'player' })
     : null
   const is_combined = Boolean(derived?.is_combined)
 
-  // Fail-fast invariant (scoped to this factory): a column advertising any
-  // denominator period MUST declare a measure; a column left on a raw
-  // with_select_string MUST pass supports_periods: []. Throws at module load,
-  // making the silent-rate-drop class (e.g. time_to_throw) structurally
-  // impossible.
-  if (!derived && supports_periods && supports_periods.length > 0) {
+  // Fail-fast invariant (scoped to this factory): EVERY column declares a
+  // measure. It used to be the weaker "a column advertising periods must
+  // declare one", because a column could opt out with `supports_periods: []`
+  // and stay on a raw with_select_string. There is no opt-out left -- the
+  // denominator vocabulary is derived from the subject grain, and every column
+  // in this factory carries accumulators -- so the invariant is the strong
+  // form, which is what makes the silent-rate-drop class structurally
+  // impossible rather than merely declared against.
+  if (!derived) {
     throw new Error(
-      `player_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine_accumulators } or set supports_periods: []`
+      `player_stat_from_plays: '${stat_name}' declares no measure -- declare measure: { accumulators, combine_accumulators }`
     )
   }
 
   // The season render is the deriver's with_select for measure columns, else
   // the raw string (the remaining carve-outs).
-  const season_select = derived ? derived.with_select : with_select_string
+  const season_select = derived.with_select
 
   // No is_percentage flag and no invariant policing it. A percentage column
   // writes its own scale inside the one combine that produces its value, so
@@ -230,7 +211,6 @@ const player_stat_from_plays = ({
       add_player_stats_play_by_play_with_statement({ ...args, fact_source }),
     source: plays_source,
     use_having: true,
-    supports_periods,
     // `measure_source` names the FACT SOURCE the aggregator scan reads, so it
     // is the column's own source rather than the literal 'plays'. A share
     // reaching the aggregator on 'plays' would scan without the cohort
@@ -371,8 +351,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
     {
@@ -395,8 +374,7 @@ export default {
         combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: null
-      },
-      supports_periods: []
+      }
     }
   ),
   player_expected_completion_percentage_from_plays: player_stat_from_plays({
@@ -422,8 +400,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -446,8 +423,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -470,8 +446,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
     {
@@ -495,8 +470,7 @@ export default {
             scale: '100.0'
           }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
@@ -522,8 +496,7 @@ export default {
         combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -539,8 +512,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -556,8 +528,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -581,8 +552,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   // completed air yards / total air yards (a unitless ratio, not a percentage)
   player_passing_air_conversion_ratio_from_plays: player_stat_from_plays({
@@ -599,8 +569,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 4
-    },
-    supports_periods: []
+    }
   }),
   player_sacked_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -649,8 +618,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -673,8 +641,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -697,8 +664,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -721,8 +687,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
   // sacks included in calculation because passer_pid is set on all attempts or sacks
@@ -750,8 +715,7 @@ export default {
           denominator: a.dropbacks
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
 
   player_rush_yards_from_plays: player_stat_from_plays({
@@ -789,8 +753,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -835,8 +798,7 @@ export default {
         combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -889,8 +851,7 @@ export default {
         combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -913,8 +874,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid', 'target_pid'],
@@ -973,7 +933,6 @@ export default {
 
   player_rush_attempts_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'rush_att_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
@@ -998,7 +957,6 @@ export default {
   }),
   player_rush_yards_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'rush_yds_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
@@ -1020,7 +978,6 @@ export default {
   }),
   player_rush_first_down_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'rush_first_down_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
@@ -1046,7 +1003,6 @@ export default {
 
   player_opportunity_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'opportunity_share_from_plays',
     pid_columns: ['ball_carrier_pid', 'target_pid'],
     // The subject's opportunities are carries plus targets, so each counts as
@@ -1125,8 +1081,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -1149,8 +1104,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -1173,8 +1127,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid', 'target_pid'],
@@ -1200,8 +1153,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_receptions_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1330,8 +1282,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1347,8 +1298,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1392,13 +1342,11 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
 
   player_air_yards_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'air_yds_share_from_plays',
     pid_columns: ['target_pid'],
     // A share is a ratio, not additive: a range year_offset must recombine the
@@ -1423,7 +1371,6 @@ export default {
   }),
   player_target_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'trg_share_from_plays',
     pid_columns: ['target_pid'],
     measure: {
@@ -1448,7 +1395,6 @@ export default {
   }),
   player_weighted_opportunity_rating_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'weighted_opp_rating_from_plays',
     pid_columns: ['target_pid'],
     // WOPR is the column that broke the two-slot numerator/denominator
@@ -1507,7 +1453,6 @@ export default {
   }),
   player_receiving_first_down_share_from_plays: player_stat_from_plays({
     fact_source_name: 'plays_cohort',
-    supports_periods: [],
     stat_name: 'recv_first_down_share_from_plays',
     pid_columns: ['target_pid'],
     measure: {
@@ -1559,8 +1504,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 4
-    },
-    supports_periods: []
+    }
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1579,8 +1523,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1603,8 +1546,7 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
@@ -1624,8 +1566,7 @@ export default {
         combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }),
 
   player_yards_created_from_plays: player_stat_from_plays({
@@ -1668,8 +1609,7 @@ export default {
           scale: '100.0'
         }),
       decimals: 2
-    },
-    supports_periods: []
+    }
   }),
 
   player_successful_rushing_and_receiving_play_percentage_from_plays:
@@ -1696,8 +1636,7 @@ export default {
             scale: '100.0'
           }),
         decimals: 2
-      },
-      supports_periods: []
+      }
     }),
 
   player_total_expected_points_added_from_plays: player_stat_from_plays({
@@ -1771,7 +1710,6 @@ export default {
       combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: null
-    },
-    supports_periods: []
+    }
   })
 }

@@ -16,10 +16,11 @@ const per_game = { period: 'game', aggregation: 'rate', threshold: null }
 // and the exemption with it: a share is an ordinary column over the
 // `plays_cohort` fact source, aggregable exactly as any other measure.
 //
-// `supports_periods` is NOT the period list any more -- it is the column's
-// extra DENOMINATOR UNITS, which a ratio column may legitimately leave empty
-// while still offering `game`. The advertised periods live on
-// `supports_output.periods`, so that is what the assertions read.
+// `supports_periods` is gone entirely. The denominator-unit vocabulary is
+// DERIVED from the subject grain -- a team subject has team plays, drives and
+// series, a player subject has those plus their own participation and actions --
+// so there is nothing left for a column to declare and no opt-out to assert on.
+// The advertised periods live on `supports_output.periods`.
 
 const build_per_game_sql = async (column_id, is_team) => {
   const request = {
@@ -64,6 +65,16 @@ describe('data-views rate-capability sweep', () => {
         expect(def.supports_output.periods.length, column_id).to.be.greaterThan(
           0
         )
+        // Derived from the subject grain: a team-subject column must never
+        // advertise a player-action unit it cannot execute.
+        if (
+          column_id.startsWith('team_') &&
+          !column_id.startsWith('player_team_')
+        ) {
+          expect(def.supports_output.periods, column_id).to.not.include(
+            'player_route'
+          )
+        }
         const is_team =
           column_id.startsWith('team_') && !column_id.startsWith('player_team_')
         const sql = await build_per_game_sql(column_id, is_team)
@@ -74,18 +85,17 @@ describe('data-views rate-capability sweep', () => {
     }
   })
 
-  // Two ways to be a carve-out, and they are different claims. A column with no
-  // MEASURE has nothing to aggregate and declares no denominator periods. A
-  // `player_team_` column has a perfectly good measure and is withheld because
-  // the aggregator cannot serve its subject grain, so it keeps its periods --
-  // asserting `[]` on it would be asserting the wrong reason.
+  // Every carve-out left is a `player_team_` column, withheld because the
+  // aggregator cannot serve its subject grain rather than because it lacks a
+  // measure. There are no measure-less from-plays columns at all now, which the
+  // factories enforce at module load.
   describe('carve-out columns advertise no rate types', () => {
     for (const [column_id, def] of carve_outs) {
       it(`${column_id}`, () => {
         expect(def.supports_output, column_id).to.be.not.ok
-        if (!column_id.startsWith('player_team_')) {
-          expect(def.supports_periods, column_id).to.deep.equal([])
-        }
+        expect(column_id, 'carve-outs are the withheld variant').to.match(
+          /^player_team_/
+        )
       })
     }
   })
@@ -132,8 +142,10 @@ describe('data-views rate-capability sweep', () => {
   // dropbacks, so it aggregates like any other ratio.
   it('time_to_throw is an ordinary two-accumulator measure', () => {
     const def = player_stats.player_time_to_throw_from_plays
-    expect(def.supports_periods).to.deep.equal([])
     expect(Boolean(def.combined_measure)).to.equal(true)
     expect(def.supports_output.aggregations).to.include('mean')
+    // A player subject carries the player-action denominator units, which its
+    // hand-set `supports_periods: []` used to withhold.
+    expect(def.supports_output.periods).to.include('player_route')
   })
 })
