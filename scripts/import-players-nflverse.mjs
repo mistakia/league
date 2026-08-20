@@ -41,7 +41,8 @@ import {
   is_main,
   report_job,
   fetch_with_retry,
-  batch_insert
+  batch_insert,
+  ensure_player_alias
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
@@ -67,6 +68,41 @@ const PLAYER_CACHE_OPTIONS = {
   all_players: true,
   include_otc_id_index: true,
   include_name_draft_index: true
+}
+
+/*
+  BOTH spellings of a divergent first name, seeded as aliases so the
+  nickname/legal-name duplicate class stops re-forming at mint time.
+
+  This feed carries a player's legal first name (`first_name`) and his football
+  name (`football_name`) on the SAME row -- 1,450 players differ -- and it runs
+  daily at 3:05, twenty-five minutes before import-players-sleeper mints at
+  3:30. Sleeper's payload carries one spelling only, so when its spelling is not
+  the one our row holds, its resolver answers `new` and a SECOND row for the
+  same person is minted: 77 such pairs had to be merged by hand on 2026-08-17,
+  and the 2026 rookies (Lebbeus/L.T. Overton, Khalil/Red Murdock,
+  Patrick/Pat Coogan, James/Jimmy Rolder) are the live shape.
+
+  Seeding is the prevention the merge round could not be. An alias is an
+  exact-match alternate recorded against a pid this importer already resolved by
+  otc or gsis id, so it never loosens matching and carries no reused-name hijack
+  risk (see ensure-player-alias.mjs). Both directions are recorded because
+  either spelling can be minted first.
+
+  It deliberately does NOT attach on the (last_name, college, draft_year) anchor
+  the standing nickname-legal-name check uses. That anchor also joins genuine
+  two-person pairs -- Colton and Dylan Taylor, three brother pairs -- and
+  merging two people on the write side is unrecoverable, which is exactly why
+  that check was left a detector rather than a mint-time guard.
+*/
+export const divergent_name_variants = ({
+  first_name,
+  last_name,
+  football_name
+}) => {
+  if (!first_name || !last_name || !football_name) return []
+  if (football_name.toLowerCase() === first_name.toLowerCase()) return []
+  return [`${first_name} ${last_name}`, `${football_name} ${last_name}`]
 }
 
 const find_player_from_nflverse_row = ({ row }) => {
@@ -139,6 +175,7 @@ const process_players_data = ({ data, dry_run, dryrun_path }) => {
   }
   const unmapped_codes_seen = new Set()
   const updates = []
+  const alias_candidates = []
   const dryrun_stream = dry_run
     ? fs.createWriteStream(dryrun_path, { flags: 'w' })
     : null
@@ -158,6 +195,18 @@ const process_players_data = ({ data, dry_run, dryrun_path }) => {
     if (row.last_season < stale_floor) {
       stats.skipped_stale_last_season += 1
       continue
+    }
+
+    // Collected BEFORE the status mapping below, which drops a row whose
+    // nflverse status has no mapping here. A name is not a status, and a rookie
+    // carrying an unmapped one is exactly the row the duplicate class forms on.
+    const name_variants = divergent_name_variants(row)
+    if (name_variants.length) {
+      alias_candidates.push({
+        pid: player.pid,
+        formatted_name: player.formatted_name || null,
+        variants: name_variants
+      })
     }
 
     let roster_status
@@ -194,7 +243,7 @@ const process_players_data = ({ data, dry_run, dryrun_path }) => {
 
   if (dryrun_stream) dryrun_stream.end()
 
-  return { stats, updates }
+  return { stats, updates, alias_candidates }
 }
 
 const save_player_updates = async (updates) => {
@@ -212,6 +261,26 @@ const save_player_updates = async (updates) => {
         )
       )
   })
+}
+
+/*
+  Idempotent and self-skipping: ensure_player_alias records nothing for a variant
+  equal to the player's canonical name or already present, so a rerun seeds zero
+  and the count reads as the new spellings this feed taught us.
+*/
+const seed_name_aliases = async (alias_candidates) => {
+  let seeded = 0
+  for (const { pid, formatted_name, variants } of alias_candidates) {
+    for (const variant of variants) {
+      seeded += await ensure_player_alias({
+        pid,
+        name: variant,
+        formatted_name,
+        source: 'nflverse-players'
+      })
+    }
+  }
+  return seeded
 }
 
 const import_players_nflverse = async ({
@@ -239,7 +308,7 @@ const import_players_nflverse = async ({
     : null
   if (dry_run) fs.mkdirSync(path.dirname(dryrun_path), { recursive: true })
 
-  const { stats, updates } = process_players_data({
+  const { stats, updates, alias_candidates } = process_players_data({
     data,
     dry_run,
     dryrun_path
@@ -255,10 +324,20 @@ const import_players_nflverse = async ({
 
   if (dry_run) {
     log(`dry-run: per-row decisions written to ${dryrun_path}; no DB writes`)
+    log(
+      `dry-run: would seed name variants for ${alias_candidates.length} players`
+    )
     return
   }
 
   await save_player_updates(updates)
+
+  const aliases_seeded = await seed_name_aliases(alias_candidates)
+  log(
+    `seeded ${aliases_seeded} new name aliases across ${alias_candidates.length} players whose football_name differs from first_name`
+  )
+
+  return { aliases_seeded }
 }
 
 const main = async () => {
