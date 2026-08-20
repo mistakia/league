@@ -38,8 +38,15 @@ export const PER_PERIOD_AGGREGATIONS = Object.freeze(['count', 'mean'])
 // their own actions.
 //
 // `game` leads both lists because it is a unit for either subject, and the
-// order is the order these have always been declared in, so deriving the list
-// moves no advertised period.
+// order is the order these have always been declared in.
+//
+// `player_deep_target`, `player_touch` and `player_opportunity` are in the
+// player list even though the retired `supports_periods` default omitted all
+// three. That omission was the divergence, not the addition: the registry has
+// always registered them for `rate` and the CLIENT has always offered them, so
+// a user could ask for one and get an answer the server did not admit to
+// serving. They EXPLAIN cleanly, and the client/server parity spec is what
+// keeps the two lists from drifting apart again.
 const TEAM_DENOMINATOR_UNITS = Object.freeze([
   'game',
   'team_half',
@@ -57,8 +64,11 @@ const PLAYER_DENOMINATOR_UNITS = Object.freeze([
   'player_pass_attempt',
   'player_target',
   'player_catchable_target',
+  'player_deep_target',
   'player_catchable_deep_target',
   'player_reception',
+  'player_touch',
+  'player_opportunity',
   'player_play',
   'player_route',
   'player_pass_play',

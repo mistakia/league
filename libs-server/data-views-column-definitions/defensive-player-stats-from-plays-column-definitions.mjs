@@ -84,7 +84,10 @@ const defensive_player_stat_from_plays = ({
       'player_pass_play',
       'player_rush_play'
     ],
-    aggregations: ['rate', 'count']
+    // `mean` joined the registry with the per-period summary and is served over
+    // the same partition vocabulary as `count`, so a hand-declared capability
+    // that lists one and not the other is stale rather than deliberate.
+    aggregations: ['rate', 'count', 'mean']
   },
   with_select: () => [`${select_string} AS ${stat_name}`],
   with_where: () => select_string,

@@ -199,9 +199,19 @@ export const offensive_output_param = {
   values: base_period_options
 }
 
+// A defender runs no ROUTES, so the participation list a defensive column
+// offers is the receiver one minus `player_route`. The server's defensive
+// factory has always excluded it; the client offered it anyway, and since
+// dispatch does not check a request against the advertised set, picking it
+// divided tackles by receiver routes and answered. Found by the client/server
+// capability parity spec on its first run.
+const defensive_player_period_options = player_period_options.filter(
+  ({ value }) => value !== 'player_route'
+)
+
 export const defensive_player_output_param = {
   ...base_output_param,
-  values: [...base_period_options, ...player_period_options]
+  values: [...base_period_options, ...defensive_player_period_options]
 }
 
 export const offensive_player_output_param = {
