@@ -128,9 +128,13 @@ describe('data-views measure-contract', () => {
         },
         supports_periods: TEAM_PERIODS
       })
+      // All three of the registry's aggregations, `mean` included as of the
+      // per-period summary. `sum` is deliberately absent: it is the wire value
+      // for NO aggregation and no plugin serves it.
       expect(result.supports_output.aggregations).to.deep.equal([
         'rate',
-        'count'
+        'count',
+        'mean'
       ])
       expect(result.supports_output.periods.slice(0, 2)).to.deep.equal([
         'game',

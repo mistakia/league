@@ -77,12 +77,25 @@ const player_action_period_options = [
   period_option('player_opportunity', 'Per Player Opportunity')
 ]
 
-// `count` counts periods clearing a threshold, so its period is a span of time
-// rather than a denominator unit. Only these two are registered as count
-// tuples in the server's output-aggregator registry.
+// The PARTITION vocabulary: a period here is a span of time, not a denominator
+// unit, which is what makes `count of games clearing a threshold` and `mean per
+// game` askable and `mean per team play` not. Both per-period aggregations are
+// registered over exactly this set on the server.
 export const COUNT_PERIOD_OPTIONS = [
   period_option('game', 'Games'),
   period_option('season', 'Seasons')
+]
+
+// The same two periods, labelled for a MEAN rather than a count: a count reads
+// as a plural noun ("Games"), a mean as an average over one ("Average Per
+// Game"). Deliberately distinct from the rate labels, which read as a bare
+// denominator ("Per Game") -- a rate divides by games PLAYED and a mean by the
+// games carrying measure rows, and 366 of 482 players disagree between them on
+// 2023 REG receiving yards, so labelling both "Per Game" would put two
+// different numbers under one name.
+export const MEAN_PERIOD_OPTIONS = [
+  period_option('game', 'Average Per Game'),
+  period_option('season', 'Average Per Season')
 ]
 
 export const THRESHOLD_OPERATOR_OPTIONS = [
@@ -107,6 +120,10 @@ const count_period_label_by_value = new Map(
   COUNT_PERIOD_OPTIONS.map(({ value, label }) => [value, label])
 )
 
+const mean_period_label_by_value = new Map(
+  MEAN_PERIOD_OPTIONS.map(({ value, label }) => [value, label])
+)
+
 // The chip renders the same glyph the operator dropdown offers, so a threshold
 // reads identically wherever it appears.
 const threshold_operator_label_by_value = new Map(
@@ -119,6 +136,10 @@ const threshold_operator_label_by_value = new Map(
  */
 export const format_output_value = ({ value }) => {
   if (!value || !value.period) return null
+
+  if (value.aggregation === 'mean') {
+    return mean_period_label_by_value.get(value.period) || value.period
+  }
 
   if (value.aggregation === 'count') {
     const period_label =
@@ -169,7 +190,8 @@ const base_output_param = {
   default_value: null,
   format_value: format_output_value,
   param_override_config,
-  count_periods: COUNT_PERIOD_OPTIONS
+  count_periods: COUNT_PERIOD_OPTIONS,
+  mean_periods: MEAN_PERIOD_OPTIONS
 }
 
 export const offensive_output_param = {

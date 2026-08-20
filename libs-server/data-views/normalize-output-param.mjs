@@ -4,6 +4,13 @@ import { translate_rate_type_to_output } from '#libs-shared/data-views-output-to
 
 const log = debug('data-views:normalize-output')
 
+// The per-period family. Both aggregations reduce ACROSS periods, so both carry
+// the same degeneracies when a row axis is already at or below the period's
+// grain -- keyed on the FAMILY rather than on `count`, so registering `mean`
+// could not leave it ungated.
+const PER_PERIOD_AGGREGATIONS = new Set(['count', 'mean'])
+const is_per_period = (aggregation) => PER_PERIOD_AGGREGATIONS.has(aggregation)
+
 const extract_rate_type = (rate_type) => {
   if (rate_type == null) return null
   if (Array.isArray(rate_type)) {
@@ -46,24 +53,25 @@ export const normalize_output_param = ({ column, row_axes = [] }) => {
       mutated = true
     } else if (
       has_week_row_axis &&
-      aggregation === 'count' &&
+      is_per_period(aggregation) &&
       period === 'season'
     ) {
       throw new Error(
-        `output={period:season,aggregation:count} is invalid under week row_axis (column ${column.column_id})`
+        `output={period:season,aggregation:${aggregation}} is invalid under week row_axis (column ${column.column_id})`
       )
     } else if (
       has_year_row_axis &&
-      aggregation === 'count' &&
+      is_per_period(aggregation) &&
       period === 'season'
     ) {
       // A partition aggregation needs the row to span several periods. Under a
       // year row axis the season period IS the row, so a season count
-      // degenerates to a 0/1 indicator. Dropped rather than thrown, matching
-      // the game/rate-under-week case above: the request is degenerate, not
-      // incoherent, and a throw would 500 a saved view that renders today.
+      // degenerates to a 0/1 indicator and a season mean to the value itself.
+      // Dropped rather than thrown, matching the game/rate-under-week case
+      // above: the request is degenerate, not incoherent, and a throw would
+      // 500 a saved view that renders today.
       log(
-        `Dropping output={period:season,aggregation:count} under year row_axis for ${column.column_id}`
+        `Dropping output={period:season,aggregation:${aggregation}} under year row_axis for ${column.column_id}`
       )
       const { output: _drop, ...rest } = next_params
       next_params = rest

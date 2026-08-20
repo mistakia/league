@@ -1,4 +1,5 @@
 import aggregator_count from './output-aggregator/aggregator-count.mjs'
+import aggregator_mean from './output-aggregator/aggregator-mean.mjs'
 import aggregator_rate from './output-aggregator/aggregator-rate.mjs'
 import { numerator_via_cte } from './period-denominator/emit-rate-outer-select.mjs'
 import plugin_per_game from './period-denominator/per-game.mjs'
@@ -7,7 +8,10 @@ import plugin_per_player from './period-denominator/per-player.mjs'
 import plugin_per_player_play from './period-denominator/per-player-play.mjs'
 import plugin_per_player_route from './period-denominator/per-player-route.mjs'
 
-const COUNT_PERIODS = ['game', 'season']
+// The PARTITION vocabulary -- the periods that divide the span rather than
+// naming a denominator unit. Both per-period aggregations are offered over
+// exactly this set, which is what keeps `mean per team_play` unaskable.
+const PER_PERIOD_PERIODS = ['game', 'season']
 
 const registry = new Map()
 
@@ -136,7 +140,10 @@ register(
 
 register('player_route', 'rate', adapt(plugin_per_player_route, {}))
 
-for (const period of COUNT_PERIODS) register(period, 'count', aggregator_count)
+for (const period of PER_PERIOD_PERIODS) {
+  register(period, 'count', aggregator_count)
+  register(period, 'mean', aggregator_mean)
+}
 
 export const resolve = ({ period, aggregation, column_def }) => {
   // Per-column override: columns whose value lives in a denominator-shaped

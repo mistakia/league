@@ -61,7 +61,7 @@ describe('data-views per-period summary', () => {
 
     // Positive control: the period CTEs must exist and must carry period_key,
     // or the assertion below passes over a query that never built one.
-    const period_ctes = [...sql.matchAll(/"(count_game_[0-9a-f]+)"/g)].map(
+    const period_ctes = [...sql.matchAll(/"(per_period_game_[0-9a-f]+)"/g)].map(
       (match) => match[1]
     )
     expect(new Set(period_ctes).size, 'expected two period CTEs').to.equal(2)

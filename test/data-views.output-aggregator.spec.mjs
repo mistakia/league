@@ -62,10 +62,13 @@ describe('data-views output aggregator', () => {
         params: { year: [2023], output: count_100_games }
       })
 
-      // The threshold must sit in a FILTER on the outer COUNT. Pushed into the
-      // CTE's WHERE it would test one play's yardage rather than the game's.
+      // The threshold must sit in a FILTER on the COUNT, testing the GAME's
+      // aggregated total. Pushed into the period CTE's WHERE it would test one
+      // play's yardage instead. That FILTER moved from the outer SELECT into
+      // the per-period summary when the summary landed -- the grain it tests is
+      // unchanged, which is what this asserts.
       expect(sql).to.match(
-        /COUNT\(DISTINCT count_game_[0-9a-f]+\.period_key\) FILTER \(WHERE count_game_[0-9a-f]+\.m_[0-9a-f]+ >= 100\)/
+        /COUNT\(DISTINCT per_period_game_[0-9a-f]+\.period_key\) FILTER \(WHERE per_period_game_[0-9a-f]+\.m_[0-9a-f]+ >= 100\)/
       )
     })
 
@@ -86,8 +89,8 @@ describe('data-views output aggregator', () => {
         params: { year: [2023], output: count_100_games }
       })
 
-      const [cte_name] = cte_names_matching(sql, 'count_game')
-      expect(cte_name, 'no materialized count_game CTE').to.be.a('string')
+      const [cte_name] = cte_names_matching(sql, 'per_period_game')
+      expect(cte_name, 'no materialized per_period_game CTE').to.be.a('string')
 
       const cte_body = sql.slice(
         sql.indexOf(`"${cte_name}" as materialized`),
@@ -110,7 +113,7 @@ describe('data-views output aggregator', () => {
       })
 
       expect(sql).to.match(
-        /FILTER \(WHERE count_game_[0-9a-f]+\.m_[0-9a-f]+ < 25\)/
+        /FILTER \(WHERE per_period_game_[0-9a-f]+\.m_[0-9a-f]+ < 25\)/
       )
     })
   })
@@ -225,7 +228,7 @@ describe('data-views output aggregator', () => {
       // A row IS a season here, so counting seasons clearing a threshold is a
       // 0/1 indicator rather than a count. Dropped, not thrown -- see the
       // matching disposition for a per-game rate on a per-week row above.
-      expect(sql).to.not.match(/count_season_[0-9a-f]+/)
+      expect(sql).to.not.match(/per_period_season_[0-9a-f]+/)
     })
 
     it('keeps a per-game count under a year row axis', async () => {
@@ -237,7 +240,7 @@ describe('data-views output aggregator', () => {
 
       // The game period is finer than the row, so the count is meaningful and
       // the guard must not reach it.
-      expect(sql).to.match(/count_game_[0-9a-f]+/)
+      expect(sql).to.match(/per_period_game_[0-9a-f]+/)
     })
   })
 
