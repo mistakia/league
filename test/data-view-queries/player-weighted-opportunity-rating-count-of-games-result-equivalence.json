@@ -1,0 +1,51 @@
+{
+  "name": "weighted opportunity rating count of games clearing a threshold (executed-result parity)",
+  "description": "The count half of the per-period family on a COMBINED measure: a count of the games whose own WOPR clears the threshold, which requires the period CTE to hold a per-game combined value for the FILTER to compare against. Same two-game seed as the mean fixture, so the per-game values are A 0.72 then 1.30 and B 1.48 then 0.90. At >= 0.9 that is ONE game for A and TWO for B. The threshold sits between the two players deliberately -- a count that read the pooled value (0.9778 and 1.2222) would answer 1 and 1, and a transposition of the 1.5 and 0.7 weights gives {1.04, 0.90} and {1.16, 1.30}, which is 2 and 2. Both wrong answers are distinguishable from the right one under the harness's order-insensitive comparison.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_weighted_opportunity_rating_from_plays",
+        "params": {
+          "year": [2024],
+          "output": {
+            "period": "game",
+            "aggregation": "count",
+            "threshold": { "op": ">=", "value": 0.9 }
+          }
+        }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-WOPO-000943', 'Test', 'Wopo', 'T.Wopo', 'Test Wopo', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-WOPP-000944', 'Test', 'Wopp', 'T.Wopp', 'Test Wopp', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (990413, 2024, 1, 'REG', 'OP', 'ZZ', '2024-09-08')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (990414, 2024, 2, 'REG', 'OP', 'ZZ', '2024-09-15')",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990413, 'TEST-WOPO-000943', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990413, 'TEST-WOPP-000944', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990414, 'TEST-WOPO-000943', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990414, 'TEST-WOPP-000944', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990413, 1, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPO-000943', 30)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990413, 2, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPP-000944', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990413, 3, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPP-000944', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990413, 4, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPP-000944', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990413, 5, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPP-000944', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990414, 1, 2024, 2, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPP-000944', 30)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990414, 2, 2024, 2, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPO-000943', 4)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990414, 3, 2024, 2, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPO-000943', 3)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990414, 4, 2024, 2, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPO-000943', 3)"
+    ],
+    "expected_rows": [
+      { "weighted_opp_rating_from_plays_0": "1" },
+      { "weighted_opp_rating_from_plays_0": "2" }
+    ],
+    "compare_columns": ["weighted_opp_rating_from_plays_0"]
+  },
+  "tags": ["from_plays", "output-aggregator", "result-equivalence"],
+  "expected_query": "with \"per_period_game_0f92f447b45c\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid) AS period_key, pg.pid AS pid, (1.5 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0)) AS m_4926f1af3a96 from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by pg.pid, CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid), \"nfl_games\".\"season_year\"), \"per_period_summary_7c939c45a50c\" as materialized (select \"per_period_game_0f92f447b45c\".\"pid\", \"per_period_game_0f92f447b45c\".\"year\", COUNT(DISTINCT per_period_game_0f92f447b45c.period_key) FILTER (WHERE per_period_game_0f92f447b45c.m_4926f1af3a96 >= 0.9) AS s_2c393a1fb980 from \"per_period_game_0f92f447b45c\" group by \"per_period_game_0f92f447b45c\".\"pid\", \"per_period_game_0f92f447b45c\".\"year\") select \"player\".\"pid\", player.first_name, player.last_name, MAX(per_period_summary_7c939c45a50c.s_2c393a1fb980) AS weighted_opp_rating_from_plays_0, \"player\".\"primary_position\" from \"player\" left join \"per_period_summary_7c939c45a50c\" on \"per_period_summary_7c939c45a50c\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

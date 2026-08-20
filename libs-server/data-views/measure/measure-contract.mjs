@@ -50,6 +50,25 @@ const INTEGRAL_AGGREGATES = new Set(['count', 'count_distinct'])
 // this list is what is REACHABLE, which is why they are separate.
 const SERVEABLE_AGGREGATIONS = ['rate', 'count', 'mean']
 
+// Render a measure's value as ONE SQL fragment over whatever grain the caller's
+// GROUP BY names. The accumulators aggregate the facts in that group and the
+// combine runs after, so the same call produces the season render, the period-
+// CTE projection and the filter comparison. It is exported because the period
+// CTE has to render at query time -- the scan it projects into is built from
+// the request, not from the declaration.
+export const render_measure_sql = ({
+  measure_name,
+  accumulators,
+  combine_accumulators,
+  decimals = null
+}) =>
+  render_combine_accumulators({
+    measure_name,
+    combine_accumulators,
+    accumulator_sql: render_accumulators({ measure_name, accumulators }),
+    decimals
+  })
+
 const assert_measure = ({ stat_name, measure }) => {
   if (!measure || typeof measure !== 'object') {
     throw new Error(
@@ -140,38 +159,38 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
         })
     : null
 
+  // The combined measure carried into a query-time scan. A combined value is a
+  // function of SEVERAL accumulators, so there is no single `measure_expr` for
+  // the period CTE to wrap in `SUM(...)`; it renders the whole combine over the
+  // scan's own GROUP BY instead, which is the law at period grain. The
+  // accumulator DECLARATIONS travel rather than rendered SQL, because the same
+  // scan also has to be able to project the accumulators unaggregated for a
+  // consumer that recombines one grain coarser (the multi-year team-play wrap).
+  const combined_measure = is_combined
+    ? { measure_name: stat_name, accumulators, combine_accumulators }
+    : null
+
   // Capability is what the wire can be ASKED for, so it advertises only what
-  // the output aggregator can serve. Every path from here consumes a single
-  // `measure_expr` -- `measure-batch.mjs` throws without one, and the period
-  // CTE projects `SUM(<measure_expr>)` per period -- which a combined measure
-  // does not have. Its value is a function of SEVERAL accumulators and exists
-  // only once the combine is evaluated at period grain, over each accumulator's
-  // per-period sum. The per-period summary reduces ACROSS periods and does not
-  // supply that; the period CTE has to project the combined value itself.
-  //
-  // So a combined measure still advertises nothing, and this is the
-  // SERVEABLE_AGGREGATIONS rule above at the measure level -- NOT the
-  // measure-shape exclusion the operator reversed. `rate` and `mean` are both
-  // semantically legal on a combined measure (see capability.mjs), and they are
-  // offered the moment the period CTE can evaluate one.
-  const supports_output = is_combined
-    ? null
-    : (() => {
-        const capability = derive_supports_output({
-          denominator_unit_periods: ['game', ...supports_periods]
-        })
-        return {
-          periods: capability.periods,
-          aggregations: capability.aggregations.filter((aggregation) =>
-            SERVEABLE_AGGREGATIONS.includes(aggregation)
-          )
-        }
-      })()
+  // the output aggregator can serve -- the SERVEABLE_AGGREGATIONS rule above at
+  // the measure level. Measure SHAPE does not gate it: a combined measure is
+  // aggregable exactly as an additive one is, now that the period CTE projects
+  // the combine itself, and `rate` and `mean` are both semantically legal on
+  // one (see capability.mjs).
+  const capability = derive_supports_output({
+    denominator_unit_periods: ['game', ...supports_periods]
+  })
+  const supports_output = {
+    periods: capability.periods,
+    aggregations: capability.aggregations.filter((aggregation) =>
+      SERVEABLE_AGGREGATIONS.includes(aggregation)
+    )
+  }
 
   return {
     with_select,
     accumulator_selects,
     recombine,
+    combined_measure,
     is_combined,
     measure_expr,
     aggregate,

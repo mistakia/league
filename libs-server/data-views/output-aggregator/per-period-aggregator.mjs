@@ -198,8 +198,17 @@ export const create_per_period_aggregator = ({
       measure_alias: resolve_measure_alias({ column_def, params, identity_id }),
       threshold
     })
+    // A MEAN is in the measure's own units, so it takes the measure's rounding,
+    // the way the rate emitters already do. A COUNT is a count of PERIODS and
+    // takes none -- rounding it would apply a ratio column's `decimals` to an
+    // integer and move every distinct-count count golden while changing no
+    // value.
+    const value =
+      aggregation === 'mean' && column_def.decimals != null
+        ? `ROUND(MAX(${summary_name}.${summary_alias}), ${column_def.decimals})`
+        : `MAX(${summary_name}.${summary_alias})`
     return {
-      sql: `MAX(${summary_name}.${summary_alias}) AS ${alias}`,
+      sql: `${value} AS ${alias}`,
       bindings: []
     }
   }

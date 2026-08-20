@@ -150,9 +150,8 @@ const player_stat_from_plays = ({
   // the aggregator-rate / aggregator-count CTE so cross-period totals match
   // legacy parity. Gated on the column being AGGREGATOR-SERVEABLE rather than
   // merely measure-bearing: both this hook and the `consumes_params_extra` it
-  // ships with are read only on the output-aggregator path, so a combined
-  // measure -- which advertises no aggregation until the per-period reducer
-  // lands -- would carry two fields nothing can reach.
+  // ships with are read only on the output-aggregator path, so a column that
+  // advertises nothing would carry two fields nothing can reach.
   const final_apply_filters = final_supports_output
     ? ({ query, params }) => {
         const defaults = get_play_by_play_default_params({ params })
@@ -193,9 +192,19 @@ const player_stat_from_plays = ({
       }
       return [`${season_select} as ${stat_name}`]
     },
-    // Consumed by select-string.mjs's year-offset correlated subquery. One
-    // expression, from the column's own combine, at the window's grain.
-    ...(is_combined ? { range_offset_select: derived.recombine } : {}),
+    // The combine applied ONE GRAIN COARSER, over a relation that has already
+    // projected one column per accumulator. Two consumers need exactly this:
+    // select-string.mjs's year-offset correlated subquery and the multi-year
+    // team-play wrap, which each sum the accumulators over their own window and
+    // combine after. They share the function rather than each deriving one,
+    // because two derivations are two chances to sum per-window ratios.
+    ...(is_combined
+      ? {
+          recombine_accumulators: derived.recombine,
+          accumulator_selects: derived.accumulator_selects,
+          combined_measure: derived.combined_measure
+        }
+      : {}),
     with_where: ({ params }) => {
       if (should_recombine_in_main({ params, is_combined })) {
         return null // the WITH statement carries accumulators, not a value
@@ -222,8 +231,17 @@ const player_stat_from_plays = ({
     source: plays_source,
     use_having: true,
     supports_periods,
+    // `measure_source` names the FACT SOURCE the aggregator scan reads, so it
+    // is the column's own source rather than the literal 'plays'. A share
+    // reaching the aggregator on 'plays' would scan without the cohort
+    // expansion, and its accumulators name the members alias that expansion
+    // binds -- a 42P01 rather than a wrong number, but only because the alias
+    // is unresolvable.
     ...(final_supports_output
-      ? { supports_output: final_supports_output, measure_source: 'plays' }
+      ? {
+          supports_output: final_supports_output,
+          measure_source: fact_source_name
+        }
       : {}),
     ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
     ...(final_aggregate ? { aggregate: final_aggregate } : {}),

@@ -45,6 +45,9 @@ export default function ColumnParamOutput({
   const count_period_options =
     column_param_definition?.count_periods ||
     output_column_param.COUNT_PERIOD_OPTIONS
+  const mean_period_options =
+    column_param_definition?.mean_periods ||
+    output_column_param.MEAN_PERIOD_OPTIONS
 
   const label = column_param_definition?.label || column_param_name
   const selected_label = mixed_state
@@ -55,6 +58,13 @@ export default function ColumnParamOutput({
     ({ period, next_aggregation }) => {
       if (next_aggregation === 'rate') {
         return handle_change({ period, aggregation: 'rate', threshold: null })
+      }
+      // A mean reduces over EVERY period, where a count reduces over the
+      // periods a threshold selects -- so it carries none, and one left behind
+      // from a previous count would be persisted into a saved view that the
+      // server then ignores.
+      if (next_aggregation === 'mean') {
+        return handle_change({ period, aggregation: 'mean', threshold: null })
       }
       return handle_change({
         period,
@@ -150,6 +160,19 @@ export default function ColumnParamOutput({
           <div className='column-param-output-options'>
             {rate_period_options.map((option) =>
               render_period_item({ option, item_aggregation: 'rate' })
+            )}
+          </div>
+        </div>
+
+        {/* A mean is a different measure from a rate rather than a spelling of
+            it -- a rate divides by a denominator UNIT (games played) and a mean
+            by the periods carrying measure rows -- so it gets its own section
+            with its own labels rather than sharing the rate list. */}
+        <div className='column-param-output-section'>
+          <div className='column-param-output-section-header'>Average Per</div>
+          <div className='column-param-output-options'>
+            {mean_period_options.map((option) =>
+              render_period_item({ option, item_aggregation: 'mean' })
             )}
           </div>
         </div>
