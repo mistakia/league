@@ -23,6 +23,7 @@ import {
   FACT_SOURCES,
   resolve_fact_source
 } from '../measure/fact-source-registry.mjs'
+import { render_measure_sql } from '../measure/measure-contract.mjs'
 
 const h12 = (s) => crypto.createHash('md5').update(s).digest('hex').slice(0, 12)
 
@@ -75,6 +76,18 @@ export const compute_group_key = ({
 // a `count_distinct` of the same (column_id, expr) never collide-and-dedup
 // into one CTE column (which would emit one and silently drop the other).
 export const compute_measure_alias = ({ column_def, params, identity_id }) => {
+  // A combined measure has no single `measure_expr`; its CTE column is the
+  // rendered combine over its accumulators. Hashing that rendered SQL keeps the
+  // alias identity rule intact -- two columns whose combines render identically
+  // over the same scan are the same CTE column and dedupe onto one.
+  if (column_def.combined_measure) {
+    return `m_${h12(
+      JSON.stringify({
+        column_id: column_def.column_id,
+        combined_sql: render_measure_sql(column_def.combined_measure)
+      })
+    )}`
+  }
   if (!column_def.measure_expr) {
     // Role-union path uses its own materialization; this helper should not
     // be called for non-batchable column-defs. Guard defensively.
@@ -111,6 +124,7 @@ export const register_measure = ({
   cte_name,
   measure_alias,
   measure_expr,
+  combined_measure = null,
   aggregate = 'sum',
   common
 }) => {
@@ -125,8 +139,14 @@ export const register_measure = ({
   if (!batch.measures.has(measure_alias)) {
     // VALUE carries both the rendered expression and its aggregate selector so
     // flush can emit COUNT(DISTINCT ...) for distinct-count measures while
-    // SUM(...) measures co-locate in the same CTE.
-    batch.measures.set(measure_alias, { measure_expr, aggregate })
+    // SUM(...) measures co-locate in the same CTE. A combined measure instead
+    // carries its whole declaration, since its CTE column is a combine over
+    // several aggregates rather than one aggregate of one expression.
+    batch.measures.set(measure_alias, {
+      measure_expr,
+      combined_measure,
+      aggregate
+    })
   }
   return { cte_name, measure_alias }
 }
@@ -141,9 +161,10 @@ export const flush = ({ query_context, build_batched_period_cte }) => {
     const sub = build_batched_period_cte({
       ...batch.common,
       measures: [...batch.measures.entries()].map(
-        ([alias, { measure_expr, aggregate }]) => ({
+        ([alias, { measure_expr, combined_measure, aggregate }]) => ({
           alias,
           measure_expr,
+          combined_measure,
           aggregate
         })
       ),

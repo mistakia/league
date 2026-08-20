@@ -227,7 +227,7 @@ const get_select_string = ({
       ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
-    if (column_definition.range_offset_select) {
+    if (column_definition.recombine_accumulators) {
       // A measure carrying a combine reduces the offset window by summing each
       // ACCUMULATOR the CTE projected and applying the combine after -- never by
       // summing the per-year combined value, which is the sum-of-ratios class
@@ -236,7 +236,7 @@ const get_select_string = ({
       // zero-denominator answer and the rounding are the season render's, at a
       // coarser grain. It replaces a hand-written copy that disagreed with the
       // other four on both the cast and the rounding.
-      const rate_expr = column_definition.range_offset_select({
+      const rate_expr = column_definition.recombine_accumulators({
         table_name: inner_table
       })
       final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`

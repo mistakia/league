@@ -67,12 +67,17 @@ describe('data-views mean aggregation', () => {
       expect(def.supports_output.aggregations).to.include('mean')
     })
 
-    it('advertises nothing on a combined column, and not because of mean', () => {
-      // A combined measure has no single measure_expr for the period CTE to
-      // sum, so nothing is reachable yet -- NOT because rate or mean is
-      // illegal on a ratio, which is the exclusion the operator reversed.
+    it('advertises mean on a COMBINED column too', () => {
+      // This asserted the opposite while a combined measure was withheld: it
+      // had no single measure_expr for the period CTE to sum, so nothing was
+      // reachable. The period CTE renders the whole COMBINE over the period
+      // group now, so a combined measure is aggregable on the same terms as an
+      // additive one -- which was always the semantics, per the operator's
+      // reversal of the measure-shape exclusion.
       const def = player_stats.player_target_share_from_plays
-      expect(Boolean(def.supports_output)).to.equal(false)
+      expect(def.supports_output.aggregations).to.include('mean')
+      expect(def.supports_output.aggregations).to.include('count')
+      expect(def.supports_output.periods).to.deep.equal(PARTITION_PERIODS)
     })
   })
 

@@ -35,6 +35,7 @@ import db from '#db'
 
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { build_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
+import { resolve_source_table } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
   resolve_effective_years,
@@ -131,13 +132,25 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
   // semantics as the batched aggregator path, with year grain forced on so
   // the wrap can join on year. measure_source defaults to 'plays' for
   // column-defs that omit it (see player-stats-from-plays).
+  //
+  // A COMBINED measure projects its ACCUMULATORS here rather than its value,
+  // because this wrap sums the numerator across years -- and summing a
+  // per-year combined value is the sum-of-per-year-ratios class the contract
+  // makes unrepresentable. The recombination below sums each accumulator and
+  // combines after, which is the same shape `select-string.mjs` uses for a
+  // year-offset window.
+  const combined_measure = column_def.combined_measure ?? null
   const numerator_subquery = build_period_cte({
     measure_source: column_def.measure_source,
-    measure_expr: column_def.measure_expr({
-      table_name: resolve_source_table(column_def.measure_source),
-      params,
-      identity_id
-    }),
+    ...(combined_measure
+      ? { accumulator_selects: column_def.accumulator_selects }
+      : {
+          measure_expr: column_def.measure_expr({
+            table_name: resolve_source_table(column_def.measure_source),
+            params,
+            identity_id
+          })
+        }),
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
@@ -169,7 +182,15 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
       ).andOn(`${rate_type_table_name}.year`, '=', 'num_y.year')
     })
     .select('num_y.pid')
-    .select(db.raw('SUM(num_y.measure_total) AS numerator_sum'))
+    .select(
+      db.raw(
+        `${
+          combined_measure
+            ? column_def.recombine_accumulators({ table_name: 'num_y' })
+            : 'SUM(num_y.measure_total)'
+        } AS numerator_sum`
+      )
+    )
     .select(
       db.raw(
         `SUM(${rate_type_table_name}.rate_type_total_count) AS denominator_sum`
@@ -177,14 +198,3 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
     )
     .groupBy('num_y.pid')
 }
-
-const SOURCE_TABLES = {
-  plays: 'nfl_plays',
-  gamelogs: 'player_gamelogs',
-  snaps: 'nfl_snaps',
-  plays_receiver: 'nfl_plays_receiver',
-  plays_role_union: 'nfl_plays'
-}
-
-const resolve_source_table = (measure_source) =>
-  SOURCE_TABLES[measure_source] ?? 'player_gamelogs'

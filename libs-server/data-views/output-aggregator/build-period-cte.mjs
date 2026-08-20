@@ -15,6 +15,7 @@ import {
   resolve_fact_source,
   subject_id_expression
 } from '../measure/fact-source-registry.mjs'
+import { render_measure_sql } from '../measure/measure-contract.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -64,6 +65,7 @@ const period_key_expr = (period) => {
 export const build_period_cte = ({
   measure_source,
   measure_expr,
+  accumulator_selects = null,
   measure_predicate,
   role_attributions,
   game_conditional_expr,
@@ -93,7 +95,11 @@ export const build_period_cte = ({
     measure_predicate,
     pid_columns,
     apply_filters,
-    measures: [{ alias: 'measure_total', measure_expr, aggregate }],
+    measures: [
+      accumulator_selects
+        ? { accumulator_selects }
+        : { alias: 'measure_total', measure_expr, aggregate }
+    ],
     period,
     query_context,
     identity_id,
@@ -399,8 +405,25 @@ export const build_batched_period_cte = ({
   // expr) (for distinct-count measures like series/drive counts); anything
   // else (default 'sum') emits SUM(expr). A count_distinct and a sum measure
   // can co-locate in one CTE -- both are valid aggregates over the same scan.
-  for (const { alias, measure_expr: m_expr, aggregate } of measures) {
-    if (aggregate === 'count_distinct') {
+  for (const {
+    alias,
+    measure_expr: m_expr,
+    aggregate,
+    combined_measure,
+    accumulator_selects
+  } of measures) {
+    if (accumulator_selects) {
+      // One column per accumulator, unaggregated by any combine. Asked for by
+      // the consumer that recombines ONE GRAIN COARSER -- the multi-year
+      // team-play wrap sums each accumulator across years and combines after,
+      // because combining first and summing would sum per-year ratios.
+      for (const fragment of accumulator_selects) sub.select(db.raw(fragment))
+    } else if (combined_measure) {
+      // The combine rendered over this scan's own GROUP BY, which is the period.
+      // `value(period) = combine(accumulate(facts in period))` -- the same law
+      // the season render applies over the whole scope.
+      sub.select(db.raw(`${render_measure_sql(combined_measure)} AS ${alias}`))
+    } else if (aggregate === 'count_distinct') {
       sub.select(db.raw(`COUNT(DISTINCT ${m_expr}) AS ${alias}`))
     } else {
       sub.select(db.raw(`SUM(${m_expr}) AS ${alias}`))
@@ -504,11 +527,16 @@ export const add_period_cte = async ({
       params,
       identity_id
     })
-    const measure_expr = column_def.measure_expr({
-      table_name: source.table,
-      params,
-      identity_id
-    })
+    // A combined measure carries its declaration instead of an expression; the
+    // builder renders the combine over the period group. Everything else --
+    // batching, the group key, the summary -- is identical for the two shapes.
+    const measure_expr = column_def.combined_measure
+      ? null
+      : column_def.measure_expr({
+          table_name: source.table,
+          params,
+          identity_id
+        })
     const common = {
       measure_source: column_def.measure_source,
       measure_predicate: column_def.measure_predicate
@@ -534,6 +562,7 @@ export const add_period_cte = async ({
       cte_name,
       measure_alias,
       measure_expr,
+      combined_measure: column_def.combined_measure ?? null,
       aggregate: column_def.aggregate ?? 'sum',
       common
     })
