@@ -655,12 +655,17 @@ observations:
     scheduled job created a player row while report_job recorded success — the fix names
     nfl_draft_year, adds a skip-only resolve_canonical_player whose only power is to refuse a
     create, and gives the run a disposition partition with bounds in both directions.
+  - >-
+    [finding] 2026-08-20 This entity is 48KB of which 665 lines are frontmatter observations over a
+    roughly 40-line body; unlike CLAUDE.md it is elected rather than auto-loaded so it taxes no
+    session involuntarily, but the accretion makes it expensive at the moment an agent reaches the
+    repo through the graph, and consolidation was not attempted during the CLAUDE.md split.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-17T15:41:30.410Z'
+updated_at: '2026-08-20T05:27:48.240Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
