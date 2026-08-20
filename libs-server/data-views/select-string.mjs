@@ -227,7 +227,20 @@ const get_select_string = ({
       ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
-    if (column_definition.recombine_accumulators) {
+    if (column_definition.main_select_string_year_offset_range) {
+      // A per-column OVERRIDE of the whole window expression, and it wins over
+      // the generic recombination below. The team family needs it because its
+      // correlation key is pid or nfl_team depending on wrap mode, which the
+      // generic form has no way to know; it recombines its OWN accumulators
+      // inside that expression, so the law still holds there.
+      final_select_expression =
+        column_definition.main_select_string_year_offset_range({
+          table_name: join_table_name,
+          params: column_params,
+          data_view_options,
+          query_context
+        })
+    } else if (column_definition.recombine_accumulators) {
       // A measure carrying a combine reduces the offset window by summing each
       // ACCUMULATOR the CTE projected and applying the combine after -- never by
       // summing the per-year combined value, which is the sum-of-ratios class
@@ -240,14 +253,6 @@ const get_select_string = ({
         table_name: inner_table
       })
       final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
-    } else if (column_definition.main_select_string_year_offset_range) {
-      final_select_expression =
-        column_definition.main_select_string_year_offset_range({
-          table_name: join_table_name,
-          params: column_params,
-          data_view_options,
-          query_context
-        })
     } else {
       // Reduce the offset window with the column's declared aggregate (default
       // SUM). Non-additive season statistics (means, mins, maxes, ranks)

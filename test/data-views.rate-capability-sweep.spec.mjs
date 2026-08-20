@@ -74,11 +74,18 @@ describe('data-views rate-capability sweep', () => {
     }
   })
 
+  // Two ways to be a carve-out, and they are different claims. A column with no
+  // MEASURE has nothing to aggregate and declares no denominator periods. A
+  // `player_team_` column has a perfectly good measure and is withheld because
+  // the aggregator cannot serve its subject grain, so it keeps its periods --
+  // asserting `[]` on it would be asserting the wrong reason.
   describe('carve-out columns advertise no rate types', () => {
     for (const [column_id, def] of carve_outs) {
       it(`${column_id}`, () => {
-        expect(def.supports_periods, column_id).to.deep.equal([])
         expect(def.supports_output, column_id).to.be.not.ok
+        if (!column_id.startsWith('player_team_')) {
+          expect(def.supports_periods, column_id).to.deep.equal([])
+        }
       })
     }
   })
@@ -88,13 +95,35 @@ describe('data-views rate-capability sweep', () => {
   // property of the period CTE projecting the combine, so a regression there
   // takes all 42 down together and this is the one place that would say so.
   it('every combined measure offers count and mean over the partitions', () => {
-    const combined = all.filter(([, def]) => def.combined_measure)
+    // Excluding the withheld `player_team_` variant, which carries a combined
+    // measure the aggregator cannot serve -- see the assertion below it.
+    const combined = all.filter(
+      ([id, def]) => def.combined_measure && !id.startsWith('player_team_')
+    )
     expect(combined.length, 'combined measures').to.be.greaterThan(40)
     for (const [column_id, def] of combined) {
       expect(def.supports_output.aggregations, column_id).to.include('count')
       expect(def.supports_output.aggregations, column_id).to.include('mean')
       expect(def.supports_output.periods, column_id).to.include('game')
       expect(def.supports_output.periods, column_id).to.include('season')
+    }
+  })
+
+  // A `player_team_*` column is a TEAM statistic pooled over the games one
+  // PLAYER was active for, which only the `_player_team_stats` CTE knows how to
+  // build. The output aggregator groups the fact scan by the column's own
+  // subject id instead, and a `plays` source names no player, so every
+  // aggregation request on one answered `column nfl_plays.pid does not exist`.
+  // Measured at 95a949c6e on the ADDITIVE variants, so it is older than the
+  // ratio conversion. Withholding the capability is what keeps a request from
+  // reaching that path at all.
+  it('no player_team_ column advertises an aggregation it cannot serve', () => {
+    const player_team = Object.entries(team_stats).filter(([id]) =>
+      id.startsWith('player_team_')
+    )
+    expect(player_team.length, 'player_team_ columns').to.be.greaterThan(20)
+    for (const [column_id, def] of player_team) {
+      expect(def.supports_output, column_id).to.be.not.ok
     }
   })
 

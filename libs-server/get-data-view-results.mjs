@@ -1308,21 +1308,24 @@ const add_clauses_for_table = async ({
   if (with_func) {
     // used by team stats column definitions
     const select_column_names = []
-    const rate_columns = []
+    // Which columns carry ACCUMULATORS in the CTE rather than a value, and
+    // what those accumulator columns are called. A combined measure's CTE
+    // holds its accumulators in every path, because the team-stats CTE is
+    // finer than the outer row and the outer expression has to sum each
+    // accumulator and combine after. This replaced an `is_rate` flag plus a
+    // `requires_numerator_denominator_in_year_offset` flag read only inside a
+    // year_offset range -- outside one the AVG carve-outs summed a per-period
+    // mean.
+    const combined_columns = {}
     for (const column_id of legacy_column_ids) {
       const column_definition = data_views_column_definitions[column_id]
       // TODO maybe use column_index here
       select_column_names.push(column_definition.column_name)
-      // AVG carve-outs (PROE / CPOE) declare requires_numerator_denominator_in_year_offset:
-      // they pool as SUM(num)/SUM(den) only in a multi-year year_offset range, so
-      // the team-stats CTE builder must project their summed num/den components
-      // there (and only there). is_rate columns carry num/den in every path.
-      if (
-        column_definition.is_rate ||
-        (column_definition.requires_numerator_denominator_in_year_offset &&
-          is_year_offset_range(group_column_params))
-      ) {
-        rate_columns.push(column_definition.column_name)
+      if (column_definition.accumulator_columns) {
+        combined_columns[column_definition.column_name] = {
+          accumulator_columns: column_definition.accumulator_columns,
+          recombine: column_definition.recombine_accumulators
+        }
       }
     }
     await with_func({
@@ -1335,7 +1338,7 @@ const add_clauses_for_table = async ({
       row_axes,
       pid_columns,
       select_column_names,
-      rate_columns,
+      combined_columns,
       data_view_options
     })
     for (const select_string of select_strings) {
