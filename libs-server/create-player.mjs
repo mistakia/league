@@ -8,6 +8,7 @@ import {
 } from '#libs-shared'
 import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import db from '#db'
+import { is_implausible_entry_age } from './player-era.mjs'
 import generate_player_id from './generate-player-id.mjs'
 
 const log = debug('create-player')
@@ -67,6 +68,28 @@ const createPlayer = async (playerData) => {
       log(playerData)
       return null
     }
+  }
+
+  /*
+    Cross-field plausibility, and it DROPS the draft year rather than refusing
+    the row. Every other identity guard reads a candidate against EXISTING rows,
+    so a source record that contradicts itself on one line -- Sleeper's 2933
+    carries birth_date 1989-10-13 and rookie_year 2025 -- passes all of them and
+    mints a fresh pid holding the contradiction (CORE-KNOX-044391).
+
+    Refusing the person instead would be the worse error, and the band says so:
+    the conflated-row audit treats a breach as worth a human READING, not as
+    proof, so a genuine late entry would be kept out of the table permanently and
+    re-refused nightly. `nfl_draft_year` is also the field that lies when two
+    pieces of evidence disagree (see player-era.mjs), and a null draft year is a
+    shape every caller already writes for a source that carries none -- so this
+    degrades to the state a human adjudication reached on that exact row.
+  */
+  if (is_implausible_entry_age(playerData)) {
+    log(
+      `Dropping implausible nfl_draft_year ${playerData.nfl_draft_year} against date_of_birth ${playerData.date_of_birth} for ${playerData.first_name} ${playerData.last_name}`
+    )
+    playerData.nfl_draft_year = null
   }
 
   // Draw the immutable opaque serial from the dedicated sequence and compose the pid.

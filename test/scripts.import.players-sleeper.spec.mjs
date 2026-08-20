@@ -275,6 +275,63 @@ describe('SCRIPTS import-players-sleeper', function () {
       expect(row).to.exist
       expect(row.nfl_draft_year).to.equal(null)
     })
+
+    /*
+      The self-contradictory payload. Sleeper's /players/nfl/2933 carries
+      birth_date 1989-10-13 alongside metadata.rookie_year '2025' on ONE source
+      record, and every identity guard before this one compares a candidate to
+      EXISTING rows -- no other `corey knox` row existed, both gsis and esb ids
+      were null, so the resolver correctly answered `new` and CORE-KNOX-044391
+      minted holding a 36-year-old entry age.
+
+      The person is still created. Only the field that lies is dropped, which is
+      what the human adjudication of that row concluded.
+    */
+    it('drops a draft year that contradicts the payload birth date, and still creates the player', async function () {
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id: 'implaus',
+          first_name: 'Implausible',
+          last_name: 'Entryage',
+          birth_date: '1989-10-13',
+          rookie_year: '2025'
+        })
+      ])
+
+      const { counts, dropped_implausible_draft_year, shortfall } =
+        await spec_run()
+
+      const row = await created_row('implaus')
+      expect(row).to.exist
+      expect(row.nfl_draft_year).to.equal(null)
+      expect(row.date_of_birth).to.equal('1989-10-13')
+      expect(counts.created).to.equal(FILLER_COUNT + 1)
+      expect(dropped_implausible_draft_year).to.equal(1)
+      expect(shortfall).to.equal(null)
+    })
+
+    it('leaves a draft year inside the plausible entry-age band alone', async function () {
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id: 'lateudfa',
+          first_name: 'Lateentry',
+          last_name: 'Undrafted',
+          // Entry age 30 -- the outer edge of the band, which a guard written
+          // with an exclusive comparison would drop.
+          birth_date: '1995-02-02',
+          rookie_year: '2025'
+        })
+      ])
+
+      const { dropped_implausible_draft_year } = await spec_run()
+
+      const row = await created_row('lateudfa')
+      expect(row).to.exist
+      expect(row.nfl_draft_year).to.equal(2025)
+      expect(dropped_implausible_draft_year).to.equal(0)
+    })
   })
 
   describe('the canonical-existence check refuses a create', function () {

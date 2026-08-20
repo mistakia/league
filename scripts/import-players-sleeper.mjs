@@ -21,6 +21,7 @@ import {
   fetch_with_retry,
   throw_if_shortfall
 } from '#libs-server'
+import { is_implausible_entry_age } from '#libs-server/player-era.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -145,6 +146,16 @@ const run = async ({
   // pid rather than counted alone.
   const skipped_members = []
   let first_writer_error = null
+
+  /*
+    NOT a disposition, so it is deliberately outside `counts` and outside the
+    conservation identity: the entry is still created, with one field dropped.
+    Reported anyway because it is the only trace that a source record arrived
+    self-contradictory, and a silent drop is how the same class went unnoticed
+    until the standing audit found it days after the mint.
+  */
+  let dropped_implausible_draft_year = 0
+  const implausible_entry_age_members = []
 
   for (const sleeper_id in result) {
     const item = result[sleeper_id]
@@ -325,6 +336,17 @@ const run = async ({
         ...data
       }
 
+      // createPlayer DROPS an internally contradictory nfl_draft_year rather
+      // than refusing the row (see its comment). Evaluating the same shared
+      // predicate here is what puts that drop in the run report -- otherwise the
+      // only record of it is a debug line nobody reads.
+      if (is_implausible_entry_age(player_data)) {
+        dropped_implausible_draft_year += 1
+        implausible_entry_age_members.push(
+          `sleeper_id=${sleeper_id} name="${name}" rookie_year=${player_data.nfl_draft_year} birth_date=${player_data.date_of_birth}`
+        )
+      }
+
       // Evaluate createPlayer's own predicate BEFORE calling, so a REFUSAL is
       // separable from a FAILURE (it returns null for both). Done before the
       // resolver because a payload that can never produce a row does not need an
@@ -460,6 +482,11 @@ const run = async ({
   console.log(`[import-players-sleeper] updated ${changeCount} player fields`)
   for (const member of skipped_members) {
     console.log(`[import-players-sleeper] SKIP ${member}`)
+  }
+  for (const member of implausible_entry_age_members) {
+    console.log(
+      `[import-players-sleeper] DROPPED implausible nfl_draft_year: ${member}`
+    )
   }
 
   const shortfalls = []
@@ -614,6 +641,7 @@ const run = async ({
   return {
     fields,
     counts,
+    dropped_implausible_draft_year,
     shortfall: shortfalls.length ? shortfalls.join(' | ') : null
   }
 }

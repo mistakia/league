@@ -84,6 +84,21 @@
 // contact; two copies of this number would be two answers to one question.
 export const MINIMUM_PLAUSIBLE_AGE_IN_SEASON = 20
 
+/*
+  The band `nfl_draft_year` and `date_of_birth` have to agree within for the
+  PAIR to be readable as one person's career. Entering the league outside it is
+  not impossible, which is why the conflated-row audit only treats a breach as
+  worth a human reading -- 47 of 25,514 rows with a usable birth date sit
+  outside it, measured against production 2026-08-19, and all but a handful are
+  visibly corrupt rather than late entries.
+
+  Exported so the audit and the mint-time guard read one band. Two copies would
+  be two answers to one question, and they would drift in the direction that
+  matters: the guard silently admitting what the audit then reports.
+*/
+export const MINIMUM_PLAUSIBLE_ENTRY_AGE = 20
+export const MAXIMUM_PLAUSIBLE_ENTRY_AGE = 30
+
 // A player row whose `draft_round` is 0 or null went undrafted, so its
 // `nfl_draft_year` is an entry year rather than a debut year. See above.
 const UNDRAFTED_ENTRY_YEAR_GRACE_SEASONS = 2
@@ -125,6 +140,33 @@ export const player_could_have_played = ({ player, season_year }) => {
   if (was_drafted(player)) return nfl_draft_year <= season_year
 
   return nfl_draft_year - season_year <= UNDRAFTED_ENTRY_YEAR_GRACE_SEASONS
+}
+
+/**
+ * Do a payload's OWN `date_of_birth` and `nfl_draft_year` contradict each other?
+ *
+ * Every other falsifier in this module reads a candidate row against an EXISTING
+ * one, so a source record that is self-contradictory on a single line passes
+ * them all and mints a fresh pid carrying the contradiction. Sleeper's
+ * `/players/nfl/2933` is the recorded case: `birth_date` 1989-10-13 alongside
+ * `metadata.rookie_year` 2025, minted as CORE-KNOX-044391 and only surfaced days
+ * later by the standing audit.
+ *
+ * @param {object} player - carries `date_of_birth` and `nfl_draft_year`. Either
+ *   one absent or unusable means there is no contradiction to see, so it passes.
+ * @returns {boolean} true only when both fields are present and their implied
+ *   entry age falls outside the plausible band.
+ */
+export const is_implausible_entry_age = (player) => {
+  const birth_year = birth_year_of(player)
+  const nfl_draft_year = Number(player?.nfl_draft_year)
+  if (!birth_year || !nfl_draft_year) return false
+
+  const entry_age = nfl_draft_year - birth_year
+  return (
+    entry_age < MINIMUM_PLAUSIBLE_ENTRY_AGE ||
+    entry_age > MAXIMUM_PLAUSIBLE_ENTRY_AGE
+  )
 }
 
 export default player_could_have_played

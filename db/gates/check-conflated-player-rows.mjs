@@ -72,6 +72,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import db from '#db'
+import {
+  MINIMUM_PLAUSIBLE_ENTRY_AGE,
+  MAXIMUM_PLAUSIBLE_ENTRY_AGE
+} from '#libs-server/player-era.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const BASELINE_PATH = path.join(
@@ -79,9 +83,9 @@ const BASELINE_PATH = path.join(
   'conflated-player-rows-baseline.json'
 )
 
-// A player entering the league outside this band is worth a human reading it.
-const MINIMUM_PLAUSIBLE_ENTRY_AGE = 20
-const MAXIMUM_PLAUSIBLE_ENTRY_AGE = 30
+// The band itself lives in libs-server/player-era.mjs, shared with the
+// mint-time guard in create-player.mjs so the audit cannot report a pair the
+// minting path was willing to write.
 
 // Slack on top of the cohort's own percentile band, in gsis serial units.
 const GSIS_COHORT_SLACK = 3000
