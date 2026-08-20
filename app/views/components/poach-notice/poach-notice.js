@@ -29,6 +29,16 @@ export default function PoachNotice({
     })
   }
 
+  const handle_activate = (poach) => {
+    const player_map = poach.get('player_map')
+    showConfirmation({
+      id: 'ACTIVATE',
+      data: {
+        player_map
+      }
+    })
+  }
+
   return (
     <Alert severity='warning'>
       <div className='poach-notice-section'>
@@ -41,9 +51,16 @@ export default function PoachNotice({
         Submitted by: <TeamName tid={poach.tid} />
       </div>
       {poach.get('player_tid') === teamId && (
-        <div className='poach-notice-section'>
+        <div className='poach-notice-section poach-notice-actions'>
           <Button
             variant='contained'
+            color='primary'
+            onClick={() => handle_activate(poach)}
+          >
+            Activate
+          </Button>
+          <Button
+            variant='outlined'
             color='primary'
             onClick={() => handle_process_poach(poach)}
           >
