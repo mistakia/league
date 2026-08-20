@@ -660,12 +660,18 @@ observations:
     roughly 40-line body; unlike CLAUDE.md it is elected rather than auto-loaded so it taxes no
     session involuntarily, but the accretion makes it expensive at the moment an agent reaches the
     repo through the graph, and consolidation was not attempted during the CLAUDE.md split.
+  - >-
+    [gotcha] 2026-08-20 yarn prettier at the league root reaches INTO the private submodule (not in
+    .prettierignore, and private carries no prettier config of its own), so a routine format run
+    dirties four files in a separate repo with its own lifecycle. Reverted rather than committed
+    during the fleet prettier pin; decide between adding private/ to .prettierignore or formatting
+    it from inside the submodule as its own commit.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-20T05:27:48.240Z'
+updated_at: '2026-08-20T06:25:48.036Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
