@@ -1,0 +1,54 @@
+{
+  "name": "two per-period count columns in one view each count their own periods (executed-result parity)",
+  "description": "Two count columns whose scans differ materialize two period CTEs at (subject, period_key, year) grain, which is FINER than the outer row -- so joining them directly cross-multiplies. One player with three receiving games and three rushing games produced nine outer rows before the per-period summary landed. This fixture pins the VALUES across that change: the counts are 2 and 2 either way, because COUNT(DISTINCT period_key) is immune to uniform replication, which is exactly why a value fixture cannot be the gate on the fan-out itself -- test/data-views.per-period-summary.spec.mjs asserts the SHAPE. What this fixture does catch is the summary reducing to the wrong grain or filtering with the wrong threshold: the two columns carry DIFFERENT thresholds over the same three periods, so a summary that collapsed them onto one column, or dropped a threshold, answers 3 or answers the other column's number.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "params": {
+          "year": [2024],
+          "output": {
+            "period": "game",
+            "aggregation": "count",
+            "threshold": { "op": ">=", "value": 100 }
+          }
+        }
+      },
+      {
+        "column_id": "player_rush_yards_from_plays",
+        "params": {
+          "year": [2024],
+          "output": {
+            "period": "game",
+            "aggregation": "count",
+            "threshold": { "op": ">=", "value": 10 }
+          }
+        }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-CNTA-000941', 'Test', 'Cnta', 'T.Cnta', 'Test Cnta', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (990501, 2024, 1, 'REG', 'ZZA', 'ZZB', '2024-09-08')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (990502, 2024, 2, 'REG', 'ZZA', 'ZZB', '2024-09-15')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (990503, 2024, 3, 'REG', 'ZZA', 'ZZB', '2024-09-22')",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990501, 1, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-CNTA-000941', true, 120)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990502, 1, 2024, 2, to_timestamp(0), 'REG', 'PASS', 'TEST-CNTA-000941', true, 90)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990503, 1, 2024, 3, to_timestamp(0), 'REG', 'PASS', 'TEST-CNTA-000941', true, 150)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, rush_yards) VALUES (990501, 2, 2024, 1, to_timestamp(0), 'REG', 'RUSH', 'TEST-CNTA-000941', 20)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, rush_yards) VALUES (990502, 2, 2024, 2, to_timestamp(0), 'REG', 'RUSH', 'TEST-CNTA-000941', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, rush_yards) VALUES (990503, 2, 2024, 3, to_timestamp(0), 'REG', 'RUSH', 'TEST-CNTA-000941', 30)"
+    ],
+    "expected_rows": [
+      { "rec_yds_from_plays_0": "2", "rush_yds_from_plays_0": "2" }
+    ],
+    "compare_columns": ["rec_yds_from_plays_0", "rush_yds_from_plays_0"]
+  },
+  "tags": ["from_plays", "output-aggregator", "result-equivalence"],
+  "expected_query": "with \"count_game_fad052e31e28\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid) AS period_key, nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.receiving_yards ELSE 0 END) AS m_2205f2f1663c from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid, CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid), \"nfl_games\".\"season_year\"), \"count_game_fe6590e96906\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid) AS period_key, nfl_plays.ball_carrier_pid AS pid, SUM(rush_yards) AS m_f3c43d061399 from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.ball_carrier_pid, CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid), \"nfl_games\".\"season_year\"), \"per_period_summary_3a8b39f38fc5\" as materialized (select \"count_game_fad052e31e28\".\"pid\", \"count_game_fad052e31e28\".\"year\", COUNT(DISTINCT count_game_fad052e31e28.period_key) FILTER (WHERE count_game_fad052e31e28.m_2205f2f1663c >= 100) AS s_185219b89812 from \"count_game_fad052e31e28\" group by \"count_game_fad052e31e28\".\"pid\", \"count_game_fad052e31e28\".\"year\"), \"per_period_summary_6d520ed441c0\" as materialized (select \"count_game_fe6590e96906\".\"pid\", \"count_game_fe6590e96906\".\"year\", COUNT(DISTINCT count_game_fe6590e96906.period_key) FILTER (WHERE count_game_fe6590e96906.m_f3c43d061399 >= 10) AS s_30addd93b0ca from \"count_game_fe6590e96906\" group by \"count_game_fe6590e96906\".\"pid\", \"count_game_fe6590e96906\".\"year\") select \"player\".\"pid\", player.first_name, player.last_name, MAX(per_period_summary_3a8b39f38fc5.s_185219b89812) AS rec_yds_from_plays_0, MAX(per_period_summary_6d520ed441c0.s_30addd93b0ca) AS rush_yds_from_plays_0, \"player\".\"primary_position\" from \"player\" left join \"per_period_summary_3a8b39f38fc5\" on \"per_period_summary_3a8b39f38fc5\".\"pid\" = \"player\".\"pid\" left join \"per_period_summary_6d520ed441c0\" on \"per_period_summary_6d520ed441c0\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}
