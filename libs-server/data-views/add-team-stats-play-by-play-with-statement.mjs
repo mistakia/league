@@ -40,7 +40,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   select_strings = [],
   row_axes = [],
   select_column_names = [],
-  rate_columns = [],
+  combined_columns = {},
   data_view_options
 }) => {
   if (!with_table_name) {
@@ -142,7 +142,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     stats_query = create_player_team_stats_query({
       with_table_name,
       select_column_names,
-      rate_columns,
+      combined_columns,
       row_axes,
       params,
       having_clauses,
@@ -168,7 +168,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     stats_query = create_player_year_team_stats_wrap_query({
       with_table_name,
       select_column_names,
-      rate_columns,
+      combined_columns,
       having_clauses,
       params
     })
@@ -176,7 +176,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     stats_query = create_team_stats_query({
       with_table_name,
       select_column_names,
-      rate_columns,
+      combined_columns,
       row_axes,
       params,
       having_clauses,
@@ -228,7 +228,7 @@ export const add_team_stats_play_by_play_with_statement = ({
 function create_player_year_team_stats_wrap_query({
   with_table_name,
   select_column_names,
-  rate_columns,
+  combined_columns,
   having_clauses,
   params = {}
 }) {
@@ -251,29 +251,27 @@ function create_player_year_team_stats_wrap_query({
 
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
-    if (rate_columns.includes(select_column_name)) {
-      // Carry numerator/denominator through to the outer query so
-      // `with_where` (`sum(num)/NULLIF(sum(denom),0)`) keeps working
-      // unchanged. The pre-aggregated rate would not be safely sum-able.
-      wrap_query.select(
-        db.raw(
-          `sum(${with_table_name}.${select_column_name}_numerator) as ${select_column_name}_numerator`
+    const combined = combined_columns[select_column_name]
+    if (combined) {
+      // Carry the ACCUMULATORS through to the outer query so `with_where`,
+      // which recombines them, keeps working unchanged. The pre-combined value
+      // would not be safely sum-able -- summing it is the sum-of-per-period-
+      // ratios class the measure contract exists to make unrepresentable.
+      for (const accumulator_column of combined.accumulator_columns) {
+        wrap_query.select(
+          db.raw(
+            `sum(${with_table_name}.${accumulator_column}) as ${accumulator_column}`
+          )
         )
-      )
-      wrap_query.select(
-        db.raw(
-          `sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}_denominator`
-        )
-      )
-      // Outside a year_offset range, also project the bare pooled rate (raw
-      // fraction, matching the season render scale -- no x100) so the
-      // non-offset main-select `column_value` path resolves. sum() of the
-      // bigint components is numeric, so this is true division, not integer
-      // truncation.
+      }
+      // Outside a year_offset range, also project the combined value itself so
+      // the non-offset main-select `column_value` path resolves. It comes from
+      // the column's own combine, so the scale, the zero-denominator answer and
+      // the rounding are the season render's at this coarser grain.
       if (emit_bare_rate) {
         wrap_query.select(
           db.raw(
-            `sum(${with_table_name}.${select_column_name}_numerator) / NULLIF(sum(${with_table_name}.${select_column_name}_denominator), 0) as ${select_column_name}`
+            `${combined.recombine({ table_name: with_table_name })} as ${select_column_name}`
           )
         )
       }
@@ -294,7 +292,7 @@ function create_player_year_team_stats_wrap_query({
 function create_team_stats_query({
   with_table_name,
   select_column_names,
-  rate_columns,
+  combined_columns,
   row_axes,
   params,
   having_clauses,
@@ -308,8 +306,8 @@ function create_team_stats_query({
     query: team_stats_query,
     with_table_name,
     select_column_names,
-    rate_columns,
-    emit_numerator_denominator: is_year_offset_range(params)
+    combined_columns,
+    emit_accumulators: is_year_offset_range(params)
   })
   add_row_axes({ query: team_stats_query, with_table_name, row_axes })
   add_having_clauses({ query: team_stats_query, having_clauses })
@@ -320,7 +318,7 @@ function create_team_stats_query({
 function create_player_team_stats_query({
   with_table_name,
   select_column_names,
-  rate_columns,
+  combined_columns,
   row_axes,
   params,
   having_clauses,
@@ -376,8 +374,8 @@ function create_player_team_stats_query({
     query: player_team_stats_query,
     with_table_name,
     select_column_names,
-    rate_columns,
-    emit_numerator_denominator: is_year_offset_range(params)
+    combined_columns,
+    emit_accumulators: is_year_offset_range(params)
   })
   add_row_axes({ query: player_team_stats_query, with_table_name, row_axes })
   add_having_clauses({ query: player_team_stats_query, having_clauses })
@@ -389,37 +387,35 @@ function add_select_columns({
   query,
   with_table_name,
   select_column_names,
-  rate_columns,
+  combined_columns,
   // In a year_offset range the displayed value is produced by the correlated
-  // subquery in select-string.mjs, which pools SUM(num)/SUM(den) itself. Carry
-  // the summed numerator/denominator components through (matching the wrap CTE
-  // shape) instead of collapsing to a pre-pooled quotient the subquery cannot
-  // re-pool across the window.
-  emit_numerator_denominator = false
+  // subquery in select-string.mjs, which recombines the accumulators itself.
+  // Carry the summed accumulators through (matching the wrap CTE shape)
+  // instead of collapsing to a pre-combined value the subquery cannot re-pool
+  // across the window.
+  emit_accumulators = false
 }) {
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
-    if (rate_columns.includes(select_column_name)) {
-      if (emit_numerator_denominator) {
-        query.select(
-          db.raw(
-            `sum(${with_table_name}.${select_column_name}_numerator) as ${select_column_name}_numerator`
+    const combined = combined_columns[select_column_name]
+    if (combined) {
+      if (emit_accumulators) {
+        for (const accumulator_column of combined.accumulator_columns) {
+          query.select(
+            db.raw(
+              `sum(${with_table_name}.${accumulator_column}) as ${accumulator_column}`
+            )
           )
-        )
-        query.select(
-          db.raw(
-            `sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}_denominator`
-          )
-        )
+        }
       } else {
+        // The combine renders the zero-denominator answer as NULL. Without it
+        // a group whose denominator sums to zero raises `division by zero` and
+        // takes the whole query with it -- reachable on
+        // team_series_conversion_rate_from_plays, whose count_distinct
+        // denominator returns 0 for preseason groups.
         query.select(
           db.raw(
-            // NULLIF, matching the sibling site above. Without it a group whose
-            // denominator sums to zero raises `division by zero` and takes the
-            // whole query with it -- reachable on
-            // team_series_conversion_rate_from_plays, whose COUNT(DISTINCT
-            // CASE ...) denominator returns 0 for preseason groups.
-            `sum(${with_table_name}.${select_column_name}_numerator) / NULLIF(sum(${with_table_name}.${select_column_name}_denominator), 0) as ${select_column_name}`
+            `${combined.recombine({ table_name: with_table_name })} as ${select_column_name}`
           )
         )
       }

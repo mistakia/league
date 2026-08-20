@@ -5,7 +5,6 @@ import get_play_by_play_default_params from '#libs-server/data-views/get-play-by
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
-import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import {
@@ -107,17 +106,6 @@ const apply_team_stats_join = ({
 const team_stat_from_plays = ({
   select_string,
   stat_name,
-  is_rate = false,
-  rate_with_selects,
-  // Non-is_rate columns that are nonetheless pooled as a quotient in a
-  // multi-year year_offset RANGE (the AVG carve-outs PROE / CPOE). They keep
-  // their raw `select_string` season render (e.g. AVG(completion_percentage_over_expected)) in every
-  // non-range path, and only emit numerator/denominator selects when the
-  // request is a year_offset range so the window can pool SUM(num)/SUM(den)
-  // instead of summing per-season means. is_rate columns already carry their
-  // num/den as rate_with_selects in all paths and ignore these.
-  numerator_select = null,
-  denominator_select = null,
   force_player_active = false,
   measure = null,
   measure_expr = null,
@@ -138,27 +126,40 @@ const team_stat_from_plays = ({
   const resolve_active = (params) =>
     force_player_active || params?.limit_to_player_active_games || false
 
-  // Measure-first contract: a rate-capable single-aggregate column declares an
-  // explicit `measure: { accumulators, combine_accumulators }`; derive_measure produces the
-  // season render, numerator measure_expr, period aggregate (sum or
-  // count_distinct), supports_output, and decimals rounding from it. is_rate
-  // numerator/denominator columns and AVG carve-outs declare no measure and
-  // pass supports_periods: [].
+  // Measure-first contract: a column declares an explicit
+  // `measure: { accumulators, combine_accumulators }`, and derive_measure
+  // produces the season render, the accumulator projection, the recombination,
+  // the numerator measure_expr, the period aggregate, supports_output and the
+  // rounding from it. There is no second ratio vocabulary here any more: the
+  // four `is_rate` columns and the two AVG carve-outs are two-accumulator
+  // measures like every other ratio in the registry.
   const derived = measure
     ? derive_measure({ stat_name, measure, supports_periods })
     : null
 
-  // Fail-fast invariant (scoped to this factory): a non-rate column advertising
-  // any denominator period MUST declare a measure; an is_rate or raw-select
-  // column MUST pass supports_periods: []. Throws at module load.
-  if (!is_rate && !derived && supports_periods && supports_periods.length > 0) {
+  // Fail-fast invariant (scoped to this factory): a column advertising any
+  // denominator period MUST declare a measure; a column left on a raw
+  // select_string MUST pass supports_periods: []. Throws at module load.
+  if (!derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
       `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine_accumulators } or set supports_periods: []`
     )
   }
 
   const season_select = derived ? derived.with_select : select_string
-  const final_supports_output = derived ? derived.supports_output : null
+  // The `force_player_active` variant advertises NOTHING, and that is a repair
+  // rather than a restriction. Its value is a TEAM statistic pooled over the
+  // games one PLAYER was active for, which only the `_player_team_stats` CTE
+  // knows how to build -- it joins `player_gamelogs`. The output aggregator has
+  // no notion of that join: it groups the fact scan by the column's own subject
+  // id, and a `plays` source names no player, so it emitted `nfl_plays.pid AS
+  // pid` and every aggregation request on a `player_team_*` column answered
+  // `column nfl_plays.pid does not exist`. Measured at 95a949c6e on the ADDITIVE
+  // variants, so it predates the ratio conversion and is not something it
+  // introduced; withholding the capability is what stops the conversion from
+  // widening a live 500 onto twelve more columns.
+  const final_supports_output =
+    derived && !force_player_active ? derived.supports_output : null
   const final_measure_expr =
     measure_expr || (derived ? derived.measure_expr : null)
   const final_aggregate = derived ? derived.aggregate : null
@@ -178,38 +179,45 @@ const team_stat_from_plays = ({
       }
     : null
 
-  // A column whose multi-year year_offset RANGE value is a pooled quotient:
-  // is_rate columns (num/den in every path) or AVG carve-outs that supply an
-  // explicit numerator/denominator pair (num/den only in the range path).
-  const has_numerator_denominator_pair = Boolean(
-    numerator_select && denominator_select
-  )
-  const uses_numerator_denominator = is_rate || has_numerator_denominator_pair
+  // A COMBINED measure's CTE carries its ACCUMULATORS rather than its value,
+  // in EVERY path -- not only in a year_offset range. The team-stats CTE is
+  // finer-grained than the outer row (it projects year and week when those row
+  // axes are active), so the outer expression pools ACROSS its rows: for an
+  // additive measure that is a SUM, and for a combined one it has to sum each
+  // accumulator and combine after. The AVG carve-outs did this only in the
+  // range path and summed a per-period MEAN everywhere else, which is the
+  // sum-of-per-period-ratios class this contract makes unrepresentable.
+  const is_combined = Boolean(derived?.is_combined)
 
   return {
     table_alias: generate_table_alias,
     column_name: stat_name,
-    with_select: ({ params = {} } = {}) => {
-      if (is_rate) {
-        return rate_with_selects
-      }
-      // AVG carve-out in a year_offset range: emit the numerator/denominator
-      // pair so the base CTE carries the components the range correlated
-      // subquery pools, instead of a per-season mean that cannot be re-pooled.
-      if (has_numerator_denominator_pair && is_year_offset_range(params)) {
-        return [
-          `${numerator_select} as ${stat_name}_numerator`,
-          `${denominator_select} as ${stat_name}_denominator`
-        ]
-      }
-      return [`${season_select} AS ${stat_name}`]
-    },
-    // Consumed by add_clauses_for_table to fold the AVG carve-outs into
-    // rate_columns when (and only when) the request is a year_offset range, so
-    // the team-stats CTE builder projects their summed num/den components.
-    // is_rate columns are already in rate_columns via column_definition.is_rate.
-    ...(has_numerator_denominator_pair
-      ? { requires_numerator_denominator_in_year_offset: true }
+    with_select: () =>
+      is_combined
+        ? derived.accumulator_selects
+        : [`${season_select} AS ${stat_name}`],
+    // The accumulator COLUMNS this measure's CTE carries, which is what the
+    // team-stats CTE builder projects through its wrap and pooling stages. It
+    // replaces the `is_rate` / `requires_numerator_denominator_in_year_offset`
+    // pair plus the builder's hardcoded `_numerator` / `_denominator`
+    // suffixes: a measure declares its own accumulator names, so a future
+    // four-accumulator team column needs nothing new here.
+    ...(is_combined
+      ? {
+          accumulator_columns: Object.keys(measure.accumulators).map(
+            (name) => `${stat_name}_${name}`
+          ),
+          recombine_accumulators: derived.recombine,
+          // Read by the multi-year team-play wrap, which projects accumulators
+          // and recombines one grain coarser rather than summing a per-year
+          // combined value.
+          accumulator_selects: derived.accumulator_selects,
+          // The declaration the output aggregator needs to render the combine
+          // at PERIOD grain. Without it the period CTE reaches for a
+          // `measure_expr` a combined measure does not have, and every
+          // count / mean / rate request on a team ratio column throws.
+          combined_measure: derived.combined_measure
+        }
       : {}),
     // Self-contained year_offset-range correlated subquery for the displayed
     // value. The final stats CTE collapses to pid-grain for the player variant
@@ -242,19 +250,16 @@ const team_stat_from_plays = ({
             params
           })
 
-      if (uses_numerator_denominator) {
-        return `(SELECT SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
+      if (is_combined) {
+        return `(SELECT ${derived.recombine({ table_name })} FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
       }
 
       return `(SELECT SUM(${table_name}.${stat_name}) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
     },
-    with_where: ({ table_name }) => {
-      if (is_rate) {
-        return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
-      }
-
-      return `sum(${table_name}.${stat_name})`
-    },
+    with_where: ({ table_name }) =>
+      is_combined
+        ? derived.recombine({ table_name })
+        : `sum(${table_name}.${stat_name})`,
     main_where: () => null,
     with: force_player_active
       ? (args) =>
@@ -306,7 +311,6 @@ const team_stat_from_plays = ({
     },
     use_having: true,
     supports_periods,
-    is_rate,
     ...(final_supports_output
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
@@ -346,22 +350,42 @@ const stat_specs = {
     },
     stat_name: 'team_pass_yds_from_plays'
   },
+  // The two AVG carve-outs. `AVG(x)` is `SUM(x) / COUNT(x)`, so the pair below
+  // reproduces it exactly at the CTE's own grain -- the declared denominator IS
+  // the AVG's implicit one, a count of NON-NULL values rather than a count of
+  // plays. What it changes is the pooling ACROSS CTE rows: the outer expression
+  // summed a per-period mean everywhere outside a year_offset range, and now
+  // sums the components and divides after.
   team_pass_rate_over_expected_from_plays: {
-    select_string: `AVG(pass_over_expected)`,
-    // AVG(pass_over_expected) re-expressed as SUM(pass_over_expected)/COUNT(non-null) so a multi-year
-    // year_offset range pools the dropbacks rather than averaging per-season
-    // means. Only emitted in the range path; the season render stays AVG.
-    numerator_select: `SUM(pass_over_expected)`,
-    denominator_select: `SUM(CASE WHEN pass_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
-    stat_name: 'team_pass_rate_over_expected_from_plays',
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: { aggregate: 'sum', expr: `pass_over_expected` },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN pass_over_expected IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_pass_rate_over_expected_from_plays'
   },
   team_completion_percentage_over_expected_from_plays: {
-    select_string: `AVG(completion_percentage_over_expected)`,
-    numerator_select: `SUM(completion_percentage_over_expected)`,
-    denominator_select: `SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
-    stat_name: 'team_completion_percentage_over_expected_from_plays',
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `completion_percentage_over_expected`
+        },
+        denominator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END`
+        }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_completion_percentage_over_expected_from_plays'
   },
   team_pass_attempts_from_plays: {
     measure: {
@@ -461,31 +485,46 @@ const stat_specs = {
     stat_name: 'team_wp_added_from_plays'
   },
   team_success_rate_from_plays: {
-    rate_with_selects: [
-      `SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
-      `COUNT(*) as team_success_rate_from_plays_denominator`
-    ],
-    stat_name: 'team_success_rate_from_plays',
-    is_rate: true,
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_successful_play = true THEN 1 ELSE 0 END`
+        },
+        denominator: { aggregate: 'count', expr: `*` }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_success_rate_from_plays'
   },
   team_expected_points_success_rate_from_plays: {
-    rate_with_selects: [
-      `SUM(CASE WHEN is_epa_successful = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator`,
-      `COUNT(*) as team_expected_points_success_rate_from_plays_denominator`
-    ],
-    stat_name: 'team_expected_points_success_rate_from_plays',
-    is_rate: true,
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN is_epa_successful = true THEN 1 ELSE 0 END`
+        },
+        denominator: { aggregate: 'count', expr: `*` }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_expected_points_success_rate_from_plays'
   },
   team_explosive_play_rate_from_plays: {
-    rate_with_selects: [
-      `SUM(CASE WHEN pass_yards >= 20 OR rush_yards >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
-      `COUNT(*) as team_explosive_play_rate_from_plays_denominator`
-    ],
-    stat_name: 'team_explosive_play_rate_from_plays',
-    is_rate: true,
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'sum',
+          expr: `CASE WHEN pass_yards >= 20 OR rush_yards >= 10 THEN 1 ELSE 0 END`
+        },
+        denominator: { aggregate: 'count', expr: `*` }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_explosive_play_rate_from_plays'
   },
   team_play_count_from_plays: {
     measure: {
@@ -548,14 +587,27 @@ const stat_specs = {
     },
     stat_name: 'team_yards_blocked_from_plays'
   },
+  // Both accumulators are count_distinct, which the closed set admits only
+  // because the distinct key is `esbid`-prefixed and so nested inside every
+  // partition the measure can be evaluated at (see accumulator.mjs). The
+  // combine's NULLIF is what closes the live `division by zero` this column
+  // raised on a preseason group, whose denominator counts zero series.
   team_series_conversion_rate_from_plays: {
-    rate_with_selects: [
-      `COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_numerator`,
-      `COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_denominator`
-    ],
-    stat_name: 'team_series_conversion_rate_from_plays',
-    is_rate: true,
-    supports_periods: []
+    measure: {
+      accumulators: {
+        numerator: {
+          aggregate: 'count_distinct',
+          expr: `CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(nfl_plays.esbid, '_', series_sequence) END`
+        },
+        denominator: {
+          aggregate: 'count_distinct',
+          expr: `CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(nfl_plays.esbid, '_', series_sequence) END`
+        }
+      },
+      combine_accumulators: (a, { divide }) =>
+        divide({ numerator: a.numerator, denominator: a.denominator })
+    },
+    stat_name: 'team_series_conversion_rate_from_plays'
   }
 }
 

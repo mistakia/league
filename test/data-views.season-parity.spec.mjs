@@ -38,6 +38,27 @@ const current_dir = path.dirname(fileURLToPath(import.meta.url))
 // were guarding on their NUMERATOR, so they rendered blank for a subject with
 // a real denominator and no events. That is a value change, covered by
 // test/data-view-queries/player-pass-touchdown-percentage-zero-numerator-result-equivalence.json.
+//
+// The team conversion moved exactly FOUR entries, and they are the AVG
+// carve-outs: PROE and CPOE in both their team and player_team variants. Their
+// render goes from a single `AVG(x)` to the two accumulators `SUM(x)` and
+// `SUM(CASE WHEN x IS NOT NULL THEN 1 ELSE 0 END)`, which is the same value at
+// this grain -- the declared denominator IS the AVG's implicit one. What it
+// repairs is the POOLING one level out: the outer expression was `sum(<that
+// AVG>)`, so the player variant summed a per-GAME mean across every game the
+// player was active for and a full season read roughly seventeen times the
+// truth. Pinned by
+// test/data-view-queries/player-team-completion-percentage-over-expected-single-year-pooling-result-equivalence.json,
+// which returns 75 before the conversion against a true 30.
+//
+// The four `is_rate` statistics moved NOTHING except series conversion, whose
+// two entries gained a `nfl_plays.` qualifier on the `esbid` inside their
+// distinct key. That is required rather than cosmetic: the season CTE scans
+// `nfl_plays` alone, but the PERIOD CTE joins `nfl_games`, which also carries
+// `esbid`, so the bare reference is a 42702 the moment the column is asked for
+// a count or a mean. Their CTE already carried the two accumulator columns
+// under these exact names, so everything else reproduced byte for byte and only
+// the OUTER recombination changed.
 const golden = JSON.parse(
   fs.readFileSync(
     path.join(current_dir, 'fixtures/data-views-season-render-golden.json'),
