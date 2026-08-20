@@ -6,26 +6,16 @@ import { derive_measure } from '#libs-server/data-views/measure/measure-contract
 
 const expect = chai.expect
 
-const TEAM_PERIODS = [
-  'team_half',
-  'team_quarter',
-  'team_play',
-  'team_pass_play',
-  'team_rush_play',
-  'team_drive',
-  'team_series'
-]
-
 describe('data-views measure-contract', () => {
   describe('derive_measure -- additive', () => {
     it('emits a bare SUM season render when decimals is null', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'rush_yds_from_plays',
         measure: {
           accumulators: { value: { aggregate: 'sum', expr: 'rush_yards' } },
           combine_accumulators: 'identity'
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       expect(result.with_select).to.equal('SUM(rush_yards)')
       expect(result.aggregate).to.equal('sum')
@@ -35,6 +25,7 @@ describe('data-views measure-contract', () => {
 
     it('rounds the season render when decimals is set', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'weighted_opportunity_from_plays',
         measure: {
           accumulators: {
@@ -45,8 +36,7 @@ describe('data-views measure-contract', () => {
           },
           combine_accumulators: 'identity',
           decimals: 2
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       expect(result.with_select).to.equal(
         'ROUND(SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2)'
@@ -59,6 +49,7 @@ describe('data-views measure-contract', () => {
   describe('derive_measure -- a bare distinct count', () => {
     it('emits a bare COUNT(DISTINCT) season render and count_distinct aggregate', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'team_series_count_from_plays',
         measure: {
           accumulators: {
@@ -68,8 +59,7 @@ describe('data-views measure-contract', () => {
             }
           },
           combine_accumulators: 'identity'
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       expect(result.with_select).to.equal(
         "COUNT(DISTINCT CONCAT(esbid, '_', series_sequence))"
@@ -82,6 +72,7 @@ describe('data-views measure-contract', () => {
 
     it('defaults decimals to 2 for the rate render but keeps the season render bare', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'team_drive_count_from_plays',
         measure: {
           accumulators: {
@@ -91,8 +82,7 @@ describe('data-views measure-contract', () => {
             }
           },
           combine_accumulators: 'identity'
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       expect(result.decimals).to.equal(2)
       // season render is bare regardless of decimals
@@ -101,6 +91,7 @@ describe('data-views measure-contract', () => {
 
     it('honors an explicit decimals override', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'team_drive_count_from_plays',
         measure: {
           accumulators: {
@@ -111,22 +102,21 @@ describe('data-views measure-contract', () => {
           },
           combine_accumulators: 'identity',
           decimals: 0
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       expect(result.decimals).to.equal(0)
     })
   })
 
   describe('supports_output derivation', () => {
-    it('prepends game/season to the declared period list and echoes supports_periods', () => {
+    it('derives the period list from the SUBJECT GRAIN, not from a declaration', () => {
       const result = derive_measure({
+        subject_grain: 'team',
         stat_name: 'rush_yds_from_plays',
         measure: {
           accumulators: { value: { aggregate: 'sum', expr: 'rush_yards' } },
           combine_accumulators: 'identity'
-        },
-        supports_periods: TEAM_PERIODS
+        }
       })
       // All three of the registry's aggregations, `mean` included as of the
       // per-period summary. `sum` is deliberately absent: it is the wire value
@@ -141,7 +131,10 @@ describe('data-views measure-contract', () => {
         'season'
       ])
       expect(result.supports_output.periods).to.include('team_play')
-      expect(result.supports_periods).to.deep.equal(TEAM_PERIODS)
+      // A team subject has no player-action denominator units. This is the
+      // second axis the fact source alone could not supply: both from-plays
+      // factories read the same `plays` source.
+      expect(result.supports_output.periods).to.not.include('player_route')
     })
   })
 
@@ -149,12 +142,12 @@ describe('data-views measure-contract', () => {
     it('throws for an unknown aggregate', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
           measure: {
             accumulators: { value: { aggregate: 'average', expr: 'x' } },
             combine_accumulators: 'identity'
-          },
-          supports_periods: TEAM_PERIODS
+          }
         })
       ).to.throw(/unknown aggregate/)
     })
@@ -162,12 +155,12 @@ describe('data-views measure-contract', () => {
     it('throws for a missing expr', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
           measure: {
             accumulators: { value: { aggregate: 'sum' } },
             combine_accumulators: 'identity'
-          },
-          supports_periods: TEAM_PERIODS
+          }
         })
       ).to.throw(/non-empty string expr/)
     })
@@ -175,11 +168,11 @@ describe('data-views measure-contract', () => {
     it('throws for an absent combine rather than assuming identity', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
           measure: {
             accumulators: { value: { aggregate: 'sum', expr: 'x' } }
-          },
-          supports_periods: TEAM_PERIODS
+          }
         })
       ).to.throw(/'identity' or a function/)
     })
@@ -187,6 +180,7 @@ describe('data-views measure-contract', () => {
     it('throws for an identity combine over two accumulators', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
           measure: {
             accumulators: {
@@ -194,8 +188,7 @@ describe('data-views measure-contract', () => {
               denominator: { aggregate: 'sum', expr: 'b' }
             },
             combine_accumulators: 'identity'
-          },
-          supports_periods: TEAM_PERIODS
+          }
         })
       ).to.throw(/identity requires exactly one/)
     })
@@ -203,9 +196,9 @@ describe('data-views measure-contract', () => {
     it('throws for a measure declaring no accumulators', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
-          measure: { accumulators: {}, combine_accumulators: 'identity' },
-          supports_periods: TEAM_PERIODS
+          measure: { accumulators: {}, combine_accumulators: 'identity' }
         })
       ).to.throw(/declares no accumulators/)
     })
@@ -213,9 +206,9 @@ describe('data-views measure-contract', () => {
     it('throws for a missing measure object', () => {
       expect(() =>
         derive_measure({
+          subject_grain: 'team',
           stat_name: 'bad_col',
-          measure: null,
-          supports_periods: TEAM_PERIODS
+          measure: null
         })
       ).to.throw(/requires a measure object/)
     })

@@ -77,7 +77,12 @@ describe('data-views mean aggregation', () => {
       const def = player_stats.player_target_share_from_plays
       expect(def.supports_output.aggregations).to.include('mean')
       expect(def.supports_output.aggregations).to.include('count')
-      expect(def.supports_output.periods).to.deep.equal(PARTITION_PERIODS)
+      // The partitions lead the list; the denominator units its subject grain
+      // supplies follow, which is what capability derivation added on top of
+      // this column's old hand-set opt-out.
+      expect(def.supports_output.periods.slice(0, 2)).to.deep.equal(
+        PARTITION_PERIODS
+      )
     })
   })
 

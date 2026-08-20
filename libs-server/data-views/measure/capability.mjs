@@ -28,6 +28,53 @@ export const PARTITION_PERIODS = Object.freeze(['game', 'season'])
 
 export const PER_PERIOD_AGGREGATIONS = Object.freeze(['count', 'mean'])
 
+// The denominator-unit vocabulary, by SUBJECT GRAIN. This is the second axis
+// the fact source alone could not supply: both from-plays factories read the
+// same `plays` source and differ only in whose row the value renders on, so a
+// source-keyed lookup would either grant a team column the player-action units
+// -- which cannot execute for a team subject -- or strip them from the player
+// columns. Which units EXIST is a property of the subject: a team has plays,
+// drives and series; a player has all of those PLUS their own participation and
+// their own actions.
+//
+// `game` leads both lists because it is a unit for either subject, and the
+// order is the order these have always been declared in, so deriving the list
+// moves no advertised period.
+const TEAM_DENOMINATOR_UNITS = Object.freeze([
+  'game',
+  'team_half',
+  'team_quarter',
+  'team_play',
+  'team_pass_play',
+  'team_rush_play',
+  'team_drive',
+  'team_series'
+])
+
+const PLAYER_DENOMINATOR_UNITS = Object.freeze([
+  ...TEAM_DENOMINATOR_UNITS,
+  'player_rush_attempt',
+  'player_pass_attempt',
+  'player_target',
+  'player_catchable_target',
+  'player_catchable_deep_target',
+  'player_reception',
+  'player_play',
+  'player_route',
+  'player_pass_play',
+  'player_rush_play'
+])
+
+export const SUBJECT_GRAINS = Object.freeze(['player', 'team'])
+
+export const denominator_units_for_subject_grain = (subject_grain) => {
+  if (subject_grain === 'team') return TEAM_DENOMINATOR_UNITS
+  if (subject_grain === 'player') return PLAYER_DENOMINATOR_UNITS
+  throw new Error(
+    `capability: unknown subject_grain '${subject_grain}' (expected ${SUBJECT_GRAINS.join(' | ')})`
+  )
+}
+
 // `denominator_unit_periods` is the fact source's own vocabulary, jointly
 // gated by the subject grain -- a team-subject column cannot offer the
 // player-action units, and a season-grain source offers no game period.

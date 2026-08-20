@@ -6,8 +6,7 @@
 // strictly after accumulation, and every downstream artifact derives from that
 // one declaration: the season render (`with_select`), the numerator measure
 // expression (`measure_expr`), the period-CTE aggregate selector, the
-// advertised `supports_output`, the echoed `supports_periods`, and the
-// rounding. Additivity is what makes a measure evaluable at any grain --
+// advertised `supports_output`, and the rounding. Additivity is what makes a measure evaluable at any grain --
 // accumulate over the facts the grain names, then combine -- which is why
 // "sum of per-period ratios" is not expressible here rather than being
 // prevented by a comment on each column that discovered it.
@@ -40,7 +39,10 @@ import {
   render_combine_accumulators,
   validate_combine_accumulators
 } from './combine-accumulators.mjs'
-import { derive_supports_output } from './capability.mjs'
+import {
+  derive_supports_output,
+  denominator_units_for_subject_grain
+} from './capability.mjs'
 
 const INTEGRAL_AGGREGATES = new Set(['count', 'count_distinct'])
 
@@ -91,7 +93,7 @@ const assert_measure = ({ stat_name, measure }) => {
   })
 }
 
-export const derive_measure = ({ stat_name, measure, supports_periods }) => {
+export const derive_measure = ({ stat_name, measure, subject_grain }) => {
   assert_measure({ stat_name, measure })
 
   const { accumulators, combine_accumulators } = measure
@@ -176,8 +178,14 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
   // aggregable exactly as an additive one is, now that the period CTE projects
   // the combine itself, and `rate` and `mean` are both semantically legal on
   // one (see capability.mjs).
+  // The denominator-unit vocabulary is DERIVED from the subject grain rather
+  // than hand-declared per column. `supports_periods` used to carry it, and
+  // 42 columns opted out with `[]` -- every one of them a combined measure,
+  // opted out back when a combine could not be aggregated at all. That is no
+  // longer a property of the column, so there is nothing left for a column to
+  // declare.
   const capability = derive_supports_output({
-    denominator_unit_periods: ['game', ...supports_periods]
+    denominator_unit_periods: denominator_units_for_subject_grain(subject_grain)
   })
   const supports_output = {
     periods: capability.periods,
@@ -195,7 +203,6 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
     measure_expr,
     aggregate,
     supports_output,
-    supports_periods,
     decimals
   }
 }
