@@ -10,7 +10,14 @@ For the structural primitives the query builder is composed of — row-grain ide
 | --------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | `is_team` column-definition flag                                            | `is_team_identity(identity_id)` in `identities.mjs`        |
 | `supported_splits` / `supports_splits`                                      | `supported_row_axes` plus grain reachability               |
-| `supported_rate_types`                                                      | `supports_output.periods`, echoed as `supports_periods`    |
+| `supported_rate_types`                                                      | `supports_output.periods`, derived from the subject grain  |
+| `supports_periods` as a hand-set field                                      | `measure/capability.mjs`, keyed on the subject grain       |
+| `measure: { kind, expr }`                                                   | `measure: { accumulators, combine_accumulators }`          |
+| `numerator_select` / `denominator_select` / `has_numerator_denominator`     | two accumulators plus a combine that divides               |
+| `is_rate` / `rate_with_selects` / `has_numerator_denominator_pair`          | the same, on the team factory                              |
+| `requires_numerator_denominator_in_year_offset`                             | `accumulator_columns` on the column definition             |
+| `is_percentage`                                                             | the combine writes its own scale                           |
+| `create_team_share_stat`                                                    | the `plays_cohort` fact source                             |
 | `rate_type_tables`                                                          | `query_context.applied_output_ctes`                        |
 | `get_rate_type_cte_table_name` / `add_rate_type_cte` / `join_rate_type_cte` | the output-aggregator plugin interface                     |
 | `rate_type_handlers` dispatch map                                           | `output-aggregator-registry.mjs`                           |
@@ -734,26 +741,34 @@ measure: { kind: 'additive' | 'distinct_count', expr: '<sql>', decimals: <int|nu
 - `expr` is the per-row SQL fragment, scanned against `nfl_plays` in the numerator CTE (qualify ambiguous columns, e.g. `nfl_plays.esbid`, because that CTE joins `nfl_games`).
 - `decimals` defaults `null`.
 
-### Kind → behavior
+### Accumulator → behavior
 
-| kind             | season render                                | numerator aggregate    | rate render                                      |
-| ---------------- | -------------------------------------------- | ---------------------- | ------------------------------------------------ |
-| `additive`       | `SUM(expr)`, or `ROUND(SUM(expr), decimals)` | `SUM(expr)`            | rounds iff `decimals` set                        |
-| `distinct_count` | `COUNT(DISTINCT expr)` (always bare integer) | `COUNT(DISTINCT expr)` | `ROUND(.../games, decimals)`, decimals default 2 |
+| aggregate        | rendered as            |
+| ---------------- | ---------------------- |
+| `sum`            | `SUM(expr)`            |
+| `count`          | `COUNT(expr)`          |
+| `count_distinct` | `COUNT(DISTINCT expr)` |
 
-`decimals` semantics: `null` wraps neither season nor rate in `ROUND` (preserving exact parity for bare-`SUM` integer columns and today's unrounded rate emit). When set it rounds the additive season render and both kinds' rate render. The `aggregate` selector (`'sum'` | `'count_distinct'`) is spread onto the column-def and read by `build-period-cte.mjs` so a `count_distinct` numerator emits `COUNT(DISTINCT ...)` while co-locating in the same batched period CTE as `sum` measures.
+A measure declares a SET of these plus a combine applied strictly after accumulation, so the same declaration renders at the season grain, at period grain inside the aggregator CTE, and one grain coarser over an offset window. `decimals` sits outside the combine: `null` wraps neither render in `ROUND`, and an integral value is never rounded at the season grain because a count has nothing to round.
 
 ### Carve-outs
 
-Averages (`AVG(...)`, `CAST(ROUND(AVG(...)))`, `AVG(x)*100`), compound ratios (`CASE WHEN SUM>0 THEN ROUND(100.0*SUM/...)`), and `has_numerator_denominator` year-offset ratios are NOT routed through the deriver. They keep their raw `with_select_string` and declare `supports_periods: []` (an average has no meaningful per-period rate). The 8 `create_team_share_stat` columns are a separate factory, non-rate by construction.
+There are none. Every column in both from-plays factories declares accumulators — the averages, the compound ratios and the shares included — which is what lets the fail-fast invariant below take its strong form.
 
 ### Fail-fast invariant
 
-Scoped inside the two migrated factories: a column that advertises any rate type MUST declare a `measure`; a column left on a raw `with_select_string` MUST pass `supports_periods: []`. Violations throw at module load, making the silent-rate-drop regression class structurally impossible. The `role_attributions` / explicit-`supports_output` factories (defensive, fantasy-points) never call `derive_measure` and are exempt by construction — a global registry sweep would wrongly throw for them.
+Scoped inside the two migrated factories: EVERY column MUST declare a `measure`. Violations throw at module load, making the silent-rate-drop regression class structurally impossible rather than merely declared against. It used to be the weaker "a column advertising any rate type must declare one", because a column could opt out with `supports_periods: []` and stay on a raw select string; there is no opt-out left. The `role_attributions` / explicit-`supports_output` factories (defensive, fantasy-points) never call `derive_measure` and are exempt by construction — a global registry sweep would wrongly throw for them.
 
 ## Output Aggregation
 
-The `output` param on a numeric measure column parameterizes how that measure collapses into a cell. It replaced the `rate_type` token system; `rate_type` remains permanently accepted on the request path because shared short URLs carry it, and is translated to `output` by `normalize-output-param.mjs` before anything else reads it.
+The `output` param on a numeric measure column parameterizes how that measure collapses into a cell. There are TWO families and `period` means a different thing in each:
+
+| Family       | Evaluation                             | `period` is                                              | Aggregations    |
+| ------------ | -------------------------------------- | -------------------------------------------------------- | --------------- |
+| `pooled`     | one combine over the whole scope       | a denominator unit (`game`, `team_play`, `player_route`) | `rate`          |
+| `per_period` | combine per period, then reduce across | a partition of time (`game`, `season`)                   | `count`, `mean` |
+
+`rate` and `mean` are different measures rather than two spellings of one: `rate` divides by a denominator UNIT (games PLAYED) and `mean` by the periods CARRYING measure rows. Measured on 2023 REG receiving yards, 366 of 482 players disagree. A column offers whichever of the two its subject grain supports, normally both, whatever its combine looks like. It replaced the `rate_type` token system; `rate_type` remains permanently accepted on the request path because shared short URLs carry it, and is translated to `output` by `normalize-output-param.mjs` before anything else reads it.
 
 ```
 output: {

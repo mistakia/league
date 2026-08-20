@@ -77,24 +77,70 @@ A column definition declares a `source` descriptor rather than a join. The sourc
 A column definition declares what it measures and where the measure lives. The load-bearing fields:
 
 - `source` — `{grain, table, attach, attach_owns_join, supports_row_axes, key_columns, extra_predicates, year_default, week_type}`. `grain` drives source-attach resolution.
-- `measure` — the input contract, `{kind, expr, decimals}` where `kind` is `additive` or `distinct_count`.
-- `supports_output` — `{periods: [...], aggregations: [...]}`. Presence of this field is the signal that the column supports output aggregation.
-- `measure_expr({table_name, params, identity_id})`, `measure_source`, `measure_predicate`, `aggregate`, `decimals` — the derived output contract consumed by the aggregator plugins.
+- `measure` — the input contract, `{accumulators, combine_accumulators, decimals}`. See the measure contract below.
+- `supports_output` — `{periods: [...], aggregations: [...]}`, DERIVED and never hand-declared. Presence of this field is the signal that the column supports output aggregation.
+- `measure_expr({table_name, params, identity_id})`, `measure_source`, `measure_predicate`, `aggregate`, `combined_measure`, `decimals` — the derived output contract consumed by the aggregator plugins.
 - `apply_filters` and `consumes_params_extra` — param handling for columns whose filters must reach inside the aggregation CTE.
 
-`derive_measure({stat_name, measure, supports_periods})` at `measure-contract.mjs:67` is the factory that turns the input contract into the output contract. It validates the measure kind and expression at module load — a malformed declaration throws on import, not at query time. For `additive` it emits `SUM(expr)` with `aggregate: 'sum'`; for `distinct_count` it emits `COUNT(DISTINCT expr)` with `aggregate: 'count_distinct'`. It always prepends `game` and `season` to `supports_periods`, so a column declares only the periods beyond those two.
+### The measure contract
 
-`measure_source` selects the scan: `plays`, `gamelogs`, `snaps`, `plays_receiver`, or `plays_role_union`.
+One law, applied at whatever scope the caller names:
 
-Ratio columns (`has_numerator_denominator: true`) declare no `supports_output`. `SUM(measure) / COUNT(period)` is not meaningful for them and no `ratio` aggregator exists.
+> **value(scope) = combine(accumulate(facts in scope))**
+
+A measure is a set of additive ACCUMULATORS plus a pure COMBINE applied strictly after accumulation. Additivity is what makes a measure evaluable at any grain — accumulate over the facts the grain names, then combine — and it is why "sum of per-period ratios" is not expressible here rather than being prevented by a comment on each column that discovered it.
+
+```
+measure: {
+  accumulators: { <name>: { aggregate, expr } },
+  combine_accumulators: 'identity' | (accumulator_sql, { divide }) => <sql fragment>,
+  decimals: <int | null>
+}
+```
+
+- `aggregate` is a closed set: `sum` | `count` | `count_distinct` (`measure/accumulator.mjs`). Declaring `count_distinct` is a claim that the distinct key is nested inside every partition the measure will be evaluated at; check it before writing one.
+- `combine_accumulators` is REQUIRED. Absence is not identity — a misspelled key would otherwise fall through, advertise a denominator vocabulary on a ratio column and emit wrong SQL with nothing throwing. `'identity'` requires exactly one accumulator.
+- A percentage column writes its own `100.0 *` inside the combine, to the LEFT of the division. There is no scale flag: the combine returns the displayed value, so there is nothing for a second declaration to disagree with.
+- `decimals` sits outside the combine and is applied by the emitter.
+
+`measure/combine-accumulators.mjs` is the ONE place a combine is rendered, at any grain. It replaced five hand-written copies that did not agree with each other — the display path emitted `NULLIF` while two filter paths answered zero for the same input. There is one answer and it is NULL: a player with no team targets did not have a 0% share.
+
+`derive_measure({stat_name, measure, subject_grain})` in `measure/measure-contract.mjs` turns that one declaration into every downstream artifact: the season render, the accumulator projection, the recombination, the numerator `measure_expr`, the period aggregate, the advertised capability and the rounding. It validates at module load — a malformed declaration throws on import, not at query time.
+
+A measure carrying a real combine derives two further shapes, and the distinction between them is the whole contract:
+
+- `combined_measure` — the declaration itself, carried into a query-time scan so the period CTE can render the combine over its OWN `GROUP BY`. That is the law at period grain.
+- `recombine({table_name})` — the same combine ONE GRAIN COARSER, over a relation that has already projected one column per accumulator. Consumers that pool ACROSS rows (the year-offset window, the multi-year team-play wrap, the team-stats CTE) sum each accumulator and combine after, never the reverse.
+
+`measure_source` selects the scan through `measure/fact-source-registry.mjs`, which declares each source's table, `subject_attribution` (`direct` / `single_role` / `multi_role` / `cohort_member`), `subject_id_lookup` and `partition_periods`. A share is an ordinary two-accumulator measure over the `plays_cohort` source, whose `cohort_expansion` attributes a team play to every player who appeared in that game.
+
+### Derived capability
+
+`supports_output` is computed from the measure, the fact source and the SUBJECT GRAIN (`measure/capability.mjs`). No column declares it and none declares a period list.
+
+- `rate` over the denominator-unit vocabulary, which is a property of the subject: a team subject has team plays, drives and series; a player subject has those plus their own participation and their own actions.
+- `count` and `mean` over the PARTITION vocabulary (`game`, `season`).
+
+Measure SHAPE gates neither family. A ratio column offers `rate` and an additive column offers `mean`, because they are different measures rather than two spellings of one — `rate` divides by a denominator UNIT and `mean` by the periods CARRYING measure rows.
+
+The subject grain is the axis that cannot come from the fact source: both from-plays factories read the same `plays` source and differ only in whose row the value renders on.
 
 ## Output aggregation
 
-`output-aggregator-registry.mjs` is a `Map<period, Map<aggregation, plugin>>`.
+`output-aggregator-registry.mjs` is a `Map<period, Map<aggregation, plugin>>`, and the two families it holds mean different things by `period`:
+
+| Family     | Evaluation                                     | `period` is                                                   | Aggregations    |
+| ---------- | ---------------------------------------------- | ------------------------------------------------------------- | --------------- |
+| pooled     | one combine over the whole scope               | a denominator unit (`game`, `team_play`, `player_route`, ...) | `rate`          |
+| per_period | combine per period, then reduce across periods | a partition of time (`game`, `season`)                        | `count`, `mean` |
+
+`game` is legitimately in both: a denominator unit for a rate, a partition for a count or a mean. The two vocabularies are disjoint on purpose — a `mean per team_play` is not a thing.
 
 Registered periods for `rate`: `game`, `team_play`, `team_pass_play`, `team_rush_play`, `team_half`, `team_quarter`, `team_drive`, `team_series`, `player_rush_attempt`, `player_pass_attempt`, `player_target`, `player_catchable_target`, `player_deep_target`, `player_catchable_deep_target`, `player_reception`, `player_touch`, `player_opportunity`, `player_play`, `player_pass_play`, `player_rush_play`, `player_route`.
 
-Registered periods for `count`: `game` and `season`. There is no `(season, 'rate')` tuple.
+Registered periods for `count` and for `mean`: `game` and `season`. There is no `(season, 'rate')` tuple.
+
+`sum` is NOT an aggregation and is not registered as one — it is the wire value for no output aggregation.
 
 ### Plugin interface
 
@@ -113,18 +159,26 @@ Registered periods for `count`: `game` and `season`. There is no `(season, 'rate
 `output-aggregator/build-period-cte.mjs` builds the per-period scan. Three period modes, keyed by `period_key_expr`:
 
 - `game` — `period_key` is `CONCAT(season_year,'_',week,'_',esbid)`
-- `season` — `period_key` is `CONCAT(season_year,'_',season_type)`
+- `season` — `period_key` is `season_year` alone. A season type filters which games are in scope; it does not divide the span, so keying on it counted `(year, season type)` PAIRS under a label reading "Seasons"
 - `aggregate` — no period key; collapses to (pid or team, year) for the numerator-only path
 
 Anything else throws.
 
 Two builders sit behind it. `build_role_union_period_cte` handles `measure_source: 'plays_role_union'`, where one play attributes to several players — a touchdown pass scores both the passer and the receiver. It builds a `UNION ALL` over role attributions, each with its own pid column and measure expression. Fantasy points is the motivating case; a single-pid `COALESCE` shape cannot express it.
 
-`build_batched_period_cte` handles everything else and is the coalescing path: measures that share a scan signature become one materialized CTE emitting `SUM(expr) AS m_<hash>` per measure.
+`build_batched_period_cte` handles everything else and is the coalescing path: measures that share a scan signature become one materialized CTE emitting one column per measure. What that column is depends on the measure shape, and this is where the contract does its work:
+
+- an ADDITIVE measure projects `SUM(expr) AS m_<hash>` (or `COUNT(DISTINCT expr)`);
+- a COMBINED measure projects the whole combine over the scan's own `GROUP BY`, because its value is a function of several accumulators and exists only once the combine is evaluated at period grain;
+- a consumer that pools ACROSS the CTE's rows instead asks for the accumulators unaggregated and recombines one grain coarser.
+
+The per-period family then reduces that column to subject grain in a summary CTE (`output-aggregator/per-period-summary.mjs`) so two per-period columns in one view cannot cross-multiply.
 
 ### Measure batching
 
-`output-aggregator/measure-batch.mjs:39` computes the batch key from `measure_source`, `period`, `identity_id`, sorted `pid_columns`, the rendered `measure_predicate`, the `apply_filters` body, `team_unit`, and the consumed-params signature. Measures sharing a key share one `nfl_plays` scan named `rate_<period>_<md5 prefix>`.
+`output-aggregator/measure-batch.mjs:39` computes the batch key from `measure_source`, `period`, `identity_id`, `pid_columns` IN ITS DECLARED ORDER, the rendered `measure_predicate`, the `apply_filters` body, `team_unit`, and the consumed-params signature. Measures sharing a key share one `nfl_plays` scan named `rate_<period>_<md5 prefix>` (the per-period family renames the prefix to `per_period_`, deliberately carrying no aggregation, so a count and a mean of one measure share the scan).
+
+The role list is ORDER-SENSITIVE in that key, and so is the table alias. It is emitted as an ordered `COALESCE` that decides which player a fact is credited to — measured over 2023+, `passer_pid` and `target_pid` are both non-null and DIFFERENT on 60,547 plays — so hashing it as a set made two columns declaring the same roles in different orders share one CTE, and one of the two was always mis-attributed.
 
 `plays_role_union` is excluded from batching. Registration is deferred — `register_measure` accumulates into `query_context.measure_batches` and `flush_measure_batches` materializes after the per-column dispatch loop completes, so batching can see every column before deciding.
 
@@ -206,3 +260,5 @@ This is also the reason `consumes_params` on an output-aggregator plugin is a di
 - [data-views-system.md](./data-views-system.md) — request/response shapes, param semantics, caching, year pushdown and materialization contracts
 - [query-builder-function-reference.md](./query-builder-function-reference.md) — function-level reference
 - `libs-server/data-views/ABOUT.md` and the per-directory `ABOUT.md` files — invariants for CTE-builder authors
+- `user:text/league/data-views/measure-contract.md` — the measure contract's law, its declaration and its capability derivation, canonically
+- `user:text/league/data-views/source-bridge-architecture.md` — the attachment half, including `subject_attribution` and the cohort expansion
