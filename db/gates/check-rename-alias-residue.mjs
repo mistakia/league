@@ -48,10 +48,32 @@
 // both contributed NOTHING. A genuine SPLIT PRODUCERS finding was then reported
 // as UNIFORM, "correct today", with an empty bare-producer list: the reviewer
 // was told every producer aliases back at exactly the moment one does not.
-// Three bare shapes count now (qualified, unqualified, and wholesale `'*'` /
-// `'table.*'`), and on the real corpus the fix reclassified SIX of the fifteen
-// findings out of ORPHANED ALIAS into SPLIT PRODUCERS, naming four bare
-// producers no run had ever printed.
+// Three bare shapes counted from 2026-08-06 (qualified, unqualified, and
+// wholesale `'*'` / `'table.*'`), and on the real corpus that fix reclassified
+// SIX of the fifteen findings out of ORPHANED ALIAS into SPLIT PRODUCERS,
+// naming four bare producers no run had ever printed.
+//
+// A FOURTH shape was added 2026-08-20: a statement with NO projection call at
+// all. `db('t').where({ ... })` awaited directly emits every column of `t`
+// under its PHYSICAL names, so it is a wholesale producer on exactly the same
+// footing as `select('*')`, and the bare side counted it as nothing. That was a
+// declared blind spot in this header and was never sized: 21 genuine wholesale
+// reads of `rosters_players` against the ONE the gate named. The widening moved
+// no finding and no class -- 15 findings, 9 ORPHANED / 6 SPLIT, zero
+// adjudications reopened, because widening the bare side adds no ALIAS sites
+// and so cannot touch the residue set or any `(table, column, file)` key. Its
+// whole cost is bare-producer lines, 10 to 86, which is why the list is now
+// capped at 8 with a count beside it.
+//
+// It is worth doing because the blind spot is not inert. `rosters_players.rid`
+// rested entirely on the single wholesale producer
+// `scripts/calculate-franchise-tag.mjs`, so giving that one statement an
+// explicit projection -- routine cleanup -- would have dropped the finding to
+// ORPHANED ALIAS while ~19 wholesale producers stayed live, swapping the
+// reviewer's verdict question away from the one that caused the
+// `transactions.value` production defect. For a rename whose new name has no
+// in-memory key reads the same shape lands on UNIFORM, the false-green the
+// 2026-08-06 review fixed for `select('*')`.
 //
 // The obvious over-fire is the other direction, and it has its own control:
 // `get-roster.mjs:48` wildcards AND aliases back in ONE statement, so its row
@@ -213,10 +235,10 @@
 //   - The comment stripper does not parse REGEX LITERALS, so a regex containing
 //     an unescaped `//` can over-strip to end of line. `\/\/` is guarded; the
 //     bare form is not, and over-stripping loses sites silently.
-//   - A statement with no projection call at all (`db('t').where(...)` awaited
-//     directly) projects the row wholesale and is NOT counted as a bare
-//     producer. Only `select`/`first`/`pluck`/`returning` argument positions
-//     are read, which keeps `groupBy` out at the cost of this shape.
+//   - A statement whose projection-less shape is DISGUISED by a nested
+//     subquery. The wholesale test reads the whole statement text, so an inner
+//     builder's `.select(...)` suppresses its enclosing statement. The
+//     conservative direction -- a missed bare producer, not an invented one.
 //
 // IMPORTABLE WITHOUT RUNNING. `main()` was called bare at module scope, so
 // importing any export ran the whole gate and set `process.exitCode = 1` -- no
@@ -519,21 +541,38 @@ const collect_statement_spans = (source) => {
   let match
   while ((match = from_re.exec(source)) !== null) {
     const { start, end } = statement_span_at(source, match.index)
-    spans.push({ table: match[1], start, end })
+    // `statement_text` is carried only on the PRIMARY span of each `db('t')`
+    // statement, and it is what the projection-less wholesale test reads. A
+    // builder-binding span is one call of a statement that already has one, so
+    // it carries none and is skipped by that test rather than being treated as
+    // a statement of its own.
+    const statement = {
+      table: match[1],
+      start,
+      end,
+      statement_text: source.slice(start, end)
+    }
+    spans.push(statement)
 
     const line_start = source.lastIndexOf('\n', match.index) + 1
     const binding_match = source
       .slice(line_start, match.index)
       .match(BUILDER_BINDING_RE)
-    if (binding_match)
-      spans.push(
-        ...builder_binding_spans({
-          source,
-          table: match[1],
-          binding: binding_match[1],
-          from_index: end
-        })
-      )
+    if (binding_match) {
+      const bound_spans = builder_binding_spans({
+        source,
+        table: match[1],
+        binding: binding_match[1],
+        from_index: end
+      })
+      spans.push(...bound_spans)
+      // `const query = db('t')` then `query.select('a')` is ONE knex statement
+      // across two JS statements, so the projection lives outside the primary
+      // span. Without this the imperative form reads as projection-less and
+      // every such statement is reported as a wholesale producer.
+      for (const bound of bound_spans)
+        statement.statement_text += source.slice(bound.start, bound.end)
+    }
   }
   // Innermost wins: a shorter span nested inside a longer one is the closer FROM.
   return spans.sort((a, b) => a.end - a.start - (b.end - b.start))
@@ -548,6 +587,38 @@ const table_at = (spans, index) => {
 // counting those produced four false SPLIT PRODUCERS findings. Only
 // select/first/pluck/returning argument positions project a row.
 const PROJECTION_METHOD_RE = /\.(?:select|first|pluck|returning)\(/g
+
+// A statement with NO projection call emits every column of its table, so it is
+// a wholesale producer exactly as `select('*')` is -- `db('rosters_players')
+// .where({ ... })` awaited directly hands the caller the row under its PHYSICAL
+// names. The bare side counted it as NOTHING until this rule, which was a
+// declared blind spot in the header and never sized: on the real corpus it is
+// 21 genuine wholesale reads of `rosters_players` against the 1 the gate named.
+//
+// The blind spot is not inert. `rosters_players.rid` rested entirely on the one
+// wholesale producer `scripts/calculate-franchise-tag.mjs`, so giving that
+// statement an explicit projection -- routine cleanup -- would have dropped the
+// finding to ORPHANED ALIAS while ~19 wholesale producers stayed live, swapping
+// the reviewer's verdict question away from the one that caused the
+// `transactions.value` production defect. For a rename whose new name has no
+// in-memory key reads the same shape lands on UNIFORM, which is the false-green
+// the 2026-08-06 review fixed for `select('*')`.
+//
+// Three families disqualify a statement. A PROJECTION names its own columns. A
+// WRITE emits no row to read. An AGGREGATE returns a computed scalar, not the
+// table's columns. These are tested against the statement's whole text, so a
+// nested subquery's projection suppresses its enclosing statement -- the
+// conservative direction, since a missed bare producer is a finding the gate
+// simply does not add.
+const PROJECTION_CALL_RE = /\.(?:select|first|pluck|returning)\(/
+const WRITE_METHOD_RE =
+  /\.(?:insert|update|del|delete|onConflict|increment|decrement|truncate)\(/
+const AGGREGATE_METHOD_RE = /\.(?:count|min|max|sum|avg)\(/
+
+const is_projectionless_wholesale_read = (statement_text) =>
+  !PROJECTION_CALL_RE.test(statement_text) &&
+  !WRITE_METHOD_RE.test(statement_text) &&
+  !AGGREGATE_METHOD_RE.test(statement_text)
 
 const collect_projection_spans = (source) => {
   const spans = []
@@ -669,11 +740,13 @@ export const collect_alias_sites = ({ relative_path, source: raw_source }) => {
 // an empty bare-producer list, telling the reviewer every producer aliases back
 // when one does not. That is the `transactions.value` shape itself, and the
 // wildcard case is the one league CLAUDE.md already documents as gate 2's
-// silent defect. Three shapes now count:
+// silent defect. Four shapes count:
 //
 //   qualified     'widgets.widget_salary'
 //   unqualified   'widget_salary', resolved against the enclosing statement
 //   wholesale     '*' or 'widgets.*', which projects every column of the table
+//   projectionless  a statement with no projection call, which emits every
+//                 column of its table exactly as '*' does
 //
 // A wholesale site names no column, so it is a bare producer of EVERY column of
 // its table and is matched by table alone at classification time.
@@ -724,6 +797,21 @@ const collect_bare_projections = ({
       aliased_pairs: aliased_pairs_at(match.index),
       file: relative_path,
       line: line_of(source, match.index)
+    })
+  }
+
+  // The projection-less wholesale read. Suppressed for the pairs its own
+  // statement aliases back, exactly as the `select('*')` form is, so a
+  // statement carrying both names is not counted against itself.
+  for (const span of statement_spans) {
+    if (!span.statement_text) continue
+    if (!is_projectionless_wholesale_read(span.statement_text)) continue
+    sites.push({
+      table: span.table,
+      column: null,
+      aliased_pairs: aliased_pairs_at(span.start),
+      file: relative_path,
+      line: line_of(source, span.start)
     })
   }
 
@@ -930,11 +1018,14 @@ export const run_scan = ({
       new_column: site.new_column,
       file: site.file,
       line: site.line,
-      bare_producers: bare_producers.map(
-        (producer) =>
-          `${producer.file}:${producer.line}` +
-          (producer.column === null ? ' [wholesale]' : '')
-      ),
+      bare_producers: bare_producers
+        .slice(0, 8)
+        .map(
+          (producer) =>
+            `${producer.file}:${producer.line}` +
+            (producer.column === null ? ' [wholesale]' : '')
+        ),
+      bare_producer_count: bare_producers.length,
       new_name_key_reads: reads
         .slice(0, 8)
         .map((read) => `${read.file}:${read.line} [${read.shape}]`),
@@ -1039,6 +1130,7 @@ export const classify_unused_adjudications = ({
       line: 0,
       anchor: 'adjudication',
       bare_producers: [],
+      bare_producer_count: 0,
       new_name_key_reads: [],
       new_name_key_read_count: 0,
       auditability: {
@@ -1574,25 +1666,46 @@ CREATE TABLE public.control_parent_default (
   //    included COMMENT PROSE: `scripts/process-projections-for-league-format.mjs`
   //    discusses its own alias in backticks twice, so the denominator could have
   //    been carried entirely by prose while the extractor had stopped matching
-  //    real code. The third case is what closes that -- it measures the corpus
-  //    with comments left IN and requires the stripped count to be strictly
-  //    lower, so the strip is proven to be doing work on real files rather than
-  //    asserted. Both halves fail if either the walk or the strip breaks.
+  //    real code.
+  //
+  //    THE STRIP IS PROVEN ON MANUFACTURED PROSE, NOT ON THE CORPUS'S OWN. The
+  //    third case asserted `unstripped_literals > stripped_literals` over the
+  //    real tree until 2026-08-20, and that margin was 345 against 341 -- FOUR,
+  //    carried entirely by two prose comments in one file
+  //    (`scripts/process-projections-for-league-format.mjs`). Deleting those
+  //    comments is legitimate cleanup and would have taken the control green,
+  //    exiting the gate 2 over a strip that works perfectly. A control whose
+  //    material a future edit can delete is a control that fails on someone
+  //    else's cleanup.
+  //
+  //    So the pair below MANUFACTURES its own prose from real material: one real
+  //    corpus file's source with an alias comment appended. Both halves are
+  //    needed and neither alone is enough. If the strip becomes a no-op the
+  //    injected alias becomes a SITE, so the site count moves and the first half
+  //    fails. If the extractor stops matching, both literal counts go to zero
+  //    and the second half's `greater` fails. Cleanup cannot starve either one,
+  //    because the prose is created by the control. The corpus-prose delta stays
+  //    as a printed informational number.
+  const notes = []
   {
     let qualified = 0
     let unqualified = 0
     let unstripped_literals = 0
+    let probe = null
     for (const file of walk_files(SERVER_ROOTS, ['.mjs', '.js'])) {
       const raw_source = fs.readFileSync(file, 'utf8')
       if (!has_alias_literal.test(raw_source)) continue
       const relative_path = path.relative(repo_root, file)
-      for (const site of collect_alias_sites({
+      const sites = collect_alias_sites({
         relative_path,
         source: raw_source
-      })) {
+      })
+      for (const site of sites) {
         if (site.anchor === 'qualified') qualified += 1
         else unqualified += 1
       }
+      if (!probe && sites.length)
+        probe = { relative_path, source: raw_source, site_count: sites.length }
       // `collect_alias_sites` strips; count the raw source separately by
       // re-inserting nothing and running the same regexes over it.
       unstripped_literals += count_alias_literals(raw_source)
@@ -1606,10 +1719,35 @@ CREATE TABLE public.control_parent_default (
       `the extractor still finds unqualified alias literals in real CODE (${unqualified})`,
       unqualified > 0
     ])
+    notes.push(
+      `corpus prose delta, informational and NOT asserted: ` +
+        `${unstripped_literals} alias literal(s) in raw source, ` +
+        `${stripped_literals} in stripped code`
+    )
+
+    const injected_alias = "'widgets.widget_salary as salary'"
+    const augmented_source = probe
+      ? `${probe.source}\n// historical note: this used to read ${injected_alias}\n`
+      : ''
+    const augmented_sites = probe
+      ? collect_alias_sites({
+          relative_path: probe.relative_path,
+          source: augmented_source
+        }).length
+      : 0
     cases.push([
-      `comment prose is excluded from the real corpus denominator ` +
-        `(${unstripped_literals} raw, ${stripped_literals} in code)`,
-      unstripped_literals > stripped_literals
+      `an alias appended as a COMMENT to a real corpus file adds no alias site ` +
+        `(${probe ? probe.relative_path : 'NO PROBE FILE'}, ` +
+        `${probe ? probe.site_count : 0} site(s) before and ${augmented_sites} after)`,
+      Boolean(probe) && augmented_sites === probe.site_count
+    ])
+    cases.push([
+      `the same appended alias IS matched in the unstripped source ` +
+        `(${probe ? count_alias_literals(probe.source) : 0} raw before, ` +
+        `${probe ? count_alias_literals(augmented_source) : 0} after)`,
+      Boolean(probe) &&
+        count_alias_literals(augmented_source) >
+          count_alias_literals(probe.source)
     ])
   }
 
@@ -1651,6 +1789,7 @@ CREATE TABLE public.control_parent_default (
   }
 
   console.log('NEGATIVE CONTROL')
+  for (const note of notes) console.log(`  note            ${note}`)
   const failures = []
   for (const [label, passed] of cases) {
     console.log(`  ${passed ? 'RED as expected' : 'STAYED GREEN'}  ${label}`)
@@ -1805,9 +1944,10 @@ const main = () => {
         `  [${finding.finding_class}] ${finding.table}.${finding.new_column} as ` +
           `${finding.column}  ${finding.file}:${finding.line}  -- ${status}`
       )
-      if (finding.bare_producers.length)
+      if (finding.bare_producer_count)
         console.log(
-          `     bare producer(s) of the same column: ${finding.bare_producers.join(', ')}`
+          `     bare producer(s) of the same column at ${finding.bare_producer_count} site(s): ` +
+            `${finding.bare_producers.join(', ')}`
         )
       if (finding.new_name_key_read_count)
         console.log(
