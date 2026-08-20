@@ -842,7 +842,6 @@ function some_function({ query_context, ...other_params }) {
   opening_days_joined: Boolean,
   player_seasonlogs_joined: Boolean,
   nfl_year_week_timestamp_joined: Boolean,
-  year_coalesce_args: Array,
   matchup_opponent_types: Set
 }
 ```

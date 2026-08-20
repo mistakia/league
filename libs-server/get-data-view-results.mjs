@@ -1675,7 +1675,6 @@ export const get_data_view_results_query = async ({
     from_table_name: from_table_config.from_table_name,
     from_table_type: from_table_config.from_table_type,
     from_table_column_id: from_table_config.column_id,
-    year_coalesce_args: [],
     matchup_opponent_types: new Set(),
     year_range: [],
     viewer_user_id: user_id
@@ -2072,28 +2071,6 @@ export const get_data_view_results_query = async ({
         data_view_options,
         data_view_metadata
       })
-
-      if (available_row_axes.includes('year')) {
-        if (
-          select_columns.length &&
-          !is_year_offset_range(group_column_params)
-        ) {
-          const column_definition =
-            data_views_column_definitions[select_columns[0].column_id]
-          if (column_definition && column_definition.year_select) {
-            const year_select_clause = column_definition.year_select({
-              table_name,
-              row_axes,
-              column_params: group_column_params
-            })
-            if (year_select_clause) {
-              data_view_options.year_coalesce_args.push(year_select_clause)
-            }
-          } else {
-            data_view_options.year_coalesce_args.push(`${table_name}.year`)
-          }
-        }
-      }
     }
   }
 

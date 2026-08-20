@@ -968,7 +968,6 @@ const data_view_options = {
   week_reference: 'player_years_weeks.week',
 
   // Optimization state
-  year_coalesce_args: [], // Year selection optimization
   matchup_opponent_types: new Set() // Required opponent CTEs
 }
 ```

@@ -501,17 +501,6 @@ const create_keeptradecut_definition = (type) => {
     join: ({ ...args }) => keeptradecut_join({ metric_column, ...args }),
     main_select_string_year_offset_range:
       keeptradecut_year_offset_range_select(metric_column),
-    year_select: ({ row_axes }) => {
-      // Under as-of semantics the observation can predate the boundary, so the
-      // row's year label must come from the REQUESTED period rather than from
-      // the observation's own timestamp. Both branches below are exact:
-      // opening_days.year is the anchor year the offset was applied to, which
-      // is what the old `EXTRACT(YEAR FROM d) - year_offset` reconstructed.
-      if (row_axes.includes('week')) {
-        return `nfl_year_week_timestamp.year`
-      }
-      return `opening_days.year`
-    },
     week_select: () => `nfl_year_week_timestamp.week`,
     source: { grain: 'player_year', supports_row_axes: ['year', 'week'] },
     get_cache_info: get_cache_info_for_keeptradecut

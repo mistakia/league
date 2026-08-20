@@ -286,19 +286,6 @@ const team_stat_from_plays = ({
       attach: (attach_args) =>
         apply_team_stats_join({ ...attach_args, force_player_active })
     },
-    year_select: ({ table_name, column_params = {} }) => {
-      const active = resolve_active(column_params)
-      const table_suffix = active ? '_player_team_stats' : '_team_stats'
-      if (!column_params.year_offset) {
-        return `${table_name}${table_suffix}.year`
-      }
-
-      const year_offset = Array.isArray(column_params.year_offset)
-        ? column_params.year_offset[0]
-        : column_params.year_offset
-
-      return `${table_name}${table_suffix}.year - ${year_offset}`
-    },
     week_select: ({ table_name, column_params = {} }) => {
       const active = resolve_active(column_params)
       const table_suffix = active ? '_player_team_stats' : '_team_stats'

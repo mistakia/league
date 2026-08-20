@@ -143,7 +143,6 @@ export default {
       return 'player'
     },
     column_name: 'age',
-    year_select: () => undefined,
     join: ({ query, row_axes, join_type, data_view_options }) => {
       if (!row_axes.includes('year')) {
         return
