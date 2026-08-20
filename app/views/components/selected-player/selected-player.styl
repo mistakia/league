@@ -1,11 +1,27 @@
 .selected__player-paper.MuiDrawer-paper
+  // Fixed viewport-based height: the MUI modal root is fixed inset-0, so 100%
+  // is the viewport and the sheet covers it minus the top peek. The banner
+  // term keeps the sheet top clear of the pause banner when it shows. If this
+  // declaration ever becomes invalid at computed-value time (the var must
+  // always resolve to a LENGTH — a unitless value makes the whole calc
+  // invalid), the sheet silently falls back to MUI's content-height
+  // `height: auto; max-height: 100%` and the bounded flex chain below it
+  // collapses with it.
   height calc(100% - 64px - var(--app-banner-height, 0px))
   border-radius 36px 36px 0 0
 
 .MuiModal-root:has(> .MuiPaper-root.selected__player-paper)
   z-index $z_selected_player
 
+// The paper is a flex column (MUI's DrawerPaper) of exactly three items —
+// header, main and the actions bar — and its height is the fixed calc above.
+// main and the tab body inside it are bounded as flex items with min-height 0,
+// so the tab body is the only surface that scrolls vertically. No percentage
+// heights in this chain: they only work while the paper's calc holds, and the
+// failure they produce when it does not is the clipped-and-unreachable body
+// from 2026-08-14.
 .selected__player-header
+  flex 0 0 auto
   display flex
   align-items stretch
   label
@@ -138,17 +154,20 @@
   padding 0 8px
 
 .selected__player-main
+  flex 1 1 0
+  min-height 0
+  display flex
+  flex-direction column
   overflow hidden
-  height 100%
 
   .base-TabPanel-root
-    overflow hidden
+    flex 1 1 0
+    min-height 0
     overflow-y scroll
-    height 100%
-    padding-bottom 48px
+    padding-bottom 16px
 
   .base-TabsList-root
-    height 52px
+    flex 0 0 52px
 
 .selected__section
   padding 16px
@@ -230,12 +249,17 @@
     fill $accentColor
     cursor pointer
 
+// The MUI base Tabs root: a flex column of the tabs list (fixed 52px, set
+// above) and the active tab panel, which takes the rest and scrolls.
 .selected__player-menu
-  flex 1
-  height 100%
+  flex 1 1 0
+  min-height 0
+  display flex
+  flex-direction column
   overflow hidden
 
 .selected__player-actions-container
+  flex 0 0 auto
   display flex
   align-items center
   background lighten($backgroundColor, 50%)

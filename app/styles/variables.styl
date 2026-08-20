@@ -68,11 +68,12 @@ $dst_color = tint(black, 25%)
   // override on any descendant silently does nothing. See react-table STYLE.md.
   --rt-z-base $z_react_table_base
 
-  // Rendered height of the app-wide pause banner (0 when none is showing).
-  // league-pause-notice publishes its measured height here so the top-anchored
-  // fixed surfaces (.page, the nav drawer) push themselves down by it instead
-  // of being covered by the banner.
-  --app-banner-height 0px
+  // No --app-banner-height default here on purpose: league-pause-notice is the
+  // only writer of that property (it publishes a measured `<n>px` on <html>
+  // and removes it on unmount), and every consumer carries its own `0px`
+  // fallback. A Stylus-declared `0px` default compiles to a UNITLESS `0`, and
+  // substituted into the drawer's calc that makes the whole height
+  // declaration invalid — the var is JS-owned, not a build-time token.
 
   --pos-QB #ff4040
   --pos-WR #ffbc40
