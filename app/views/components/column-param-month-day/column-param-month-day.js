@@ -11,14 +11,21 @@ import PropTypes from 'prop-types'
 
 import FilterBase from 'react-table/src/filter-base'
 import { format_column_params } from 'react-table/src/utils/format-column-params.js'
+import { current_season } from '#constants'
+import { KEEPTRADECUT_AS_OF_WINDOW_DAYS } from '#libs-shared/data-views-constants.mjs'
 import {
   MONTH_LABELS,
   DAYS_IN_MONTH,
   parse_month_day,
-  to_month_day
+  to_month_day,
+  as_of_window_status,
+  as_of_years_in_scope
 } from '@core/data-views-fields/month-day.mjs'
 
 import './column-param-month-day.styl'
+
+const format_full_date = (date) =>
+  `${MONTH_LABELS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
 
 export default function ColumnParamMonthDay({
   column_param_name,
@@ -26,7 +33,8 @@ export default function ColumnParamMonthDay({
   selected_param_values,
   handle_change = () => {},
   mixed_state = false,
-  row_axes = []
+  row_axes = [],
+  column = null
 }) {
   const [trigger_close, set_trigger_close] = useState(null)
 
@@ -66,6 +74,28 @@ export default function ColumnParamMonthDay({
     },
     [selected, write]
   )
+
+  /*
+    The blank a future anchor produces is correct but mute: the value is the
+    latest observation in the 30 days BEFORE the chosen day, so a day that has
+    not arrived holds none yet and every player renders empty. Said here, at
+    configure time, rather than left for the reader to distinguish from a
+    coverage gap or a broken join after the query returns.
+
+    Only when a single column is being edited -- `column` is absent for bulk
+    edit and where-clause records, and the years in scope are read off that
+    column's own sibling params, so without it the warning would be guesswork.
+  */
+  const window_status = useMemo(() => {
+    if (!column) return null
+    return as_of_window_status({
+      month_day: selected_param_values,
+      years: as_of_years_in_scope({
+        column_params: typeof column === 'string' ? {} : column.params || {},
+        default_year: current_season.year
+      })
+    })
+  }, [column, selected_param_values])
 
   const handle_clear = useCallback(() => {
     write(null)
@@ -136,6 +166,20 @@ export default function ColumnParamMonthDay({
         Resolves each row to this calendar day within its own year. Unset, the
         row&apos;s value is taken as of that season&apos;s NFL opening day.
       </div>
+      {window_status?.status === 'not_open' && (
+        <div className='column-param-month-day-note warning'>
+          This day has not arrived. Its {KEEPTRADECUT_AS_OF_WINDOW_DAYS}-day
+          window opens {format_full_date(window_status.window_opens_at)}, so the
+          column stays blank for every player until then.
+        </div>
+      )}
+      {window_status?.status === 'partial' && (
+        <div className='column-param-month-day-note warning'>
+          This day has not arrived. Only players ranked in the{' '}
+          {KEEPTRADECUT_AS_OF_WINDOW_DAYS} days before it have a value so far,
+          so the column is partly filled.
+        </div>
+      )}
     </div>
   )
 
@@ -155,5 +199,6 @@ ColumnParamMonthDay.propTypes = {
   ]),
   handle_change: PropTypes.func,
   mixed_state: PropTypes.bool,
-  row_axes: PropTypes.array
+  row_axes: PropTypes.array,
+  column: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }

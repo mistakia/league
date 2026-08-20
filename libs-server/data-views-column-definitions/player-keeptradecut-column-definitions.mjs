@@ -11,6 +11,7 @@ import {
   create_date_based_cache_info,
   CACHE_TTL
 } from '#libs-server/data-views/cache-info-utils.mjs'
+import { KEEPTRADECUT_AS_OF_WINDOW_DAYS } from '#libs-shared/data-views-constants.mjs'
 
 // TODO career_year
 
@@ -160,7 +161,7 @@ const generate_table_alias = ({ type, params = {}, row_axes = [] } = {}) => {
 // Year axis ONLY. The week axis needs the unbounded reach (17 of 124 NFL weeks
 // carry no observation on the week's own start day) and the default branch is
 // "latest outright" by definition.
-const YEAR_AXIS_AS_OF_WINDOW = '30 days'
+const YEAR_AXIS_AS_OF_WINDOW = `${KEEPTRADECUT_AS_OF_WINDOW_DAYS} days`
 
 // The year-axis boundary, clamped so it can never sit in the future.
 //
