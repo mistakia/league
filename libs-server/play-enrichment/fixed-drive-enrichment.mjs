@@ -119,8 +119,8 @@ const get_effective_posteam = (play) => {
 const is_defensive_td = (play) =>
   Boolean(
     play.is_touchdown &&
-      play.touchdown_nfl_team &&
-      play.offense_nfl_team !== play.touchdown_nfl_team
+    play.touchdown_nfl_team &&
+    play.offense_nfl_team !== play.touchdown_nfl_team
   )
 
 /**

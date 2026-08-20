@@ -627,9 +627,8 @@ describe('compute_play_changes defensive: lhs undefined on clearable prop', func
 
 describe('yardage-stat-enrichment _gsis emission contract', function () {
   it('emits no _gsis fields after Phase B Task 11 migration', async () => {
-    const { enrich_yardage_stats } = await import(
-      '#libs-server/play-enrichment/yardage-stat-enrichment.mjs'
-    )
+    const { enrich_yardage_stats } =
+      await import('#libs-server/play-enrichment/yardage-stat-enrichment.mjs')
     const esbid = 1
     const play_id = 100
     // stat_id 11 is rushing yards (bc). Pre-Task-11 this would have emitted ball_carrier_gsis_player_id.

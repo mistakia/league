@@ -142,8 +142,8 @@ export default function isReserveEligible({
   // test/libs-shared/is-reserve-eligible.spec.mjs.
   return Boolean(
     (roster_status && roster_status !== player_nfl_status.ACTIVE) ||
-      game_designation === player_nfl_injury_status.OUT ||
-      game_designation === player_nfl_injury_status.DOUBTFUL ||
-      (game_designation && current_season.week === 0)
+    game_designation === player_nfl_injury_status.OUT ||
+    game_designation === player_nfl_injury_status.DOUBTFUL ||
+    (game_designation && current_season.week === 0)
   )
 }

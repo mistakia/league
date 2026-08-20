@@ -387,9 +387,9 @@ const main = async () => {
 
   const job_success = Boolean(
     !error ||
-      error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers ||
-      // A pause is a hold, not a failure.
-      error instanceof Errors.LeaguePaused
+    error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers ||
+    // A pause is a hold, not a failure.
+    error instanceof Errors.LeaguePaused
   )
   if (!job_success) {
     console.log(error)

@@ -51,9 +51,7 @@ All fixtures follow a standardized structure:
   "response_type": "league-config",
   "collected_at": "2024-01-01T00:00:00.000Z",
   "anonymized": true,
-  "data": {
-    /* raw platform response */
-  },
+  "data": {/* raw platform response */},
   "season_year": 2024,
   "league_id": "123456789"
 }

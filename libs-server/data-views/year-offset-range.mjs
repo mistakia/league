@@ -1,9 +1,9 @@
 export const is_year_offset_range = (params) =>
   Boolean(
     params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      params.year_offset[0] !== params.year_offset[1]
+    Array.isArray(params.year_offset) &&
+    params.year_offset.length > 1 &&
+    params.year_offset[0] !== params.year_offset[1]
   )
 
 // A year_offset range only has meaning for sources that carry a year dimension

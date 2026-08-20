@@ -811,7 +811,7 @@ const get_from_table_config = ({
     // when it is the FROM source.
     const aggregator_handled = Boolean(
       sort_based_from_table.column_params?.output &&
-        column_definition?.supports_output
+      column_definition?.supports_output
     )
 
     if (

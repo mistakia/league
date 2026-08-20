@@ -132,9 +132,8 @@ export async function load_player_points_with_game_status({
   scoring_format_id
 }) {
   // Import market projections loader dynamically to avoid circular dependency
-  const { load_market_projections } = await import(
-    './load-market-projections.mjs'
-  )
+  const { load_market_projections } =
+    await import('./load-market-projections.mjs')
 
   // Import projection loaders from split file
   const { load_player_projections, load_player_projection_stats } =
@@ -205,9 +204,8 @@ export async function load_player_points_with_game_status({
     .first()
 
   // Import merge helper dynamically to avoid circular dependency
-  const { merge_player_projections } = await import(
-    './merge-player-projections.mjs'
-  )
+  const { merge_player_projections } =
+    await import('./merge-player-projections.mjs')
 
   // Load raw projection stats for stat-level merging
   const traditional_stats = await load_player_projection_stats({

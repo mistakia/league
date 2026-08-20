@@ -60,9 +60,8 @@ describe('LIBS-SHARED scoring format equivalence', function () {
   })
 
   it('reproduces every pre-change total across all 65 formats', async () => {
-    const { stat_lines } = await import(
-      './fixtures/scoring-stat-line-corpus.mjs'
-    )
+    const { stat_lines } =
+      await import('./fixtures/scoring-stat-line-corpus.mjs')
     const stat_lines_by_name = new Map(
       stat_lines.map((line) => [line.name, line])
     )

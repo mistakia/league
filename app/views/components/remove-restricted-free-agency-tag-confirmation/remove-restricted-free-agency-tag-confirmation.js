@@ -9,7 +9,9 @@ import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
 
-export default class RemoveRestrictedFreeAgencyTagConfirmation extends React.Component {
+export default class RemoveRestrictedFreeAgencyTagConfirmation
+  extends React.Component
+{
   handleSubmit = () => {
     const pid = this.props.player_map.get('pid')
     const { tid } = this.props.team.roster

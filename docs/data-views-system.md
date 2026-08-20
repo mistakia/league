@@ -912,9 +912,7 @@ Each site falls back to `player.current_nfl_team` only when the bridge is not ap
 ```javascript
 // Only join tables when actually needed
 if (join_func) {
-  await join_func({
-    /* join parameters */
-  })
+  await join_func({/* join parameters */})
 } else if (select_strings.length || main_where_clause_strings.length) {
   players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
 }

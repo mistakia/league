@@ -38,10 +38,10 @@ const normalize_array = (v) => (v == null ? [] : Array.isArray(v) ? v : [v])
 const has_explicit_time_scope = (params) =>
   Boolean(
     params &&
-      (params.nfl_week_id ||
-        params.year ||
-        params.seas_type ||
-        params.year_offset)
+    (params.nfl_week_id ||
+      params.year ||
+      params.seas_type ||
+      params.year_offset)
   )
 
 // Compute the effective nfl_week_id list for an emission site.

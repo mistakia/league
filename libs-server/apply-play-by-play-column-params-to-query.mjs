@@ -34,9 +34,9 @@ export default function ({
   // branch emits the derived year/seas_type predicates.
   const scope_owned = Boolean(
     query_context &&
-      query_context.nfl_week_ids &&
-      query_context.nfl_week_ids.length &&
-      skip_param_name !== 'nfl_week_id'
+    query_context.nfl_week_ids &&
+    query_context.nfl_week_ids.length &&
+    skip_param_name !== 'nfl_week_id'
   )
   if (scope_owned) {
     apply_scope_to_query({

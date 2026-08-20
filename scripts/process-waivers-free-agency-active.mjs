@@ -316,11 +316,11 @@ const main = async () => {
 
   const job_success = Boolean(
     !error ||
-      error instanceof Errors.EmptyFreeAgencyWaivers ||
-      error instanceof Errors.NotRegularSeason ||
-      // A pause is a hold, not a failure: the single-waiver path throws this
-      // rather than writing to a paused league.
-      error instanceof Errors.LeaguePaused
+    error instanceof Errors.EmptyFreeAgencyWaivers ||
+    error instanceof Errors.NotRegularSeason ||
+    // A pause is a hold, not a failure: the single-waiver path throws this
+    // rather than writing to a paused league.
+    error instanceof Errors.LeaguePaused
   )
   if (!job_success) {
     console.log(error)

@@ -34,9 +34,8 @@ describe('data-views weighted-mean equivalence with the expression compiler', ()
 
   before(async () => {
     try {
-      expression_compiler = await import(
-        '#libs-server/data-views/expression-compiler.mjs'
-      )
+      expression_compiler =
+        await import('#libs-server/data-views/expression-compiler.mjs')
     } catch {
       expression_compiler = null
     }

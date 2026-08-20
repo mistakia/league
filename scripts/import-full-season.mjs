@@ -108,63 +108,56 @@ let import_pff_seasonlogs = null
 let import_pff_team_grades = null
 
 try {
-  const ngs_players_module = await import(
-    '../private/scripts/import-players-ngs.mjs'
-  )
+  const ngs_players_module =
+    await import('../private/scripts/import-players-ngs.mjs')
   import_players_ngs = ngs_players_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const rosters_module = await import(
-    '../private/scripts/import-gameday-rosters.mjs'
-  )
+  const rosters_module =
+    await import('../private/scripts/import-gameday-rosters.mjs')
   import_gameday_rosters = rosters_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const nfl_pro_plays_module = await import(
-    '#private/scripts/import-plays-nfl-pro.mjs'
-  )
+  const nfl_pro_plays_module =
+    await import('#private/scripts/import-plays-nfl-pro.mjs')
   import_plays_nfl_pro = nfl_pro_plays_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const ngs_gl_module = await import(
-    '../private/scripts/import-gamelogs-ngs.mjs'
-  )
+  const ngs_gl_module =
+    await import('../private/scripts/import-gamelogs-ngs.mjs')
   import_gamelogs_ngs = ngs_gl_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const pff_grades_module = await import(
-    '../private/scripts/import-pff-grades.mjs'
-  )
+  const pff_grades_module =
+    await import('../private/scripts/import-pff-grades.mjs')
   import_pff_grades = pff_grades_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const pff_seasonlogs_module = await import(
-    '../private/scripts/import-pff-seasonlogs.mjs'
-  )
+  const pff_seasonlogs_module =
+    await import('../private/scripts/import-pff-seasonlogs.mjs')
   import_pff_seasonlogs = pff_seasonlogs_module.default
 } catch {
   // Private script not available
 }
 
 try {
-  const pff_team_module = await import(
-    '../private/scripts/import-pff-team-grades.mjs'
-  )
+  const pff_team_module =
+    await import('../private/scripts/import-pff-team-grades.mjs')
   import_pff_team_grades = pff_team_module.default
 } catch {
   // Private script not available

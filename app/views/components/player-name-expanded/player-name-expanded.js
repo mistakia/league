@@ -128,8 +128,8 @@ class PlayerNameExpanded extends Player {
     const player_has_non_active_status = Boolean(
       (nfl_player_status_abbreviations[player_roster_status] &&
         player_roster_status !== player_nfl_status.ACTIVE) ||
-        (nfl_player_status_abbreviations[player_game_designation] &&
-          player_game_designation !== player_nfl_status.ACTIVE)
+      (nfl_player_status_abbreviations[player_game_designation] &&
+        player_game_designation !== player_nfl_status.ACTIVE)
     )
 
     return (

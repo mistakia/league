@@ -1516,8 +1516,8 @@ CREATE TABLE public.control_parent_default (
       'a PARTITION BY parent parses and does not swallow its first child',
       Boolean(
         parsed.get('control_parent') &&
-          parsed.get('control_parent').has('season_year') &&
-          parsed.get('control_parent_default')
+        parsed.get('control_parent').has('season_year') &&
+        parsed.get('control_parent_default')
       )
     ])
   }

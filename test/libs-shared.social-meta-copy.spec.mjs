@@ -39,9 +39,9 @@ export const is_indexable_route_with_copy = (route) => {
   if (route.robots === private_robots) return true
   return Boolean(
     route.title &&
-      route.title.trim() &&
-      route.description &&
-      route.description.trim()
+    route.title.trim() &&
+    route.description &&
+    route.description.trim()
   )
 }
 

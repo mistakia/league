@@ -9,9 +9,8 @@ const log = debug('underdog')
 let _underdog_session_manager = null
 const load_underdog_session_manager = async () => {
   if (!_underdog_session_manager) {
-    ;({ underdog_session_manager: _underdog_session_manager } = await import(
-      '#private/libs-server/underdog/underdog-session-manager.mjs'
-    ))
+    ;({ underdog_session_manager: _underdog_session_manager } =
+      await import('#private/libs-server/underdog/underdog-session-manager.mjs'))
   }
   return _underdog_session_manager
 }

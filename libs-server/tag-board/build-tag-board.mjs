@@ -399,10 +399,10 @@ export default function build_tag_board({
       row.projected_points_added !== null && row.projected_points_added <= 0
     row.franchise_eligible = Boolean(
       row.untagged &&
-        row.franchise_price !== null &&
-        row.franchise_saving > 0 &&
-        row.franchise_consecutive_year_ok &&
-        !row.below_replacement
+      row.franchise_price !== null &&
+      row.franchise_saving > 0 &&
+      row.franchise_consecutive_year_ok &&
+      !row.below_replacement
     )
     row.rookie_eligible = Boolean(
       row.untagged && row.nfl_draft_year === rookie_class_year

@@ -520,9 +520,8 @@ describe('audit-drive-seq-coherence classification', function () {
 
   before(async function () {
     this.timeout(30000)
-    ;({ classify_drive_seq_coherence } = await import(
-      '../scripts/audit-drive-seq-coherence.mjs'
-    ))
+    ;({ classify_drive_seq_coherence } =
+      await import('../scripts/audit-drive-seq-coherence.mjs'))
   })
 
   const classify = (rows) => classify_drive_seq_coherence(rows)
@@ -628,9 +627,8 @@ describe('prop-market-settlement nfl_plays select coverage', function () {
   // the market against a zero metric rather than raising, so the two must be
   // checked against each other rather than trusted to stay in sync.
   it('preloads every nfl_plays column the NFL_PLAYS handler reads', async () => {
-    const { HANDLER_TYPES, market_type_mappings } = await import(
-      '#libs-server/prop-market-settlement/market-type-mappings.mjs'
-    )
+    const { HANDLER_TYPES, market_type_mappings } =
+      await import('#libs-server/prop-market-settlement/market-type-mappings.mjs')
 
     const required_columns = new Set()
     for (const mapping of Object.values(market_type_mappings)) {

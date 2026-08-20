@@ -2079,7 +2079,7 @@ const sits_inside_a_from_taking_function = (sql, index) => {
         const opener = /([a-z_][a-z0-9_]*)\s*$/i.exec(sql.slice(0, cursor))
         return Boolean(
           opener &&
-            FUNCTIONS_TAKING_FROM_AS_A_SEPARATOR.has(opener[1].toLowerCase())
+          FUNCTIONS_TAKING_FROM_AS_A_SEPARATOR.has(opener[1].toLowerCase())
         )
       }
       depth--

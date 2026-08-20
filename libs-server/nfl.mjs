@@ -74,7 +74,7 @@ const get_nfl_client_credentials = async () => {
 export const generate_guid = () => {
   let e = new Date().getTime()
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (x) {
-    const r = (e + 16 * Math.random()) % 16 | 0
+    const r = ((e + 16 * Math.random()) % 16) | 0
     e = Math.floor(e / 16)
     return (x === 'x' ? r : (3 & r) | 8).toString(16)
   })

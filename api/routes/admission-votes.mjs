@@ -103,9 +103,9 @@ const get_latest_vote = ({ db, league_id }) =>
 const is_deemed_passed = (vote) =>
   Boolean(
     vote.closed_at &&
-      !vote.decision_outcome &&
-      vote.decision_due_at &&
-      Date.now() > new Date(vote.decision_due_at).getTime()
+    !vote.decision_outcome &&
+    vote.decision_due_at &&
+    Date.now() > new Date(vote.decision_due_at).getTime()
   )
 
 /**

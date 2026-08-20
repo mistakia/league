@@ -89,8 +89,8 @@ const run_active = async ({ daily = false }) => {
 
   const job_success = Boolean(
     !effective_error ||
-      effective_error instanceof Errors.EmptyFreeAgencyWaivers ||
-      effective_error instanceof Errors.NotRegularSeason
+    effective_error instanceof Errors.EmptyFreeAgencyWaivers ||
+    effective_error instanceof Errors.NotRegularSeason
   )
 
   if (!job_success) {
@@ -169,7 +169,7 @@ const run_practice = async ({ daily = false }) => {
 
   const job_success = Boolean(
     !effective_error ||
-      effective_error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
+    effective_error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
   )
 
   if (!job_success) {

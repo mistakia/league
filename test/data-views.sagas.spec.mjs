@@ -49,9 +49,8 @@ describe('data-views saga integration contracts', () => {
 
   describe('restore_view_states_from_browser dispatch suppression', () => {
     it('equivalent plain-JS table_states compare equal for dispatch suppression', async () => {
-      const { default: deep_equal } = await import(
-        '#app/core/utils/deep_equal.js'
-      )
+      const { default: deep_equal } =
+        await import('#app/core/utils/deep_equal.js')
       const a = make_state({ sort: [{ column_id: 'x', desc: true }] })
       const b = make_state({ sort: [{ column_id: 'x', desc: true }] })
       expect(deep_equal(a, b)).to.be.true
@@ -62,9 +61,8 @@ describe('data-views saga integration contracts', () => {
 
   describe('reconcile_server_views preserves client-only views', () => {
     it('a view id present in redux but absent from server is not evicted', async () => {
-      const { reconcile_server_views } = await import(
-        '#libs-shared/data-view-storage/storage.mjs'
-      )
+      const { reconcile_server_views } =
+        await import('#libs-shared/data-view-storage/storage.mjs')
       save_snapshot({
         view_id: 'client-only',
         table_state: make_state(),
@@ -80,9 +78,8 @@ describe('data-views saga integration contracts', () => {
     })
 
     it('a view id absent from both server and redux is evicted', async () => {
-      const { reconcile_server_views } = await import(
-        '#libs-shared/data-view-storage/storage.mjs'
-      )
+      const { reconcile_server_views } =
+        await import('#libs-shared/data-view-storage/storage.mjs')
       save_snapshot({
         view_id: 'orphan',
         table_state: make_state(),
