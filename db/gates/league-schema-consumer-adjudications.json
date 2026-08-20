@@ -120,14 +120,6 @@
       "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
     },
     {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "player_gamelogs",
-      "column": "count",
-      "kind": "not_a_column",
-      "reason": "The worked EXAMPLE of a CTE alias shadowing a physical table, quoted in the gate-4 section to explain why .sql files were removed from gate 1's prose derivation. The sentence's entire point is that `player_gamelogs` there is a WITH alias and `count` is its projection, so gate 1 reporting it is the illustration rather than a defect."
-    },
-    {
       "gate": 4,
       "path": "nfl/query/matchup/player-occurrences-vs-specific-defense.sql",
       "statement_contains": "select player.short_name, player.primary_position, nfl_team, opponent_nfl_team",
@@ -142,150 +134,6 @@
       "column": "nfl_status",
       "kind": "not_a_column",
       "reason": "Shorthand for a VALUE, not a column: player_changelog.column_name = 'nfl_status' has 25,773 rows. The comment names the changelog rows the importer writes."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "config",
-      "column": "databases",
-      "kind": "not_a_column",
-      "reason": "A user-base config KEY path (config.databases.instances.league.tunnel.local_port), not a column. `config` is a real league table, so this cannot be filtered by name."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "teams",
-      "column": "restricted",
-      "kind": "not_a_column",
-      "reason": "The spec basename `teams.restricted-free-agency`. Structurally indistinguishable from a qualified reference: no directory prefix and no file extension."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "prop_market_selections_index",
-      "column": "esbid",
-      "kind": "history",
-      "reason": "Cites a defect this gate's own EXPLAIN half found \u2014 a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "league_format_player_seasonlogs",
-      "column": "year",
-      "kind": "history",
-      "reason": "Conformed to season_year by the season_grain cluster; the text says so explicitly."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "scoring_format_player_seasonlogs",
-      "column": "year",
-      "kind": "history",
-      "reason": "Same cluster as above, cited as the other side of a (table, column) asymmetry that has since moved."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "player_seasonlogs",
-      "column": "year",
-      "kind": "history",
-      "reason": "Became season_year; cited as the conform's other side."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "nfl_games",
-      "column": "start_time",
-      "kind": "history",
-      "reason": "Never existed under that name; cited as a now-repaired finding in the user-base doc sweep."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "nfl_games",
-      "column": "year",
-      "kind": "history",
-      "reason": "Conformed to season_year in the 2026-07-29 nfl_games cluster."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "nfl_plays",
-      "column": "year",
-      "kind": "history",
-      "reason": "The 2026-07 plays/snaps conformance; cited as the regenerated-golden failure that blessed a live 42703."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "leagues",
-      "column": "hosted",
-      "kind": "history",
-      "reason": "Became is_hosted; cited as the SPA deploy-lag outage that took eleven pages down for logged-in users."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "player",
-      "column": "pff_id",
-      "kind": "history",
-      "reason": "Became pff_player_id. The three PFF log tables followed on 2026-08-07, so the schema is now uniform on pff_player_id and this pair no longer illustrates an asymmetry."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "player",
-      "column": "formatted",
-      "kind": "history",
-      "reason": "Became formatted_name; cited as the base-storage stale-checkout failure that wrote nothing for three weeks while exiting 0."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "practice",
-      "column": "seas_type",
-      "kind": "history",
-      "reason": "Conformed to season_type; cited as an undeployed-sweep 42703 waiting on a September cron fire."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "prop_markets_index",
-      "column": "year",
-      "kind": "history",
-      "reason": "Conformed to season_year; cited as the `pmi.` alias grep false negative that hid a four-day outage."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "league_player_season_projection_values",
-      "column": "year",
-      "kind": "history",
-      "reason": "Became season_year; cited as the onConflict target the rename sweep missed, which emptied the table."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "scoring_format_player_projection_points",
-      "column": "total",
-      "kind": "history",
-      "reason": "Renamed in 72346e579; cited as the defect the name stoplist suppressed. Removing this citation would delete the evidence for the rule against name filters."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "restricted_free_agency_bids",
-      "column": "announced",
-      "kind": "history",
-      "reason": "Column removed; window state moved to restricted_free_agency_nominations."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "restricted_free_agency_bids",
-      "column": "reason",
-      "kind": "history",
-      "reason": "Replaced by outcome plus outcome_detail."
     },
     {
       "gate": 1,
@@ -472,75 +320,11 @@
     },
     {
       "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "teams",
-      "column": "year",
-      "kind": "history",
-      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "nfl_team_seasonlogs",
-      "column": "year",
-      "kind": "history",
-      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "league_scoring_formats",
-      "column": "scoring_format_id",
-      "kind": "history",
-      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "users",
-      "column": "reset_token",
-      "kind": "history",
-      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "config",
-      "column": "degraded",
-      "kind": "not_a_column",
-      "reason": "Cited as an EXAMPLE of the false-positive class that keeps user-base .mjs out of gate 1's prose derivation: a JavaScript property read off a local variable whose name collides with the league `config` table. The sentence's whole point is that it is not a schema claim."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "config",
-      "column": "email",
-      "kind": "not_a_column",
-      "reason": "The league repo's own JS config object, read at libs-server/send-email.mjs module load (`config.email` gates whether the Resend client is built at all). `config` is a real league table, so this cannot be filtered by name -- same collision as config.databases and config.degraded above. Arrived with c6443c4c3, which documented why config-test.json enables mail."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "transactions",
-      "column": "timestamp",
-      "kind": "history",
-      "reason": "Past-tense record, not live instruction. The sentence says a stale transactions.timestamp inside a concat_ws survived every gate, which is an accurate account of the defect 34a7a40f5 repaired -- the column is occurred_at now and the passage is the incident note explaining why gate 3 grew a .raw() transport. Naming the pre-rename spelling is the whole point of the sentence; rewriting it to occurred_at would make the paragraph describe a defect that could not have happened. Adjudicated 2026-08-08."
-    },
-    {
-      "gate": 1,
       "path": "cli/lib/pre-commit-guard-inference-config.sh",
       "table": "config",
       "column": "machine_registry",
       "kind": "not_a_column",
       "reason": "Not the league config table. This is a shell comment in user-base describing BASE's own config, whose machine_registry key is empty under NODE_ENV=test -- the environment validator-seams.mjs injects around. The league schema happens to carry a table called `config`, which is the only reason the prose pair rule binds the two halves together."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "config",
-      "column": "url",
-      "kind": "not_a_column",
-      "reason": "config.url is a property of this app's runtime config object (config.js, loaded per NODE_ENV), not the league config table -- that table is a key/value store whose only columns are key, config_value and updated_at. The sentence describes which base URL the emailed reset link is built from."
     },
     {
       "gate": 1,
@@ -557,22 +341,6 @@
       "column": "groupme_id",
       "kind": "history",
       "reason": "Cited as one of five RECORDED INSTANCES of an audit rule missing a column -- history, not live instruction. The column has since been dropped from leagues (no %group% column remains), which does not falsify the example: the point being made is about the vocabulary gap in the audit rule, not about the column existing."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "player",
-      "column": "formatted_alias",
-      "kind": "not_a_column",
-      "reason": "The worked EXAMPLE of the knex gate's own inline-subquery false positive, quoted in the check-knex-column-resolution section to explain why a nested builder's columns land in the enclosing statement's table environment. formatted_alias is a real player_aliases column; the reported player.formatted_alias pair is the mis-binding the paragraph exists to illustrate, so gate 1 reporting it is the illustration rather than a defect. Same shape as the player_gamelogs.count worked example."
-    },
-    {
-      "gate": 1,
-      "path": "CLAUDE.md",
-      "table": "nfl_plays",
-      "column": "recv_yards",
-      "kind": "history",
-      "reason": "Accurate past-tense record of what the 2026-08-18 recv -> receiving conform DID. The sentence says the sweep correctly rewrote every nfl_plays.recv_yards and the only residue was the metric alias, so the pre-rename spelling is cited deliberately as the column that moved. The column is now receiving_yards."
     },
     {
       "gate": 1,
@@ -597,6 +365,246 @@
       "column": "uid",
       "kind": "history",
       "reason": "Accurate past-tense record of the 2026-08-17 uid retirement. The sentence says playoffs.uid was a playoff-week ordinal and BECAME playoff_week_number, naming the pre-rename spelling as the point. Only live instruction counts as a defect."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "player_gamelogs",
+      "column": "count",
+      "kind": "not_a_column",
+      "reason": "The worked EXAMPLE of a CTE alias shadowing a physical table, quoted in the gate-4 section to explain why .sql files were removed from gate 1's prose derivation. The sentence's entire point is that `player_gamelogs` there is a WITH alias and `count` is its projection, so gate 1 reporting it is the illustration rather than a defect."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/ship.md",
+      "table": "config",
+      "column": "databases",
+      "kind": "not_a_column",
+      "reason": "A user-base config KEY path (config.databases.instances.league.tunnel.local_port), not a column. `config` is a real league table, so this cannot be filtered by name."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/test.md",
+      "table": "teams",
+      "column": "restricted",
+      "kind": "not_a_column",
+      "reason": "The spec basename `teams.restricted-free-agency`. Structurally indistinguishable from a qualified reference: no directory prefix and no file extension."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "prop_market_selections_index",
+      "column": "esbid",
+      "kind": "history",
+      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "league_format_player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year by the season_grain cluster; the text says so explicitly."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "scoring_format_player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same cluster as above, cited as the other side of a (table, column) asymmetry that has since moved."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Became season_year; cited as the conform's other side."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "nfl_games",
+      "column": "start_time",
+      "kind": "history",
+      "reason": "Never existed under that name; cited as a now-repaired finding in the user-base doc sweep."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "nfl_games",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year in the 2026-07-29 nfl_games cluster."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/data.md",
+      "table": "nfl_plays",
+      "column": "year",
+      "kind": "history",
+      "reason": "The 2026-07 plays/snaps conformance; cited as the regenerated-golden failure that blessed a live 42703."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/api.md",
+      "table": "leagues",
+      "column": "hosted",
+      "kind": "history",
+      "reason": "Became is_hosted; cited as the SPA deploy-lag outage that took eleven pages down for logged-in users."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/ship.md",
+      "table": "leagues",
+      "column": "hosted",
+      "kind": "history",
+      "reason": "Became is_hosted; cited as the SPA deploy-lag outage that took eleven pages down for logged-in users."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "player",
+      "column": "pff_id",
+      "kind": "history",
+      "reason": "Became pff_player_id. The three PFF log tables followed on 2026-08-07, so the schema is now uniform on pff_player_id and this pair no longer illustrates an asymmetry."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/ship.md",
+      "table": "player",
+      "column": "formatted",
+      "kind": "history",
+      "reason": "Became formatted_name; cited as the base-storage stale-checkout failure that wrote nothing for three weeks while exiting 0."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/ship.md",
+      "table": "practice",
+      "column": "seas_type",
+      "kind": "history",
+      "reason": "Conformed to season_type; cited as an undeployed-sweep 42703 waiting on a September cron fire."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/data.md",
+      "table": "prop_markets_index",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year; cited as the `pmi.` alias grep false negative that hid a four-day outage."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "league_player_season_projection_values",
+      "column": "year",
+      "kind": "history",
+      "reason": "Became season_year; cited as the onConflict target the rename sweep missed, which emptied the table."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "scoring_format_player_projection_points",
+      "column": "total",
+      "kind": "history",
+      "reason": "Renamed in 72346e579; cited as the defect the name stoplist suppressed. Removing this citation would delete the evidence for the rule against name filters."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/scripts.md",
+      "table": "restricted_free_agency_bids",
+      "column": "announced",
+      "kind": "history",
+      "reason": "Column removed; window state moved to restricted_free_agency_nominations."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/scripts.md",
+      "table": "restricted_free_agency_bids",
+      "column": "reason",
+      "kind": "history",
+      "reason": "Replaced by outcome plus outcome_detail."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "teams",
+      "column": "year",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "nfl_team_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "league_scoring_formats",
+      "column": "scoring_format_id",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "users",
+      "column": "reset_token",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "config",
+      "column": "degraded",
+      "kind": "not_a_column",
+      "reason": "Cited as an EXAMPLE of the false-positive class that keeps user-base .mjs out of gate 1's prose derivation: a JavaScript property read off a local variable whose name collides with the league `config` table. The sentence's whole point is that it is not a schema claim."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/test.md",
+      "table": "config",
+      "column": "email",
+      "kind": "not_a_column",
+      "reason": "The league repo's own JS config object, read at libs-server/send-email.mjs module load (`config.email` gates whether the Resend client is built at all). `config` is a real league table, so this cannot be filtered by name -- same collision as config.databases and config.degraded above. Arrived with c6443c4c3, which documented why config-test.json enables mail."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "transactions",
+      "column": "timestamp",
+      "kind": "history",
+      "reason": "Past-tense record, not live instruction. The sentence says a stale transactions.timestamp inside a concat_ws survived every gate, which is an accurate account of the defect 34a7a40f5 repaired -- the column is occurred_at now and the passage is the incident note explaining why gate 3 grew a .raw() transport. Naming the pre-rename spelling is the whole point of the sentence; rewriting it to occurred_at would make the paragraph describe a defect that could not have happened. Adjudicated 2026-08-08."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/test.md",
+      "table": "config",
+      "column": "url",
+      "kind": "not_a_column",
+      "reason": "config.url is a property of this app's runtime config object (config.js, loaded per NODE_ENV), not the league config table -- that table is a key/value store whose only columns are key, config_value and updated_at. The sentence describes which base URL the emailed reset link is built from."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/schema.md",
+      "table": "player",
+      "column": "formatted_alias",
+      "kind": "not_a_column",
+      "reason": "The worked EXAMPLE of the knex gate's own inline-subquery false positive, quoted in the check-knex-column-resolution section to explain why a nested builder's columns land in the enclosing statement's table environment. formatted_alias is a real player_aliases column; the reported player.formatted_alias pair is the mis-binding the paragraph exists to illustrate, so gate 1 reporting it is the illustration rather than a defect. Same shape as the player_gamelogs.count worked example."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/data.md",
+      "table": "nfl_plays",
+      "column": "recv_yards",
+      "kind": "history",
+      "reason": "Accurate past-tense record of what the 2026-08-18 recv -> receiving conform DID. The sentence says the sweep correctly rewrote every nfl_plays.recv_yards and the only residue was the metric alias, so the pre-rename spelling is cited deliberately as the column that moved. The column is now receiving_yards."
     }
   ]
 }
