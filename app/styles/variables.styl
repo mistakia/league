@@ -71,9 +71,15 @@ $dst_color = tint(black, 25%)
   // No --app-banner-height default here on purpose: league-pause-notice is the
   // only writer of that property (it publishes a measured `<n>px` on <html>
   // and removes it on unmount), and every consumer carries its own `0px`
-  // fallback. A Stylus-declared `0px` default compiles to a UNITLESS `0`, and
-  // substituted into the drawer's calc that makes the whole height
-  // declaration invalid — the var is JS-owned, not a build-time token.
+  // fallback. A `0px` declared here would ship as a UNITLESS 0 in the
+  // production bundle: stylus-loader defaults compress on for production-like
+  // builds (mode "production" OR no mode — `yarn build` sets neither) and the
+  // compressor normalizes a zero length, so the served :root read
+  // `--app-banner-height: 0` while the dev build (mode development, compress
+  // off) kept the 0px and the drawer only broke once deployed. Substituted
+  // into the selected-player calc that makes the whole height declaration
+  // invalid, and the var(...) fallback never fires because 0 is a SET value.
+  // A JS-owned var is not a build-time token — see write-stylus.md.
 
   --pos-QB #ff4040
   --pos-WR #ffbc40
