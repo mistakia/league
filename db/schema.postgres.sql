@@ -334,6 +334,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_box_defenders;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ball_carrier_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_nfl_play_stats_stat_id_is_valid_esbid_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_matchup_stats_esbid;
@@ -31398,6 +31399,13 @@ CREATE INDEX idx_nfl_play_stats_current_week_play_id ON public.nfl_play_stats_cu
 --
 
 CREATE INDEX idx_nfl_play_stats_play_id ON public.nfl_play_stats USING btree (play_id);
+
+
+--
+-- Name: idx_nfl_play_stats_stat_id_is_valid_esbid_play_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_play_stats_stat_id_is_valid_esbid_play_id ON public.nfl_play_stats USING btree (stat_id, is_valid, esbid, play_id);
 
 
 --
