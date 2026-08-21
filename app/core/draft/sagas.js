@@ -22,12 +22,17 @@ dayjs.extend(isBetween)
 
 export function* load_draft() {
   const { leagueId } = yield select(get_app)
+  // No-op when the league is unresolved (e.g. a deep link whose :lid is not a
+  // number): otherwise leagueId interpolates as "undefined" into the API URL
+  // and Postgres rejects it as invalid integer syntax. Mirrors load_league.
+  if (!leagueId) return
   yield call(api_get_draft, { leagueId })
 }
 
 export function* draft_player() {
   const { selected } = yield select(get_draft_state)
   const { teamId, leagueId } = yield select(get_app)
+  if (!leagueId) return
   const { draft_pick_id } = yield select(get_rookie_draft_next_pick)
   const params = { leagueId, pid: selected, teamId, pickId: draft_pick_id }
   yield call(api_post_draft, params)
@@ -60,6 +65,7 @@ export function* load_missing_players_from_pick_details({ payload }) {
 
       if (missing_player_ids.length > 0) {
         const { leagueId } = yield select(get_app)
+        if (!leagueId) return
         yield call(api_get_players, { leagueId, pids: missing_player_ids })
       }
     }
@@ -69,6 +75,7 @@ export function* load_missing_players_from_pick_details({ payload }) {
 export function* load_draft_pick_details({ payload }) {
   const { pick_id } = payload
   const { leagueId } = yield select(get_app)
+  if (!leagueId) return
 
   // Check if pick details are already loaded
   const draft_state = yield select(get_draft_state)
