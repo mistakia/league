@@ -109,6 +109,7 @@
     "source-map": "^0.7.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "websocket-driver": "0.7.5",
     "ws": "^7.5.10"
   },
   "devDependencies": {
