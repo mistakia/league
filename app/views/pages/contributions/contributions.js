@@ -46,6 +46,7 @@ const SubmissionQuestion = ({
   submission_id,
   claim_token,
   is_answering,
+  is_purged,
   submit_contribution_answer
 }) => {
   const [answer_body, set_answer_body] = useState('')
@@ -68,17 +69,33 @@ const SubmissionQuestion = ({
   const expires_at = question.get('expires_at')
   const is_expired = expires_at && dayjs(expires_at).isBefore(dayjs())
 
+  // AN EXPIRED QUESTION IS STILL ANSWERABLE. The route records a late answer
+  // and resurfaces the submission from awaiting_information or expired back to
+  // received, so the form stays live and the copy says what expiry actually
+  // cost the submitter -- the queue slot -- rather than presenting a dead end.
+  // Disabling the field here would be the client refusing what the server
+  // accepts, which reads to a submitter as their answer being lost.
+  //
+  // A PURGED submission is the one case that never resurfaces: its content is
+  // already deleted, so there is nothing for an answer to reopen.
   return (
     <div className='contributions__question'>
       <div className='contributions__question-text'>
         {question.get('question_text')}
       </div>
-      {is_expired ? (
-        <Alert severity='warning'>
-          This question expired and the report was closed.
+      {is_purged ? (
+        <Alert severity='info'>
+          This report&apos;s content was deleted, so it can no longer be
+          reopened.
         </Alert>
       ) : (
         <>
+          {is_expired && (
+            <Alert severity='warning'>
+              We stopped waiting on this one. Answer anyway and we will pick it
+              back up.
+            </Alert>
+          )}
           <TextField
             fullWidth
             multiline
@@ -112,6 +129,7 @@ SubmissionQuestion.propTypes = {
   submission_id: PropTypes.string,
   claim_token: PropTypes.string,
   is_answering: PropTypes.bool,
+  is_purged: PropTypes.bool,
   submit_contribution_answer: PropTypes.func
 }
 
@@ -178,6 +196,7 @@ export default function ContributionsPage({
 
     const questions = submission.get('questions') || []
     const pull_request_number = submission.get('pull_request_number')
+    const is_purged = Boolean(submission.get('purged_at'))
 
     return (
       <PageLayout
@@ -209,7 +228,7 @@ export default function ContributionsPage({
               )}
             </div>
 
-            {Boolean(submission.get('purged_at')) && (
+            {is_purged && (
               <Alert severity='info'>
                 The content of this report was deleted on request. Its status
                 and history are kept.
@@ -230,6 +249,7 @@ export default function ContributionsPage({
                       question,
                       submission_id,
                       claim_token,
+                      is_purged,
                       is_answering,
                       submit_contribution_answer
                     }}
