@@ -666,12 +666,27 @@ observations:
     dirties four files in a separate repo with its own lifecycle. Reverted rather than committed
     during the fleet prettier pin; decide between adding private/ to .prettierignore or formatting
     it from inside the submodule as its own commit.
+  - >-
+    [design] POST /api/errors persists no database row and returns no identifier -- it symbolicates
+    the stack and emits a fingerprint-deduped log_error signal to the base signals API, so there is
+    nothing to foreign-key a bug report to and a correlation id has to be minted client-side and
+    carried into both the error metadata and the submission.
+  - >-
+    [design] The deployed commit SHA is deliberately NOT in the bundle -- DefinePlugin supplies only
+    IS_DEV and APP_VERSION, and build_manifest_plugin writes the SHA to dist/build-manifest.json
+    precisely so it does not rehash every chunk on every commit; a client needing the SHA must fetch
+    the manifest rather than have it added to DefinePlugin.
+  - >-
+    [hazard] 2026-08-22 mistakia/league master was UNPROTECTED -- branches/master/protection
+    returned 404 and the sole ruleset "protect main" (id 831141) was enforcement:disabled and
+    targeted the branch name main while the default branch is master, so a failing check blocked no
+    merge.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-20T06:25:48.036Z'
+updated_at: '2026-08-22T21:19:30.226Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
