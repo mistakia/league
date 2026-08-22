@@ -48,8 +48,25 @@ export const add_cte = ({ query_context, params = {} }) => {
   )
 }
 
+// Joined into the outer FROM only when the year axis runs WITHOUT a week axis.
+// Under a week axis the player_year_week bridge joins player_years_weeks, which
+// is built from player_years and so already carries the (pid, year) pair of
+// exactly one player_years row -- and the identity's year_column is
+// player_years_weeks.year, so nothing in the outer query reads player_years at
+// all. Joining it anyway was redundant, and expensive: both CTEs are opaque to
+// the planner, so a two-column (pid, year) correlation multiplied two
+// independent selectivity estimates and produced a nested loop. Measured on
+// production 2026-08-21, a single-year week split estimated 1,188 rows against
+// 506,322 actual and ran 295M join-filter comparisons; dropping this join and
+// the week bridge's year correlation took the statement from 35.9s to 1.1s.
+//
+// The guard lives here rather than at the call sites so both of them --
+// setup_from_table_and_player_joins and build-period-cte's
+// ensure_split_bridges -- inherit it. add_cte still registers the CTE
+// unconditionally, since player_years_weeks selects from it.
 export const join_cte = ({ query_context }) => {
-  const { players_query } = query_context
+  const { players_query, row_axes = [] } = query_context
+  if (row_axes.includes('week')) return
   players_query.innerJoin('player_years', 'player_years.pid', 'player.pid')
 }
 

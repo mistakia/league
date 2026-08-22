@@ -34,6 +34,7 @@ import {
   participation_year_reference
 } from '#libs-server/data-views/participation-status-cte.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
+import { resolve_explicit_nfl_week_ids } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 import {
   is_year_offset_range,
   year_offset_range_applies
@@ -506,6 +507,32 @@ const process_item_params = (item) => {
   return item
 }
 
+// The years / weeks a params object declares, from either spelling of the time
+// scope. resolve_nfl_week_params already decomposes params.nfl_week_id onto
+// params.year and params.week, so that spelling arrives here pre-flattened;
+// single_nfl_week_id does not and has to be decomposed on read. Reading only
+// params.year/params.week left a view whose ONLY time scope was
+// single_nfl_week_id looking unscoped to the row axis, which then fell through
+// to the full 2000-current default -- the 13M-row player_year_week fan-out.
+const declared_nfl_weeks = (params) =>
+  decompose_nfl_weeks({ nfl_weeks: resolve_explicit_nfl_week_ids({ params }) })
+
+const declared_years = (params) => {
+  if (!params) return []
+  if (params.year) {
+    return Array.isArray(params.year) ? params.year : [params.year]
+  }
+  return declared_nfl_weeks(params).years
+}
+
+const declared_weeks = (params) => {
+  if (!params) return []
+  if (params.week != null) {
+    return Array.isArray(params.week) ? params.week : [params.week]
+  }
+  return declared_nfl_weeks(params).weeks
+}
+
 const get_year_range = (columns, where) => {
   const years = new Set()
 
@@ -543,17 +570,14 @@ const get_year_range = (columns, where) => {
   }
 
   const check_params = (params) => {
-    if (params.year) {
-      const year_array = Array.isArray(params.year)
-        ? params.year
-        : [params.year]
-      const offsets = collect_offsets(params)
-      // Always include the base years (offset 0) so a year_offset column does
-      // not strip the unshifted column's coverage.
-      year_array.forEach((y) => add_shifted(y, []))
-      if (offsets.length) {
-        year_array.forEach((y) => add_shifted(y, offsets))
-      }
+    const year_array = declared_years(params)
+    if (!year_array.length) return
+    const offsets = collect_offsets(params)
+    // Always include the base years (offset 0) so a year_offset column does
+    // not strip the unshifted column's coverage.
+    year_array.forEach((y) => add_shifted(y, []))
+    if (offsets.length) {
+      year_array.forEach((y) => add_shifted(y, offsets))
     }
   }
 
@@ -593,8 +617,7 @@ const get_week_range = (columns, where) => {
   const weeks = new Set()
 
   const check_params = (params) => {
-    if (!params || params.week == null) return
-    const week_array = Array.isArray(params.week) ? params.week : [params.week]
+    const week_array = declared_weeks(params)
     for (const week of week_array) {
       const parsed = parseInt(week, 10)
       if (Number.isFinite(parsed)) weeks.add(parsed)

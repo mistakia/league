@@ -14,9 +14,9 @@
 
 import {
   apply_year_offset_to_nfl_weeks,
-  get_nfl_week_identifiers_for_year,
-  parse_nfl_week_identifier
+  get_nfl_week_identifiers_for_year
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { resolve_explicit_nfl_week_ids } from './resolve-single-nfl-week-id.mjs'
 
 const DEFAULT_SEAS_TYPE = ['REG']
 
@@ -50,10 +50,13 @@ const expand_year_seas_type = ({ year, seas_type }) => {
 const resolve_params_contribution = (params) => {
   if (!params || typeof params !== 'object') return []
 
-  let nfl_week_ids = normalize_array(params.nfl_week_id).filter(
-    (id) =>
-      typeof id === 'string' && parse_nfl_week_identifier({ identifier: id })
-  )
+  // single_nfl_week_id counts here exactly as nfl_week_id does. It is the scope
+  // param the week-scoped column families carry (dfs salary, betting markets),
+  // and reading only nfl_week_id left those views with an EMPTY view scope: no
+  // apply_scope_to_query predicate anywhere, and no year for the row axis to
+  // scope to, so the axis fell through to the full 2000-current default and
+  // fanned out to 13M intermediate rows.
+  let nfl_week_ids = resolve_explicit_nfl_week_ids({ params })
 
   if (!nfl_week_ids.length) {
     nfl_week_ids = expand_year_seas_type({

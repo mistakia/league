@@ -2,7 +2,8 @@ import {
   format_nfl_week_identifier,
   current_nfl_week_identifier,
   current_nfl_week_params,
-  last_meaningful_reg_week_params_for_year
+  last_meaningful_reg_week_params_for_year,
+  parse_nfl_week_identifier
 } from '#libs-shared/nfl-week-identifier.mjs'
 
 // Resolves a `{dynamic_type: 'current_nfl_week'}` param object to a concrete
@@ -71,6 +72,30 @@ export function resolve_nfl_week_ids({ params = {} } = {}) {
 
   const single = resolve_single_nfl_week_id({ params })
   return single ? [single] : []
+}
+
+// The nfl_week_id list a params object EXPLICITLY declares, with dynamic
+// entries resolved and anything that is not a parseable identifier dropped.
+//
+// Unlike resolve_nfl_week_ids there is deliberately NO fallback. A scope
+// reader has to be able to tell "this params object names no weeks" apart from
+// "it names the current one", because the fallback would impose a time scope on
+// a view that declares none -- which is the opposite of the widening this
+// helper exists to prevent. Precedence matches the column definitions'
+// (single_nfl_week_id ahead of nfl_week_id).
+export function resolve_explicit_nfl_week_ids({ params = {} } = {}) {
+  const raw =
+    params.single_nfl_week_id != null
+      ? params.single_nfl_week_id
+      : params.nfl_week_id
+  const list = Array.isArray(raw) ? raw : raw == null ? [] : [raw]
+  return list
+    .map(resolve_dynamic_single_nfl_week)
+    .filter(
+      (id) =>
+        typeof id === 'string' &&
+        Boolean(parse_nfl_week_identifier({ identifier: id }))
+    )
 }
 
 export default function resolve_single_nfl_week_id({ params = {} } = {}) {

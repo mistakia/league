@@ -35,10 +35,15 @@ const sort_deterministic = (ids) => [...ids].sort()
 
 const normalize_array = (v) => (v == null ? [] : Array.isArray(v) ? v : [v])
 
+// single_nfl_week_id is listed alongside nfl_week_id so this agrees with
+// resolve_params_contribution, which now reads both. Omitting it made a column
+// carrying only single_nfl_week_id take the view scope verbatim instead of
+// narrowing it.
 const has_explicit_time_scope = (params) =>
   Boolean(
     params &&
     (params.nfl_week_id ||
+      params.single_nfl_week_id ||
       params.year ||
       params.seas_type ||
       params.year_offset)
@@ -71,7 +76,10 @@ export const compute_effective_scope = ({
   // Rule 4: seas_type without year → re-expand view's years onto the column's
   // seas_type. Detect by absence of year / nfl_week_id / year_offset.
   const has_year_like =
-    column_params.nfl_week_id || column_params.year || column_params.year_offset
+    column_params.nfl_week_id ||
+    column_params.single_nfl_week_id ||
+    column_params.year ||
+    column_params.year_offset
   if (!has_year_like && normalize_array(column_params.seas_type).length) {
     if (!view_scope.length) return []
     const allowed = new Set(normalize_array(column_params.seas_type))
