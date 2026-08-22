@@ -180,6 +180,58 @@ export interface ConfigRow {
   updated_at: Date | null
 }
 
+export interface ContributionAnswersRow {
+  answer_id: string
+  question_id: string
+  answer_body: string
+  answered_at: Date
+}
+
+export interface ContributionEventsRow {
+  event_id: string
+  submission_id: string
+  contribution_event_type: string
+  previous_submission_status: string | null
+  new_submission_status: string | null
+  event_context: any | null
+  occurred_at: Date
+}
+
+export interface ContributionQuestionsRow {
+  question_id: string
+  submission_id: string
+  question_template_key: string
+  question_text: string
+  asked_at: Date
+  expires_at: Date
+}
+
+export interface ContributionSubmissionsRow {
+  submission_id: string
+  submitter_user_id: number | null
+  submission_kind: string
+  submission_trust_tier: string
+  submission_title: string
+  submission_body: string
+  captured_context: any | null
+  screenshot_reference: string | null
+  claim_token_hash: string | null
+  submission_status: string
+  autonomy_class: string | null
+  base_task_uri: string | null
+  pull_request_number: number | null
+  submitted_at: Date
+  updated_at: Date
+  purged_at: Date | null
+}
+
+export interface ContributionTrustOverridesRow {
+  submitter_user_id: number
+  submission_trust_tier: string
+  override_reason: string
+  created_at: Date
+}
+
 export interface DfsContestsRow {
   source_contest_id: string
   source_id: DfsSourceId

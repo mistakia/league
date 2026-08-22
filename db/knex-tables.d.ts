@@ -33,6 +33,11 @@ import type {
   CompositeMarketValueCalibrationRow,
   CompositeMarketValueDailyRow,
   ConfigRow,
+  ContributionAnswersRow,
+  ContributionEventsRow,
+  ContributionQuestionsRow,
+  ContributionSubmissionsRow,
+  ContributionTrustOverridesRow,
   DfsContestsRow,
   DraftRow,
   DraftkingsCategoryActivityRow,
@@ -338,6 +343,11 @@ declare module 'knex/types/tables' {
     composite_market_value_calibration: CompositeMarketValueCalibrationRow
     composite_market_value_daily: CompositeMarketValueDailyRow
     config: ConfigRow
+    contribution_answers: ContributionAnswersRow
+    contribution_events: ContributionEventsRow
+    contribution_questions: ContributionQuestionsRow
+    contribution_submissions: ContributionSubmissionsRow
+    contribution_trust_overrides: ContributionTrustOverridesRow
     dfs_contests: DfsContestsRow
     draft: DraftRow
     draftkings_category_activity: DraftkingsCategoryActivityRow
