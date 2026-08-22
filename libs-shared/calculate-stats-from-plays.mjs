@@ -1,4 +1,7 @@
-import { create_empty_extended_stats } from '#constants'
+import {
+  create_empty_extended_stats,
+  non_nullified_play_types
+} from '#constants'
 
 const round = (value, precision) => {
   const multiplier = Math.pow(10, precision || 0)
@@ -40,7 +43,13 @@ const calculateStatsFromPlays = (plays) => {
   }
 
   plays.forEach((play) => {
-    if (play.is_fumble_lost) {
+    // The switch below is a de-facto allow-list, so it never reaches a NOPL
+    // row. This branch runs BEFORE it and was unguarded, so a fumble on a
+    // penalty-nullified play counted as a real turnover.
+    if (
+      play.is_fumble_lost &&
+      non_nullified_play_types.includes(play.play_type)
+    ) {
       addStat(play.fumble_lost_pid, 'fumbles_lost', 1)
       playerToTeam[play.fumble_lost_pid] = play.offense_nfl_team
     }

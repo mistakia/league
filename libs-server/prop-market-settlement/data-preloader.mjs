@@ -1,6 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
+import { stat_countable_play_types } from '#constants'
 
 const log = debug('data-preloader')
 
@@ -132,6 +133,10 @@ const load_nfl_plays = async (esbids) => {
       'is_interception'
     )
     .whereIn('esbid', esbids)
+    // Settlement counts passing, rushing and receiving production, so a
+    // nullified play and a two-point conversion are both out. play_type is
+    // filtered without being selected -- the handler never reads it.
+    .whereIn('play_type', stat_countable_play_types)
 }
 
 /**

@@ -12,7 +12,7 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { groupBy } from '#libs-shared'
-import { current_season } from '#constants'
+import { current_season, stat_countable_play_types } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
@@ -212,7 +212,7 @@ const calculate_historical_hit_rates = async ({
       player_gamelogs.map((g) => g.esbid)
     )
     .where('quarter', 1)
-    .whereNot('play_type', 'NOPL')
+    .whereIn('play_type', stat_countable_play_types)
 
   // Process first quarter stats into lookup
   const first_quarter_stats_by_game = first_quarter_stats.reduce(
@@ -267,7 +267,7 @@ const calculate_historical_hit_rates = async ({
       player_gamelogs.map((g) => g.esbid)
     )
     .whereIn('quarter', [1, 2])
-    .whereNot('play_type', 'NOPL')
+    .whereIn('play_type', stat_countable_play_types)
 
   // Process first half stats into lookup
   const first_half_stats_by_game = first_half_stats.reduce((acc, play) => {

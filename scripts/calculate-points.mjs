@@ -1,7 +1,7 @@
 import db from '#db'
 import { is_main, getLeague } from '#libs-server'
 import { groupBy, calculatePoints } from '#libs-shared'
-import { fantasy_positions } from '#constants'
+import { fantasy_positions, stat_countable_play_types } from '#constants'
 import chalk from 'chalk'
 import { Table } from 'console-table-printer'
 
@@ -80,6 +80,7 @@ const load_big_play_yards = async ({ league, year, week }) => {
       .join('nfl_games', 'nfl_games.esbid', 'nfl_plays.esbid')
       .where('nfl_games.season_year', year)
       .where('nfl_games.season_type', 'REG')
+      .whereIn('nfl_plays.play_type', stat_countable_play_types)
       .whereNotNull(`nfl_plays.${pid_column}`)
       .whereNotNull(`nfl_plays.${yards_column}`)
       .groupBy(`nfl_plays.${pid_column}`, 'nfl_plays.esbid')
