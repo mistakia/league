@@ -258,19 +258,14 @@ describe('enrich_player_identifications single-player family ownership', functio
     expect(enriched.ball_carrier_pid).to.equal('PID_NEW')
   })
 
-  it('psr family: family-owned NULL-clear when play has stats but no stat_id 14/15/16', () => {
-    // Play has only a tackle stat (stat_id 79); psr family is owned but
-    // empty -> NULL-clear stale psr columns from a prior import.
-    const play_row = {
-      esbid,
-      play_id,
-      passer_gsis_player_id: 'GSIS_QB',
-      passer_pid: 'PID_QB'
-    }
+  it('psr family: family-owned NULL-clear when the play row holds nothing to preserve', () => {
+    // Play has only a tackle stat (stat_id 79); psr family is owned but empty
+    // and the play row carries no passer gsis -> both columns NULL-write.
+    const play_row = { esbid, play_id }
     const stats = [
       play_stat({ esbid, play_id, stat_id: 79, gsis_player_id: 'GSIS_T' })
     ]
-    const cache = make_player_cache({ GSIS_QB: 'PID_QB', GSIS_T: 'PID_T' })
+    const cache = make_player_cache({ GSIS_T: 'PID_T' })
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
@@ -558,6 +553,156 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
 
     expect(enriched.ball_carrier_gsis_player_id).to.equal('00-0039757')
     expect(enriched.ball_carrier_pid).to.equal('TERR-JENN')
+  })
+})
+
+describe('enrich_player_identifications play-row resolution state (family statIds absent)', function () {
+  const esbid = 1
+  const play_id = 100
+
+  // The writer is play-type blind -- it never reads play_type. What separates
+  // these cases is whether the family's statIds are present, which is the
+  // observable the writer keys on. play_type is carried on the rows only to
+  // name the production class each case stands for.
+
+  it('NOPL pass: preserves the play-row passer gsis and resolves a pid', () => {
+    // A penalty-nullified pass. A real pass was thrown and the play row holds
+    // the passer, but the NFL stat ledger books no passing statIds for it. The
+    // owned writer used to read that silence as "no passer" and delete both
+    // columns on every game finalize.
+    const play_row = {
+      esbid,
+      play_id,
+      play_type: 'NOPL',
+      passer_gsis_player_id: 'GSIS_QB',
+      passer_pid: null
+    }
+    const stats = [
+      play_stat({ esbid, play_id, stat_id: 93, gsis_player_id: 'GSIS_PEN' })
+    ]
+    const cache = make_player_cache({ GSIS_QB: 'PID_QB', GSIS_PEN: 'PID_PEN' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
+    expect(enriched.passer_pid).to.equal('PID_QB')
+  })
+
+  it('two-point pass: preserves passer and target attribution', () => {
+    // CONV. A real pass and a real reception, booked outside the standard
+    // passing and receiving families.
+    const play_row = {
+      esbid,
+      play_id,
+      play_type: 'CONV',
+      passer_gsis_player_id: 'GSIS_QB',
+      passer_pid: null,
+      target_gsis_player_id: 'GSIS_WR',
+      target_pid: null
+    }
+    const stats = [
+      play_stat({ esbid, play_id, stat_id: 79, gsis_player_id: 'GSIS_T' })
+    ]
+    const cache = make_player_cache({
+      GSIS_QB: 'PID_QB',
+      GSIS_WR: 'PID_WR',
+      GSIS_T: 'PID_T'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
+    expect(enriched.passer_pid).to.equal('PID_QB')
+    expect(enriched.target_gsis_player_id).to.equal('GSIS_WR')
+    expect(enriched.target_pid).to.equal('PID_WR')
+  })
+
+  it('ordinary pass: the feed still wins over a stale play-row value', () => {
+    // Regression guard on state 1. The family's statIds ARE present, so the
+    // play-row resolution state must not fire and must not shield a stale
+    // value from reattribution.
+    const play_row = {
+      esbid,
+      play_id,
+      play_type: 'PASS',
+      passer_gsis_player_id: 'GSIS_STALE',
+      passer_pid: 'PID_STALE'
+    }
+    const stats = [
+      play_stat({ esbid, play_id, stat_id: 15, gsis_player_id: 'GSIS_QB' })
+    ]
+    const cache = make_player_cache({
+      GSIS_STALE: 'PID_STALE',
+      GSIS_QB: 'PID_QB'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
+    expect(enriched.passer_pid).to.equal('PID_QB')
+  })
+
+  it('genuinely no participant: nothing to preserve, both columns NULL-write', () => {
+    // A kickoff. No passer statIds and no passer on the play row -- the
+    // clearing branch is still reachable and still runs.
+    const play_row = { esbid, play_id, play_type: 'KOFF' }
+    const stats = [
+      play_stat({ esbid, play_id, stat_id: 79, gsis_player_id: 'GSIS_T' })
+    ]
+    const cache = make_player_cache({ GSIS_T: 'PID_T' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.passer_gsis_player_id).to.equal(null)
+    expect(enriched.passer_pid).to.equal(null)
+    expect(enriched.target_gsis_player_id).to.equal(null)
+    expect(enriched.target_pid).to.equal(null)
+    expect(enriched.ball_carrier_gsis_player_id).to.equal(null)
+    expect(enriched.ball_carrier_pid).to.equal(null)
+  })
+
+  it('unresolvable play-row gsis: preserves the gsis and leaves an existing pid alone', () => {
+    // The translation gap. find_player cannot resolve the gsis, so the state
+    // abstains rather than writing NULL over either column -- it never
+    // destroys, it only adds.
+    const play_row = {
+      esbid,
+      play_id,
+      play_type: 'NOPL',
+      passer_gsis_player_id: 'GSIS_UNTRANSLATABLE',
+      passer_pid: 'PID_FROM_ELSEWHERE'
+    }
+    const stats = [
+      play_stat({ esbid, play_id, stat_id: 79, gsis_player_id: 'GSIS_T' })
+    ]
+    const cache = make_player_cache({ GSIS_T: 'PID_T' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_UNTRANSLATABLE')
+    expect(enriched.passer_pid).to.equal('PID_FROM_ELSEWHERE')
+  })
+
+  it('statIds present but gsisId NULL: the clear is a real retraction and still happens', () => {
+    // The boundary the state is deliberately scoped away from. Here the feed
+    // DID speak about the role and named nobody, which is different from never
+    // mentioning it. The snap-roster fallback owns this case, not this state.
+    const play_row = {
+      esbid,
+      play_id,
+      play_type: 'RUSH',
+      ball_carrier_gsis_player_id: 'GSIS_STALE',
+      ball_carrier_pid: 'PID_STALE'
+    }
+    const stats = [
+      { esbid, play_id, stat_id: 10, gsis_player_id: null, player_name: 'T.X' }
+    ]
+    const cache = make_player_cache({ GSIS_STALE: 'PID_STALE' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.ball_carrier_gsis_player_id).to.equal(null)
+    expect(enriched.ball_carrier_pid).to.equal(null)
   })
 })
 

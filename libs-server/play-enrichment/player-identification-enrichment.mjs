@@ -41,6 +41,7 @@ export const enrich_player_identifications = (
   let enriched_count = 0
   let skipped_count = 0
   let fallback_resolved_count = 0
+  let play_row_resolved_count = 0
   const missing_gsis_ids = new Set()
 
   const normalize_name = (value) =>
@@ -105,14 +106,41 @@ export const enrich_player_identifications = (
   }
 
   // Owned single-player writer for bc/psr/trg/intp/fuml. Writes _gsis and
-  // _pid in lockstep strictly from play_data (no fallback to existing play
-  // row values, no early-return when _pid already set -- the reattribution
-  // clear path depends on overwriting whatever was there).
+  // _pid in lockstep from play_data (no early-return when _pid is already set
+  // -- the reattribution clear path depends on overwriting whatever was
+  // there).
+  //
+  // Three states, not two. allow_play_row_resolution is set by the caller when
+  // the family's statIds are ABSENT from the feed for this play, which is a
+  // different fact from the feed naming the role and leaving it empty:
+  //
+  //   1. play_data carries a gsis -> write {_gsis, _pid} in lockstep. The feed
+  //      spoke; it is the source of truth and overwrites whatever was there.
+  //   2. play_data carries nothing, the family's statIds are absent, and the
+  //      play row already holds a _gsis -> RESOLVE it to a _pid and preserve
+  //      both. The feed never spoke about this role, so the play-row value is
+  //      attribution we already hold rather than one the feed retracted.
+  //   3. otherwise -> NULL-clear both.
+  //
+  // State 2 is the correction. Treating a family's missing statIds as "the
+  // role was not occupied" erased the passer on every penalty-nullified (NOPL)
+  // and two-point (CONV) pass, where a real pass was thrown -- the play text
+  // names the passer -- but the stat ledger books it outside the passing
+  // families. Role _pid is ATTRIBUTION (who); whether a play counts toward a
+  // stat is a separate, explicit predicate. See
+  // user:task/league/separate-play-role-attribution-from-countability.md.
+  //
+  // Deliberately NOT applied when the family's statIds ARE present but carry
+  // no gsisId: there the feed spoke about the role and named nobody, so the
+  // clear is a real retraction, and resolve_role_gsis_via_snap_roster above is
+  // the recovery path for it. State 2 also never writes a NULL over an
+  // existing value -- an unresolvable _gsis leaves an already-set _pid alone.
   const map_owned_player_field = (
     enriched_play,
     play_data,
     gsis_field,
-    pid_field
+    pid_field,
+    allow_play_row_resolution = false
   ) => {
     const gsisid = play_data[gsis_field] || null
     if (gsisid) {
@@ -127,6 +155,21 @@ export const enrich_player_identifications = (
       } else {
         enriched_play[pid_field] = null
         missing_gsis_ids.add(gsisid)
+      }
+    } else if (allow_play_row_resolution && enriched_play[gsis_field]) {
+      const play_row_gsis = enriched_play[gsis_field]
+      if (!enriched_play[pid_field]) {
+        const player = player_cache.find_player({
+          gsis_player_id: play_row_gsis,
+          ignore_free_agent: false,
+          ignore_retired: false
+        })
+        if (player) {
+          enriched_play[pid_field] = player.pid
+          play_row_resolved_count++
+        } else {
+          missing_gsis_ids.add(play_row_gsis)
+        }
       }
     } else {
       enriched_play[gsis_field] = null
@@ -172,13 +215,16 @@ export const enrich_player_identifications = (
 
   // Owned single-player families: each entry's statIds gate ownership.
   // When has_any_play_stats is true, the family is owned: if any statId in
-  // the set is present, write {_gsis, _pid} from play_data; otherwise
-  // NULL-clear both. Penalty is excluded because getPlayFromPlayStats case
+  // the set is present, write {_gsis, _pid} from play_data; otherwise fall to
+  // map_owned_player_field's play-row resolution state, which preserves an
+  // existing _gsis and NULL-clears only when there is nothing to preserve.
+  // Penalty is excluded because getPlayFromPlayStats case
   // 93 is empty -- it stays on the legacy map_player_field path below.
   // Each family's stat_ids gate MUST mirror the full set of statIds that
   // getPlayFromPlayStats uses to populate the family's _gsis field. A gate
-  // narrower than that set silently NULL-clears the role on plays whose only
-  // evidence is an omitted statId (see below). Keep these in lockstep with
+  // narrower than that set silently stops the feed's own attribution from
+  // reaching the role on plays whose only evidence is an omitted statId (see
+  // below), leaving whatever the play row already held. Keep these in lockstep with
   // libs-shared/get-play-from-play-stats.mjs.
   const owned_single_player_families = [
     {
@@ -272,8 +318,9 @@ export const enrich_player_identifications = (
       )
 
       // Single-player owned families: per-family stat-id presence drives
-      // whether play_data carries the role's gsis. When absent, the owned
-      // writer NULL-clears both _gsis and _pid.
+      // whether play_data carries the role's gsis, and -- when it does not --
+      // whether the owned writer may resolve from the play row instead of
+      // NULL-clearing.
       for (const family of owned_single_player_families) {
         const has_family_stats = stats_for_play.some((s) =>
           family.stat_ids.includes(s.stat_id)
@@ -303,11 +350,14 @@ export const enrich_player_identifications = (
           }
         }
 
+        // The family's statIds being absent entirely is what licenses the
+        // play-row resolution state -- see map_owned_player_field.
         map_owned_player_field(
           enriched_play,
           family_play_data,
           family.gsis,
-          family.pid
+          family.pid,
+          !has_family_stats
         )
       }
 
@@ -327,6 +377,9 @@ export const enrich_player_identifications = (
     `Player identification enrichment: ${enriched_count} enriched, ${skipped_count} skipped` +
       (fallback_resolved_count
         ? `, ${fallback_resolved_count} resolved via snap-roster fallback (source NULL gsisId)`
+        : '') +
+      (play_row_resolved_count
+        ? `, ${play_row_resolved_count} resolved from an existing play-row _gsis (family statIds absent)`
         : '')
   )
 
