@@ -6,17 +6,11 @@
     "columns": [
       {
         "column_id": "player_passing_expected_points_added_from_plays",
-        "params": {
-          "year": [2023, 2024, 2025]
-        }
+        "params": { "year": [2023, 2024, 2025] }
       }
     ],
     "where": [
-      {
-        "column_id": "player_position",
-        "operator": "IN",
-        "value": ["QB"]
-      }
+      { "column_id": "player_position", "operator": "IN", "value": ["QB"] }
     ],
     "sort": [
       {
@@ -25,7 +19,7 @@
       }
     ]
   },
-  "expected_query": "with \"tc35f3855a8453d3504e8c2d54fe5e16d\" as materialized (select COALESCE(passer_pid) as pid, SUM(epa) as passing_expected_points_added_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023, 2024, 2025) group by COALESCE(passer_pid)), \"base_years\" as (SELECT unnest(ARRAY[2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"tc35f3855a8453d3504e8c2d54fe5e16d\".\"passing_expected_points_added_from_plays\" AS \"passing_expected_points_added_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tc35f3855a8453d3504e8c2d54fe5e16d\" on \"tc35f3855a8453d3504e8c2d54fe5e16d\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('QB') group by player.first_name, player.last_name, \"tc35f3855a8453d3504e8c2d54fe5e16d\".\"passing_expected_points_added_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t0b91c5373b9d0dafd47f921aa01a6b83\" as materialized (select COALESCE(passer_pid) as pid, SUM(epa) as passing_expected_points_added_from_plays from \"nfl_plays\" where \"play_type\" in ('PASS', 'RUSH', 'KOFF', 'PUNT', 'FGXP', 'FREE') and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023, 2024, 2025) group by COALESCE(passer_pid)), \"base_years\" as (SELECT unnest(ARRAY[2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"t0b91c5373b9d0dafd47f921aa01a6b83\".\"passing_expected_points_added_from_plays\" AS \"passing_expected_points_added_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t0b91c5373b9d0dafd47f921aa01a6b83\" on \"t0b91c5373b9d0dafd47f921aa01a6b83\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('QB') group by player.first_name, player.last_name, \"t0b91c5373b9d0dafd47f921aa01a6b83\".\"passing_expected_points_added_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "parameters", "cte", "regression", "multi-year"],
   "timeout_ms": 35000
 }

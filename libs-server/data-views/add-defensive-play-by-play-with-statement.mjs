@@ -3,6 +3,7 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { apply_play_type_filter } from '#libs-server/data-views/apply-play-type-filter.mjs'
 import { normalize_career_year_range } from '#libs-server/data-views/param-utils.mjs'
 
 export const add_defensive_play_by_play_with_statement = ({
@@ -117,7 +118,18 @@ export const add_defensive_play_by_play_with_statement = ({
 
       this.as('defensive_plays')
     })
-    .whereNot('play_type', 'NOPL')
+
+  // DEFENSIVE stats take non_nullified, NOT the stat_countable set the player
+  // and team paths take: a tackle, sack or interception on a two-point
+  // conversion is real defensive production and must not be dropped. The two
+  // sets differ in exactly CONV, and this is the site that difference exists
+  // for. Unqualified because the filter applies to the derived defensive_plays
+  // table, where nfl_plays is not in scope.
+  apply_play_type_filter({
+    query: with_query,
+    play_type_set: 'non_nullified',
+    table_name: null
+  })
 
   const unique_select_strings = new Set(select_strings)
 

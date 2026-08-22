@@ -2,6 +2,7 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { apply_play_type_filter } from '#libs-server/data-views/apply-play-type-filter.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
@@ -61,9 +62,16 @@ export const add_team_stats_play_by_play_with_statement = ({
     : { wrap_mode: false, years: null }
   const wrap_mode = wrap_decision.wrap_mode
 
-  const with_query = db('nfl_plays')
-    .select(`nfl_plays.${TEAM_UNIT_COLUMN[team_unit]} as nfl_team`)
-    .whereNot('play_type', 'NOPL')
+  const with_query = db('nfl_plays').select(
+    `nfl_plays.${TEAM_UNIT_COLUMN[team_unit]} as nfl_team`
+  )
+  // Team from-plays stats take the same set as the player path -- see
+  // libs-shared/constants/play-type-constants.mjs.
+  apply_play_type_filter({
+    query: with_query,
+    play_type_set: 'stat_countable',
+    table_name: null
+  })
 
   const unique_select_strings = new Set(select_strings)
 

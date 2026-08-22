@@ -3,6 +3,7 @@ import { data_views_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { apply_play_type_filter } from '#libs-server/data-views/apply-play-type-filter.mjs'
 import { normalize_career_year_range } from '#libs-server/data-views/param-utils.mjs'
 import {
   FACT_SOURCES,
@@ -62,9 +63,17 @@ export const add_player_stats_play_by_play_with_statement = ({
   // rather than to db.raw and let it quote the way every other reference here
   // is quoted -- a raw fragment emits `pg.pid` where the rest of the statement
   // emits `"pg"."pid"`, which is the same SQL and a different golden.
-  const with_query = db('nfl_plays')
-    .select(is_cohort ? subject_id : db.raw(`${subject_id} as pid`))
-    .whereNot('play_type', 'NOPL')
+  const with_query = db('nfl_plays').select(
+    is_cohort ? subject_id : db.raw(`${subject_id} as pid`)
+  )
+  // Player from-plays stats: neither a nullified play nor a two-point
+  // conversion is a standard passing, rushing or receiving event. CONV was
+  // excluded nowhere before this, here included.
+  apply_play_type_filter({
+    query: with_query,
+    play_type_set: 'stat_countable',
+    table_name: null
+  })
 
   if (is_cohort) {
     cohort_expansion.join(with_query)
