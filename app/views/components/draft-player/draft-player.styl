@@ -54,3 +54,26 @@
   flex 0 0 auto
   display flex
   justify-content center
+
+// The draft page raises its virtualized row height on a phone; the row itself
+// has to grow into that box or the extra space lands below the tap target
+// rather than inside it. Hover-revealed icons never reveal on touch, so the
+// watchlist toggle is shown outright.
+@media (max-width 700px)
+  .player-draft__item
+    height 100%
+    padding 2px 12px
+    font-size 14px
+    line-height 16px
+    border-bottom 1px solid $borderColor
+    .player-draft__item-action .icon
+      opacity 1
+
+  .player-draft__item-name
+    line-height 16px
+
+  .player-draft__item-index
+    flex 0 0 28px
+
+  .player-draft__item-metric
+    flex 0 0 40px

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
@@ -6,6 +6,12 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
 import List from 'react-virtualized-compat/dist/es/List'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+import SearchIcon from '@mui/icons-material/Search'
+import ClearIcon from '@mui/icons-material/Clear'
+import { useMediaQuery, useTheme } from '@mui/material'
 
 import Button from '@components/button'
 import PageLayout from '@layouts/page'
@@ -47,6 +53,9 @@ export default function DraftPage({
   draft_clock_now
 }) {
   const { lid } = useParams()
+  const theme = useTheme()
+  const is_mobile = useMediaQuery(theme.breakpoints.down('md'))
+  const [player_filter, set_player_filter] = useState('')
   const scroll_to_pick = () => {
     const element = document.querySelector(
       '.draft__side-main .draft__pick.active'
@@ -74,6 +83,15 @@ export default function DraftPage({
     })
   }
   const positions = fantasy_positions
+  const position_boards = [
+    { pos: 'QB', title: 'Quarterbacks' },
+    { pos: 'RB', title: 'Running Backs' },
+    { pos: 'WR', title: 'Wide Receivers' },
+    { pos: 'TE', title: 'Tight ends' }
+  ]
+  // A 25px row is a ~7mm touch target. The board is the primary surface on a
+  // phone, since the positional columns are hidden below 1000px.
+  const row_height = is_mobile ? 40 : 25
 
   const draftActive =
     league.draft_start &&
@@ -169,46 +187,105 @@ export default function DraftPage({
       b.getIn(['pts_added', '0'], default_points_added) -
       a.getIn(['pts_added', '0'], default_points_added)
   )
-  const allRow = ({ index, key, ...params }) => {
-    const player_map = sorted.get(index)
-    return (
-      <DraftPlayer
-        key={key}
-        index={index}
-        player_map={player_map}
-        {...params}
-      />
-    )
+
+  // Every token has to land somewhere, so "hunter col" narrows rather than
+  // widens. Substring rather than the app's `fuzzy_search`, which is a
+  // subsequence test and on a 400-player board matches almost everything a
+  // short query could be.
+  const filter_tokens = player_filter
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+  const is_filtered = filter_tokens.length > 0
+  const matches_filter = (player_map) => {
+    if (!is_filtered) return true
+    const haystack = [
+      player_map.get('name') || '',
+      player_map.get('short_name') || '',
+      player_map.get('team') || '',
+      player_map.get('primary_position') || '',
+      player_map.get('college') || ''
+    ]
+      .join(' ')
+      .toLowerCase()
+    return filter_tokens.every((token) => haystack.includes(token))
   }
 
-  const groups = {}
-  for (const position of positions) {
-    if (!groups[position]) groups[position] = []
-    groups[position] = sorted.filter(
-      (pMap) => pMap.get('primary_position') === position
+  // Rank comes from the unfiltered board, so the number beside a name means
+  // the same thing whether or not a filter is applied.
+  const to_ranked_rows = (player_maps) =>
+    player_maps
+      .map((player_map, rank) => ({ player_map, rank }))
+      .filter(({ player_map }) => matches_filter(player_map))
+
+  const overall_rows = to_ranked_rows(sorted).toArray()
+  const allRow = ({ index, key, ...params }) => {
+    const { player_map, rank } = overall_rows[index]
+    return (
+      <DraftPlayer key={key} index={rank} player_map={player_map} {...params} />
     )
   }
 
   const items = {}
-  for (const position in groups) {
-    if (!items[position]) items[position] = []
-    const players = groups[position]
-    for (const player of players.values()) {
-      items[position].push(player)
-    }
+  for (const position of positions) {
+    items[position] = to_ranked_rows(
+      sorted.filter((pMap) => pMap.get('primary_position') === position)
+    ).toArray()
   }
 
   const positionRow = ({ index, key, pos, ...params }) => {
-    const player_map = items[pos][index]
+    const { player_map, rank } = items[pos][index]
     return (
-      <DraftPlayer
-        key={key}
-        index={index}
-        player_map={player_map}
-        {...params}
-      />
+      <DraftPlayer key={key} index={rank} player_map={player_map} {...params} />
     )
   }
+
+  const player_filter_field = (
+    <div className='draft__main-filter'>
+      <TextField
+        fullWidth
+        size='small'
+        variant='outlined'
+        value={player_filter}
+        onChange={(event) => set_player_filter(event.target.value)}
+        placeholder='Filter by name, team, position or college'
+        inputProps={{
+          autoCapitalize: 'none',
+          autoCorrect: 'off',
+          autoComplete: 'off',
+          spellCheck: 'false',
+          'aria-label': 'Filter players'
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <SearchIcon fontSize='small' />
+            </InputAdornment>
+          ),
+          endAdornment: player_filter ? (
+            <InputAdornment position='end'>
+              <IconButton
+                size='small'
+                aria-label='Clear player filter'
+                onClick={() => set_player_filter('')}
+              >
+                <ClearIcon fontSize='small' />
+              </IconButton>
+            </InputAdornment>
+          ) : null
+        }}
+      />
+    </div>
+  )
+
+  // A position group can be empty with no filter applied — a rookie class with
+  // no tight ends is not a failed search.
+  const empty_board_message = (
+    <div className='draft__main-board-pos-empty'>
+      {is_filtered ? 'No players match' : 'No players'}
+    </div>
+  )
 
   const pickItems = []
 
@@ -361,87 +438,66 @@ export default function DraftPage({
       </div>
       <div className='draft__main'>
         {p.get('pid') && selected}
+        {player_filter_field}
         <div className='draft__main-board'>
           <div className='draft__main-board-pos overall'>
-            <div className='draft__main-board-pos-head'>Overall</div>
+            <div className='draft__main-board-pos-head'>
+              Overall
+              {is_filtered && (
+                <span className='draft__main-board-pos-count'>
+                  {overall_rows.length}
+                </span>
+              )}
+            </div>
             <div className='draft__main-board-pos-body'>
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowHeight={25}
-                    rowCount={sorted.size}
-                    rowRenderer={allRow}
-                  />
-                )}
-              </AutoSizer>
+              {overall_rows.length === 0 ? (
+                empty_board_message
+              ) : (
+                <AutoSizer>
+                  {({ height, width }) => (
+                    <List
+                      key={row_height}
+                      width={width}
+                      height={height}
+                      rowHeight={row_height}
+                      rowCount={overall_rows.length}
+                      rowRenderer={allRow}
+                    />
+                  )}
+                </AutoSizer>
+              )}
             </div>
           </div>
-          <div className='draft__main-board-pos'>
-            <div className='draft__main-board-pos-head'>Quarterbacks</div>
-            <div className='draft__main-board-pos-body'>
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowHeight={25}
-                    rowCount={items.QB.length}
-                    rowRenderer={(args) => positionRow({ pos: 'QB', ...args })}
-                  />
+          {position_boards.map(({ pos, title }) => (
+            <div key={pos} className='draft__main-board-pos'>
+              <div className='draft__main-board-pos-head'>
+                {title}
+                {is_filtered && (
+                  <span className='draft__main-board-pos-count'>
+                    {items[pos].length}
+                  </span>
                 )}
-              </AutoSizer>
-            </div>
-          </div>
-          <div className='draft__main-board-pos'>
-            <div className='draft__main-board-pos-head'>Running Backs</div>
-            <div className='draft__main-board-pos-body'>
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowHeight={25}
-                    rowCount={items.RB.length}
-                    rowRenderer={(args) => positionRow({ pos: 'RB', ...args })}
-                  />
+              </div>
+              <div className='draft__main-board-pos-body'>
+                {items[pos].length === 0 ? (
+                  empty_board_message
+                ) : (
+                  <AutoSizer>
+                    {({ height, width }) => (
+                      <List
+                        key={row_height}
+                        width={width}
+                        height={height}
+                        rowHeight={row_height}
+                        rowCount={items[pos].length}
+                        rowRenderer={(args) => positionRow({ pos, ...args })}
+                      />
+                    )}
+                  </AutoSizer>
                 )}
-              </AutoSizer>
+              </div>
             </div>
-          </div>
-          <div className='draft__main-board-pos'>
-            <div className='draft__main-board-pos-head'>Wide Receivers</div>
-            <div className='draft__main-board-pos-body'>
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowHeight={25}
-                    rowCount={items.WR.length}
-                    rowRenderer={(args) => positionRow({ pos: 'WR', ...args })}
-                  />
-                )}
-              </AutoSizer>
-            </div>
-          </div>
-          <div className='draft__main-board-pos'>
-            <div className='draft__main-board-pos-head'>Tight ends</div>
-            <div className='draft__main-board-pos-body'>
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    rowHeight={25}
-                    rowCount={items.TE.length}
-                    rowRenderer={(args) => positionRow({ pos: 'TE', ...args })}
-                  />
-                )}
-              </AutoSizer>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
