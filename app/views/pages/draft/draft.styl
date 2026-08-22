@@ -58,6 +58,12 @@
 .draft__main-filter
   flex 0 0 auto
   padding 0 16px 8px
+  display flex
+  justify-content flex-end
+  // The field is `fullWidth`, so the cap has to land on the MUI form control
+  // rather than the wrapper for the flex alignment to have anything to move.
+  .MuiFormControl-root
+    max-width 320px
 
 .draft__main-board
   flex 1
@@ -170,14 +176,12 @@
       flex 1 0 33%
       padding 8px 12px
 
+  // Full bleed on a phone; the desktop cap and right alignment would leave
+  // most of a narrow screen empty.
   .draft__main-filter
     padding 0 8px 8px
+    .MuiFormControl-root
+      max-width none
 
   .draft__main-board
     border-bottom none
-
-  .draft__side
-    height 110px
-
-  .draft__side-main
-    padding 8px

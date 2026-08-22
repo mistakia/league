@@ -11,7 +11,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useMediaQuery, useTheme } from '@mui/material'
 
 import Button from '@components/button'
 import PageLayout from '@layouts/page'
@@ -53,8 +52,6 @@ export default function DraftPage({
   draft_clock_now
 }) {
   const { lid } = useParams()
-  const theme = useTheme()
-  const is_mobile = useMediaQuery(theme.breakpoints.down('md'))
   const [player_filter, set_player_filter] = useState('')
   const scroll_to_pick = () => {
     const element = document.querySelector(
@@ -89,10 +86,6 @@ export default function DraftPage({
     { pos: 'WR', title: 'Wide Receivers' },
     { pos: 'TE', title: 'Tight ends' }
   ]
-  // A 25px row is a ~7mm touch target. The board is the primary surface on a
-  // phone, since the positional columns are hidden below 1000px.
-  const row_height = is_mobile ? 40 : 25
-
   const draftActive =
     league.draft_start &&
     draft_clock_now.isAfter(dayjs(league.draft_start).startOf('day'))
@@ -456,10 +449,9 @@ export default function DraftPage({
                 <AutoSizer>
                   {({ height, width }) => (
                     <List
-                      key={row_height}
                       width={width}
                       height={height}
-                      rowHeight={row_height}
+                      rowHeight={25}
                       rowCount={overall_rows.length}
                       rowRenderer={allRow}
                     />
@@ -485,10 +477,9 @@ export default function DraftPage({
                   <AutoSizer>
                     {({ height, width }) => (
                       <List
-                        key={row_height}
                         width={width}
                         height={height}
-                        rowHeight={row_height}
+                        rowHeight={25}
                         rowCount={items[pos].length}
                         rowRenderer={(args) => positionRow({ pos, ...args })}
                       />
