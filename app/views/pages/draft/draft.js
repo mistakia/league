@@ -235,7 +235,7 @@ export default function DraftPage({
   }
 
   const player_filter_field = (
-    <div className='draft__main-filter'>
+    <div className='draft__side-top-filter'>
       <TextField
         fullWidth
         size='small'
@@ -427,11 +427,13 @@ export default function DraftPage({
     <div className='draft'>
       <div className='draft__side'>
         <div className='draft__side-main'>{pickItems}</div>
-        <div className='draft__side-top'>{draftInfo}</div>
+        <div className='draft__side-top'>
+          {draftInfo}
+          {player_filter_field}
+        </div>
       </div>
       <div className='draft__main'>
         {p.get('pid') && selected}
-        {player_filter_field}
         <div className='draft__main-board'>
           <div className='draft__main-board-pos overall'>
             <div className='draft__main-board-pos-head'>
