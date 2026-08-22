@@ -2,6 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
+import { non_nullified_play_types } from '#constants'
 
 const log = debug('route-share')
 
@@ -50,7 +51,7 @@ const load_team_dropbacks = async ({ esbids }) => {
       .count('* as dropbacks')
       .whereIn('esbid', chunk)
       .where({ is_qb_dropback: true })
-      .whereNot({ play_type: 'NOPL' })
+      .whereIn('play_type', non_nullified_play_types)
       .groupBy('possession_nfl_team', 'esbid')
 
     for (const row of rows) {

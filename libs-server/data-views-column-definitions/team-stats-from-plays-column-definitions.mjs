@@ -1,4 +1,5 @@
 import db from '#db'
+import { stat_countable_play_types } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
@@ -165,7 +166,8 @@ const team_stat_from_plays = ({
         const filtered_params = { ...defaults }
         delete filtered_params.career_year
         delete filtered_params.career_game
-        query.whereNot('nfl_plays.play_type', 'NOPL')
+        // Same set as the team with-statement chokepoint: not NOPL, not CONV.
+        query.whereIn('nfl_plays.play_type', stat_countable_play_types)
         apply_play_by_play_column_params_to_query({
           query,
           params: filtered_params,

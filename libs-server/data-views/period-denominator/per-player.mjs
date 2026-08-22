@@ -1,4 +1,5 @@
 import db from '#db'
+import { non_nullified_play_types } from '#constants'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
@@ -43,7 +44,10 @@ export const add_per_player_cte = ({
   data_view_options = {},
   query_context = null
 }) => {
-  const cte_query = db('nfl_plays').whereNot('play_type', 'NOPL')
+  const cte_query = db('nfl_plays').whereIn(
+    'play_type',
+    non_nullified_play_types
+  )
 
   let count_expression = 'COUNT(*)'
   switch (stat_type) {

@@ -1,4 +1,5 @@
 import db from '#db'
+import { non_nullified_play_types, scrimmage_play_types } from '#constants'
 import {
   resolve_year_offset_range,
   emit_year_match
@@ -90,7 +91,7 @@ export const add_per_team_play_cte = ({
   const team_unit_column = TEAM_UNIT_COLUMN[team_unit]
   const cte_query = db('nfl_plays')
     .select(`nfl_plays.${team_unit_column} as ${team_unit}`)
-    .whereNot('play_type', 'NOPL')
+    .whereIn('play_type', non_nullified_play_types)
     .groupBy(`nfl_plays.${team_unit_column}`)
 
   let count_expression = 'COUNT(*)'
@@ -119,7 +120,10 @@ export const add_per_team_play_cte = ({
   if (play_type) {
     cte_query.where('play_type', play_type)
   } else {
-    cte_query.whereIn('play_type', ['PASS', 'RUSH'])
+    // Offensive snaps -- a rate DENOMINATOR, not countability. Membership is
+    // unchanged from the literal this replaces; widening it to a countability
+    // set would add the special-teams population and deflate every rate stat.
+    cte_query.whereIn('play_type', scrimmage_play_types)
   }
 
   let year_grouped = false

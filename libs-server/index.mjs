@@ -1,3 +1,5 @@
+import { non_nullified_play_types } from '#constants'
+
 export * as simulation from './simulation/index.mjs'
 export { default as readCSV } from './read-csv.mjs'
 export { default as sendNotifications } from './send-notifications.mjs'
@@ -227,7 +229,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.yard_line_100'
     )
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .whereNot('nfl_plays.play_type', 'NOPL')
+    .whereIn('nfl_plays.play_type', non_nullified_play_types)
 
 const fields = [
   'nfl_plays_current_week.esbid',
