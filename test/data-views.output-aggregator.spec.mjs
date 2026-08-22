@@ -107,6 +107,38 @@ describe('data-views output aggregator', () => {
       expect(cte_body).to.not.include('"nfl_games"."season_year" in (')
     })
 
+    it('applies the same rule to the ROLE-UNION builder, which used to keep the duplicate', async () => {
+      // The two builders disagreed until this landed: build_batched_period_cte
+      // dropped the nfl_games scope while build_role_union_period_cte still
+      // emitted it, which read as a deliberate carve-out and was only ever an
+      // unmeasured one. Measured back to back on production 2026-08-21, the
+      // de-duplicated role-union statement runs 242-256ms against 291-379ms and
+      // its CTE returns an identical row set in both EXCEPT ALL directions.
+      //
+      // Pinned here rather than left to the eight goldens that moved with it:
+      // a golden records WHAT the SQL is and cannot say that the two builders
+      // must agree, which is the thing a future reader would otherwise
+      // "repair" in the wrong direction.
+      const sql = await build_sql({
+        column_id: 'player_solo_tackles_from_plays',
+        params: { year: [2023], output: count_100_games }
+      })
+
+      const [cte_name] = cte_names_matching(sql, 'per_period_game')
+      expect(cte_name, 'no materialized per_period_game CTE').to.be.a('string')
+
+      const cte_body = sql.slice(
+        sql.indexOf(`"${cte_name}" as materialized`),
+        sql.indexOf(') select ')
+      )
+      // The positive half is what keeps the negative half from passing
+      // vacuously: an assertion that a predicate is ABSENT is satisfied just as
+      // well by a CTE body this slice failed to capture.
+      expect(cte_body).to.include('"nfl_plays"."season_year" in (2023)')
+      expect(cte_body).to.not.include('"nfl_games"."season_year" in (')
+      expect(cte_body).to.not.include('"nfl_games"."season_type" in (')
+    })
+
     it('carries the threshold operator through to the FILTER', async () => {
       const sql = await build_sql({
         column_id: 'player_receiving_yards_from_plays',

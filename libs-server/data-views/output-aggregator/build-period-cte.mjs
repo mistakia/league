@@ -292,11 +292,19 @@ const build_role_union_period_cte = ({
   if (!is_aggregate) {
     outer.select(db.raw(`${period_key} AS period_key`)).groupByRaw(period_key)
   }
+  // Same rule as the batched builder: nfl_games carries only what the fact
+  // relation cannot express, and nfl_plays expresses all three components, so
+  // it carries nothing. Every union arm above already scoped nfl_plays and the
+  // outer join is on esbid, so the dropped predicates were implied by the
+  // fact-side ones they duplicated.
   apply_scope_to_query({
     query: outer,
     table_name: 'nfl_games',
     query_context,
-    column_params: params
+    column_params: params,
+    has_year: false,
+    has_seas_type: !physical_has_seas_type(source_table),
+    has_nfl_week_id: !physical_has_nfl_week_id(source_table)
   })
   // career_year / career_game: legacy with_func joined player_seasonlogs on
   // (pid, year, seas_type) and filtered between bounds. Mirror that here so
