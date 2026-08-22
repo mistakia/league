@@ -81,9 +81,18 @@ api.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')
   res.set('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS, PUT')
+  // x-contribution-claim-token is a NON-SIMPLE header, so a cross-origin read
+  // of a contribution preflights and the browser drops the request unless the
+  // header is named here. Production serves the SPA same-origin with the API so
+  // nothing preflights there, which is exactly what makes this easy to miss:
+  // the omission is invisible in production and breaks every browser
+  // verification pass, which is the mandated oracle for a client change in this
+  // repository. The token stays a header rather than a query parameter because
+  // a query parameter lands in access logs, in Referer headers on any outbound
+  // link, and in browser history.
   res.set(
     'Access-Control-Allow-Headers',
-    'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+    'Authorization, Origin, X-Requested-With, Content-Type, Accept, x-contribution-claim-token'
   )
   res.set('Vary', 'Origin')
   next()
