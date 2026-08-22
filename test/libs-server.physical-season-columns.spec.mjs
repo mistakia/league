@@ -35,8 +35,10 @@ import {
   physical_year_column,
   physical_seas_type_column,
   physical_table_names,
-  tables_without_seas_type
+  tables_without_seas_type,
+  tables_with_nfl_week_id
 } from '#libs-server/data-views/physical-season-columns.mjs'
+import { FACT_SOURCES } from '#libs-server/data-views/measure/fact-source-registry.mjs'
 
 const { expect } = chai
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -125,8 +127,23 @@ const REVIEWED_DYNAMIC_CALL_SITES = [
     file: 'apply-play-by-play-column-params-to-query.mjs',
     expression: 'table_name'
   },
-  { file: 'build-period-cte.mjs', expression: 'source_table' }
+  { file: 'build-period-cte.mjs', expression: 'scope_table_name' }
 ]
+
+// Every relation the period-CTE builder can scan, taken from the fact-source
+// registry rather than listed here. That builder resolves its scope columns
+// through this map by variable, so the reviewed-call-site check above cannot see
+// which table it lands on -- this is what makes the dynamic site safe. A cohort
+// source is reached under an ALIAS, so the map is consulted for the physical
+// table behind it.
+const fact_source_relations = () => {
+  const relations = new Set()
+  for (const source of Object.values(FACT_SOURCES)) {
+    relations.add(source.table)
+    if (source.cohort_expansion) relations.add(source.cohort_expansion.table)
+  }
+  return [...relations].sort()
+}
 
 describe('physical season columns', () => {
   describe('the map agrees with db/schema.postgres.sql', () => {
@@ -146,6 +163,44 @@ describe('physical season columns', () => {
       it(`${table_name} really carries ${physical_seas_type_column(table_name)}`, () => {
         expect(
           table_columns(table_name).has(physical_seas_type_column(table_name))
+        ).to.equal(true)
+      })
+    }
+  })
+
+  // The scope emitter asks the map which components a table can carry before it
+  // emits them, so a table wrongly listed here emits a 42703 and one wrongly
+  // omitted loses the predicate that prunes it. Both directions read from the
+  // schema.
+  describe('the nfl_week_id declaration agrees with the schema', () => {
+    for (const table_name of tables_with_nfl_week_id()) {
+      it(`${table_name} really carries nfl_week_id`, () => {
+        expect(table_columns(table_name).has('nfl_week_id')).to.equal(true)
+      })
+    }
+
+    for (const table_name of physical_table_names()) {
+      if (tables_with_nfl_week_id().has(table_name)) continue
+      it(`${table_name} really has no nfl_week_id`, () => {
+        expect(table_columns(table_name).has('nfl_week_id')).to.equal(false)
+      })
+    }
+  })
+
+  // The period-CTE builder reaches this map by variable, so nothing static can
+  // tell which table it lands on. This is that guard: a fact source whose table
+  // is unregistered would emit the vocabulary `year` against a conformed table.
+  describe('every fact-source relation is registered', () => {
+    for (const table_name of fact_source_relations()) {
+      it(`${table_name} resolves to a real season-year column`, () => {
+        const columns = table_columns(table_name)
+        expect(
+          columns,
+          `${table_name} is missing from the schema`
+        ).to.not.equal(null)
+        expect(
+          columns.has(physical_year_column(table_name)),
+          `a fact source scans ${table_name}, which resolves to ${physical_year_column(table_name)} -- register it in physical-season-columns`
         ).to.equal(true)
       })
     }

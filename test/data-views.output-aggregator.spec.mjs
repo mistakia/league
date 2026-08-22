@@ -83,7 +83,7 @@ describe('data-views output aggregator', () => {
       )
     })
 
-    it('materializes the period CTE and pushes the year filter into it', async () => {
+    it('materializes the period CTE and pushes the year onto the fact scan, not nfl_games', async () => {
       const sql = await build_sql({
         column_id: 'player_receiving_yards_from_plays',
         params: { year: [2023], output: count_100_games }
@@ -96,7 +96,15 @@ describe('data-views output aggregator', () => {
         sql.indexOf(`"${cte_name}" as materialized`),
         sql.indexOf(') select ')
       )
-      expect(cte_body).to.include('"nfl_games"."season_year" in (2023)')
+      // The year has to be on nfl_plays for the partition pruning, and it has
+      // to be ONLY there: duplicating it on the nfl_games join flips the CTE
+      // onto a nested loop that reads 5.98M buffers against 179K, which is a
+      // slower query than the unpruned one it replaced.
+      expect(cte_body).to.include('"nfl_plays"."season_year" in (2023)')
+      // Anchored on the PREDICATE rather than the name: the CTE still projects
+      // and groups by nfl_games.season_year, so a bare name check passes over
+      // the duplicate this asserts against.
+      expect(cte_body).to.not.include('"nfl_games"."season_year" in (')
     })
 
     it('carries the threshold operator through to the FILTER', async () => {

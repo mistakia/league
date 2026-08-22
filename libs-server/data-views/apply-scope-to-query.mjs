@@ -105,11 +105,17 @@ export const compute_effective_scope = ({
 // regenerated query-match goldens happily blessed. Resolving by table name makes
 // forgetting them the CORRECT behaviour instead of a silent defect. The explicit
 // arguments remain for the cases the map cannot know about.
+// has_year exists for the one caller that has already emitted the scope on
+// ANOTHER relation joined to this one: a duplicate predicate is not free, it
+// changes the plan. Emitting year on both nfl_plays and the nfl_games it joins
+// flipped the per-period CTE off a hash join and onto a 35,198-iteration nested
+// loop (5.98M buffer hits against 179K) -- see build-period-cte.mjs.
 export const apply_scope_to_query = ({
   query,
   table_name,
   query_context,
   column_params = null,
+  has_year = true,
   has_seas_type = true,
   has_nfl_week_id = true,
   year_column = null,
@@ -144,7 +150,7 @@ export const apply_scope_to_query = ({
       sorted_seas_types
     )
   }
-  if (sorted_years.length) {
+  if (has_year && sorted_years.length) {
     const resolved_year_column = year_column || physical_year_column(table_name)
     query.whereIn(`${table_name}.${resolved_year_column}`, sorted_years)
   }

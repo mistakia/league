@@ -11,6 +11,12 @@ import {
 import { normalize_career_year_range } from '../param-utils.mjs'
 import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
 import {
+  physical_has_nfl_week_id,
+  physical_has_seas_type,
+  physical_seas_type_column,
+  physical_year_column
+} from '../physical-season-columns.mjs'
+import {
   FACT_SOURCES,
   resolve_fact_source,
   subject_id_expression
@@ -38,6 +44,45 @@ const period_key_expr = (period) => {
   if (period === 'season') return season_period_key
   if (period === 'aggregate') return null
   throw new Error(`build_period_cte does not handle period: ${period}`)
+}
+
+// Emit view scope against a PHYSICAL fact relation, qualified by the alias it
+// is reachable under.
+//
+// The nfl_games join carries the scope already, but it joins on esbid alone, so
+// the planner cannot infer the fact table's season_year from it and scans every
+// partition: a single-year Wide Receiver Overview read all 26 nfl_plays
+// partitions and every player_gamelogs partition, 2.6M intermediate rows and
+// ~12s of a 16.1s run (signal 126307). The predicate belongs on the fact scan
+// for the same reason add-player-stats-play-by-play-with-statement.mjs puts it
+// there, and it is the SAME effective scope, so it narrows nothing.
+//
+// Which scope columns exist and what they are called are properties of the
+// PHYSICAL table (player_gamelogs carries season_year and neither a season type
+// nor an nfl_week_id), while the predicate has to be qualified by the ALIAS --
+// the cohort expansion joins player_gamelogs as `pg`, so the two differ and
+// resolving the columns off the alias would emit the vocabulary names.
+const apply_scope_to_fact_relation = ({
+  query,
+  table_name,
+  alias = null,
+  query_context,
+  params
+}) => {
+  const has_seas_type = physical_has_seas_type(table_name)
+  const scope_table_name = alias || table_name
+  apply_scope_to_query({
+    query,
+    table_name: scope_table_name,
+    query_context,
+    column_params: params,
+    has_seas_type,
+    has_nfl_week_id: physical_has_nfl_week_id(table_name),
+    year_column: physical_year_column(table_name),
+    seas_type_column: has_seas_type
+      ? physical_seas_type_column(table_name)
+      : null
+  })
 }
 
 // This builder no longer owns the source table: which table a measure's facts
@@ -196,14 +241,13 @@ const build_role_union_period_cte = ({
       // alongside year, so partition pruning + composite indexes engage from a
       // single emission. The outer nfl_games join below adds matching predicates
       // (defense in depth) without depending on apply_filters to gate season type.
-      apply_scope_to_query({
+      // source_table is the PHYSICAL nfl_plays here, not a CTE alias, so the
+      // conformed column names resolve through physical-season-columns.
+      apply_scope_to_fact_relation({
         query: sub,
         table_name: source_table,
         query_context,
-        // source_table is the PHYSICAL nfl_plays here, not a CTE alias.
-        // apply_scope_to_query resolves the conformed column names by table
-        // name through physical-season-columns.
-        column_params: params
+        params
       })
       if (apply_filters) apply_filters({ query: sub })
       return sub
@@ -441,16 +485,51 @@ export const build_batched_period_cte = ({
     sub.whereRaw(measure_predicate)
   }
 
-  // Emit view-scope on the outer nfl_games join (the source-table side gets
-  // it via apply_filters when the column-def routes through
-  // apply_play_by_play_column_params_to_query; defense-in-depth here ensures
-  // the join is gated by season-type regardless of apply_filters specifics).
+  // The fact scan needs the scope on ITS OWN side to prune partitions -- the
+  // apply_filters path emits a season type but no year, because it runs without
+  // a query_context and so never reaches the scope-owned branch. See
+  // apply_scope_to_fact_relation.
+  apply_scope_to_fact_relation({
+    query: sub,
+    table_name: source_table,
+    query_context,
+    params
+  })
+
+  // nfl_games then carries only the components the fact table CANNOT express:
+  // player_gamelogs has a season year and no season type, so a REG-only view
+  // still has to gate the join. Emitting a component on both sides is not free
+  // defense in depth -- the duplicate is what flipped the WOPR per-period CTE
+  // onto a nested loop that reads 5.98M buffers against 179K, turning the
+  // pruning win into a 0.7s LOSS. Measured on production 2026-08-21: scope on
+  // both sides 6.3s, scope on the fact side alone 3.1s.
+  //
+  // Dropping the predicates does not widen the scan: every fact row joins
+  // nfl_games on esbid, and the two agree on (year, season type, week) for all
+  // 1,487,212 rows of nfl_plays, so the nfl_games predicate was implied by the
+  // fact-side one it duplicates.
   apply_scope_to_query({
     query: sub,
     table_name: 'nfl_games',
     query_context,
-    column_params: params
+    column_params: params,
+    has_year: false,
+    has_seas_type: !physical_has_seas_type(source_table),
+    has_nfl_week_id: !physical_has_nfl_week_id(source_table)
   })
+
+  // The cohort members table is reached by a join the fact-side predicates
+  // never touch, so it prunes only on a predicate of its own; without one the
+  // expansion reads every player_gamelogs partition for a single-year view.
+  if (source.cohort_expansion) {
+    apply_scope_to_fact_relation({
+      query: sub,
+      table_name: source.cohort_expansion.table,
+      alias: source.cohort_expansion.alias,
+      query_context,
+      params
+    })
+  }
 
   if (apply_filters) apply_filters({ query: sub })
 

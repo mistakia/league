@@ -27,7 +27,8 @@ const PHYSICAL_YEAR_COLUMN = {
   nfl_plays_player: 'season_year',
   nfl_plays_receiver: 'season_year',
   nfl_plays_rusher: 'season_year',
-  nfl_snaps: 'season_year'
+  nfl_snaps: 'season_year',
+  player_gamelogs: 'season_year'
 }
 
 const PHYSICAL_SEAS_TYPE_COLUMN = {
@@ -48,8 +49,18 @@ const TABLES_WITHOUT_SEAS_TYPE = new Set([
   'nfl_plays_player',
   'nfl_plays_receiver',
   'nfl_plays_rusher',
-  'nfl_snaps'
+  'nfl_snaps',
+  'player_gamelogs'
 ])
+
+// nfl_week_id is a GENERATED column and only two tables carry one. Declared as
+// an inclusion set rather than an exclusion set because the map's fallback for
+// an unregistered name is a CTE alias, and a CTE alias projects the vocabulary
+// columns without ever projecting nfl_week_id -- so "absent from the map" has to
+// mean "no nfl_week_id" or an emitter targeting an alias emits a 42703. Callers
+// pass has_nfl_week_id: false for a table that carries none; apply_scope_to_query
+// then leaves the (year, seas_type) predicates to do the pruning on their own.
+const TABLES_WITH_NFL_WEEK_ID = new Set(['nfl_games', 'nfl_plays'])
 
 export const physical_year_column = (table_name) =>
   PHYSICAL_YEAR_COLUMN[table_name] || 'year'
@@ -63,6 +74,14 @@ export const physical_seas_type_column = (table_name) => {
   return PHYSICAL_SEAS_TYPE_COLUMN[table_name] || 'seas_type'
 }
 
+export const physical_has_seas_type = (table_name) =>
+  !TABLES_WITHOUT_SEAS_TYPE.has(table_name)
+
+export const physical_has_nfl_week_id = (table_name) =>
+  TABLES_WITH_NFL_WEEK_ID.has(table_name)
+
 export const physical_table_names = () => Object.keys(PHYSICAL_YEAR_COLUMN)
 
 export const tables_without_seas_type = () => new Set(TABLES_WITHOUT_SEAS_TYPE)
+
+export const tables_with_nfl_week_id = () => new Set(TABLES_WITH_NFL_WEEK_ID)
