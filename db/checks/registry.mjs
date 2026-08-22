@@ -55,6 +55,7 @@ import db from '#db'
 
 import { recompute_route_share } from '#libs-server'
 import { pfr_gamelog_agreement_rows } from '#libs-server/pfr-gamelog-agreement.mjs'
+import { erased_role_attribution_by_play_type } from '#libs-server/erased-role-attribution.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -260,6 +261,41 @@ const registry = [
     // catch, which is the healer's join breaking and selecting nothing.
     min_denominator: 30000,
     repair_command: 'node scripts/recompute-route-share.mjs'
+  },
+
+  {
+    check_id: 'role-attribution-erased',
+    invariant:
+      'A nullified or two-point play the changelog shows once carried a passer still carries one — a _pid, or at minimum the _gsis it can be resolved from. No other oracle sees this: the residual monitor grades the OPPOSITE shape (_gsis present, _pid null), and the obvious repair for that reading is to clear the _gsis, which turns it green by deleting the last record of who the player was.',
+    grain: ['play_type'],
+    rows: async () => {
+      // Graded through the same module a healer must import, so detector and
+      // healer cannot drift into disagreeing about which rows are erased.
+      const rows = await erased_role_attribution_by_play_type()
+      return rows.map((row) => ({
+        play_type: row.play_type,
+        // `scanned` is every row the changelog shows was once attributed, not
+        // the erased count. The erased population DRAINS as recovery lands, so
+        // a floor on it would go red as a consequence of success and a zero
+        // there could not be told apart from a join that stopped matching.
+        numerator: row.erased,
+        denominator: row.scanned,
+        resolvable: row.resolvable,
+        restored: row.restored
+      }))
+    },
+    max_count: 0,
+    calibration:
+      'Exact: a row that once had a passer and now has neither a pid nor a gsis lost data, and the changelog holds the previous_value that proves it. Measured 2026-08-22: NOPL scans 3,279 once-attributed rows — 2,299 erased, 980 still resolvable, ZERO restored; CONV scans 166 and all 166 are erased. The contrast that calibrates it is PASS, which is deliberately OUT of scope: 5,457 of 5,458 cleared PASS rows were repopulated, so the same clear-and-rewrite cycle is transient there and a loss here. DIRECTION IS THE POINT: clearing a resolvable residual to satisfy the old monitor moves a row out of `resolvable` and into `numerator`, so the repair that greens that oracle reds this one. RUSH is out of scope for a second reason — deliberate clears of bogus passer stamps live there (five cleared 2026-08-22 under source bogus-passer-stamp-triage) and they are a repair, not a loss. This reads red from the day it lands and that is a correct reading of a known defect; per design-data-checks.md a finding rides a self-closing signal and does not fail the run. It does not contradict the rule about repairs that RAISE a count, because this one falls. The erased bucket is recoverable only from play_changelog.previous_value, since those rows have no surviving gsis for enrichment to resolve. RELATIONSHIP TO THE RESIDUAL MONITOR (cli/monitoring/check-league-role-pid-residual.sh): it is NOT superseded and must not be retired for this. The two grade opposite halves and move in opposite directions — it owns rows still resolvable, this owns rows past resolving — so retiring it would leave the resolvable half ungraded. Its three known weaknesses are ruled on here rather than inherited: the three-season lookback is DROPPED, because this check is bounded by changelog reach (2023 onward for role columns) instead of a rolling window; qb_pid coverage is NOT added, because qb_pid is a separate writer with no changelog rows and so has no erasure oracle at all; and its self-closing signal branch — a destructive repair resolving its own finding with no human in the loop — is the reason this check exists, since that same repair reds this one.',
+    min_gradeable_units: 1,
+    // Exactly two rows, fixed by construction, so the row-count floor is a
+    // tautology and the denominator carries the whole signal. The scanned
+    // population only ever GROWS (a clear is never un-recorded), so a reading
+    // below 100 against today's smallest of 166 means the changelog join broke
+    // or the column spelling moved, not that the corpus got healthier.
+    min_denominator: 100,
+    repair_command:
+      'Restore from play_changelog.previous_value — these rows have no surviving _gsis, so re-running enrichment cannot reach them. See user:task/league/separate-play-role-attribution-from-countability.md. Do NOT clear a resolvable residual to make the role-pid monitor green; that moves rows INTO this finding.'
   },
 
   {
