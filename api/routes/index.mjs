@@ -25,6 +25,7 @@ import context_docs from './context-docs.mjs'
 import waitlist from './waitlist.mjs'
 import waitlist_submissions from './waitlist-submissions.mjs'
 import admission_votes from './admission-votes.mjs'
+import contributions from './contributions.mjs'
 
 export default {
   auth,
@@ -53,5 +54,6 @@ export default {
   context_docs,
   waitlist,
   waitlist_submissions,
-  admission_votes
+  admission_votes,
+  contributions
 }

@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-22 against league_production
 --
 -- Contribution pipeline: the submission of record and its audit trail.
 --
@@ -20,9 +20,10 @@
 -- logged-out visitor on /data-views or /plays sees the most breakage and must
 -- be able to report it. What authentication buys is not admission but autonomy.
 -- submission_trust_tier is resolved at insert and is a DATA value read by the
--- poller, not a code branch, so the operator can demote an authenticated
--- submitter who floods the queue and promote a known anonymous reporter without
--- a deploy. ON DELETE SET NULL rather than CASCADE: a submission outlives the
+-- poller, not a code branch, so the operator can demote or promote an
+-- AUTHENTICATED submitter without a deploy, via contribution_trust_overrides
+-- below. Promoting a known anonymous reporter is not expressible -- see that
+-- table's header for why. ON DELETE SET NULL rather than CASCADE: a submission outlives the
 -- account that filed it, and deleting a user must not silently erase the audit
 -- trail of work already shipped from their report.
 --
@@ -46,9 +47,11 @@
 --
 -- Additive and reversible: DROP TABLE IF EXISTS public.contribution_answers,
 -- public.contribution_questions, public.contribution_events,
--- public.contribution_submissions CASCADE;
+-- public.contribution_trust_overrides, public.contribution_submissions CASCADE;
 
-BEGIN;
+-- No explicit BEGIN/COMMIT: yarn db:exec wraps the file in --single-transaction
+-- and owns the transaction. An explicit pair here would nest inside that
+-- wrapper, commit early, and leave anything after it outside the rollback.
 
 CREATE TABLE IF NOT EXISTS public.contribution_submissions (
     submission_id uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -99,6 +102,33 @@ CREATE INDEX IF NOT EXISTS idx_contribution_submissions_submission_trust_tier
 CREATE INDEX IF NOT EXISTS idx_contribution_submissions_submitter_user_id
     ON public.contribution_submissions (submitter_user_id, submitted_at DESC)
     WHERE submitter_user_id IS NOT NULL;
+
+-- What makes the trust tier DATA rather than a branch. Without a per-submitter
+-- override the resolver has only one input -- "is there a session" -- and the
+-- operator's stated lever, demoting an authenticated submitter who is flooding
+-- the queue, needs a deploy. One row here changes that submitter's tier on
+-- their next submission with no code change.
+--
+-- The reverse lever in the planning document, promoting a known anonymous
+-- reporter, is NOT expressible here and cannot be: an anonymous submitter has
+-- no stable identity to key an override on. Their route to a higher tier is to
+-- register, or the operator raises the tier on the individual submission row.
+-- Recorded so a later reader does not look for the missing half.
+--
+-- override_reason is NOT NULL because an unexplained tier change is
+-- indistinguishable from a mistake six months later, and this table is small
+-- enough that the cost of a sentence is nil.
+CREATE TABLE IF NOT EXISTS public.contribution_trust_overrides (
+    submitter_user_id bigint NOT NULL,
+    submission_trust_tier character varying(20) NOT NULL,
+    override_reason text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT contribution_trust_overrides_pkey PRIMARY KEY (submitter_user_id),
+    CONSTRAINT contribution_trust_overrides_submitter_user_id_fkey
+        FOREIGN KEY (submitter_user_id) REFERENCES public.users(id) ON DELETE CASCADE,
+    CONSTRAINT contribution_trust_overrides_submission_trust_tier_check
+        CHECK (submission_trust_tier IN ('untrusted', 'standard', 'trusted'))
+);
 
 -- Follow-up questions are drawn from a fixed template set, never generated, and
 -- capped at three per submission. question_template_key records which template
@@ -157,4 +187,3 @@ CREATE TABLE IF NOT EXISTS public.contribution_events (
 CREATE INDEX IF NOT EXISTS idx_contribution_events_submission_id
     ON public.contribution_events (submission_id, occurred_at);
 
-COMMIT;

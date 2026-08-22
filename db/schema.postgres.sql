@@ -3,8 +3,8 @@
 --
 
 
--- Dumped from database version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
+-- Dumped from database version 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -58,6 +58,11 @@ ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_connection_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_submitter_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_submitter_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_questions DROP CONSTRAINT IF EXISTS contribution_questions_submission_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_events DROP CONSTRAINT IF EXISTS contribution_events_submission_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_answers DROP CONSTRAINT IF EXISTS contribution_answers_question_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.admission_vote_eligible_teams DROP CONSTRAINT IF EXISTS admission_vote_eligible_teams_admission_vote_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.admission_vote_candidates DROP CONSTRAINT IF EXISTS admission_vote_candidates_submission_id_fkey;
@@ -397,6 +402,11 @@ DROP INDEX IF EXISTS public.idx_draft_tid;
 DROP INDEX IF EXISTS public.idx_draft_lid;
 DROP INDEX IF EXISTS public.idx_dfs_contests_season_year_week;
 DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
+DROP INDEX IF EXISTS public.idx_contribution_submissions_submitter_user_id;
+DROP INDEX IF EXISTS public.idx_contribution_submissions_submission_trust_tier;
+DROP INDEX IF EXISTS public.idx_contribution_submissions_status_trust_tier;
+DROP INDEX IF EXISTS public.idx_contribution_questions_submission_id;
+DROP INDEX IF EXISTS public.idx_contribution_events_submission_id;
 DROP INDEX IF EXISTS public.idx_bid_changelog_league_player_season;
 DROP INDEX IF EXISTS public.idx_bid_changelog_bid_identity;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
@@ -657,6 +667,12 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_questions DROP CONSTRAINT IF EXISTS contribution_questions_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_events DROP CONSTRAINT IF EXISTS contribution_events_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_answers DROP CONSTRAINT IF EXISTS contribution_answers_question_id_key;
+ALTER TABLE IF EXISTS ONLY public.contribution_answers DROP CONSTRAINT IF EXISTS contribution_answers_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_daily DROP CONSTRAINT IF EXISTS composite_market_value_daily_pkey;
@@ -1018,6 +1034,11 @@ DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_draft_pick_id_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
+DROP TABLE IF EXISTS public.contribution_trust_overrides;
+DROP TABLE IF EXISTS public.contribution_submissions;
+DROP TABLE IF EXISTS public.contribution_questions;
+DROP TABLE IF EXISTS public.contribution_events;
+DROP TABLE IF EXISTS public.contribution_answers;
 DROP TABLE IF EXISTS public.config;
 DROP SEQUENCE IF EXISTS public.composite_market_value_daily_cmv_row_id_seq;
 DROP TABLE IF EXISTS public.composite_market_value_daily;
@@ -2247,6 +2268,89 @@ CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     config_value jsonb,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: contribution_answers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_answers (
+    answer_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    question_id uuid NOT NULL,
+    answer_body text NOT NULL,
+    answered_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: contribution_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_events (
+    event_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    submission_id uuid NOT NULL,
+    contribution_event_type character varying(50) NOT NULL,
+    previous_submission_status character varying(30),
+    new_submission_status character varying(30),
+    event_context jsonb,
+    occurred_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: contribution_questions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_questions (
+    question_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    submission_id uuid NOT NULL,
+    question_template_key character varying(50) NOT NULL,
+    question_text text NOT NULL,
+    asked_at timestamp with time zone DEFAULT now() NOT NULL,
+    expires_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: contribution_submissions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_submissions (
+    submission_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    submitter_user_id bigint,
+    submission_kind character varying(20) NOT NULL,
+    submission_trust_tier character varying(20) DEFAULT 'untrusted'::character varying NOT NULL,
+    submission_title character varying(200) NOT NULL,
+    submission_body text NOT NULL,
+    captured_context jsonb,
+    screenshot_reference text,
+    claim_token_hash character varying(64),
+    submission_status character varying(30) DEFAULT 'received'::character varying NOT NULL,
+    autonomy_class character varying(20),
+    base_task_uri text,
+    pull_request_number integer,
+    submitted_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    purged_at timestamp with time zone,
+    CONSTRAINT contribution_submissions_autonomy_class_check CHECK (((autonomy_class IS NULL) OR ((autonomy_class)::text = ANY ((ARRAY['auto_ship'::character varying, 'agent_implement'::character varying, 'plan_only'::character varying, 'product_decision'::character varying])::text[])))),
+    CONSTRAINT contribution_submissions_captured_context_size_check CHECK (((captured_context IS NULL) OR (octet_length((captured_context)::text) <= 262144))),
+    CONSTRAINT contribution_submissions_submission_kind_check CHECK (((submission_kind)::text = ANY ((ARRAY['bug_report'::character varying, 'feature_idea'::character varying])::text[]))),
+    CONSTRAINT contribution_submissions_submission_status_check CHECK (((submission_status)::text = ANY ((ARRAY['received'::character varying, 'awaiting_information'::character varying, 'accepted'::character varying, 'rejected'::character varying, 'duplicate'::character varying, 'in_progress'::character varying, 'shipped'::character varying, 'expired'::character varying])::text[]))),
+    CONSTRAINT contribution_submissions_submission_trust_tier_check CHECK (((submission_trust_tier)::text = ANY ((ARRAY['untrusted'::character varying, 'standard'::character varying, 'trusted'::character varying])::text[])))
+);
+
+
+--
+-- Name: contribution_trust_overrides; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_trust_overrides (
+    submitter_user_id bigint NOT NULL,
+    submission_trust_tier character varying(20) NOT NULL,
+    override_reason text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT contribution_trust_overrides_submission_trust_tier_check CHECK (((submission_trust_tier)::text = ANY ((ARRAY['untrusted'::character varying, 'standard'::character varying, 'trusted'::character varying])::text[])))
 );
 
 
@@ -28722,6 +28826,54 @@ ALTER TABLE ONLY public.config
 
 
 --
+-- Name: contribution_answers contribution_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_answers
+    ADD CONSTRAINT contribution_answers_pkey PRIMARY KEY (answer_id);
+
+
+--
+-- Name: contribution_answers contribution_answers_question_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_answers
+    ADD CONSTRAINT contribution_answers_question_id_key UNIQUE (question_id);
+
+
+--
+-- Name: contribution_events contribution_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_events
+    ADD CONSTRAINT contribution_events_pkey PRIMARY KEY (event_id);
+
+
+--
+-- Name: contribution_questions contribution_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_questions
+    ADD CONSTRAINT contribution_questions_pkey PRIMARY KEY (question_id);
+
+
+--
+-- Name: contribution_submissions contribution_submissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_submissions
+    ADD CONSTRAINT contribution_submissions_pkey PRIMARY KEY (submission_id);
+
+
+--
+-- Name: contribution_trust_overrides contribution_trust_overrides_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_trust_overrides
+    ADD CONSTRAINT contribution_trust_overrides_pkey PRIMARY KEY (submitter_user_id);
+
+
+--
 -- Name: dfs_contests dfs_contests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -30965,6 +31117,41 @@ CREATE INDEX idx_bid_changelog_bid_identity ON public.bid_changelog USING btree 
 --
 
 CREATE INDEX idx_bid_changelog_league_player_season ON public.bid_changelog USING btree (league_id, player_id, season_year, changed_at);
+
+
+--
+-- Name: idx_contribution_events_submission_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_contribution_events_submission_id ON public.contribution_events USING btree (submission_id, occurred_at);
+
+
+--
+-- Name: idx_contribution_questions_submission_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_contribution_questions_submission_id ON public.contribution_questions USING btree (submission_id);
+
+
+--
+-- Name: idx_contribution_submissions_status_trust_tier; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_contribution_submissions_status_trust_tier ON public.contribution_submissions USING btree (submission_status, submission_trust_tier);
+
+
+--
+-- Name: idx_contribution_submissions_submission_trust_tier; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_contribution_submissions_submission_trust_tier ON public.contribution_submissions USING btree (submission_trust_tier);
+
+
+--
+-- Name: idx_contribution_submissions_submitter_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_contribution_submissions_submitter_user_id ON public.contribution_submissions USING btree (submitter_user_id, submitted_at DESC) WHERE (submitter_user_id IS NOT NULL);
 
 
 --
@@ -57744,6 +57931,46 @@ ALTER TABLE ONLY public.adp_format
 
 
 --
+-- Name: contribution_answers contribution_answers_question_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_answers
+    ADD CONSTRAINT contribution_answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.contribution_questions(question_id) ON DELETE CASCADE;
+
+
+--
+-- Name: contribution_events contribution_events_submission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_events
+    ADD CONSTRAINT contribution_events_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.contribution_submissions(submission_id) ON DELETE CASCADE;
+
+
+--
+-- Name: contribution_questions contribution_questions_submission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_questions
+    ADD CONSTRAINT contribution_questions_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.contribution_submissions(submission_id) ON DELETE CASCADE;
+
+
+--
+-- Name: contribution_submissions contribution_submissions_submitter_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_submissions
+    ADD CONSTRAINT contribution_submissions_submitter_user_id_fkey FOREIGN KEY (submitter_user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: contribution_trust_overrides contribution_trust_overrides_submitter_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_trust_overrides
+    ADD CONSTRAINT contribution_trust_overrides_submitter_user_id_fkey FOREIGN KEY (submitter_user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: external_league_connections external_league_connections_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -58187,6 +58414,41 @@ GRANT SELECT ON SEQUENCE public.composite_market_value_daily_cmv_row_id_seq TO l
 --
 
 GRANT SELECT ON TABLE public.config TO league_reader;
+
+
+--
+-- Name: TABLE contribution_answers; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_answers TO league_reader;
+
+
+--
+-- Name: TABLE contribution_events; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_events TO league_reader;
+
+
+--
+-- Name: TABLE contribution_questions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_questions TO league_reader;
+
+
+--
+-- Name: TABLE contribution_submissions; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_submissions TO league_reader;
+
+
+--
+-- Name: TABLE contribution_trust_overrides; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_trust_overrides TO league_reader;
 
 
 --

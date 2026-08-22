@@ -165,6 +165,14 @@ api.use('/api/selection-combinations', routes.selection_combinations)
 // router carries the submit route and nothing else -- its read side is mounted
 // below the guard, so no handler here reads user-owned rows.
 api.use('/api/waitlist', routes.waitlist)
+// Public, unauthenticated write: /data-views and /plays render with no session
+// and are where most breakage is seen, so an authenticated-only report path
+// would exclude the visitors who hit the most bugs. Authentication buys
+// AUTONOMY, not admission -- an anonymous submission is stored at trust tier
+// `untrusted` and never enters the automated planning path. The list route on
+// this router 401s on !req.auth explicitly rather than relying on the guard
+// below, and the detail route admits only the author or a claim token.
+api.use('/api/contributions', routes.contributions)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
