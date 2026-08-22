@@ -152,6 +152,25 @@ export const page_routes = [
     description:
       'Operational status of the data imports, projections, and jobs behind xo.football.'
   },
+  {
+    // Before the `:submission_id` pattern below it: first match wins, and the
+    // param pattern would otherwise take this page's title.
+    //
+    // Both are private_robots. A submission carries whatever the reporter
+    // typed and a captured page context, so neither the list nor a detail page
+    // belongs in an index — and the detail route is reachable with a claim
+    // token, which must never be followed by a crawler.
+    pattern: '/contributions',
+    title: 'My Reports',
+    description: 'Bug reports and feature ideas you have submitted.',
+    robots: private_robots
+  },
+  {
+    pattern: '/contributions/:submission_id',
+    title: 'Report',
+    description: 'A submitted bug report or feature idea and its status.',
+    robots: private_robots
+  },
 
   // League surfaces. The extractor prefixes the league name onto these titles
   // when it can resolve one; the copy here is the fallback.

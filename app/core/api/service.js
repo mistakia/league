@@ -330,6 +330,42 @@ export const api = {
     const url = `${API_URL}/status`
     return { url }
   },
+  // The four contribution requests. Each spreads ...POST(data) rather than
+  // nesting the options one level down: api_request merges a service function's
+  // return FLAT into the fetch init, so `{ url, opts: { method: 'POST' } }`
+  // silently degrades to a GET. See docs/guides/spa.md.
+  post_contribution(data) {
+    const url = `${API_URL}/contributions`
+    return { url, ...POST(data) }
+  },
+  get_contributions() {
+    const url = `${API_URL}/contributions`
+    return { url }
+  },
+  // The claim token travels in a header, never the query string: a query
+  // parameter lands in access logs, in Referer headers on any outbound link and
+  // in browser history, and this is a bearer credential for one submitter's
+  // report. deepmerge combines this with the default Authorization header
+  // rather than replacing it.
+  get_contribution({ submission_id, claim_token }) {
+    const url = `${API_URL}/contributions/${submission_id}`
+    return claim_token
+      ? { url, headers: { 'x-contribution-claim-token': claim_token } }
+      : { url }
+  },
+  post_contribution_answer({ submission_id, claim_token, ...data }) {
+    const url = `${API_URL}/contributions/${submission_id}/answers`
+    const options = { url, ...POST(data) }
+    return claim_token
+      ? {
+          ...options,
+          headers: {
+            ...options.headers,
+            'x-contribution-claim-token': claim_token
+          }
+        }
+      : options
+  },
   get_scoreboard(params) {
     const url = `${API_URL}/scoreboard?${queryString.stringify(params)}`
     return { url }

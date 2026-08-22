@@ -95,6 +95,10 @@ export const get_plays = (state, { week = current_season.week } = {}) =>
   state.getIn(['plays', week], new Map())
 export const get_draft_state = (state) => state.get('draft')
 export const get_status = (state) => state.get('status')
+
+// The contribution slice. Named `contributions` rather than `status` because
+// `status` and /status are the system-status page and must not be disturbed.
+export const get_contributions = (state) => state.get('contributions')
 export const get_stats_state = (state) => state.get('stats')
 export const get_sources_state = (state) => state.get('sources')
 export const get_rosters_state = (state) => state.get('rosters')

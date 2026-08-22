@@ -6,6 +6,7 @@ import { createBrowserHistory, createHashHistory } from 'history'
 
 import rootSaga from './sagas'
 import rootReducer from './reducers'
+import { contribution_breadcrumbs_middleware } from './contribution-breadcrumbs'
 
 const sagaMiddleware = createSagaMiddleware()
 const initialState = window.__INITIAL_STATE__
@@ -21,7 +22,14 @@ const { createReduxHistory, routerMiddleware, routerReducer } =
     selectRouterState: (state) => state.get('router')
   })
 
-const middlewares = [sagaMiddleware, routerMiddleware]
+// The breadcrumb recorder runs FIRST so it observes every action, including any
+// a later middleware might swallow. It records the action type and a timestamp
+// only -- see contribution-breadcrumbs.js for why the payload never enters it.
+const middlewares = [
+  contribution_breadcrumbs_middleware,
+  sagaMiddleware,
+  routerMiddleware
+]
 const enhancers = [applyMiddleware(...middlewares)]
 
 const dynamic_reducers = {}

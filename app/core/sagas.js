@@ -21,6 +21,7 @@ import { poach_sagas } from './poaches'
 import { schedule_sagas } from './schedule'
 import { error_sagas } from './errors'
 import { status_sagas } from './status'
+import { contribution_sagas } from './contributions'
 import { scoreboard_sagas } from './scoreboard'
 import { play_sagas } from './plays'
 import { gamelog_sagas } from './gamelogs'
@@ -57,6 +58,7 @@ export default function* rootSaga() {
     ...schedule_sagas,
     ...error_sagas,
     ...status_sagas,
+    ...contribution_sagas,
     ...scoreboard_sagas,
     ...play_sagas,
     ...gamelog_sagas,

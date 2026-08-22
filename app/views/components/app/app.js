@@ -24,6 +24,11 @@ const AuctionControls = lazy(() => import('@components/auction-controls'))
 const AuctionCommissionerControls = lazy(
   () => import('@components/auction-commissioner-controls')
 )
+// Lazy, so the dialog and everything it pulls in stay OUT of the main bundle.
+// It is mounted on every route because the entry point has to be reachable
+// from the public /data-views and /plays pages, which is where most breakage is
+// seen and where the visitor is logged out.
+const ContributionDialog = lazy(() => import('@components/contribution-dialog'))
 
 hotkeys('control+command+w', () => {
   document.body.classList.toggle('hide-watchlist')
@@ -96,6 +101,7 @@ export default function App({
       <Suspense fallback={null}>
         <Confirmation />
         <Notification />
+        <ContributionDialog />
         <SelectedPlayer />
         {is_auction_live && <AuctionControls />}
         {is_auction_live && isCommish && is_hosted && (

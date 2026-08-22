@@ -21,6 +21,7 @@ import { trade_review_reducer } from './trade-review'
 import { schedule_reducer } from './schedule'
 import { notification_reducer } from './notifications'
 import { status_reducer } from './status'
+import { contribution_reducer } from './contributions'
 import { scoreboard_reducer } from './scoreboard'
 import { plays_reducer } from './plays'
 import { gamelogs_reducer } from './gamelogs'
@@ -65,6 +66,7 @@ const rootReducer = (router, dynamic_reducers = {}) =>
     trade_review: trade_review_reducer,
     schedule: schedule_reducer,
     status: status_reducer,
+    contributions: contribution_reducer,
     scoreboard: scoreboard_reducer,
     plays: plays_reducer,
     gamelogs: gamelogs_reducer,

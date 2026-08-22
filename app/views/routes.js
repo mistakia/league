@@ -27,6 +27,9 @@ const TradePage = lazy(() => import('@pages/trade'))
 const TeamSettingsPage = lazy(() => import('@pages/team-settings'))
 const MarkdownPage = lazy(() => import('@pages/markdown'))
 const StatusPage = lazy(() => import('@pages/status'))
+// `contributions`, NOT `status` -- /status and @pages/status above are the
+// existing system-status page and are a different thing entirely.
+const ContributionsPage = lazy(() => import('@pages/contributions'))
 const TransactionsPage = lazy(() => import('@pages/transactions'))
 const StandingsPage = lazy(() => import('@pages/standings'))
 const StatsPage = lazy(() => import('@pages/stats'))
@@ -179,6 +182,15 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>
       <Route path='/status' element={<StatusPage />} />
+      {/* Both routes are open to anonymous callers. The list renders a
+          sign-in prompt with nothing in it, and the detail route is how an
+          anonymous submitter reaches their own report with the claim token
+          carried in the URL fragment. */}
+      <Route path='/contributions' element={<ContributionsPage />} />
+      <Route
+        path='/contributions/:submission_id'
+        element={<ContributionsPage />}
+      />
       <Route path='/settings' element={<UserSettingsPage />} />
       <Route
         path='/leagues/:lid/team-settings'

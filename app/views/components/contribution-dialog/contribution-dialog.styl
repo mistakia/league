@@ -1,0 +1,38 @@
+// The z-index comes from the named scale in app/styles/variables.styl, which
+// stylus-loader injects into every stylesheet (no import needed). A bare
+// numeric literal here is a defect that `yarn check:z-index-scale` fails in CI.
+//
+// $z_dialog is the correct EXISTING layer and no new one is needed: it already
+// sits above $z_selected_player (1400) and the react-table band (1451-1456), and
+// $z_snackbar (1550) is above it, so the submit toast renders over the open
+// dialog rather than behind it.
+.contribution-dialog
+  z-index $z_dialog
+
+  &__kind
+    margin-bottom 8px
+
+  &__context
+    margin-top 16px
+    box-shadow none
+    border 1px solid rgba(0, 0, 0, 0.12)
+
+  &__context-preview
+    margin 0
+    max-height 240px
+    overflow auto
+    font-size 11px
+    line-height 1.4
+    white-space pre-wrap
+    word-break break-all
+
+  &__receipt-lead
+    margin-top 0
+
+  &__claim
+    margin-top 12px
+    padding 8px
+    background rgba(0, 0, 0, 0.04)
+    border-radius 4px
+    font-size 12px
+    word-break break-all

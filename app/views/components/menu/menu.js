@@ -44,7 +44,8 @@ export default function AppMenu({
   teamId,
   leagueId,
   league,
-  is_commish
+  is_commish,
+  open_contribution_dialog
 }) {
   const isMobile = window.innerWidth < 800
   const is_hosted = Boolean(league.is_hosted)
@@ -242,6 +243,9 @@ export default function AppMenu({
                   <NavLink to='/login'>Login</NavLink>
                 )}
                 {is_logged_in && <NavLink to='/settings'>Settings</NavLink>}
+                {is_logged_in && (
+                  <NavLink to='/contributions'>My Reports</NavLink>
+                )}
               </div>
             </div>
             <div className='menu__section'>
@@ -249,6 +253,14 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
+                {/* The menu is the only navigation surface present on every
+                    route, which is why the report entry lives here rather than
+                    on a page. An anchor rather than a NavLink: it opens a
+                    dialog over the current page instead of navigating, since a
+                    report is about the page the reporter is already on. */}
+                <a onClick={() => open_contribution_dialog()}>
+                  Report a problem
+                </a>
                 <NavLink to='/constitution'>Rules</NavLink>
                 <NavLink to='/about'>About</NavLink>
                 <a
@@ -298,5 +310,6 @@ AppMenu.propTypes = {
   logout: PropTypes.func,
   menu_open: PropTypes.bool,
   set_menu_open: PropTypes.func,
-  is_commish: PropTypes.bool
+  is_commish: PropTypes.bool,
+  open_contribution_dialog: PropTypes.func
 }

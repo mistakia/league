@@ -2,6 +2,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { uuidv4 } from '#libs-shared'
+
 // Client error reporting.
 //
 // Errors are POSTed to /api/errors, which symbolicates the stack against the
@@ -134,6 +136,33 @@ const should_report = () =>
 
 let current_user = null
 
+// CLIENT-MINTED CORRELATION, because the server side cannot supply it.
+// POST /api/errors persists no row and returns no identifier -- it symbolicates
+// the stack and emits a fingerprint-deduped log_error signal to the base signal
+// queue, then replies { success: true }. So there is nothing to link a bug
+// report TO unless the browser mints the identifier itself and puts it on both
+// sides: into the error's metadata (which the route passes through to the
+// signal's context.metadata) and into the submission's captured context.
+// Triage then greps the signal queue for the identifier.
+//
+// The session identifier is deliberately NOT minted here. `app.clientId`
+// already exists as a per-load uuidv4 on the redux app record; a second one
+// would correlate to nothing.
+export const CLIENT_TRACE_LIMIT = 10
+
+const client_trace_buffer = []
+
+// A copy, and never persisted to storage. These identifiers are session-scoped
+// by design and each one names a stack in the signal queue.
+export const get_client_trace_ids = () => client_trace_buffer.slice()
+
+const record_client_trace_id = (client_trace_id) => {
+  client_trace_buffer.push(client_trace_id)
+  while (client_trace_buffer.length > CLIENT_TRACE_LIMIT) {
+    client_trace_buffer.shift()
+  }
+}
+
 const post_to_league_api = (err, metadata) => {
   try {
     // Suppress expected post-deploy chunk-load churn (see is_chunk_load_error):
@@ -147,10 +176,18 @@ const post_to_league_api = (err, metadata) => {
     // beacon population arrives through window.onerror and the extension
     // population through unhandledrejection, and both are the same finding.
     if (is_third_party_origin_error(err)) return
-    const enriched =
-      current_user && typeof current_user === 'object'
-        ? { ...(metadata || {}), user: current_user }
-        : metadata
+    // Minted AFTER the suppression guards, so the buffer holds only identifiers
+    // that actually reached the signal queue. An identifier for an error that
+    // was dropped would name a signal triage can never find.
+    const client_trace_id = uuidv4()
+    record_client_trace_id(client_trace_id)
+    const enriched = {
+      ...(metadata || {}),
+      client_trace_id,
+      ...(current_user && typeof current_user === 'object'
+        ? { user: current_user }
+        : {})
+    }
     fetch('/api/errors', {
       method: 'POST',
       credentials: 'same-origin',

@@ -12,6 +12,12 @@ import {
 } from '@core/app/actions'
 import { get_app } from '@core/selectors'
 import { get_status_actions } from '@core/status/actions'
+import {
+  post_contribution_actions,
+  get_contributions_actions,
+  get_contribution_actions,
+  post_contribution_answer_actions
+} from '@core/contributions/actions'
 import { get_schedule_actions } from '@core/schedule/actions'
 import {
   get_draft_actions,
@@ -509,6 +515,27 @@ export const api_get_status = fetch.bind(
   null,
   api.get_status,
   get_status_actions
+)
+
+export const api_post_contribution = fetch.bind(
+  null,
+  api.post_contribution,
+  post_contribution_actions
+)
+export const api_get_contributions = fetch.bind(
+  null,
+  api.get_contributions,
+  get_contributions_actions
+)
+export const api_get_contribution = fetch.bind(
+  null,
+  api.get_contribution,
+  get_contribution_actions
+)
+export const api_post_contribution_answer = fetch.bind(
+  null,
+  api.post_contribution_answer,
+  post_contribution_answer_actions
 )
 
 export const api_get_cutlist = fetch.bind(
