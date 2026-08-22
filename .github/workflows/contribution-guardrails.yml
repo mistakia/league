@@ -1,0 +1,130 @@
+# Server-side enforcement of the guarded-path list for contribution pull
+# requests.
+#
+# WHAT THIS PROTECTS AGAINST. A contribution pull request is opened by an agent
+# executing a plan authored by an untrusted contributor. The contributor never
+# writes code, but the plan they wrote steers what the agent does, so the
+# question is not "is this diff malicious" -- it is "can a plan talk the agent
+# into changing something no contribution is allowed to change". Dependency
+# manifests, the sops policy, CI definitions and schema are exactly that list:
+# each one is a path where a change is either a supply-chain decision or a
+# production data decision, and both are operator-only.
+#
+# The egress workflow applies the same list locally before it pushes. This is
+# the half that runs where the agent cannot reach it. A local gate the agent
+# executes is advice; a required check on the base repository is enforcement.
+#
+# THE JOB ALWAYS RUNS, and that is deliberate rather than wasteful. Branch
+# protection on master requires this check by name, and a required check that is
+# SKIPPED never reports a conclusion -- GitHub leaves the pull request pending
+# forever rather than passing it. Gating the whole job behind
+# `if: contains(labels, ...)` would therefore block every ordinary pull request
+# the operator opens. So the job runs on every pull request and decides inside:
+# no label means "not a contribution", which passes immediately.
+#
+# mistakia/league is a PUBLIC repository, so these runs cost no billed Actions
+# minutes.
+
+name: Contribution Guardrails
+
+on:
+  pull_request:
+    # `labeled` and `unlabeled` are load-bearing. The label is applied by the
+    # egress workflow AFTER the pull request is created, so without these the
+    # check would have run once, before the label existed, concluded "not a
+    # contribution", and passed -- and its stale success would satisfy branch
+    # protection for a diff it never actually judged.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contribution-guardrails-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guarded-paths:
+    name: guarded-paths
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          # The merge commit's parents are the base tip and the head, which is
+          # what makes the three-dot diff below resolve without a second fetch.
+          fetch-depth: 0
+
+      - name: Refuse guarded paths on a labelled contribution
+        env:
+          # Read through the environment rather than interpolated into the
+          # script body. A pull request title or label is attacker-controlled
+          # text, and `${{ }}` inside a run block is substituted before bash
+          # ever parses it -- which is the standard script-injection shape in
+          # GitHub Actions.
+          IS_CONTRIBUTION: ${{ contains(github.event.pull_request.labels.*.name, 'contribution') }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$IS_CONTRIBUTION" != "true" ]; then
+            echo "Not a contribution pull request (no 'contribution' label); nothing to enforce."
+            exit 0
+          fi
+
+          # The guarded-path list. db/migrations/** is deliberately ABSENT: it
+          # holds one file from 2020 and is dead, so guarding it would imply a
+          # live path that is not one. Schema work lands in db/adhoc/**, which
+          # is guarded.
+          guarded_paths='
+          package.json
+          yarn.lock
+          .yarnrc.yml
+          .sops.yaml
+          db/schema.postgres.sql
+          '
+          guarded_prefixes='
+          .github/workflows/
+          db/adhoc/
+          '
+
+          # Two-dot against the recorded base SHA rather than three-dot against
+          # a branch name: three-dot resolves a merge base, and on a stale head
+          # that silently widens the diff to include commits the contributor did
+          # not write. A guard that reports paths the pull request did not touch
+          # gets ignored, which is the failure mode that matters for a gate.
+          changed_files="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+
+          echo "Files changed in this pull request:"
+          echo "$changed_files" | sed 's/^/  /'
+
+          violations=""
+
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            for guarded in $guarded_paths; do
+              if [ "$file" = "$guarded" ]; then
+                violations="${violations}${file}"$'\n'
+              fi
+            done
+            for prefix in $guarded_prefixes; do
+              case "$file" in
+                "$prefix"*) violations="${violations}${file}"$'\n' ;;
+              esac
+            done
+          done <<< "$changed_files"
+
+          if [ -n "$violations" ]; then
+            echo ""
+            echo "REFUSED. This contribution touches guarded paths:"
+            echo "$violations" | sed 's/^/  /'
+            echo ""
+            echo "Dependency changes, sops policy, CI definitions and schema are"
+            echo "operator-only and cannot arrive through a contribution."
+            exit 1
+          fi
+
+          echo ""
+          echo "OK. No guarded path touched."
