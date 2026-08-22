@@ -32,4 +32,8 @@ user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349
 
 ### [Roadmap](https://github.com/users/mistakia/projects/3/views/1)
 
+### Contributing
+
+Found a bug or have an idea? See [docs/contributing.md](docs/contributing.md) — reporting works signed out, from any page.
+
 </div>
