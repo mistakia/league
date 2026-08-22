@@ -160,6 +160,13 @@ export {
 // Error constants
 export { roster_validation_errors } from './error-constants.mjs'
 
+// Play-type predicate sets (countability, per stat family)
+export {
+  scrimmage_play_types,
+  stat_countable_play_types,
+  non_nullified_play_types
+} from './play-type-constants.mjs'
+
 // Selection constants (for standard selection ID format)
 export {
   selection_values,

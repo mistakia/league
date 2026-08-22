@@ -45,7 +45,7 @@
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
-import { get_position_group } from '#constants'
+import { get_position_group, scrimmage_play_types } from '#constants'
 
 // A team value that cannot be one of this game's two sides is not evidence.
 const UNUSABLE_TEAMS = new Set(['INA', ''])
@@ -57,7 +57,7 @@ const DEFENSE_POSITION_GROUPS = new Set(['DL', 'LB', 'DB'])
 // On a punt or a kickoff `offense_nfl_team` is the KICKING team, so both the
 // coverage unit and the return unit are on the field for a play whose
 // possession says nothing about which of them a given player belongs to.
-const SCRIMMAGE_PLAY_TYPES = ['PASS', 'RUSH']
+// The set itself is shared -- see libs-shared/constants/play-type-constants.mjs.
 
 // Below this, a modal possession is one or two plays and the resolver is
 // reading noise -- measured error on S falls from 0.409% to 0.185% at 3.
@@ -147,7 +147,7 @@ export const create_snap_gamelog_team_resolver = async ({
     })
     .whereIn('nfl_snaps.esbid', esbids)
     .where('nfl_snaps.season_year', season_year)
-    .whereIn('nfl_plays.play_type', SCRIMMAGE_PLAY_TYPES)
+    .whereIn('nfl_plays.play_type', scrimmage_play_types)
     .whereNotNull('nfl_plays.offense_nfl_team')
     .whereNotNull('nfl_plays.defense_nfl_team')
     .groupBy(
