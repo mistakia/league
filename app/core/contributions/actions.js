@@ -28,14 +28,16 @@ export const contribution_actions = {
     submission_kind,
     submission_title,
     submission_body,
-    captured_context
+    captured_context,
+    screenshot = null
   }) => ({
     type: contribution_actions.SUBMIT_CONTRIBUTION,
     payload: {
       submission_kind,
       submission_title,
       submission_body,
-      captured_context
+      captured_context,
+      screenshot
     }
   }),
 

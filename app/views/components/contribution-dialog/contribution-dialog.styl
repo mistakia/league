@@ -26,6 +26,22 @@
     white-space pre-wrap
     word-break break-all
 
+  &__screenshot
+    margin-top 8px
+
+  // Bounded so a tall capture cannot push the submit buttons off screen. The
+  // preview exists to let the submitter recognise what they are attaching, not
+  // to be read at full size.
+  &__screenshot-preview
+    display block
+    width 100%
+    max-height 220px
+    object-fit contain
+    object-position top
+    border 1px solid rgba(0, 0, 0, 0.12)
+    border-radius 4px
+    background rgba(0, 0, 0, 0.02)
+
   &__receipt-lead
     margin-top 0
 

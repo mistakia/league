@@ -12,6 +12,8 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import Alert from '@mui/material/Alert'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import Button from '@components/button'
@@ -48,7 +50,9 @@ export default function ContributionDialog({
   const [submission_title, set_submission_title] = useState('')
   const [submission_body, set_submission_body] = useState('')
   const [captured_context, set_captured_context] = useState(null)
+  const [screenshot, set_screenshot] = useState(null)
   const [is_capturing, set_is_capturing] = useState(false)
+  const [include_screenshot, set_include_screenshot] = useState(true)
 
   // Opens from ?report=bug so a support reply can link straight into the form.
   // The parameter is stripped once consumed, so a refresh or a shared URL does
@@ -71,13 +75,36 @@ export default function ContributionDialog({
     if (!is_open) return
     let is_current = true
     set_is_capturing(true)
-    capture_contribution_context({ state })
-      .then((context) => {
-        if (is_current) set_captured_context(context)
+
+    // The screenshot module is imported DYNAMICALLY so its capture code lands
+    // in this dialog's chunk rather than the main bundle. Almost nobody files
+    // a report, and the people who never do should not pay for the ability.
+    const capture_screenshot_if_available = async () => {
+      try {
+        const { capture_screenshot } = await import(
+          /* webpackChunkName: "contribution-screenshot" */
+          '@core/contribution-screenshot'
+        )
+        return await capture_screenshot()
+      } catch (_error) {
+        return null
+      }
+    }
+
+    Promise.all([
+      capture_contribution_context({ state }),
+      capture_screenshot_if_available()
+    ])
+      .then(([context, captured_screenshot]) => {
+        if (!is_current) return
+        set_captured_context(context)
+        set_screenshot(captured_screenshot)
       })
       .catch(() => {
         // DEGRADE, NEVER BLOCK. Context is a triage aid, not a precondition.
-        if (is_current) set_captured_context(null)
+        if (!is_current) return
+        set_captured_context(null)
+        set_screenshot(null)
       })
       .finally(() => {
         if (is_current) set_is_capturing(false)
@@ -116,7 +143,11 @@ export default function ContributionDialog({
       submission_kind,
       submission_title: submission_title.trim(),
       submission_body: submission_body.trim(),
-      captured_context
+      captured_context,
+      // A screenshot is a picture of whatever was on the submitter's screen,
+      // which may include their own roster, their league or their account. It
+      // is attached only if they left it attached.
+      screenshot: include_screenshot ? screenshot : null
     })
   }, [
     is_submittable,
@@ -124,7 +155,9 @@ export default function ContributionDialog({
     submission_kind,
     submission_title,
     submission_body,
-    captured_context
+    captured_context,
+    include_screenshot,
+    screenshot
   ])
 
   const handle_close = useCallback(() => {
@@ -135,6 +168,8 @@ export default function ContributionDialog({
     set_submission_title('')
     set_submission_body('')
     set_captured_context(null)
+    set_screenshot(null)
+    set_include_screenshot(true)
     dismiss_contribution_receipt()
   }, [dismiss_contribution_receipt])
 
@@ -236,6 +271,33 @@ export default function ContributionDialog({
           slotProps={{ htmlInput: { maxLength: MAXIMUM_BODY_LENGTH } }}
           onChange={(event) => set_submission_body(event.target.value)}
         />
+
+        {/* THE SCREENSHOT IS SHOWN, not merely described. It is a picture of
+            whatever was on screen, so a checkbox saying "attach a screenshot"
+            with nothing to look at asks the submitter to consent to something
+            they cannot see. Rendering it is what makes declining meaningful. */}
+        {screenshot && (
+          <div className='contribution-dialog__screenshot'>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={include_screenshot}
+                  onChange={(event) =>
+                    set_include_screenshot(event.target.checked)
+                  }
+                />
+              }
+              label='Attach this screenshot'
+            />
+            {include_screenshot && (
+              <img
+                src={screenshot}
+                alt='Screenshot of the page as it appeared when you opened this form'
+                className='contribution-dialog__screenshot-preview'
+              />
+            )}
+          </div>
+        )}
 
         {/* The submitter sees exactly what is being sent before they send it.
             Every field here is allowlisted at capture -- see

@@ -43,6 +43,32 @@ export const MAXIMUM_ANSWER_LENGTH = 4000
 // the caller cannot act on.
 export const MAXIMUM_CAPTURED_CONTEXT_BYTES = 262144
 
+// 1 MB of DECODED image bytes, matching the check constraint on
+// contribution_screenshots.byte_size. The client's own budget is 600000
+// (app/core/contribution-screenshot.js), so a well-behaved submission lands
+// well under this and the ceiling exists for the caller who is not one.
+export const MAXIMUM_SCREENSHOT_BYTES = 1048576
+
+// Mirrors the content_type check constraint. The client only ever sends JPEG;
+// the other two are admitted because the column permits them and refusing a
+// format the database would accept puts the two rules out of step.
+export const SCREENSHOT_CONTENT_TYPES = Object.freeze([
+  'image/jpeg',
+  'image/png',
+  'image/webp'
+])
+
+const SCREENSHOT_DATA_URI_PATTERN =
+  /^data:([a-z]+\/[a-z+.-]+);base64,([\s\S]+)$/
+
+// What contribution_submissions.screenshot_reference HOLDS. The column predates
+// this table and was never written; it is not, and never was, a filesystem
+// path. Storing a table-qualified reference rather than a bare boolean keeps it
+// self-describing if the bytes ever move again -- a reader who finds this value
+// knows where to look without consulting a schema they may not have.
+export const screenshot_reference_for = (submission_id) =>
+  `contribution_screenshots:${submission_id}`
+
 export const SUBMISSION_KINDS = Object.freeze(['bug_report', 'feature_idea'])
 
 // The statuses that mean "waiting on the submitter", and therefore the only two
@@ -205,12 +231,55 @@ const read_submission_from_body = (body) => {
     captured_context = body.captured_context
   }
 
+  // The screenshot holds to the SAME contract as captured_context: a triage
+  // aid, never a precondition. The client already degrades a failed capture to
+  // null rather than blocking the submit, so an absent screenshot is the
+  // ordinary case and not an error.
+  //
+  // Validated by DECODING rather than by measuring the string. A base64 payload
+  // is 4 characters per 3 bytes, so a length check on the data URI refuses
+  // images a third smaller than the stated ceiling -- and more to the point, a
+  // payload that is not valid base64 has to be caught here rather than surfacing
+  // as a bytea write of garbage.
+  let screenshot = null
+  if (body.screenshot !== undefined && body.screenshot !== null) {
+    if (typeof body.screenshot !== 'string') {
+      return { error: 'screenshot must be a data URI string' }
+    }
+
+    const match = SCREENSHOT_DATA_URI_PATTERN.exec(body.screenshot)
+    if (!match) {
+      return { error: 'screenshot must be a base64 data URI' }
+    }
+
+    const [, content_type, payload] = match
+    if (!SCREENSHOT_CONTENT_TYPES.includes(content_type)) {
+      return {
+        error: `screenshot content type must be one of ${SCREENSHOT_CONTENT_TYPES.join(', ')}`
+      }
+    }
+
+    const image_bytes = Buffer.from(payload, 'base64')
+    if (!image_bytes.length) {
+      return { error: 'screenshot payload is empty' }
+    }
+
+    if (image_bytes.length > MAXIMUM_SCREENSHOT_BYTES) {
+      return {
+        error: `screenshot must be at most ${MAXIMUM_SCREENSHOT_BYTES} bytes`
+      }
+    }
+
+    screenshot = { content_type, image_bytes, byte_size: image_bytes.length }
+  }
+
   return {
     submission: {
       submission_kind,
       submission_title,
       submission_body,
-      captured_context
+      captured_context,
+      screenshot
     }
   }
 }
@@ -244,6 +313,13 @@ const read_submission_from_body = (body) => {
  *               captured_context:
  *                 type: object
  *                 nullable: true
+ *               screenshot:
+ *                 type: string
+ *                 nullable: true
+ *                 description: |
+ *                   A base64 data URI of the page at report time. Optional and
+ *                   never a precondition; the bytes are stored in
+ *                   contribution_screenshots rather than on the submission row.
  *     responses:
  *       200:
  *         description: The stored submission
@@ -314,6 +390,28 @@ router.post('/', submit_rate_limiter, async (req, res) => {
           'submission_status',
           'submission_trust_tier'
         ])
+
+      // The bytes go to their own table, keyed by the submission, INSIDE the
+      // same transaction. A submission whose screenshot_reference is set but
+      // whose image row is missing would be a dangling pointer that only the
+      // purge path would ever notice, so the two commit together or neither
+      // does.
+      if (submission.screenshot) {
+        await trx('contribution_screenshots').insert({
+          submission_id: inserted[0].submission_id,
+          image_bytes: submission.screenshot.image_bytes,
+          content_type: submission.screenshot.content_type,
+          byte_size: submission.screenshot.byte_size
+        })
+
+        await trx('contribution_submissions')
+          .where({ submission_id: inserted[0].submission_id })
+          .update({
+            screenshot_reference: screenshot_reference_for(
+              inserted[0].submission_id
+            )
+          })
+      }
 
       // NOTHING MUTATES A SUBMISSION WITHOUT AN EVENT. Creation is a state
       // change like any other, and writing it inside the same transaction is

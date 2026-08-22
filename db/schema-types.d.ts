@@ -206,6 +206,14 @@ export interface ContributionQuestionsRow {
   expires_at: Date
 }
 
+export interface ContributionScreenshotsRow {
+  submission_id: string
+  image_bytes: Buffer
+  content_type: string
+  byte_size: number
+  captured_at: Date
+}
+
 export interface ContributionSubmissionsRow {
   submission_id: string
   submitter_user_id: number | null

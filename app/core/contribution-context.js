@@ -17,10 +17,16 @@ import { get_client_trace_ids } from '@core/bugsnag'
 export const MAXIMUM_CONTEXT_BYTES = 200000
 
 // Dropped in this order when the budget is exceeded. Cheapest triage value
-// first: the screenshot is by far the largest component and the most
-// reconstructible from the rest, the route and build are tiny and load-bearing.
+// first; the route and build are tiny and load-bearing, so they are never
+// candidates.
+//
+// The SCREENSHOT is deliberately absent from this list because it is no longer
+// part of this payload. It travels as its own top-level field on the
+// submission and lands in contribution_screenshots as bytea -- putting a
+// base64 image inside a JSONB column with a 262144-byte check constraint meant
+// a 33% base64 tax competing against the redux snapshot for the same ceiling,
+// and the image lost that race every time.
 export const CONTEXT_DROP_ORDER = Object.freeze([
-  'screenshot',
   'redux_snapshot',
   'data_view',
   'action_breadcrumbs'
@@ -226,8 +232,7 @@ export const enforce_context_budget = (context) => {
 export const capture_contribution_context = async ({
   state,
   table_state = null,
-  saved_table_state = null,
-  screenshot = null
+  saved_table_state = null
 }) => {
   const [build, data_view] = await Promise.all([
     read_build(),
@@ -248,7 +253,6 @@ export const capture_contribution_context = async ({
     // identifiers are minted per reported error in app/core/bugsnag.js, because
     // POST /api/errors persists no row and returns no identifier of its own.
     client_trace_ids: get_client_trace_ids(),
-    screenshot,
     captured_at: new Date().toISOString()
   }
 

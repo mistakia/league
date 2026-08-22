@@ -16,8 +16,6 @@
 // it as a safe summary because it is short is how "Bug on my account
 // alice@example.com" survives a purge.
 
-import fs from 'fs/promises'
-
 export const PURGED_BODY_PLACEHOLDER = '[purged at submitter request]'
 export const PURGED_TITLE_PLACEHOLDER = '[purged]'
 
@@ -25,14 +23,10 @@ export const PURGED_TITLE_PLACEHOLDER = '[purged]'
 // does not exist or was already purged. Idempotent by construction: a second
 // call finds purged_at set and returns without rewriting it, so the timestamp
 // records the FIRST purge rather than the most recent call.
-export default async function purge_submission({
-  db,
-  submission_id,
-  logger = null
-}) {
+export default async function purge_submission({ db, submission_id }) {
   const submission = await db('contribution_submissions')
     .where({ submission_id })
-    .first('submission_id', 'screenshot_reference', 'purged_at')
+    .first('submission_id', 'purged_at')
 
   if (!submission) {
     return { purged: false, reason: 'not_found' }
@@ -42,27 +36,28 @@ export default async function purge_submission({
     return { purged: false, reason: 'already_purged' }
   }
 
-  // The stored image goes first and its failure is NON-FATAL. If the file
-  // cannot be removed -- already gone, or a permission fault -- the database
-  // redaction must still happen: a row whose body survives because an unlinked
-  // file threw is the worst of both outcomes. The orphaned file is logged and
-  // the reference is cleared regardless, which is also why the file is unlinked
-  // BEFORE the reference is dropped rather than after. Dropping the reference
-  // first and then failing to unlink would leave a file on disk that nothing
-  // records the existence of.
-  if (submission.screenshot_reference) {
-    try {
-      await fs.unlink(submission.screenshot_reference)
-    } catch (error) {
-      if (error.code !== 'ENOENT' && logger) {
-        logger(error)
-      }
-    }
-  }
-
   const purged_at = new Date()
 
   await db.transaction(async (trx) => {
+    // THE IMAGE BYTES, deleted inside the same transaction as the redaction.
+    //
+    // This used to be an fs.unlink against screenshot_reference, treating it as
+    // a filesystem path, with an elaborate non-fatal ordering to keep an
+    // unlink fault from stranding a body. That storage design was never built:
+    // the bytes live in contribution_screenshots, because triage reaches league
+    // only through the Postgres tunnel and could never have read a file on
+    // league's disk. With the image in the database the ordering problem
+    // disappears entirely -- the delete and the redaction are the same
+    // transaction, so there is no window where one has happened and the other
+    // has not, and nothing to log because there is no second system to fall out
+    // of step with.
+    //
+    // Unconditional rather than gated on screenshot_reference: the pointer is
+    // the derived value and the row is the fact, so deleting on the key repairs
+    // a submission whose pointer was somehow lost rather than orphaning bytes
+    // that outlive their purge.
+    await trx('contribution_screenshots').where({ submission_id }).del()
+
     await trx('contribution_submissions').where({ submission_id }).update({
       submission_title: PURGED_TITLE_PLACEHOLDER,
       submission_body: PURGED_BODY_PLACEHOLDER,

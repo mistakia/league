@@ -60,6 +60,7 @@ ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_created_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_submitter_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_submitter_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_screenshots DROP CONSTRAINT IF EXISTS contribution_screenshots_submission_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_questions DROP CONSTRAINT IF EXISTS contribution_questions_submission_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_events DROP CONSTRAINT IF EXISTS contribution_events_submission_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_answers DROP CONSTRAINT IF EXISTS contribution_answers_question_id_fkey;
@@ -669,6 +670,7 @@ ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.contribution_screenshots DROP CONSTRAINT IF EXISTS contribution_screenshots_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_questions DROP CONSTRAINT IF EXISTS contribution_questions_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_events DROP CONSTRAINT IF EXISTS contribution_events_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_answers DROP CONSTRAINT IF EXISTS contribution_answers_question_id_key;
@@ -1036,6 +1038,7 @@ DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.contribution_trust_overrides;
 DROP TABLE IF EXISTS public.contribution_submissions;
+DROP TABLE IF EXISTS public.contribution_screenshots;
 DROP TABLE IF EXISTS public.contribution_questions;
 DROP TABLE IF EXISTS public.contribution_events;
 DROP TABLE IF EXISTS public.contribution_answers;
@@ -2309,6 +2312,22 @@ CREATE TABLE public.contribution_questions (
     question_text text NOT NULL,
     asked_at timestamp with time zone DEFAULT now() NOT NULL,
     expires_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: contribution_screenshots; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contribution_screenshots (
+    submission_id uuid NOT NULL,
+    image_bytes bytea NOT NULL,
+    content_type character varying(40) DEFAULT 'image/jpeg'::character varying NOT NULL,
+    byte_size integer NOT NULL,
+    captured_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT contribution_screenshots_byte_size_check CHECK (((byte_size > 0) AND (byte_size <= 1048576))),
+    CONSTRAINT contribution_screenshots_byte_size_matches_check CHECK ((byte_size = octet_length(image_bytes))),
+    CONSTRAINT contribution_screenshots_content_type_check CHECK (((content_type)::text = ANY ((ARRAY['image/jpeg'::character varying, 'image/png'::character varying, 'image/webp'::character varying])::text[])))
 );
 
 
@@ -28855,6 +28874,14 @@ ALTER TABLE ONLY public.contribution_events
 
 ALTER TABLE ONLY public.contribution_questions
     ADD CONSTRAINT contribution_questions_pkey PRIMARY KEY (question_id);
+
+
+--
+-- Name: contribution_screenshots contribution_screenshots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_screenshots
+    ADD CONSTRAINT contribution_screenshots_pkey PRIMARY KEY (submission_id);
 
 
 --
@@ -57955,6 +57982,14 @@ ALTER TABLE ONLY public.contribution_questions
 
 
 --
+-- Name: contribution_screenshots contribution_screenshots_submission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contribution_screenshots
+    ADD CONSTRAINT contribution_screenshots_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.contribution_submissions(submission_id) ON DELETE CASCADE;
+
+
+--
 -- Name: contribution_submissions contribution_submissions_submitter_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -58435,6 +58470,13 @@ GRANT SELECT ON TABLE public.contribution_events TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.contribution_questions TO league_reader;
+
+
+--
+-- Name: TABLE contribution_screenshots; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.contribution_screenshots TO league_reader;
 
 
 --

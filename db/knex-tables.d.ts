@@ -36,6 +36,7 @@ import type {
   ContributionAnswersRow,
   ContributionEventsRow,
   ContributionQuestionsRow,
+  ContributionScreenshotsRow,
   ContributionSubmissionsRow,
   ContributionTrustOverridesRow,
   DfsContestsRow,
@@ -346,6 +347,7 @@ declare module 'knex/types/tables' {
     contribution_answers: ContributionAnswersRow
     contribution_events: ContributionEventsRow
     contribution_questions: ContributionQuestionsRow
+    contribution_screenshots: ContributionScreenshotsRow
     contribution_submissions: ContributionSubmissionsRow
     contribution_trust_overrides: ContributionTrustOverridesRow
     dfs_contests: DfsContestsRow

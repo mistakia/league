@@ -17,6 +17,12 @@ import {
   clear_breadcrumbs,
   BREADCRUMB_LIMIT
 } from '@core/contribution-breadcrumbs'
+import {
+  decoded_byte_length,
+  capture_screenshot,
+  SCREENSHOT_QUALITY_LADDER,
+  MAXIMUM_SCREENSHOT_BYTES
+} from '@core/contribution-screenshot'
 
 const expect = chai.expect
 
@@ -237,31 +243,35 @@ describe('contribution capture surfaces', function () {
 
   describe('the captured-context byte budget', function () {
     it('leaves a context under budget untouched', function () {
-      const context = { route: { pathname: '/plays' }, screenshot: 'small' }
+      const context = {
+        route: { pathname: '/plays' },
+        redux_snapshot: { app: { year: 2026 } }
+      }
       const result = enforce_context_budget(context)
       expect(result).to.deep.equal(context)
       expect(result).to.not.have.property('dropped_components')
     })
 
-    it('drops the screenshot first and names it', function () {
+    it('drops the redux snapshot first and names it', function () {
       const context = {
         route: { pathname: '/data-views' },
-        screenshot: 'x'.repeat(MAXIMUM_CONTEXT_BYTES + 1000),
-        redux_snapshot: { app: { year: 2026 } }
+        redux_snapshot: { blob: 'x'.repeat(MAXIMUM_CONTEXT_BYTES + 1000) },
+        data_view: { canonical_url: 'https://xo.football/data-views' }
       }
       const result = enforce_context_budget(context)
-      expect(result).to.not.have.property('screenshot')
-      expect(result.dropped_components).to.deep.equal(['screenshot'])
+      expect(result).to.not.have.property('redux_snapshot')
+      expect(result.dropped_components).to.deep.equal(['redux_snapshot'])
       // A truncated capture is VISIBLY truncated -- the surviving components
       // stay, so triage can tell "dropped" from "never captured".
-      expect(result.redux_snapshot).to.deep.equal({ app: { year: 2026 } })
+      expect(result.data_view).to.deep.equal({
+        canonical_url: 'https://xo.football/data-views'
+      })
     })
 
     it('drops further components in the declared order', function () {
       const oversized = 'x'.repeat(MAXIMUM_CONTEXT_BYTES)
       const context = {
         route: { pathname: '/plays' },
-        screenshot: oversized,
         redux_snapshot: { blob: oversized },
         data_view: { blob: oversized },
         action_breadcrumbs: [{ type: 'LOAD_TEAMS', at: 1 }]
@@ -276,11 +286,65 @@ describe('contribution capture surfaces', function () {
     it('skips a component that is already absent rather than naming it', function () {
       const context = {
         route: { pathname: '/plays' },
-        screenshot: null,
-        redux_snapshot: { blob: 'x'.repeat(MAXIMUM_CONTEXT_BYTES + 1000) }
+        redux_snapshot: null,
+        data_view: { blob: 'x'.repeat(MAXIMUM_CONTEXT_BYTES + 1000) }
       }
       const result = enforce_context_budget(context)
-      expect(result.dropped_components).to.deep.equal(['redux_snapshot'])
+      expect(result.dropped_components).to.deep.equal(['data_view'])
+    })
+
+    // THE SCREENSHOT IS NOT IN THIS BUDGET AT ALL, and that is the contract
+    // this case pins. It travels as its own top-level submission field into
+    // contribution_screenshots as bytea; a base64 image inside a JSONB column
+    // with a 262144-byte ceiling would lose the drop race to the redux
+    // snapshot every time it mattered.
+    it('does not treat the screenshot as a droppable context component', function () {
+      expect(CONTEXT_DROP_ORDER).to.not.include('screenshot')
+    })
+  })
+
+  describe('the screenshot budget', function () {
+    // The budget is stated in DECODED bytes because that is what the bytea
+    // column stores and what its check constraint bounds. Measuring the data
+    // URI string instead would refuse images a third smaller than the stated
+    // ceiling, so this is the arithmetic the ceiling depends on.
+    it('measures decoded bytes rather than data URI characters', function () {
+      const payload = Buffer.from('a'.repeat(3000)).toString('base64')
+      expect(decoded_byte_length(`data:image/jpeg;base64,${payload}`)).to.equal(
+        3000
+      )
+    })
+
+    it('accounts for base64 padding on both remainders', function () {
+      // One and two padding characters respectively, which is where an
+      // unpadded length calculation goes wrong.
+      const one_over = Buffer.from('x'.repeat(3001)).toString('base64')
+      const two_over = Buffer.from('x'.repeat(3002)).toString('base64')
+      expect(
+        decoded_byte_length(`data:image/jpeg;base64,${one_over}`)
+      ).to.equal(3001)
+      expect(
+        decoded_byte_length(`data:image/jpeg;base64,${two_over}`)
+      ).to.equal(3002)
+    })
+
+    it('reports zero for a string that is not a data URI', function () {
+      expect(decoded_byte_length('not-a-data-uri')).to.equal(0)
+    })
+
+    it('falls in quality rather than rising', function () {
+      const descending = [...SCREENSHOT_QUALITY_LADDER].sort((a, b) => b - a)
+      expect(SCREENSHOT_QUALITY_LADDER).to.deep.equal(descending)
+      expect(MAXIMUM_SCREENSHOT_BYTES).to.be.above(0)
+    })
+
+    // DEGRADE, NEVER THROW is the contract the whole capture path holds to: a
+    // report that fails to send because its screenshot could not be rendered
+    // is strictly worse than a report with no screenshot. There is no canvas
+    // in Node, so this run exercises the failure arm specifically -- which is
+    // the arm that matters, since it is the one that must not propagate.
+    it('returns null instead of throwing when the page cannot be rendered', async function () {
+      expect(await capture_screenshot()).to.equal(null)
     })
   })
 })

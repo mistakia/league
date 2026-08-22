@@ -10,7 +10,8 @@ import {
   anonymous_submit_rate_limit_store,
   authenticated_submit_rate_limit_store,
   answer_rate_limit_store,
-  hash_claim_token
+  hash_claim_token,
+  MAXIMUM_SCREENSHOT_BYTES
 } from '#api/routes/contributions.mjs'
 import purge_submission from '#libs-server/contribution/purge-submission.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
@@ -478,6 +479,110 @@ describe('ROUTES /contributions', function () {
         .where({ submission_id })
         .first('submission_status')
       row.submission_status.should.equal('expired')
+    })
+  })
+
+  // The image round trip, asserted on the BYTES rather than on a 200. The
+  // route can answer 200 having written nothing, so the oracle is that what
+  // comes back out of bytea is byte-identical to what went in.
+  describe('screenshot', function () {
+    // A one-pixel JPEG. Real enough to have a content type and a decodable
+    // payload, small enough to keep the fixture inline.
+    const tiny_jpeg_bytes = Buffer.from(
+      '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==',
+      'base64'
+    )
+    const tiny_jpeg_data_uri = `data:image/jpeg;base64,${tiny_jpeg_bytes.toString('base64')}`
+
+    it('stores the bytes and points the submission at them', async function () {
+      const created = await submit({
+        ...valid_submission,
+        screenshot: tiny_jpeg_data_uri
+      })
+      created.should.have.status(200)
+      const { submission_id } = created.body
+
+      const image = await knex('contribution_screenshots')
+        .where({ submission_id })
+        .first()
+
+      expect(image).to.not.equal(undefined)
+      image.content_type.should.equal('image/jpeg')
+      image.byte_size.should.equal(tiny_jpeg_bytes.length)
+      Buffer.compare(image.image_bytes, tiny_jpeg_bytes).should.equal(0)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id })
+        .first('screenshot_reference')
+      row.screenshot_reference.should.equal(
+        `contribution_screenshots:${submission_id}`
+      )
+    })
+
+    // The screenshot is a triage aid and never a precondition, so the ordinary
+    // case -- a client whose capture degraded to null -- must still submit.
+    it('accepts a submission with no screenshot', async function () {
+      const created = await submit(valid_submission)
+      created.should.have.status(200)
+
+      const image = await knex('contribution_screenshots')
+        .where({ submission_id: created.body.submission_id })
+        .first()
+      expect(image).to.equal(undefined)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id: created.body.submission_id })
+        .first('screenshot_reference')
+      expect(row.screenshot_reference).to.equal(null)
+    })
+
+    it('refuses a payload that is not a data URI', async function () {
+      const response = await submit({
+        ...valid_submission,
+        screenshot: 'https://example.com/screenshot.jpg'
+      })
+      response.should.have.status(400)
+    })
+
+    it('refuses a content type the column would reject', async function () {
+      const response = await submit({
+        ...valid_submission,
+        screenshot: 'data:image/gif;base64,R0lGODlhAQABAAAAACw='
+      })
+      response.should.have.status(400)
+    })
+
+    // The ceiling is enforced on DECODED bytes. A base64 string a third larger
+    // than the limit decodes to exactly the limit, so a naive length check on
+    // the string would refuse this and a correct one admits it -- which is the
+    // pair that makes the check non-vacuous.
+    it('refuses an image over the byte ceiling', async function () {
+      const oversized = Buffer.alloc(MAXIMUM_SCREENSHOT_BYTES + 1, 0x41)
+      const response = await submit({
+        ...valid_submission,
+        screenshot: `data:image/jpeg;base64,${oversized.toString('base64')}`
+      })
+      response.should.have.status(400)
+    })
+
+    it('deletes the bytes on purge', async function () {
+      const created = await submit({
+        ...valid_submission,
+        screenshot: tiny_jpeg_data_uri
+      })
+      const { submission_id } = created.body
+
+      await purge_submission({ db: knex, submission_id })
+
+      const image = await knex('contribution_screenshots')
+        .where({ submission_id })
+        .first()
+      expect(image).to.equal(undefined)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id })
+        .first('screenshot_reference')
+      expect(row.screenshot_reference).to.equal(null)
     })
   })
 
