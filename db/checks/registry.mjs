@@ -45,6 +45,11 @@
   emptied table report zero findings, pass its floor and resolve its own
   findings signal.
 
+  Adding or removing a check also breaks test/data-checks.spec.mjs, which pins
+  the registry LENGTH ("holds N checks with unique ids"). That is deliberate --
+  it makes an accidental drop visible -- but it fails in a file your change
+  does not name, so update the count in the same commit.
+
   Calibrate on the GAP between normal and defective, never on the worst normal
   reading, and re-measure immediately before changing a threshold. Every figure
   in a `calibration` string below is a reading taken at one instant against a
