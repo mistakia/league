@@ -381,6 +381,104 @@ describe('ROUTES /contributions', function () {
 
       response.should.have.status(404)
     })
+
+    const ask_expired = async (submission_id) => {
+      const [question] = await knex('contribution_questions')
+        .insert({
+          submission_id,
+          question_template_key: 'reproduction_steps',
+          question_text: 'What steps reproduce it?',
+          expires_at: new Date(Date.now() - 86400000)
+        })
+        .returning('question_id')
+      return question.question_id
+    }
+
+    // THE RESURFACE PATH. Expiry reclaims a queue slot; it is not a closed
+    // door. The submitter who comes back a month later carries the one fact
+    // that makes the report actionable, and refusing them throws it away.
+    it('accepts a late answer and resurfaces an expired submission', async function () {
+      const created = await submit(valid_submission)
+      await knex('contribution_submissions')
+        .where({ submission_id: created.body.submission_id })
+        .update({ submission_status: 'expired' })
+      const question_id = await ask_expired(created.body.submission_id)
+
+      const response = await chai_request
+        .execute(server)
+        .post(`/api/contributions/${created.body.submission_id}/answers`)
+        .set('x-contribution-claim-token', created.body.claim_token)
+        .send({ question_id, answer_body: 'Open a saved view and reload.' })
+
+      response.should.have.status(200)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id: created.body.submission_id })
+        .first('submission_status')
+      row.submission_status.should.equal('received')
+
+      const event = await knex('contribution_events')
+        .where({
+          submission_id: created.body.submission_id,
+          contribution_event_type: 'answer_received'
+        })
+        .first()
+      event.previous_submission_status.should.equal('expired')
+      event.event_context.is_late_answer.should.equal(true)
+    })
+
+    // The negative control for the case above: a late answer is information,
+    // never a veto over a disposition somebody already made.
+    it('records a late answer without reopening a rejected submission', async function () {
+      const created = await submit(valid_submission)
+      await knex('contribution_submissions')
+        .where({ submission_id: created.body.submission_id })
+        .update({ submission_status: 'rejected' })
+      const question_id = await ask_expired(created.body.submission_id)
+
+      const response = await chai_request
+        .execute(server)
+        .post(`/api/contributions/${created.body.submission_id}/answers`)
+        .set('x-contribution-claim-token', created.body.claim_token)
+        .send({ question_id, answer_body: 'Open a saved view and reload.' })
+
+      response.should.have.status(200)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id: created.body.submission_id })
+        .first('submission_status')
+      row.submission_status.should.equal('rejected')
+
+      const answer = await knex('contribution_answers')
+        .where({ question_id })
+        .first()
+      expect(answer).to.not.equal(undefined)
+    })
+
+    // A purged submission has no body left to triage, so returning it to the
+    // queue would put an unreadable row in front of a human.
+    it('does not resurface a purged submission', async function () {
+      const created = await submit(valid_submission)
+      const { submission_id } = created.body
+      const question_id = await ask_expired(submission_id)
+      await purge_submission({ db: knex, submission_id })
+      await knex('contribution_submissions')
+        .where({ submission_id })
+        .update({ submission_status: 'expired' })
+
+      const response = await chai_request
+        .execute(server)
+        .post(`/api/contributions/${submission_id}/answers`)
+        .set('x-contribution-claim-token', created.body.claim_token)
+        .send({ question_id, answer_body: 'Open a saved view and reload.' })
+
+      response.should.have.status(200)
+
+      const row = await knex('contribution_submissions')
+        .where({ submission_id })
+        .first('submission_status')
+      row.submission_status.should.equal('expired')
+    })
   })
 
   describe('purge', function () {

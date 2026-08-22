@@ -45,6 +45,14 @@ export const MAXIMUM_CAPTURED_CONTEXT_BYTES = 262144
 
 export const SUBMISSION_KINDS = Object.freeze(['bug_report', 'feature_idea'])
 
+// The statuses that mean "waiting on the submitter", and therefore the only two
+// an incoming answer returns to `received`. Every other status is a disposition
+// somebody already made.
+export const RESURFACEABLE_SUBMISSION_STATUSES = Object.freeze([
+  'awaiting_information',
+  'expired'
+])
+
 // Stores are constructed here and EXPORTED so the spec can reset them between
 // cases, following api/routes/waitlist.mjs. Disabling the limiters under
 // NODE_ENV=test would leave the only abuse control on a public write surface
@@ -551,7 +559,10 @@ router.get('/:submission_id', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       409:
- *         description: The question was already answered or has expired
+ *         description: |
+ *           The question was already answered. An EXPIRED question is still
+ *           answerable — a late answer is recorded and resurfaces a parked or
+ *           expired submission back into the triage queue.
  *         content:
  *           application/json:
  *             schema:
@@ -603,9 +614,17 @@ router.post(
         return res.status(404).send({ error: 'Question not found' })
       }
 
-      if (new Date(question.expires_at) < new Date()) {
-        return res.status(409).send({ error: 'This question has expired' })
-      }
+      // AN EXPIRED QUESTION IS STILL ANSWERABLE, deliberately. Expiry exists so
+      // a parked submission stops holding a queue slot -- it is a statement
+      // about OUR attention, not about the submitter's welcome. Refusing a late
+      // answer would throw away the one thing that makes the report actionable,
+      // from the one person who can supply it, at the exact moment they came
+      // back. So the answer is recorded and the submission RESURFACES below.
+      //
+      // The bound that makes this safe is on the asking side, not here: at most
+      // three questions ever exist per submission
+      // (user-base extension/contribution/request-information.mjs), so a late
+      // answer can resurface a submission at most three times.
 
       const existing_answer = await db('contribution_answers')
         .where({ question_id })
@@ -620,14 +639,26 @@ router.post(
       await db.transaction(async (trx) => {
         await trx('contribution_answers').insert({ question_id, answer_body })
 
-        // An answer is what moves a submission out of awaiting_information, so it
-        // is a state change and writes an event. The status only moves when the
-        // submission was actually parked on a question -- an answer to an
-        // already-triaged submission is recorded without reopening it.
-        const is_awaiting =
-          submission.submission_status === 'awaiting_information'
+        // An answer is what moves a submission back into the queue, so it is a
+        // state change and writes an event. The status only moves from the two
+        // statuses that MEAN "waiting on the submitter" -- an answer to an
+        // already-triaged, rejected or shipped submission is recorded without
+        // reopening it, because a late answer is information, not a veto over a
+        // disposition already made.
+        //
+        // `expired` is in the set for the same reason the expiry check above was
+        // removed: the sweep that set it was reclaiming a queue slot, and the
+        // submitter answering is exactly the event that earns the slot back.
+        //
+        // A PURGED submission never resurfaces regardless of status. Its body
+        // and captured context are gone, so returning it to the queue would put
+        // a row triage cannot read back in front of a human.
+        const is_resurfaceable =
+          RESURFACEABLE_SUBMISSION_STATUSES.includes(
+            submission.submission_status
+          ) && !submission.purged_at
 
-        if (is_awaiting) {
+        if (is_resurfaceable) {
           await trx('contribution_submissions')
             .where({ submission_id: submission.submission_id })
             .update({ submission_status: 'received', updated_at: new Date() })
@@ -637,10 +668,13 @@ router.post(
           submission_id: submission.submission_id,
           contribution_event_type: 'answer_received',
           previous_submission_status: submission.submission_status,
-          new_submission_status: is_awaiting
+          new_submission_status: is_resurfaceable
             ? 'received'
             : submission.submission_status,
-          event_context: JSON.stringify({ question_id })
+          event_context: JSON.stringify({
+            question_id,
+            is_late_answer: new Date(question.expires_at) < new Date()
+          })
         })
       })
 
