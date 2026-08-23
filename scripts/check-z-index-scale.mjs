@@ -29,6 +29,12 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from '../db/gates/scan-corpus.mjs'
+
 const repo_root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..'
@@ -39,7 +45,14 @@ const repo_root = path.resolve(
 // to other floating surfaces, and so has to be named.
 const LOCAL_STACKING_CEILING = 100
 
-const SEARCH_ROOTS = ['app', 'private']
+// `app` only. `private` was listed here and could never match: this check reads
+// .styl/.js/.jsx and that submodule is 64 .mjs files, two .json and a cron --
+// no stylesheet and no JSX anywhere in it, so the root contributed a permanent
+// zero that read as coverage. A declared root whose extensions cannot match is
+// worse than an undeclared one, because it is indistinguishable from a clean
+// scan. The corpus block below states the file count per root so a root that
+// stops contributing is visible rather than silent.
+const SEARCH_ROOTS = ['app']
 
 const SCALE_FILE = path.join(repo_root, 'app/styles/variables.styl')
 
@@ -152,6 +165,20 @@ const main = () => {
   })
 
   const violations = []
+
+  // Declared per root so the count is the gate's OWN read, not a filesystem
+  // guess: `private` is a submodule CI does not check out, and this check runs
+  // in CI, so it has been reporting a clean scale over a root it never opened.
+  const counts = {}
+  for (const root of SEARCH_ROOTS) {
+    counts[root] =
+      list_files(path.join(repo_root, root), ['.styl']).length +
+      list_files(path.join(repo_root, root), ['.js', '.jsx']).length
+  }
+  const corpus = resolve_corpus({ roots: SEARCH_ROOTS, repo_root, counts })
+  console.log(format_corpus({ corpus, counts }))
+  console.log('')
+
   const files = [
     ...SEARCH_ROOTS.flatMap((root) =>
       list_files(path.join(repo_root, root), ['.styl'])
@@ -204,7 +231,8 @@ const main = () => {
     console.log(
       `z-index scale OK — ${scale_layers.size} named layers, ` +
         `${MUI_OVERLAYS_REQUIRING_A_PIN.length} MUI overlays pinned, no bare ` +
-        `literals at or above ${LOCAL_STACKING_CEILING}`
+        `literals at or above ${LOCAL_STACKING_CEILING}` +
+        verdict_suffix(corpus)
     )
     return 0
   }

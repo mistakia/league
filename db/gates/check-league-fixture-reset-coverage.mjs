@@ -96,6 +96,12 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
+
 const gate_dir = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(gate_dir, '..', '..')
 const schema_path = path.join(repo_root, 'db', 'schema.postgres.sql')
@@ -493,6 +499,13 @@ const run = async () => {
   const unclassified = Object.keys(tables).length - result.scoped.size
   const reset_not_scoped = reset_list.filter((t) => !result.scoped.has(t))
 
+  // Which of WRITER_ROOTS actually existed. `private` is a submodule no
+  // workflow checks out, so in CI this gate has been recording writer roots
+  // over an empty directory and reporting full coverage.
+  const corpus = resolve_corpus({ roots: WRITER_ROOTS, repo_root })
+  console.log(format_corpus({ corpus }))
+  console.log('')
+
   console.log('league fixture reset coverage')
   console.log(
     `  tables in the schema considered      ${Object.keys(tables).length}`
@@ -688,7 +701,7 @@ const run = async () => {
   }
 
   console.log(
-    '\nGATE OK -- every league-scoped table is cleared or adjudicated'
+    `\nGATE OK -- every league-scoped table is cleared or adjudicated${verdict_suffix(corpus)}`
   )
 }
 

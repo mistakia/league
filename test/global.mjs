@@ -125,6 +125,27 @@ export async function mochaGlobalSetup() {
 // what makes an entry stale and why an unexercised entry is silent.
 export const mochaHooks = {
   afterAll() {
+    // A SUBSET suite exercises no API routes, so the hold-out check's
+    // zero-pairs guard fires on it every time -- correctly, in that it observed
+    // zero pairs, and uselessly, in that a run carrying no API specs was never
+    // going to observe any. That made `yarn test:private` structurally unable
+    // to pass, which is why nothing invoked it and why private/test rotted
+    // until a spec was still updating `seasons.year`, a column renamed to
+    // season_year.
+    //
+    // Declared by the invoking script rather than sniffed, and announced rather
+    // than skipped silently: a suite that cannot judge API coverage has to say
+    // so, or this becomes the same absent-check-reading-as-a-pass the guard
+    // exists to prevent.
+    if (process.env.LEAGUE_SUITE_SUBSET) {
+      console.log(
+        '\nresponse validation hold-out NOT CHECKED -- LEAGUE_SUITE_SUBSET is ' +
+          'set, so this run exercises no API routes and cannot judge the ' +
+          'hold-out list. Run the full suite for that verdict.'
+      )
+      return
+    }
+
     const report = assert_holdout_is_current()
     print_response_validation_report(report)
   }

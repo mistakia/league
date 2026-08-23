@@ -43,6 +43,8 @@ import path from 'path'
 import { spawnSync } from 'child_process'
 import { fileURLToPath } from 'url'
 
+import { CORPUS_INCOMPLETE_MARKER } from '../db/gates/scan-corpus.mjs'
+
 const repo_root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..'
@@ -307,6 +309,23 @@ export const evaluate_gate_result = ({
     }
   }
 
+  // Checked before the exit code, because this is exactly the case where the
+  // exit code is the misleading half: a gate that never read part of its
+  // declared corpus cannot go red on it, so its 0 is narrower than an
+  // unqualified OK claims. Reported as its own verdict rather than folded into
+  // OK, so `GATE OK` stops meaning two different things depending on which
+  // directories happened to exist.
+  if (exit_code === 0 && output.includes(CORPUS_INCOMPLETE_MARKER)) {
+    const match = output.match(
+      new RegExp(`${CORPUS_INCOMPLETE_MARKER} -- not scanned: (.*)`)
+    )
+    const roots = match ? match[1] : ''
+    return {
+      verdict: 'OK (PARTIAL)',
+      detail: roots ? `not scanned: ${roots.trim()}` : 'corpus incomplete'
+    }
+  }
+
   if (exit_code === 0) return { verdict: 'OK', detail: '' }
   if (exit_code === 1) return { verdict: 'FINDINGS', detail: 'exit 1' }
   if (exit_code === 2) {
@@ -436,6 +455,33 @@ const CONTROLS = [
       declares_negative_control: true
     },
     expect: 'OK'
+  },
+  {
+    label: 'exit 0 over an incomplete corpus is not a plain OK',
+    input: {
+      exit_code: 0,
+      output: `CORPUS\n  MISSING  private\n\n  ${CORPUS_INCOMPLETE_MARKER} -- not scanned: private\nGATE OK`,
+      declares_negative_control: false
+    },
+    expect: 'OK (PARTIAL)'
+  },
+  {
+    label: 'a complete corpus block is still a plain OK',
+    input: {
+      exit_code: 0,
+      output: 'CORPUS\n  scanned  scripts   211 files\nGATE OK',
+      declares_negative_control: false
+    },
+    expect: 'OK'
+  },
+  {
+    label: 'an incomplete corpus does not mask a finding',
+    input: {
+      exit_code: 1,
+      output: `CORPUS\n  MISSING  private\n  ${CORPUS_INCOMPLETE_MARKER} -- not scanned: private`,
+      declares_negative_control: false
+    },
+    expect: 'FINDINGS'
   }
 ]
 

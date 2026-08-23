@@ -51,6 +51,12 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 
@@ -164,8 +170,15 @@ function parse_hits(lines) {
 const PLAYS_TABLES =
   '(nfl_plays|nfl_plays_current_week|nfl_plays_passer|nfl_plays_receiver|nfl_plays_rusher|nfl_plays_player|nfl_snaps|nfl_play_stats|nfl_play_stats_current_week)'
 
+// Resolved ONCE rather than per column, so the corpus this gate actually read
+// is a property of the run and not of whichever column happened to be scanned
+// first. existsSync was the wrong oracle here: an uninitialized submodule is a
+// present, EMPTY directory, so `private` passed the filter and contributed
+// nothing.
+const corpus = resolve_corpus({ roots: SCAN_DIRS, repo_root })
+
 function scan_column(old_col) {
-  const dirs = SCAN_DIRS.filter((d) => fs.existsSync(path.join(repo_root, d)))
+  const dirs = corpus.present
   const esc = old_col.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
   // GATE 1: table-qualified raw SQL  <plays_table>.<col>
@@ -253,8 +266,13 @@ function main() {
   }
 
   if (argv.json) {
-    console.log(JSON.stringify({ gate_total, warn_total, results }, null, 2))
+    console.log(
+      JSON.stringify({ gate_total, warn_total, corpus, results }, null, 2)
+    )
   } else {
+    console.log(format_corpus({ corpus }))
+    console.log('')
+
     for (const [old_col, { new: new_col, gate, warn }] of Object.entries(
       results
     )) {
@@ -277,7 +295,7 @@ function main() {
     process.exitCode = 1
   } else if (!argv.json) {
     console.log(
-      '\nGATE OK: no qualified/structured unambiguous old refs remain.'
+      `\nGATE OK: no qualified/structured unambiguous old refs remain.${verdict_suffix(corpus)}`
     )
   }
 }

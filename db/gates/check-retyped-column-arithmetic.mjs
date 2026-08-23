@@ -958,13 +958,25 @@ const main = async () => {
   const corpus = []
   for (const root of SCAN_ROOTS) {
     const absolute = path.join(repo_root, root)
-    if (!fs.existsSync(absolute)) {
+    // existsSync is NOT sufficient, and `private` is exactly why: an
+    // uninitialized submodule is a present, EMPTY mountpoint, so the existence
+    // check passed and the walk then contributed zero files -- the unread tree
+    // this branch exists to refuse, arriving through the one door it left open.
+    // `git worktree add` and a CI checkout without `submodules:` both produce
+    // that shape.
+    let entries = null
+    try {
+      entries = fs.readdirSync(absolute)
+    } catch {
+      entries = null
+    }
+    if (entries === null || entries.length === 0) {
       // Exit 2, never a skip. A root that silently resolves to nothing is a gate
       // reading green over an unread tree, and `walk_files` treats an unreadable
       // directory as empty -- the exact way check-knex-column-resolution's
       // coverage floors were shown to miss one root going dark.
       console.error(
-        `TOOLING ERROR: scan root ${root} does not exist, so this gate did NOT run.` +
+        `TOOLING ERROR: scan root ${root} ${entries === null ? 'does not exist' : 'is EMPTY'}, so this gate did NOT run.` +
           (root === 'private'
             ? '\n`private` is a submodule and a fresh worktree does not inherit one: run\n' +
               '`git submodule update --init private` here, then re-run.'
