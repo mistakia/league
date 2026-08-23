@@ -2,6 +2,7 @@ import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { plays_views_actions } from './index'
 import { default_plays_view_view_id } from './default-plays-views'
+import build_data_view_request_params from '@core/data-views/build-data-view-request-params.mjs'
 import {
   api_post_plays_view,
   api_get_plays_views,
@@ -43,7 +44,8 @@ const get_plays_view_by_id = (state, { view_id }) => {
 function* handle_plays_view_request({
   data_view,
   ignore_cache = false,
-  append_results = false
+  append_results = false,
+  offset = 0
 }) {
   const { columns } = data_view.table_state
 
@@ -51,10 +53,18 @@ function* handle_plays_view_request({
     return
   }
 
+  // Shared with the data-views page deliberately: this surface mirrors that one
+  // and carried the identical stale-cursor defect, so the rule lives in one
+  // place rather than in two that can drift apart again. `offset` is a
+  // per-REQUEST cursor, never part of table_state -- see the module for the
+  // defect that prevents.
   const opts = {
-    view_id: data_view.view_id,
-    ...data_view.table_state,
-    append_results,
+    ...build_data_view_request_params({
+      view_id: data_view.view_id,
+      table_state: data_view.table_state,
+      offset,
+      append_results
+    }),
     source: 'plays_page'
   }
 
@@ -111,7 +121,7 @@ function* handle_selected_player_plays_request({ payload }) {
 
 export function* plays_view_changed({ payload }) {
   const { view_change_params = {} } = payload
-  const { view_state_changed, view_metadata_changed, append_results } =
+  const { view_state_changed, view_metadata_changed, append_results, offset } =
     view_change_params
 
   yield call(persist_table_state_to_browser, { payload })
@@ -122,7 +132,7 @@ export function* plays_view_changed({ payload }) {
 
   if (view_state_changed) {
     const data_view = yield select(get_selected_plays_view)
-    yield call(handle_plays_view_request, { data_view, append_results })
+    yield call(handle_plays_view_request, { data_view, append_results, offset })
   }
 }
 

@@ -1,4 +1,7 @@
-// Builds the params for one data-view results request.
+// Builds the params for one data-view results request. Shared by the data-views
+// page and the plays page, which mirror each other closely enough that they had
+// the SAME defect below in two copies -- one place is what keeps the next fix
+// from landing on only one of them.
 //
 // This exists as its own function for one reason: `offset` is a per-REQUEST
 // cursor and must NOT be inherited from table_state, and the only thing

@@ -150,47 +150,47 @@ export default function PlaysPage({
     const is_fetching =
       plays_view_request.status === 'pending' ||
       plays_view_request.status === 'processing'
-    const has_offset = Boolean(selected_plays_view.table_state.offset)
-
-    if (is_fetching && has_offset) {
+    if (is_fetching) {
       return
     }
 
-    const current_offset = selected_plays_view.table_state.offset || 0
-    const current_limit = selected_plays_view.table_state.limit || 500
-    const new_offset = current_offset + current_limit
+    // The next page starts where the loaded rows end. Deriving the cursor from
+    // the result is what keeps it OUT of table_state -- storing it there is
+    // what made a scroll poison the next column add, sort or filter with a
+    // stale offset (see build_data_view_request_params in @core/data-views).
+    const offset = plays.length
+    if (!offset) {
+      return
+    }
 
     const total_count = plays_view_request.metadata?.total_count || 0
-    if (total_count > 0 && new_offset >= total_count) {
+    if (total_count > 0 && offset >= total_count) {
       return
     }
 
-    const updated_data_view = {
-      ...selected_plays_view,
-      table_state: {
-        ...selected_plays_view.table_state,
-        offset: new_offset
-      }
-    }
-
-    plays_view_changed(updated_data_view, {
+    plays_view_changed(selected_plays_view, {
       view_state_changed: true,
-      append_results: true
+      append_results: true,
+      offset
     })
-  }, [selected_plays_view, plays_view_request, plays_view_changed])
+  }, [
+    selected_plays_view,
+    plays_view_request,
+    plays.length,
+    plays_view_changed
+  ])
 
   const is_view_loading = view_id && selected_plays_view.view_id !== view_id
 
-  const is_fetching_more =
+  // An in-flight request is a pagination one exactly when rows survived it: the
+  // reducer preserves `result` on an append and clears it on a replace.
+  const is_request_in_flight =
     plays_view_request.status === 'pending' ||
     plays_view_request.status === 'processing'
-      ? Boolean(selected_plays_view.table_state.offset)
-      : false
 
-  const is_loading =
-    (plays_view_request.status === 'pending' ||
-      plays_view_request.status === 'processing') &&
-    !selected_plays_view.table_state.offset
+  const is_fetching_more = is_request_in_flight && plays.length > 0
+
+  const is_loading = is_request_in_flight && plays.length === 0
 
   const body = is_view_loading ? (
     <Loading loading />
