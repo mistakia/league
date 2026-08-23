@@ -284,3 +284,55 @@ SELECT gsis_player_id, incumbent_pid, incumbent_name, incumbent_last_name,
        count(*) OVER (PARTITION BY gsis_player_id) AS incumbent_count
 FROM matched`
 }
+
+/*
+  The BIRTH-DATE form, and the rung that closes the gap the other two leave.
+
+  A person can be in `player` holding NO external identifier at all and NO
+  gamelogs. The external-id form has nothing to match on them and the name form
+  needs a team-season it cannot have, so both return clean and the id looks
+  mintable. 70 of 689 mints in the first run landed on exactly that shape --
+  people already in the table, duplicated.
+
+  Matching normalized short name AND exact date of birth catches them. The name
+  is what FINDS the pair; the birth date is what confirms it, and a shared
+  surname, first initial and exact date of birth is not a coincidence worth
+  hedging against. The `0000-00-00` sentinel is excluded on both sides, since it
+  is an absence wearing a value and would otherwise pair thousands of unrelated
+  rows.
+
+  Restricted to incumbents holding no gsis id. One that already holds a
+  different gsis id is a contradiction this rung has no standing to resolve.
+*/
+export const birth_date_attach_sql = (candidates) => {
+  const quote = (v) =>
+    v === null || v === undefined || v === ''
+      ? 'NULL'
+      : `'${String(v).replace(/'/g, "''")}'`
+  const values = candidates
+    .map(
+      (row) =>
+        `(${quote(row.gsis_player_id)}, ${quote(row.first_name)}, ${quote(row.last_name)}, ${quote(row.date_of_birth)})`
+    )
+    .join(', ')
+  const feed_name_key = short_name_key(
+    "left(f.first_name, 1) || '.' || f.last_name"
+  )
+  return `WITH raw_feed (gsis_player_id, first_name, last_name, date_of_birth) AS (
+  VALUES ${values}
+), feed AS (
+  SELECT gsis_player_id::text AS gsis_player_id, first_name::text AS first_name,
+         last_name::text AS last_name, date_of_birth::text AS date_of_birth
+  FROM raw_feed
+  WHERE date_of_birth IS NOT NULL AND date_of_birth::text NOT LIKE '0000%'
+)
+SELECT f.gsis_player_id, p.pid AS incumbent_pid, p.short_name AS incumbent_name,
+       p.last_name AS incumbent_last_name, p.gsis_player_id AS incumbent_gsis,
+       ARRAY['short_name+date_of_birth'] AS matched_on,
+       count(*) OVER (PARTITION BY f.gsis_player_id) AS incumbent_count
+FROM feed f
+JOIN player p ON p.primary_position <> 'DST'
+  AND p.gsis_player_id IS NULL
+  AND p.date_of_birth::text = f.date_of_birth
+  AND ${short_name_key('p.short_name')} = ${feed_name_key}`
+}

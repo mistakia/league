@@ -12,7 +12,8 @@ import { load_source_records } from '#libs-server/player-identity-sources.mjs'
 import {
   missing_gsis_ids_sql,
   collision_preflight_sql,
-  external_id_attach_sql
+  external_id_attach_sql,
+  birth_date_attach_sql
 } from '#libs-server/player-identity-collision-oracle.mjs'
 
 const log = debug('repair-missing-player-gsis-ids')
@@ -96,6 +97,7 @@ const surnames_agree = (left, right) => {
 const classify_candidate = ({
   source_record,
   external_matches,
+  birth_date_matches,
   name_matches
 }) => {
   if (!source_record) {
@@ -160,6 +162,31 @@ const classify_candidate = ({
         : DISPOSITION.ATTACH_HIGH,
       incumbent
     }
+  }
+
+  /*
+    No hard id reached a player row. Before minting, the birth-date rung asks
+    whether this person is in the table with no identifiers at all -- the shape
+    that neither of the other two rungs can see, and that duplicated 70 people
+    the first time this ran.
+  */
+  if (birth_date_matches.length) {
+    const incumbents = new Map(
+      birth_date_matches.map((match) => [match.incumbent_pid, match])
+    )
+    if (incumbents.size > 1) {
+      return {
+        disposition: DISPOSITION.REVIEW_DUPLICATE_INCUMBENTS,
+        incumbents: [...incumbents.values()]
+      }
+    }
+    const incumbent = [...incumbents.values()][0]
+    if (
+      !surnames_agree(source_record.last_name, incumbent.incumbent_last_name)
+    ) {
+      return { disposition: DISPOSITION.REVIEW_SURNAME_CONFLICT, incumbent }
+    }
+    return { disposition: DISPOSITION.ATTACH_CORROBORATED, incumbent }
   }
 
   /*
@@ -255,6 +282,17 @@ const build_dispositions = async ({ source_records }) => {
     }
   }
 
+  const birth_date_by_id = new Map()
+  if (feed.length) {
+    const { rows } = await db.raw(birth_date_attach_sql(feed))
+    for (const row of rows) {
+      if (!birth_date_by_id.has(row.gsis_player_id)) {
+        birth_date_by_id.set(row.gsis_player_id, [])
+      }
+      birth_date_by_id.get(row.gsis_player_id).push(row)
+    }
+  }
+
   const { rows: name_rows } = await db.raw(collision_preflight_sql())
   const name_by_id = new Map()
   for (const row of name_rows) {
@@ -269,6 +307,7 @@ const build_dispositions = async ({ source_records }) => {
     ...classify_candidate({
       source_record: source_records.get(row.gsis_player_id) || null,
       external_matches: external_by_id.get(row.gsis_player_id) || [],
+      birth_date_matches: birth_date_by_id.get(row.gsis_player_id) || [],
       name_matches: name_by_id.get(row.gsis_player_id) || []
     })
   }))
@@ -443,7 +482,7 @@ const report = ({ dispositions, output_path }) => {
   All three must come back non-zero. If any comes back clean, the corresponding
   real check is not evidence of anything.
 */
-const verify_integrity_gates_can_fail = async ({ dispositions }) => {
+const verify_integrity_gates_can_fail = async () => {
   const duplicate_control = await check_no_duplicate_identities({
     columns: ['last_name']
   })
@@ -461,13 +500,16 @@ const verify_integrity_gates_can_fail = async ({ dispositions }) => {
       ('complete', 'QB', 74, 220, '00-0000002')
     ) AS synthetic (pid, primary_position, height_inches, weight_pounds, gsis_player_id)`
   })
-  const attach_target_gsis_ids = dispositions
-    .filter((row) => WRITABLE_ATTACH.has(row.disposition))
-    .map((row) => row.incumbent.incumbent_pid)
+  /*
+    The sentinel control reads the table directly rather than the run's own
+    attach targets. Deriving it from the run made it go vacuous the moment a
+    re-run had nothing left to attach -- a control whose input can empty out is
+    not a control, and it reported CANNOT FAIL exactly when the run was cleanest.
+    `0000-00-00` rows predate this work by years and are not going anywhere.
+  */
   const { rows: sentinel_rows } = await db.raw(
     `SELECT count(*) AS sentinels FROM player
-     WHERE pid = ANY('{${attach_target_gsis_ids.join(',')}}')
-       AND date_of_birth::text LIKE '0000%'`
+     WHERE date_of_birth::text LIKE '0000%' AND primary_position <> 'DST'`
   )
   const sentinel_control = Number(sentinel_rows[0].sentinels)
 
@@ -516,7 +558,7 @@ const repair_missing_player_gsis_ids = async ({
   const dispositions = await build_dispositions({ source_records })
   const buckets = report({ dispositions, output_path })
 
-  if (!(await verify_integrity_gates_can_fail({ dispositions }))) {
+  if (!(await verify_integrity_gates_can_fail())) {
     throw new Error(
       'an integrity check could not be made to report — its clean result is not evidence'
     )
