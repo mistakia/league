@@ -247,6 +247,112 @@ describe('data view admission gate and instrumentation', function () {
     expect(emitted.length).to.equal(emitted_before_fast)
   })
 
+  it('holds an accepted slow query silent under its ceiling and still emits above it', async function () {
+    const slow = async () => {
+      await sleep(30)
+      return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+    }
+
+    // Learn the signature from a real emission rather than hardcoding the hash,
+    // so this stays anchored to what the executor actually computes.
+    const discovered = []
+    await execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-accept-discover',
+      run_query: slow,
+      signal_emitter: async (args) => discovered.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+    expect(discovered.length).to.equal(1)
+    const signature = discovered[0].payload.signature
+    expect(signature, 'signature travels on the payload').to.be.a('string')
+
+    // Accepted at a ceiling this run cannot reach: silent.
+    const under = []
+    await execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-accept-under',
+      run_query: slow,
+      signal_emitter: async (args) => under.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10,
+      accepted_slow_queries: { [signature]: { threshold_ms: 100000 } }
+    })
+    expect(under.length).to.equal(0)
+
+    // The negative control that makes the assertion above non-vacuous: the SAME
+    // accepted signature, a ceiling this run does clear, and the signal comes
+    // back. Acceptance is a raised threshold, never a mute -- without this case
+    // a registry that suppressed everything unconditionally would pass.
+    const over = []
+    await execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-accept-over',
+      run_query: slow,
+      signal_emitter: async (args) => over.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 100000,
+      accepted_slow_queries: { [signature]: { threshold_ms: 10 } }
+    })
+    expect(over.length).to.equal(1)
+    expect(over[0].payload.signature).to.equal(signature)
+  })
+
+  it('lapses an acceptance when the query shape changes', async function () {
+    const slow = async () => {
+      await sleep(30)
+      return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+    }
+    // An acceptance is keyed by query SHAPE. A view carrying a different column
+    // hashes differently, so the entry stops matching and the default threshold
+    // governs again -- a narrowed view has to re-earn its acceptance.
+    const other_params = () => ({
+      ...sample_params(),
+      columns: [{ column_id: 'player_targets', params: { year: [2023] } }]
+    })
+
+    const discovered = []
+    await execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-lapse-discover',
+      run_query: slow,
+      signal_emitter: async (args) => discovered.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+    const accepted_signature = discovered[0].payload.signature
+
+    const emitted = []
+    await execute_data_view_request({
+      request_id: 'v',
+      params: other_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-lapse',
+      run_query: slow,
+      signal_emitter: async (args) => emitted.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10,
+      accepted_slow_queries: { [accepted_signature]: { threshold_ms: 100000 } }
+    })
+
+    expect(emitted.length).to.equal(1)
+    expect(emitted[0].payload.signature).to.not.equal(accepted_signature)
+  })
+
   it('re-checks the cache at admission and returns it without executing', async function () {
     let executed = false
     const result = await execute_data_view_request({

@@ -103,6 +103,57 @@ const data_view_query_signature = (params) => {
     .slice(0, 16)
 }
 
+// Accepted slow queries -- shapes that were measured, diagnosed, and knowingly
+// left slow because the only remaining fix costs something we declined to pay.
+//
+// An entry RAISES this signature's emission threshold to its accepted ceiling.
+// It is not a mute: a run above the ceiling still emits, because "known to cost
+// 6.6s" and "degraded to 14s" are different facts and only the second wants
+// triage.
+//
+// Acceptance lapses on its own. The signature is derived from query SHAPE, so
+// editing the view changes the hash, the entry stops matching, and the shape
+// reports again until someone re-accepts it. That is the intended direction of
+// failure -- a narrowed view should have to re-earn its acceptance rather than
+// inherit one made about a different query.
+//
+// Every entry states the trade-off that was declined, so a reader sees which
+// fix was available and why it was not taken. `review_after` exists so an
+// accepted cost gets revisited instead of inherited forever.
+const ACCEPTED_SLOW_QUERIES = {
+  da81f8407752c611: {
+    threshold_ms: 8000,
+    measured_ms: 6593,
+    accepted_at: '2026-08-23',
+    review_after: '2027-02-23',
+    signal_id: 126506,
+    reason:
+      'Wide 7-year player-year view: 23 outer joins, 7 CTEs, seven nfl_plays ' +
+      'partition index scans at 136-190ms each. No dominant node, no ' +
+      'misestimate, every scan index-driven, largest single leaf under 200ms ' +
+      '-- there is no index or query rewrite left to make. The only remaining ' +
+      'fix is narrowing the view (fewer columns or a shorter year range), a ' +
+      'product decision we declined. 8000 deliberately does NOT cover the ' +
+      'loaded case: this class of query measured 4,992ms idle against ' +
+      '10,840ms under load, so a contended run still emits, which is the ' +
+      'run worth looking at.'
+  }
+}
+
+// An accepted ceiling wins over an explicitly passed emission_threshold_ms.
+// Acceptance is a standing policy statement about one query shape; the
+// parameter is a per-call seam. Ordering them this way means no caller can
+// un-accept a shape by passing a threshold, and callers that pass one still get
+// it for every shape carrying no entry.
+const effective_threshold_ms = ({
+  signature,
+  emission_threshold_ms,
+  accepted_slow_queries = ACCEPTED_SLOW_QUERIES
+}) => {
+  const accepted = accepted_slow_queries[signature]
+  return accepted ? accepted.threshold_ms : emission_threshold_ms
+}
+
 const severity_for_total_ms = (total_ms, threshold_ms) => {
   const tiers =
     threshold_ms === DATA_VIEW_EMISSION_THRESHOLD_MS
@@ -147,11 +198,19 @@ const report_slow_query = ({
   user_id,
   started_at,
   signal_emitter = emit_signal,
-  emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS
+  emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS,
+  accepted_slow_queries = ACCEPTED_SLOW_QUERIES
 }) => {
   const signature = data_view_query_signature(params)
   const dedup_key = `slow_query:data_view:${signature}`
-  const severity = severity_for_total_ms(total_ms, emission_threshold_ms)
+  const severity = severity_for_total_ms(
+    total_ms,
+    effective_threshold_ms({
+      signature,
+      emission_threshold_ms,
+      accepted_slow_queries
+    })
+  )
 
   if (!severity) return
 
@@ -249,6 +308,7 @@ const release_slot = () => {
  *   write (the /debug route must keep its bypass-cache contract)
  * @param {number} [opts.heartbeat_interval_ms] - seam for a short interval in tests
  * @param {number} [opts.emission_threshold_ms] - seam for the 5s emission threshold
+ * @param {object} [opts.accepted_slow_queries] - seam for the accepted-cost registry
  */
 export async function execute_data_view_request({
   request_id,
@@ -265,7 +325,8 @@ export async function execute_data_view_request({
   cache_get = (key) => redis_cache.get(key),
   skip_cache = false,
   heartbeat_interval_ms = DATA_VIEW_HEARTBEAT_INTERVAL_MS,
-  emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS
+  emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS,
+  accepted_slow_queries = ACCEPTED_SLOW_QUERIES
 }) {
   const exec_id = execution_id || mint_execution_id()
   const request_started_at = Date.now()
@@ -398,8 +459,14 @@ export async function execute_data_view_request({
       user_id,
       started_at,
       signal_emitter,
-      emission_threshold_ms
+      emission_threshold_ms,
+      accepted_slow_queries
     })
+
+    // Telemetry reads emitted_signal off the SAME effective threshold the
+    // emitter used, so an accepted shape reports false here rather than
+    // claiming a signal that was never sent.
+    const execution_signature = data_view_query_signature(params)
 
     admission.counters.completed++
     log_data_view_telemetry({
@@ -413,9 +480,16 @@ export async function execute_data_view_request({
       query_execution_duration_ms,
       total_ms,
       result_row_count,
-      signature: data_view_query_signature(params),
+      signature: execution_signature,
       emitted_signal: Boolean(
-        severity_for_total_ms(total_ms, emission_threshold_ms)
+        severity_for_total_ms(
+          total_ms,
+          effective_threshold_ms({
+            signature: execution_signature,
+            emission_threshold_ms,
+            accepted_slow_queries
+          })
+        )
       ),
       user_id: user_id ? 'signed-in' : 'anonymous'
     })
