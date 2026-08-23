@@ -23,9 +23,14 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-betrivers-odds')
-debug.enable('import-betrivers-odds,insert-prop-markets')
+// Guarded because this module is importable (test/betrivers-market-season-year
+// .spec.mjs): an unguarded module-scope enable REPLACES the namespace set for
+// whatever process loads it, and an explicit DEBUG must stay authoritative.
+if (!process.env.DEBUG) {
+  debug.enable('import-betrivers-odds,insert-prop-markets')
+}
 
-const format_market = async ({
+export const format_market = async ({
   betrivers_market,
   observed_at,
   event,
