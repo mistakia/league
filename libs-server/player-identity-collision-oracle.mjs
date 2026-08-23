@@ -16,6 +16,30 @@
   Exported as SQL fragments rather than a JS predicate because the joins run over
   `player_gamelogs` and `nfl_play_stats` at full table scale; pulling the rows
   out to compare them in JS is not viable.
+
+  TWO forms, and the name form ALONE IS NOT SUFFICIENT. Read this before using
+  either.
+
+  `collision_preflight_sql` matches on name plus a shared team-season, and the
+  team-season comes from `player_gamelogs`. That is a circular dependency: a
+  gamelog is only generated once a play stat RESOLVES to a pid, so a player whose
+  whole career sits behind an unresolved gsis id has no gamelogs at all -- and
+  neither does the incumbent row, because the incumbent IS that same person. The
+  name form therefore returns nothing for exactly the population where the
+  incumbent is most certainly already in the table.
+
+  Measured: it missed Ernie Sims, the single heaviest id in the whole set at 599
+  graded stat rows, whose row `ERNE-SIMS-024567` was sitting in `player` holding
+  no gsis id the entire time. Across the missing set the name form finds 162
+  candidates and `external_id_attach_sql` finds 342.
+
+  Note that this blind spot is invisible to the calibration in
+  scripts/calibrate-player-identity-collision-oracle.mjs, and necessarily so: the
+  known-good set is ids that already resolve, and an id that resolves has
+  gamelogs by construction. A false-negative rate measured there cannot see a
+  failure mode whose precondition is non-resolution. That is a limit of the
+  calibration, not a defect in it -- but it is why the name form must never be
+  run as the only rung.
 */
 
 /*
@@ -180,4 +204,52 @@ JOIN player_team_seasons sb
   ON sb.nfl_team = sa.nfl_team AND sb.season_year = sa.season_year AND sb.pid > sa.pid
 JOIN named a ON a.pid = sa.pid
 JOIN named b ON b.pid = sb.pid AND b.name_key = a.name_key`
+}
+
+/*
+  The EXTERNAL-ID form, and the one that carries the evidence.
+
+  A biographical feed keyed on the gsis id also hands us that person's OTHER
+  identifiers -- nflverse carries `esb_id` and `pfr_id` -- and `player` already
+  holds both columns. So the question "is this person already in the table"
+  usually has a hard answer that never touches a name, a team or a season, and
+  it is available for every id the feed covers.
+
+  This is strictly better evidence than the name form, and where the two
+  disagree the name form is the one that is wrong: 12 ids resolve to a different
+  pid under each, and every one is a namesake the name form pointed at -- Dean
+  Wright against Dwayne Wright, James Rodgers against Jacquizz Rodgers.
+
+  `candidates` is [{ gsis_player_id, esb_id, pfr_id }], injected through VALUES
+  because these ids live in the feed rather than in any table we can join.
+
+  Two returned flags do NOT decide anything and must be read by a human:
+  `incumbent_count` above 1 means the external id matches several player rows,
+  which is a duplicate pair in `player` rather than an answer here; a non-null
+  `incumbent_gsis` means the incumbent already holds a DIFFERENT gsis id, which
+  contradicts the attach and points at a genuine namesake.
+*/
+export const external_id_attach_sql = (candidates) => {
+  const values = candidates
+    .map(({ gsis_player_id, esb_id, pfr_id }) => {
+      const quote = (v) => (v ? `'${String(v).replace(/'/g, "''")}'` : 'NULL')
+      return `(${quote(gsis_player_id)}, ${quote(esb_id)}, ${quote(pfr_id)})`
+    })
+    .join(', ')
+  return `WITH feed (gsis_player_id, esb_id, pfr_id) AS (
+  VALUES ${values}
+), matched AS (
+  SELECT f.gsis_player_id, p.pid AS incumbent_pid, p.short_name AS incumbent_name,
+         p.gsis_player_id AS incumbent_gsis,
+         array_remove(ARRAY[
+           CASE WHEN p.esb_player_id = f.esb_id THEN 'esb_player_id' END,
+           CASE WHEN p.pfr_player_id = f.pfr_id THEN 'pfr_player_id' END
+         ], NULL) AS matched_on
+  FROM feed f
+  JOIN player p ON p.primary_position <> 'DST'
+    AND (p.esb_player_id = f.esb_id OR p.pfr_player_id = f.pfr_id)
+)
+SELECT gsis_player_id, incumbent_pid, incumbent_name, incumbent_gsis, matched_on,
+       count(*) OVER (PARTITION BY gsis_player_id) AS incumbent_count
+FROM matched`
 }

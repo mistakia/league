@@ -130,7 +130,7 @@ const find_player_from_nflverse_row = ({ row }) => {
   return null
 }
 
-const download_players_file = async ({ force_download = false }) => {
+export const download_players_file = async ({ force_download = false }) => {
   const current_date = new Date().toISOString().split('T')[0]
   const file_name = `nflverse_players_${current_date}.parquet`
   const file_path = `${os.tmpdir()}/${file_name}`
@@ -155,7 +155,7 @@ const download_players_file = async ({ force_download = false }) => {
   return file_path
 }
 
-const read_parquet_rows = (parquet_file) =>
+export const read_parquet_rows = (parquet_file) =>
   new Promise((resolve, reject) => {
     parquetRead({
       file: parquet_file,

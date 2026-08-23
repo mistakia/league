@@ -6,7 +6,8 @@ import {
   short_name_key,
   missing_gsis_ids_sql,
   collision_preflight_sql,
-  table_wide_collision_sql
+  table_wide_collision_sql,
+  external_id_attach_sql
 } from '#libs-server/player-identity-collision-oracle.mjs'
 
 const log = debug('calibrate-player-identity-collision-oracle')
@@ -183,6 +184,57 @@ const run_negative_control = async () => {
   return assertions.every(([, passed]) => passed)
 }
 
+/*
+  Negative control for the external-id form.
+
+  Its seeds are drawn from the table itself: a player row that already holds BOTH
+  a gsis id and an esb id is a pair we know is the same person, so the form must
+  return that row's own pid for that row's own esb id. A fabricated esb id must
+  return nothing.
+
+  This control cannot be built the way the name form's is. There the seeds are
+  injected and the incumbents are real; here the whole point is that the feed
+  identifier and the player column agree, so the only honest seed is a real
+  agreeing pair.
+*/
+const run_external_id_negative_control = async () => {
+  const { rows: known } = await db.raw(
+    `SELECT gsis_player_id, esb_player_id, pfr_player_id, pid FROM player
+     WHERE gsis_player_id IS NOT NULL AND esb_player_id IS NOT NULL
+       AND primary_position <> 'DST' ORDER BY pid LIMIT 5`
+  )
+  const seeds = known.map((row) => ({
+    gsis_player_id: row.gsis_player_id,
+    esb_id: row.esb_player_id,
+    pfr_id: row.pfr_player_id
+  }))
+  seeds.push({
+    gsis_player_id: '00-0000000',
+    esb_id: 'ZZZ999999',
+    pfr_id: 'ZzzzZz99'
+  })
+
+  const { rows } = await db.raw(external_id_attach_sql(seeds))
+  const found = new Map()
+  for (const row of rows) {
+    if (!found.has(row.gsis_player_id)) found.set(row.gsis_player_id, new Set())
+    found.get(row.gsis_player_id).add(row.incumbent_pid)
+  }
+  log(`external-id control: ${rows.length} rows over ${seeds.length} seeds`)
+
+  const assertions = [
+    [
+      'every known-good seed resolves to its own pid',
+      known.every((row) => found.get(row.gsis_player_id)?.has(row.pid))
+    ],
+    ['the fabricated seed resolves to nothing', !found.has('00-0000000')]
+  ]
+  for (const [description, passed] of assertions) {
+    log(`  ${passed ? 'PASS' : 'FAIL'} ${description}`)
+  }
+  return assertions.every(([, passed]) => passed)
+}
+
 const report_baselines = async () => {
   const { rows: population } = await db.raw(`WITH missing AS (
   ${missing_gsis_ids_sql}
@@ -227,9 +279,10 @@ const calibrate_player_identity_collision_oracle = async () => {
   const false_negatives = await measure_false_negative_rate()
   log('false-negative rate at the gsis-id grain: %o', false_negatives)
   const control_pass = await run_negative_control()
+  const external_id_control_pass = await run_external_id_negative_control()
   await report_baselines()
 
-  if (!cases_pass || !control_pass) {
+  if (!cases_pass || !control_pass || !external_id_control_pass) {
     throw new Error(
       'collision oracle calibration FAILED — do not trust any downstream "no collision" result'
     )
