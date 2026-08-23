@@ -575,6 +575,82 @@ describe('LIBS-SHARED calculatePoints', function () {
       close_to(score_yards_against(undefined), 0)
     })
 
+    // The `games` parameter carries the row's grain to the two per-game
+    // thresholds. Written as a CONTROL, not a regression guard: every assertion
+    // below fails against the pre-fix code, which applied a per-game threshold
+    // to whatever grain the row held. Confirm that by reverting the
+    // `* games` in calculate-points.mjs -- the season cases go to -132 and
+    // -103.4 and this block goes red. A version of this spec that passes both
+    // ways would be worthless, because nothing in production populates these
+    // columns at a period grain today.
+    it('scales the per-game thresholds by the games in the period', () => {
+      const score_season = ({ stat, value, games }) =>
+        calculatePoints({
+          league: ppr_league(),
+          stats: { [stat]: value },
+          games
+        })[stat]
+
+      // A full 17-game season allowing 350 points sits UNDER the season
+      // threshold of 17 * 20 = 340 only just, so it scores a small penalty.
+      close_to(
+        score_season({
+          stat: 'defensive_points_against',
+          value: 350,
+          games: 17
+        }),
+        -4
+      )
+
+      // The same figure scored as though it were one game is the defect this
+      // fix exists to prevent: max(350 - 20, 0) * -0.4.
+      close_to(
+        score_season({
+          stat: 'defensive_points_against',
+          value: 350,
+          games: 1
+        }),
+        -132
+      )
+
+      // A genuinely strong season -- 250 allowed against a 340 threshold --
+      // scores nothing rather than a catastrophic penalty.
+      close_to(
+        score_season({
+          stat: 'defensive_points_against',
+          value: 250,
+          games: 17
+        }),
+        0
+      )
+
+      // Yards behave the same way: 5,470 against a 17 * 300 = 5,100 threshold.
+      close_to(
+        score_season({
+          stat: 'defensive_yards_against',
+          value: 5470,
+          games: 17
+        }),
+        -7.4
+      )
+    })
+
+    it('defaults games to 1 so every per-game caller is unchanged', () => {
+      const with_default = calculatePoints({
+        league: ppr_league(),
+        stats: { defensive_points_against: 31, defensive_yards_against: 350 }
+      })
+      const with_explicit_one = calculatePoints({
+        league: ppr_league(),
+        stats: { defensive_points_against: 31, defensive_yards_against: 350 },
+        games: 1
+      })
+
+      close_to(with_default.defensive_points_against, -4.4)
+      close_to(with_default.defensive_yards_against, -1)
+      close_to(with_default.total, with_explicit_one.total)
+    })
+
     it('writes every DST key as zero on an empty stat line', () => {
       const result = calculatePoints({ league: ppr_league(), stats: {} })
 

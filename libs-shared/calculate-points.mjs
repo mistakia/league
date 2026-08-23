@@ -130,7 +130,8 @@ const calculatePoints = ({
   stats,
   position = '',
   league,
-  use_projected_stats = false
+  use_projected_stats = false,
+  games = 1
 }) => {
   // The projected path scores a narrower base stat set -- a projection source
   // supplies no first downs and no kneel-adjusted rushing yards. Kicking and
@@ -173,9 +174,30 @@ const calculatePoints = ({
       stat_value = stats.rushing_yards_excluding_kneels
     }
     // Rate/threshold pairs: only the amount beyond the threshold scores.
+    //
+    // The threshold is a PER-GAME quantity (20 points allowed, 300 yards
+    // allowed), so it must carry the grain of the row being scored. A gamelog
+    // row covers one game and takes the threshold as-is; a period row -- week 0
+    // holds season totals, as every other stat at week 0 does -- must scale it
+    // by the games in the period, or a season points-against of 350 scores as
+    // max(350 - 20, 0) * -0.4 = -132 instead of roughly zero.
+    //
+    // Latent until something populates these two columns at a period grain: the
+    // 2026 board carries NULL and every stored 2021-2025 week-0 row carries the
+    // fabricated 0.0 predating the weight-projections fix, and both clamp to
+    // zero. It arms the moment a real value arrives.
+    //
+    // Scaling the threshold is exact only when the per-game values are equal,
+    // because the rule is convex: sum(max(x_i - t, 0)) >= max(sum(x_i) - n*t, 0)
+    // whenever the x_i differ. A team allowing 10 and then 30 against a
+    // threshold of 20 scores 10 per-game and 0 on the season total. So a period
+    // row systematically UNDERSTATES the penalty, and a season-grain source
+    // that wants the exact figure has to carry the per-game distribution rather
+    // than the total. Understating by that gap is the intended trade here; the
+    // alternative on a total is not a better approximation, it is -132.
     else if (threshold_columns[stat]) {
       const threshold = league_value(league, threshold_columns[stat])
-      stat_value = Math.max(stat_value - threshold, 0)
+      stat_value = Math.max(stat_value - threshold * games, 0)
     }
     // Touchdowns not counting as first downs: substitute the excluding-TD twin.
     // Read through league_value rather than off the raw property, so a partial
