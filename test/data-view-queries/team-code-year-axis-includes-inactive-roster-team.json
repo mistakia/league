@@ -1,0 +1,23 @@
+{
+  "name": "team_code under a year axis renders the team the player was rostered on, including a season with no active game",
+  "description": "The player_years_teams bridge deliberately does NOT filter pgl.is_active, so it agrees with the player_year_teams identity bridge that team_*_from_plays attaches to. While it filtered on active and that bridge did not, a player carrying gamelogs but no active REG game rendered a BLANK team_code beside populated team stats -- 5,076 of 53,767 player-years on production (AJ Dillon 2024 GB, Alexander Mattison 2025 MIA). The seeded player has one 2022 gamelog, inactive, on GB while his current team is KC: he must read GB, which pins BOTH halves -- the relaxed filter (not null) and the row axis still routing through the historical bridge (not the current-team fallback).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [{ "column_id": "team_code", "params": { "year": [2022] } }],
+    "row_axes": ["year"],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TMCI-920011', 'Test', 'Tmcia', 'T.Tmcia', 'Test Tmcia', 'MLB', 'MLB', '1998-01-01', 2020, 'KC')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (971011, 2022, 1, 'REG', 'GB', 'ZFX', '2022-09-11')",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, is_active) VALUES (971011, 'TEST-TMCI-920011', 'ZFX', 'GB', 'MLB', 2022, false)"
+    ],
+    "expected_rows": [{ "team_code_0": ["GB"] }],
+    "compare_columns": ["team_code_0"]
+  },
+  "tags": ["team", "row_axes", "year", "cte", "joins", "result-equivalence"],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')), \"player_years_teams\" as (SELECT pid, year, array_agg(DISTINCT team_code) AS teams\n          FROM (SELECT pgl.pid, 2022::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2022 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2022) src\n          GROUP BY pid, year) select \"player\".\"pid\", player.first_name, player.last_name, player_years_teams.teams as team_code_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_years_teams\" on \"player_years_teams\".\"pid\" = \"player\".\"pid\" and \"player_years_teams\".\"year\" = \"player_years\".\"year\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, player_years_teams.teams, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

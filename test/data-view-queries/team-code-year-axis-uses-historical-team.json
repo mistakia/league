@@ -4,23 +4,14 @@
   "request": {
     "prefix_columns": ["player_name"],
     "columns": [
-      {
-        "column_id": "team_code",
-        "params": {
-          "year": [2021, 2022]
-        }
-      }
+      { "column_id": "team_code", "params": { "year": [2021, 2022] } }
     ],
     "row_axes": ["year"],
     "where": [
-      {
-        "column_id": "player_position",
-        "operator": "IN",
-        "value": ["MLB"]
-      }
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
     ]
   },
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2021,2022]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')), \"player_years_teams\" as (SELECT pid, year, array_agg(DISTINCT team_code) AS teams\n          FROM (SELECT pgl.pid, 2021::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2021 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE pgl.is_active = TRUE AND g.season_type = 'REG' AND g.season_year = 2021 UNION ALL SELECT pgl.pid, 2022::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2022 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE pgl.is_active = TRUE AND g.season_type = 'REG' AND g.season_year = 2022) src\n          GROUP BY pid, year) select \"player\".\"pid\", player.first_name, player.last_name, player_years_teams.teams as team_code_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_years_teams\" on \"player_years_teams\".\"pid\" = \"player\".\"pid\" and \"player_years_teams\".\"year\" = \"player_years\".\"year\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, player_years_teams.teams, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2021,2022]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')), \"player_years_teams\" as (SELECT pid, year, array_agg(DISTINCT team_code) AS teams\n          FROM (SELECT pgl.pid, 2021::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2021 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2021 UNION ALL SELECT pgl.pid, 2022::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2022 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2022) src\n          GROUP BY pid, year) select \"player\".\"pid\", player.first_name, player.last_name, player_years_teams.teams as team_code_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_years_teams\" on \"player_years_teams\".\"pid\" = \"player\".\"pid\" and \"player_years_teams\".\"year\" = \"player_years\".\"year\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, player_years_teams.teams, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TMCD-920001', 'Test', 'Tmcda', 'T.Tmcda', 'Test Tmcda', 'MLB', 'MLB', '1998-01-01', 2020, 'KC')",
@@ -35,18 +26,10 @@
       "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, is_active) VALUES (971002, 'TEST-TMCD-920002', 'ZFX', 'NYG', 'MLB', 2021, true)"
     ],
     "expected_rows": [
-      {
-        "team_code_0": ["BUF"]
-      },
-      {
-        "team_code_0": ["BUF", "MIA"]
-      },
-      {
-        "team_code_0": ["NYG"]
-      },
-      {
-        "team_code_0": null
-      }
+      { "team_code_0": ["BUF"] },
+      { "team_code_0": ["BUF", "MIA"] },
+      { "team_code_0": ["NYG"] },
+      { "team_code_0": null }
     ],
     "compare_columns": ["team_code_0"]
   },
