@@ -470,55 +470,50 @@ export default function DataViewsPage({
   )
 
   const fetch_more = useCallback(() => {
-    // Don't fetch more if we're already loading or fetching more
     const is_fetching =
       data_view_request.status === 'pending' ||
       data_view_request.status === 'processing'
-    const has_offset = Boolean(selected_data_view.table_state.offset)
-
-    // If we're already fetching more data (not initial load), don't fetch again
-    if (is_fetching && has_offset) {
+    if (is_fetching) {
       return
     }
 
-    const current_offset = selected_data_view.table_state.offset || 0
-    const current_limit = selected_data_view.table_state.limit || 500
-    const new_offset = current_offset + current_limit
+    // The next page starts where the loaded rows end. Deriving the cursor from
+    // the result is what keeps it OUT of table_state -- storing it there is
+    // what made a scroll poison the next column add, sort or filter with a
+    // stale offset (see handle_data_view_request in @core/data-views/sagas).
+    // It also keeps scrolling from marking the view dirty, since react-table
+    // decides that by comparing table_state against saved_table_state.
+    const offset = players.length
+    if (!offset) {
+      return
+    }
 
-    // Check if we've already fetched all data
     const total_count = data_view_request.metadata?.total_count || 0
-    if (total_count > 0 && new_offset >= total_count) {
-      return // Don't fetch more if we've reached the total count
+    if (total_count > 0 && offset >= total_count) {
+      return
     }
 
-    // Update the data view with new offset
-    const updated_data_view = {
-      ...selected_data_view,
-      table_state: {
-        ...selected_data_view.table_state,
-        offset: new_offset
-      }
-    }
-
-    data_view_changed(updated_data_view, {
+    data_view_changed(selected_data_view, {
       view_state_changed: true,
-      append_results: true // Flag to indicate we should append results instead of replacing
+      append_results: true,
+      offset
     })
-  }, [selected_data_view, data_view_request, data_view_changed])
+  }, [selected_data_view, data_view_request, players.length, data_view_changed])
 
   const is_view_loading =
     isPending || (view_id && selected_data_view.view_id !== view_id)
 
-  const is_fetching_more =
+  // An in-flight request is a pagination one exactly when rows survived it: the
+  // reducer preserves `result` on an append and clears it on a replace. That is
+  // the same fact the old `table_state.offset` reads were reaching for, minus
+  // the stored cursor.
+  const is_request_in_flight =
     data_view_request.status === 'pending' ||
     data_view_request.status === 'processing'
-      ? Boolean(selected_data_view.table_state.offset)
-      : false
 
-  const is_loading =
-    (data_view_request.status === 'pending' ||
-      data_view_request.status === 'processing') &&
-    !selected_data_view.table_state.offset
+  const is_fetching_more = is_request_in_flight && players.length > 0
+
+  const is_loading = is_request_in_flight && players.length === 0
 
   const body = is_view_loading ? (
     <Loading loading />

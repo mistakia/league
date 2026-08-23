@@ -11,6 +11,7 @@ import {
 } from 'redux-saga/effects'
 
 import { data_views_actions } from './index'
+import build_data_view_request_params from './build-data-view-request-params.mjs'
 import {
   default_data_view_view_id,
   default_data_views
@@ -91,7 +92,8 @@ init_storage({
 function* handle_data_view_request({
   data_view,
   ignore_cache = false,
-  append_results = false
+  append_results = false,
+  offset = 0
 }) {
   const { columns } = data_view.table_state
 
@@ -99,11 +101,14 @@ function* handle_data_view_request({
     return
   }
 
-  const opts = {
+  // `offset` is a per-REQUEST cursor, never part of table_state -- see
+  // build_data_view_request_params for the defect that rule prevents.
+  const opts = build_data_view_request_params({
     view_id: data_view.view_id,
-    ...data_view.table_state,
+    table_state: data_view.table_state,
+    offset,
     append_results
-  }
+  })
 
   yield call(send, {
     type: 'DATA_VIEW_REQUEST',
@@ -302,7 +307,7 @@ export function* watch_websocket_reconnected() {
 
 export function* data_view_changed({ payload }) {
   const { view_change_params = {} } = payload
-  const { view_state_changed, view_metadata_changed, append_results } =
+  const { view_state_changed, view_metadata_changed, append_results, offset } =
     view_change_params
 
   if (view_metadata_changed) {
@@ -311,7 +316,7 @@ export function* data_view_changed({ payload }) {
 
   if (view_state_changed) {
     const data_view = yield select(get_selected_data_view)
-    yield call(handle_data_view_request, { data_view, append_results })
+    yield call(handle_data_view_request, { data_view, append_results, offset })
   }
 }
 
