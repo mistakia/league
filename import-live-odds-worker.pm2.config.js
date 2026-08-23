@@ -11,9 +11,12 @@ module.exports = {
       merge_logs: true,
       env_production: {
         NODE_ENV: 'production',
-        // debug.enable REPLACES the namespace set rather than adding to it, so a
-        // helper's instrumentation is unreachable unless its namespace is named
-        // here. insert-prop-markets was missing, which made the entire prop
+        // An explicit DEBUG is AUTHORITATIVE: enable_debug_namespaces() returns
+        // early when it is set, so this list is the whole namespace set for the
+        // process and a helper's instrumentation is unreachable unless named
+        // here. (Before that helper, a module-scope debug.enable REPLACED the
+        // set and the last import won regardless of this line.)
+        // insert-prop-markets was missing, which made the entire prop
         // write path's telemetry dark in production: the per-batch line carrying
         // market count, selection-insert count and reaper deletes, the cache
         // prefetch sizes, and the run total have never been logged. That is the
