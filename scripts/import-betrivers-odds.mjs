@@ -89,6 +89,7 @@ const format_market = async ({
     source_market_name: `${betrivers_market.betDescription} - (${betrivers_market.betOfferType})`,
 
     esbid: nfl_game?.esbid || null,
+    season_year: nfl_game ? nfl_game.year : current_season.year,
     source_event_id: event?.id,
     source_event_name: event?.name,
 
