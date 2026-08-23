@@ -130,19 +130,33 @@ export default class Season {
     return diff
   }
 
-  // Article XIV defines "Regular Season" as starting "12:00 AM EST on the
-  // first Tuesday of Week 1 of the NFL Regular Season" -- the Tuesday
-  // immediately preceding the (always-Thursday) opener. `regular_season_start`
-  // is one week earlier than that -- the Tuesday NINE days before the opener --
-  // to anchor preseason roster and waiver mechanics.
+  // The constitution's definitions section fixes ONE Regular Season boundary:
+  // "12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season" --
+  // the Tuesday immediately preceding the (always-Thursday) opener, which is
+  // what this getter computes. `regular_season_start` is the Tuesday NINE days
+  // before the opener, one week earlier, to anchor preseason roster and waiver
+  // mechanics.
   //
-  // A note this comment used to get wrong by claiming "two weeks earlier": the
-  // gap is nine days, so `regular_season_start + 1 week` and this getter are
-  // the SAME instant in every season, and so is the moment `isRegularSeason`
-  // turns true. Anything reasoning about a window between them is reasoning
-  // about a window that does not exist. The prose mattered -- it reads as a
-  // justification for setting the anchor a week early, which is exactly the
-  // 2026 defect that unlinked every betting market from its game.
+  // Nine days is seven plus two, so `regular_season_start + 1 week` and this
+  // getter are the SAME instant in every season, and so is the moment
+  // `isRegularSeason` turns true. That identity is not a coincidence to work
+  // around -- it is the invariant that lets every caller ask `isRegularSeason`
+  // and get the constitutional answer. `test/season.spec.mjs` pins it against
+  // `openingDay`, whose date is checkable against the NFL schedule, so a
+  // mis-set anchor fails there instead of silently moving a boundary.
+  //
+  // This getter therefore has ONE remaining consumer: `is-santuary-period.mjs`,
+  // which needs the boundary as a DATE to measure Article XIV Section 15(1)'s
+  // "first twenty-four (24) hours of the Regular Season" from. A caller that
+  // only wants to know whether the Regular Season has begun wants
+  // `isRegularSeason`; `api/routes/teams/protect.mjs` carried a redundant
+  // `isBefore(practice_squad_protection_start)` guard behind that check until
+  // it was removed, and it was unreachable for its whole life.
+  //
+  // The prose here used to claim `regular_season_start` was "two weeks
+  // earlier", which reads as a justification for setting the anchor a week
+  // early -- exactly the 2026 defect that unlinked every betting market from
+  // its game.
   get practice_squad_protection_start() {
     const days_since_tuesday = (this.openingDay.day() - 2 + 7) % 7
     return this.openingDay.subtract(days_since_tuesday, 'day').startOf('day')

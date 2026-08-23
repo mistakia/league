@@ -129,20 +129,19 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
+    // Article XIV Section 11 permits protection "at any time during the
+    // Regular Season", and the constitution's definitions section fixes a
+    // single Regular Season boundary: 12:00 AM EST on the first Tuesday of
+    // Week 1 of the NFL Regular Season. There is no second, protection-specific
+    // trigger, so this one check is the whole window. `isRegularSeason` turns
+    // true at exactly that instant -- `test/season.spec.mjs` pins the identity
+    // against `openingDay` so a drifted `regular_season_start` fails there
+    // rather than being caught by a guard on this one route. `app/core/
+    // selectors.js` gates `status.eligible.protect` on the same getter alone.
     if (!current_season.isRegularSeason) {
       return res
         .status(400)
         .send({ error: 'not permitted during the offseason' })
-    }
-
-    if (
-      current_season.now.isBefore(
-        current_season.practice_squad_protection_start
-      )
-    ) {
-      return res
-        .status(400)
-        .send({ error: 'practice squad protection is not yet open' })
     }
 
     // make sure player is on roster

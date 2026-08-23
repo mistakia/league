@@ -187,13 +187,50 @@ describe('LIBS-SHARED Season', function () {
   it('practice_squad_protection_start', function () {
     const { openingDay, practice_squad_protection_start } = current_season
 
-    // Article XIV: "Regular Season" begins 12:00 AM EST on the first Tuesday
-    // of Week 1 of the NFL Regular Season -- the Tuesday immediately
-    // preceding the (always-Thursday) opener, not `regular_season_start`
-    // (which anchors preseason waiver/roster mechanics two weeks earlier).
+    // The constitution's definitions section: "Regular Season" begins 12:00 AM
+    // EST on the first Tuesday of Week 1 of the NFL Regular Season -- the
+    // Tuesday immediately preceding the (always-Thursday) opener, not
+    // `regular_season_start`, which anchors preseason waiver/roster mechanics
+    // ONE week earlier (nine days before the opener, per the assertion above).
     expect(practice_squad_protection_start.day()).to.equal(2)
     expect(practice_squad_protection_start.isBefore(openingDay)).to.equal(true)
     expect(openingDay.diff(practice_squad_protection_start, 'day')).to.equal(2)
+  })
+
+  // This is the assertion that lets every caller ask `isRegularSeason` and get
+  // the CONSTITUTIONAL answer, and it is why `api/routes/teams/protect.mjs`
+  // needs no second Article XIV check. Both sides are pinned to `openingDay`,
+  // whose date is checkable against the NFL schedule; expressing either one
+  // relative to `regular_season_start` would make the test vacuous with
+  // respect to the anchor, which is exactly how the 2026 miscount survived.
+  it('isRegularSeason turns true at the constitutional Regular Season start', function () {
+    const { openingDay } = current_season
+    const constitutional_start = openingDay.subtract('2', 'day')
+
+    // the getter agrees with the openingDay-derived boundary
+    expect(current_season.practice_squad_protection_start.valueOf()).to.equal(
+      constitutional_start.valueOf()
+    )
+
+    // one minute before: still the offseason, for the fantasy season and for
+    // Article XIV alike
+    MockDate.set(constitutional_start.subtract('1', 'minute').toISOString())
+    expect(current_season.isRegularSeason).to.equal(false)
+    expect(
+      current_season.now.isBefore(
+        current_season.practice_squad_protection_start
+      )
+    ).to.equal(true)
+
+    // at the boundary: both flip together, so no window exists in which the
+    // regular season has started but protection has not opened
+    MockDate.set(constitutional_start.toISOString())
+    expect(current_season.isRegularSeason).to.equal(true)
+    expect(
+      current_season.now.isBefore(
+        current_season.practice_squad_protection_start
+      )
+    ).to.equal(false)
   })
 
   it('year', function () {

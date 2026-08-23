@@ -134,29 +134,27 @@ describe('API /teams - protect', function () {
       // TODO
     })
 
-    it('rejects a protect one minute before the Article XIV window opens', async () => {
-      // This used to pin `regular_season_start.add(1, 'week')` and describe it
-      // as "the regular season has started but it is before the first Tuesday
-      // of Week 1", asserting the route's 'practice squad protection is not
-      // yet open' error. No such window exists. `regular_season_start` is the
-      // Tuesday nine days before the always-Thursday opener and
-      // practice_squad_protection_start is the Tuesday two days before it, so
-      // `regular_season_start + 1 week` IS the instant protection opens -- and
-      // it is the same instant `isRegularSeason` turns true, for every season,
-      // since both reduce to `openingDay - 2 days`. The route checks
-      // isRegularSeason FIRST, so its Article XIV branch is unreachable and
-      // this boundary is guarded by the offseason error instead.
+    it('rejects a protect one minute before the Regular Season begins', async () => {
+      // Both legs are pinned to `openingDay`, whose date is checkable against
+      // the NFL schedule. This case used to pin
+      // `regular_season_start.add(1, 'week')` and assert the route's separate
+      // 'practice squad protection is not yet open' error, which no season can
+      // produce: `regular_season_start` is the Tuesday nine days before the
+      // always-Thursday opener, so `+ 1 week` IS `openingDay - 2 days` -- the
+      // constitutional Regular Season start AND the instant `isRegularSeason`
+      // turns true. That guard was unreachable for its whole life and is gone;
+      // `test/season.spec.mjs` now pins the identity the removal rests on.
       //
-      // The old offset only landed inside a gap while the 2026
+      // The old offset only landed anywhere meaningful while the 2026
       // `regular_season_start` was set a week early -- the same miscount that
-      // unlinked every 2026 betting market from its game. In both cases
-      // expressing a boundary RELATIVE to the anchor is what hid it, so this
-      // pins the boundary itself.
-      MockDate.set(
-        current_season.practice_squad_protection_start
-          .subtract('1', 'minute')
-          .toISOString()
+      // unlinked every 2026 betting market from its game. Expressing a
+      // boundary RELATIVE to the anchor under test is what hid both.
+      const constitutional_start = current_season.openingDay.subtract(
+        '2',
+        'day'
       )
+
+      MockDate.set(constitutional_start.subtract('1', 'minute').toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -176,6 +174,38 @@ describe('API /teams - protect', function () {
         })
 
       await error(request, 'not permitted during the offseason')
+
+      // One minute later the same request succeeds. Without this leg the case
+      // above passes for any clock the route rejects, including a boundary set
+      // to the wrong week -- which is precisely how its predecessor stayed
+      // green while asserting a state the code could not produce.
+      //
+      // Crossing the boundary moves `current_season.week` from 0 to 1, and a
+      // roster is a snapshot of one (year, week), so the player has to be
+      // seeded onto the week-1 roster too. That is what really happens to a
+      // practice squad player held across the boundary, not a test artifact.
+      MockDate.set(constitutional_start.toISOString())
+
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: roster_slot_types.PSD
+      })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/protect')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          pid: player.pid,
+          leagueId: 1
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(roster_slot_types.PSDP)
 
       MockDate.set(
         current_season.regular_season_start.add('1', 'month').toISOString()
