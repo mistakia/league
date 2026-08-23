@@ -7,12 +7,12 @@
 //
 // The live instance is `private/`, a submodule NO workflow checks out (there is
 // no `submodules:` key in any file under .github/workflows). So on the runner
-// it is an empty directory, and the two gates that name it in their corpus --
-// check-league-fixture-reset-coverage and check-z-index-scale -- have been
-// passing green in CI over a root that does not exist. The cost is not
-// hypothetical: private/test still updates `seasons.year`, a column the
-// season_year conform renamed, because every consumer sweep that would have
-// caught it ran over a corpus private/ was not in.
+// it is an empty directory, and check-league-fixture-reset-coverage -- which
+// names it in WRITER_ROOTS and does run in CI -- had been passing green there
+// over a root it never opened. The cost is not hypothetical: private/test was
+// still updating `seasons.year` long after the conform renamed the column to
+// season_year, because every consumer sweep that would have caught it ran over
+// a corpus private/ was not in.
 //
 // Declaring the corpus does not make CI check the submodule out, and is not
 // meant to. It makes the narrowing VISIBLE, so a green in CI and a green
@@ -26,12 +26,19 @@ import path from 'path'
 export const CORPUS_INCOMPLETE_MARKER = 'CORPUS INCOMPLETE'
 
 /**
- * Split declared roots into the ones that exist and the ones that do not.
+ * Split declared roots into the ones this gate actually read and the ones it
+ * did not.
  *
  * @param {object} params
  * @param {string[]} params.roots repo-relative directory names
  * @param {string} params.repo_root absolute path to the repository root
- * @returns {{ roots: string[], present: string[], missing: string[] }}
+ * @param {Map<string, number>|object} [params.counts] files the caller actually
+ *   read per root. When given it is authoritative and the filesystem is not
+ *   consulted, because a root that yielded no files cannot produce a finding.
+ * @returns {{ roots: string[], present: string[], missing: string[],
+ *   reasons: object }} `reasons` maps each missing root to why it was unread:
+ *   `absent`, `empty (uninitialized submodule?)`, `no files read` or
+ *   `not walked`.
  */
 export const resolve_corpus = ({ roots, repo_root, counts }) => {
   const present = []
@@ -93,7 +100,8 @@ export const resolve_corpus = ({ roots, repo_root, counts }) => {
  * stops at the first finding should already know what was and was not scanned.
  *
  * @param {object} params
- * @param {{ roots: string[], present: string[], missing: string[] }} params.corpus
+ * @param {{ roots: string[], missing: string[], reasons: object }} params.corpus
+ *   as returned by resolve_corpus
  * @param {Map<string, number>|object} [params.counts] files scanned per root
  * @returns {string}
  */
