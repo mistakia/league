@@ -294,6 +294,98 @@ const as_of_observed_at = ({
     }
   }
 
+// The YEAR-axis as-of lookup, resolved ONCE per (pid, year) instead of once per
+// outer row.
+//
+// As a correlated subquery this is O(outer rows), and the outer side of a
+// player-year view is `player CROSS JOIN base_years` -- 28,129 players x 7 years
+// = 196,903 rows, probed once per KTC column. A three-column view therefore ran
+// 590,709 probes to answer a 500-row page, and only 893 players carry ANY KTC
+// observation, so ~97% of those probes matched nothing. Measured on production
+// (signals 126516/126517): the three arms were 71% of a 4,992ms execution.
+//
+// Pre-aggregated the same answer costs one pass: DISTINCT ON keyed by the same
+// (pid, year), ordered by observed_at DESC, which is exactly the MAX(observed_at)
+// the subquery selected. The outer join becomes a hash join on (pid, year).
+// 4,992ms -> ~2,000ms, byte-identical output INCLUDING __data_view_total_count__,
+// verified on both emitted signatures.
+//
+// Deliberately NOT filtered to the view's year range: opening_days is 57 rows,
+// each contributing one bounded window, and constraining it measured no faster
+// (2,088-2,113ms unfiltered against 1,852-2,194ms filtered) while requiring the
+// resolved year list at build time. The window predicate is what prunes.
+const keeptradecut_year_axis_as_of_cte = ({
+  metric_column,
+  is_superflex,
+  year_offset_single,
+  as_of_month_day
+}) => {
+  const boundary_sql = as_of_month_day
+    ? year_axis_month_day_boundary({
+        year_sql: 'ktc_od.year',
+        year_offset_single,
+        as_of_month_day
+      })
+    : year_axis_opening_day_boundary({
+        opening_day_sql: 'ktc_od.opening_day',
+        year_offset_single
+      })
+
+  return db.raw(
+    `select distinct on (ktc_src.pid, ktc_od.year) ktc_src.pid, ktc_od.year, ktc_src.${metric_column} ` +
+      'from opening_days ktc_od ' +
+      'inner join keeptradecut_valuations ktc_src on ' +
+      `ktc_src.is_superflex = ${is_superflex ? 'true' : 'false'} ` +
+      `and ktc_src.${metric_column} is not null ` +
+      `and ktc_src.observed_at <= ${boundary_sql} ` +
+      `and ktc_src.observed_at > (${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}') ` +
+      `order by ktc_src.pid, ktc_od.year, ktc_src.observed_at desc`
+  )
+}
+
+// One CTE per DISTINCT as-of rule, not per column: two columns sharing a metric,
+// superflex flag, offset and boundary resolve the same rows, and re-registering
+// the same name would emit a duplicate WITH alias (42712).
+const register_keeptradecut_year_axis_cte = ({
+  metric_column,
+  query,
+  params,
+  data_view_options,
+  year_offset_single,
+  as_of_month_day
+}) => {
+  const is_superflex = is_superflex_from_params(params)
+  // as_of_month_day is a PARSED OBJECT ({ month, day }), so it has to be spelled
+  // out rather than interpolated: every distinct value stringifies to
+  // "[object Object]", which collapses two columns anchored on different
+  // calendar days onto one CTE and renders one day's observation under both
+  // headers. Caught by the two-days-diverge result-equivalence oracle.
+  const as_of_key = as_of_month_day
+    ? `${as_of_month_day.month}-${as_of_month_day.day}`
+    : 'opening_day'
+  const cte_name = get_table_hash(
+    `ktc_as_of/${metric_column}/${is_superflex}/${year_offset_single}/${as_of_key}`
+  )
+
+  if (!data_view_options.keeptradecut_as_of_ctes) {
+    data_view_options.keeptradecut_as_of_ctes = new Set()
+  }
+  if (!data_view_options.keeptradecut_as_of_ctes.has(cte_name)) {
+    query.with(
+      cte_name,
+      keeptradecut_year_axis_as_of_cte({
+        metric_column,
+        is_superflex,
+        year_offset_single,
+        as_of_month_day
+      })
+    )
+    data_view_options.keeptradecut_as_of_ctes.add(cte_name)
+  }
+
+  return cte_name
+}
+
 const keeptradecut_join = ({
   metric_column,
   query,
@@ -309,13 +401,41 @@ const keeptradecut_join = ({
   )
   const { year_offset_single, as_of_month_day } = get_default_params({ params })
 
-  if (row_axes.includes('year') && !data_view_options.opening_days_joined) {
-    query.leftJoin(
-      'opening_days',
-      'opening_days.year',
-      data_view_options.year_reference
-    )
-    data_view_options.opening_days_joined = true
+  // The week axis takes precedence over the year axis below, so the pre-aggregated
+  // path covers exactly the year-axis-only case. opening_days is no longer joined
+  // into the OUTER query from here at all -- the boundary it supplied now lives
+  // inside the CTE, and the age column registers its own join when it needs one.
+  if (row_axes.includes('year') && !row_axes.includes('week')) {
+    const cte_name = register_keeptradecut_year_axis_cte({
+      metric_column,
+      query,
+      params,
+      data_view_options,
+      year_offset_single,
+      as_of_month_day
+    })
+
+    query[join_func](`${cte_name} as ${table_name}`, function () {
+      this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
+
+      // Same year predicate the opening_days form carried, moved onto the
+      // pre-aggregated row's own year.
+      if (data_view_options.year_reference) {
+        this.andOn(
+          db.raw(`${table_name}.year`),
+          '=',
+          db.raw(`(${data_view_options.year_reference})`)
+        )
+      } else if (params.year) {
+        const year_array = Array.isArray(params.year)
+          ? params.year
+          : [params.year]
+        if (year_array.length > 0) {
+          this.andOn(db.raw(`${table_name}.year IN (${year_array.join(', ')})`))
+        }
+      }
+    })
+    return
   }
 
   if (
@@ -340,8 +460,10 @@ const keeptradecut_join = ({
       db.raw('?', [is_superflex_from_params(params)])
     )
 
+    // No recency floor on either remaining arm. It was the year axis's alone
+    // (YEAR_AXIS_AS_OF_WINDOW, guarding a delisted player's last rank from being
+    // carried forward) and it moved into the pre-aggregated CTE with that arm.
     let boundary_sql = null
-    let lower_bound_sql = null
 
     if (row_axes.includes('week')) {
       // TODO handle year_offset_single and week_offset_single
@@ -352,39 +474,9 @@ const keeptradecut_join = ({
       // not a semantic change. The matview retype is a recorded follow-up that
       // deletes this cast.
       boundary_sql = 'to_timestamp(nfl_year_week_timestamp.week_timestamp)'
-    } else if (row_axes.includes('year')) {
-      // The opening_days join stays on both branches. The month/day boundary
-      // reads opening_days.year rather than opening_days.opening_day, which is
-      // the same joined row and keeps both year predicates below meaningful.
-      boundary_sql = as_of_month_day
-        ? year_axis_month_day_boundary({
-            year_sql: 'opening_days.year',
-            year_offset_single,
-            as_of_month_day
-          })
-        : year_axis_opening_day_boundary({
-            opening_day_sql: 'opening_days.opening_day',
-            year_offset_single
-          })
-      // Recency floor -- see YEAR_AXIS_AS_OF_WINDOW. Without it a delisted
-      // player's final rank is carried into every later season.
-      lower_bound_sql = `(${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}')`
-
-      // TODO pretty sure this is always truthy
-      if (data_view_options.year_reference) {
-        this.andOn(
-          db.raw(`opening_days.year`),
-          '=',
-          db.raw(`(${data_view_options.year_reference})`)
-        )
-      } else if (params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        if (year_array.length > 0) {
-          this.andOn(db.raw(`opening_days.year IN (${year_array.join(', ')})`))
-        }
-      }
+      // No year-axis arm here: a year-axis-only request returned above through
+      // the pre-aggregated CTE, and a year+week request resolves its boundary on
+      // the week arm. Both the recency floor and the year predicate moved with it.
     } else if (params.date) {
       // The old form carried `AT TIME ZONE 'UTC'` here. It was a verified no-op
       // on both DST sides against the epoch column, and translating it onto a
@@ -411,8 +503,7 @@ const keeptradecut_join = ({
         metric_column,
         params,
         data_view_options,
-        boundary_sql,
-        lower_bound_sql
+        boundary_sql
       })
     )
   }
