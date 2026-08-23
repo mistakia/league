@@ -609,6 +609,85 @@ const registry = [
   },
 
   {
+    check_id: 'prop-markets-games-season-agreement',
+    invariant:
+      'Every prop_markets_index row that resolved an esbid carries the season_year of the game it resolved. season_year is functionally determined by esbid — a game belongs to exactly one season — so this is derivable rather than merely expected. Nothing enforces it: the column is nullable, there is no foreign key to nfl_games and no CHECK, and each importer writes the field independently. The consequence of a violation is INVISIBILITY rather than a wrong number, which is why no other oracle sees it: consumers filter markets by season_year (api/routes/markets.mjs, libs-server/data-views-column-definitions/player-betting-market-column-definitions.mjs, libs-server/prop-market-settlement/prop-market-utils.mjs) and several join nfl_games on esbid AND season_year together, so a null silently drops the row from an inner join instead of surfacing as a missing value. Three importers never wrote the column at all — Caesars and BetMGM, fixed 2026-08-23, and BetRivers, dormant since 2024-07-17 and repaired in data but NOT in code — and 210,731 rows sat unreachable through every one of those paths for years while every job reported success.',
+    grain: ['esbid', 'source_id'],
+    rows: async () => {
+      // Aggregated to (esbid, source_id, season_year) before the join rather
+      // than compared per market row: the whole point is one finding per game
+      // per book, and a book that stopped writing the column would otherwise
+      // report every one of that game's markets. The market count rides along so
+      // a finding says how much data the disagreement covers.
+      //
+      // `is distinct from` covers BOTH shapes with one predicate — a season that
+      // was never written (null, the defect that motivated this check) and one
+      // that disagrees with the game (a mis-attribution). Splitting them would
+      // be two rows over one population with one repair.
+      const { rows: found } = await db.raw(
+        `
+        with market_games as (
+          select esbid, source_id, season_year, count(*) as market_count
+          from prop_markets_index
+          where esbid is not null
+          group by 1, 2, 3
+        )
+        select m.esbid, m.source_id::text as source_id, m.market_count
+        from market_games m
+        join nfl_games g on g.esbid = m.esbid
+        where m.season_year is distinct from g.season_year
+        `
+      )
+
+      // The population SCANNED is every market row this check could grade —
+      // rows holding an esbid that resolves to a game — derived from the check's
+      // own join rather than from a bare count of the table, which would report
+      // the 1.57M esbid-less futures rows this check never looks at and would
+      // not move if the graded population collapsed.
+      const {
+        rows: [scanned]
+      } = await db.raw(
+        `
+        select coalesce(sum(m.market_count), 0) as count
+        from (
+          select esbid, source_id, season_year, count(*) as market_count
+          from prop_markets_index
+          where esbid is not null
+          group by 1, 2, 3
+        ) m
+        join nfl_games g on g.esbid = m.esbid
+        `
+      )
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            esbid: row.esbid,
+            source_id: row.source_id,
+            market_count: Number(row.market_count),
+            numerator: 1,
+            denominator
+          }))
+        : [{ esbid: null, source_id: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: season_year is derivable from esbid, so a row disagreeing with its own game is a defect by definition and max_count 0 is a live invariant rather than an aspiration. Measured on production 2026-08-23, immediately after the backfill in db/adhoc/2026-08-23-backfill-prop-markets-index-season-year.sql: 0 disagreeing groups against 1,483,492 graded rows and 3,423 (esbid, source_id, season_year) groups, of which 3,417 matched a game. DEMONSTRATED RED rather than assumed: inverting the predicate to `is not distinct from` on the same production corpus reports 3,417 groups, so the join and the comparison are both live and the zero is a finding rather than a query that could never speak. Before the backfill the shipped predicate reported 210,731 rows across BETRIVERS, DRAFTKINGS, CAESARS, FANDUEL and BETMGM, which is the reading that would constitute a real defect. WHAT IT DELIBERATELY DOES NOT REPORT: the 6 groups (107 rows, 3 esbids) holding an esbid that matches NO nfl_games row — 2024011400, which is the pre-postponement id for the PIT@BUF wild card game that moved to 2024-01-15 and is really 2024011501, plus 2024121900 and 2024122209, whose FanDuel and Caesars event names are transposed against the real 2024121901 and 2024122214. Those rows are invisible to every consumer either way, since each of the paths named in the invariant inner-joins nfl_games, so an orphan is dropped both before and after this check exists — and reporting them would put 6 permanently-open findings in front of the one that is real, which is a baseline wearing an adjudication schema. A GROWING orphan population means esbid resolution has broken and is a different condition with a different owner; this check is silent about it by construction. It is ALSO silent about the 1,575,321 rows carrying no esbid at all, which have no honest source for a season — including 86 FanDuel futures rows whose season was parsed out of a yardage or odds threshold ("1000+ Regular Season Receiving Yards 2024-25" read as season 1000); that parser is fixed in libs-server/fanduel/fanduel-market-types.mjs but those rows are unrepaired, and they are a plausibility question over a population this check cannot join against, not an agreement one.',
+    min_gradeable_units: 1,
+    // Exactly one sentinel row when clean, so the row-count floor is a tautology
+    // and the denominator carries the whole signal. 1,483,492 graded rows
+    // measured 2026-08-23. No code path deletes from prop_markets_index — the
+    // importers upsert and nothing prunes — so the population only grows, and
+    // 1,000,000 leaves about a third of headroom against the reading this floor
+    // exists to catch: an importer stopping, a truncate, or the esbid resolution
+    // breaking wholesale, any of which would otherwise report a clean sentinel
+    // and resolve this check's own findings signal.
+    min_denominator: 1000000,
+    repair_command:
+      'Establish WHICH SIDE moved before rewriting either, and note the two causes need opposite responses. If the market rows carry a null, an importer is not writing the column and the row is merely incomplete: fix the importer first, because a backfill applied while a writer still emits nulls leaves a tail behind it, then re-derive with an UPDATE joining nfl_games on esbid alone, following db/adhoc/2026-08-23-backfill-prop-markets-index-season-year.sql. Scope any such backfill to rows WITH an esbid — a row without one has no honest source for a season, and observed_at is not a substitute because futures markets are observed year-round and would be assigned a season by the accident of when they were scraped. If instead the market rows carry a season that DISAGREES with the game, do not assume the market side is wrong: nfl_games.season_year moving under a correctly-imported market row produces the identical finding, and rewriting the markets would bury a corrected schedule. Check whether the game row was recently amended before touching anything.'
+  },
+
+  {
     check_id: 'player-field-override-drift',
     invariant:
       'Every human verdict in player_field_override equals the value `player` actually holds for that (pid, column_name). This is the only oracle that can see a correction which was RECORDED and never LANDED: two writes on the parent repair task were claimed applied and "verified by read-back" while JORD-MURR-006621 still held 8106 and SEAN-RYAN-027249 still held 5834, and nothing could detect it because the intended values existed only as prose. player_changelog structurally cannot cover this — a write that never happened leaves no changelog row at all.',

@@ -512,17 +512,51 @@ export const get_market_type = ({ marketType, marketName }) => {
   return null
 }
 
+// A season in a page-level market name appears either as a "2024-25" span or as
+// a bare four-digit year, and it CANNOT be read as the first four-digit run in
+// the string. These names lead with a yardage or odds threshold, so "1000+
+// Regular Season Receiving Yards 2024-25" yields 1000 and "Thanksgiving Day
+// Specials: +2000 to +4900" yields 2000. That shape wrote 86 prop_markets_index
+// rows carrying a season of 1000, 1250, 1500, 1900, 2000, 4000, 4500 or 5000
+// before it was found on 2026-08-23; every one of them is a FanDuel futures row
+// with no esbid, so nothing joining nfl_games could contradict it.
+//
+// Prefer the span, which is unambiguous. Otherwise take the first four-digit run
+// that is not part of a THRESHOLD, which is the shape carrying a '+' on one side
+// or the other. Classifying the benign class out by shape beats guessing a
+// plausible year window: a window wide enough to admit real seasons still admits
+// "+2000", which is the exact value that got through.
+const SEASON_SPAN_PATTERN = /\b(\d{4})-\d{2}\b/
+const FOUR_DIGIT_PATTERN = /\b\d{4}\b/g
+
+const is_threshold_token = ({ market_name, index, length }) =>
+  /\+\s*$/.test(market_name.slice(0, index)) ||
+  /^\s*\+/.test(market_name.slice(index + length))
+
 export const get_market_year = ({ marketName, source_event_name }) => {
-  if (!source_event_name) {
-    // likely not a game, check marketName for year
-    const match = marketName.match(/(\d{4})/)
-    if (match) {
-      return Number(match[1])
-    }
-    // No year found in marketName
+  if (source_event_name) {
+    // TODO use source_event_name and event start date to match a game
     return null
   }
 
-  // TODO use source_event_name and event start date to match a game
+  const span_match = marketName.match(SEASON_SPAN_PATTERN)
+  if (span_match) {
+    return Number(span_match[1])
+  }
+
+  for (const match of marketName.matchAll(FOUR_DIGIT_PATTERN)) {
+    if (
+      is_threshold_token({
+        market_name: marketName,
+        index: match.index,
+        length: match[0].length
+      })
+    ) {
+      continue
+    }
+    return Number(match[0])
+  }
+
+  // No year found in marketName
   return null
 }
