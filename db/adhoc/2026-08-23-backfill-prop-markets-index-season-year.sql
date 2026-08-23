@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-23 against league_production
 --
 -- Backfill prop_markets_index.season_year from the game the row is already
 -- linked to.
