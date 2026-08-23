@@ -35,6 +35,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclusive-fields.mjs'
 import { build_nflfastr_game_resolver } from '#libs-server/nflfastr/resolve-nflfastr-game.mjs'
 import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 /**
  * CLI Arguments:
@@ -1209,7 +1210,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    debug.enable(
+    enable_debug_namespaces(
       'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
     )
     const year = argv.year || current_season.year

@@ -10,9 +10,10 @@ import {
   scoring_formats as named_scoring_formats,
   league_formats as named_league_formats
 } from '#libs-shared/league-format-definitions.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-league-formats')
-debug.enable('generate-league-formats')
+enable_debug_namespaces('generate-league-formats')
 
 const generate_scoring_format_title = (scoring_format) => {
   const parts = []

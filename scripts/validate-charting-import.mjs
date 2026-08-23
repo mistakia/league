@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('validate-charting-import')
 
@@ -224,7 +225,7 @@ const main = async () => {
       default: current_season.year
     }).argv
 
-    debug.enable('validate-charting-import')
+    enable_debug_namespaces('validate-charting-import')
 
     await validate_charting_import({ year: argv.year })
   } catch (error) {

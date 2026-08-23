@@ -5,13 +5,14 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('populate-nfl-year-week-timestamp')
-debug.enable('populate-nfl-year-week-timestamp')
+enable_debug_namespaces('populate-nfl-year-week-timestamp')
 
 const populate_nfl_year_week_timestamp = async ({
   year = current_season.year

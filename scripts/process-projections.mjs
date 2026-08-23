@@ -38,11 +38,12 @@ import { process_scoring_format_year } from './process-projections-for-scoring-f
 import { job_types } from '#libs-shared/job-constants.mjs'
 import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
 import { season_net_projection_key } from '#libs-shared/calculate-distributional-baselines.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(dayOfYear)
 
 const log = debug('process-projections')
-debug.enable(
+enable_debug_namespaces(
   'process-projections,project-lineups,simulation:*,calculate-matchup-projection,record-league-format-projection-value-history'
 )
 
@@ -884,7 +885,7 @@ const SIGNAL_DEDUP_FAILURE = `pipeline_failure:${SIGNAL_SOURCE}`
 const SIGNAL_DEDUP_SUCCESS = `pipeline_success:${SIGNAL_SOURCE}`
 
 const main = async () => {
-  debug.enable(
+  enable_debug_namespaces(
     'process-projections,project-lineups,simulation:*,record-league-format-projection-value-history'
   )
   const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'

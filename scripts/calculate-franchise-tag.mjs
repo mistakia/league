@@ -7,13 +7,14 @@ import { groupBy } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('calculate:franchise-tags')
-debug.enable('calculate:franchise-tags')
+enable_debug_namespaces('calculate:franchise-tags')
 
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 

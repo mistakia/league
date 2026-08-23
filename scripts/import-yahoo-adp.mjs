@@ -17,13 +17,14 @@ import {
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-yahoo-adp')
-debug.enable('import-yahoo-adp,update-player,get-player')
+enable_debug_namespaces('import-yahoo-adp,update-player,get-player')
 
 const observed_at = new Date()
 const batch_size = 500

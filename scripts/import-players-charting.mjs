@@ -13,6 +13,7 @@ import {
   extract_players_from_matchups
 } from '#libs-server/charting-data/player-matching.mjs'
 import { preload_active_players } from '#libs-server/player-cache.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-players-charting')
 
@@ -220,7 +221,7 @@ const main = async () => {
         description: 'Season type (REG, POST, PRE)'
       }).argv
 
-    debug.enable(
+    enable_debug_namespaces(
       'import-players-charting,charting-data,charting-data:player-matching'
     )
 

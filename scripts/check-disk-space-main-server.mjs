@@ -4,9 +4,10 @@ import debug from 'debug'
 import { is_main, report_job } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('check-disk-space')
-debug.enable('check-disk-space')
+enable_debug_namespaces('check-disk-space')
 
 const signal_log = create_logger('check-disk-space', { service: 'league-host' })
 

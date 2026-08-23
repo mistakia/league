@@ -5,11 +5,10 @@ import { hideBin } from 'yargs/helpers'
 import is_main from './is-main.mjs'
 import db from '#db'
 import updatePlayer from './update-player.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('set-player-field-override')
-if (!process.env.DEBUG) {
-  debug.enable('set-player-field-override')
-}
+enable_debug_namespaces('set-player-field-override')
 
 /**
  * Record a human verdict about one (pid, column_name) and apply it, as ONE

@@ -13,9 +13,10 @@ import {
 import process_plays from './process-plays.mjs'
 import generate_player_gamelogs from './generate-player-gamelogs.mjs'
 import generate_player_snaps_for_week from './generate-player-snaps.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('process-stats-for-week')
-debug.enable('process-stats-for-week')
+enable_debug_namespaces('process-stats-for-week')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))

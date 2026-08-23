@@ -5,12 +5,13 @@ import debug from 'debug'
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const MFL_USER_AGENT = 'TEFLONMFLCLIENT'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:players:mfl')
-debug.enable('league:player:get,import:players:mfl')
+enable_debug_namespaces('league:player:get,import:players:mfl')
 // const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {

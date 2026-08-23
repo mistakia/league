@@ -14,6 +14,7 @@ import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Configuration constants
 const DEBUG_NAMESPACE = 'filter-prop-pairings'
@@ -27,7 +28,7 @@ const initialize_cli = () => {
 }
 
 const log = debug(DEBUG_NAMESPACE)
-debug.enable(DEBUG_NAMESPACE)
+enable_debug_namespaces(DEBUG_NAMESPACE)
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')

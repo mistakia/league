@@ -12,9 +12,10 @@ import {
 import { fanduel_dfs_session_manager } from '#private/libs-server/fanduel/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-fanduel-dfs-ownership')
-debug.enable(
+enable_debug_namespaces(
   'import-fanduel-dfs-ownership,fanduel:dfs,fanduel-dfs-session-manager'
 )
 

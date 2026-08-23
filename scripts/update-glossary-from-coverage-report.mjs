@@ -7,11 +7,12 @@ import { fileURLToPath } from 'url'
 
 // import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-glossary-from-coverage-report')
-debug.enable('update-glossary-from-coverage-report')
+enable_debug_namespaces('update-glossary-from-coverage-report')
 
 const update_glossary_from_coverage_report = async () => {
   const __dirname = dirname(fileURLToPath(import.meta.url))

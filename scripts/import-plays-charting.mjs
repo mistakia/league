@@ -12,6 +12,7 @@ import play_cache, {
 } from '#libs-server/play-cache.mjs'
 import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
 import { map_charting_play_to_db_fields } from '#libs-server/charting-data/field-mapping.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-plays-charting')
 
@@ -273,7 +274,7 @@ const main = async () => {
         default: false
       }).argv
 
-    debug.enable('import-plays-charting,charting-data')
+    enable_debug_namespaces('import-plays-charting,charting-data')
 
     await import_plays_charting({
       year: argv.year,

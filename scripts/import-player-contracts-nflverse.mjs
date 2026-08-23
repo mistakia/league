@@ -54,13 +54,14 @@ import {
   preload_active_players,
   find_player
 } from '#libs-server/player-cache.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-player-contracts-nflverse')
-debug.enable('import-player-contracts-nflverse,get-player,fetch')
+enable_debug_namespaces('import-player-contracts-nflverse,get-player,fetch')
 
 // Constants
 const NFLVERSE_CONTRACTS_URL =

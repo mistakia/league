@@ -7,6 +7,7 @@ import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import calculate_points from './calculate-points.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -14,14 +15,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-scoring-format-player-gamelogs')
-// Guarded: a module-scope debug.enable REPLACES the enabled namespace set, and
-// ESM evaluates imports before the importing module's body -- so an unguarded
-// call here is clobbered by any script that imports this one, taking its own
-// logging with it. An explicit DEBUG is authoritative; this stays the default
-// for a bare CLI run.
-if (!process.env.DEBUG) {
-  debug.enable('generate-scoring-format-player-gamelogs')
-}
+enable_debug_namespaces('generate-scoring-format-player-gamelogs')
 
 const generate_scoring_format_player_gamelogs = async ({
   scoring_format_id,

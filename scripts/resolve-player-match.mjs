@@ -19,6 +19,7 @@ import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
 import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import { search_players as espn_search_players } from '#libs-server/espn.mjs'
 import { search_players as pfr_search_players } from '#private/libs-server/pro-football-reference.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // NFL Pro search is in private libs - dynamically import to handle missing module
 const get_nfl_pro_search = async () => {
@@ -32,7 +33,9 @@ const get_nfl_pro_search = async () => {
 }
 
 const log = debug('resolve-player-match')
-debug.enable('resolve-player-match,create-player,update-player,merge-player')
+enable_debug_namespaces(
+  'resolve-player-match,create-player,update-player,merge-player'
+)
 
 // File-based cache for Sleeper player data
 const CACHE_DIR = path.join(os.tmpdir(), 'league-player-cache')

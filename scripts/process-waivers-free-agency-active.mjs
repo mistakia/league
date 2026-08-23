@@ -16,10 +16,11 @@ import {
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import apply_nfl_games_current_week_join from '#libs-server/data-views/join-nfl-games-current-week.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('process:waivers:freeagency')
 if (process.env.NODE_ENV !== 'test') {
-  debug.enable('process:waivers:freeagency')
+  enable_debug_namespaces('process:waivers:freeagency')
 }
 
 const process_active_waivers = async ({ daily = false, wid = null } = {}) => {

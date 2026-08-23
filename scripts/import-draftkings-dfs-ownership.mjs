@@ -21,11 +21,12 @@ import {
 } from '#private/libs-server/cloakbrowser.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const exec_file_async = promisify(execFile)
 
 const log = debug('import-draftkings-dfs-ownership')
-debug.enable(
+enable_debug_namespaces(
   'import-draftkings-dfs-ownership,draft-kings:dfs:api,draftkings-session-manager,cloakbrowser'
 )
 

@@ -9,9 +9,10 @@ import {
   named_scoring_formats,
   named_league_formats
 } from '#libs-shared/named-format-catalog.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('verify-format-data-coverage')
-debug.enable('verify-format-data-coverage')
+enable_debug_namespaces('verify-format-data-coverage')
 
 const signal_log = create_logger('verify-format-data-coverage', {
   service: 'league-host'

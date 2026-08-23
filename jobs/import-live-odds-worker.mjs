@@ -8,30 +8,11 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
 import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-live-odds-worker')
 
-// Do NOT call debug.enable() when DEBUG is set. It is tempting to append to it
-// instead of branching, and that does not work: under debug 4.4.3 a call made
-// AFTER a logger already exists can turn that logger OFF but cannot turn it back
-// ON, and every logger in the import graph is already constructed by the time
-// this line runs, because ESM evaluates all imports before the module body.
-// Measured on the production host -- with DEBUG naming insert-prop-markets, the
-// logger reads enabled=true at import and still enabled=false after an enable()
-// call naming it.
-//
-// So the unconditional `debug.enable('import-live-odds-worker')` this used to be
-// did not merely fail to add namespaces, it actively switched off the ones the
-// environment had turned on. That is what kept the prop write path dark: the pm2
-// config named insert-prop-markets, the debug library enabled it at load, and
-// this line switched it off one module body later -- while the worker's own
-// namespace kept logging, which is precisely what made the config look effective.
-//
-// When DEBUG is unset there are no environment-enabled namespaces to protect, so
-// enabling this worker's own is safe and keeps a bare local run useful.
-if (!process.env.DEBUG) {
-  debug.enable('import-live-odds-worker')
-}
+enable_debug_namespaces('import-live-odds-worker')
 
 install_process_handlers({
   service_name: 'import-live-odds-worker',

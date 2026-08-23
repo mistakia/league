@@ -26,6 +26,7 @@ import {
 } from '#libs-server'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const NOTIFICATION_TYPE_RFA_ANNOUNCED = 'rfa_announced'
 
@@ -38,7 +39,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('announce-restricted-free-agent')
-debug.enable('announce-restricted-free-agent')
+enable_debug_namespaces('announce-restricted-free-agent')
 
 const ET_FORMAT = 'YYYY-MM-DD HH:mm:ss [ET]'
 

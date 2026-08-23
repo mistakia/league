@@ -20,6 +20,7 @@ import {
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Auto-process retry window: keep attempting for this many days past extension_deadline_at
 // in case the cron is missed (e.g., outage). The notification marker still
@@ -32,7 +33,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('process-extensions')
-debug.enable('process-extensions')
+enable_debug_namespaces('process-extensions')
 
 const getTransactionType = (tag) => {
   switch (tag) {

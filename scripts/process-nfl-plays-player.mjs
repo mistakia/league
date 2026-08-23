@@ -3,9 +3,10 @@ import debug from 'debug'
 import db from '#db'
 import { is_main, find_player_row, updatePlayer } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('process-nfl-plays-player')
-debug.enable('process-nfl-plays-player,get-player,update-player')
+enable_debug_namespaces('process-nfl-plays-player,get-player,update-player')
 
 const process_nfl_plays_player = async () => {
   const no_player_found = new Set()

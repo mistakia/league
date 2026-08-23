@@ -7,6 +7,7 @@ import config from '#config'
 import db from '#db'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 const IS_PROD = process.env.NODE_ENV === 'production'
@@ -20,13 +21,15 @@ install_process_handlers({
 })
 
 if (IS_DEV) {
-  debug.enable(
+  enable_debug_namespaces(
     'server,api*,notifications*,auction*,scoreboard*,express:*,knex:*'
   )
 } else if (IS_PROD) {
-  debug.enable('api*,notifications*,auction*,scoreboard*,data-view-socket')
+  enable_debug_namespaces(
+    'api*,notifications*,auction*,scoreboard*,data-view-socket'
+  )
 } else {
-  debug.enable('*')
+  enable_debug_namespaces('*')
 }
 
 const main = async () => {

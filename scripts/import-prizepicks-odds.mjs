@@ -15,6 +15,7 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { touchdown_market_types } from '#libs-server/prizepicks.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -22,15 +23,7 @@ const initialize_cli = () => {
 
 const log = debug('import-prizepicks-odds')
 
-// Only claim the namespace set when nothing else has configured one. This module
-// is imported as a library by jobs/import-live-odds-worker.mjs, and a
-// module-scope debug.enable REPLACES the whole set for the importing process --
-// so this line ran during the worker's import phase and, being the LAST of the
-// three importers it loads, silently switched off every namespace the worker's
-// DEBUG had turned on, including insert-prop-markets.
-if (!process.env.DEBUG) {
-  debug.enable('import-prizepicks-odds,get-player,prizepicks')
-}
+enable_debug_namespaces('import-prizepicks-odds,get-player,prizepicks')
 
 const format_market = async ({
   prizepicks_market,

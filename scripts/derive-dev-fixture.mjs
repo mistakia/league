@@ -26,6 +26,7 @@ import { execFile as execFile_cb } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // NOT `import { is_main } from '#libs-server'`. That barrel loads config/, which
 // resolves config-<NODE_ENV>.json and throws on import when NODE_ENV is unset --
@@ -41,7 +42,7 @@ const execFile = (cmd, args, options = {}) =>
   })
 
 const log = debug('derive-dev-fixture')
-debug.enable('derive-dev-fixture')
+enable_debug_namespaces('derive-dev-fixture')
 
 const script_dir = path.dirname(fileURLToPath(import.meta.url))
 const projection_path = path.join(script_dir, 'dev-fixture-projection.json')

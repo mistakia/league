@@ -7,13 +7,14 @@ import { Roster } from '#libs-shared'
 import { current_season, transaction_types } from '#constants'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('check-restricted-free-agency-salary-cap-violations')
-debug.enable('check-restricted-free-agency-salary-cap-violations')
+enable_debug_namespaces('check-restricted-free-agency-salary-cap-violations')
 
 // Constants for better maintainability
 const CURRENT_YEAR = current_season.year

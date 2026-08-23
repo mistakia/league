@@ -43,9 +43,10 @@ import * as cheerio from 'cheerio'
 
 import db from '#db'
 import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('scrape-pfr-coaches')
-debug.enable(
+enable_debug_namespaces(
   'scrape-pfr-coaches,pro-football-reference,pro-football-reference-pages,cloakbrowser'
 )
 

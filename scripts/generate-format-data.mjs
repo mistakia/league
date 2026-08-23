@@ -22,9 +22,10 @@ import {
   process_single_format,
   cleanup_orphaned_data
 } from '#libs-server/format-data-generation/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug(SCRIPT_CONFIG.log_name)
-debug.enable(SCRIPT_CONFIG.log_name)
+enable_debug_namespaces(SCRIPT_CONFIG.log_name)
 
 /**
  * Generate core format definitions

@@ -20,13 +20,14 @@ import {
   get_league_format,
   record_league_format_projection_value_history
 } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('process-projections-for-league-format')
-debug.enable(
+enable_debug_namespaces(
   'process-projections-for-league-format,record-league-format-projection-value-history'
 )
 

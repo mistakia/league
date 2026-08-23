@@ -14,6 +14,7 @@ import {
   index_by_pid
 } from '#libs-server/composite-market-value/utils.mjs'
 import { run_cmv_script } from '#libs-server/composite-market-value/script-runner.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Nightly per-(source, format_category, date) linear calibration of native
 // source values onto the KTC axis. OLS regression on the overlap set; falls
@@ -26,7 +27,7 @@ import { run_cmv_script } from '#libs-server/composite-market-value/script-runne
 // v2 follow-up evaluates isotonic / rank-percentile.
 
 const log = debug('calibrate-composite-market-value-sources')
-debug.enable('calibrate-composite-market-value-sources')
+enable_debug_namespaces('calibrate-composite-market-value-sources')
 
 const SOURCES = { KTC: 1, ADP: 2, RANKINGS: 3, PROPS: 4 }
 const OVERLAP_FLOOR = 30

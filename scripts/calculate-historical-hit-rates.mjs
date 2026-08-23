@@ -15,6 +15,7 @@ import { groupBy } from '#libs-shared'
 import { current_season, stat_countable_play_types } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -56,7 +57,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('calculate-historical-hit-rates')
-debug.enable('calculate-historical-hit-rates')
+enable_debug_namespaces('calculate-historical-hit-rates')
 
 const calculate_hit_rate = (hits, total) => {
   return total > 0 ? hits / total : 0

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import db from '#db'
 import { convert_to_csv } from '#libs-shared'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -15,7 +16,7 @@ const data_path = path.join(__dirname, '../data')
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('export-data-nfl-players')
-debug.enable('export-data-nfl-players')
+enable_debug_namespaces('export-data-nfl-players')
 
 const export_data_nfl_players = async () => {
   const data = await db.transaction(async (trx) => {

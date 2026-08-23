@@ -8,9 +8,10 @@ import {
   get_market_types_by_data_source,
   HANDLER_TYPES
 } from '#libs-server/prop-market-settlement/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('analyze-market-type-coverage')
-debug.enable('analyze-market-type-coverage')
+enable_debug_namespaces('analyze-market-type-coverage')
 
 const analyze_market_type_coverage = async () => {
   log('Analyzing market type coverage')

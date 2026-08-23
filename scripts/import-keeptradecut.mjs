@@ -21,13 +21,14 @@ import {
   liquidity_observed_at
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-keeptradecut')
-debug.enable('import-keeptradecut,get-player,update-player,fetch')
+enable_debug_namespaces('import-keeptradecut,get-player,update-player,fetch')
 
 const KTC_PICK_SLOT = { Early: 1, Mid: 2, Late: 3 }
 const KTC_PICK_ROUND = { '1st': 1, '2nd': 2, '3rd': 3, '4th': 4 }

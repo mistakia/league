@@ -15,9 +15,10 @@ import { active_roster_slots, starting_lineup_slots } from '#constants'
 
 import compute_roster_slot_metrics from '#libs-server/league-team-player-seasonlogs/compute-roster-slot-metrics.mjs'
 import compute_optimal_metrics from '#libs-server/league-team-player-seasonlogs/compute-optimal-metrics.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-league-team-player-seasonlogs')
-debug.enable('generate-league-team-player-seasonlogs')
+enable_debug_namespaces('generate-league-team-player-seasonlogs')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))

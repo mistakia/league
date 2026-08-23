@@ -7,9 +7,10 @@ import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import generate_roster_asset_lineage from './generate-roster-asset-lineage.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('refresh-roster-asset-lineage')
-debug.enable('refresh-roster-asset-lineage')
+enable_debug_namespaces('refresh-roster-asset-lineage')
 
 const initialize_cli = () =>
   yargs(hideBin(process.argv))

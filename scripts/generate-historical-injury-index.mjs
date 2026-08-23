@@ -30,9 +30,10 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { rebuild_sql } from './historical-injury-index-sql.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-historical-injury-index')
-debug.enable('generate-historical-injury-index')
+enable_debug_namespaces('generate-historical-injury-index')
 
 const BATCH_SIZE = 500
 const PARTITION_LOWER_BOUND = 2009

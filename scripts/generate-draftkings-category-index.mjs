@@ -7,11 +7,12 @@ import path, { dirname } from 'path'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-draftkings-category-index')
-debug.enable('generate-draftkings-category-index')
+enable_debug_namespaces('generate-draftkings-category-index')
 
 const generate_draftkings_category_index = async () => {
   // build index of draft king categories

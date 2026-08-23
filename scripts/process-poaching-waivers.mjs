@@ -16,6 +16,7 @@ import {
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -23,7 +24,7 @@ const initialize_cli = () => {
 
 const log = debug('process:waivers:poach')
 if (process.env.NODE_ENV !== 'test') {
-  debug.enable('process:waivers:poach')
+  enable_debug_namespaces('process:waivers:poach')
 }
 
 const run = async ({ daily = false } = {}) => {

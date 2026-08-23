@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { getYardlineInfoFromString } from '#libs-shared'
 import { is_main, readCSV, getPlay, format_starting_hash } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -137,7 +138,7 @@ const run = async ({ dry = false, filepath } = {}) => {
 
 const main = async () => {
   const argv = initialize_cli()
-  debug.enable('import-charted-plays-from-csv')
+  enable_debug_namespaces('import-charted-plays-from-csv')
   let error
   try {
     await run({ dry: argv.dry, filepath: argv.path })

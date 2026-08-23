@@ -13,13 +13,14 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-draftkings-salaries')
-debug.enable('import-draftkings-salaries,draft-kings,update-player')
+enable_debug_namespaces('import-draftkings-salaries,draft-kings,update-player')
 
 const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
   await preload_active_players({

@@ -23,20 +23,16 @@ import {
 } from '#libs-server'
 import { is_implausible_entry_age } from '#libs-server/player-era.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-players-sleeper')
-// Guarded because a bare debug.enable REPLACES the namespace set for the whole
-// process: importing this module from a spec would clobber every other spec's
-// logging for the rest of the mocha run. Matches libs-server/create-player.mjs.
-if (!process.env.DEBUG) {
-  debug.enable(
-    'import-players-sleeper,update-player,create-player,get-player,fetch,resolve-canonical-player'
-  )
-}
+enable_debug_namespaces(
+  'import-players-sleeper,update-player,create-player,get-player,fetch,resolve-canonical-player'
+)
 const timestamp = Math.round(Date.now() / 1000)
 
 // The Sleeper /players/nfl endpoint is a monotonically growing historical dump

@@ -7,10 +7,11 @@ import { fileURLToPath } from 'url'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('nfl-plays-coverage-report')
-debug.enable('nfl-plays-coverage-report')
+enable_debug_namespaces('nfl-plays-coverage-report')
 
 const nfl_plays_coverage_report = async () => {
   // get a list of columns in the nfl_plays table

@@ -40,9 +40,10 @@ import {
   readCSV
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-nfl-gamebook-starters')
-debug.enable('import-nfl-gamebook-starters')
+enable_debug_namespaces('import-nfl-gamebook-starters')
 
 const stream_pipeline = promisify(pipeline)
 const RESOLUTION_FLOOR_PER_GAME = 0.95

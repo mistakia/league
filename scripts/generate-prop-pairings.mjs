@@ -8,6 +8,7 @@ import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -15,7 +16,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-prop-pairings')
-debug.enable('generate-prop-pairings')
+enable_debug_namespaces('generate-prop-pairings')
 
 const get_prop_pairing_id = (props) => {
   const sorted_props = props

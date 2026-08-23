@@ -4,6 +4,7 @@ import db from '#db'
 import { current_season } from '#constants'
 import { getLeague, is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('set-draft-pick-number')
 
@@ -104,7 +105,7 @@ const set_draft_pick_number = async ({ lid }) => {
 }
 
 const main = async () => {
-  debug.enable('set-draft-pick-number')
+  enable_debug_namespaces('set-draft-pick-number')
   let error
   try {
     await set_draft_pick_number()

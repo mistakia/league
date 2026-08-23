@@ -10,13 +10,14 @@ import { hideBin } from 'yargs/helpers'
 
 import { is_main } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('analyze-draftkings-wagers')
-debug.enable('analyze-draftkings-wagers')
+enable_debug_namespaces('analyze-draftkings-wagers')
 
 /**
  * Update the count of wagers lost by a specific number of legs.

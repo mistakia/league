@@ -1,7 +1,6 @@
 /* global describe it before */
 
 import MockDate from 'mockdate'
-import debug from 'debug'
 import fs from 'node:fs'
 import path from 'node:path'
 import * as chai from 'chai'
@@ -13,6 +12,7 @@ import {
   process_expected_query
 } from '#libs-server'
 import { compare_queries } from './utils/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -106,7 +106,7 @@ console.log(`\nLoaded ${data_view_test_queries.length} JSON test cases\n`)
 describe('Data View', () => {
   before(() => {
     MockDate.reset()
-    debug.enable('data-views')
+    enable_debug_namespaces('data-views')
   })
 
   describe('Data View Test Queries', () => {

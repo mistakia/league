@@ -48,9 +48,10 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { validate_response_shape } from './import-nflverse-injuries.validate.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-nflverse-injuries')
-debug.enable('import-nflverse-injuries')
+enable_debug_namespaces('import-nflverse-injuries')
 
 const BATCH_SIZE = 500
 

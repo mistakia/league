@@ -50,9 +50,10 @@ import db from '#db'
 import { is_main } from '#libs-server'
 import { system_view_ids_set } from '#libs-shared/view-organization/system-data-view-ids.mjs'
 import { AUTO_TAG_VOCABULARY_SET } from '#libs-shared/view-organization/auto-tag-vocabulary.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-data-view-llm-tags')
-debug.enable('generate-data-view-llm-tags')
+enable_debug_namespaces('generate-data-view-llm-tags')
 
 const KEBAB_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const MAX_TAG_LENGTH = 64

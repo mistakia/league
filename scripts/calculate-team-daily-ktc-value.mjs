@@ -16,13 +16,14 @@ import {
 import { derive_league_format_is_superflex } from '#libs-server/derive-league-format-is-superflex.mjs'
 import { build_pick_holding_value_index } from '#libs-server/league-pick-holding-values.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('calculate-team-daily-ktc-value')
-debug.enable('calculate-team-daily-ktc-value')
+enable_debug_namespaces('calculate-team-daily-ktc-value')
 
 const max_day_interval = 5
 

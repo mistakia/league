@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import { is_main, generateSchedule, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-schedule')
 
@@ -23,7 +24,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    debug.enable('generate-schedule')
+    enable_debug_namespaces('generate-schedule')
 
     const lid = argv.lid
     if (!lid) {

@@ -6,11 +6,12 @@ import db from '#db'
 // import config from '#config'
 import { nfl_team_abbreviations } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('seed-nfl-teams')
-debug.enable('seed-nfl-teams')
+enable_debug_namespaces('seed-nfl-teams')
 
 const seed_nfl_teams = async () => {
   // get all tables with pid columns

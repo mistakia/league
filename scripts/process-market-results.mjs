@@ -23,6 +23,7 @@ import {
   fetch_markets_for_games
 } from '#libs-server/prop-market-settlement/prop-market-utils.mjs'
 import { update_market_settlement_status } from './update-market-settlement-status.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -555,7 +556,7 @@ const main = async () => {
 
   // Enable debug logging when not showing help
   if (!process.argv.includes('--help')) {
-    debug.enable('process-market-results,selection-result-writer')
+    enable_debug_namespaces('process-market-results,selection-result-writer')
   }
 
   let processing_error = null
@@ -612,7 +613,7 @@ export const process_market_results = async ({
   dry_run = false,
   verbose = false
 } = {}) => {
-  debug.enable('process-market-results,selection-result-writer')
+  enable_debug_namespaces('process-market-results,selection-result-writer')
 
   const config = {
     year: year || current_season.year,

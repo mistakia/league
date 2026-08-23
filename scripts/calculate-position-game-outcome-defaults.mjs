@@ -6,10 +6,11 @@ import db from '#db'
 import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-position-game-outcome-defaults')
-debug.enable('calculate-position-game-outcome-defaults')
+enable_debug_namespaces('calculate-position-game-outcome-defaults')
 
 // Minimum players for a valid position/archetype default
 const MIN_PLAYERS_FOR_DEFAULT = 5

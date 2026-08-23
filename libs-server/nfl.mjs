@@ -4,14 +4,10 @@ import db from '#db'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
 import { fetch_with_retry } from './proxy-manager.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('nfl')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('nfl')
-}
+enable_debug_namespaces('nfl')
 
 const fetch_json_with_context = async (url, response) => {
   const body = await response.text()

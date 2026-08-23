@@ -11,6 +11,7 @@ import {
   is_main,
   update_test_file
 } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('update-test-queries')
 
@@ -108,6 +109,6 @@ const parse_arguments = () => {
 }
 
 if (is_main(import.meta.url)) {
-  debug.enable('update-test-queries')
+  enable_debug_namespaces('update-test-queries')
   main().catch(console.error)
 }

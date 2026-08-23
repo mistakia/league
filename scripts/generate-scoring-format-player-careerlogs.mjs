@@ -6,6 +6,7 @@ import db from '#db'
 import { sum, groupBy } from '#libs-shared'
 import { fantasy_positions } from '#constants'
 import { is_main, getLeague } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 const initialize_cli = () => {
@@ -13,7 +14,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-scoring-format-player-careerlogs')
-debug.enable('generate-scoring-format-player-careerlogs')
+enable_debug_namespaces('generate-scoring-format-player-careerlogs')
 
 const generate_scoring_format_player_careerlogs = async ({
   scoring_format_id,

@@ -6,9 +6,10 @@ import db from '#db'
 import { current_season, player_tag_types } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-rosters')
-debug.enable('generate-rosters')
+enable_debug_namespaces('generate-rosters')
 
 // How close to `regular_season_start` the forward slice may be materialized.
 // The job runs nightly, so anything above one day is margin; a week is enough

@@ -11,9 +11,10 @@ import build_tag_board, {
   contract_key,
   resolve_rookie_class_year
 } from '#libs-server/tag-board/build-tag-board.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate:tag-board')
-debug.enable('generate:tag-board')
+enable_debug_namespaces('generate:tag-board')
 
 const DYNASTY_ASSET_TYPE_PLAYER = 1
 

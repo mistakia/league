@@ -18,10 +18,11 @@ import { hideBin } from 'yargs/helpers'
 
 import { is_main, getLeague, batch_insert } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('generate-nfl-team-seasonlogs')
-debug.enable('generate-nfl-team-seasonlogs')
+enable_debug_namespaces('generate-nfl-team-seasonlogs')
 
 const passing_stats = [
   'pass_rating',

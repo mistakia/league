@@ -7,13 +7,14 @@ import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+enable_debug_namespaces('import:projections,get-player')
 const week = Math.max(current_season.week, 1)
 
 const generated_at = new Date()

@@ -12,9 +12,10 @@ import {
   emit_signal
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-dst-market-projections')
-debug.enable('generate-dst-market-projections')
+enable_debug_namespaces('generate-dst-market-projections')
 
 const initialize_cli = () => yargs(hideBin(process.argv)).argv
 

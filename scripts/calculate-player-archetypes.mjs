@@ -7,10 +7,11 @@ import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { ARCHETYPE_THRESHOLDS } from '#libs-shared/simulation/correlation-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-player-archetypes')
-debug.enable('calculate-player-archetypes')
+enable_debug_namespaces('calculate-player-archetypes')
 
 /**
  * Determine QB archetype based on rushing rate.

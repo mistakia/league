@@ -51,6 +51,7 @@ import {
 } from '#libs-server/player-cache.mjs'
 
 import validate_response_shape from './import-players-nflverse.validate.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () =>
   yargs(hideBin(process.argv))
@@ -58,7 +59,7 @@ const initialize_cli = () =>
     .option('dry-run', { type: 'boolean', default: false }).argv
 
 const log = debug('import-players-nflverse')
-debug.enable('import-players-nflverse,get-player,fetch')
+enable_debug_namespaces('import-players-nflverse,get-player,fetch')
 
 const NFLVERSE_PLAYERS_URL =
   'https://github.com/nflverse/nflverse-data/releases/download/players/players.parquet'

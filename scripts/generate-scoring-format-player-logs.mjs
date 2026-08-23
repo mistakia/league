@@ -9,13 +9,14 @@ import { is_main } from '#libs-server'
 import generate_scoring_format_player_gamelogs from './generate-scoring-format-player-gamelogs.mjs'
 import generate_scoring_format_player_seasonlogs from './generate-scoring-format-player-seasonlogs.mjs'
 import generate_scoring_format_player_careerlogs from './generate-scoring-format-player-careerlogs.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('generate-scoring-format-player-logs')
-debug.enable(
+enable_debug_namespaces(
   'generate-scoring-format-player-logs,generate-scoring-format-player-gamelogs,generate-scoring-format-player-seasonlogs,generate-scoring-format-player-careerlogs'
 )
 

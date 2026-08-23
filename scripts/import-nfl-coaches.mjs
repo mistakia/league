@@ -9,9 +9,10 @@ import path from 'path'
 import db from '#db'
 import { is_main } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-nfl-coaches')
-debug.enable('import-nfl-coaches')
+enable_debug_namespaces('import-nfl-coaches')
 
 const SOURCE_BASE =
   'https://raw.githubusercontent.com/samhoppen/NFL_public/refs/heads/main/data'

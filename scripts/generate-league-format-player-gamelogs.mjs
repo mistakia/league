@@ -7,6 +7,7 @@ import { current_season } from '#constants'
 import { is_main, getLeague, get_league_format } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import calculate_points_added from './calculate-points-added.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -14,7 +15,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-league-format-player-gamelogs')
-debug.enable('generate-league-format-player-gamelogs')
+enable_debug_namespaces('generate-league-format-player-gamelogs')
 
 const generate_league_format_player_gamelogs = async ({
   league_format_id,

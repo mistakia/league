@@ -7,13 +7,14 @@ import { Roster, calculateStandings } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, getRoster, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('process-matchups')
-debug.enable('process-matchups,calculate-standings')
+enable_debug_namespaces('process-matchups,calculate-standings')
 
 const run = async ({ lid = 1, year = current_season.year }) => {
   const league = await getLeague({ lid, year })

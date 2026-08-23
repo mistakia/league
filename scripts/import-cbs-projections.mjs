@@ -13,13 +13,14 @@ import {
 } from '#libs-server'
 import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+enable_debug_namespaces('import:projections,get-player')
 
 const year = current_season.year
 const generated_at = new Date()

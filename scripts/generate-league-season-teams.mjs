@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -12,7 +13,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-league-season-teams')
-debug.enable('generate-league-season-teams')
+enable_debug_namespaces('generate-league-season-teams')
 
 /**
  * Generate team records for a new season with draft order based on previous year standings

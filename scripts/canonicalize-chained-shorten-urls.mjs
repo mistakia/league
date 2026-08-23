@@ -6,9 +6,10 @@ import db from '#db'
 import { is_main } from '#libs-server'
 import { get_blake2b_hash } from '#libs-shared'
 import resolve_short_url_chain from '#libs-shared/resolve-short-url-chain.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('canonicalize-chained-shorten-urls')
-debug.enable('canonicalize-chained-shorten-urls')
+enable_debug_namespaces('canonicalize-chained-shorten-urls')
 
 const argv = yargs(hideBin(process.argv))
   .option('dry-run', {

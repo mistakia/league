@@ -6,6 +6,7 @@ import db from '#db'
 import { current_season } from '#constants'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main, batch_insert, selection_result } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -13,7 +14,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('calculate-weekly-market-selections-analysis')
-debug.enable('calculate-weekly-market-selections-analysis')
+enable_debug_namespaces('calculate-weekly-market-selections-analysis')
 
 const prop_desc = {
   [player_prop_types.GAME_ALT_PASSING_YARDS]: 'pass',

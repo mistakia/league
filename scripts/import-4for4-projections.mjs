@@ -12,9 +12,10 @@ import {
 import { current_season, external_data_sources } from '#constants'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import:projections')
-debug.enable('import:projections,get-player,4for4')
+enable_debug_namespaces('import:projections,get-player,4for4')
 
 const generated_at = new Date()
 

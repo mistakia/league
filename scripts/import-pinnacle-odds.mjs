@@ -22,6 +22,7 @@ import {
 } from '#libs-server/player-cache.mjs'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Constants
 const CONCURRENCY_LIMIT = 10
@@ -104,13 +105,7 @@ const initialize_cli = () => {
 
 const log = debug('import-pinnacle-odds')
 
-// See the note in import-prizepicks-odds.mjs: a module-scope debug.enable
-// REPLACES the namespace set for the whole process, and this module is imported
-// as a library by jobs/import-live-odds-worker.mjs. Defer to an explicit DEBUG
-// so the worker's configuration survives.
-if (!process.env.DEBUG) {
-  debug.enable(DEBUG_MODULES)
-}
+enable_debug_namespaces(DEBUG_MODULES)
 
 /**
  * Formats the source event name based on matchup type

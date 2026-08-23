@@ -22,6 +22,7 @@ import {
   print_fanatics_sets_if_requested,
   handle_markdown_outputs
 } from '#libs-server/wager-analysis/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('analyze-wagers')
 
@@ -303,7 +304,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     if (!argv.quiet) {
-      debug.enable('analyze-wagers')
+      enable_debug_namespaces('analyze-wagers')
     }
     await analyze_wagers({
       fanduel_filename: argv.fanduel,

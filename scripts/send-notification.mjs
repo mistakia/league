@@ -3,6 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { getLeague, sendNotifications, is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('send-notification')
 
@@ -34,7 +35,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    debug.enable('send-notification')
+    enable_debug_namespaces('send-notification')
     await run({
       message: argv.message,
       dry: argv.dry

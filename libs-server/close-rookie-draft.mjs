@@ -1,11 +1,10 @@
 import debug from 'debug'
 
 import db from '#db'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('close-rookie-draft')
-if (!process.env.DEBUG) {
-  debug.enable('close-rookie-draft')
-}
+enable_debug_namespaces('close-rookie-draft')
 
 /**
  * Closes a league's rookie draft for one year: records when it ended and

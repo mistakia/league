@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main, getRoster, processRelease } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -12,7 +13,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('decommission-team')
-debug.enable('decommission-team')
+enable_debug_namespaces('decommission-team')
 
 const decommission_team = async ({ year = current_season.year, team_id }) => {
   if (!team_id) {

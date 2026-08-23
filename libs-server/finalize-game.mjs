@@ -16,14 +16,10 @@ import generate_player_gamelogs from '#scripts/generate-player-gamelogs.mjs'
 import generate_player_snaps_for_week from '#scripts/generate-player-snaps.mjs'
 import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('finalize-game')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('finalize-game')
-}
+enable_debug_namespaces('finalize-game')
 
 /**
  * Finalize a single game after END_GAME detection

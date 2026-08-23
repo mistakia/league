@@ -1,14 +1,10 @@
 import debug from 'debug'
 
 import is_main from './is-main.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-player-id')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('generate-player-id')
-}
+enable_debug_namespaces('generate-player-id')
 
 // Player ID (pid) format:
 //

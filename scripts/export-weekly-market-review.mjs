@@ -9,9 +9,10 @@ import path from 'path'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('export-weekly-market-review')
-debug.enable('export-weekly-market-review')
+enable_debug_namespaces('export-weekly-market-review')
 
 /**
  * Format query results to markdown table

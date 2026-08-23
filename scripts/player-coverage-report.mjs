@@ -5,9 +5,10 @@ import { fileURLToPath } from 'url'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('player-coverage-report')
-debug.enable('player-coverage-report')
+enable_debug_namespaces('player-coverage-report')
 
 const player_coverage_report = async ({ table_name = 'player' }) => {
   // get a list of columns in the players table

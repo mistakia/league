@@ -6,10 +6,11 @@ import db from '#db'
 import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-player-variance')
-debug.enable('calculate-player-variance')
+enable_debug_namespaces('calculate-player-variance')
 
 /**
  * Calculate variance statistics for each player from historical gamelogs.

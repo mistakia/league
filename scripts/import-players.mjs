@@ -11,9 +11,10 @@ import {
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import:nfl:players')
-debug.enable('import:nfl:players,get-player,update-player')
+enable_debug_namespaces('import:nfl:players,get-player,update-player')
 
 const run = async () => {
   const missing = []

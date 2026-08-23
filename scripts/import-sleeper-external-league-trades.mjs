@@ -13,9 +13,10 @@ import {
   parse_sleeper_user_leagues,
   sleeper_transaction_buckets_to_fetch
 } from '#libs-server/external-league-trades/sleeper-trade-parser.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-sleeper-external-league-trades')
-debug.enable('import-sleeper-external-league-trades')
+enable_debug_namespaces('import-sleeper-external-league-trades')
 
 const argv = yargs(hideBin(process.argv)).argv
 

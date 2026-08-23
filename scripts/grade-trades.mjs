@@ -5,9 +5,10 @@ import { hideBin } from 'yargs/helpers'
 import { is_main } from '#libs-server'
 import grade_trades from '#libs-server/trade-review/grade-trades.mjs'
 import format_trade_asset_label from '#libs-shared/format-trade-asset-label.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('grade-trades')
-debug.enable('grade-trades')
+enable_debug_namespaces('grade-trades')
 
 // Calibrated against league 1's net_value_proceeds distribution, which is not
 // the distribution the old default was set against: the figure it grades is now

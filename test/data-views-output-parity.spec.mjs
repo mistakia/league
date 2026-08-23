@@ -1,10 +1,10 @@
 /* global describe it before */
 
 import MockDate from 'mockdate'
-import debug from 'debug'
 
 import { get_data_view_results_query } from '#libs-server'
 import { compare_queries } from './utils/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Parity audit: legacy `rate_type` params and native `output` params should
 // produce byte-identical SQL after request-time normalization. Seeded across
@@ -94,7 +94,7 @@ const rate_type_fixtures = [
 describe('Data View output parity', () => {
   before(() => {
     MockDate.reset()
-    debug.enable('data-views')
+    enable_debug_namespaces('data-views')
   })
 
   // The rate_type -> output retrofit (sub-bullet #11) and the Outer SELECT

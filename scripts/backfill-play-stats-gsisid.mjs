@@ -3,11 +3,10 @@ import db from '#db'
 import { is_main } from '#libs-server'
 import { play_stat_name_matches_player } from '#libs-server/resolve-play-stat-player.mjs'
 import { player_could_have_played } from '#libs-server/player-era.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('backfill-play-stats-gsisid')
-if (!process.env.DEBUG) {
-  debug.enable('backfill-play-stats-gsisid')
-}
+enable_debug_namespaces('backfill-play-stats-gsisid')
 
 /**
  * Fill missing `nfl_play_stats.gsis_player_id` by matching the feed's

@@ -14,13 +14,16 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-fantasypros-dynasty')
-debug.enable('import-fantasypros-dynasty,get-player,fantasypros,fetch')
+enable_debug_namespaces(
+  'import-fantasypros-dynasty,get-player,fantasypros,fetch'
+)
 
 const observed_at = new Date()
 

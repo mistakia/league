@@ -7,14 +7,10 @@ import {
 } from '#libs-shared/bookmaker-constants.mjs'
 import db from '#db'
 import * as cache from './cache.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('fanatics')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('fanatics')
-}
+enable_debug_namespaces('fanatics')
 
 const get_fanatics_config = async () => {
   const config_row = await db('config')

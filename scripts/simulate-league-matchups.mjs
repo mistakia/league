@@ -6,6 +6,7 @@ import db from '#db'
 import { is_main, report_job, simulation } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv))
   .option('lid', {
@@ -54,7 +55,7 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h').argv
 
 const log = debug('simulate-league-matchups')
-debug.enable('simulate-league-matchups,simulation:*')
+enable_debug_namespaces('simulate-league-matchups,simulation:*')
 
 const format_percentage = (value) => {
   if (value === null || value === undefined) return 'N/A'

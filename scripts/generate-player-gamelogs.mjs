@@ -53,6 +53,7 @@ import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.
 import { player_could_have_played } from '#libs-server/player-era.mjs'
 import { create_snap_gamelog_team_resolver } from '#libs-server/resolve-snap-gamelog-team.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return (
@@ -80,12 +81,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-player-gamelogs')
-// Guarded because `debug.enable` REPLACES the enabled namespace set rather than
-// adding to it, so an unguarded call at module scope silences every other
-// namespace in any process that imports this file -- including the spec run.
-if (!process.env.DEBUG) {
-  debug.enable('generate-player-gamelogs')
-}
+enable_debug_namespaces('generate-player-gamelogs')
 
 // Database field constraints
 const DB_CONSTRAINTS = {

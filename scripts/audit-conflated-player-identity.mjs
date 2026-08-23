@@ -7,9 +7,10 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main } from '#libs-server'
 import { MINIMUM_PLAUSIBLE_AGE_IN_SEASON } from '#libs-server/player-era.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('audit-conflated-player-identity')
-debug.enable('audit-conflated-player-identity')
+enable_debug_namespaces('audit-conflated-player-identity')
 
 // A conflated player row merges two different people — most often a father and
 // a son sharing a name. Each field is individually plausible; the defect is only

@@ -45,9 +45,10 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { validate_response_shape } from './import-nflverse-weekly-rosters.validate.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-nflverse-weekly-rosters')
-debug.enable('import-nflverse-weekly-rosters')
+enable_debug_namespaces('import-nflverse-weekly-rosters')
 
 const SOURCE_SENTINEL = 'nflverse-weekly-rosters'
 const BATCH_SIZE = 500

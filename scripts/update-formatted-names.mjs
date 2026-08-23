@@ -4,9 +4,10 @@ import db from '#db'
 import { format_player_name } from '#libs-shared'
 import { is_main, updatePlayer, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('update-formatted-names')
-debug.enable('update-formatted-names')
+enable_debug_namespaces('update-formatted-names')
 
 const updateFormattedNames = async () => {
   const player_rows = await db('player')

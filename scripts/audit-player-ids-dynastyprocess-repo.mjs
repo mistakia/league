@@ -11,13 +11,14 @@ import db from '#db'
 
 import { is_main, readCSV, updatePlayer } from '#libs-server'
 import { format_player_name, fixTeam } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('audit-player-ids-dynastyprocess-repo')
-debug.enable('audit-player-ids-dynastyprocess-repo,update-player')
+enable_debug_namespaces('audit-player-ids-dynastyprocess-repo,update-player')
 
 const rl = readline.createInterface({
   input: process.stdin,

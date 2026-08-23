@@ -2,9 +2,10 @@ import debug from 'debug'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('calculate-play-yardline')
-debug.enable('calculate-play-yardline')
+enable_debug_namespaces('calculate-play-yardline')
 
 const calculate_play_yardline = async () => {
   const timestamp = new Date()

@@ -23,9 +23,10 @@ import {
 import populate_nfl_year_week_timestamp from './populate-nfl-year-week-timestamp.mjs'
 import populate_qb_pid from './populate-qb-pid.mjs'
 import { build_snap_roster_by_esbid } from '#libs-server/play-enrichment/build-snap-roster.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('process-plays')
-debug.enable('process-plays')
+enable_debug_namespaces('process-plays')
 
 const ENRICHED_FIELD_NAMES = [
   'offense_nfl_team',

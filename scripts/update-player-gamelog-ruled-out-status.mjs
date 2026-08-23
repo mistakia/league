@@ -50,13 +50,14 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { get_target_week } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('update-player-gamelog-ruled-out-status')
-debug.enable('update-player-gamelog-ruled-out-status')
+enable_debug_namespaces('update-player-gamelog-ruled-out-status')
 
 // ----------------------------
 // Helper Functions

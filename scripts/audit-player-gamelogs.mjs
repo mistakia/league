@@ -8,6 +8,7 @@ import { current_season, fantasy_positions } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import * as pfr from '#private/libs-server/pro-football-reference.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -24,7 +25,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('audit-player-gamelogs')
-debug.enable('audit-player-gamelogs,pro-football-reference')
+enable_debug_namespaces('audit-player-gamelogs,pro-football-reference')
 
 const format_gamelog = ({
   passing_attempts = 0,

@@ -7,13 +7,14 @@ import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
 import { is_main } from '#libs-server'
 import { getGameDayAbbreviation } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 dayjs.extend(timezone)
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-nfl-games')
-debug.enable('process-nfl-games')
+enable_debug_namespaces('process-nfl-games')
 
 const processNflGames = async () => {
   const games = await db('nfl_games')

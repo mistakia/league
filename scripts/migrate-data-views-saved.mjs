@@ -7,9 +7,10 @@ import debug from 'debug'
 import db from '#db'
 import { is_main } from '#libs-server'
 import { migrate_table_state } from '#libs-shared/data-views-saved-view-migration.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('migrate-data-views-saved')
-debug.enable('migrate-data-views-saved')
+enable_debug_namespaces('migrate-data-views-saved')
 
 const TABLES = [
   { name: 'user_data_views', pk: 'view_id' },

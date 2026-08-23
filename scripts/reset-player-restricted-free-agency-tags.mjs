@@ -5,6 +5,7 @@ import { current_season, player_tag_types } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('reset-player-restricted-free-agency-tags')
 
@@ -91,7 +92,7 @@ const run = async () => {
 }
 
 const main = async () => {
-  debug.enable('reset-player-restricted-free-agency-tags')
+  enable_debug_namespaces('reset-player-restricted-free-agency-tags')
 
   let error
   try {

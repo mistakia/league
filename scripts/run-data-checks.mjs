@@ -104,11 +104,10 @@ import {
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import registry from '#db/checks/registry.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('run-data-checks')
-if (!process.env.DEBUG) {
-  debug.enable('run-data-checks')
-}
+enable_debug_namespaces('run-data-checks')
 
 const SERVICE = 'league-host'
 

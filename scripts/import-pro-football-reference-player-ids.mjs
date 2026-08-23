@@ -6,6 +6,7 @@ import db from '#db'
 import { format_player_name } from '#libs-shared'
 import { is_main } from '#libs-server'
 import * as pfr from '#private/libs-server/pro-football-reference.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -13,7 +14,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-pfr-player-ids')
-debug.enable('import-pfr-player-ids,pro-football-reference')
+enable_debug_namespaces('import-pfr-player-ids,pro-football-reference')
 
 const import_pro_football_reference_player_ids = async ({
   ignore_cache = false

@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -44,7 +45,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-invite-code')
-debug.enable('generate-invite-code')
+enable_debug_namespaces('generate-invite-code')
 
 const generate_random_code = () => {
   // Generate a random 20-character code using alphanumeric characters

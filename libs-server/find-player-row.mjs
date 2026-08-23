@@ -7,14 +7,10 @@ import { fixTeam, format_player_name, Errors, team_aliases } from '#libs-shared'
 import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import { player_nfl_status } from '#constants'
 import db from '#db'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('get-player')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('get-player')
-}
+enable_debug_namespaces('get-player')
 
 // Match tolerance for a position lookup. Every value here is a legal stored
 // value: these lists are matched against primary/secondary/tertiary_position,

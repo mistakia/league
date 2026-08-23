@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import { is_main } from '#libs-server'
 import config from '#config'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -18,7 +19,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-jwt-token')
-debug.enable('generate-jwt-token')
+enable_debug_namespaces('generate-jwt-token')
 
 const script = async ({ user_id }) => {
   // Create payload with userId

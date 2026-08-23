@@ -18,13 +18,14 @@ import {
 } from '#libs-server'
 import { preload_plays, find_play } from '#libs-server/play-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-ftn-charting-plays')
-debug.enable('import-ftn-charting-plays,update-play,play-cache')
+enable_debug_namespaces('import-ftn-charting-plays,update-play,play-cache')
 
 const format_number = (num) => {
   if (num === null || num === undefined || num === '') {

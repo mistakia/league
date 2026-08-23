@@ -3,9 +3,10 @@ import debug from 'debug'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('populate-opening-days')
-debug.enable('populate-opening-days')
+enable_debug_namespaces('populate-opening-days')
 
 // Refresh the `opening_days` materialized view. The view is derived purely from
 // the NFL schedule (min REG game date per year over nfl_games), so its coverage

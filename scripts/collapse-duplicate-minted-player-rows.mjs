@@ -7,9 +7,10 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, updatePlayer } from '#libs-server'
 import { short_name_key } from '#libs-server/player-identity-collision-oracle.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('collapse-duplicate-minted-player-rows')
-debug.enable('collapse-duplicate-minted-player-rows,update-player')
+enable_debug_namespaces('collapse-duplicate-minted-player-rows,update-player')
 
 /*
   Collapses a player row that repair-missing-player-gsis-ids MINTED onto the row

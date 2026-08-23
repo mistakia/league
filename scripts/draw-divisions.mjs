@@ -8,6 +8,7 @@ import { current_season } from '#constants'
 import { chunk_mutating } from '#libs-shared/chunk.mjs'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Draw a league's Divisions under Article V Section 13.
 //
@@ -34,9 +35,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 // and cli/league/resolve-draw.mjs; the records live in data/league/draws/.
 
 const log = debug('draw-divisions')
-if (!process.env.DEBUG) {
-  debug.enable('draw-divisions')
-}
+enable_debug_namespaces('draw-divisions')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv

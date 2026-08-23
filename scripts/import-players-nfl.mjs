@@ -16,13 +16,14 @@ import {
 import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { validate_response_shape } from './import-players-nfl.validate.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-players-nfl')
-debug.enable(
+enable_debug_namespaces(
   'import-players-nfl,nfl-pro,update-player,create-player,get-player'
 )
 

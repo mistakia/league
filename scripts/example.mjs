@@ -4,10 +4,11 @@ import debug from 'debug'
 
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('template')
-debug.enable('template')
+enable_debug_namespaces('template')
 
 const script = async () => {}
 const main = async () => {

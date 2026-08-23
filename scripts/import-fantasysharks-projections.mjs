@@ -12,13 +12,14 @@ import {
   check_projections_index_floor
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import:projections')
-debug.enable('import:projections,get-player,fetch')
+enable_debug_namespaces('import:projections,get-player,fetch')
 
 const run = async ({ season = false, dry = false } = {}) => {
   const URL = season

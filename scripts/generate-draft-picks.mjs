@@ -6,6 +6,7 @@ import db from '#db'
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -62,7 +63,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
 }
 
 const main = async () => {
-  debug.enable('generate-draft-picks')
+  enable_debug_namespaces('generate-draft-picks')
   let error
   try {
     const argv = initialize_cli()

@@ -22,13 +22,16 @@ import {
   player_game_prop_types,
   team_game_market_types
 } from '#libs-shared/bookmaker-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-fanatics-odds')
-debug.enable('import-fanatics-odds,get-player,insert-prop-markets,fanatics')
+enable_debug_namespaces(
+  'import-fanatics-odds,get-player,insert-prop-markets,fanatics'
+)
 
 const format_market = async ({
   market,

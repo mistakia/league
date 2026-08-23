@@ -8,13 +8,14 @@ import handle_season_args_for_script from '#libs-server/handle-season-args-for-s
 import generate_league_format_player_gamelogs from './generate-league-format-player-gamelogs.mjs'
 import generate_league_format_player_seasonlogs from './generate-league-format-player-seasonlogs.mjs'
 import generate_league_format_player_careerlogs from './generate-league-format-player-careerlogs.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('generate-league-format-player-logs')
-debug.enable(
+enable_debug_namespaces(
   'generate-league-format-player-logs,generate-league-format-player-gamelogs,generate-league-format-player-seasonlogs,generate-league-format-player-careerlogs'
 )
 

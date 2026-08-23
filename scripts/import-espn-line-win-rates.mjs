@@ -13,10 +13,11 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-espn-line-win-rates')
-debug.enable('import-espn-line-win-rates,get-player')
+enable_debug_namespaces('import-espn-line-win-rates,get-player')
 
 const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   const result = {

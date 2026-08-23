@@ -21,13 +21,16 @@ import {
   find_player
 } from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-nfl-games-nflverse')
-debug.enable('import-nfl-games-nflverse,update-nfl-game,get-player,fetch')
+enable_debug_namespaces(
+  'import-nfl-games-nflverse,update-nfl-game,get-player,fetch'
+)
 
 const format_number = (num) => {
   if (num === null || num === undefined || num === '') {

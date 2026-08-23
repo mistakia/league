@@ -1,4 +1,3 @@
-import debug from 'debug'
 import chalk from 'chalk'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -6,6 +5,7 @@ import { Table } from 'console-table-printer'
 
 import { is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -61,7 +61,7 @@ const calculateRookiePickValue = async ({ year }) => {
 }
 
 if (is_main(import.meta.url)) {
-  debug.enable('script:calculate-points-added')
+  enable_debug_namespaces('script:calculate-points-added')
   const main = async () => {
     try {
       const argv = initialize_cli()

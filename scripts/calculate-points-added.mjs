@@ -14,13 +14,14 @@ import {
   calculateBaselines
 } from '#libs-shared'
 import { fantasy_positions } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('calculate-points-added')
-debug.enable('calculate-points-added')
+enable_debug_namespaces('calculate-points-added')
 
 const calculate_points_added = async ({
   year,
@@ -297,7 +298,7 @@ const main = async () => {
 }
 
 if (is_main(import.meta.url)) {
-  debug.enable('calculate-points-added')
+  enable_debug_namespaces('calculate-points-added')
   main()
 }
 

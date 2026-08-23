@@ -10,6 +10,7 @@ import {
   format_sql,
   resolve_table_state_from_short_url
 } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('debug-data-view')
 
@@ -20,7 +21,7 @@ const debug_data_view = async ({
 }) => {
   try {
     if (debug_mode) {
-      debug.enable('debug-data-view')
+      enable_debug_namespaces('debug-data-view')
       log('Debug mode enabled')
     }
 

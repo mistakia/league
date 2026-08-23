@@ -9,9 +9,10 @@ import {
   table_wide_collision_sql,
   external_id_attach_sql
 } from '#libs-server/player-identity-collision-oracle.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('calibrate-player-identity-collision-oracle')
-debug.enable('calibrate-player-identity-collision-oracle')
+enable_debug_namespaces('calibrate-player-identity-collision-oracle')
 
 /*
   Calibrates and falsifies the collision oracle, and reports its baselines.

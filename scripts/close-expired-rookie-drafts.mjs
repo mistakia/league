@@ -12,11 +12,10 @@ import {
 import { getDraftDates } from '#libs-shared'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('close-expired-rookie-drafts')
-if (!process.env.DEBUG) {
-  debug.enable('close-expired-rookie-drafts')
-}
+enable_debug_namespaces('close-expired-rookie-drafts')
 
 /**
  * Closes any rookie draft whose window has elapsed while picks were still

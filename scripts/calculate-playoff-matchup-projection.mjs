@@ -5,13 +5,14 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('calculate-playoff-matchup-projection')
-debug.enable('calculate-playoff-matchup-projection')
+enable_debug_namespaces('calculate-playoff-matchup-projection')
 
 const calculate_playoff_matchup_projection = async ({
   year = current_season.year,

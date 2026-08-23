@@ -8,20 +8,14 @@ import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import debug from 'debug'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('calculate-points')
-// Guarded: a module-scope debug.enable REPLACES the enabled namespace set, and
-// ESM evaluates imports before the importing module's body -- so an unguarded
-// call here is clobbered by any script that imports this one, taking its own
-// logging with it. An explicit DEBUG is authoritative; this stays the default
-// for a bare CLI run.
-if (!process.env.DEBUG) {
-  debug.enable('calculate-points')
-}
+enable_debug_namespaces('calculate-points')
 
 // Per-play yardage arrays for big-play bonuses.
 //
@@ -280,7 +274,7 @@ const main = async () => {
 
 // If this script is run directly, execute the main function
 if (is_main(import.meta.url)) {
-  debug.enable('calculate-points')
+  enable_debug_namespaces('calculate-points')
   main()
 }
 

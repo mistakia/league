@@ -7,6 +7,7 @@ import db from '#db'
 import { current_season } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // parseSync() rather than `.argv`: the two return the same object for a config
 // with no async middleware, but `.argv` is TYPED as a union with a Promise, so
@@ -17,7 +18,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('create-season-partitions')
-debug.enable('create-season-partitions')
+enable_debug_namespaces('create-season-partitions')
 
 // partition_column: the range-partition key column. Every table here is now
 // partitioned by season_year -- verified against pg_get_partkeydef. player_gamelogs

@@ -5,10 +5,11 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_year } from '#constants'
 import { get_super_priority_status, is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('analyze:super-priority')
 if (process.env.NODE_ENV !== 'test') {
-  debug.enable('analyze:super-priority')
+  enable_debug_namespaces('analyze:super-priority')
 }
 
 const run = async ({

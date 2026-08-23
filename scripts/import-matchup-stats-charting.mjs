@@ -10,22 +10,13 @@ import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
 import { match_charting_player } from '#libs-server/charting-data/player-matching.mjs'
 import { preload_active_players } from '#libs-server/player-cache.mjs'
 import grade_matchup_import_run from '#libs-server/charting-data/grade-matchup-import-run.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-matchup-stats-charting')
 
-// A debug.enable at module scope REPLACES the enabled namespace set for the
-// whole process, and ESM evaluates imports before the importing module's body,
-// so an unguarded call here would clobber whatever an entry point set. Guarding
-// on DEBUG makes an explicit environment value authoritative and leaves this
-// list as the default for a bare CLI run. Deferring it into main() instead is
-// the documented way to silence the script entirely -- a logger constructed at
-// module scope is not reliably re-enabled afterwards -- which is why every
-// outcome line below goes through console.log rather than this logger.
-if (!process.env.DEBUG) {
-  debug.enable(
-    'import-matchup-stats-charting,charting-data,charting-data:player-matching'
-  )
-}
+enable_debug_namespaces(
+  'import-matchup-stats-charting,charting-data,charting-data:player-matching'
+)
 
 // Charting data only exists once a game has been played, and a game still in
 // progress is charted partially or not at all. Selecting one would count as a

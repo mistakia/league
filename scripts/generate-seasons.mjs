@@ -4,9 +4,10 @@ import db from '#db'
 import { current_season } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-seasons')
-debug.enable('generate-seasons')
+enable_debug_namespaces('generate-seasons')
 
 const generate_seasons = async () => {
   // get all hosted leagues that are not archived

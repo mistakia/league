@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(utc)
@@ -16,7 +17,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-season-dates')
-debug.enable('generate-season-dates')
+enable_debug_namespaces('generate-season-dates')
 
 const generateSeasonDates = async ({ year = current_season.year } = {}) => {
   const result = {

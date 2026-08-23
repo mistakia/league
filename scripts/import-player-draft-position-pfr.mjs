@@ -8,6 +8,7 @@ import { is_main, updatePlayer, find_player_row } from '#libs-server'
 import { parse_draft_html } from '#libs-server/parse-pfr-draft-html.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const signal_log = create_logger('import-player-draft-position-pfr', {
@@ -21,7 +22,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-player-draft-position-pfr')
-debug.enable(
+enable_debug_namespaces(
   'import-player-draft-position-pfr,update-player,get-player,pro-football-reference,pro-football-reference-pages,cloakbrowser'
 )
 

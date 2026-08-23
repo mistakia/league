@@ -10,6 +10,7 @@ import readline from 'readline'
 
 import { is_main } from '#libs-server'
 import { assert_destructive_target_values_allowed } from '#db/guard-destructive-target.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Increase maxBuffer size to handle larger outputs
 const exec = (cmd, options = {}) =>
@@ -19,7 +20,7 @@ const exec = (cmd, options = {}) =>
   })
 
 const log = debug('restore-backup')
-debug.enable('restore-backup')
+enable_debug_namespaces('restore-backup')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))

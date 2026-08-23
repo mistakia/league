@@ -7,9 +7,10 @@ import { get_half } from '#libs-server/play-enrichment/fixed-drive-enrichment.mj
 import { is_administrative_play } from '#libs-server/play-enrichment/enrichment-helpers.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('audit-drive-seq-coherence')
-debug.enable('audit-drive-seq-coherence')
+enable_debug_namespaces('audit-drive-seq-coherence')
 
 const signal_log = create_logger('audit-drive-seq-coherence', {
   service: 'league-host'

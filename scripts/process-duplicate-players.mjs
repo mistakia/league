@@ -10,6 +10,7 @@ import {
   levenshtein_distance,
   ngram_distance
 } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -17,7 +18,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('process-duplicate-players')
-debug.enable('process-duplicate-players,update-player,merge-player')
+enable_debug_namespaces('process-duplicate-players,update-player,merge-player')
 
 // Module-level cache for nickname sets (loaded in main)
 let nickname_sets = []

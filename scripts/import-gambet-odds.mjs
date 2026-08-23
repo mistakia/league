@@ -18,13 +18,14 @@ import {
 } from '#libs-server'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-gambet-odds')
-debug.enable('import-gambet-odds,get-player,gambet')
+enable_debug_namespaces('import-gambet-odds,get-player,gambet')
 
 const exclude_words = [
   'total',

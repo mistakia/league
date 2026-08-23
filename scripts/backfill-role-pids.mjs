@@ -14,6 +14,7 @@ import {
   get_play_stats,
   get_completed_games
 } from '#libs-server/play-stats-utils.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Surgical backfill for the psr/trg family-gate regression (Phase B, commit
 // 01dece89). Re-runs ONLY player-identification enrichment and persists ONLY
@@ -22,7 +23,7 @@ import {
 // process-plays reprocess would introduce. See
 // libs-server/play-enrichment/player-identification-enrichment.mjs.
 const log = debug('backfill-role-pids')
-debug.enable('backfill-role-pids')
+enable_debug_namespaces('backfill-role-pids')
 
 const ROLE_COLS = [
   'passer_gsis_player_id',

@@ -8,9 +8,10 @@ import { current_season } from '#constants'
 import format_player_name from '#libs-shared/format-player-name.mjs'
 import { is_main, getLeague } from '#libs-server'
 import process_release from '#libs-server/process-release.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('release-player')
-debug.enable('release-player')
+enable_debug_namespaces('release-player')
 
 // Configuration
 const ADMIN_USER_ID = 1 // Could be made configurable via environment variable

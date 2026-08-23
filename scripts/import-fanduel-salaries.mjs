@@ -16,13 +16,16 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-fanduel-salaries')
-debug.enable('import-fanduel-salaries,get-player,fanduel,update-player')
+enable_debug_namespaces(
+  'import-fanduel-salaries,get-player,fanduel,update-player'
+)
 
 const import_fanduel_salaries = async ({
   dry_run = false,

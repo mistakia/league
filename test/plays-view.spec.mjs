@@ -1,17 +1,17 @@
 /* global describe it before */
 
 import * as chai from 'chai'
-import debug from 'debug'
 
 import { get_plays_view_results_query } from '#libs-server'
 import { current_season } from '#constants'
 import { compare_queries } from './utils/index.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const { expect } = chai
 
 describe('Plays View', () => {
   before(() => {
-    debug.enable('plays-view')
+    enable_debug_namespaces('plays-view')
   })
 
   describe('browse mode', () => {

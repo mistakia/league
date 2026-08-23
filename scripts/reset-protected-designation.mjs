@@ -16,9 +16,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('reset-protected-designation')
-debug.enable('reset-protected-designation')
+enable_debug_namespaces('reset-protected-designation')
 
 const NOTIFICATION_TYPE_PROTECTIONS_EXPIRED =
   'practice_squad_protections_expired'

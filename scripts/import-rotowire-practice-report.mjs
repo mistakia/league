@@ -11,9 +11,10 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import:practice-report')
-debug.enable('import:practice-report,get-player,fetch')
+enable_debug_namespaces('import:practice-report,get-player,fetch')
 
 const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
 const { week, year } = current_season

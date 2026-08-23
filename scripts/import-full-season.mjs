@@ -97,6 +97,7 @@ import export_data_player_gamelogs from './export-data-player-gamelogs.mjs'
 import export_data_league_matchups from './export-data-league-matchups.mjs'
 import export_data_league_playoffs from './export-data-league-playoffs.mjs'
 import export_data_league_team_seasonlogs from './export-data-league-team-seasonlogs.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Private scripts - import with graceful fallback
 let import_players_ngs = null
@@ -167,7 +168,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPORT_OUTPUT_DIR = path.resolve(__dirname, '..', 'tmp')
 
 const log = debug('import-full-season')
-debug.enable(
+enable_debug_namespaces(
   'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,import-plays-charting,import-matchup-stats-charting,import-players-charting,charting-data,process-plays,generate-player-gamelogs,audit-player-gamelogs'
 )
 

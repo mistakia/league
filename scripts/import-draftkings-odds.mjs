@@ -33,6 +33,7 @@ import {
   reset_tracking_write_stats
 } from '#libs-server/draftkings/index.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const signal_log = create_logger('import-draftkings-odds', {
   service: 'league-imports'
@@ -124,13 +125,7 @@ const initialize_cli = () => {
 
 const log = debug('import-draft-kings')
 
-// See the note in import-prizepicks-odds.mjs: a module-scope debug.enable
-// REPLACES the namespace set for the whole process, and this module is imported
-// as a library by jobs/import-live-odds-worker.mjs. Defer to an explicit DEBUG
-// so the worker's configuration survives.
-if (!process.env.DEBUG) {
-  debug.enable(DEBUG_MODULES.join(','))
-}
+enable_debug_namespaces(DEBUG_MODULES.join(','))
 
 // Helper functions moved to separate modules
 

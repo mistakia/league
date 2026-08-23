@@ -37,9 +37,12 @@ import {
   readCSV
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('backfill-players-from-nflverse-weekly-rosters')
-debug.enable('backfill-players-from-nflverse-weekly-rosters,create-player')
+enable_debug_namespaces(
+  'backfill-players-from-nflverse-weekly-rosters,create-player'
+)
 
 const stream_pipeline = promisify(pipeline)
 

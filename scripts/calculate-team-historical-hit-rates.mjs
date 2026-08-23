@@ -9,9 +9,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { team_game_market_types } from '#libs-shared/bookmaker-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('calculate-team-historical-hit-rates')
-debug.enable('calculate-team-historical-hit-rates')
+enable_debug_namespaces('calculate-team-historical-hit-rates')
 
 const TEAM_YARDAGE_MARKET_TYPES = [
   team_game_market_types.GAME_TEAM_TOTAL_YARDS,

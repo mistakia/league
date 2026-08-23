@@ -7,13 +7,14 @@ import { Roster, calculatePoints } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('process-playoffs')
-debug.enable('process-playoffs')
+enable_debug_namespaces('process-playoffs')
 
 const process_playoffs = async ({ lid, year }) => {
   // skip if processing current season and it is before the wildcard round

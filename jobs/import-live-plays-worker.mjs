@@ -6,18 +6,11 @@ import { wait, report_run_outcome, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-live-plays-worker')
 
-// See the long note in import-live-odds-worker.mjs. An unconditional
-// debug.enable() here would switch OFF whatever namespaces DEBUG had turned on,
-// because under debug 4.4.3 a call made after the loggers exist can disable but
-// not enable, and ESM has already evaluated every import by this point. Latent
-// on this worker rather than live, since nothing has needed a second namespace
-// on it yet, but it is the same trap waiting for whoever adds one.
-if (!process.env.DEBUG) {
-  debug.enable('import-live-plays-worker')
-}
+enable_debug_namespaces('import-live-plays-worker')
 
 install_process_handlers({
   service_name: 'import-live-plays-worker',

@@ -26,6 +26,7 @@ import {
   normalize_game_clock,
   normalize_yardline
 } from '#libs-server/play-enum-utils.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-plays-nfl-v1')
 
@@ -774,7 +775,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    debug.enable('import-plays-nfl-v1,nfl,play-enum-utils')
+    enable_debug_namespaces('import-plays-nfl-v1,nfl,play-enum-utils')
     const dry_run = argv.dry
 
     let result

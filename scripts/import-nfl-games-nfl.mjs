@@ -15,6 +15,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(timezone)
 
@@ -23,7 +24,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-nfl-games-nfl')
-debug.enable('import-nfl-games-nfl,nfl')
+enable_debug_namespaces('import-nfl-games-nfl,nfl')
 
 const format = (item) => {
   const datetime = item.time ? dayjs(item.time).tz('America/New_York') : null

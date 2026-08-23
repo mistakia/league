@@ -15,9 +15,12 @@ import {
   external_id_attach_sql,
   birth_date_attach_sql
 } from '#libs-server/player-identity-collision-oracle.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('repair-missing-player-gsis-ids')
-debug.enable('repair-missing-player-gsis-ids,create-player,update-player')
+enable_debug_namespaces(
+  'repair-missing-player-gsis-ids,create-player,update-player'
+)
 
 /*
   Closes the gap where a gsis id appears in the stat ledger with no `player`

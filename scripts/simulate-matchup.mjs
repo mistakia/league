@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, simulation } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv))
   .option('lid', {
@@ -50,7 +51,7 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h').argv
 
 const log = debug('simulate-matchup')
-debug.enable('simulate-matchup')
+enable_debug_namespaces('simulate-matchup')
 
 const format_percentage = (value) => {
   return `${(value * 100).toFixed(1)}%`

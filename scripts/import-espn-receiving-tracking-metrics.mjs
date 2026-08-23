@@ -7,13 +7,14 @@ import os from 'os'
 import db from '#db'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-espn-receiving-tracking-metrics')
-debug.enable('import-espn-receiving-tracking-metrics')
+enable_debug_namespaces('import-espn-receiving-tracking-metrics')
 
 const import_espn_receiving_tracking_metrics = async ({
   year = null,

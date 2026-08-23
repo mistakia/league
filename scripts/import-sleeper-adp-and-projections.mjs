@@ -17,6 +17,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
 
 import db from '#db'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -25,7 +26,7 @@ const initialize_cli = () => {
 const log = debug('import-sleeper-adp-and-projections')
 const generated_at = new Date()
 const BATCH_SIZE = 500
-debug.enable('import-sleeper-adp-and-projections,sleeper,get-player')
+enable_debug_namespaces('import-sleeper-adp-and-projections,sleeper,get-player')
 
 const format_adp = (projection_item) => ({
   adp_std: projection_item.stats.adp_std,

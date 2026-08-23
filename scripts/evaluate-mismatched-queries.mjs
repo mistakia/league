@@ -18,6 +18,7 @@ import {
   format_sql,
   normalize_sql_for_comparison
 } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('evaluate-mismatched-queries')
 
@@ -1120,6 +1121,6 @@ const list_available_tests = (test_cases) => {
 }
 
 if (is_main(import.meta.url)) {
-  debug.enable('evaluate-mismatched-queries')
+  enable_debug_namespaces('evaluate-mismatched-queries')
   main().catch(console.error)
 }

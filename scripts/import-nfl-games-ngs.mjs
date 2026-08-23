@@ -11,6 +11,7 @@ import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(timezone)
 
@@ -19,7 +20,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-games-ngs')
-debug.enable('import-games-ngs')
+enable_debug_namespaces('import-games-ngs')
 
 const getWeek = (week, week_type) => {
   switch (week_type) {

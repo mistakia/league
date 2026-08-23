@@ -15,9 +15,10 @@ import {
   SALARY_ATTRIBUTION_RULE,
   TERMINATED_BY
 } from '#libs-server/roster-asset-lineage/constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-roster-asset-lineage')
-debug.enable('generate-roster-asset-lineage')
+enable_debug_namespaces('generate-roster-asset-lineage')
 
 const initialize_cli = () =>
   yargs(hideBin(process.argv))

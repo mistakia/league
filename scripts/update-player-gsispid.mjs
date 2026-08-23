@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, updatePlayer } from '#libs-server'
 import { decode_smart_player_id } from '#libs-server/resolve-play-stat-player.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 const initialize_cli = () => {
@@ -12,9 +13,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('update-player-gsispid')
-if (!process.env.DEBUG) {
-  debug.enable('update-player-gsispid,update-player')
-}
+enable_debug_namespaces('update-player-gsispid,update-player')
 
 /**
  * Refuse a `smart_player_id` that encodes a DIFFERENT player's gsis id.

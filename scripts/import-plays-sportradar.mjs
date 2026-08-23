@@ -57,6 +57,7 @@ import {
   print_collision_summary,
   should_track_collision
 } from '#libs-server/sportradar/sportradar-reporting.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(timezone)
 
@@ -1542,7 +1543,9 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    debug.enable('import-plays-sportradar,sportradar,play-enum-utils')
+    enable_debug_namespaces(
+      'import-plays-sportradar,sportradar,play-enum-utils'
+    )
     const year = argv.year ? parseInt(argv.year) : null
     const week = argv.week ? parseInt(argv.week) : null
     const game_id = argv['game-id'] || null

@@ -5,11 +5,12 @@ import debug from 'debug'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-league-careerlogs')
-debug.enable('calculate-league-careerlogs')
+enable_debug_namespaces('calculate-league-careerlogs')
 
 const calculate_league_careerlogs = async ({ lid }) => {
   log(`Calculating careerlogs for league ${lid}`)

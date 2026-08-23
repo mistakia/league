@@ -25,13 +25,14 @@ import { get_target_week } from '#libs-shared'
 
 import process_stats_for_week from './process-stats-for-week.mjs'
 import process_matchups from './process-matchups.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('update-stats-and-process-matchups')
-debug.enable('update-stats-and-process-matchups')
+enable_debug_namespaces('update-stats-and-process-matchups')
 
 // ----------------------------
 // Helper Functions

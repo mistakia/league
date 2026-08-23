@@ -11,6 +11,7 @@ import db from '#db'
 import { fixTeam, Errors, format_standard_selection_id } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, fanduel, find_player_row, batch_insert } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(isBetween)
@@ -20,7 +21,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-fanduel-wagers')
-debug.enable('import-fanduel-wagers,fanduel')
+enable_debug_namespaces('import-fanduel-wagers,fanduel')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')

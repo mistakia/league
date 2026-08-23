@@ -19,6 +19,7 @@ import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
 import calculate_team_historical_hit_rates from '#scripts/calculate-team-historical-hit-rates.mjs'
 import finalize_season from '#private/scripts/finalize-season.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('finalize-week')
 
@@ -278,7 +279,7 @@ const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
 }
 
 const main = async () => {
-  debug.enable('finalize-week')
+  enable_debug_namespaces('finalize-week')
   let error
   let finalize_result
 

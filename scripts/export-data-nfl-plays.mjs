@@ -9,6 +9,7 @@ import db from '#db'
 import { convert_to_csv } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -16,7 +17,7 @@ const data_path = path.join(__dirname, '../data')
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('export-data-nfl-plays')
-debug.enable('export-data-nfl-plays')
+enable_debug_namespaces('export-data-nfl-plays')
 const nfl_play_fields = [
   'esbid',
   'play_id',

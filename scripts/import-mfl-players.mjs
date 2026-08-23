@@ -6,6 +6,7 @@ import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const MFL_USER_AGENT = 'TEFLONMFLCLIENT'
 
@@ -14,7 +15,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import:players:mfl')
-debug.enable('league:player:get,import:players:mfl,get-player')
+enable_debug_namespaces('league:player:get,import:players:mfl,get-player')
 
 const run = async ({ dry = false } = {}) => {
   const missing = []

@@ -8,13 +8,14 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, draftkings, get_selection_id_from_source } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-draftkings-wagers')
-debug.enable('import-draftkings-wagers,draft-kings')
+enable_debug_namespaces('import-draftkings-wagers,draft-kings')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')

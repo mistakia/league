@@ -6,6 +6,7 @@ import db from '#db'
 import { Roster, optimizeLineup } from '#libs-shared'
 import { current_season, roster_slot_types } from '#constants'
 import { getLeague, getRoster, getPlayers, is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -243,7 +244,7 @@ const project_lineups = async (lid) => {
 }
 
 const main = async () => {
-  debug.enable('project-lineups')
+  enable_debug_namespaces('project-lineups')
   let error
   try {
     const argv = initialize_cli()

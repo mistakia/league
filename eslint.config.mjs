@@ -6,6 +6,7 @@ import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
 import noUnproxiedFetchWithRetry from './eslint-rules/no-unproxied-fetch-with-retry.mjs'
 import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
+import noBareDebugEnable from './eslint-rules/no-bare-debug-enable.mjs'
 
 // One `local` plugin holding every rule in eslint-rules/. Registering a second
 // plugin object under the same name in a second config block would silently
@@ -13,7 +14,8 @@ import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
 const local_rules = {
   rules: {
     ...noUnproxiedFetchWithRetry.rules,
-    ...noBareContainerJsdoc.rules
+    ...noBareContainerJsdoc.rules,
+    ...noBareDebugEnable.rules
   }
 }
 
@@ -65,6 +67,7 @@ export default [
     rules: {
       'local/no-unproxied-fetch-with-retry': 'error',
       'local/no-bare-container-jsdoc': 'error',
+      'local/no-bare-debug-enable': 'error',
       camelcase: ['off'],
       curly: ['off'],
       indent: ['off'],
@@ -98,6 +101,20 @@ export default [
     }
   },
   {
+    // db/adhoc is written once, run once and NEVER edited; db/archive is
+    // tooling whose cluster closed, kept for reference and not run
+    // (db/README.md). Both are frozen history, so a rule that would require
+    // editing them is asking for churn against files whose whole value is that
+    // they still read as what was run. The three call sites in here are
+    // one-shot scripts nothing imports, so the namespace race cannot reach
+    // them anyway.
+    files: ['db/adhoc/**/*.mjs', 'db/archive/**/*.mjs'],
+
+    rules: {
+      'local/no-bare-debug-enable': 'off'
+    }
+  },
+  {
     files: ['test/**/*.mjs', 'test/**/*.js'],
 
     rules: {
@@ -126,13 +143,22 @@ export default [
     },
 
     rules: {
-      // Deliberately ONLY the proxy-safety rule. no-bare-container-jsdoc is a
-      // ratchet against a committed baseline, and CI never checks this
-      // submodule out -- so a baseline entry for a private/ file reads as
-      // "allowance 2, actual 0" on the runner and fails the gate for a file
-      // that was never fixed and is merely absent. That turned master red on
-      // 32f05d60f. The submodule's own repo is where such a rule would belong.
-      'local/no-unproxied-fetch-with-retry': 'error'
+      // The two BASELINE-FREE rules, and only those. What decides eligibility
+      // here is not importance, it is whether the rule can fail over a file it
+      // cannot see: CI never checks this submodule out, so on the runner
+      // private/ is an empty directory.
+      //
+      // A stateless rule is safe under that -- zero files means zero reports,
+      // and the check is merely narrower on the runner than it is locally.
+      // no-bare-container-jsdoc is not, because it ratchets against a committed
+      // baseline: an entry for a private/ file reads as "allowance 2, actual 0"
+      // on the runner and fails the gate for a file that was never fixed and is
+      // merely absent. That turned master red on 32f05d60f.
+      //
+      // no-bare-debug-enable is deliberately baseline-free for this reason
+      // among others -- see the header of eslint-rules/no-bare-debug-enable.mjs.
+      'local/no-unproxied-fetch-with-retry': 'error',
+      'local/no-bare-debug-enable': 'error'
     }
   }
 ]

@@ -4,11 +4,12 @@ import debug from 'debug'
 
 import db from '#db'
 import { is_main, espn, find_player_row, updatePlayer } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-espn')
-debug.enable('import-players-espn,espn,get-player,update-player')
+enable_debug_namespaces('import-players-espn,espn,get-player,update-player')
 
 const importPlayersESPN = async () => {
   let changeCount = 0

@@ -8,14 +8,10 @@ import { normalize_position } from '#libs-shared/constants/position-constants.mj
 import is_main from './is-main.mjs'
 import db from '#db'
 import record_changelog from './record-changelog.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('update-player')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('update-player')
-}
+enable_debug_namespaces('update-player')
 
 const excluded_props = ['pid', 'formatted_name']
 

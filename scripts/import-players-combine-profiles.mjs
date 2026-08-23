@@ -11,6 +11,7 @@ import {
   updatePlayer,
   nfl
 } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -18,7 +19,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-players-combine-profiles')
-debug.enable(
+enable_debug_namespaces(
   'import-players-combine-profiles,get-player,create-player,update-player,nfl'
 )
 

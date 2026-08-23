@@ -17,18 +17,14 @@ import {
 } from '#libs-server'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-betrivers-odds')
-// Guarded because this module is importable (test/betrivers-market-season-year
-// .spec.mjs): an unguarded module-scope enable REPLACES the namespace set for
-// whatever process loads it, and an explicit DEBUG must stay authoritative.
-if (!process.env.DEBUG) {
-  debug.enable('import-betrivers-odds,insert-prop-markets')
-}
+enable_debug_namespaces('import-betrivers-odds,insert-prop-markets')
 
 export const format_market = async ({
   betrivers_market,

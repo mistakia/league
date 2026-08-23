@@ -1,14 +1,10 @@
 import debug from 'debug'
 
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('betonline')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('betonline')
-}
+enable_debug_namespaces('betonline')
 
 const DIGITAL_SPORTS_TECH_API_URL = 'https://bv2.digitalsportstech.com/api'
 

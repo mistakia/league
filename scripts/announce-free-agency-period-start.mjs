@@ -18,6 +18,7 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { get_free_agent_period } from '#libs-shared'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Initialize dayjs plugins
 dayjs.extend(utc)
@@ -38,7 +39,7 @@ const TIMEZONE_AMERICA_NEW_YORK = 'America/New_York'
 
 // Debug logging
 const log = debug('announce-free-agency-period-start')
-debug.enable('announce-free-agency-period-start')
+enable_debug_namespaces('announce-free-agency-period-start')
 
 /**
  * Initialize CLI argument parsing

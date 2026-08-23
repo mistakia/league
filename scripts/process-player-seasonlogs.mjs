@@ -8,13 +8,14 @@ import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('process-player-seasonlogs')
-debug.enable('process-player-seasonlogs')
+enable_debug_namespaces('process-player-seasonlogs')
 
 const processPlayerSeasonlogs = async ({
   year = current_season.year,

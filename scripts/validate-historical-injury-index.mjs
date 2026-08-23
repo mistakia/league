@@ -19,9 +19,10 @@ import debug from 'debug'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('validate-historical-injury-index')
-debug.enable('validate-historical-injury-index')
+enable_debug_namespaces('validate-historical-injury-index')
 
 const validate = async () => {
   const failures = []

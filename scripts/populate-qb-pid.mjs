@@ -5,13 +5,14 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('populate-qb-pid')
-debug.enable('populate-qb-pid')
+enable_debug_namespaces('populate-qb-pid')
 
 // nfl_snaps data available from 2016 onward
 const SNAP_DATA_START_YEAR = 2016

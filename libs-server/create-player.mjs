@@ -10,14 +10,10 @@ import { normalize_position } from '#libs-shared/constants/position-constants.mj
 import db from '#db'
 import { is_implausible_entry_age } from './player-era.mjs'
 import generate_player_id from './generate-player-id.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('create-player')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('create-player')
-}
+enable_debug_namespaces('create-player')
 
 /*
    first_name

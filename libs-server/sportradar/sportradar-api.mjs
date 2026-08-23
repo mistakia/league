@@ -6,6 +6,7 @@ import db from '#db'
 import { wait } from '#libs-server'
 import is_main from '#libs-server/is-main.mjs'
 import * as cache from '#libs-server/cache.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const create_serial_queue = () => {
   let chain = Promise.resolve()
@@ -40,12 +41,7 @@ const queue = create_serial_queue()
 let last_request
 
 const log = debug('sportradar')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('sportradar')
-}
+enable_debug_namespaces('sportradar')
 
 // Helper to monitor queue during long waits
 const monitor_queue_wait = ({

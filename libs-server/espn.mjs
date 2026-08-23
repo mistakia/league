@@ -5,14 +5,10 @@ import db from '#db'
 import * as cache from './cache.mjs'
 import { wait } from './wait.mjs'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('espn')
-// Library module: a bare debug.enable REPLACES the namespace set for the whole
-// process, so importing this would silently switch off namespaces the entry
-// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
-if (!process.env.DEBUG) {
-  debug.enable('espn')
-}
+enable_debug_namespaces('espn')
 
 const slot_nums = { QB: 0, RB: 2, WR: 4, TE: 6, K: 17, DST: 16 }
 

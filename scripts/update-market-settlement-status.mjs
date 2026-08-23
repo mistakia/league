@@ -23,6 +23,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('update-market-settlement')
 
@@ -263,7 +264,7 @@ const main = async () => {
 
   // Enable debug logging
   if (argv.verbose || (!argv.help && !process.argv.includes('--help'))) {
-    debug.enable('update-market-settlement')
+    enable_debug_namespaces('update-market-settlement')
   }
 
   try {

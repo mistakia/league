@@ -18,13 +18,14 @@ import {
 } from '#libs-server'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('import-betonline')
-debug.enable('import-betonline,get-player,betonline')
+enable_debug_namespaces('import-betonline,get-player,betonline')
 
 const timestamp = Math.round(Date.now() / 1000)
 const observed_at = new Date()

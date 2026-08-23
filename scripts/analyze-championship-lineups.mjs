@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, simulation } from '#libs-server'
 import { current_season } from '#constants'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const argv = yargs(hideBin(process.argv))
   .option('lid', {
@@ -63,7 +64,7 @@ const argv = yargs(hideBin(process.argv))
   .alias('help', 'h').argv
 
 const log = debug('analyze-championship-lineups')
-debug.enable('analyze-championship-lineups')
+enable_debug_namespaces('analyze-championship-lineups')
 
 // ============================================================================
 // Formatting Utilities

@@ -1,20 +1,11 @@
-import debug from 'debug'
-
 import db from '#db'
 import { wait, report_run_outcome, is_main } from '#libs-server'
 import { refresh_projection_caches } from '#libs-server/refresh-projection-caches.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
-// Same trap as the two live-import workers: an unconditional debug.enable()
-// here would switch OFF whatever namespaces DEBUG had turned on, because under
-// debug 4.4.3 a call made after the loggers exist can disable but not enable,
-// and ESM has already evaluated every import by this point. Kept even though
-// this file no longer logs through `debug` itself, because the processors it
-// calls do.
-if (!process.env.DEBUG) {
-  debug.enable('refresh-projection-cache-worker')
-}
+enable_debug_namespaces('refresh-projection-cache-worker')
 
 // Outcome lines go to the CONSOLE, not through `debug`. This worker's log IS
 // its audit trail -- it is the only record that a rebuild happened, since a

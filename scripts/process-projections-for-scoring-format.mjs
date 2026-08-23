@@ -6,13 +6,14 @@ import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('process-projections-for-scoring-format')
-debug.enable('process-projections-for-scoring-format')
+enable_debug_namespaces('process-projections-for-scoring-format')
 
 // Re-derive scoring_format_player_projection_points for one (scoring_format,
 // year) slice entirely from the authoritative projections_index /

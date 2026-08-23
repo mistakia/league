@@ -17,9 +17,10 @@ import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('notifications-draft')
-debug.enable('notifications-draft')
+enable_debug_namespaces('notifications-draft')
 
 const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 

@@ -7,13 +7,14 @@ import { sum, groupBy, calculatePrices } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('generate-league-format-player-seasonlogs')
-debug.enable('generate-league-format-player-seasonlogs')
+enable_debug_namespaces('generate-league-format-player-seasonlogs')
 
 const generate_league_format_player_seasonlogs = async ({
   year = current_season.year,

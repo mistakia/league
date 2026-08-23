@@ -7,6 +7,7 @@ import { current_season } from '#constants'
 import { is_main, getAcquisitionTransaction, getLeague } from '#libs-server'
 import generateSeasonDates from './generate-season-dates.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -14,7 +15,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-league-player-seasonlogs')
-debug.enable('generate-league-player-seasonlogs')
+enable_debug_namespaces('generate-league-player-seasonlogs')
 
 const generate_league_player_seasonlogs = async ({
   year = current_season.year,

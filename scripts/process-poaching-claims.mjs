@@ -11,6 +11,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // This script has no per-league loop -- it iterates claims directly across
 // every league -- so the pause cannot be applied as a `continue`. It is a
@@ -27,7 +28,7 @@ const exclude_paused_leagues = (query) =>
 
 const log = debug('process:claims')
 if (process.env.NODE_ENV !== 'test') {
-  debug.enable('process:claims')
+  enable_debug_namespaces('process:claims')
 }
 
 const run = async () => {

@@ -8,13 +8,14 @@ import { current_season } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
 const log = debug('generate-player-snaps')
-debug.enable('generate-player-snaps')
+enable_debug_namespaces('generate-player-snaps')
 
 const create_quarter_snap_sets = () => ({
   q1_off: new Set(),

@@ -32,13 +32,14 @@ import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Initialize dayjs plugins
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const log = debug('process-restricted-free-agency-bids')
-debug.enable('process-restricted-free-agency-bids')
+enable_debug_namespaces('process-restricted-free-agency-bids')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -633,7 +634,7 @@ const run = async ({ dry_run = false } = {}) => {
 export default run
 
 const main = async () => {
-  debug.enable('process-restricted-free-agency-bids')
+  enable_debug_namespaces('process-restricted-free-agency-bids')
   const argv = initialize_cli()
   // yargs camel-case-expands `--dry-run` to the `dryRun` key (not `dry_run`),
   // so without this, `--dry-run` silently ran the script live. Accept both.

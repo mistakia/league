@@ -7,9 +7,10 @@ import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { get_canonical_penalty_type } from '#libs-shared/penalty-utils.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('backfill-penalty-type')
-debug.enable('backfill-penalty-type')
+enable_debug_namespaces('backfill-penalty-type')
 
 const backfill_penalty_type = async ({
   year,

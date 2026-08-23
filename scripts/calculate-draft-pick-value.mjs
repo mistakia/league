@@ -5,11 +5,12 @@ import debug from 'debug'
 import db from '#db'
 import { groupBy, median } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-draft-pick-value')
-debug.enable('calculate-draft-pick-value')
+enable_debug_namespaces('calculate-draft-pick-value')
 
 const calculateDraftPickValue = async ({ league_format_id } = {}) => {
   if (!league_format_id) {

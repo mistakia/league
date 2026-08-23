@@ -10,6 +10,7 @@ import { fixTeam } from '#libs-shared'
 import { is_main, report_job } from '#libs-server'
 import { get_games_schedule } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -19,7 +20,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-games-sportradar')
-debug.enable('import-games-sportradar,sportradar')
+enable_debug_namespaces('import-games-sportradar,sportradar')
 
 /**
  * Extract team mappings from Sportradar games response

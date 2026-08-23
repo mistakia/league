@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { current_season } from '#constants'
 import { getPlayerExtensions, is_main } from '#libs-server'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -12,7 +13,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('calculate-player-extension-count')
-debug.enable('calculate-player-extension-count')
+enable_debug_namespaces('calculate-player-extension-count')
 
 const run = async ({ lid }) => {
   const rosters = await db('rosters')

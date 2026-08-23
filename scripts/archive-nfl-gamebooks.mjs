@@ -26,9 +26,10 @@ import db from '#db'
 import { current_season } from '#constants'
 import { is_main, report_job, wait } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('archive-nfl-gamebooks')
-debug.enable('archive-nfl-gamebooks')
+enable_debug_namespaces('archive-nfl-gamebooks')
 
 const stream_pipeline = promisify(pipeline)
 

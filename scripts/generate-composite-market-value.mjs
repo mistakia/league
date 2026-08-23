@@ -15,6 +15,7 @@ import {
   latest_in_window_by_pid
 } from '#libs-server/composite-market-value/utils.mjs'
 import { run_cmv_script } from '#libs-server/composite-market-value/script-runner.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 // Daily blender: per (format_category, date), reads each source's native
 // values, applies persisted calibration onto the KTC axis, then takes a
@@ -36,7 +37,7 @@ import { run_cmv_script } from '#libs-server/composite-market-value/script-runne
 // pts-added (0-50) would blend into garbage.
 
 const log = debug('generate-composite-market-value')
-debug.enable('generate-composite-market-value')
+enable_debug_namespaces('generate-composite-market-value')
 
 const SOURCES = { KTC: 1, ADP: 2, RANKINGS: 3, PROPS: 4 }
 const STALENESS = { KTC: 2, ADP: 14, RANKINGS: 14, PROPS: 30 }

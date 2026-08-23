@@ -15,13 +15,16 @@ import {
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const signal_log = create_logger('import-underdog-bestball-adp', {
   service: 'league-imports'
 })
 
 const log = debug('import-underdog-bestball-adp')
-debug.enable('import-underdog-bestball-adp,underdog,underdog-session-manager')
+enable_debug_namespaces(
+  'import-underdog-bestball-adp,underdog,underdog-session-manager'
+)
 
 const observed_at = new Date()
 const BATCH_SIZE = 500

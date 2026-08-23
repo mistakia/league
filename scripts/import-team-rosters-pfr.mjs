@@ -6,9 +6,10 @@ import { JSDOM } from 'jsdom'
 import db from '#db'
 import { active_nfl_teams } from '#private/libs-server/pro-football-reference.mjs'
 import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
+import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-team-rosters-pfr')
-debug.enable(
+enable_debug_namespaces(
   'import-team-rosters-pfr,pro-football-reference,pro-football-reference-pages,proxy-manager,cloakbrowser'
 )
 
