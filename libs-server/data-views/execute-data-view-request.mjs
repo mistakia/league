@@ -1,10 +1,5 @@
 import crypto from 'crypto'
-import {
-  get_data_view_results,
-  redis_cache,
-  emit_signal,
-  resolve_signal
-} from '#libs-server'
+import { get_data_view_results, redis_cache, emit_signal } from '#libs-server'
 
 // The single entry every path that executes a data-view query calls. Holds both
 // the bounded-concurrency admission gate and the telemetry/signal
@@ -51,8 +46,7 @@ const admission = {
     superseded_waiters: 0,
     discarded_results: 0,
     cache_hits: 0,
-    signals_emitted: 0,
-    signals_resolved: 0
+    signals_emitted: 0
   }
 }
 
@@ -77,7 +71,6 @@ export const reset_admission_state = () => {
   admission.counters.discarded_results = 0
   admission.counters.cache_hits = 0
   admission.counters.signals_emitted = 0
-  admission.counters.signals_resolved = 0
 }
 
 const mint_execution_id = () => crypto.randomBytes(8).toString('hex')
@@ -132,11 +125,18 @@ export const log_data_view_telemetry = (entry) => {
   console.log(`data-view-telemetry: ${JSON.stringify(entry)}`)
 }
 
-// Emits a slow_query signal for a data-view execution past the threshold, or
-// self-resolves the same signature when it lands under target. Fire-and-forget:
-// emit_signal and resolve_signal return null on every failure path rather than
-// throwing, and both send no host, so both default to scope '' and the resolve
-// arm closes exactly what the emit arm opened.
+// Emits a slow_query signal for a data-view execution past the threshold.
+// Fire-and-forget: emit_signal returns null on every failure path rather than
+// throwing.
+//
+// There is deliberately NO auto-resolve arm. It lived here until it was found to
+// be unreachable in the case that mattered -- this function is only called on the
+// cache-MISS path, after a 12-hour result cache write, so a slow shape emitted
+// once and every repeat inside that window was a cache hit that returned early
+// and never reported at all. Worse, where it did fire it closed with a hardcoded
+// `[Fix]` note, and a shape crossing back under threshold is not evidence of a
+// fix: the same production query measured 4,992ms idle and 10,840ms under load.
+// slow_query is registered `event` accordingly; closure is triage-owned.
 const report_slow_query = ({
   params,
   path,
@@ -147,41 +147,34 @@ const report_slow_query = ({
   user_id,
   started_at,
   signal_emitter = emit_signal,
-  signal_resolver = resolve_signal,
   emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS
 }) => {
   const signature = data_view_query_signature(params)
   const dedup_key = `slow_query:data_view:${signature}`
   const severity = severity_for_total_ms(total_ms, emission_threshold_ms)
 
-  if (severity) {
-    admission.counters.signals_emitted++
-    signal_emitter({
-      source: 'libs-server/data-views/execute-data-view-request.mjs',
-      kind: 'slow_query',
-      severity,
-      title: `Slow data-view query ${total_ms}ms via ${path}`,
-      payload: {
-        query_group: 'data_view',
-        signature,
-        path,
-        admission_wait_duration_ms,
-        query_execution_duration_ms,
-        total_ms,
-        result_row_count,
-        user_id: user_id || null,
-        started_at
-      },
-      dedup_key,
-      forensic_link: `postgres-log@${started_at}`
-    })
-  } else {
-    admission.counters.signals_resolved++
-    signal_resolver({
-      dedup_key,
-      resolution_note: `[Fix] data-view query shape ${signature} under ${emission_threshold_ms}ms`
-    })
-  }
+  if (!severity) return
+
+  admission.counters.signals_emitted++
+  signal_emitter({
+    source: 'libs-server/data-views/execute-data-view-request.mjs',
+    kind: 'slow_query',
+    severity,
+    title: `Slow data-view query ${total_ms}ms via ${path}`,
+    payload: {
+      query_group: 'data_view',
+      signature,
+      path,
+      admission_wait_duration_ms,
+      query_execution_duration_ms,
+      total_ms,
+      result_row_count,
+      user_id: user_id || null,
+      started_at
+    },
+    dedup_key,
+    forensic_link: `postgres-log@${started_at}`
+  })
 }
 
 // Acquires a slot, abortable while waiting. The abort path is how a disconnect
@@ -251,7 +244,6 @@ const release_slot = () => {
  * @param {(info: object) => void} [opts.on_status] - called once when execution starts.
  * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object }>} [opts.run_query] - execution seam (defaults to get_data_view_results)
  * @param {(opts: object) => void} [opts.signal_emitter] - seam for the slow-query emitter
- * @param {(opts: object) => void} [opts.signal_resolver] - seam for the self-resolve arm
  * @param {(key: string) => Promise<object|null>} [opts.cache_get] - seam for the admission cache re-check
  * @param {boolean} [opts.skip_cache] - bypass the admission re-check and cache
  *   write (the /debug route must keep its bypass-cache contract)
@@ -270,7 +262,6 @@ export async function execute_data_view_request({
   on_status,
   run_query = get_data_view_results,
   signal_emitter = emit_signal,
-  signal_resolver = resolve_signal,
   cache_get = (key) => redis_cache.get(key),
   skip_cache = false,
   heartbeat_interval_ms = DATA_VIEW_HEARTBEAT_INTERVAL_MS,
@@ -407,7 +398,6 @@ export async function execute_data_view_request({
       user_id,
       started_at,
       signal_emitter,
-      signal_resolver,
       emission_threshold_ms
     })
 

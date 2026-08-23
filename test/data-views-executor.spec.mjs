@@ -187,9 +187,8 @@ describe('data view admission gate and instrumentation', function () {
     )
   })
 
-  it('emits a stable dedup key for repeated identical slow requests and resolves it on recovery', async function () {
+  it('emits a stable dedup key for repeated identical slow requests and emits nothing under target', async function () {
     const emitted = []
-    const resolved = []
     const slow = async () => {
       await sleep(30)
       return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
@@ -207,7 +206,6 @@ describe('data view admission gate and instrumentation', function () {
       cache_key: 'k-slow',
       run_query: slow,
       signal_emitter: async (args) => emitted.push(args),
-      signal_resolver: async (args) => resolved.push(args),
       cache_get: async () => null,
       emission_threshold_ms: 10
     })
@@ -219,7 +217,6 @@ describe('data view admission gate and instrumentation', function () {
       cache_key: 'k-slow',
       run_query: slow,
       signal_emitter: async (args) => emitted.push(args),
-      signal_resolver: async (args) => resolved.push(args),
       cache_get: async () => null,
       emission_threshold_ms: 10
     })
@@ -229,7 +226,12 @@ describe('data view admission gate and instrumentation', function () {
     expect(emitted[0].payload.query_group).to.equal('data_view')
     expect(emitted[0].dedup_key).to.equal(emitted[1].dedup_key)
 
-    // Recovery: the same signature landing under target resolves the open key.
+    // Under target the executor is SILENT -- it does not emit, and (since the
+    // self-resolve arm was removed) it does not close the open key either.
+    // slow_query is registered `event`; closure is triage-owned. Asserting the
+    // count is unchanged rather than merely "no new emit" is what would catch a
+    // reintroduced auto-close arm smuggling a resolution in on this path.
+    const emitted_before_fast = emitted.length
     await execute_data_view_request({
       request_id: 'v',
       params: sample_params(),
@@ -238,13 +240,11 @@ describe('data view admission gate and instrumentation', function () {
       cache_key: 'k-fast',
       run_query: fast,
       signal_emitter: async (args) => emitted.push(args),
-      signal_resolver: async (args) => resolved.push(args),
       cache_get: async () => null,
       emission_threshold_ms: 100
     })
 
-    expect(resolved.length).to.equal(1)
-    expect(resolved[0].dedup_key).to.equal(emitted[0].dedup_key)
+    expect(emitted.length).to.equal(emitted_before_fast)
   })
 
   it('re-checks the cache at admission and returns it without executing', async function () {
