@@ -94,7 +94,18 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
     .from(inner_query.as('player_year_team_counts'))
     .groupBy('pid', 'year')
 
-  players_query.withMaterialized(CTE_NAME, cte_query)
+  // Plain `with`, deliberately NOT `withMaterialized`: MATERIALIZED is an
+  // optimizer fence, and on a bridge CTE this small it only blinds the planner.
+  // Fenced, the CTE Scan estimates rows=1 against an actual 2,411, and the outer
+  // join becomes a nested loop rescanning all of them once per player (28,129
+  // loops, ~67.8M comparisons) -- 8.3s of an 8.7s data view (signals 126228,
+  // 126446). Unfenced, Postgres sees the real statistics and hash joins instead:
+  // 7.0s -> 0.22s on production, byte-identical results.
+  //
+  // Postgres inlines a plain CTE only at a SINGLE reference and materializes it
+  // otherwise, so this stays correct if a future view references the bridge
+  // twice -- the fence is not load-bearing here, it was the migration default.
+  players_query.with(CTE_NAME, cte_query)
   query_context.registered_ctes.add(CTE_NAME)
   query_context.player_year_teams_cte_name = CTE_NAME
   query_context.player_year_teams_year_range = year_range

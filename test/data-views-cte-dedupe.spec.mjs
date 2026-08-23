@@ -67,8 +67,10 @@ describe('Data View CTE dedupe', () => {
     const { query } = await get_data_view_results_query(request)
     const sql = query.toString()
 
-    expect(
-      count_occurrences(sql, '"player_year_teams" as materialized')
-    ).to.equal(1)
+    // Anchored on the CTE DECLARATION, not on the MATERIALIZED keyword: the
+    // bridge emits a plain `with` (see identity-bridges/player-year-to-team-year.mjs
+    // for why the fence was removed), and a matcher keyed to the keyword would
+    // return a confident 0 here rather than reporting a re-emission.
+    expect(count_occurrences(sql, '"player_year_teams" as (')).to.equal(1)
   })
 })
