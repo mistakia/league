@@ -516,22 +516,57 @@ export const get_market_type = ({ marketType, marketName }) => {
 // a bare four-digit year, and it CANNOT be read as the first four-digit run in
 // the string. These names lead with a yardage or odds threshold, so "1000+
 // Regular Season Receiving Yards 2024-25" yields 1000 and "Thanksgiving Day
-// Specials: +2000 to +4900" yields 2000. That shape wrote 86 prop_markets_index
-// rows carrying a season of 1000, 1250, 1500, 1900, 2000, 4000, 4500 or 5000
-// before it was found on 2026-08-23; every one of them is a FanDuel futures row
-// with no esbid, so nothing joining nfl_games could contradict it.
+// Specials: +2000 to +4900" yields 2000. That shape wrote FanDuel futures rows
+// carrying a season of 1000, 1250, 1500, 1900, 2000, 4000, 4500 or 5000 before
+// it was found on 2026-08-23; every one had no esbid, so nothing joining
+// nfl_games could contradict it. Repaired in
+// db/adhoc/2026-08-23-repair-fanduel-threshold-season-years.sql.
 //
 // Prefer the span, which is unambiguous. Otherwise take the first four-digit run
-// that is not part of a THRESHOLD, which is the shape carrying a '+' on one side
-// or the other. Classifying the benign class out by shape beats guessing a
-// plausible year window: a window wide enough to admit real seasons still admits
-// "+2000", which is the exact value that got through.
+// that is not part of a THRESHOLD. Classifying the benign class out by shape
+// beats guessing a plausible year window: a window wide enough to admit real
+// seasons still admits "+2000", which is the exact value that got through.
+//
+// A THRESHOLD IS NOT ONLY A '+' TOKEN, and reading it that way is what the first
+// fix got wrong. Scoring the shipped parser over all 3,994 distinct FanDuel
+// futures names on 2026-08-23 found five it still misread, none of them carrying
+// a '+' anywhere near the number: "Any Player to Break the Record for Most
+// Passing Yards in the Regular Season (Over 5477.5 Reg season Pass Yards)" gave
+// 5477, its rushing and receiving siblings gave 2105 and 1964, and "<player> to
+// have 75+ Receptions & 1000 Yards Receiving Yards" gave 1000 for two players --
+// there the '+' sits on the RECEPTIONS count, not on the yardage that follows it.
+// So the four shapes below are all threshold spellings this vocabulary actually
+// uses: an adjacent '+', a decimal fraction (a season is never written "2024.5"),
+// an explicit over/under comparator, and a unit noun immediately after the
+// number. Together they take the five to null and leave all 349 genuine bare
+// years standing.
 const SEASON_SPAN_PATTERN = /\b(\d{4})-\d{2}\b/
 const FOUR_DIGIT_PATTERN = /\b\d{4}\b/g
 
-const is_threshold_token = ({ market_name, index, length }) =>
-  /\+\s*$/.test(market_name.slice(0, index)) ||
-  /^\s*\+/.test(market_name.slice(index + length))
+// Kept separate from the '+' tests below rather than folded in as an
+// alternation: '+' is a non-word character, so a trailing \b after it fails
+// against the space in "4000+ Passing Yards" and silently disarms the very check
+// the first fix added. Caught by scoring the parser over the whole corpus.
+const THRESHOLD_UNIT_NOUNS =
+  /^\s*(?:yards|yds|receptions|receiving|rushing|passing|points|pts|tds|touchdowns)\b/i
+
+const THRESHOLD_COMPARATORS =
+  /\b(?:over|under|at least|more than|fewer than)\s+$/i
+
+const is_threshold_token = ({ market_name, index, length }) => {
+  const before = market_name.slice(0, index)
+  const after = market_name.slice(index + length)
+
+  return (
+    /\+\s*$/.test(before) ||
+    /^\s*\+/.test(after) ||
+    // A decimal fraction: the number is a betting line, not a year.
+    /^\.\d/.test(after) ||
+    // An explicit comparator introduces a line on either side of the number.
+    THRESHOLD_COMPARATORS.test(before) ||
+    THRESHOLD_UNIT_NOUNS.test(after)
+  )
+}
 
 export const get_market_year = ({ marketName, source_event_name }) => {
   if (source_event_name) {
