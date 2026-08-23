@@ -134,11 +134,28 @@ describe('API /teams - protect', function () {
       // TODO
     })
 
-    it('before practice squad protection opens', async () => {
-      // regular season has started (isRegularSeason true) but before the
-      // first Tuesday of Week 1
+    it('rejects a protect one minute before the Article XIV window opens', async () => {
+      // This used to pin `regular_season_start.add(1, 'week')` and describe it
+      // as "the regular season has started but it is before the first Tuesday
+      // of Week 1", asserting the route's 'practice squad protection is not
+      // yet open' error. No such window exists. `regular_season_start` is the
+      // Tuesday nine days before the always-Thursday opener and
+      // practice_squad_protection_start is the Tuesday two days before it, so
+      // `regular_season_start + 1 week` IS the instant protection opens -- and
+      // it is the same instant `isRegularSeason` turns true, for every season,
+      // since both reduce to `openingDay - 2 days`. The route checks
+      // isRegularSeason FIRST, so its Article XIV branch is unreachable and
+      // this boundary is guarded by the offseason error instead.
+      //
+      // The old offset only landed inside a gap while the 2026
+      // `regular_season_start` was set a week early -- the same miscount that
+      // unlinked every 2026 betting market from its game. In both cases
+      // expressing a boundary RELATIVE to the anchor is what hid it, so this
+      // pins the boundary itself.
       MockDate.set(
-        current_season.regular_season_start.add('1', 'week').toISOString()
+        current_season.practice_squad_protection_start
+          .subtract('1', 'minute')
+          .toISOString()
       )
 
       const player = await selectPlayer({ rookie: true })
@@ -158,7 +175,7 @@ describe('API /teams - protect', function () {
           leagueId: 1
         })
 
-      await error(request, 'practice squad protection is not yet open')
+      await error(request, 'not permitted during the offseason')
 
       MockDate.set(
         current_season.regular_season_start.add('1', 'month').toISOString()

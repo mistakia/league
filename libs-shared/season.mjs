@@ -132,10 +132,17 @@ export default class Season {
 
   // Article XIV defines "Regular Season" as starting "12:00 AM EST on the
   // first Tuesday of Week 1 of the NFL Regular Season" -- the Tuesday
-  // immediately preceding the (always-Thursday) opener. This is distinct from
-  // `regular_season_start`, which is deliberately two weeks earlier to anchor
-  // preseason roster/waiver mechanics and is not the constitutional trigger
-  // for practice-squad protection.
+  // immediately preceding the (always-Thursday) opener. `regular_season_start`
+  // is one week earlier than that -- the Tuesday NINE days before the opener --
+  // to anchor preseason roster and waiver mechanics.
+  //
+  // A note this comment used to get wrong by claiming "two weeks earlier": the
+  // gap is nine days, so `regular_season_start + 1 week` and this getter are
+  // the SAME instant in every season, and so is the moment `isRegularSeason`
+  // turns true. Anything reasoning about a window between them is reasoning
+  // about a window that does not exist. The prose mattered -- it reads as a
+  // justification for setting the anchor a week early, which is exactly the
+  // 2026 defect that unlinked every betting market from its game.
   get practice_squad_protection_start() {
     const days_since_tuesday = (this.openingDay.day() - 2 + 7) % 7
     return this.openingDay.subtract(days_since_tuesday, 'day').startOf('day')

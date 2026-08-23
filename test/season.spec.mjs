@@ -155,6 +155,35 @@ describe('LIBS-SHARED Season', function () {
     expect(current_season.week).to.equal(17)
   })
 
+  // Every other assertion in this file is expressed RELATIVE to
+  // regular_season_start, which makes them all vacuous with respect to the
+  // anchor itself -- they stayed green through a 2026 value set a full week
+  // early, which shifted every regular-season game to week N+1 and silently
+  // unlinked all 4,632 2026 rows in prop_markets_index. These assertions
+  // deliberately anchor on openingDay instead, because the opener's date is
+  // independently verifiable against the NFL schedule while the anchor is not.
+  it('regular_season_start places the opener in REG week 1', function () {
+    const { openingDay, regular_season_start } = current_season
+
+    // Tuesday, nine days before the always-Thursday opener.
+    expect(regular_season_start.day()).to.equal(2)
+    expect(openingDay.day()).to.equal(4)
+    expect(openingDay.diff(regular_season_start, 'day')).to.equal(9)
+
+    // The opener and the Sunday that follows it are both REG week 1, and the
+    // Thursday a week earlier is still preseason.
+    expect(current_season.calculate_week(openingDay)).to.deep.equal({
+      seas_type: 'REG',
+      week: 1
+    })
+    expect(
+      current_season.calculate_week(openingDay.add('3', 'day'))
+    ).to.deep.equal({ seas_type: 'REG', week: 1 })
+    expect(
+      current_season.calculate_week(openingDay.subtract('7', 'day')).seas_type
+    ).to.equal('PRE')
+  })
+
   it('practice_squad_protection_start', function () {
     const { openingDay, practice_squad_protection_start } = current_season
 
