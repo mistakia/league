@@ -688,6 +688,144 @@ const registry = [
   },
 
   {
+    check_id: 'snaps-games-season-agreement',
+    invariant:
+      'Every nfl_snaps row carries the season_year of the game its esbid resolves to. season_year is functionally determined by esbid — a game belongs to exactly one season — so this is derivable rather than merely expected, and nothing enforces it: no foreign key, no CHECK, and the column is part of the primary key rather than a computed one. The writer NEVER READS nfl_games: private/libs-server/ngs.mjs takes the season straight off the vendor payload (`data.plays.find((play) => play.season)?.season`) and keys its delete-and-reinsert on esbid alone, so the two sides are stamped from independent sources and can only be compared after the fact. Two aggravating properties make a failure here silent rather than loud. The optional chain yields `undefined` when no play in the feed carries a season, against a NOT NULL column; and the whole snap write sits inside a try/catch that logs to a debug namespace and continues, so a rejected batch leaves the run green. A disagreement therefore drops the rows from every consumer that scopes snaps by season while the job reports success.',
+    grain: ['esbid'],
+    rows: async () => {
+      // Aggregated to (esbid, season_year) before the join rather than compared
+      // per snap: the whole point is one finding per GAME, and a game whose
+      // season moved would otherwise report every one of its ~3,500 snap rows.
+      // The snap count rides along so a finding says how much data the
+      // disagreement covers.
+      const { rows: found } = await db.raw(
+        `
+        with snap_games as (
+          select esbid, season_year, count(*) as row_count
+          from nfl_snaps
+          group by 1, 2
+        )
+        select m.esbid, m.row_count
+        from snap_games m
+        join nfl_games g on g.esbid = m.esbid
+        where m.season_year is distinct from g.season_year
+        `
+      )
+
+      // The population SCANNED is every snap row this check could grade — rows
+      // whose esbid resolves to a game — derived from the check's OWN join
+      // rather than from a bare count of the table. A bare count would keep
+      // reading the full table if the join collapsed, which is the exact shape
+      // that let a neighbouring check report 27,748 against a 27,236 scan.
+      const {
+        rows: [scanned]
+      } = await db.raw(
+        `
+        select coalesce(sum(m.row_count), 0) as count
+        from (
+          select esbid, season_year, count(*) as row_count
+          from nfl_snaps
+          group by 1, 2
+        ) m
+        join nfl_games g on g.esbid = m.esbid
+        `
+      )
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            esbid: row.esbid,
+            row_count: Number(row.row_count),
+            numerator: 1,
+            denominator
+          }))
+        : [{ esbid: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: season_year is derivable from esbid, so a row disagreeing with its own game is a defect by definition and max_count 0 is a live invariant rather than an aspiration. Measured on production 2026-08-23: 0 disagreeing groups against 11,634,932 graded rows across 3,269 (esbid, season_year) groups, every one of which matched a game — there are ZERO orphan esbids in this table, unlike the sibling gamelogs check. DEMONSTRATED RED rather than assumed: inverting the shipped predicate to `is not distinct from` on the same production corpus reports all 3,269 groups covering all 11,634,932 rows, so the join and the comparison are both live and the zero is a finding rather than a query that could never speak. COST, measured with explain analyze the same day: 742ms, a parallel append over all 27 nfl_snaps partitions feeding a hash join against an index-only scan of nfl_games — cheap enough for the weekly runner at this table’s size. WHAT MAKES A DEFECT REACHABLE HERE, since the writer never mis-stamps under normal operation: nfl_games upserts on esbid and merges every column including season_year (scripts/import-nfl-games-nfl.mjs), so a schedule correction rewrites the game while the snap rows keep the season the NGS feed reported when they were first imported. That is the same cause the nfl-plays-games-season-agreement repair command describes, and nothing re-stamps snaps when it happens. A SHARPER VARIANT WAS TESTED AND DELIBERATELY NOT REGISTERED: season_year sits inside this table’s onConflict key (esbid, play_id, gsis_it_player_id, season_year), so a drifted season would mint a duplicate row rather than update one — measured 2026-08-23, zero (esbid, play_id, gsis_it_player_id) triples carry more than one distinct season_year. That is a corroborator of this same invariant, not a second condition, and registering it would leave one invariant with two graders that can drift apart and disagree about method.',
+    min_gradeable_units: 1,
+    // Exactly one sentinel row when clean, so the row-count floor is a
+    // tautology and the denominator carries the whole signal. 11,634,932
+    // graded rows measured 2026-08-23, partitioned by season and growing
+    // roughly 450,000 rows a year; nothing prunes and no code path deletes
+    // except the per-esbid rebuild, which reinserts. 8,000,000 leaves about a
+    // third of headroom against the reading this floor exists to catch — a
+    // partition detached or the esbid join breaking wholesale, either of which
+    // would otherwise report a clean sentinel and resolve this check’s own
+    // findings signal.
+    min_denominator: 8000000,
+    repair_command:
+      'Establish WHICH SIDE moved before rewriting either. The snap rows carry the season the NGS feed reported at import and the game row carries the schedule, so a disagreement is normally a game whose season was corrected on nfl_games without the snaps being re-imported — nfl_games upserts on esbid and merges season_year, so this happens with no snap write at all. Re-import the affected game rather than UPDATEing nfl_snaps: season_year is the partition key, so a hand-written update either fails or moves rows between partitions, and it destroys the evidence of which feed was wrong. Check first whether the game row was recently amended; if instead the FEED is wrong, the season is read at private/libs-server/ngs.mjs from the first play carrying a `season` field, and note that path swallows a failed snap insert into a debug log rather than failing its run.'
+  },
+
+  {
+    check_id: 'gamelogs-games-season-agreement',
+    invariant:
+      'Every player_gamelogs row carries the season_year of the game its esbid resolves to. season_year is functionally determined by esbid, so this is derivable rather than merely expected, and nothing enforces it — no foreign key to nfl_games, no CHECK. The writer stamps the season from its own INVOCATION rather than from the game: scripts/generate-player-gamelogs.mjs selects games where nfl_games.season_year equals the --season_year argument and then writes that argument onto every row, so the two agree when the row is written and never again. No other oracle sees a disagreement. scripts/audit-player-gamelogs.mjs grades stat VALUES against Pro Football Reference — the pfr-gamelog-agreement class already in this registry — and is silent about which season a row claims; gamelog-orphans grades the child-to-parent edge and never reaches nfl_games. A wrong season is fully populated and entirely wrong, so every null-counting check scores it healthy while the row drops out of any consumer that scopes gamelogs by season.',
+    grain: ['esbid'],
+    rows: async () => {
+      // Aggregated to (esbid, season_year) before the join rather than compared
+      // per gamelog: one finding per GAME, not one per player in it.
+      const { rows: found } = await db.raw(
+        `
+        with gamelog_games as (
+          select esbid, season_year, count(*) as row_count
+          from player_gamelogs
+          group by 1, 2
+        )
+        select m.esbid, m.row_count
+        from gamelog_games m
+        join nfl_games g on g.esbid = m.esbid
+        where m.season_year is distinct from g.season_year
+        `
+      )
+
+      // Derived from the check's OWN scan predicate. A bare count of
+      // player_gamelogs would report the 2,310 rows holding an esbid that
+      // matches no game, which this check never looks at, and would not move if
+      // the graded population collapsed.
+      const {
+        rows: [scanned]
+      } = await db.raw(
+        `
+        select coalesce(sum(m.row_count), 0) as count
+        from (
+          select esbid, season_year, count(*) as row_count
+          from player_gamelogs
+          group by 1, 2
+        ) m
+        join nfl_games g on g.esbid = m.esbid
+        `
+      )
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            esbid: row.esbid,
+            row_count: Number(row.row_count),
+            numerator: 1,
+            denominator
+          }))
+        : [{ esbid: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: season_year is derivable from esbid, so a row disagreeing with its own game is a defect by definition and max_count 0 is a live invariant rather than an aspiration. Measured on production 2026-08-23: 0 disagreeing groups against 885,864 graded rows across 8,134 (esbid, season_year) groups. DEMONSTRATED RED rather than assumed: inverting the shipped predicate to `is not distinct from` on the same production corpus reports all 8,134 groups covering all 885,864 rows, so the join and the comparison are both live and the zero is a finding rather than a query that could never speak. WHAT MAKES A DEFECT REACHABLE, since writer and game agree at write time by construction: nfl_games upserts on esbid and merges every column including season_year and week (scripts/import-nfl-games-nfl.mjs), so a corrected schedule rewrites the game while the gamelog rows keep the season the generator was invoked with. Nothing re-stamps them. This is a NARROWER window than the sibling snaps check, whose writer takes its season from the vendor payload and never consults nfl_games at all — the two are registered separately because their repair paths name different importers, following the same one-row-per-table shape as nfl-plays-games-season-agreement and prop-markets-games-season-agreement. WHAT IT DELIBERATELY DOES NOT REPORT: the 2,310 rows across 124 esbids holding no nfl_games row at all, all of them 2013 (1,040 rows, 59 games) and 2014 (1,270 rows, 65 games) — the same missing PRE-season games nfl-plays-games-season-agreement names in its own calibration, which is corroboration that the gap is one population and not two. Reporting them here would put 124 permanently-open findings in front of the one that is real, which is a baseline wearing an adjudication schema; a GROWING orphan population means games are missing and is a different condition with a different owner. A SHARPER VARIANT WAS TESTED AND DELIBERATELY NOT REGISTERED: season_year sits inside this table’s onConflict key (esbid, pid, season_year), and unlike the snaps writer there is no delete-then-insert, so a drifted season would mint a DUPLICATE gamelog rather than update one — measured 2026-08-23, zero (esbid, pid) pairs carry more than one distinct season_year. It corroborates this same invariant rather than adding a condition, and registering it would leave one invariant with two graders.',
+    min_gradeable_units: 1,
+    // Exactly one sentinel row when clean, so the row-count floor is a
+    // tautology and the denominator carries the whole signal. 885,864 graded
+    // rows measured 2026-08-23, growing roughly 30,000 a season and never
+    // pruned. 600,000 leaves about a third of headroom against the reading this
+    // floor exists to catch, which is the esbid join breaking or the table
+    // being emptied — either of which would otherwise report a clean sentinel
+    // and resolve this check’s own findings signal.
+    min_denominator: 600000,
+    repair_command:
+      'Establish WHICH SIDE moved before rewriting either, and do NOT assume the gamelog side is wrong. nfl_games upserts on esbid and merges season_year, so a game whose season or week was corrected under a correctly-generated gamelog produces this finding, and rewriting the gamelogs would bury the corrected schedule — check whether the game row was recently amended first. If the game is right and the gamelogs are stale, regenerate the affected week rather than hand-updating: node scripts/generate-player-gamelogs.mjs --season_year <year> --week <week>. Note that season_year is part of this table’s conflict key and the writer does not delete first, so a regeneration under a CHANGED season inserts a second row instead of updating the old one; confirm the stale row is gone afterwards rather than assuming the upsert replaced it.'
+  },
+
+  {
     check_id: 'player-field-override-drift',
     invariant:
       'Every human verdict in player_field_override equals the value `player` actually holds for that (pid, column_name). This is the only oracle that can see a correction which was RECORDED and never LANDED: two writes on the parent repair task were claimed applied and "verified by read-back" while JORD-MURR-006621 still held 8106 and SEAN-RYAN-027249 still held 5834, and nothing could detect it because the intended values existed only as prose. player_changelog structurally cannot cover this — a write that never happened leaves no changelog row at all.',
