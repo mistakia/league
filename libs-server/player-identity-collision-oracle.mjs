@@ -210,46 +210,77 @@ JOIN named b ON b.pid = sb.pid AND b.name_key = a.name_key`
   The EXTERNAL-ID form, and the one that carries the evidence.
 
   A biographical feed keyed on the gsis id also hands us that person's OTHER
-  identifiers -- nflverse carries `esb_id` and `pfr_id` -- and `player` already
-  holds both columns. So the question "is this person already in the table"
-  usually has a hard answer that never touches a name, a team or a season, and
-  it is available for every id the feed covers.
+  identifiers -- nflverse carries `esb_id` and `pfr_id`, NFL Pro carries `esbId`,
+  `smartId` and `gsisItId` -- and `player` already holds a column for each. So
+  the question "is this person already in the table" usually has a hard answer
+  that never touches a name, a team or a season.
 
   This is strictly better evidence than the name form, and where the two
   disagree the name form is the one that is wrong: 12 ids resolve to a different
   pid under each, and every one is a namesake the name form pointed at -- Dean
   Wright against Dwayne Wright, James Rodgers against Jacquizz Rodgers.
 
-  `candidates` is [{ gsis_player_id, esb_id, pfr_id }], injected through VALUES
-  because these ids live in the feed rather than in any table we can join.
+  `candidates` is [{ gsis_player_id, esb_id, pfr_id, smart_id, gsis_it_id }],
+  injected through VALUES because these ids live in the feed rather than in any
+  table we can join. `matched_on` names every id kind that agreed, so a caller
+  can require more than one.
 
-  Two returned flags do NOT decide anything and must be read by a human:
-  `incumbent_count` above 1 means the external id matches several player rows,
-  which is a duplicate pair in `player` rather than an answer here; a non-null
-  `incumbent_gsis` means the incumbent already holds a DIFFERENT gsis id, which
-  contradicts the attach and points at a genuine namesake.
+  Two returned flags do NOT decide anything on their own. `incumbent_count`
+  above 1 means the feed's ids reach several player rows, which is a duplicate
+  pair in `player` rather than an answer here. A non-null `incumbent_gsis` means
+  the incumbent already holds a DIFFERENT gsis id, which contradicts the attach
+  and points at a genuine namesake.
 */
+export const EXTERNAL_ID_MATCH_COLUMNS = [
+  ['esb_id', 'esb_player_id'],
+  ['pfr_id', 'pfr_player_id'],
+  ['smart_id', 'smart_player_id'],
+  ['gsis_it_id', 'gsis_it_player_id']
+]
+
 export const external_id_attach_sql = (candidates) => {
+  const quote = (v) =>
+    v === null || v === undefined || v === ''
+      ? 'NULL'
+      : `'${String(v).replace(/'/g, "''")}'`
+  const feed_columns = [
+    'gsis_player_id',
+    ...EXTERNAL_ID_MATCH_COLUMNS.map(([f]) => f)
+  ]
   const values = candidates
-    .map(({ gsis_player_id, esb_id, pfr_id }) => {
-      const quote = (v) => (v ? `'${String(v).replace(/'/g, "''")}'` : 'NULL')
-      return `(${quote(gsis_player_id)}, ${quote(esb_id)}, ${quote(pfr_id)})`
-    })
+    .map(
+      (row) =>
+        `(${feed_columns.map((column) => quote(row[column])).join(', ')})`
+    )
     .join(', ')
-  return `WITH feed (gsis_player_id, esb_id, pfr_id) AS (
+  // Every column is cast because a VALUES list of all-NULL for one id kind
+  // would otherwise arrive as `text` by default and fail the comparison against
+  // a non-text player column.
+  const casts = feed_columns
+    .map((column) => `${column}::text AS ${column}`)
+    .join(', ')
+  const predicate = EXTERNAL_ID_MATCH_COLUMNS.map(
+    ([feed, column]) => `p.${column}::text = f.${feed}`
+  ).join(' OR ')
+  const matched_on = EXTERNAL_ID_MATCH_COLUMNS.map(
+    ([feed, column]) =>
+      `CASE WHEN p.${column}::text = f.${feed} THEN '${column}' END`
+  ).join(',\n           ')
+  return `WITH raw_feed (${feed_columns.join(', ')}) AS (
   VALUES ${values}
+), feed AS (
+  SELECT ${casts} FROM raw_feed
 ), matched AS (
   SELECT f.gsis_player_id, p.pid AS incumbent_pid, p.short_name AS incumbent_name,
-         p.gsis_player_id AS incumbent_gsis,
+         p.last_name AS incumbent_last_name, p.gsis_player_id AS incumbent_gsis,
          array_remove(ARRAY[
-           CASE WHEN p.esb_player_id = f.esb_id THEN 'esb_player_id' END,
-           CASE WHEN p.pfr_player_id = f.pfr_id THEN 'pfr_player_id' END
+           ${matched_on}
          ], NULL) AS matched_on
   FROM feed f
-  JOIN player p ON p.primary_position <> 'DST'
-    AND (p.esb_player_id = f.esb_id OR p.pfr_player_id = f.pfr_id)
+  JOIN player p ON p.primary_position <> 'DST' AND (${predicate})
 )
-SELECT gsis_player_id, incumbent_pid, incumbent_name, incumbent_gsis, matched_on,
+SELECT gsis_player_id, incumbent_pid, incumbent_name, incumbent_last_name,
+       incumbent_gsis, matched_on,
        count(*) OVER (PARTITION BY gsis_player_id) AS incumbent_count
 FROM matched`
 }
