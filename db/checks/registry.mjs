@@ -148,7 +148,7 @@ const EXPECTED_ADP_SOURCES = [
 // August, so before that date an empty season is early rather than missing --
 // the seasonal-blind-window trap, expressed as a per-row precondition instead
 // of a short-circuit that would make the check vacuous.
-const adp_season_window_is_open = (season_year) => {
+const adp_season_window_is_open = (/** @type {number} */ season_year) => {
   const now = new Date()
   const window_open = new Date(Date.UTC(season_year, 7, 1))
   return now >= window_open
@@ -693,7 +693,10 @@ const registry = [
       // rather than clean. A season with no adp rows at all is a different and
       // larger failure, and correctly reads un-gradeable here.
       const season_rows_by_year = new Map(
-        seasons.map((row) => [Number(row.season_year), Number(row.season_rows)])
+        seasons.map((/** @type {Record<string, any>} */ row) => [
+          Number(row.season_year),
+          Number(row.season_rows)
+        ])
       )
 
       const observed = await db('player_adp_index')
@@ -702,7 +705,7 @@ const registry = [
         .groupBy('season_year', 'source_id')
 
       const formats_by_key = new Map(
-        observed.map((row) => [
+        observed.map((/** @type {Record<string, any>} */ row) => [
           `${row.season_year}:${row.source_id}`,
           Number(row.formats)
         ])
@@ -741,10 +744,10 @@ const registry = [
 
       return rows
     },
-    precondition: (row) => row.window_open,
+    precondition: (/** @type {Record<string, any>} */ row) => row.window_open,
     max_count: 0,
     calibration:
-      'EXACT, not a tolerance: a source we schedule an importer for either wrote its formats for a season or it did not, so the healthy reading is zero missing formats against a non-zero season population. Measured 2026-08-23 across the three seasons player_adp_index holds. 2024: all seven then-live sources present at their full format counts (SLEEPER 12, RTS 3, CBS 2, MFL 2, ESPN 1, YAHOO 1, NFL 1) against 17,242 season rows. 2026: the seven live sources plus UNDERDOG present at full counts against 14,089 rows and climbing. 2025 is the defect this is calibrated against — 17,498 season rows, ALL of them SLEEPER, every other source at zero because commit 242976665 re-enabled the secondary ADP crontab lines only in 2026 after they had been disabled for the 2025 season. Those ten (season, source) pairs are parked as baselined debt rather than adjudicated: the data is genuinely missing and the vendors serve current-season ADP only, so no backfill can clear them. The expectation table is DECLARED rather than derived from what the table happens to hold, because deriving it would define the healthy state as whatever landed and could never report an absence. Format counts are minimums, so a vendor adding a format is not a finding while dropping one is.',
+      'EXACT, not a tolerance: a source we schedule an importer for either wrote its formats for a season or it did not, so the healthy reading is zero missing formats against a non-zero season population. Measured 2026-08-23 across the three seasons player_adp_index holds. 2024: all seven then-live sources present at their full format counts (SLEEPER 12, RTS 3, CBS 2, MFL 2, ESPN 1, YAHOO 1, NFL 1) against 17,242 season rows. 2026: the seven live sources plus UNDERDOG present at full counts against 14,089 rows and climbing. 2025 is the defect this is calibrated against — 17,498 season rows, ALL of them SLEEPER, every other source at zero because commit 242976665 re-enabled the secondary ADP crontab lines only in 2026 after they had been disabled for the 2025 season. Those six (season, source) pairs are parked as baselined debt rather than adjudicated, because the data is genuinely missing rather than correct. Two of the six are repairable and four are not, and the distinction was measured on 2026-08-23 rather than assumed: MFL serves full historical ADP under PERIOD=ALL (2022 returns 3,068 drafts where the importer live PERIOD=RECENT returns zero out of season) and ESPN serves it per season back to 2020 (2019 returns 0.0 for every player), while CBS, RTS and Yahoo are scrapes of a live draft board and NFL.com has shut down. The expectation table is DECLARED rather than derived from what the table happens to hold, because deriving it would define the healthy state as whatever landed and could never report an absence. Format counts are minimums, so a vendor adding a format is not a finding while dropping one is.',
     min_gradeable_units: 6,
     // The row count grows one season at a time, so a floor on it alone would be
     // satisfied by a scan that read almost nothing. 1,000 sits an order of
@@ -753,7 +756,7 @@ const registry = [
     // breaking and returning a near-empty season.
     min_denominator: 1000,
     repair_command:
-      'Identify which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line and the runs ledger (`base run list --source service:league-import-<source>-adp`). If it ran and wrote nothing, its own oracle should have failed the run — read /var/log/league/import-<source>-adp.log for the `oracle FAIL` line. A season already past its draft window CANNOT be backfilled from any of these vendors: they serve current ADP only, and player_adp_history holds no earlier observation. Park such a season as baselined debt rather than leaving the finding open.'
+      'Identify which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line and the runs ledger (`base run list --source service:league-import-<source>-adp`). If it ran and wrote nothing, its own oracle should have failed the run — read /var/log/league/import-<source>-adp.log for the `oracle FAIL` line. Whether a past season can be backfilled is PER VENDOR and must not be assumed either way: MFL serves it under PERIOD=ALL and ESPN under its per-season kona endpoint (2020 onward), while CBS, RTS and Yahoo scrape a live draft board that no longer exists for a closed season. Park a genuinely unreachable season as baselined debt rather than leaving the finding open.'
   }
 ]
 

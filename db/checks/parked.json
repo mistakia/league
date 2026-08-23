@@ -299,7 +299,7 @@
       "source_id": "ESPN"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Repairable, and measured so on 2026-08-23 rather than assumed: this vendor still serves the 2025 season (MFL under PERIOD=ALL, ESPN under its per-season kona endpoint), so the entry stands only until a backfill runs. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season."
   },
   {
     "check_id": "adp-source-season-coverage",
@@ -308,7 +308,7 @@
       "source_id": "YAHOO"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Unrecoverable, not deferred: this vendor scrapes a live draft board (CBS, RTS, Yahoo) or has shut its fantasy product down (NFL.com, retired in b12b2dcb4), and player_adp_history holds no 2025 observation, so no backfill can clear it. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
   },
   {
     "check_id": "adp-source-season-coverage",
@@ -317,7 +317,7 @@
       "source_id": "CBS"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Unrecoverable, not deferred: this vendor scrapes a live draft board (CBS, RTS, Yahoo) or has shut its fantasy product down (NFL.com, retired in b12b2dcb4), and player_adp_history holds no 2025 observation, so no backfill can clear it. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
   },
   {
     "check_id": "adp-source-season-coverage",
@@ -326,7 +326,7 @@
       "source_id": "MFL"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Repairable, and measured so on 2026-08-23 rather than assumed: this vendor still serves the 2025 season (MFL under PERIOD=ALL, ESPN under its per-season kona endpoint), so the entry stands only until a backfill runs. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season."
   },
   {
     "check_id": "adp-source-season-coverage",
@@ -335,7 +335,7 @@
       "source_id": "RTS"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Unrecoverable, not deferred: this vendor scrapes a live draft board (CBS, RTS, Yahoo) or has shut its fantasy product down (NFL.com, retired in b12b2dcb4), and player_adp_history holds no 2025 observation, so no backfill can clear it. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
   },
   {
     "check_id": "adp-source-season-coverage",
@@ -344,6 +344,6 @@
       "source_id": "NFL"
     },
     "disposition": "baselined",
-    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+    "owner": "Unrecoverable, not deferred: this vendor scrapes a live draft board (CBS, RTS, Yahoo) or has shut its fantasy product down (NFL.com, retired in b12b2dcb4), and player_adp_history holds no 2025 observation, so no backfill can clear it. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
   }
 ]
