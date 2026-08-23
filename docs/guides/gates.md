@@ -8,6 +8,31 @@ Extracted from `CLAUDE.md`, which keeps the one-line rule and routes here.
 
 ---
 
+## Never key a gate on a field the gated actor can write
+
+A gate decides whether to enforce by reading something. If the actor being
+gated can change that something, the gate is advisory — it will be turned off
+by whatever it was built to stop, and it will look green while it happens.
+
+Paid for on 2026-08-23 by `contribution-guardrails.yml`. It enforced the
+guarded-path list only on pull requests carrying a `contribution` label, and the
+GitHub App it constrained held `pull_requests: write` — which includes label
+management. The App deleted the label from its own pull request (HTTP 200) and
+the check went from fail to pass on an unchanged diff. Re-keyed on the author
+login, which GitHub assigns at creation and the App cannot edit.
+
+Two things to check when adding a gate:
+
+- **Who can write the discriminator?** Enumerate it against the actor's actual
+  permission set, not its intended use. A permission grants everything it
+  grants, and label management rides along with pull-request write.
+- **Is the discriminator assigned or asserted?** Author, commit SHA and event
+  type are assigned by the forge. Labels, titles, branch names and body text are
+  asserted by whoever opened the thing. Prefer assigned.
+
+The same reasoning applies to any control keyed on pull request title, body, or
+requested reviewers — all of them are writable with `pull_requests: write`.
+
 ## Lint and JSDoc ratchets
 
 **Code Quality:**
