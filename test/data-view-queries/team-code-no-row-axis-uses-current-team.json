@@ -1,0 +1,11 @@
+{
+  "name": "team_code with no row axis still resolves to the current-team snapshot",
+  "description": "Negative control for team-code-year-axis-uses-historical-team. source.supports_row_axes widens what the column may receive, it does not make the year bridge unconditional: with no row axis there is no season to attribute to, so team_code must keep resolving through the player_teams snapshot (ARRAY[current_nfl_team]) and must not drag in the player_years_teams gamelog scan. This fixture turns red if get_player_bridge stops discriminating on row_axes.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": ["team_code"],
+    "limit": 5
+  },
+  "expected_query": "with \"player_teams\" as (SELECT pid, ARRAY[current_nfl_team]::text[] AS teams FROM player WHERE current_nfl_team IS NOT NULL AND current_nfl_team <> 'INA') select \"player\".\"pid\", player.first_name, player.last_name, player_teams.teams as team_code_0, \"player\".\"primary_position\" from \"player\" left join \"player_teams\" on \"player_teams\".\"pid\" = \"player\".\"pid\" group by player.first_name, player.last_name, player_teams.teams, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 5",
+  "tags": ["team", "row_axes", "cte", "joins", "basic"]
+}

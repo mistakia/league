@@ -99,7 +99,15 @@ const join_player_bridge = ({ query, query_context, row_axes, join_type }) => {
 const make_column = ({ column_name }) => ({
   table_name: 'team',
   column_name,
-  source: { grain: 'team' },
+  // grain stays `team` so a team-subject query is not dragged onto the
+  // team_year identity, but the player-grain bridge below projects year and
+  // week onto its own CTE. Without the override,
+  // group_tables_by_supported_row_axes intersects the request row_axes with
+  // the `team` identity's (empty) row_axes and hands this column
+  // `row_axes: []`, so get_player_bridge falls through to the year-less
+  // player_teams snapshot and every year row renders the player's CURRENT
+  // team.
+  source: { grain: 'team', supports_row_axes: ['year', 'week'] },
   get_cache_info: team_table_get_cache_info,
 
   table_alias: ({ row_axes = [], query_context = null } = {}) => {
