@@ -208,9 +208,9 @@ export interface ContributionQuestionsRow {
 
 export interface ContributionScreenshotsRow {
   submission_id: string
-  image_bytes: Buffer
-  content_type: string
-  byte_size: number
+  image_data: Buffer
+  image_format: string
+  image_size: number
   captured_at: Date
 }
 

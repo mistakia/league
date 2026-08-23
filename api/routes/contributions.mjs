@@ -44,15 +44,15 @@ export const MAXIMUM_ANSWER_LENGTH = 4000
 export const MAXIMUM_CAPTURED_CONTEXT_BYTES = 262144
 
 // 1 MB of DECODED image bytes, matching the check constraint on
-// contribution_screenshots.byte_size. The client's own budget is 600000
+// contribution_screenshots.image_size. The client's own budget is 600000
 // (app/core/contribution-screenshot.js), so a well-behaved submission lands
 // well under this and the ceiling exists for the caller who is not one.
 export const MAXIMUM_SCREENSHOT_BYTES = 1048576
 
-// Mirrors the content_type check constraint. The client only ever sends JPEG;
+// Mirrors the image_format check constraint. The client only ever sends JPEG;
 // the other two are admitted because the column permits them and refusing a
 // format the database would accept puts the two rules out of step.
-export const SCREENSHOT_CONTENT_TYPES = Object.freeze([
+export const SCREENSHOT_IMAGE_FORMATS = Object.freeze([
   'image/jpeg',
   'image/png',
   'image/webp'
@@ -252,25 +252,27 @@ const read_submission_from_body = (body) => {
       return { error: 'screenshot must be a base64 data URI' }
     }
 
-    const [, content_type, payload] = match
-    if (!SCREENSHOT_CONTENT_TYPES.includes(content_type)) {
+    const [, image_format, payload] = match
+    if (!SCREENSHOT_IMAGE_FORMATS.includes(image_format)) {
       return {
-        error: `screenshot content type must be one of ${SCREENSHOT_CONTENT_TYPES.join(', ')}`
+        error: `screenshot content type must be one of ${SCREENSHOT_IMAGE_FORMATS.join(', ')}`
       }
     }
 
-    const image_bytes = Buffer.from(payload, 'base64')
-    if (!image_bytes.length) {
+    const image_data = Buffer.from(payload, 'base64')
+    if (!image_data.length) {
       return { error: 'screenshot payload is empty' }
     }
 
-    if (image_bytes.length > MAXIMUM_SCREENSHOT_BYTES) {
+    if (image_data.length > MAXIMUM_SCREENSHOT_BYTES) {
       return {
         error: `screenshot must be at most ${MAXIMUM_SCREENSHOT_BYTES} bytes`
       }
     }
 
-    screenshot = { content_type, image_bytes, byte_size: image_bytes.length }
+    // Keyed to match the column names so the insert below is a direct mapping
+    // rather than a translation layer that can drift from the schema.
+    screenshot = { image_format, image_data, image_size: image_data.length }
   }
 
   return {
@@ -399,9 +401,9 @@ router.post('/', submit_rate_limiter, async (req, res) => {
       if (submission.screenshot) {
         await trx('contribution_screenshots').insert({
           submission_id: inserted[0].submission_id,
-          image_bytes: submission.screenshot.image_bytes,
-          content_type: submission.screenshot.content_type,
-          byte_size: submission.screenshot.byte_size
+          image_data: submission.screenshot.image_data,
+          image_format: submission.screenshot.image_format,
+          image_size: submission.screenshot.image_size
         })
 
         await trx('contribution_submissions')

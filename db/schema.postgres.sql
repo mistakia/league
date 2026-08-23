@@ -2321,13 +2321,13 @@ CREATE TABLE public.contribution_questions (
 
 CREATE TABLE public.contribution_screenshots (
     submission_id uuid NOT NULL,
-    image_bytes bytea NOT NULL,
-    content_type character varying(40) DEFAULT 'image/jpeg'::character varying NOT NULL,
-    byte_size integer NOT NULL,
+    image_data bytea NOT NULL,
+    image_format character varying(40) DEFAULT 'image/jpeg'::character varying NOT NULL,
+    image_size integer NOT NULL,
     captured_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT contribution_screenshots_byte_size_check CHECK (((byte_size > 0) AND (byte_size <= 1048576))),
-    CONSTRAINT contribution_screenshots_byte_size_matches_check CHECK ((byte_size = octet_length(image_bytes))),
-    CONSTRAINT contribution_screenshots_content_type_check CHECK (((content_type)::text = ANY ((ARRAY['image/jpeg'::character varying, 'image/png'::character varying, 'image/webp'::character varying])::text[])))
+    CONSTRAINT contribution_screenshots_image_format_check CHECK (((image_format)::text = ANY ((ARRAY['image/jpeg'::character varying, 'image/png'::character varying, 'image/webp'::character varying])::text[]))),
+    CONSTRAINT contribution_screenshots_image_size_check CHECK (((image_size > 0) AND (image_size <= 1048576))),
+    CONSTRAINT contribution_screenshots_image_size_matches_check CHECK ((image_size = octet_length(image_data)))
 );
 
 

@@ -507,9 +507,9 @@ describe('ROUTES /contributions', function () {
         .first()
 
       expect(image).to.not.equal(undefined)
-      image.content_type.should.equal('image/jpeg')
-      image.byte_size.should.equal(tiny_jpeg_bytes.length)
-      Buffer.compare(image.image_bytes, tiny_jpeg_bytes).should.equal(0)
+      image.image_format.should.equal('image/jpeg')
+      image.image_size.should.equal(tiny_jpeg_bytes.length)
+      Buffer.compare(image.image_data, tiny_jpeg_bytes).should.equal(0)
 
       const row = await knex('contribution_submissions')
         .where({ submission_id })
