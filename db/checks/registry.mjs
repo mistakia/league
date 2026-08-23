@@ -406,6 +406,95 @@ const registry = [
   },
 
   {
+    check_id: 'bare-bones-gsis-player-rows',
+    invariant:
+      'No `player` row carries a gsis id without a position, a height and a weight. The operator ruled the bare-bones row an anti-pattern on 2026-08-22 — a row with no biography cannot be deduplicated against, so it manufactures exactly the conflated identity audit-conflated-player-identity.mjs exists to unwind. Nothing enforced it: createPlayer refuses such a row, but a direct insert or a later importer relaxing its own field list would not be seen by any surface.',
+    grain: ['pid'],
+    rows: async () => {
+      const { rows: found } = await db.raw(
+        `select pid from player
+         where gsis_player_id is not null
+           and primary_position <> 'DST'
+           and (primary_position is null or height_inches is null or weight_pounds is null)`
+      )
+      const [scanned] = await db('player')
+        .whereNotNull('gsis_player_id')
+        .andWhere('primary_position', '<>', 'DST')
+        .count({ count: '*' })
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            pid: row.pid,
+            numerator: 1,
+            denominator
+          }))
+        : [{ pid: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'Measured 2026-08-23, immediately after scripts/repair-missing-player-gsis-ids.mjs attached 345 gsis ids and minted 619 rows: 0 findings against 17,600-odd gsis-bearing rows scanned. Zero is the CORRECT steady state here rather than a suspiciously clean one, and the reason is structural: height_inches is non-null on every row in the table, so this predicate has never had a match to find. That also means it cannot be falsified against live data — a zero here proves nothing on its own, and calling it a pass would be circular. It is falsified instead by running the identical predicate over a synthetic pair, one bare row and one complete, which is wired into repair-missing-player-gsis-ids as a pre-flight and must find exactly the bare one. Treat a finding as a writer defect, not a data gap: something minted a row this repo has no path to mint.',
+    min_gradeable_units: 1,
+    min_denominator: 15000,
+    repair_command:
+      'Do NOT fill the missing fields to clear the finding — that hides which writer produced the row. Find the writer first: player_changelog carries the source on every field it wrote, and libs-server/create-player.mjs is the only mint path for real players (scripts/seed-nfl-teams.mjs inserts DST pseudo-rows and is excluded here by primary_position). Then decide whether the row is a person we can source biography for, in which case fill it from a gsis-keyed source of truth, or a row that should never have existed, in which case collapse it with scripts/collapse-duplicate-minted-player-rows.mjs.'
+  },
+
+  {
+    check_id: 'shared-birth-date-duplicate-player-rows',
+    invariant:
+      'No two `player` rows share a normalized short name AND an exact date of birth. This is the third duplicate class, and the two registered siblings are both blind to it: duplicate-person-rows requires the twin to hold ZERO external identifiers, and nickname-legal-name-duplicate-rows requires college AND draft year and excludes equal-name pairs by construction. It is also the class the identity-repair attach ladder could not see — a person holding no external id and no gamelog is invisible to both an id match and a name-and-team-season match, which is how 70 duplicate rows were minted on 2026-08-23 before this rung existed.',
+    grain: ['pid', 'duplicate_pid'],
+    rows: async () => {
+      // The 0000-00-00 sentinel is excluded on BOTH sides. It is an absence
+      // wearing a value, and thousands of rows carry it, so admitting it would
+      // pair unrelated people by the thousand and bury the real class.
+      const { rows: found } = await db.raw(
+        `with keyed as (
+          select pid, date_of_birth,
+            lower(regexp_replace(
+              regexp_replace(short_name, '[ ,]+(Jr|Sr|II|III|IV|V)[.]{0,1}[ ]*$', '', 'i'),
+              '[^A-Za-z]', '', 'g')) as name_key
+          from player
+          where primary_position <> 'DST'
+            and short_name is not null
+            and date_of_birth is not null
+            and date_of_birth::text not like '0000%'
+        )
+        select a.pid, b.pid as duplicate_pid
+        from keyed a
+        join keyed b
+          on b.name_key = a.name_key
+         and b.date_of_birth = a.date_of_birth
+         and b.pid > a.pid`
+      )
+
+      const [scanned] = await db('player').count({ count: '*' })
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            pid: row.pid,
+            duplicate_pid: row.duplicate_pid,
+            numerator: 1,
+            denominator
+          }))
+        : [{ pid: null, duplicate_pid: null, numerator: 0, denominator }]
+    },
+    // A RATCHET, not an invariant. 39 pairs predate the 2026-08-23 identity
+    // repair and adjudicating them is a separate exercise, so the threshold
+    // holds the line at what was there rather than asserting a clean table.
+    // Lower it as pairs are retired; never raise it.
+    max_count: 39,
+    calibration:
+      'Measured 2026-08-23 across three readings on the same day, which is what makes the ratchet trustworthy: 39 pairs before the identity repair, 109 immediately after it minted 689 rows, and 39 again after scripts/collapse-duplicate-minted-player-rows.mjs retired the 70 it had created. The middle reading is the calibration that matters — the check moved by exactly the number of duplicates introduced and back, so it is measuring the thing it claims to. 16 of the standing 39 have a gsis id on BOTH rows, which is the harder half: those cannot be collapsed by moving identifiers and need a real merge. A finding is a CANDIDATE, not a duplicate — twins exist, and two people sharing a surname, a first initial and a birth date is rare rather than impossible.',
+    min_gradeable_units: 1,
+    min_denominator: 25000,
+    repair_command:
+      'Adjudicate each pair before merging; this predicate finds twins as readily as duplicates. Where one row holds no gsis id and is unreferenced, scripts/collapse-duplicate-minted-player-rows.mjs moves the identifiers onto the incumbent and deletes it, proving the row is referenced by none of the 140 pid-carrying tables first. Where BOTH rows carry a gsis id, that script correctly refuses — the two ids are a contradiction it has no standing to resolve, and those belong with the conflated-identity adjudication in scripts/audit-conflated-player-identity.mjs.'
+  },
+
+  {
     check_id: 'nickname-legal-name-duplicate-rows',
     invariant:
       'No person holds two `player` rows spelling their first name differently. The sibling duplicate-person-rows check cannot see this class on TWO independent grounds, both verified 2026-08-15 against production: it joins on `formatted_name` equality, which Red/Khalil Murdock and L.T./Labbeus Overton fail by construction, and it requires the second row to hold ZERO external identifiers, while these carry an esb id. It returns none of the five live 2026 pairs. Nothing else grades it either — libs-server/player-name-utils.mjs reaches Jimmy/James and Pat/Patrick but not Red/Khalil, L.T./Labbeus or Trey/James, and `player_aliases` cannot be seeded because the minting source (scripts/import-players-sleeper.mjs, cron 30 3 * * *) carries no legal-name spelling in its payload.',
