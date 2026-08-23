@@ -3,7 +3,9 @@ import * as chai from 'chai'
 
 import grade_adp_import_run, {
   MINIMUM_FEED_PLAYERS,
-  MINIMUM_MATCH_RATE
+  MINIMUM_MATCH_RATE,
+  MINIMUM_ADP_FILL_RATE,
+  summarize_adp_feed
 } from '#libs-server/grade-adp-import-run.mjs'
 
 const expect = chai.expect
@@ -111,6 +113,65 @@ describe('LIBS-SERVER grade_adp_import_run', function () {
     )
   })
 
+  it('fails a feed that is half empty rather than entirely empty', () => {
+    // The live Yahoo shape on 2026-08-23: 203 of 466 matched rows carried an
+    // ADP and the rest carried nothing, which the zero-only rule passed every
+    // day for two months.
+    const grade = grade_adp_import_run({
+      source_id: 'YAHOO',
+      year: 2026,
+      feeds: [
+        { label: 'HALF_PPR_REDRAFT', fetched: 500, matched: 466, with_adp: 203 }
+      ]
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.failures[0]).to.include('adp fill rate 43.6%')
+    expect(grade.failures[0]).to.include(
+      `below ${(MINIMUM_ADP_FILL_RATE * 100).toFixed(1)}%`
+    )
+  })
+
+  it('fails a fully populated feed carrying one repeated sentinel', () => {
+    // ESPN's per-season endpoint answers 2025 with averageDraftPosition 170.00
+    // for all 500 players. Complete, fully matched, fully filled, and garbage:
+    // no other rule can see it.
+    const grade = grade_adp_import_run({
+      source_id: 'ESPN',
+      year: 2025,
+      feeds: [
+        {
+          label: 'PPR_REDRAFT',
+          fetched: 500,
+          matched: 497,
+          with_adp: 497,
+          distinct_adp: 1
+        }
+      ]
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.failures[0]).to.include(
+      'single repeated average draft position'
+    )
+  })
+
+  it('passes a real distribution under the same rule', () => {
+    // The control the case above needs: same shape, many distinct positions.
+    const grade = grade_adp_import_run({
+      source_id: 'ESPN',
+      year: 2026,
+      feeds: [
+        {
+          label: 'PPR_REDRAFT',
+          fetched: 500,
+          matched: 497,
+          with_adp: 497,
+          distinct_adp: 480
+        }
+      ]
+    })
+    expect(grade.passed).to.equal(true)
+  })
+
   it('skips the fill-rate rule when the caller does not count it', () => {
     const grade = grade_adp_import_run({
       source_id: 'MFL',
@@ -119,6 +180,41 @@ describe('LIBS-SERVER grade_adp_import_run', function () {
     })
     expect(grade.passed).to.equal(true)
     expect(grade.summary).to.not.include('with adp')
+  })
+
+  describe('summarize_adp_feed', () => {
+    it('counts every figure off the same rows, at one grain', () => {
+      const feed = summarize_adp_feed({
+        label: 'PPR_REDRAFT',
+        fetched: 10,
+        rows: [
+          { average_draft_position: 1.5 },
+          { average_draft_position: 2.5 },
+          { average_draft_position: 2.5 },
+          { average_draft_position: null }
+        ]
+      })
+      expect(feed).to.deep.equal({
+        label: 'PPR_REDRAFT',
+        fetched: 10,
+        matched: 4,
+        with_adp: 3,
+        distinct_adp: 2
+      })
+    })
+
+    it('cannot report more filled rows than it matched', () => {
+      // The Sleeper grain bug expressed as an invariant: with_adp is drawn from
+      // the same array as matched, so it can never exceed it.
+      const feed = summarize_adp_feed({
+        label: 'ALL_FORMATS',
+        fetched: 100,
+        rows: Array.from({ length: 50 }, (_, i) => ({
+          average_draft_position: i + 1
+        }))
+      })
+      expect(feed.with_adp).to.be.at.most(feed.matched)
+    })
   })
 
   it('honors injected bounds', () => {

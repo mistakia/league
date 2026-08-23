@@ -11,6 +11,7 @@ import {
   updatePlayer,
   find_or_create_adp_format,
   grade_adp_import_run,
+  summarize_adp_feed,
   espn
 } from '#libs-server'
 import { current_season } from '#constants'
@@ -40,20 +41,43 @@ const import_espn_adp = async ({
     adp_format.decode_adp_type('PPR_REDRAFT')
   )
 
-  const players = data.players.map((player) => ({
+  // The current season's payload carries `ownership` and `draftRanksByRankType`
+  // on every player; historical seasons do not. Measured 2026-08-23 against the
+  // per-season endpoint, a bare `player.ownership.x` threw for 2019-2022 and
+  // `draftRanksByRankType.STANDARD` threw for 2023, so the script could not
+  // read any season it had not just imported. Reach through optional access:
+  // an absent sub-object is a player with no draft data, not a dead feed, and
+  // the oracle's fill-rate rule is what decides whether too many are missing.
+  const parsed_players = data.players.map((player) => ({
     espn_id: player.id,
     player_name: player.player.fullName,
     team: espn.teamId[player.player.proTeamId],
     position: espn.positionId[player.player.defaultPositionId],
-    auction_value_average: player.player.ownership.auctionValueAverage,
-    average_draft_position: player.player.ownership.averageDraftPosition,
-    percent_owned: player.player.ownership.percentOwned,
-    standard_rank: player.player.draftRanksByRankType.STANDARD.rank,
-    ppr_rank: player.player.draftRanksByRankType.PPR.rank,
+    auction_value_average: player.player.ownership?.auctionValueAverage ?? null,
+    // ESPN reports 0.0 for a player nobody drafted, which is a sentinel and
+    // not a draft position -- 2019 answers 0.0 for all 500 players. Writing it
+    // verbatim puts every undrafted player ahead of pick 1.
+    average_draft_position:
+      player.player.ownership?.averageDraftPosition || null,
+    percent_owned: player.player.ownership?.percentOwned ?? null,
+    standard_rank: player.player.draftRanksByRankType?.STANDARD?.rank ?? null,
+    ppr_rank: player.player.draftRanksByRankType?.PPR?.rank ?? null,
     standard_auction_value:
-      player.player.draftRanksByRankType.STANDARD.auctionValue,
-    ppr_auction_value: player.player.draftRanksByRankType.PPR.auctionValue
+      player.player.draftRanksByRankType?.STANDARD?.auctionValue ?? null,
+    ppr_auction_value:
+      player.player.draftRanksByRankType?.PPR?.auctionValue ?? null
   }))
+
+  // A player the vendor publishes no draft position for does not belong in an
+  // ADP index -- the row would carry nothing and read as covered. Drop them
+  // BEFORE matching, so the oracle's match rate measures the population ESPN
+  // actually reports on rather than its whole player universe.
+  const players = parsed_players.filter(
+    (player) => player.average_draft_position != null
+  )
+  log(
+    `${players.length} of ${parsed_players.length} espn players carry a draft position`
+  )
 
   const adp_inserts = []
   const matched_espn_ids = new Set()
@@ -150,14 +174,11 @@ const import_espn_adp = async ({
     source_id: 'ESPN',
     year,
     feeds: [
-      {
+      summarize_adp_feed({
         label: 'PPR_REDRAFT',
         fetched: players.length,
-        matched: adp_inserts.length,
-        with_adp: adp_inserts.filter(
-          (insert) => insert.average_draft_position != null
-        ).length
-      }
+        rows: adp_inserts
+      })
     ]
   })
   // console.log, not the debug logger: a scheduled run's verdict must not

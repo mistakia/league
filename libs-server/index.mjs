@@ -149,6 +149,7 @@ export { default as emit_signal, resolve_signal } from './emit-signal.mjs'
 export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
 export { default as grade_adp_import_run } from './grade-adp-import-run.mjs'
+export { summarize_adp_feed } from './grade-adp-import-run.mjs'
 export {
   has_league_notification_been_sent,
   claim_league_notification,

@@ -243,7 +243,17 @@ const import_sleeper_adp_and_projections = async ({
   }
 
   // One matched player yields one adp row per Sleeper format, so the feed is
-  // graded on distinct players matched, not on row count.
+  // graded on distinct players matched, not on row count. Every counter here
+  // must therefore be at PLAYER grain: counting `with_adp` over rows reported
+  // 8,619 filled against 8,355 matched on 2026-08-23 -- a fill rate above 100%,
+  // which the rate rule cannot interpret. This is why the other five sources
+  // use summarize_adp_feed and this one does not; its rows are not its
+  // population.
+  const players_with_adp = new Set(
+    adp_inserts
+      .filter((insert) => insert.average_draft_position != null)
+      .map((insert) => insert.pid)
+  )
   const adp_grade = grade_adp_import_run({
     source_id: 'SLEEPER',
     year: current_season.year,
@@ -252,9 +262,12 @@ const import_sleeper_adp_and_projections = async ({
         label: 'ALL_FORMATS',
         fetched: projections_considered,
         matched: matched_sleeper_ids.size,
-        with_adp: adp_inserts.filter(
-          (insert) => insert.average_draft_position != null
-        ).length
+        with_adp: players_with_adp.size,
+        distinct_adp: new Set(
+          adp_inserts
+            .filter((insert) => insert.average_draft_position != null)
+            .map((insert) => insert.average_draft_position)
+        ).size
       }
     ]
   })

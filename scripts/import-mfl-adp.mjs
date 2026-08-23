@@ -9,7 +9,8 @@ import {
   report_job,
   batch_insert,
   find_or_create_adp_format,
-  grade_adp_import_run
+  grade_adp_import_run,
+  summarize_adp_feed
   // updatePlayer
 } from '#libs-server'
 import { current_season } from '#constants'
@@ -46,19 +47,32 @@ const import_mfl_adp = async ({
   year = current_season.year,
   dry_run = false
 } = {}) => {
+  // PERIOD=ALL, not RECENT. RECENT is a trailing window over the last few
+  // drafts, and outside the live draft season that window is empty -- the
+  // endpoint returns zero players for every past year, which is why this
+  // importer could never read a season it had not just run. Three reasons ALL
+  // is also the right request DURING the season, measured 2026-08-23:
+  //
+  //   - It is a strict superset. 2026 PPR under ALL returned 389 players over
+  //     152 drafts against RECENT's 307 over 57, so ALL is the larger sample
+  //     and the less noisy average, not a staler one.
+  //   - `player_adp_index` is season-grain. A full-season average is what that
+  //     grain means, and it is what every other source here publishes.
+  //   - One request shape serves the live cron and a backfill, so the path
+  //     being exercised daily is the same one a historical import uses.
+  //
+  // IS_PPR=0 selects true standard (non-PPR) leagues. The prior IS_PPR=-1 meant
+  // "any scoring" and returned PPR-identical data, so STANDARD_REDRAFT was a
+  // mislabeled duplicate of the PPR_REDRAFT pull below (verified 2026-06-29:
+  // IS_PPR=-1 == IS_PPR=1 byte-for-byte). IS_PPR=0 may return no rows when MFL
+  // has no standard mocks yet -- correct-but-empty beats populated-but-mislabeled.
   const adp_types = [
     {
-      // IS_PPR=0 selects true standard (non-PPR) leagues. The prior IS_PPR=-1
-      // meant "any scoring" and returned PPR-identical data, so STANDARD_REDRAFT
-      // was a mislabeled duplicate of the PPR_REDRAFT pull below (verified
-      // 2026-06-29: IS_PPR=-1 == IS_PPR=1 byte-for-byte). IS_PPR=0 may return no
-      // rows when MFL has no standard mocks yet -- correct-but-empty beats
-      // populated-but-mislabeled.
-      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=RECENT&FCOUNT=12&IS_PPR=0&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
+      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=ALL&FCOUNT=12&IS_PPR=0&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
       ranking_type: 'STANDARD_REDRAFT'
     },
     {
-      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=RECENT&FCOUNT=12&IS_PPR=1&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
+      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=ALL&FCOUNT=12&IS_PPR=1&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
       ranking_type: 'PPR_REDRAFT'
     }
   ]
@@ -172,14 +186,13 @@ const import_mfl_adp = async ({
     //   }
     // }
 
-    feeds.push({
-      label: ranking_type,
-      fetched: formatted_players.length,
-      matched: adp_inserts.length,
-      with_adp: adp_inserts.filter(
-        (insert) => insert.average_draft_position != null
-      ).length
-    })
+    feeds.push(
+      summarize_adp_feed({
+        label: ranking_type,
+        fetched: formatted_players.length,
+        rows: adp_inserts
+      })
+    )
 
     if (dry_run) {
       log(`Dry run: ${adp_inserts.length} ${ranking_type} ADP rankings`)

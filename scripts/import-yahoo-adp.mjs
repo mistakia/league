@@ -11,6 +11,7 @@ import {
   updatePlayer,
   find_or_create_adp_format,
   grade_adp_import_run,
+  summarize_adp_feed,
   yahoo
 } from '#libs-server'
 import { current_season } from '#constants'
@@ -49,7 +50,18 @@ const import_yahoo_adp = async ({
   dry_run = false
 } = {}) => {
   const raw_data = await yahoo.get_yahoo_adp()
-  const players = parse_yahoo_data(raw_data)
+  const parsed_players = parse_yahoo_data(raw_data)
+
+  // Yahoo's feed spans its whole player universe, and the ones nobody drafts
+  // carry no draft_analysis at all -- average_pick and percent_drafted both
+  // parse to null. Writing them produced 263 of 466 index rows holding nothing
+  // for the 2026 season and 14,202 such history rows since 2026-06-29, which
+  // every presence check read as covered. Drop them BEFORE matching so the
+  // oracle's match rate measures the drafted population, not the universe.
+  const players = parsed_players.filter((player) => player.adp != null)
+  log(
+    `${players.length} of ${parsed_players.length} yahoo players carry a draft position`
+  )
 
   const average_draft_position_format_id = await find_or_create_adp_format(
     db,
@@ -155,14 +167,11 @@ const import_yahoo_adp = async ({
     source_id: 'YAHOO',
     year,
     feeds: [
-      {
+      summarize_adp_feed({
         label: 'HALF_PPR_REDRAFT',
         fetched: players.length,
-        matched: adp_inserts.length,
-        with_adp: adp_inserts.filter(
-          (insert) => insert.average_draft_position != null
-        ).length
-      }
+        rows: adp_inserts
+      })
     ]
   })
   // console.log, not the debug logger: a scheduled run's verdict must not

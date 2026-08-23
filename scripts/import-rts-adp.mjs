@@ -12,6 +12,7 @@ import {
   updatePlayer,
   find_or_create_adp_format,
   grade_adp_import_run,
+  summarize_adp_feed,
   rts
 } from '#libs-server'
 import { current_season } from '#constants'
@@ -169,14 +170,13 @@ const import_rts_adp = async ({
       }
     }
 
-    feeds.push({
-      label: ranking_type,
-      fetched: players.length,
-      matched: adp_inserts.length,
-      with_adp: adp_inserts.filter(
-        (insert) => insert.average_draft_position != null
-      ).length
-    })
+    feeds.push(
+      summarize_adp_feed({
+        label: ranking_type,
+        fetched: players.length,
+        rows: adp_inserts
+      })
+    )
 
     if (dry_run) {
       log(`Dry run: ${adp_inserts.length} ${ranking_type} ADP rankings`)
