@@ -18,9 +18,10 @@
 # protection on master requires this check by name, and a required check that is
 # SKIPPED never reports a conclusion -- GitHub leaves the pull request pending
 # forever rather than passing it. Gating the whole job behind
-# `if: contains(labels, ...)` would therefore block every ordinary pull request
-# the operator opens. So the job runs on every pull request and decides inside:
-# no label means "not a contribution", which passes immediately.
+# `if:` on the job would therefore block every ordinary pull request the
+# operator opens. So the job runs on every pull request and decides inside: an
+# author other than the contribution App means "not a contribution", which
+# passes immediately.
 #
 # mistakia/league is a PUBLIC repository, so these runs cost no billed Actions
 # minutes.
@@ -29,12 +30,12 @@ name: Contribution Guardrails
 
 on:
   pull_request:
-    # `labeled` and `unlabeled` are load-bearing. The label is applied by the
-    # egress workflow AFTER the pull request is created, so without these the
-    # check would have run once, before the label existed, concluded "not a
-    # contribution", and passed -- and its stale success would satisfy branch
-    # protection for a diff it never actually judged.
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    # The author is fixed at creation, so unlike the old label keying there is
+    # no post-creation event that can change whether this is a contribution.
+    # `synchronize` remains load-bearing: it re-judges every new commit, so a
+    # clean pull request cannot be amended into a guarded-path one after the
+    # check has already gone green.
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -59,11 +60,19 @@ jobs:
       - name: Refuse guarded paths on a labelled contribution
         env:
           # Read through the environment rather than interpolated into the
-          # script body. A pull request title or label is attacker-controlled
-          # text, and `${{ }}` inside a run block is substituted before bash
-          # ever parses it -- which is the standard script-injection shape in
-          # GitHub Actions.
-          IS_CONTRIBUTION: ${{ contains(github.event.pull_request.labels.*.name, 'contribution') }}
+          # script body. A pull request title or branch name is
+          # attacker-controlled text, and `${{ }}` inside a run block is
+          # substituted before bash ever parses it -- which is the standard
+          # script-injection shape in GitHub Actions.
+          #
+          # KEYED ON AUTHOR IDENTITY, NOT ON A LABEL. An earlier version keyed
+          # this on a `contribution` label. That was verified BYPASSABLE on
+          # 2026-08-23: the App's `pull_requests: write` permission includes
+          # label management, so it removed the label from its own pull request
+          # (HTTP 200) and the guardrail flipped from fail to pass. The author
+          # login is assigned by GitHub at creation and the App cannot change
+          # it, so it is the one marker the constrained actor cannot edit.
+          IS_CONTRIBUTION: ${{ github.event.pull_request.user.login == 'league-contributor[bot]' }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
