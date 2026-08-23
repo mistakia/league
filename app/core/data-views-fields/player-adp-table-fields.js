@@ -16,6 +16,13 @@ const create_player_adp_field = (props) => ({
       default_value: current_season.year
     },
     adp_source_id: {
+      // DRAFTKINGS is deliberately absent: the value exists in the
+      // `adp_source_id` postgres enum from the best-ball time-series design,
+      // no importer was ever written for it, and player_adp_index holds zero
+      // DraftKings rows in any season. Offering it in the picker guarantees a
+      // blank column. NFL stays despite its importer being retired in
+      // b12b2dcb4 -- it wrote the 2024 and 2026 seasons and those rows are
+      // still selectable.
       values: [
         'SLEEPER',
         'ESPN',
@@ -24,7 +31,6 @@ const create_player_adp_field = (props) => ({
         'NFL',
         'CBS',
         'UNDERDOG',
-        'DRAFTKINGS',
         'RTS'
       ],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,

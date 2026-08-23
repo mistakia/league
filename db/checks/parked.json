@@ -291,5 +291,59 @@
     "reason": "Josh Johnson and Tyler Johnson are two different Louisiana-Monroe players in the same class. Two people.",
     "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman — six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
     "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "ESPN"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "YAHOO"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "CBS"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "MFL"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "RTS"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "adp-source-season-coverage",
+    "grain": {
+      "season_year": 2025,
+      "source_id": "NFL"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, not deferred: every one of these vendors serves CURRENT-season ADP only and player_adp_history holds no 2025 observation, so no backfill can clear these rows. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The entry stands permanently; the guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
   }
 ]

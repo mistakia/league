@@ -9,7 +9,8 @@ import {
   find_player_row,
   batch_insert,
   check_projections_index_floor,
-  find_or_create_adp_format
+  find_or_create_adp_format,
+  grade_adp_import_run
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -167,11 +168,17 @@ const import_sleeper_adp_and_projections = async ({
   const matched_sleeper_ids = new Set()
   const unmatched_projections = []
 
+  // Projections carrying no stats are skipped below, so they are not part of
+  // the denominator the oracle grades a match rate against.
+  let projections_considered = 0
+
   // First iteration: match by sleeper_id
   for (const projection of projections) {
     if (!projection.stats || Object.keys(projection.stats).length === 0) {
       continue
     }
+
+    projections_considered += 1
 
     let player_row
     try {
@@ -234,6 +241,27 @@ const import_sleeper_adp_and_projections = async ({
       })
     }
   }
+
+  // One matched player yields one adp row per Sleeper format, so the feed is
+  // graded on distinct players matched, not on row count.
+  const adp_grade = grade_adp_import_run({
+    source_id: 'SLEEPER',
+    year: current_season.year,
+    feeds: [
+      {
+        label: 'ALL_FORMATS',
+        fetched: projections_considered,
+        matched: matched_sleeper_ids.size,
+        with_adp: adp_inserts.filter(
+          (insert) => insert.average_draft_position != null
+        ).length
+      }
+    ]
+  })
+  // console.log, not the debug logger: a scheduled run's verdict must not
+  // depend on winning a DEBUG namespace negotiation.
+  console.log(adp_grade.summary)
+  if (!adp_grade.passed) throw new Error(adp_grade.summary)
 
   if (dry_run) {
     log(adp_inserts[0])
@@ -358,7 +386,7 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

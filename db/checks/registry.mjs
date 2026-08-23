@@ -111,6 +111,49 @@ const PLAYER_EXTERNAL_ID_COLUMNS = [
   'yahoo_player_id'
 ]
 
+// The ADP sources we run an importer for, with the number of distinct
+// adp_format rows each vendor publishes. DECLARED, never derived from the table
+// being graded: a derived expectation defines health as whatever landed, which
+// is precisely the reading that let a whole season of missing sources look
+// normal.
+//
+// `expected_formats` is a MINIMUM. A vendor adding a format is not a finding;
+// dropping one is. DRAFTKINGS is deliberately absent — the data-view field
+// offers it as an adp_source_id and no importer has ever existed for it, so
+// expecting rows would raise a finding no repair could clear.
+const EXPECTED_ADP_SOURCES = [
+  { source_id: 'SLEEPER', first_season: 2024, expected_formats: 12 },
+  { source_id: 'RTS', first_season: 2024, expected_formats: 3 },
+  { source_id: 'CBS', first_season: 2024, expected_formats: 2 },
+  { source_id: 'MFL', first_season: 2024, expected_formats: 2 },
+  { source_id: 'ESPN', first_season: 2024, expected_formats: 1 },
+  { source_id: 'YAHOO', first_season: 2024, expected_formats: 1 },
+  // NFL.com shut its fantasy product down and moved to ESPN; the importer was
+  // retired in league b12b2dcb4 on 2026-08-14, after it had already written the
+  // 2026 season. `last_season` stops a retired source from raising a finding
+  // every year forever while keeping the seasons it DID cover graded.
+  {
+    source_id: 'NFL',
+    first_season: 2024,
+    last_season: 2026,
+    expected_formats: 1
+  },
+  // Underdog best ball runs from base-storage rather than the league host, on
+  // the hourly `ln-bestball-adp` binfile, and started with the 2026 season.
+  { source_id: 'UNDERDOG', first_season: 2026, expected_formats: 2 }
+]
+
+// A season becomes gradeable on August 1 of its own year. Every vendor
+// publishes by late July and the importers' crontab window is June through
+// August, so before that date an empty season is early rather than missing --
+// the seasonal-blind-window trap, expressed as a per-row precondition instead
+// of a short-circuit that would make the check vacuous.
+const adp_season_window_is_open = (season_year) => {
+  const now = new Date()
+  const window_open = new Date(Date.UTC(season_year, 7, 1))
+  return now >= window_open
+}
+
 // Seasons the PFR cache holds completely enough to be worth asking about. The
 // precondition rejects a week the reference cannot cover, so listing a thin
 // season costs an un-gradeable report rather than a false finding.
@@ -631,6 +674,86 @@ const registry = [
     min_denominator: 10,
     repair_command:
       'Do NOT edit player_field_override to match `player` — that inverts the direction of authority and destroys the verdict. Establish which side is wrong first. If the override is right and the write never landed or was reverted, re-apply it: node libs-server/set-player-field-override.mjs --pid <pid> --column_name <column> --override_value <value> --provider_name <provider> --adjudicated_by <who> --evidence_source <evidence> --reason <why>. The usual cause of a refusal is the cross-row uniqueness guard on an external id, which requires clearing the value from the row wrongly holding it FIRST. If the verdict itself has been superseded by new evidence, re-run that same command with the new value and evidence, which revises the row in place and records the change in player_changelog. If the player row was merged away, re-point the override at the surviving pid.'
+  },
+
+  {
+    check_id: 'adp-source-season-coverage',
+    invariant:
+      'Every ADP source we run an importer for wrote rows, in every format it publishes, for every season whose draft window has opened. No other oracle sees a season-shaped hole: the per-run grade in libs-server/grade-adp-import-run.mjs only speaks for a run that HAPPENED, and the runs staleness sweep only speaks for a source whose cadence is declared — so a commented-out crontab line produces no failing run, no stale ledger row and no finding anywhere. That is exactly how the whole 2025 season ended up holding Sleeper ADP and nothing else, discovered a year later by a data view rendering blank.',
+    grain: ['season_year', 'source_id'],
+    rows: async () => {
+      const seasons = await db('player_adp_index')
+        .select('season_year')
+        .count('* as season_rows')
+        .groupBy('season_year')
+
+      // Denominator is the season's WHOLE adp population across every source,
+      // not this source's own row count -- which is zero in precisely the case
+      // this check exists to catch, and a zero denominator is un-gradeable
+      // rather than clean. A season with no adp rows at all is a different and
+      // larger failure, and correctly reads un-gradeable here.
+      const season_rows_by_year = new Map(
+        seasons.map((row) => [Number(row.season_year), Number(row.season_rows)])
+      )
+
+      const observed = await db('player_adp_index')
+        .select('season_year', 'source_id')
+        .countDistinct('average_draft_position_format_id as formats')
+        .groupBy('season_year', 'source_id')
+
+      const formats_by_key = new Map(
+        observed.map((row) => [
+          `${row.season_year}:${row.source_id}`,
+          Number(row.formats)
+        ])
+      )
+
+      const rows = []
+      for (const [season_year, season_rows] of season_rows_by_year) {
+        for (const source of EXPECTED_ADP_SOURCES) {
+          if (season_year < source.first_season) continue
+          if (source.last_season && season_year > source.last_season) continue
+
+          const formats_found =
+            formats_by_key.get(`${season_year}:${source.source_id}`) || 0
+          const formats_missing = Math.max(
+            source.expected_formats - formats_found,
+            0
+          )
+
+          rows.push({
+            season_year,
+            source_id: source.source_id,
+            numerator: formats_missing,
+            denominator: season_rows,
+            formats_found,
+            formats_expected: source.expected_formats,
+            // The season is judged only once its draft window has opened. Every
+            // source publishes by late July, and the importers' own crontab
+            // window is June through August, so August 1 is past the point
+            // where an absence is early rather than missing. Before that date
+            // the current season is legitimately empty and grading it would
+            // manufacture a finding every winter.
+            window_open: adp_season_window_is_open(season_year)
+          })
+        }
+      }
+
+      return rows
+    },
+    precondition: (row) => row.window_open,
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: a source we schedule an importer for either wrote its formats for a season or it did not, so the healthy reading is zero missing formats against a non-zero season population. Measured 2026-08-23 across the three seasons player_adp_index holds. 2024: all seven then-live sources present at their full format counts (SLEEPER 12, RTS 3, CBS 2, MFL 2, ESPN 1, YAHOO 1, NFL 1) against 17,242 season rows. 2026: the seven live sources plus UNDERDOG present at full counts against 14,089 rows and climbing. 2025 is the defect this is calibrated against — 17,498 season rows, ALL of them SLEEPER, every other source at zero because commit 242976665 re-enabled the secondary ADP crontab lines only in 2026 after they had been disabled for the 2025 season. Those ten (season, source) pairs are parked as baselined debt rather than adjudicated: the data is genuinely missing and the vendors serve current-season ADP only, so no backfill can clear them. The expectation table is DECLARED rather than derived from what the table happens to hold, because deriving it would define the healthy state as whatever landed and could never report an absence. Format counts are minimums, so a vendor adding a format is not a finding while dropping one is.',
+    min_gradeable_units: 6,
+    // The row count grows one season at a time, so a floor on it alone would be
+    // satisfied by a scan that read almost nothing. 1,000 sits an order of
+    // magnitude under the smallest season population observed (17,242 in 2024)
+    // and far above the reading it exists to catch, which is the group-by
+    // breaking and returning a near-empty season.
+    min_denominator: 1000,
+    repair_command:
+      'Identify which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line and the runs ledger (`base run list --source service:league-import-<source>-adp`). If it ran and wrote nothing, its own oracle should have failed the run — read /var/log/league/import-<source>-adp.log for the `oracle FAIL` line. A season already past its draft window CANNOT be backfilled from any of these vendors: they serve current ADP only, and player_adp_history holds no earlier observation. Park such a season as baselined debt rather than leaving the finding open.'
   }
 ]
 

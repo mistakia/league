@@ -1110,8 +1110,8 @@ describe('data check registry', function () {
     })
   })
 
-  it('holds nine checks with unique ids', () => {
-    expect(registry).to.have.lengthOf(9)
+  it('holds ten checks with unique ids', () => {
+    expect(registry).to.have.lengthOf(10)
     expect(checks_by_id.size).to.equal(registry.length)
   })
 
@@ -1174,12 +1174,27 @@ describe('data check registry', function () {
     ).to.not.throw()
   })
 
-  it('parks nothing under a disposition of baselined today', () => {
-    // gamelog-orphans measured zero on all four child tables on 2026-08-14, so
-    // it ships as a regression detector over a clean population. A baselined
-    // entry here would suppress nothing and be reported as stale on every run.
-    expect(
-      parked_entries.filter((entry) => entry.disposition === 'baselined')
-    ).to.have.lengthOf(0)
+  it('parks baselined debt only where a repair genuinely cannot land', () => {
+    // The set is pinned rather than the count, so a baselined entry appearing
+    // on a different check is visible in this file. Debt is the exception:
+    // gamelog-orphans, for one, measured zero on all four child tables on
+    // 2026-08-14 and ships as a regression detector over a clean population, so
+    // a baselined entry there would suppress nothing and report stale forever.
+    //
+    // adp-source-season-coverage is the one check that genuinely holds it. Its
+    // 2025 findings are unrecoverable by construction -- the ADP vendors serve
+    // the current season only -- so no repair command exists to clear them and
+    // adjudicating them would assert the missing data is correct.
+    const baselined = parked_entries.filter(
+      (entry) => entry.disposition === 'baselined'
+    )
+
+    expect([
+      ...new Set(baselined.map((entry) => entry.check_id))
+    ]).to.deep.equal(['adp-source-season-coverage'])
+
+    for (const entry of baselined) {
+      expect(entry.owner, entry.check_id).to.be.a('string')
+    }
   })
 })

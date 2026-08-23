@@ -8,7 +8,8 @@ import {
   is_main,
   report_job,
   batch_insert,
-  find_or_create_adp_format
+  find_or_create_adp_format,
+  grade_adp_import_run
   // updatePlayer
 } from '#libs-server'
 import { current_season } from '#constants'
@@ -61,6 +62,8 @@ const import_mfl_adp = async ({
       ranking_type: 'PPR_REDRAFT'
     }
   ]
+
+  const feeds = []
 
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_mfl_data(url)
@@ -169,6 +172,15 @@ const import_mfl_adp = async ({
     //   }
     // }
 
+    feeds.push({
+      label: ranking_type,
+      fetched: formatted_players.length,
+      matched: adp_inserts.length,
+      with_adp: adp_inserts.filter(
+        (insert) => insert.average_draft_position != null
+      ).length
+    })
+
     if (dry_run) {
       log(`Dry run: ${adp_inserts.length} ${ranking_type} ADP rankings`)
       log(adp_inserts[0])
@@ -206,6 +218,12 @@ const import_mfl_adp = async ({
     log(`Unmatched players: ${unmatched_players.length}`)
     unmatched_players.forEach((player) => log(player))
   }
+
+  const grade = grade_adp_import_run({ source_id: 'MFL', year, feeds })
+  // console.log, not the debug logger: a scheduled run's verdict must not
+  // depend on winning a DEBUG namespace negotiation.
+  console.log(grade.summary)
+  if (!grade.passed) throw new Error(grade.summary)
 }
 
 const main = async () => {
@@ -223,7 +241,7 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
