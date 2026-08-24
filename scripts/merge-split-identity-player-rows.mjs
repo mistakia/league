@@ -469,6 +469,166 @@ const audit_merge = async ({ plans, tables }) => {
   return failures
 }
 
+/*
+  The audit for pairs that were merged by an EARLIER process.
+
+  `audit_merge` above can only run in the process that did the merge, because it
+  compares against reference counts captured before the write. Two apply runs
+  died before reaching it, so eight pairs are merged and unaudited, and a plain
+  re-run cannot reach them -- they now present as one row each and
+  `evaluate_pair` refuses them as `not_a_pair`.
+
+  What this can and cannot establish, stated rather than blurred:
+
+  - UNION OF VALUES: fully checkable. The pre-merge snapshot carries both
+    halves' column values, so the invariant that catches the sentinel defect --
+    a real value losing a tie-break to an absence -- is checked exactly as it
+    would have been in-process.
+  - NO SURVIVING FOLD: fully checkable, and it carries more weight here than it
+    looks. The code that performed these merges never deleted rows in its skip
+    branch, and deleted only post-repoint leftovers otherwise, so for THESE
+    merges "the folded pid is referenced by nothing" implies everything moved
+    rather than that something was dropped.
+  - REFERENCE CONSERVATION: NOT checkable, ever. The per-table before-counts
+    were never persisted and the rows have already moved, so there is no way to
+    recover what they were. This reports that as unverifiable rather than
+    passing it, because a check that cannot run must not return green.
+*/
+const audit_already_merged_pairs = async ({
+  dispositions_path,
+  before_rows_path,
+  tables
+}) => {
+  const dispositions = JSON.parse(fs.readFileSync(dispositions_path, 'utf8'))
+  const before_rows = JSON.parse(fs.readFileSync(before_rows_path, 'utf8'))
+  const before_by_pid = new Map(before_rows.map((row) => [row.pid, row]))
+
+  const held = dispositions.filter(
+    (row) => row.disposition === 'review_duplicate_incumbents'
+  )
+
+  const failures = []
+  const audited = []
+  const pending = []
+
+  for (const disposition of held) {
+    const pids = disposition.incumbents.map((row) => row.incumbent_pid)
+    const live = await db('player').whereIn('pid', pids)
+    const live_by_pid = new Map(live.map((row) => [row.pid, row]))
+
+    if (live.length === 2) {
+      pending.push({ gsis_player_id: disposition.gsis_player_id, pids })
+      continue
+    }
+    if (live.length !== 1) {
+      failures.push(
+        `${disposition.gsis_player_id}: ${live.length} of its two rows survive (${pids.join(', ')})`
+      )
+      continue
+    }
+
+    const survivor = live[0]
+    const folded_pid = pids.find((pid) => pid !== survivor.pid)
+    const before_survivor = before_by_pid.get(survivor.pid)
+    const before_folded = before_by_pid.get(folded_pid)
+
+    if (!before_survivor || !before_folded) {
+      failures.push(
+        `${disposition.gsis_player_id}: the pre-merge snapshot is missing ${!before_survivor ? survivor.pid : folded_pid}`
+      )
+      continue
+    }
+
+    // Same exclusions the in-process audit uses: these are the columns the
+    // repair deliberately WRITES after the merge, so neither half having held
+    // them is not a loss.
+    const deliberate = new Set([
+      'gsis_player_id',
+      'esb_player_id',
+      'pfr_player_id',
+      'smart_player_id',
+      'gsis_it_player_id',
+      'first_name',
+      'last_name',
+      'short_name',
+      'formatted_name'
+    ])
+
+    for (const column of Object.keys(before_survivor)) {
+      if (column === 'pid' || deliberate.has(column)) continue
+
+      const candidates = [
+        before_survivor[column],
+        before_folded[column]
+      ].filter((value) => !is_absent_value(value))
+      if (!candidates.length) continue
+
+      const after = survivor[column]
+      if (is_absent_value(after)) {
+        failures.push(
+          `${survivor.pid}.${column} lost its value — held ${JSON.stringify(candidates)}, now ${JSON.stringify(after)}`
+        )
+        continue
+      }
+      if (!candidates.some((value) => String(value) === String(after))) {
+        failures.push(
+          `${survivor.pid}.${column} holds ${JSON.stringify(after)}, which neither half held (${JSON.stringify(candidates)})`
+        )
+      }
+    }
+
+    if (survivor.gsis_player_id !== disposition.gsis_player_id) {
+      failures.push(
+        `${survivor.pid} holds gsis ${survivor.gsis_player_id}, expected ${disposition.gsis_player_id}`
+      )
+    }
+    if (!is_real_birth_date(survivor.date_of_birth)) {
+      failures.push(
+        `${survivor.pid} carries birth date ${survivor.date_of_birth}`
+      )
+    }
+    if (live_by_pid.has(folded_pid)) {
+      failures.push(`${folded_pid} survived its own fold`)
+    }
+
+    audited.push({
+      gsis_player_id: disposition.gsis_player_id,
+      survivor_pid: survivor.pid,
+      folded_pid
+    })
+  }
+
+  // Orphans, across every pid-carrying table at once.
+  const folded_pids = audited.map((entry) => entry.folded_pid)
+  if (folded_pids.length) {
+    const orphans = await count_references({ pids: folded_pids, tables })
+    for (const entry of audited) {
+      const orphaned = orphans.get(entry.folded_pid)
+      if (orphaned.total > 0) {
+        failures.push(
+          `${entry.folded_pid} is still referenced by ${orphaned.by_table.map((row) => `${row.table}(${row.rows})`).join(', ')}`
+        )
+      }
+    }
+  }
+
+  for (const entry of audited) {
+    log(
+      `audited ${entry.gsis_player_id}: survivor ${entry.survivor_pid}, folded ${entry.folded_pid}`
+    )
+  }
+  for (const entry of pending) {
+    log(
+      `NOT MERGED ${entry.gsis_player_id}: both rows alive (${entry.pids.join(', ')})`
+    )
+  }
+  log(
+    `reference conservation is UNVERIFIABLE for these ${audited.length} pairs — the pre-merge per-table counts were never persisted, so this audit does not assert it`
+  )
+
+  return { failures, audited, pending }
+}
+
 const merge_split_identity_player_rows = async ({
   dispositions_path,
   apply = false
@@ -555,12 +715,43 @@ const main = async () => {
         type: 'boolean',
         default: false,
         describe: 'perform the merges; omit for a dry run'
+      })
+      .option('audit_merged_pairs', {
+        type: 'boolean',
+        default: false,
+        describe:
+          'audit pairs merged by an earlier process instead of merging; requires --before_rows_path'
+      })
+      .option('before_rows_path', {
+        type: 'string',
+        describe: 'the pre-merge snapshot of both halves of every pair'
       }).argv
 
-    await merge_split_identity_player_rows({
-      dispositions_path: argv.dispositions_path,
-      apply: argv.apply
-    })
+    if (argv.audit_merged_pairs) {
+      if (!argv.before_rows_path) {
+        throw new Error(
+          '--audit_merged_pairs requires --before_rows_path: without the pre-merge rows there is nothing to compare the survivor against'
+        )
+      }
+      const tables = await get_pid_referencing_tables()
+      const { failures, audited, pending } = await audit_already_merged_pairs({
+        dispositions_path: argv.dispositions_path,
+        before_rows_path: argv.before_rows_path,
+        tables
+      })
+      if (failures.length) {
+        for (const failure of failures) log(`AUDIT FAILURE — ${failure}`)
+        throw new Error(`${failures.length} merged pairs failed the audit`)
+      }
+      log(
+        `audit passed for ${audited.length} previously-merged pairs, ${pending.length} still unmerged`
+      )
+    } else {
+      await merge_split_identity_player_rows({
+        dispositions_path: argv.dispositions_path,
+        apply: argv.apply
+      })
+    }
   } catch (err) {
     error = err
     log(error)
