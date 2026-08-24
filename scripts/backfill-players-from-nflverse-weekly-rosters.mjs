@@ -57,7 +57,14 @@ const initialize_cli = () =>
 const release_url_for_year = (year) =>
   `https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_${year}.csv`
 
-const download_csv = async ({ year, force_download = false }) => {
+// Exported so the identity-repair source ladder reads weekly rosters through
+// THIS download path rather than a second copy of it -- the same arrangement
+// player-identity-sources.mjs already has with import-players-nflverse's
+// `download_players_file`. One URL, one cache location, one failure mode.
+export const download_weekly_roster_csv = async ({
+  year,
+  force_download = false
+}) => {
   const file_path = path.join(os.tmpdir(), `nflverse_roster_weekly_${year}.csv`)
   if (force_download || !fs.existsSync(file_path)) {
     log(`downloading ${release_url_for_year(year)}`)
@@ -159,7 +166,7 @@ const csv_row_to_player_data = (r) => ({
 })
 
 const backfill_year = async ({ year, force_download, dry_run }) => {
-  const csv_path = await download_csv({ year, force_download })
+  const csv_path = await download_weekly_roster_csv({ year, force_download })
   const rows = await readCSV(csv_path)
   if (rows instanceof Error) throw rows
 

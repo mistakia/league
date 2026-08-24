@@ -540,7 +540,9 @@ const repair_missing_player_gsis_ids = async ({
   apply = false,
   output_path,
   include_nfl_pro = true,
-  nfl_pro_last_season = current_season.year
+  nfl_pro_last_season = current_season.year,
+  include_weekly_rosters = true,
+  weekly_roster_last_season = current_season.year
 } = {}) => {
   const dry_run = !apply
   log(dry_run ? 'DRY RUN — nothing will be written' : 'APPLYING writes')
@@ -554,7 +556,9 @@ const repair_missing_player_gsis_ids = async ({
 
   const source_records = await load_source_records({
     include_nfl_pro,
-    nfl_pro_last_season
+    nfl_pro_last_season,
+    include_weekly_rosters,
+    weekly_roster_last_season
   })
   log(`${source_records.size} gsis-keyed source records loaded`)
 
@@ -609,13 +613,20 @@ const main = async () => {
       .option('nfl_pro_last_season', {
         type: 'number',
         default: current_season.year
+      })
+      .option('include_weekly_rosters', { type: 'boolean', default: true })
+      .option('weekly_roster_last_season', {
+        type: 'number',
+        default: current_season.year
       }).argv
 
     await repair_missing_player_gsis_ids({
       apply: argv.apply,
       output_path: argv.output_path,
       include_nfl_pro: argv.include_nfl_pro,
-      nfl_pro_last_season: argv.nfl_pro_last_season
+      nfl_pro_last_season: argv.nfl_pro_last_season,
+      include_weekly_rosters: argv.include_weekly_rosters,
+      weekly_roster_last_season: argv.weekly_roster_last_season
     })
   } catch (err) {
     error = err
