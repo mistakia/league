@@ -3,10 +3,61 @@ import debug from 'debug'
 import db from '#db'
 import update_player_id from './update-player-id.mjs'
 import updatePlayer from './update-player.mjs'
+import { BIRTH_DATE_PLACEHOLDER } from './resolve-canonical-player.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('merge-player')
 enable_debug_namespaces('merge-player,update-player-id')
+
+// `date_of_birth` is a character varying whose "never learned" value is the
+// `0000-00-00` sentinel rather than NULL, so it is both truthy and exactly as
+// long as a real date. The field merge below breaks string ties by length and
+// otherwise prefers `remove_player_row`, which means the sentinel wins outright
+// against a real birth date whenever the row holding the real one survives --
+// the merge then WRITES the sentinel, the one value this repair class is
+// forbidden to produce. An absence is not a value; treat it as one nowhere.
+const is_absent = (value) => !value || value === BIRTH_DATE_PLACEHOLDER
+
+// Exported for its own spec: this rule decides what the surviving row ends up
+// holding, and it is the half of the merge that can be wrong without any
+// database write failing.
+export const merge_player_row_fields = ({
+  update_player_row,
+  remove_player_row
+}) =>
+  Object.keys(update_player_row).reduce((acc, key) => {
+    if (key === 'pid') {
+      return acc
+    }
+
+    const update_value = update_player_row[key]
+    const remove_value = remove_player_row[key]
+
+    // select present values, or longest string, or largest number
+    if (!is_absent(update_value) && !is_absent(remove_value)) {
+      if (typeof update_value === 'string') {
+        if (update_value.length > remove_value.length) {
+          acc[key] = update_value
+        } else {
+          acc[key] = remove_value
+        }
+      } else if (typeof update_value === 'number') {
+        if (update_value > remove_value) {
+          acc[key] = update_value
+        } else {
+          acc[key] = remove_value
+        }
+      } else {
+        acc[key] = update_value
+      }
+    } else if (!is_absent(update_value)) {
+      acc[key] = update_value
+    } else if (!is_absent(remove_value)) {
+      acc[key] = remove_value
+    }
+
+    return acc
+  }, {})
 
 // The caller names which row survives: `update_player_row` keeps its pid and
 // `remove_player_row` is folded into it.
@@ -32,39 +83,10 @@ export default async function ({ update_player_row, remove_player_row }) {
 
   await db('player').where('pid', remove_player_row.pid).del()
 
-  // merge update_player_row and remove_player_row, select truthy values or longest string or largest number
-  const merged_player_row = Object.keys(update_player_row).reduce(
-    (acc, key) => {
-      if (key === 'pid') {
-        return acc
-      }
-
-      if (update_player_row[key] && remove_player_row[key]) {
-        if (typeof update_player_row[key] === 'string') {
-          if (update_player_row[key].length > remove_player_row[key].length) {
-            acc[key] = update_player_row[key]
-          } else {
-            acc[key] = remove_player_row[key]
-          }
-        } else if (typeof update_player_row[key] === 'number') {
-          if (update_player_row[key] > remove_player_row[key]) {
-            acc[key] = update_player_row[key]
-          } else {
-            acc[key] = remove_player_row[key]
-          }
-        } else {
-          acc[key] = update_player_row[key]
-        }
-      } else if (update_player_row[key]) {
-        acc[key] = update_player_row[key]
-      } else if (remove_player_row[key]) {
-        acc[key] = remove_player_row[key]
-      }
-
-      return acc
-    },
-    {}
-  )
+  const merged_player_row = merge_player_row_fields({
+    update_player_row,
+    remove_player_row
+  })
 
   await updatePlayer({
     pid: update_player_row.pid,
