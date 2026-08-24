@@ -19,30 +19,66 @@
   2019 preseason game, all of them stat ids 29 and 32 -- kicking stats, which
   only a K or a P records.
 
-  ## Dante Barnett — the survey had the direction backwards
+  ## Dante Barnett — THREE people on one row, not two
 
   `DANT-BARN-002837` IS the 2017 Kansas State Dante Barnett. The row holds his
-  esb id BAR403653, his 2017-era nfl_player_id, a 2017 rookie contract, and his
-  Booker T. Washington (OK) high school, and its own `college_division` says Big
-  12. Its `smart_player_id` decodes to ASCII "00-0033677" in its own bytes.
+  esb id BAR403653, his 2017-era nfl_player_id, a 2017 rookie contract, his
+  Booker T. Washington (OK) high school, and combine numbers (4.67 forty, 4.21
+  shuttle) no 275 lb lineman runs; its own `college_division` says Big 12 and its
+  `smart_player_id` decodes to ASCII "00-0033677" in its own bytes. He is
+  pro-football-reference `BarnDa03`: SS, 6-0, 192 lb, Kansas St., signed and
+  released by Denver in 2017 and never active for a regular-season game.
 
-  What is grafted onto it is AHMED HASSANEIN, the 2025 sixth-round Boise State
-  edge rusher: gsis `00-0040761`, the 2025 draft year, the 6th round and the
-  196th overall pick -- which is exactly Hassanein's slot -- and his 275 lb
-  playing weight on a row whose own height is a 6-foot-1 defensive back's.
+  TWO other men are grafted onto him, and separating them is what this repair is.
 
-  Hassanein has his own row, `AHME-HASS-003538`, correctly holding esb HAS512236
-  and the same 2025 pick, and MISSING the gsis id sitting on Barnett's row. So
-  the repair does not merely clear: it returns each id to its owner.
+  AHMED HASSANEIN, the 2025 sixth-round Boise State edge rusher (pfr `HassAh00`,
+  born 2002-07-09), contributed gsis `00-0040761`, gsis_it 58805, the 6th round
+  and the 196th overall pick, which is exactly his slot. He has his own row,
+  `AHME-HASS-003538`, holding esb HAS512236 and that same pick and MISSING the
+  gsis id, so the repair returns the id rather than merely clearing it.
 
-  Two contaminated fields belong to a third party and are cleared rather than
-  corrected, because nothing here establishes a right value:
+  A SECOND DANTE BARNETT -- pfr `BarnDa04`, a 6-1, 275 lb defensive lineman who
+  signed with Cincinnati in April 2025, spent 2025 on Green Bay's practice squad
+  and signed with Cleveland in August 2026 -- contributed `date_of_birth`
+  2003-02-11, `college` "Dickinson, Pa.", `weight_pounds` 275 and
+  `jersey_number` 69, which his pfr page displays. He has NO row of our own, and
+  that absence is the mechanism: both importers match him onto the safety BY
+  NAME. The player_changelog records the collision directly -- on 2026-07-24 the
+  `nfl` importer rewrote date_of_birth, college, current_nfl_team and
+  jersey_number TWICE in seven minutes, flip-flopping between Hassanein's values
+  (2002-07-10, Boise State, DET, 99) and this man's (2003-02-11, Dickinson Pa.,
+  GB, 69). Clearing without creating his row leaves that oscillation running, so
+  this repair creates it.
 
-  - `date_of_birth` 2003-02-11 is neither man's. Hassanein was born 2002-07-09
-    and Barnett was a 2017 rookie, so a 2003 birth date would make him fourteen.
-  - `jersey_number` 69 on a 193 lb defensive back is impossible under the NFL's
-    own numbering, but no source here says whose it is. It is left alone and
-    recorded as a finding rather than guessed at.
+  ## What the changelog recovers
+
+  The safety's own values are not lost and do not have to be nulled. On
+  2025-09-17 Sleeper overwrote them in one batch, and the previous_value column
+  still holds them: date_of_birth 1993-06-14, college Kansas State,
+  weight_pounds 193, nfl_draft_year 2017, gsis 00-0033677, gsis_it 45551. Each
+  is restored to that value rather than cleared.
+
+  `jersey_number` is the exception and goes NULL: 69 is demonstrably the 2025
+  lineman's, and the safety never played a regular-season game, so pfr displays
+  no number for him and no source here gives him one.
+
+  `height_inches` 73 is deliberately NOT touched. It predates every contaminating
+  write -- the changelog carries no height change at all -- so it is the safety's
+  own recorded value, and the 2025 lineman being coincidentally 6-1 is not
+  evidence against a field nobody overwrote.
+
+  ## The stat row the grafted gsis id dragged in
+
+  `DANT-BARN-002837` carries one `player_gamelogs` row, esbid 2025080851 -- DET
+  against ATL in 2025, sourced `nfl-pro-gameday-roster`, and reached only through
+  the grafted gsis id. It is Hassanein's game, and its `player_position` reads DB
+  because it inherited the safety's position off the row it landed on. Fixing the
+  id without moving the gamelog would leave a 2025 Detroit appearance on a man
+  who last dressed for Denver in 2017.
+
+  It is repointed to `AHME-HASS-003538`, which holds no gamelogs at all, so the
+  move cannot collide. The safety's own `player_seasonlogs` row (2017 PRE, DB,
+  career year 1) is his and stays.
 
   ## Ryan Anderson — the incumbent is right and holds TWO of the punter's ids
 
@@ -78,14 +114,14 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { updatePlayer } from '#libs-server'
+import { updatePlayer, createPlayer } from '#libs-server'
 import set_player_field_override from '#libs-server/set-player-field-override.mjs'
 
 const PROVIDER = 'nflverse'
 const ADJUDICATED_BY = 'operator (approved 2026-08-24)'
 
 const BARNETT_EVIDENCE =
-  'nflverse weekly rosters 2017: gsis 00-0033677 is Dante Barnett, DB, Kansas State, esb BAR403653, gsis_it 45551, 193 lb. nflverse players parquet: gsis 00-0040761 is Ahmed Hassanein, DE, Boise State, esb HAS512236, born 2002-07-09, 275 lb, 2025 draft. nfl_play_stats names 00-0033677 D.Barnett on 7 rows in 2017 and 00-0040761 A.Hassanein on 6 rows in 2025.'
+  'nflverse weekly rosters 2017: gsis 00-0033677 is Dante Barnett, DB, Kansas State, esb BAR403653, gsis_it 45551, 193 lb. nflverse players parquet: gsis 00-0040761 is Ahmed Hassanein, DE, Boise State, esb HAS512236, born 2002-07-09, 275 lb, 2025 draft. nfl_play_stats names 00-0033677 D.Barnett on 7 rows in 2017 and 00-0040761 A.Hassanein on 6 rows in 2025. pro-football-reference BarnDa03 is the Kansas St. SS, 6-0 192, Denver 2017; BarnDa04 is a second Dante Barnett, 6-1 275, jersey 69, Cincinnati 2025 / Green Bay practice squad / Cleveland 2026. player_changelog 2025-09-17 records the overwritten values as previous_value: date_of_birth 1993-06-14, college Kansas State, weight_pounds 193, nfl_draft_year 2017.'
 
 const ANDERSON_EVIDENCE =
   'nflverse weekly rosters 2019: gsis 00-0035138 is Ryan Anderson, P, Rutgers, esb AND490464, gsis_it 47570; gsis 00-0035335 is Ryan Anderson, OL, Wake Forest, esb AND490543, gsis_it 48464. nfl_play_stats carries 00-0035138 on stat ids 29 and 32 only, which are kicking stats.'
@@ -94,6 +130,27 @@ const BARNETT_PID = 'DANT-BARN-002837'
 const HASSANEIN_PID = 'AHME-HASS-003538'
 const LINEMAN_PID = 'RYAN-ANDE-004143'
 const PUNTER_PID = 'RYAN-ANDE-023589'
+
+// The second Dante Barnett, who has no row yet. Created by this script.
+const BARNETT_2025_PFR_ID = 'BarnDa04'
+const BARNETT_2025_PLAYER = {
+  first_name: 'Dante',
+  last_name: 'Barnett',
+  primary_position: 'DE',
+  secondary_position: 'DE',
+  position_depth: 'DE',
+  height_inches: 73,
+  weight_pounds: 275,
+  date_of_birth: '2003-02-11',
+  college: 'Dickinson, Pa.',
+  nfl_draft_year: 2025,
+  jersey_number: 69,
+  current_nfl_team: 'CLE',
+  pfr_player_id: BARNETT_2025_PFR_ID
+}
+
+// Hassanein's, reached only through the gsis id grafted onto the safety's row.
+const HASSANEIN_GAMELOG_ESBID = 2025080851
 
 /*
   The preconditions. A row that has moved since this was adjudicated -- picked up
@@ -112,14 +169,18 @@ const EXPECT = {
     draft_overall_pick: 196,
     weight_pounds: 275,
     college: 'Dickinson, Pa.',
-    date_of_birth: '2003-02-11'
+    date_of_birth: '2003-02-11',
+    jersey_number: 69,
+    pfr_player_id: null
   },
   [HASSANEIN_PID]: {
     last_name: 'Hassanein',
     esb_player_id: 'HAS512236',
+    pfr_player_id: 'HassAh00',
     gsis_player_id: null,
     nfl_draft_year: 2025,
-    draft_overall_pick: 196
+    draft_overall_pick: 196,
+    date_of_birth: '0000-00-00'
   },
   [LINEMAN_PID]: {
     last_name: 'Anderson',
@@ -188,7 +249,7 @@ const WRITES = [
     pid: BARNETT_PID,
     column_name: 'weight_pounds',
     value: 193,
-    note: "275 is Hassanein's listed weight; the roster gives Barnett 193",
+    note: "Sleeper wrote 275 over 193 on 2025-09-17 alongside the 2025 lineman's birth date and college; both other men weigh 275 and the safety weighs 193",
     evidence_source: BARNETT_EVIDENCE
   },
   {
@@ -203,8 +264,23 @@ const WRITES = [
     kind: 'adjudicate',
     pid: BARNETT_PID,
     column_name: 'date_of_birth',
+    value: '1993-06-14',
+    note: "2003-02-11 is the 2025 lineman's; the changelog holds the safety's own date as the value Sleeper overwrote on 2025-09-17",
+    evidence_source: BARNETT_EVIDENCE
+  },
+  {
+    kind: 'adjudicate',
+    pid: BARNETT_PID,
+    column_name: 'jersey_number',
     value: null,
-    note: '2003-02-11 belongs to neither man and no source here gives Barnett a birth date',
+    note: 'pfr displays 69 on BarnDa04, the 2025 lineman; the safety never dressed for a regular-season game and has no number anywhere',
+    evidence_source: BARNETT_EVIDENCE
+  },
+  {
+    kind: 'attach',
+    pid: BARNETT_PID,
+    update: { pfr_player_id: 'BarnDa03' },
+    note: 'the safety had no pfr id, which is part of why he kept absorbing the other Dante Barnett',
     evidence_source: BARNETT_EVIDENCE
   },
   {
@@ -212,6 +288,14 @@ const WRITES = [
     pid: HASSANEIN_PID,
     update: { gsis_player_id: '00-0040761' },
     note: "the id Barnett's row was holding, returned to its owner",
+    evidence_source: BARNETT_EVIDENCE
+  },
+  {
+    kind: 'adjudicate',
+    pid: HASSANEIN_PID,
+    column_name: 'date_of_birth',
+    value: '2002-07-09',
+    note: "0000-00-00 is not a date; pfr and the nflverse players parquet agree on Hassanein's",
     evidence_source: BARNETT_EVIDENCE
   },
   {
@@ -264,6 +348,50 @@ const check_preconditions = async () => {
       }
     }
   }
+
+  /*
+    The two pfr ids must be unowned, or the attach and the create would each be
+    refused as a duplicate and the run would report a half-done repair.
+  */
+  for (const pfr_player_id of ['BarnDa03', BARNETT_2025_PFR_ID]) {
+    const holders = await db('player').where({ pfr_player_id })
+    if (holders.length) {
+      failures.push(
+        `pfr ${pfr_player_id} is already held by ${holders.map((row) => row.pid).join(', ')}`
+      )
+    }
+  }
+
+  /*
+    Exactly one Dante Barnett row is the whole premise. A second one means
+    somebody already created the 2025 lineman and this script would mint a
+    duplicate rather than repair anything.
+  */
+  const barnetts = await db('player').where({ formatted_name: 'dante barnett' })
+  if (barnetts.length !== 1 || barnetts[0].pid !== BARNETT_PID) {
+    failures.push(
+      `expected exactly one dante barnett row (${BARNETT_PID}), found ${barnetts.map((row) => row.pid).join(', ') || 'none'}`
+    )
+  }
+
+  // The gamelog must still be on the safety, and the destination must be clear.
+  const gamelog = await db('player_gamelogs')
+    .where({ esbid: HASSANEIN_GAMELOG_ESBID, pid: BARNETT_PID })
+    .first()
+  if (!gamelog) {
+    failures.push(
+      `gamelog ${HASSANEIN_GAMELOG_ESBID} is no longer on ${BARNETT_PID}`
+    )
+  }
+  const destination_gamelog = await db('player_gamelogs')
+    .where({ esbid: HASSANEIN_GAMELOG_ESBID, pid: HASSANEIN_PID })
+    .first()
+  if (destination_gamelog) {
+    failures.push(
+      `${HASSANEIN_PID} already holds gamelog ${HASSANEIN_GAMELOG_ESBID}; the repoint would collide`
+    )
+  }
+
   return failures
 }
 
@@ -279,6 +407,12 @@ const describe = () => {
       )
     }
   }
+  console.log(
+    `  CREATE a row for the 2025 Dante Barnett — ${JSON.stringify(BARNETT_2025_PLAYER)}`
+  )
+  console.log(
+    `  MOVE player_gamelogs esbid ${HASSANEIN_GAMELOG_ESBID} from ${BARNETT_PID} to ${HASSANEIN_PID} — Hassanein's 2025 DET game, reached only through the grafted gsis id`
+  )
 }
 
 const apply_writes = async () => {
@@ -325,12 +459,47 @@ const apply_writes = async () => {
 }
 
 /*
+  The 2025 Dante Barnett's own row. Created AFTER the safety's writes, so the
+  jersey number, birth date and college it carries are no longer duplicated on a
+  row the importers would rather match.
+
+  createPlayer swallows its own insert error and returns null, so a null return
+  is reported as a failure rather than read as a no-op.
+*/
+const create_2025_barnett = async () => {
+  const created = await createPlayer({ ...BARNETT_2025_PLAYER })
+  if (!created) {
+    return {
+      pid: null,
+      failure:
+        'createPlayer returned null for the 2025 Dante Barnett (see the create-player log)'
+    }
+  }
+  console.log(
+    `created ${created.pid} for the 2025 Dante Barnett, pfr ${BARNETT_2025_PFR_ID}`
+  )
+  return { pid: created.pid, failure: null }
+}
+
+const move_hassanein_gamelog = async () => {
+  const moved = await db('player_gamelogs')
+    .where({ esbid: HASSANEIN_GAMELOG_ESBID, pid: BARNETT_PID })
+    .update({ pid: HASSANEIN_PID })
+  console.log(
+    `moved ${moved} gamelog row(s) for esbid ${HASSANEIN_GAMELOG_ESBID} to ${HASSANEIN_PID}`
+  )
+  return moved === 1
+    ? null
+    : `expected to move exactly 1 gamelog row, moved ${moved}`
+}
+
+/*
   The end state, asserted rather than assumed. Each id must sit on exactly one
   row and it must be the right one -- which is the invariant the conflation broke
   and the only thing worth checking after a repair whose whole content is moving
   ids between rows.
 */
-const verify = async () => {
+const verify = async (created_2025_pid) => {
   const expected_owner = {
     '00-0033677': BARNETT_PID,
     '00-0040761': HASSANEIN_PID,
@@ -383,6 +552,59 @@ const verify = async () => {
     }
   }
 
+  const pfr_owner = {
+    BarnDa03: BARNETT_PID,
+    [BARNETT_2025_PFR_ID]: created_2025_pid,
+    HassAh00: HASSANEIN_PID
+  }
+  for (const [pfr_player_id, pid] of Object.entries(pfr_owner)) {
+    const rows = await db('player').where({ pfr_player_id })
+    if (rows.length !== 1 || rows[0].pid !== pid) {
+      failures.push(
+        `pfr ${pfr_player_id} is held by ${rows.map((row) => row.pid).join(', ') || 'none'}, expected ${pid}`
+      )
+    }
+  }
+
+  /*
+    The separation itself, asserted on the fields that were fused. Checking the
+    ids alone would pass on a row that still carried the other man's birth date.
+  */
+  const safety = await db('player').where({ pid: BARNETT_PID }).first()
+  const safety_expected = {
+    date_of_birth: '1993-06-14',
+    college: 'Kansas State',
+    weight_pounds: 193,
+    nfl_draft_year: 2017,
+    jersey_number: null,
+    draft_round: null,
+    draft_overall_pick: null
+  }
+  for (const [column, value] of Object.entries(safety_expected)) {
+    const found = safety[column]
+    const matches = value === null ? !found : String(found) === String(value)
+    if (!matches) {
+      failures.push(
+        `${BARNETT_PID}.${column} holds ${JSON.stringify(found)}, expected ${JSON.stringify(value)}`
+      )
+    }
+  }
+
+  const gamelogs = await db('player_gamelogs').where({
+    esbid: HASSANEIN_GAMELOG_ESBID
+  })
+  const gamelog_pids = gamelogs.map((row) => row.pid)
+  if (gamelog_pids.includes(BARNETT_PID)) {
+    failures.push(
+      `gamelog ${HASSANEIN_GAMELOG_ESBID} is still on ${BARNETT_PID}`
+    )
+  }
+  if (!gamelog_pids.includes(HASSANEIN_PID)) {
+    failures.push(
+      `gamelog ${HASSANEIN_GAMELOG_ESBID} did not land on ${HASSANEIN_PID}`
+    )
+  }
+
   return failures
 }
 
@@ -413,7 +635,15 @@ const main = async () => {
 
   console.log('')
   const unapplied = await apply_writes()
-  const failures = await verify()
+
+  const { pid: created_2025_pid, failure: create_failure } =
+    await create_2025_barnett()
+  if (create_failure) unapplied.push(create_failure)
+
+  const move_failure = await move_hassanein_gamelog()
+  if (move_failure) unapplied.push(move_failure)
+
+  const failures = await verify(created_2025_pid)
 
   for (const entry of unapplied) {
     console.log(`NOT APPLIED — ${entry}`)
@@ -428,10 +658,7 @@ const main = async () => {
   }
 
   console.log(
-    '\nverified: every gsis, esb and gsis_it id above is held by exactly one row, and it is the right one'
-  )
-  console.log(
-    'NOT REPAIRED, recorded as a finding: DANT-BARN-002837 carries jersey_number 69, which no 193 lb defensive back wears and which no source here attributes to anyone'
+    '\nverified: every gsis, esb, gsis_it and pfr id above is held by exactly one row and it is the right one; the safety carries his own birth date, college, weight and draft year; and Hassanein carries his own 2025 gamelog'
   )
 
   await db.destroy()
