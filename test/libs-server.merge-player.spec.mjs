@@ -12,19 +12,19 @@ const expect = chai.expect
 // whenever it sat on the removed row.
 const esb_row = {
   pid: 'ERNE-SIMS-024567',
-  first_name: 'ernest',
-  last_name: 'sims',
+  first_name: 'Ernest',
+  last_name: 'Sims',
   date_of_birth: '0000-00-00',
   height_inches: 71,
-  weight_pounds: 230
+  weight_pounds: 231
 }
 
 const pfr_row = {
-  pid: 'ERNI-SIMS-002455',
-  first_name: 'ernie',
-  last_name: 'sims',
+  pid: 'ERNE-SIMS-024953',
+  first_name: 'Ernest',
+  last_name: 'Sims III',
   date_of_birth: '1984-12-23',
-  height_inches: 71,
+  height_inches: 72,
   weight_pounds: 230
 }
 
@@ -78,7 +78,7 @@ describe('LIBS SERVER merge_player_row_fields', function () {
       remove_player_row: esb_row
     })
 
-    expect(merged.first_name).to.equal('ernest')
+    expect(merged.last_name).to.equal('Sims III')
   })
 
   it('never carries the surviving pid into the update', () => {
