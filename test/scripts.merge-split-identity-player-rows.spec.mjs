@@ -190,6 +190,111 @@ describe('SCRIPTS merge-split-identity-player-rows', function () {
       expect(plan.refusal).to.equal(undefined)
     })
 
+    /*
+      The Lefeged case, read from production 2026-08-24. `00-0028650` is one
+      person across a row named "Joseph Young" holding esb LEF333270 and a row
+      named "Joe Lefeged" holding pfr LefeJo00. Both identifiers spell Lefeged
+      and neither spells Young, so the row name is what is corrupt. A veto read
+      off the names alone refuses a pair the identifiers settle.
+    */
+    const lefeged_source = {
+      first_name: 'Joseph',
+      last_name: 'Young',
+      position: 'S',
+      college: 'Rutgers',
+      esb_id: 'LEF333270',
+      pfr_id: 'LefeJo00',
+      smart_id: null,
+      gsis_it_id: null
+    }
+    const young_row = {
+      pid: 'JOSE-YOUN-024689',
+      first_name: 'Joseph',
+      last_name: 'Young',
+      short_name: 'J.Young',
+      date_of_birth: '0000-00-00',
+      nfl_draft_year: 2011,
+      gsis_player_id: null,
+      esb_player_id: 'LEF333270',
+      pfr_player_id: null
+    }
+    const lefeged_row = {
+      pid: 'JOEX-LEFE-021580',
+      first_name: 'Joe',
+      last_name: 'Lefeged',
+      short_name: 'J.Lefeged',
+      date_of_birth: '1988-06-02',
+      nfl_draft_year: 2011,
+      gsis_player_id: null,
+      esb_player_id: null,
+      pfr_player_id: 'LefeJo00'
+    }
+
+    const evaluate_lefeged = ({ rows, source_record = lefeged_source }) =>
+      evaluate_pair({
+        disposition: disposition({
+          gsis_player_id: '00-0028650',
+          pids: rows.map((row) => row.pid),
+          source_record
+        }),
+        rows,
+        references: references({
+          'JOSE-YOUN-024689': 40,
+          'JOEX-LEFE-021580': 12
+        })
+      })
+
+    it('merges past a row-name disagreement the identifiers settle', () => {
+      const plan = evaluate_lefeged({ rows: [young_row, lefeged_row] })
+
+      expect(plan.refusal).to.equal(undefined)
+      expect(plan.corrected_name.last_name).to.equal('Lefeged')
+      expect(plan.corrected_name.short_name).to.equal('J.Lefeged')
+    })
+
+    it('still refuses when the identifiers do not corroborate each other', () => {
+      const plan = evaluate_lefeged({
+        rows: [young_row, lefeged_row],
+        source_record: { ...lefeged_source, pfr_id: 'WheaTy00' }
+      })
+
+      expect(plan.refusal).to.equal(REFUSAL.SURNAME_DISAGREES)
+    })
+
+    // Corroborating each other is not enough on its own. Two ids agreeing on a
+    // surname that matches NEITHER row is evidence about a third person, and
+    // picking either row from it would be a guess.
+    it('still refuses when the identifiers match neither row', () => {
+      const plan = evaluate_lefeged({
+        rows: [young_row, lefeged_row],
+        source_record: {
+          ...lefeged_source,
+          esb_id: 'WHE333270',
+          pfr_id: 'WheaTy00'
+        }
+      })
+
+      expect(plan.refusal).to.equal(REFUSAL.SURNAME_DISAGREES)
+    })
+
+    it('still refuses when only one identifier is present', () => {
+      const plan = evaluate_lefeged({
+        rows: [young_row, lefeged_row],
+        source_record: { ...lefeged_source, pfr_id: null }
+      })
+
+      expect(plan.refusal).to.equal(REFUSAL.SURNAME_DISAGREES)
+    })
+
+    it('leaves the name alone when the rows already agree', () => {
+      const plan = evaluate_sims({
+        'ERNE-SIMS-024567': 3,
+        'ERNE-SIMS-024953': 113
+      })
+
+      expect(plan.corrected_name).to.equal(null)
+    })
+
     it('refuses anything that is not exactly two rows', () => {
       const plan = evaluate_pair({
         disposition: disposition({
