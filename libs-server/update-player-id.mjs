@@ -23,7 +23,13 @@ enable_debug_namespaces('update-player-id')
   conflict. INCLUDE columns are excluded too (`ord <= indnkeyatts`): they are
   payload, not part of the uniqueness.
 */
-const get_unique_key_columns = async function ({ table_name, column_name }) {
+// Exported so a caller can ask, BEFORE the repoint, how many rows this rule
+// will refuse to move and therefore delete. An audit that re-derives the rule
+// instead of sharing it is auditing a copy that can drift.
+export const get_unique_key_columns = async function ({
+  table_name,
+  column_name
+}) {
   const { rows } = await db.raw(
     `
     -- attname is the name type, and the driver has no parser for a name array,
@@ -71,7 +77,11 @@ const get_unique_key_columns = async function ({ table_name, column_name }) {
   presence check was reaching for and is correct only for rows the survivor
   already has an equivalent of.
 */
-const build_conflict_predicates = ({ table_name, column_name, key_sets }) =>
+export const build_conflict_predicates = ({
+  table_name,
+  column_name,
+  key_sets
+}) =>
   key_sets.map((columns) => {
     // A key of the pid column ALONE means one row per player, so any row under
     // `new_pid` blocks every row under `current_pid`. That falls out of `rest`
