@@ -1,0 +1,82 @@
+-- STATUS: APPLIED 2026-08-24 against league_production
+--
+-- Add a btree index on player_changelog.pid.
+--
+-- Requires `yarn db:exec --no-transaction` (a non-blocking index build cannot
+-- run inside a transaction block). Built without blocking writes because this
+-- table is on the write path of every updatePlayer call, and a plain build
+-- holds SHARE for the whole 8.3 GB scan, blocking every importer behind it.
+-- Every statement below is independently re-runnable -- two session SETs, a
+-- guarded drop and a guarded create -- which is what makes giving up the
+-- transaction wrapper safe here.
+--
+-- The table had NO index on pid at all -- its only index is the primary key on
+-- `id`. So every pid-qualified read sequentially scans all 67,826,128 rows over
+-- 8,289 MB. player_changelog is the largest table in the database.
+--
+-- What this actually unblocks. `update_player_id` iterates every pid-carrying
+-- column in the schema -- 858 (table, column) pairs, not the 140 that carry a
+-- column named exactly `pid` -- and touches this table on each of them. That is
+-- what made two merge apply runs die: run from a laptop over an `ssh -L`
+-- tunnel, the accumulated sequential scans take long enough that the tunnel
+-- drops, and both runs failed at the same point. The failure was previously
+-- attributed to the partitioned nfl_plays tables, which was wrong: nfl_plays
+-- carries no pid column, and this table is nine times the size of the only
+-- other large unindexed one.
+--
+-- Measured 2026-08-24, every pid-carrying column over 200 MB, checked for an
+-- index LEADING with that column. Exactly two lack one:
+--
+--     player_changelog.pid   8289 MB   <- this file
+--     props.pid               919 MB   <- left alone deliberately, see below
+--
+-- Everything else is already covered, including the other giants
+-- (scoring_format_player_gamelogs at 6.7 GB, prop_market_selections_index at
+-- 2.4 GB). So this one index removes roughly 90% of the unindexed scan volume
+-- an identity merge pays. `props.pid` is the remaining 10% and is deliberately
+-- NOT included: it is a separate judgement on a betting table with its own read
+-- patterns, and it is small enough that the merge does not need it.
+--
+-- Column choice. Single-column on pid, and not partial. `pid` has no nulls
+-- (pg_stats null_frac = 0), so a `WHERE pid IS NOT NULL` predicate would
+-- exclude nothing and buy nothing -- the opposite of the prop_markets_index
+-- case, where a partial index earned its place by excluding 51.5% of the table.
+-- No second column: every consumer here filters on pid alone and then wants the
+-- whole row, so a composite would add bytes without removing a lookup.
+--
+-- Cost, MEASURED after the build rather than estimated: 464 MB, against an
+-- 8.3 GB table and a 1,454 MB primary key. The estimate written here before the
+-- apply was 2 to 2.5 GB, and it was wrong by a factor of five -- btree
+-- deduplication collapses the long runs of repeated pid values, which is
+-- exactly the shape of an append-only per-player audit log. Plus btree
+-- maintenance on each updatePlayer insert.
+--
+-- The return: a pid lookup that sequentially scanned 67.8M rows and could not
+-- finish inside the role's statement_timeout now returns in about 0.2s, and
+-- every future identity repair, merge and audit becomes tractable rather than
+-- being a transport problem.
+--
+-- No application read path filters this table by pid -- it is an audit log
+-- written by updatePlayer and read by repairs, merges and audits. So this index
+-- serves maintenance rather than serving traffic, which is the honest framing.
+
+-- The role carries a statement_timeout that a build over 67.8M rows cannot
+-- finish inside; the first attempt on 2026-08-24 was cancelled by it. Unlimited
+-- to EXECUTE but bounded to ACQUIRE is the asymmetry that matters: once a lock
+-- request is queued it blocks new readers behind it, so an unbounded wait to
+-- acquire is strictly worse than failing.
+SET lock_timeout = '30s';
+SET statement_timeout = 0;
+
+-- The drop is not redundant, and leaving it out is a trap.
+--
+-- A cancelled non-blocking build leaves the index present but INVALID and NOT
+-- READY -- which is exactly what the first attempt left behind here. `IF NOT
+-- EXISTS` then sees the name, skips the build, and the file reports success
+-- while the index remains unusable: the planner ignores it, and the sequential
+-- scans this migration exists to remove carry on. Dropping first makes a
+-- re-run genuinely re-runnable rather than merely non-erroring.
+DROP INDEX CONCURRENTLY IF EXISTS public.idx_player_changelog_pid;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_player_changelog_pid
+  ON public.player_changelog USING btree (pid);

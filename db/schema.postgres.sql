@@ -275,6 +275,7 @@ DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season_year;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
+DROP INDEX IF EXISTS public.idx_player_changelog_pid;
 DROP INDEX IF EXISTS public.idx_player_adp_index_source_format;
 DROP INDEX IF EXISTS public.idx_player_adp_index_season_year;
 DROP INDEX IF EXISTS public.idx_player_adp_index_pid;
@@ -32075,6 +32076,13 @@ CREATE INDEX idx_player_adp_index_season_year ON public.player_adp_index USING b
 --
 
 CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, average_draft_position_format_id);
+
+
+--
+-- Name: idx_player_changelog_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_changelog_pid ON public.player_changelog USING btree (pid);
 
 
 --
