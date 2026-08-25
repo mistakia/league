@@ -341,7 +341,7 @@ const process_markets_with_workers = async ({
  * Core processing logic shared by CLI and programmatic interfaces
  *
  * @param {object} options - Processing options
- * @param {object} options.config - Configuration object with year, week, seas_type, etc.
+ * @param {object} options.config - Configuration object with season_year, week, season_type, etc.
  * @param {boolean} options.enable_error_reporting - Enable detailed error analysis
  * @param {boolean} options.enable_job_reporting - Enable job status reporting
  * @param {boolean} options.close_db_on_complete - Close database connection when done
@@ -354,7 +354,7 @@ const execute_processing = async ({
   close_db_on_complete = false
 }) => {
   const start_time = Date.now()
-  const seas_type = config.seas_type || current_season.nfl_seas_type
+  const season_type = config.season_type || current_season.nfl_seas_type
   const week = config.week || get_target_week()
 
   let esbids
@@ -368,13 +368,13 @@ const execute_processing = async ({
     log(`Processing specific games: ${esbids.join(', ')}`)
   } else {
     log(
-      `Starting market results processing for year ${config.year} week ${week} ${seas_type}`
+      `Starting market results processing for season_year ${config.season_year} week ${week} ${season_type}`
     )
 
     const query = db('nfl_games')
       .select('esbid')
-      .where('season_year', config.year)
-      .andWhere('season_type', seas_type)
+      .where('season_year', config.season_year)
+      .andWhere('season_type', season_type)
       .andWhere('week', week)
     log(`Query: ${query.toString()}`)
     const games = await query
@@ -411,7 +411,7 @@ const execute_processing = async ({
   const supported_market_types = get_supported_market_types()
   const markets = await fetch_markets_for_games({
     esbids: valid_esbids,
-    year: config.year,
+    year: config.season_year,
     missing_only: config.missing_only,
     supported_market_types
   })
@@ -597,18 +597,18 @@ const main = async () => {
  * Wrapper function for programmatic use (e.g., from finalize_game)
  *
  * @param {object} params
- * @param {number} params.year - Season year
+ * @param {number} params.season_year - Season year
  * @param {number} params.week - Week number (optional if esbids provided)
- * @param {string} params.seas_type - Season type (PRE, REG, POST)
+ * @param {string} params.season_type - Season type (PRE, REG, POST)
  * @param {Array<string>} params.esbids - Array of game IDs to process
  * @param {boolean} params.dry_run - Preview mode
  * @param {boolean} params.verbose - Verbose logging
  * @returns {Promise<object>} Processing results with stats
  */
 export const process_market_results = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   esbids,
   dry_run = false,
   verbose = false
@@ -616,9 +616,9 @@ export const process_market_results = async ({
   enable_debug_namespaces('process-market-results,selection-result-writer')
 
   const config = {
-    year: year || current_season.year,
+    season_year: season_year || current_season.year,
     week,
-    seas_type,
+    season_type,
     esbids,
     dry_run,
     verbose,

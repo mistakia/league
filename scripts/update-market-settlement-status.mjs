@@ -77,18 +77,18 @@ const initialize_cli = () => {
  * Update market settlement status for markets where all selections are settled
  *
  * @param {object} options - Processing options
- * @param {number} options.year - Filter by year
+ * @param {number} options.season_year - Filter by season year
  * @param {number} options.week - Filter by week (requires joining with nfl_games)
- * @param {string} options.seas_type - Filter by season type (requires joining with nfl_games)
+ * @param {string} options.season_type - Filter by season type (requires joining with nfl_games)
  * @param {Array<string>} options.esbids - Filter by game IDs
  * @param {boolean} options.dry_run - Preview mode
  * @param {boolean} options.verbose - Verbose logging
  * @returns {Promise<number>} Number of markets updated
  */
 export const update_market_settlement_status = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   esbids,
   dry_run = false,
   verbose = false
@@ -99,22 +99,22 @@ export const update_market_settlement_status = async ({
   const conditions = []
   const bindings = {}
 
-  if (year) {
-    conditions.push('pmi.season_year = :year')
-    bindings.year = year
+  if (season_year) {
+    conditions.push('pmi.season_year = :season_year')
+    bindings.season_year = season_year
   }
 
-  // For week and seas_type filtering, we need to join with nfl_games
-  const needs_game_join = week || seas_type
+  // For week and season_type filtering, we need to join with nfl_games
+  const needs_game_join = week || season_type
 
   if (week) {
     conditions.push('ng.week = :week')
     bindings.week = week
   }
 
-  if (seas_type) {
-    conditions.push('ng.season_type = :seas_type')
-    bindings.seas_type = seas_type
+  if (season_type) {
+    conditions.push('ng.season_type = :season_type')
+    bindings.season_type = season_type
   }
 
   if (esbids && esbids.length > 0) {
@@ -144,7 +144,7 @@ export const update_market_settlement_status = async ({
         pmi.esbid,
         pmi.season_year,
         pmi.market_type,
-        ${needs_game_join ? 'ng.week, ng.season_type as seas_type,' : ''}
+        ${needs_game_join ? 'ng.week, ng.season_type,' : ''}
         COUNT(DISTINCT pms.source_selection_id) as total_selections,
         COUNT(DISTINCT CASE
           WHEN pms.selection_result IS NOT NULL
@@ -177,7 +177,7 @@ export const update_market_settlement_status = async ({
       is_market_settled,
       esbid,
       season_year,
-      ${needs_game_join ? 'week, seas_type::text,' : ''}
+      ${needs_game_join ? 'week, season_type::text,' : ''}
       market_type
     FROM market_settlement_check
     WHERE total_selections = settled_selections  -- All selections are settled
@@ -188,9 +188,9 @@ export const update_market_settlement_status = async ({
 
   if (verbose) {
     log(`Checking markets for settlement with filters:`, {
-      year,
+      season_year,
       week,
-      seas_type,
+      season_type,
       esbids: esbids?.length || 0
     })
   }
@@ -268,7 +268,11 @@ const main = async () => {
   }
 
   try {
-    const result = await update_market_settlement_status(argv)
+    const result = await update_market_settlement_status({
+      ...argv,
+      season_year: argv.year,
+      season_type: argv.seas_type
+    })
 
     if (argv.dry_run) {
       log(`DRY RUN completed: ${result} markets would be updated`)

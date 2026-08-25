@@ -52,16 +52,16 @@ const getWeek = (week, week_type) => {
 
 const format = (item) => {
   const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
-  const seas_type = item.seasonType
-  const week_type = ['REG', 'PRE'].includes(seas_type)
-    ? seas_type
+  const season_type = item.seasonType
+  const week_type = ['REG', 'PRE'].includes(season_type)
+    ? season_type
     : item.weekNameAbbr
   const time_eastern = item.gameTimeEastern
   const week = getWeek(item.week, week_type)
-  const year = item.season
+  const season_year = item.season
   const score = item.score || {}
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_eastern, week_type })
+    ? getGameDayAbbreviation({ season_type, date, time_eastern, week_type })
     : null
 
   const datetime = dayjs(
@@ -75,7 +75,7 @@ const format = (item) => {
     shield_game_id: item.smartId,
     ngs_game_id: item.gameId,
 
-    season_year: year,
+    season_year,
     week,
     date,
     time_eastern,
@@ -85,7 +85,7 @@ const format = (item) => {
     away_nfl_team: fixTeam(item.visitorTeamAbbr),
     home_nfl_team: fixTeam(item.homeTeamAbbr),
 
-    season_type: seas_type,
+    season_type,
     week_type,
     is_overtime: (score.phase || '').includes('OVERTIME'),
 
@@ -100,15 +100,18 @@ const format = (item) => {
   }
 }
 
-const run = async ({ year = current_season.year, collector = null } = {}) => {
-  log(`Importing games for ${year}`)
+const run = async ({
+  season_year = current_season.year,
+  collector = null
+} = {}) => {
+  log(`Importing games for ${season_year}`)
 
   const result = {
     games_processed: 0,
     games_updated: 0
   }
 
-  const url = `${NGS_API_URL}/league/schedule?season=${year}`
+  const url = `${NGS_API_URL}/league/schedule?season=${season_year}`
 
   let data
   try {
@@ -122,7 +125,7 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
     })
   } catch (error) {
     if (collector) {
-      collector.add_error(error, { year, context: 'fetch_schedule' })
+      collector.add_error(error, { season_year, context: 'fetch_schedule' })
     }
     throw error
   }
@@ -168,12 +171,12 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year
-    const result = await run({ year })
+    const season_year = argv.year
+    const result = await run({ season_year })
 
     throw_if_shortfall(
       result.games_processed < NFL_GAMES_FLOOR_PER_YEAR
-        ? `nfl_games row-count shortfall for year ${year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
+        ? `nfl_games row-count shortfall for season_year ${season_year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
         : null
     )
   } catch (err) {

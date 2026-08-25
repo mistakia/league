@@ -226,18 +226,18 @@ query {
 }
 
 export const getGames = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   token,
   ignore_cache
 }) => {
-  const cache_key = `/nfl/games/${year}/${seas_type}/${week}.json`
+  const cache_key = `/nfl/games/${season_year}/${season_type}/${week}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
       log(
-        `cache hit for nfl games with year: ${year}, week: ${week}, seas_type: ${seas_type}`
+        `cache hit for nfl games with season_year: ${season_year}, week: ${week}, season_type: ${season_type}`
       )
       return cache_value
     }
@@ -249,7 +249,7 @@ export const getGames = async ({
     token = await get_session_token_v3()
   }
 
-  const url = `${api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
+  const url = `${api_url}/experience/v1/games?season=${season_year}&seasonType=${season_type}&week=${week}&withExternalIds=true&limit=100`
   log(url)
   const res = await fetch_with_retry({
     url,

@@ -29,10 +29,10 @@ enable_debug_namespaces('import-nfl-games-nfl,nfl')
 const format = (item) => {
   const datetime = item.time ? dayjs(item.time).tz('America/New_York') : null
   const date = datetime ? datetime.format('YYYY/MM/DD') : null
-  const seas_type = item.seasonType
+  const season_type = item.seasonType
   const week_type = item.weekType
   const time_eastern = datetime ? datetime.format('HH:mm:ss') : null
-  const year = item.season
+  const season_year = item.season
   const score = item.detail || {}
 
   const esbid = (item.externalIds.find((e) => e.source === 'elias') || {}).id
@@ -40,7 +40,7 @@ const format = (item) => {
     .id
 
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_eastern, week_type })
+    ? getGameDayAbbreviation({ season_type, date, time_eastern, week_type })
     : null
 
   return {
@@ -48,7 +48,7 @@ const format = (item) => {
     ...(shieldid && { shield_game_id: shieldid }),
     ...(item.id && { detail_v1_game_id: item.id }),
 
-    ...(year && { season_year: year }),
+    ...(season_year && { season_year }),
     // `!= null`, not a truthiness test: PRE week 0 is the Hall of Fame game and
     // is falsy, so a truthiness test dropped `week` from the payload entirely
     // and the insert failed the NOT NULL constraint on nfl_games.week.
@@ -65,7 +65,7 @@ const format = (item) => {
       home_nfl_team: fixTeam(item.homeTeam.abbreviation)
     }),
 
-    ...(seas_type && { season_type: seas_type }),
+    ...(season_type && { season_type }),
     ...(week_type && { week_type }),
     ...(score.detail && {
       is_overtime: (score.detail.phase || '').includes('OVERTIME')
@@ -87,14 +87,16 @@ const format = (item) => {
 }
 
 const run = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   week = current_season.nfl_seas_week,
-  seas_type = current_season.nfl_seas_type,
+  season_type = current_season.nfl_seas_type,
   token,
   ignore_cache = false,
   collector = null
 } = {}) => {
-  log(`processing ${seas_type} season games for week ${week} in ${year}`)
+  log(
+    `processing ${season_type} season games for week ${week} in ${season_year}`
+  )
 
   const result = {
     games_processed: 0,
@@ -103,9 +105,9 @@ const run = async ({
   }
 
   const games = await db('nfl_games').where({
-    season_year: year,
+    season_year,
     week,
-    season_type: seas_type
+    season_type
   })
 
   const game_missing_detailid_v1 = games.find((game) => !game.detail_v1_game_id)
@@ -122,9 +124,9 @@ const run = async ({
     } catch (error) {
       if (collector) {
         collector.add_error(error, {
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           context: 'get_session_token'
         })
       }
@@ -135,7 +137,7 @@ const run = async ({
   if (!token) {
     const error = new Error('missing access token')
     if (collector) {
-      collector.add_error(error, { year, week, seas_type })
+      collector.add_error(error, { season_year, week, season_type })
     }
     throw error
   }
@@ -143,15 +145,20 @@ const run = async ({
   let data
   try {
     data = await nfl.getGames({
-      year,
+      season_year,
       week,
-      seas_type,
+      season_type,
       token,
       ignore_cache
     })
   } catch (error) {
     if (collector) {
-      collector.add_error(error, { year, week, seas_type, context: 'getGames' })
+      collector.add_error(error, {
+        season_year,
+        week,
+        season_type,
+        context: 'getGames'
+      })
     }
     throw error
   }
@@ -224,19 +231,24 @@ const main = async () => {
       // on 2026-08-15 it read 2 while PRE week 1 games were in progress, so
       // --current would refresh an unplayed week and never mark week 1 FINAL.
       // Sweeping every week of the season type is week-agnostic.
-      const year = argv.year || current_season.year
-      const seas_type = argv.seas_type || current_season.nfl_seas_type
+      const season_year = argv.year || current_season.year
+      const season_type = argv.seas_type || current_season.nfl_seas_type
 
       const weeks = await db('nfl_games')
         .select('week')
-        .where({ season_year: year, season_type: seas_type })
+        .where({ season_year, season_type })
         .groupBy('week')
         .orderBy('week', 'asc')
 
       let games_processed = 0
       let games_skipped = 0
       for (const { week } of weeks) {
-        const result = await run({ year, week, seas_type, ignore_cache })
+        const result = await run({
+          season_year,
+          week,
+          season_type,
+          ignore_cache
+        })
         games_processed += result.games_processed || 0
         games_skipped += result.games_skipped || 0
         await wait(3000)
@@ -244,64 +256,82 @@ const main = async () => {
 
       throw_if_shortfall(
         games_processed === 0 && games_skipped === 0
-          ? `import-nfl-games-nfl --full_season shortfall: 0 games processed AND 0 games skipped across ${weeks.length} ${seas_type} week(s) in ${year}`
+          ? `import-nfl-games-nfl --full_season shortfall: 0 games processed AND 0 games skipped across ${weeks.length} ${season_type} week(s) in ${season_year}`
           : null
       )
     } else if (argv.year && argv.all) {
-      const year = argv.year
+      const season_year = argv.year
 
       const pre_weeks = await db('nfl_games')
         .select('week')
-        .where({ season_year: year, season_type: 'PRE' })
+        .where({ season_year, season_type: 'PRE' })
         .groupBy('week')
       for (const { week } of pre_weeks) {
-        await run({ year, week, seas_type: 'PRE', ignore_cache })
+        await run({ season_year, week, season_type: 'PRE', ignore_cache })
         await wait(3000)
       }
 
       const reg_weeks = await db('nfl_games')
         .select('week')
-        .where({ season_year: year, season_type: 'REG' })
+        .where({ season_year, season_type: 'REG' })
         .groupBy('week')
       for (const { week } of reg_weeks) {
-        await run({ year, week, seas_type: 'REG', ignore_cache })
+        await run({ season_year, week, season_type: 'REG', ignore_cache })
         await wait(3000)
       }
 
       const post_weeks = await db('nfl_games')
         .select('week')
-        .where({ season_year: year, season_type: 'POST' })
+        .where({ season_year, season_type: 'POST' })
         .groupBy('week')
       for (const { week } of post_weeks) {
-        await run({ year, week, seas_type: 'POST', ignore_cache })
+        await run({ season_year, week, season_type: 'POST', ignore_cache })
         await wait(3000)
       }
     } else if (argv.all) {
       const start = argv.start || 1970
       const end = argv.end || 2002
-      for (let year = start; year < end; year++) {
+      for (let season_year = start; season_year < end; season_year++) {
         const token = await nfl.get_session_token_v3()
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'PRE', token, ignore_cache })
+          await run({
+            season_year,
+            week,
+            season_type: 'PRE',
+            token,
+            ignore_cache
+          })
           await wait(3000)
         }
 
         for (let week = 0; week < 18; week++) {
-          await run({ year, week, seas_type: 'REG', token, ignore_cache })
+          await run({
+            season_year,
+            week,
+            season_type: 'REG',
+            token,
+            ignore_cache
+          })
           await wait(3000)
         }
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'POST', token, ignore_cache })
+          await run({
+            season_year,
+            week,
+            season_type: 'POST',
+            token,
+            ignore_cache
+          })
           await wait(3000)
         }
       }
     } else {
-      const year = argv.year
+      const season_year = argv.year
       const week = argv.week
-      const seas_type = argv.seas_type
-      await run({ year, week, seas_type, ignore_cache })
+      const season_type = argv.seas_type
+      await run({ season_year, week, season_type, ignore_cache })
     }
   } catch (err) {
     error = err

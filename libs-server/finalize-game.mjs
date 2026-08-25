@@ -70,12 +70,12 @@ export const finalize_game = async ({
     fn: () =>
       Promise.all([
         import_nfl_games_nfl({
-          year: season_year,
+          season_year,
           week,
-          seas_type: season_type,
+          season_type,
           ignore_cache: true
         }),
-        import_nfl_games_ngs({ year: season_year })
+        import_nfl_games_ngs({ season_year })
       ])
   })
 
@@ -119,9 +119,9 @@ export const finalize_game = async ({
     logger: log,
     fn: () =>
       process_market_results({
-        year: season_year,
+        season_year,
         week,
-        seas_type: season_type,
+        season_type,
         esbids: [esbid]
       })
   })

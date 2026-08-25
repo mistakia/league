@@ -25,8 +25,8 @@ const processNflGames = async () => {
     away_nfl_team,
     home_nfl_team,
     week,
-    season_year: year,
-    season_type: seas_type,
+    season_year,
+    season_type,
     week_type
   } of games) {
     if (date && time_eastern) {
@@ -40,14 +40,14 @@ const processNflGames = async () => {
         away_nfl_team,
         home_nfl_team,
         week,
-        season_year: year,
-        season_type: seas_type,
+        season_year,
+        season_type,
         kickoff_at: datetime.toDate()
       }
 
       if (week_type) {
         update.day = getGameDayAbbreviation({
-          seas_type,
+          season_type,
           date,
           time_eastern,
           week_type

@@ -109,13 +109,21 @@ export const getPlayer = ({ sportradar_id }) =>
     return data
   })
 
-export const get_games_schedule = ({ season_year, season_type = 'REG' }) =>
+export const get_games_schedule = ({
+  season_year,
+  season_type = 'REG',
+  ignore_cache = false
+}) =>
   queue.add(async () => {
     const cache_key = `/sportradar/schedule/${season_year}/${season_type}`
-    const cache_value = await cache.get({ key: cache_key })
-    if (cache_value) {
-      log(`Cache hit for schedule ${season_year}/${season_type}`)
-      return cache_value
+    // `ignore_cache` was accepted by the only caller and silently dropped here,
+    // so `--ignore_cache` on import-games-sportradar refreshed nothing.
+    if (!ignore_cache) {
+      const cache_value = await cache.get({ key: cache_key })
+      if (cache_value) {
+        log(`Cache hit for schedule ${season_year}/${season_type}`)
+        return cache_value
+      }
     }
 
     const current_time = process.hrtime.bigint()

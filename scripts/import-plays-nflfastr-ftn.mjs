@@ -113,7 +113,7 @@ const format_play = (play) => ({
 })
 
 const run = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   overwrite_existing = false,
   force_download = false,
   collector = null
@@ -124,15 +124,15 @@ const run = async ({
     plays_not_matched: 0
   }
 
-  if (year < 2022) {
+  if (season_year < 2022) {
     throw new Error('FTN Charting data is only available from 2022 onwards')
   }
 
-  if (year === current_season.year && !current_season.week) {
+  if (season_year === current_season.year && !current_season.week) {
     throw new Error('Season has not started yet')
   }
 
-  if (year === current_season.year && current_season.week === 1) {
+  if (season_year === current_season.year && current_season.week === 1) {
     const current_day = dayjs().day()
     if (current_day < 5 && current_day > 1) {
       // 5 is Friday
@@ -140,7 +140,7 @@ const run = async ({
     }
   }
 
-  const filename = `ftn_charting_${year}.csv`
+  const filename = `ftn_charting_${season_year}.csv`
   const path = `${os.tmpdir()}/${filename}`
   const url = `https://github.com/nflverse/nflverse-data/releases/download/ftn_charting/${filename}`
 
@@ -157,9 +157,9 @@ const run = async ({
   }
 
   // Pre-cache game ID mapping (nflverse_game_id -> esbid) for O(1) lookups
-  log(`Loading game ID mapping for year ${year}...`)
+  log(`Loading game ID mapping for season_year ${season_year}...`)
   const games = await db('nfl_games')
-    .where({ season_year: year })
+    .where({ season_year })
     .whereNotNull('nflverse_game_id')
     .select('esbid', 'nflverse_game_id')
   const game_id_map = new Map()
@@ -169,8 +169,8 @@ const run = async ({
   log(`Loaded ${game_id_map.size} games`)
 
   // Preload plays into cache for efficient matching
-  log(`Preloading plays for year ${year}...`)
-  await preload_plays({ years: [year] })
+  log(`Preloading plays for season_year ${season_year}...`)
+  await preload_plays({ years: [season_year] })
   log(`Plays preloaded`)
 
   const play_not_matched = []
@@ -245,10 +245,10 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year || current_season.year
+    const season_year = argv.year || current_season.year
     const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
-    await run({ year, overwrite_existing, force_download })
+    await run({ season_year, overwrite_existing, force_download })
   } catch (err) {
     error = err
     console.log(error)
