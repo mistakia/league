@@ -78,7 +78,7 @@ describe('Data Views - player_career_year current-season projection', function (
         [year - 1, 2]
       ]) {
         await trx.raw(
-          `INSERT INTO player_seasonlogs (pid, season_year, season_type, player_position, career_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES ('TEST-CYR-000001', ${season}, 'REG', 'MLB', ${career_year}, 0, 0, 0)`
+          `INSERT INTO player_seasonlogs (pid, season_year, season_type, career_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES ('TEST-CYR-000001', ${season}, 'REG', ${career_year}, 0, 0, 0)`
         )
       }
 

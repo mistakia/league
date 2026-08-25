@@ -94,7 +94,6 @@ const generate_player_career_game_counts = async () => {
           season_updates[season_key] = {
             pid: game.pid,
             season_year: game.year,
-            player_position: game.player_position,
             career_year: player_career_years[pid].size,
             season_type: game.seas_type
           }

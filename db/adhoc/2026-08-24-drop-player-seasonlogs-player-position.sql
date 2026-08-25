@@ -1,0 +1,51 @@
+-- STATUS: APPLIED 2026-08-25 against league_production
+--
+-- Drop player_seasonlogs.player_position, which no code reads.
+--
+-- The column has three writers that disagree about what it means, and zero
+-- consumers to adjudicate between them:
+--
+--   scripts/generate-player-career-game-counts.mjs inserts it from
+--   player_gamelogs.player_position -- the position the player held during
+--   that season's games.
+--
+--   scripts/process-player-seasonlogs.mjs intends player.primary_position --
+--   the position the player holds NOW -- and f673bce2a deliberately released
+--   it from the upsert hold-back, so once that writer runs it overwrites the
+--   other on every pass.
+--
+--   scripts/import-espn-receiving-tracking-metrics.mjs also writes
+--   player.primary_position, under a bare .merge() that asserts it on every
+--   conflict.
+--
+-- That second writer has not run since the 2026-08-05 conform (72346e579)
+-- renamed this column from `pos`: it still builds its insert with a `pos` key,
+-- so every batch raises 42703 and the column has taken no writes from it for
+-- three weeks. The renamed-column consumer gate did not catch it because the
+-- gate pairs a table with the columns READ off it, and this is an INSERT
+-- payload key; db/gates/renamed-column-consumer-adjudications.json names the
+-- script under player_gamelogs.pos and clears it correctly for that table.
+--
+-- Reading, rather than choosing between the two meanings, settles it. Nothing
+-- consumes the value:
+--
+--   api/routes/players.mjs ships it only inside a wholesale
+--   `player_seasonlogs.*` select
+--   app/core/data-views-fields/player-seasonlogs-table-fields.js exposes
+--   exactly one field from this table, career_year
+--   no reference in libs-server/, libs-shared/, scripts/, private/, or app/
+--   resolves to this column -- every `player_position` in app/ is
+--   player.player_position or pff_player_position
+--
+-- No index depends on it. The single-column CHECK constraint
+-- player_seasonlogs_pos_vocabulary -- which still carries the pre-conform
+-- `pos` name -- is dropped by Postgres along with the column.
+--
+-- The 111,206 pre-drop values are backed up outside this repo at
+-- user-base/scratch/drop-player-seasonlogs-player-position/.
+--
+-- Companion code changes ship in the same commit: the insert key is removed
+-- from both writers and from the three test fixtures that supply it because
+-- the column is NOT NULL.
+
+ALTER TABLE public.player_seasonlogs DROP COLUMN player_position;

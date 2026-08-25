@@ -88,7 +88,6 @@ const import_espn_receiving_tracking_metrics = async ({
     const player_seasonlogs_insert = {
       pid: player.pid,
       season_year: item.min_season,
-      player_position: player.primary_position,
       season_type: 'REG',
       espn_rtm_routes: item.rtm_routes,
       espn_rtm_targets: item.rtm_targets,

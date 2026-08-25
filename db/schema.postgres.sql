@@ -24964,7 +24964,6 @@ CREATE TABLE public.player_seasonlogs (
     pid character varying(25) NOT NULL,
     season_year smallint NOT NULL,
     season_type character varying(10) NOT NULL,
-    player_position character varying(4) NOT NULL,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -25014,7 +25013,8 @@ CREATE TABLE public.player_seasonlogs (
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
     fumble_return_touchdowns smallint DEFAULT 0,
-    CONSTRAINT player_seasonlogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL
 );
 
 

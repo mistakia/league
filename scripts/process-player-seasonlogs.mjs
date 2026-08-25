@@ -26,8 +26,7 @@ const processPlayerSeasonlogs = async ({
 
   // get league player gamelogs for season
   const gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'player.primary_position')
-    .join('player', 'player.pid', 'player_gamelogs.pid')
+    .select('player_gamelogs.*')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .where('nfl_games.season_year', year)
     .where('nfl_games.season_type', seas_type)
@@ -38,7 +37,6 @@ const processPlayerSeasonlogs = async ({
   for (const pid of pids) {
     // get gamelogs for pid
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
-    const pos = player_gamelogs[0].primary_position
 
     const season_stats = create_empty_fantasy_stats()
     for (const gamelog of player_gamelogs) {
@@ -51,7 +49,6 @@ const processPlayerSeasonlogs = async ({
       pid,
       season_year: year,
       season_type: seas_type,
-      pos,
       ...season_stats
     })
   }
@@ -93,10 +90,14 @@ const main = async () => {
     })
   } catch (err) {
     error = err
-    log(error)
+    // console.error, not log: a verdict must not depend on debug namespace
+    // resolution. This script writes nothing observable on success, so the
+    // exit code is its only oracle -- and it reported success for three weeks
+    // while every batch raised 42703 on a column renamed out from under it.
+    console.error(error)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

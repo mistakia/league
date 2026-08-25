@@ -19618,7 +19618,6 @@ export interface PlayerSeasonlogsRow {
   pid: string
   season_year: number
   season_type: string
-  player_position: string
   passing_attempts: number | null
   passing_completions: number | null
   passing_yards: number | null
@@ -19668,6 +19667,8 @@ export interface PlayerSeasonlogsRow {
   receiving_first_downs: number
   rushing_yards_excluding_kneels: number
   fumble_return_touchdowns: number | null
+  rushing_first_downs_excluding_touchdowns: number
+  receiving_first_downs_excluding_touchdowns: number
 }
 
 export interface PlayerTeamExtensionStateRow {

@@ -24,9 +24,9 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-ESPN-000902', 'Test', 'Espn', 'T.Espn', 'Test Espn', 'MLB', 'MLB', '2000-01-01', 2020)",
-      "INSERT INTO player_seasonlogs (pid, season_year, season_type, player_position, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'REG', 'MLB', 50)",
-      "INSERT INTO player_seasonlogs (pid, season_year, season_type, player_position, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'POST', 'MLB', 99)",
-      "INSERT INTO player_seasonlogs (pid, season_year, season_type, player_position, espn_overall_score) VALUES ('TEST-ESPN-000902', 2025, 'REG', 'MLB', 70)"
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'REG', 50)",
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'POST', 99)",
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, espn_overall_score) VALUES ('TEST-ESPN-000902', 2025, 'REG', 70)"
     ],
     "reference_sql": "SELECT AVG(espn_overall_score) AS espn_overall_score_0 FROM player_seasonlogs WHERE pid = 'TEST-ESPN-000902' AND season_year IN (2024, 2025) AND season_type = 'REG'",
     "compare_columns": ["espn_overall_score_0"]
