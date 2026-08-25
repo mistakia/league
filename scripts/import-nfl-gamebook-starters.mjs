@@ -138,21 +138,24 @@ const initialize_cli = () =>
 const cache_path_for = (esbid) =>
   path.join(os.homedir(), 'cache/nfl/gamebook', `${esbid}.pdf`)
 
-const release_url_for_year = (year) =>
-  `https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_${year}.csv`
+const release_url_for_year = (season_year) =>
+  `https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_${season_year}.csv`
 
-const download_csv = async ({ year, force_download = false }) => {
-  const file_path = path.join(os.tmpdir(), `nflverse_roster_weekly_${year}.csv`)
+const download_csv = async ({ season_year, force_download = false }) => {
+  const file_path = path.join(
+    os.tmpdir(),
+    `nflverse_roster_weekly_${season_year}.csv`
+  )
   if (force_download || !fs.existsSync(file_path)) {
-    log(`downloading ${release_url_for_year(year)}`)
+    log(`downloading ${release_url_for_year(season_year)}`)
     // use_proxy: false -- public GitHub release asset, not a vendor scrape target.
     const response = await fetch_with_retry({
-      url: release_url_for_year(year),
+      url: release_url_for_year(season_year),
       use_proxy: false
     })
     if (!response.ok) {
       throw new Error(
-        `nflverse weekly_rosters download failed for ${year}: ${response.status} ${response.statusText}`
+        `nflverse weekly_rosters download failed for ${season_year}: ${response.status} ${response.statusText}`
       )
     }
     await stream_pipeline(response.body, fs.createWriteStream(file_path))
@@ -316,8 +319,8 @@ const GAME_TYPE_TO_SEAS_TYPE = {
 }
 const POST_GAME_TYPE_WEEK = { WC: 1, DIV: 2, CON: 3, CONF: 3, SB: 4 }
 
-const build_jersey_to_pid_index = async ({ year, force_download }) => {
-  const csv_path = await download_csv({ year, force_download })
+const build_jersey_to_pid_index = async ({ season_year, force_download }) => {
+  const csv_path = await download_csv({ season_year, force_download })
   const rows = await readCSV(csv_path)
   if (rows instanceof Error) throw rows
 
@@ -358,12 +361,12 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
       continue
     }
 
-    const seas_type = GAME_TYPE_TO_SEAS_TYPE[r.game_type]
-    if (!seas_type) continue
+    const season_type = GAME_TYPE_TO_SEAS_TYPE[r.game_type]
+    if (!season_type) continue
     const week =
-      seas_type === 'POST' ? POST_GAME_TYPE_WEEK[r.game_type] : Number(r.week)
+      season_type === 'POST' ? POST_GAME_TYPE_WEEK[r.game_type] : Number(r.week)
 
-    const key_prefix = `${team}-${seas_type}-${week}`
+    const key_prefix = `${team}-${season_type}-${week}`
     if (r.jersey_number) {
       by_jersey.set(`${key_prefix}-${Number(r.jersey_number)}`, pid)
     }
@@ -374,15 +377,15 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
   }
 
   log(
-    `year=${year} index: ${by_jersey.size} jersey keys, ${by_lastname.size} lastname keys, ${pid_by_gsis.size}/${gsis_ids.length} gsis->pid resolved`
+    `year=${season_year} index: ${by_jersey.size} jersey keys, ${by_lastname.size} lastname keys, ${pid_by_gsis.size}/${gsis_ids.length} gsis->pid resolved`
   )
   return { by_jersey, by_lastname }
 }
 
-const resolve_player = ({ team, seas_type, week, jnum, name, index }) => {
+const resolve_player = ({ team, season_type, week, jnum, name, index }) => {
   // Primary: exact seas_type / week match.
   const lname = last_name_of(name)
-  const prefix = `${team}-${seas_type}-${week}`
+  const prefix = `${team}-${season_type}-${week}`
   const j_hit = index.by_jersey.get(`${prefix}-${jnum}`)
   if (j_hit) return { pid: j_hit, via: 'jersey' }
   const l_hit = index.by_lastname.get(`${prefix}-${lname}`)
@@ -390,7 +393,7 @@ const resolve_player = ({ team, seas_type, week, jnum, name, index }) => {
 
   // PRE games have no nflverse CSV coverage (CSV omits PRE entirely);
   // fall back to REG W1 since the active 53 is largely the same roster.
-  if (seas_type === 'PRE') {
+  if (season_type === 'PRE') {
     const reg_prefix = `${team}-REG-1`
     const j_hit_pre = index.by_jersey.get(`${reg_prefix}-${jnum}`)
     if (j_hit_pre) return { pid: j_hit_pre, via: 'jersey_pre_fallback' }
@@ -444,7 +447,7 @@ const process_game = async ({ game, index, dry_run }) => {
       attempted += 1
       const match = resolve_player({
         team: side.abbr,
-        seas_type: game.seas_type,
+        season_type: game.season_type,
         week: game.week,
         jnum: slot.jnum,
         name: slot.name,
@@ -455,7 +458,7 @@ const process_game = async ({ game, index, dry_run }) => {
       starter_rows.push({
         pid: match.pid,
         esbid: game.esbid,
-        year: game.year,
+        season_year: game.season_year,
         started: true
       })
     }
@@ -492,7 +495,7 @@ const process_game = async ({ game, index, dry_run }) => {
     // (esbid, pid) resolves to a row whose `nfl_team` is wrong; setting
     // is_starter=true there would produce nonsense team-level aggregates.
     const n = await db('player_gamelogs')
-      .where({ esbid: r.esbid, pid: r.pid, season_year: r.year })
+      .where({ esbid: r.esbid, pid: r.pid, season_year: r.season_year })
       .whereNot({ nfl_team: 'INA' })
       .update({ is_starter: r.started })
     updated_count += n
@@ -515,32 +518,32 @@ const process_game = async ({ game, index, dry_run }) => {
 }
 
 const import_for_year = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   force_download,
   dry_run
 }) => {
   const query = db('nfl_games')
     .select(
       'esbid',
-      'season_year as year',
+      'season_year',
       'week',
       'home_nfl_team',
       'away_nfl_team',
-      'season_type as seas_type',
+      'season_type',
       'shield_game_id'
     )
-    .where({ season_year: year })
+    .where({ season_year })
     .whereNotNull('shield_game_id')
   if (week !== undefined) query.where({ week })
-  if (seas_type) query.where({ season_type: seas_type })
+  if (season_type) query.where({ season_type })
   const games = await query
   log(
-    `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games to process`
+    `${season_year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games to process`
   )
 
-  const index = await build_jersey_to_pid_index({ year, force_download })
+  const index = await build_jersey_to_pid_index({ season_year, force_download })
 
   const counts = {
     games_processed: 0,
@@ -568,16 +571,16 @@ const import_for_year = async ({
     }
   }
 
-  log(`${year}: ${JSON.stringify(counts)}`)
+  log(`${season_year}: ${JSON.stringify(counts)}`)
   return counts
 }
 
 const import_nfl_gamebook_starters = async ({
-  year,
+  season_year,
   start_year,
   end_year,
   week,
-  seas_type,
+  season_type,
   force_download = false,
   dry_run = false
 }) => {
@@ -588,7 +591,7 @@ const import_nfl_gamebook_starters = async ({
     }
     for (let y = start_year; y <= end_year; y++) years.push(y)
   } else {
-    years.push(year || current_season.year)
+    years.push(season_year || current_season.year)
   }
 
   const totals = {
@@ -603,9 +606,9 @@ const import_nfl_gamebook_starters = async ({
   }
   for (const y of years) {
     const c = await import_for_year({
-      year: y,
+      season_year: y,
       week,
-      seas_type,
+      season_type,
       force_download,
       dry_run
     })
@@ -633,11 +636,11 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const result = await import_nfl_gamebook_starters({
-      year: argv.year,
+      season_year: argv.year,
       start_year: argv.start_year,
       end_year: argv.end_year,
       week: argv.week,
-      seas_type: argv.seas_type,
+      season_type: argv.season_type,
       force_download: argv.force_download,
       dry_run: argv.dry_run
     })

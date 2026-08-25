@@ -17,26 +17,20 @@ import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mj
 
 const log = debug('import-players-charting')
 
-async function get_games_for_import({ year, week, esbid, seas_type }) {
+async function get_games_for_import({ season_year, week, esbid, season_type }) {
   const query = db('nfl_games')
-    .select(
-      'esbid',
-      'shield_game_id',
-      'season_year as year',
-      'week',
-      'season_type as seas_type'
-    )
+    .select('esbid', 'shield_game_id', 'season_year', 'week', 'season_type')
     .whereNotNull('shield_game_id')
 
   if (esbid) {
     query.where('esbid', esbid)
   } else {
-    query.where('season_year', year)
+    query.where('season_year', season_year)
     if (week) {
       query.where('week', week)
     }
-    if (seas_type) {
-      query.where('season_type', seas_type)
+    if (season_type) {
+      query.where('season_type', season_type)
     }
   }
 
@@ -45,18 +39,18 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
 }
 
 export async function import_players_charting({
-  year = current_season.year,
+  season_year = current_season.year,
   week,
   esbid,
   dry = false,
   proxy_pool = 'default',
   request_delay = 3000,
-  seas_type = null,
+  season_type = null,
   collector = null
 } = {}) {
   console.time('import-players-charting')
   log(
-    `starting charting player import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
+    `starting charting player import: year=${season_year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
   )
 
   const client = new ChartingDataClient({
@@ -67,7 +61,12 @@ export async function import_players_charting({
   // Preload player cache with all players for matching
   await preload_active_players({ all_players: true })
 
-  const games = await get_games_for_import({ year, week, esbid, seas_type })
+  const games = await get_games_for_import({
+    season_year,
+    week,
+    esbid,
+    season_type
+  })
   log(`found ${games.length} games to process`)
 
   if (games.length === 0) {
@@ -145,7 +144,7 @@ export async function import_players_charting({
     // today -- see libs-server/charting-data/player-matching.mjs.
     const pid = await match_charting_player({
       ...player_info,
-      season_year: year
+      season_year
     })
 
     if (pid) {
@@ -226,13 +225,13 @@ const main = async () => {
     )
 
     await import_players_charting({
-      year: argv.year,
+      season_year: argv.year,
       week: argv.week,
       esbid: argv.esbid,
       dry: argv.dry,
       proxy_pool: argv.proxy_pool,
       request_delay: argv.request_delay,
-      seas_type: argv.seas_type
+      season_type: argv.season_type
     })
   } catch (err) {
     error = err

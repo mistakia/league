@@ -80,11 +80,11 @@ const store_team_mappings = async ({ team_mappings }) => {
  * @param {number|null} week - Optional week filter
  * @returns {Map<string, object>} Map of games keyed by "home-away" (without date for fuzzy matching)
  */
-const preload_games = async ({ year, week = null }) => {
+const preload_games = async ({ season_year, week = null }) => {
   const query = db('nfl_games')
     .select(
       'esbid',
-      'season_year as year',
+      'season_year',
       'week',
       'date',
       'home_nfl_team',
@@ -92,7 +92,7 @@ const preload_games = async ({ year, week = null }) => {
       'sportradar_game_id',
       'sportradar_season_id'
     )
-    .where({ season_year: year })
+    .where({ season_year })
 
   if (week) {
     query.where({ week })
@@ -120,7 +120,7 @@ const preload_games = async ({ year, week = null }) => {
   }
 
   log(
-    `Preloaded ${games.length} games for year ${year}${week ? ` week ${week}` : ''}`
+    `Preloaded ${games.length} games for year ${season_year}${week ? ` week ${week}` : ''}`
   )
   return games_map
 }
@@ -220,7 +220,7 @@ const match_game_to_esbid = ({ sportradar_game, games_map }) => {
  * Import games from Sportradar and map them to existing nfl_games records
  */
 const import_games_sportradar = async ({
-  year,
+  season_year,
   week,
   all = false,
   dry = false,
@@ -237,8 +237,8 @@ const import_games_sportradar = async ({
     for (let y = 2018; y <= 2024; y++) {
       years.push(y)
     }
-  } else if (year) {
-    years.push(year)
+  } else if (season_year) {
+    years.push(season_year)
   } else {
     // Default to current year
     const current_year = new Date().getFullYear()
@@ -259,20 +259,20 @@ const import_games_sportradar = async ({
     log(`Fetching games for ${process_year}...`)
 
     // Preload games from database for this year
-    const games_map = await preload_games({ year: process_year, week })
+    const games_map = await preload_games({ season_year: process_year, week })
 
     // Fetch schedule from Sportradar
     let schedule_data
     try {
       schedule_data = await get_games_schedule({
-        year: process_year,
+        season_year: process_year,
         season_type,
         ignore_cache
       })
     } catch (error) {
       if (collector) {
         collector.add_error(error, {
-          year: process_year,
+          season_year: process_year,
           context: 'get_games_schedule'
         })
       }
@@ -283,7 +283,7 @@ const import_games_sportradar = async ({
       log(`No schedule data returned for ${process_year}`)
       if (collector) {
         collector.add_warning(`No schedule data returned for ${process_year}`, {
-          year: process_year
+          season_year: process_year
         })
       }
       continue
@@ -414,19 +414,19 @@ const main = async () => {
   const argv = initialize_cli()
   let error
   try {
-    const year = argv.year ? parseInt(argv.year) : null
+    const season_year = argv.year ? parseInt(argv.year) : null
     const week = argv.week ? parseInt(argv.week) : null
     const all = argv.all || false
     const dry = argv.dry || false
     const ignore_cache = argv.ignore_cache || false
     const season_type = argv['seas-type'] === 'POST' ? 'PST' : 'REG'
 
-    if (!year && !all) {
+    if (!season_year && !all) {
       log('Warning: No --year specified, defaulting to current year')
     }
 
     await import_games_sportradar({
-      year,
+      season_year,
       week,
       all,
       dry,

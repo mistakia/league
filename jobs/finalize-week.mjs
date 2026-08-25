@@ -181,7 +181,7 @@ const finalize_week = async () => {
     logger: log,
     fn: () =>
       calculate_team_historical_hit_rates({
-        year,
+        season_year: year,
         current_week_only: true
       })
   })

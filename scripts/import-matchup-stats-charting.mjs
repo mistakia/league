@@ -40,14 +40,20 @@ const DEFAULT_SEASON_TYPES = ['REG', 'POST']
 // re-fetching games already covered would cost 272 vendor requests to rewrite
 // rows that are already there; skipping them also makes the job self-healing,
 // since a week missed for any reason is picked up by the next run.
-async function get_games_for_import({ year, week, esbid, seas_type, force }) {
+async function get_games_for_import({
+  season_year,
+  week,
+  esbid,
+  season_type,
+  force
+}) {
   const query = db('nfl_games')
     .select(
       'esbid',
       'shield_game_id',
-      'season_year as year',
+      'season_year',
       'week',
-      'season_type as seas_type',
+      'season_type',
       'home_nfl_team',
       'away_nfl_team'
     )
@@ -61,12 +67,12 @@ async function get_games_for_import({ year, week, esbid, seas_type, force }) {
   if (esbid) {
     query.where('esbid', esbid)
   } else {
-    query.where('season_year', year)
+    query.where('season_year', season_year)
     if (week) {
       query.where('week', week)
     }
-    if (seas_type) {
-      query.where('season_type', seas_type)
+    if (season_type) {
+      query.where('season_type', season_type)
     } else {
       // Preseason is excluded from the default scope. The vendor charts it, but
       // the rosters are camp bodies we largely do not carry: the 2026 Hall of
@@ -181,7 +187,7 @@ function determine_matchup_type(matchup) {
 const BATCH_SIZE = 500
 
 async function process_game({ game, client, stats, dry = false }) {
-  const { esbid, shield_game_id, week, year: season_year } = game
+  const { esbid, shield_game_id, week, season_year } = game
 
   log(
     `processing matchup stats for game ${esbid} (shield: ${shield_game_id}, week ${week})`
@@ -286,20 +292,20 @@ async function process_game({ game, client, stats, dry = false }) {
 }
 
 export async function import_matchup_stats_charting({
-  year = current_season.year,
+  season_year = current_season.year,
   week,
   esbid,
   dry = false,
   proxy_pool = 'default',
   use_proxy = true,
   request_delay = 3000,
-  seas_type = null,
+  season_type = null,
   force = false,
   collector = null
 } = {}) {
   console.time('import-matchup-stats-charting')
   console.log(
-    `starting charting matchup stats import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry} force=${force}`
+    `starting charting matchup stats import: year=${season_year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry} force=${force}`
   )
 
   const client = new ChartingDataClient({
@@ -312,10 +318,10 @@ export async function import_matchup_stats_charting({
   await preload_active_players({ all_players: true })
 
   const { games_selected, games_to_process } = await get_games_for_import({
-    year,
+    season_year,
     week,
     esbid,
-    seas_type,
+    season_type,
     force
   })
   console.log(
@@ -347,7 +353,7 @@ export async function import_matchup_stats_charting({
     // A season-wide scope on the CURRENT season may hold no completed game yet;
     // any narrower ask (a week, a game, an earlier season) named something the
     // caller expects to exist.
-    expects_games: Boolean(week || esbid) || year !== current_season.year
+    expects_games: Boolean(week || esbid) || season_year !== current_season.year
   })
   console.log(grade.summary)
   if (!grade.passed) {
@@ -405,14 +411,14 @@ const main = async () => {
       }).argv
 
     await import_matchup_stats_charting({
-      year: argv.year,
+      season_year: argv.year,
       week: argv.week,
       esbid: argv.esbid,
       dry: argv.dry,
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,
-      seas_type: argv.seas_type,
+      season_type: argv.season_type,
       force: argv.force
     })
   } catch (err) {

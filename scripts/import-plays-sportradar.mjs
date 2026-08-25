@@ -1347,12 +1347,18 @@ const process_game = async ({
   }
 }
 
-const build_games_query = ({ game_id, year, week, all, seas_type }) => {
+const build_games_query = ({
+  game_id,
+  season_year,
+  week,
+  all,
+  season_type
+}) => {
   let games_query = db('nfl_games')
     .whereNotNull('sportradar_game_id')
     .select(
       'esbid',
-      'season_year as year',
+      'season_year',
       'week',
       'sportradar_game_id',
       'v',
@@ -1364,9 +1370,9 @@ const build_games_query = ({ game_id, year, week, all, seas_type }) => {
   if (game_id) {
     games_query = games_query.where({ esbid: game_id })
   } else if (!all) {
-    if (year) games_query = games_query.where({ season_year: year })
+    if (season_year) games_query = games_query.where({ season_year })
     if (week) games_query = games_query.where({ week })
-    if (seas_type) games_query = games_query.where({ season_type: seas_type })
+    if (season_type) games_query = games_query.where({ season_type })
   }
 
   return games_query
@@ -1389,7 +1395,7 @@ const initialize_stats = () => ({
  * Import play-by-play data for games with Sportradar game IDs
  */
 const import_plays_sportradar = async ({
-  year,
+  season_year,
   week,
   game_id,
   all = false,
@@ -1397,7 +1403,7 @@ const import_plays_sportradar = async ({
   overwrite_existing = false,
   ignore_sportradar_field_conflicts = false,
   ignore_cache = false,
-  seas_type = null,
+  season_type = null,
   collector = null
 } = {}) => {
   console.time('import-plays-sportradar-total')
@@ -1406,7 +1412,13 @@ const import_plays_sportradar = async ({
   const team_mappings_cache = await load_team_mappings()
 
   // Build and execute games query
-  const games_query = build_games_query({ game_id, year, week, all, seas_type })
+  const games_query = build_games_query({
+    game_id,
+    season_year,
+    week,
+    all,
+    season_type
+  })
   const games = await games_query
   log(`Found ${games.length} games with Sportradar game IDs`)
 
@@ -1419,7 +1431,7 @@ const import_plays_sportradar = async ({
   // Preload caches
   log('Preloading play cache...')
   await preload_plays({
-    years: [...new Set(games.map((g) => g.year))],
+    years: [...new Set(games.map((g) => g.season_year))],
     weeks: [...new Set(games.map((g) => g.week))],
     esbids: games.map((g) => g.esbid)
   })
@@ -1546,7 +1558,7 @@ const main = async () => {
     enable_debug_namespaces(
       'import-plays-sportradar,sportradar,play-enum-utils'
     )
-    const year = argv.year ? parseInt(argv.year) : null
+    const season_year = argv.year ? parseInt(argv.year) : null
     const week = argv.week ? parseInt(argv.week) : null
     const game_id = argv['game-id'] || null
     const all = argv.all || false
@@ -1555,10 +1567,10 @@ const main = async () => {
     const ignore_sportradar_field_conflicts =
       argv['ignore-sportradar-field-conflicts'] || false
     const ignore_cache = argv['ignore-cache'] || false
-    const seas_type = argv['seas-type'] || null
+    const season_type = argv['seas-type'] || null
 
     await import_plays_sportradar({
-      year,
+      season_year,
       week,
       game_id,
       all,
@@ -1566,7 +1578,7 @@ const main = async () => {
       overwrite_existing,
       ignore_sportradar_field_conflicts,
       ignore_cache,
-      seas_type
+      season_type
     })
   } catch (err) {
     error = err

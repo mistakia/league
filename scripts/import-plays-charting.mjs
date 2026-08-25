@@ -16,14 +16,14 @@ import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mj
 
 const log = debug('import-plays-charting')
 
-async function get_games_for_import({ year, week, esbid, seas_type }) {
+async function get_games_for_import({ season_year, week, esbid, season_type }) {
   const query = db('nfl_games')
     .select(
       'esbid',
       'shield_game_id',
-      'season_year as year',
+      'season_year',
       'week',
-      'season_type as seas_type',
+      'season_type',
       'home_nfl_team',
       'away_nfl_team'
     )
@@ -32,12 +32,12 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
   if (esbid) {
     query.where('esbid', esbid)
   } else {
-    query.where('season_year', year)
+    query.where('season_year', season_year)
     if (week) {
       query.where('week', week)
     }
-    if (seas_type) {
-      query.where('season_type', seas_type)
+    if (season_type) {
+      query.where('season_type', season_type)
     }
   }
 
@@ -175,19 +175,19 @@ async function process_game({ game, client, stats, dry = false }) {
 }
 
 export async function import_plays_charting({
-  year = current_season.year,
+  season_year = current_season.year,
   week,
   esbid,
   dry = false,
   proxy_pool = 'default',
   use_proxy = true,
   request_delay = 3000,
-  seas_type = null,
+  season_type = null,
   collector = null
 } = {}) {
   console.time('import-plays-charting')
   log(
-    `starting charting play import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
+    `starting charting play import: year=${season_year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
   )
 
   const client = new ChartingDataClient({
@@ -196,7 +196,12 @@ export async function import_plays_charting({
     request_delay_ms: request_delay
   })
 
-  const games = await get_games_for_import({ year, week, esbid, seas_type })
+  const games = await get_games_for_import({
+    season_year,
+    week,
+    esbid,
+    season_type
+  })
   log(`found ${games.length} games to process`)
 
   if (games.length === 0) {
@@ -277,14 +282,14 @@ const main = async () => {
     enable_debug_namespaces('import-plays-charting,charting-data')
 
     await import_plays_charting({
-      year: argv.year,
+      season_year: argv.year,
       week: argv.week,
       esbid: argv.esbid,
       dry: argv.dry,
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,
-      seas_type: argv.seas_type
+      season_type: argv.season_type
     })
   } catch (err) {
     error = err

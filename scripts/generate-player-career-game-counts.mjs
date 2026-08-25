@@ -13,7 +13,7 @@ enable_debug_namespaces('generate-player-career-game-counts')
 
 const generate_player_career_game_counts = async () => {
   const years = await db('nfl_games')
-    .distinct('season_year as year')
+    .distinct('season_year')
     .whereIn('season_type', ['REG', 'POST'])
     .orderBy('season_year', 'asc')
 
@@ -25,7 +25,7 @@ const generate_player_career_game_counts = async () => {
 
   const seas_type_order = { REG: 0, POST: 1 }
 
-  for (const { year } of years) {
+  for (const { season_year } of years) {
     const rows = await db('player_gamelogs')
       .select(
         'player_gamelogs.pid',
@@ -33,9 +33,9 @@ const generate_player_career_game_counts = async () => {
         'player_gamelogs.opponent_nfl_team',
         'player_gamelogs.nfl_team',
         'player_gamelogs.player_position',
-        'nfl_games.season_year as year',
+        'nfl_games.season_year',
         'nfl_games.week',
-        'nfl_games.season_type as seas_type'
+        'nfl_games.season_type'
       )
       .innerJoin('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid').andOn(
@@ -44,11 +44,11 @@ const generate_player_career_game_counts = async () => {
           'player_gamelogs.season_year'
         )
       })
-      .where({ 'nfl_games.season_year': year })
+      .where({ 'nfl_games.season_year': season_year })
       .whereIn('nfl_games.season_type', ['REG', 'POST'])
 
     log(
-      `processing year ${year}: loaded ${rows.length} player games (excluding preseason)`
+      `processing year ${season_year}: loaded ${rows.length} player games (excluding preseason)`
     )
 
     const pid_to_rows = {}
@@ -69,15 +69,15 @@ const generate_player_career_game_counts = async () => {
       const games = pid_to_rows[pid]
       games.sort((a, b) => {
         const seas_cmp =
-          (seas_type_order[a.seas_type] ?? 0) -
-          (seas_type_order[b.seas_type] ?? 0)
+          (seas_type_order[a.season_type] ?? 0) -
+          (seas_type_order[b.season_type] ?? 0)
         if (seas_cmp !== 0) return seas_cmp
         return a.week - b.week
       })
 
       for (const game of games) {
         player_career_games[pid]++
-        player_career_years[pid].add(game.year)
+        player_career_years[pid].add(game.season_year)
 
         game_updates.push({
           pid: game.pid,
@@ -85,17 +85,17 @@ const generate_player_career_game_counts = async () => {
           opponent_nfl_team: game.opponent_nfl_team,
           nfl_team: game.nfl_team,
           player_position: game.player_position,
-          season_year: game.year,
+          season_year: game.season_year,
           career_game: player_career_games[pid]
         })
 
-        const season_key = `${game.pid}_${game.year}_${game.seas_type}`
+        const season_key = `${game.pid}_${game.season_year}_${game.season_type}`
         if (!season_updates[season_key]) {
           season_updates[season_key] = {
             pid: game.pid,
-            season_year: game.year,
+            season_year: game.season_year,
             career_year: player_career_years[pid].size,
-            season_type: game.seas_type
+            season_type: game.season_type
           }
         }
       }
@@ -117,7 +117,7 @@ const generate_player_career_game_counts = async () => {
 
       total_game_updates += game_updates.length
       log(
-        `updated career game counts for ${game_updates.length} games in ${year}`
+        `updated career game counts for ${game_updates.length} games in ${season_year}`
       )
     }
 
@@ -135,7 +135,7 @@ const generate_player_career_game_counts = async () => {
 
       total_season_updates += season_updates_array.length
       log(
-        `updated career year counts for ${season_updates_array.length} seasons in ${year}`
+        `updated career year counts for ${season_updates_array.length} seasons in ${season_year}`
       )
     }
   }

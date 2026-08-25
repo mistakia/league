@@ -74,7 +74,7 @@ const is_hit = ({ actual_value, line, selection_type, strict, cushion }) => {
   return false
 }
 
-const get_team_yardage_markets = async ({ year, current_week_only }) => {
+const get_team_yardage_markets = async ({ season_year, current_week_only }) => {
   const query = db('prop_market_selections_index')
     .select(
       'prop_markets_index.esbid',
@@ -86,13 +86,13 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.season_type as seas_type',
+      'nfl_games.season_type',
       'nfl_games.week',
-      'nfl_games.season_year as year'
+      'nfl_games.season_year'
     )
     .whereNotNull('prop_markets_index.esbid')
     .whereNotNull('prop_market_selections_index.selection_pid')
-    .where('prop_markets_index.season_year', year)
+    .where('prop_markets_index.season_year', season_year)
     .whereIn('prop_markets_index.market_type', TEAM_YARDAGE_MARKET_TYPES)
     .join('prop_markets_index', function () {
       this.on(
@@ -181,7 +181,7 @@ const aggregate_team_game_yards = async ({ teams }) => {
 
 const get_game_info_for_esbids = async ({ esbids }) => {
   const games = await db('nfl_games')
-    .select('esbid', 'season_year as year', 'week', 'season_type as seas_type')
+    .select('esbid', 'season_year', 'week', 'season_type')
     .whereIn('esbid', esbids)
 
   const game_info = {}
@@ -204,19 +204,21 @@ const filter_games_by_period = ({
     if (!info) return false
 
     const is_before_selection =
-      info.year < selection_year ||
-      (info.year === selection_year &&
-        ((selection_seas_type === 'POST' && info.seas_type === 'REG') ||
-          (info.seas_type === selection_seas_type &&
+      info.season_year < selection_year ||
+      (info.season_year === selection_year &&
+        ((selection_seas_type === 'POST' && info.season_type === 'REG') ||
+          (info.season_type === selection_seas_type &&
             info.week < selection_week)))
 
     if (!is_before_selection) return false
 
     switch (period) {
       case 'current_season':
-        return info.year === selection_year && info.seas_type !== 'POST'
+        return (
+          info.season_year === selection_year && info.season_type !== 'POST'
+        )
       case 'last_season':
-        return info.year === selection_year - 1
+        return info.season_year === selection_year - 1
       case 'overall':
         return true
       default:
@@ -265,14 +267,17 @@ const calculate_team_hit_rates = ({
 }
 
 const calculate_team_historical_hit_rates = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   current_week_only = false,
   dry_run = false,
   batch_size = 1000
 } = {}) => {
   log('Starting team historical hit rate calculation')
 
-  const selections = await get_team_yardage_markets({ year, current_week_only })
+  const selections = await get_team_yardage_markets({
+    season_year,
+    current_week_only
+  })
   log(`Processing ${selections.length} team yardage selections`)
 
   if (selections.length === 0) {
@@ -333,9 +338,9 @@ const calculate_team_historical_hit_rates = async ({
         const filtered_games = filter_games_by_period({
           team_games,
           period,
-          selection_year: selection.year,
+          selection_year: selection.season_year,
           selection_week: selection.week,
-          selection_seas_type: selection.seas_type,
+          selection_seas_type: selection.season_type,
           game_info
         })
 
@@ -343,9 +348,9 @@ const calculate_team_historical_hit_rates = async ({
           const all_games = filter_games_by_period({
             team_games,
             period: 'overall',
-            selection_year: selection.year,
+            selection_year: selection.season_year,
             selection_week: selection.week,
-            selection_seas_type: selection.seas_type,
+            selection_seas_type: selection.season_type,
             game_info
           })
           return calculate_team_hit_rates({
@@ -360,9 +365,9 @@ const calculate_team_historical_hit_rates = async ({
           const all_games = filter_games_by_period({
             team_games,
             period: 'overall',
-            selection_year: selection.year,
+            selection_year: selection.season_year,
             selection_week: selection.week,
-            selection_seas_type: selection.seas_type,
+            selection_seas_type: selection.season_type,
             game_info
           })
           return calculate_team_hit_rates({
@@ -487,7 +492,7 @@ const calculate_team_historical_hit_rates = async ({
       )
     })
     .whereIn('pmi.market_type', TEAM_YARDAGE_MARKET_TYPES)
-    .where('pmi.season_year', year)
+    .where('pmi.season_year', season_year)
     .whereNull('pmsi.overall_hit_rate_soft')
     .count({ null_count: 'pmsi.source_selection_id' })
     .first()
@@ -495,7 +500,7 @@ const calculate_team_historical_hit_rates = async ({
   const null_count = Number(null_count_row?.null_count ?? 0)
   if (null_count > 0) {
     return {
-      shortfall: `${null_count} team yardage selection(s) still have NULL overall_hit_rate_soft after run (year=${year})`
+      shortfall: `${null_count} team yardage selection(s) still have NULL overall_hit_rate_soft after run (year=${season_year})`
     }
   }
 
@@ -540,7 +545,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const result = await calculate_team_historical_hit_rates({
-      year: argv.year,
+      season_year: argv.year,
       current_week_only: argv.current_week_only,
       dry_run: argv.dry_run,
       batch_size: argv.batch_size

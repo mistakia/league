@@ -68,16 +68,16 @@ const fetch_pdf = async ({ url, max_retries = 3 }) => {
   throw last_error
 }
 
-const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
+const archive_year = async ({ season_year, week, ignore_cache, dry_run }) => {
   const query = db('nfl_games')
-    .select('esbid', 'shield_game_id', 'season_type as seas_type', 'week')
-    .where({ season_year: year })
+    .select('esbid', 'shield_game_id', 'season_type', 'week')
+    .where({ season_year })
     .whereNotNull('shield_game_id')
   if (week !== undefined) query.where({ week })
 
   const games = await query
   log(
-    `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shield_game_id`
+    `${season_year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shield_game_id`
   )
 
   const counts = {
@@ -107,7 +107,7 @@ const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
       if (result.status === 404) {
         counts.not_found += 1
         log(
-          `404 ${game.esbid} (${game.seas_type} W${game.week}) shield_game_id=${game.shield_game_id}`
+          `404 ${game.esbid} (${game.season_type} W${game.week}) shield_game_id=${game.shield_game_id}`
         )
         continue
       }
@@ -121,12 +121,12 @@ const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
     }
   }
 
-  log(`${year}: ${JSON.stringify(counts)}`)
+  log(`${season_year}: ${JSON.stringify(counts)}`)
   return counts
 }
 
 const archive_nfl_gamebooks = async ({
-  year,
+  season_year,
   start_year,
   end_year,
   week,
@@ -140,7 +140,7 @@ const archive_nfl_gamebooks = async ({
     }
     for (let y = start_year; y <= end_year; y++) years.push(y)
   } else {
-    years.push(year || current_season.year)
+    years.push(season_year || current_season.year)
   }
 
   const totals = {
@@ -151,7 +151,12 @@ const archive_nfl_gamebooks = async ({
     errored: 0
   }
   for (const y of years) {
-    const c = await archive_year({ year: y, week, ignore_cache, dry_run })
+    const c = await archive_year({
+      season_year: y,
+      week,
+      ignore_cache,
+      dry_run
+    })
     for (const k of Object.keys(totals)) totals[k] += c[k]
   }
 
@@ -173,7 +178,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const result = await archive_nfl_gamebooks({
-      year: argv.year,
+      season_year: argv.year,
       start_year: argv.start_year,
       end_year: argv.end_year,
       week: argv.week,

@@ -70,8 +70,8 @@ const format_prop_row = ({
   week,
   opponent,
   player_row,
-  seas_type,
-  year,
+  season_type,
+  season_year,
   all_plays = []
 }) => {
   const player_gamelogs = all_player_gamelogs.filter(
@@ -92,9 +92,9 @@ const format_prop_row = ({
           acc[play.esbid] = {
             esbid: play.esbid,
             pid: prop_row.selection_pid,
-            year: play.season_year,
+            season_year: play.season_year,
             week: play.week,
-            seas_type: play.season_type,
+            season_type: play.season_type,
             pos: player_row.primary_position,
             first_quarter_stats: {
               passing_yards: 0,
@@ -128,9 +128,9 @@ const format_prop_row = ({
 
   // Sort quarter gamelogs to match the order of regular gamelogs
   quarter_gamelogs.sort((a, b) => {
-    if (a.year !== b.year) return a.year - b.year
-    if (a.seas_type !== b.seas_type)
-      return b.seas_type.localeCompare(a.seas_type)
+    if (a.season_year !== b.season_year) return a.season_year - b.season_year
+    if (a.season_type !== b.season_type)
+      return b.season_type.localeCompare(a.season_type)
     return a.week - b.week
   })
 
@@ -138,27 +138,28 @@ const format_prop_row = ({
     (p) => {
       if (p.opponent_nfl_team !== opponent) return false
       if (p.player_position !== player_row.primary_position) return false
-      if (p.year !== year) return false
-      if (seas_type === 'REG' && p.seas_type === 'POST') return false
-      if (seas_type === p.seas_type && p.week >= week) return false
+      if (p.season_year !== season_year) return false
+      if (season_type === 'REG' && p.season_type === 'POST') return false
+      if (season_type === p.season_type && p.week >= week) return false
       return true
     }
   )
 
-  const format_week = (year, seas_type, week) => `/${year}/${seas_type}/${week}`
+  const format_week = (season_year, season_type, week) =>
+    `/${season_year}/${season_type}/${week}`
 
   const current_season_gamelogs = player_gamelogs.filter(
-    (p) => p.year === year && p.seas_type === seas_type
+    (p) => p.season_year === season_year && p.season_type === season_type
   )
   const current_season_quarter_gamelogs = quarter_gamelogs.filter(
-    (p) => p.year === year && p.seas_type === seas_type
+    (p) => p.season_year === season_year && p.season_type === season_type
   )
 
   const last_season_gamelogs = player_gamelogs.filter(
-    (p) => p.year === year - 1
+    (p) => p.season_year === season_year - 1
   )
   const last_season_quarter_gamelogs = quarter_gamelogs.filter(
-    (p) => p.year === year - 1
+    (p) => p.season_year === season_year - 1
   )
 
   const last_five_gamelogs = player_gamelogs.slice(-5)
@@ -192,7 +193,7 @@ const format_prop_row = ({
       hit_weeks_soft: hits_soft.length
         ? JSON.stringify(
             hits_soft
-              .map((p) => format_week(p.year, p.seas_type, p.week))
+              .map((p) => format_week(p.season_year, p.season_type, p.week))
               .sort()
           )
         : null,
@@ -200,13 +201,13 @@ const format_prop_row = ({
       hit_weeks_hard: hits_hard.length
         ? JSON.stringify(
             hits_hard
-              .map((p) => format_week(p.year, p.seas_type, p.week))
+              .map((p) => format_week(p.season_year, p.season_type, p.week))
               .sort()
           )
         : null,
       weeks_played: JSON.stringify(
         merged_gamelogs
-          .map((p) => format_week(p.year, p.seas_type, p.week))
+          .map((p) => format_week(p.season_year, p.season_type, p.week))
           .sort()
       )
     }
@@ -238,13 +239,15 @@ const format_prop_row = ({
   })
   const opponent_hit_weeks = [
     ...new Set(
-      opponent_allowed_hits.map((p) => format_week(p.year, p.seas_type, p.week))
+      opponent_allowed_hits.map((p) =>
+        format_week(p.season_year, p.season_type, p.week)
+      )
     )
   ]
   const opponent_weeks_played = [
     ...new Set(
       current_season_opponent_player_gamelogs.map((p) =>
-        format_week(p.year, p.seas_type, p.week)
+        format_week(p.season_year, p.season_type, p.week)
       )
     )
   ]
@@ -306,9 +309,9 @@ const format_prop_row = ({
 
 const calculate_weekly_market_selections_analysis = async ({
   prop_rows,
-  seas_type = current_season.nfl_seas_type,
+  season_type = current_season.nfl_seas_type,
   week = current_season.nfl_seas_week,
-  year = current_season.year,
+  season_year = current_season.year,
   dry_run = false
 } = {}) => {
   log(`calculating analysis for ${prop_rows.length} prop rows`)
@@ -318,24 +321,24 @@ const calculate_weekly_market_selections_analysis = async ({
   }
 
   const nfl_games = await db('nfl_games').where({
-    season_year: year,
+    season_year,
     week,
-    season_type: seas_type
+    season_type
   })
   log(
     `loaded ${nfl_games.length} nfl games for week ${week} ${current_season.year}`
   )
 
-  const current_year = year
-  const previous_year = year - 1
+  const current_year = season_year
+  const previous_year = season_year - 1
 
   const all_player_gamelogs = await db('player_gamelogs')
     .select(
       'player_gamelogs.*',
       'nfl_games.esbid',
       'nfl_games.week',
-      'nfl_games.season_type as seas_type',
-      'nfl_games.season_year as year'
+      'nfl_games.season_type',
+      'nfl_games.season_year'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .whereIn('nfl_games.season_year', [current_year, previous_year])
@@ -378,8 +381,8 @@ const calculate_weekly_market_selections_analysis = async ({
       'ball_carrier_pid'
     )
     .where({
-      season_year: year,
-      season_type: seas_type
+      season_year,
+      season_type
     })
     .whereNot('play_type', 'NOPL')
     .orderBy('esbid')
@@ -421,8 +424,8 @@ const calculate_weekly_market_selections_analysis = async ({
       week,
       opponent,
       player_row,
-      seas_type,
-      year,
+      season_type,
+      season_year,
       all_plays: nfl_plays || []
     })
 
@@ -456,14 +459,14 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const week = argv.week || current_season.nfl_seas_week
-    const year = argv.year || current_season.year
-    const seas_type = argv.seas_type || current_season.nfl_seas_type
+    const season_year = argv.year || current_season.year
+    const season_type = argv.season_type || current_season.nfl_seas_type
     const source = argv.source || 'FANDUEL'
     const dry_run = argv.dry || false
     log({
       week,
-      year,
-      seas_type,
+      season_year,
+      season_type,
       source
     })
 
@@ -472,7 +475,7 @@ const main = async () => {
         'prop_markets_index.*',
         'prop_market_selections_index.*',
         'nfl_games.week',
-        'nfl_games.season_year as year'
+        'nfl_games.season_year'
       )
       .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
       .join('prop_market_selections_index', function () {
@@ -525,8 +528,8 @@ const main = async () => {
       .where('prop_markets_index.time_type', 'CLOSE')
       .where('prop_markets_index.source_id', source)
       .where('nfl_games.week', week)
-      .where('nfl_games.season_type', seas_type)
-      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_type', season_type)
+      .where('nfl_games.season_year', season_year)
 
     // log(prop_rows_query.toString())
 
@@ -535,8 +538,8 @@ const main = async () => {
     await calculate_weekly_market_selections_analysis({
       prop_rows,
       week,
-      year,
-      seas_type,
+      season_year,
+      season_type,
       dry_run
     })
   } catch (err) {

@@ -84,7 +84,7 @@ const get_hits = ({
 }
 
 const calculate_historical_hit_rates = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   missing_only = false,
   current_week_only = false,
   market_types = null,
@@ -104,13 +104,13 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.season_type as seas_type',
+      'nfl_games.season_type',
       'nfl_games.week',
-      'nfl_games.season_year as year'
+      'nfl_games.season_year'
     )
     .whereNotNull('prop_market_selections_index.selection_pid')
     .whereNotNull('prop_markets_index.esbid')
-    .where('prop_markets_index.season_year', year)
+    .where('prop_markets_index.season_year', season_year)
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
@@ -183,8 +183,8 @@ const calculate_historical_hit_rates = async ({
     .select(
       'player_gamelogs.*',
       'nfl_games.week',
-      'nfl_games.season_year as year',
-      'nfl_games.season_type as seas_type',
+      'nfl_games.season_year',
+      'nfl_games.season_type',
       'nfl_games.esbid'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -356,23 +356,25 @@ const calculate_historical_hit_rates = async ({
       // Filter gamelogs by time periods
       const current_season_gamelogs = player_gamelogs.filter(
         (g) =>
-          g.year === selection.year &&
-          ((selection.seas_type === 'POST' && g.seas_type === 'REG') ||
-            (g.seas_type === selection.seas_type && g.week < selection.week))
+          g.season_year === selection.season_year &&
+          ((selection.season_type === 'POST' && g.season_type === 'REG') ||
+            (g.season_type === selection.season_type &&
+              g.week < selection.week))
       )
 
       const all_gamelogs = player_gamelogs.filter(
         (g) =>
-          g.year < selection.year ||
-          (g.year === selection.year &&
-            ((selection.seas_type === 'POST' && g.seas_type === 'REG') ||
-              (g.seas_type === selection.seas_type && g.week < selection.week)))
+          g.season_year < selection.season_year ||
+          (g.season_year === selection.season_year &&
+            ((selection.season_type === 'POST' && g.season_type === 'REG') ||
+              (g.season_type === selection.season_type &&
+                g.week < selection.week)))
       )
 
       const last_five = all_gamelogs.slice(-5)
       const last_ten = all_gamelogs.slice(-10)
       const last_season = all_gamelogs.filter(
-        (g) => g.year === selection.year - 1
+        (g) => g.season_year === selection.season_year - 1
       )
 
       // Calculate implied probability from odds
@@ -507,7 +509,7 @@ const calculate_historical_hit_rates = async ({
   // year (prop_selections.length === 0 returned early above).
   if (processed_count === 0) {
     return {
-      shortfall: `processed 0 of ${prop_selections.length} selections for year=${year} (missing_gamelogs=${missing_gamelogs_count})`
+      shortfall: `processed 0 of ${prop_selections.length} selections for year=${season_year} (missing_gamelogs=${missing_gamelogs_count})`
     }
   }
 
@@ -519,7 +521,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const result = await calculate_historical_hit_rates({
-      year: argv.year,
+      season_year: argv.year,
       missing_only: argv.missing_only,
       current_week_only: argv.current_week_only,
       market_types: argv.market_types,
