@@ -34,6 +34,14 @@ const build_betrivers_market = () => ({
 
 const event = { id: 'event-1', name: 'Chiefs v Ravens' }
 
+// The nfl_game fixtures below are hand-built, so nothing ties them to the real
+// row shape and a rename moves the producer without moving them. This one
+// carried `year` until 2026-08-24, when the importer stopped aliasing
+// season_year back and started reading the physical name: the fixture then fed
+// format_market a key it no longer reads, and the spec failed on `undefined`
+// over a writer that was correct. Keep these keys spelled as nfl_games
+// physically stores them, which is what db('nfl_games').select('*') returns.
+
 describe('betrivers prop market season_year', function () {
   it('takes the season from the resolved game, not the current season', async () => {
     const past_season = current_season.year - 3
@@ -44,7 +52,7 @@ describe('betrivers prop market season_year', function () {
       event,
       nfl_game: {
         esbid: '2023091000',
-        year: past_season,
+        season_year: past_season,
         away_nfl_team: 'KC',
         home_nfl_team: 'BAL'
       }
