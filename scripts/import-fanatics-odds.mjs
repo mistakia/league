@@ -52,8 +52,8 @@ const format_market = async ({
     nfl_game = nfl_games.find(
       (game) =>
         game.week === week &&
-        game.seas_type === seas_type &&
-        game.year === current_season.year &&
+        game.season_type === seas_type &&
+        game.season_year === current_season.year &&
         game.away_nfl_team === fixTeam(away_team) &&
         game.home_nfl_team === fixTeam(home_team)
     )
@@ -117,7 +117,7 @@ const format_market = async ({
     source_market_id: market.id,
     source_market_name: market.name,
     esbid: nfl_game?.esbid || null,
-    season_year: nfl_game?.year || current_season.year,
+    season_year: nfl_game?.season_year || current_season.year,
     source_event_id: String(event.id),
     source_event_name: event.name,
     is_open: market.state === 'OPEN',
@@ -165,11 +165,9 @@ const run = async ({
   const observed_at = new Date()
   const league_info = await fanatics.get_league_info({ ignore_cache })
 
-  const nfl_games = await db('nfl_games')
-    .select('*', 'season_year as year', 'season_type as seas_type')
-    .where({
-      season_year: current_season.year
-    })
+  const nfl_games = await db('nfl_games').select('*').where({
+    season_year: current_season.year
+  })
 
   const formatted_markets = []
   const raw_markets = []

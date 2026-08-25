@@ -170,8 +170,8 @@ const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
   return nfl_games.find(
     (game) =>
       game.week === week &&
-      game.seas_type === seas_type &&
-      game.year === current_season.year &&
+      game.season_type === seas_type &&
+      game.season_year === current_season.year &&
       game.away_nfl_team === fixTeam(team_info.away_team) &&
       game.home_nfl_team === fixTeam(team_info.home_team)
   )
@@ -457,7 +457,7 @@ const format_market = async ({
     source_market_id,
     source_market_name: `type: ${pinnacle_matchup.type} / units: ${pinnacle_matchup.units} / category: ${special_category} / description: ${special_description}`,
     esbid: nfl_game ? nfl_game.esbid : null,
-    season_year: nfl_game ? nfl_game.year : current_season.year,
+    season_year: nfl_game ? nfl_game.season_year : current_season.year,
     source_event_id: pinnacle_matchup.id,
     source_event_name: format_source_event_name({
       is_valid_matchup: team_info.is_valid_matchup,
@@ -810,7 +810,7 @@ const import_pinnacle_odds = async ({
     const file_timestamp = Math.round(Date.now() / 1000)
     const observed_at = new Date()
     const nfl_games = await db('nfl_games')
-      .select('*', 'season_year as year', 'season_type as seas_type')
+      .select('*')
       .where({ season_year: current_season.year })
 
     // The initial matchups fetch is the one network call NOT inside the batch

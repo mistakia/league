@@ -156,11 +156,9 @@ const run = async () => {
 
   const file_timestamp = Math.round(Date.now() / 1000)
   const observed_at = new Date()
-  const nfl_games = await db('nfl_games')
-    .select('*', 'season_year as year', 'season_type as seas_type')
-    .where({
-      season_year: current_season.year
-    })
+  const nfl_games = await db('nfl_games').select('*').where({
+    season_year: current_season.year
+  })
 
   log(`Running in ${argv.mode} mode`)
 
