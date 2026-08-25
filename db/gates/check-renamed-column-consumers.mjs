@@ -153,6 +153,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import {
+  count_files_by_root,
   format_corpus,
   resolve_corpus,
   verdict_suffix
@@ -256,12 +257,6 @@ const walk_files = (roots, extensions) => {
   for (const root of roots) visit(path.join(repo_root, root))
   return files
 }
-
-// What each declared root actually yielded. A count is the authoritative
-// oracle for whether a root was read -- an existence check is not, because an
-// uninitialized submodule is a present, empty mountpoint.
-const count_files_by_root = (roots, extensions) =>
-  new Map(roots.map((root) => [root, walk_files([root], extensions).length]))
 
 const is_comment = (line) => {
   const trimmed = line.trim()
@@ -838,7 +833,11 @@ const main = () => {
   // inversion of the defect the corpus block exists to prevent.
   const corpus_roots =
     argv.gate === 1 ? [...SERVER_ROOTS] : [...SERVER_ROOTS, ...SPA_ROOTS]
-  const corpus_counts = count_files_by_root(corpus_roots, ['.mjs', '.js'])
+  const corpus_counts = count_files_by_root({
+    files: walk_files(corpus_roots, ['.mjs', '.js']),
+    roots: corpus_roots,
+    repo_root
+  })
   const corpus = resolve_corpus({
     roots: corpus_roots,
     repo_root,

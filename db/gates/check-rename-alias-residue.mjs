@@ -259,6 +259,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import {
+  count_files_by_root,
   format_corpus,
   resolve_corpus,
   verdict_suffix
@@ -397,12 +398,6 @@ const walk_files = (roots, extensions) => {
   for (const root of roots) visit(path.join(repo_root, root))
   return files
 }
-
-// What each declared root actually yielded. The count is the authoritative
-// oracle for whether a root was read; an existence check is not, because an
-// uninitialized submodule is a present, empty mountpoint.
-const count_files_by_root = (roots, extensions) =>
-  new Map(roots.map((root) => [root, walk_files([root], extensions).length]))
 
 const is_registry_path = (relative_path) =>
   REGISTRY_PATH_MARKERS.some((marker) => relative_path.includes(marker))
@@ -1875,8 +1870,17 @@ const main = () => {
 
   // Resolved and printed before anything else this run says, so a reader who
   // stops at the first finding already knows which roots the verdict covers.
+  // Walked ONCE, and the same lists feed both the scan and the corpus count --
+  // so the count is what the scan read rather than what a second walk found.
+  const producer_files = walk_files(SERVER_ROOTS, ['.mjs', '.js'])
+  const spa_files = walk_files(SPA_ROOTS, ['.js', '.mjs'])
+
   const corpus_roots = [...SERVER_ROOTS, ...SPA_ROOTS]
-  const corpus_counts = count_files_by_root(corpus_roots, ['.mjs', '.js'])
+  const corpus_counts = count_files_by_root({
+    files: [...producer_files, ...spa_files],
+    roots: corpus_roots,
+    repo_root
+  })
   const corpus = resolve_corpus({
     roots: corpus_roots,
     repo_root,
@@ -1898,11 +1902,8 @@ const main = () => {
   const scan = run_scan({
     lost_columns,
     current_tables,
-    producer_files: walk_files(SERVER_ROOTS, ['.mjs', '.js']),
-    read_files: [
-      ...walk_files(SERVER_ROOTS, ['.mjs', '.js']),
-      ...walk_files(SPA_ROOTS, ['.js', '.mjs'])
-    ]
+    producer_files,
+    read_files: [...producer_files, ...spa_files]
   })
 
   const adjudications = load_adjudications()

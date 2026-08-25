@@ -96,6 +96,38 @@ export const resolve_corpus = ({ roots, repo_root, counts }) => {
 }
 
 /**
+ * Bucket the files a gate ACTUALLY READ by declared root.
+ *
+ * This takes the caller's own file list rather than walking anything itself,
+ * which is the whole point: it keeps "what I counted" and "what I read" the
+ * same object, so the two cannot drift. A gate that counts by re-walking is
+ * answering a different question from the one its verdict rests on, and both
+ * defects found reviewing the first version of this wiring were exactly that
+ * gap -- one gate reported `app` as scanned on a run that never opened it,
+ * and another reported roots it had not read as read.
+ *
+ * A file outside every declared root is ignored rather than bucketed, since a
+ * root that is not declared is not part of the claim.
+ *
+ * @param {object} params
+ * @param {string[]} params.files absolute or repo-relative paths the gate read
+ * @param {string[]} params.roots declared repo-relative root names
+ * @param {string} params.repo_root absolute path to the repository root
+ * @returns {Map<string, number>} files read per declared root, zero included
+ */
+export const count_files_by_root = ({ files, roots, repo_root }) => {
+  const counts = new Map(roots.map((root) => [root, 0]))
+  for (const file of files) {
+    const relative = path.isAbsolute(file)
+      ? path.relative(repo_root, file)
+      : file
+    const [root] = relative.split(path.sep)
+    if (counts.has(root)) counts.set(root, counts.get(root) + 1)
+  }
+  return counts
+}
+
+/**
  * The corpus block, printed BEFORE any findings. Ordering matters: a reader who
  * stops at the first finding should already know what was and was not scanned.
  *
