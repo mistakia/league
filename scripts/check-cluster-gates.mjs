@@ -38,6 +38,7 @@
  *   yarn check:cluster --list               # the manifest, run nothing
  */
 
+import fs from 'fs'
 import net from 'net'
 import path from 'path'
 import { spawnSync } from 'child_process'
@@ -60,6 +61,21 @@ const repo_root = path.resolve(
 // read.
 const TEST_CONTAINER = { host: '127.0.0.1', port: 5433 }
 const PRODUCTION_TUNNEL = { host: '127.0.0.1', port: 15432 }
+
+// The user-base prose corpus that stranded-vocabulary-literals gate 2 scans. It
+// is reached by walking UP from the checkout, so it exists on a workstation and
+// on no CI runner. Resolved here by the same marker directory the gate itself
+// walks for, so the runner's SKIP and the gate's own reachability cannot drift.
+const USER_BASE_PROSE_MARKER = path.join('text', 'nfl', 'query')
+
+const find_user_base_prose_root = () => {
+  let dir = repo_root
+  while (dir !== path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, USER_BASE_PROSE_MARKER))) return dir
+    dir = path.dirname(dir)
+  }
+  return null
+}
 
 const PRODUCTION_ENV = {
   NODE_ENV: 'production',
@@ -188,13 +204,19 @@ const GATES = [
     oracle:
       'alias-qualified and unqualified knex column references, resolved through the statement that binds them, vs the schema file'
   },
+  // Split into its two gates for the same reason renamed-column-consumers is:
+  // the halves have different prerequisites. Invoked bare, gate 2 could not
+  // reach its user-base corpus on a runner and the whole gate declared itself
+  // BLIND, which the private corpus-gates workflow then had to allow BY NAME --
+  // an allowance that would have hidden a genuinely blind gate of the same name
+  // forever. Named per gate, gate 1 is CI-eligible and gate 2 SKIPS loudly.
   {
-    id: 'stranded-vocabulary-literals',
-    command: ['db/gates/check-stranded-vocabulary-literals.mjs'],
+    id: 'stranded-vocabulary-literals-gate-1',
+    command: ['db/gates/check-stranded-vocabulary-literals.mjs', '--gate', '1'],
     requires: 'none',
     negative_control: true,
     oracle:
-      "a literal bound to a CHECK-constrained column vs that column's permitted set — the bound VALUE, not the column name, so no other gate here shares its class"
+      "a knex literal bound to a CHECK-constrained column vs that column's permitted set — the bound VALUE, not the column name, so no other gate here shares its class"
   },
   {
     id: 'dropped-table-consumers',
@@ -226,6 +248,14 @@ const GATES = [
     negative_control: false,
     oracle:
       'columns this cluster removed vs consumers still reading them, per-site adjudicated'
+  },
+  {
+    id: 'stranded-vocabulary-literals-gate-2',
+    command: ['db/gates/check-stranded-vocabulary-literals.mjs', '--gate', '2'],
+    requires: 'user-base-prose',
+    negative_control: true,
+    oracle:
+      "a SQL literal in the user-base query corpus vs its CHECK-constrained column's permitted set — the half no CI runner can reach, since the corpus is not in this repo"
   },
   {
     id: 'rename-alias-residue',
@@ -387,6 +417,11 @@ const missing_prerequisite = async ({ requires, base_ref }) => {
     return (await is_listening(PRODUCTION_TUNNEL))
       ? null
       : `no production tunnel on :${PRODUCTION_TUNNEL.port} — bring up \`base db\``
+  }
+  if (requires === 'user-base-prose') {
+    return find_user_base_prose_root()
+      ? null
+      : `no ${USER_BASE_PROSE_MARKER} above this checkout — the corpus lives in user-base, so this gate is unrunnable on a CI runner`
   }
   throw new Error(`unknown prerequisite: ${requires}`)
 }
