@@ -40,7 +40,7 @@ enable_debug_namespaces('backfill-play-stats-gsisid')
  * wrong.
  */
 
-const build_game_rosters = async ({ esbids, year }) => {
+const build_game_rosters = async ({ esbids, season_year }) => {
   // Players the feed itself identified somewhere in this game.
   const feed_identified = await db('nfl_play_stats as ps')
     .join('player as p', 'p.gsis_player_id', 'ps.gsis_player_id')
@@ -60,7 +60,7 @@ const build_game_rosters = async ({ esbids, year }) => {
   const snap_participants = await db('nfl_snaps as s')
     .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_player_id')
     .whereIn('s.esbid', esbids)
-    .where('s.season_year', year)
+    .where('s.season_year', season_year)
     .whereNotNull('p.gsis_player_id')
     .distinct(
       's.esbid',
@@ -179,12 +179,17 @@ const log_resolutions = (rows) => {
   }
 }
 
-const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
-  log(`Backfilling gsis_player_id on nfl_play_stats for year ${year}`)
+const backfill_play_stats_gsisid = async ({
+  season_year,
+  dry_run = false
+} = {}) => {
+  log(
+    `Backfilling gsis_player_id on nfl_play_stats for season_year ${season_year}`
+  )
 
   const unresolved = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
-    .where('g.season_year', year)
+    .where('g.season_year', season_year)
     .whereNull('ps.gsis_player_id')
     .whereNotNull('ps.player_name')
     .where('ps.player_name', '!=', '')
@@ -204,7 +209,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   log(`${unresolved.length} rows carry a name and no gsis_player_id`)
 
   const esbids = [...new Set(unresolved.map((row) => row.esbid))]
-  const rosters = await build_game_rosters({ esbids, year })
+  const rosters = await build_game_rosters({ esbids, season_year })
 
   const rows_to_fix = []
   let no_roster = 0
@@ -219,7 +224,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     const resolution = resolve_against_roster({
       play_stat,
       roster,
-      season_year: year
+      season_year
     })
     if (!resolution) {
       unresolved_against_roster++
@@ -241,7 +246,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
 
   const remaining = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
-    .where('g.season_year', year)
+    .where('g.season_year', season_year)
     .whereNull('ps.gsis_player_id')
     .whereNotNull('ps.player_name')
     .where('ps.player_name', '!=', '')
@@ -255,10 +260,11 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
 const main = async () => {
   const args = process.argv.slice(2)
   const year_index = args.indexOf('--year')
-  const year = year_index >= 0 ? parseInt(args[year_index + 1], 10) : null
+  const season_year =
+    year_index >= 0 ? parseInt(args[year_index + 1], 10) : null
   const dry_run = args.includes('--dry')
 
-  if (!year) {
+  if (!season_year) {
     console.error(
       'Usage: node scripts/backfill-play-stats-gsisid.mjs --year 2025 [--dry]'
     )
@@ -266,7 +272,7 @@ const main = async () => {
   }
 
   try {
-    await backfill_play_stats_gsisid({ year, dry_run })
+    await backfill_play_stats_gsisid({ season_year, dry_run })
   } catch (err) {
     console.error(err)
   }

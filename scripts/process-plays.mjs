@@ -125,8 +125,8 @@ const build_play_update_object = (enriched_play) => {
 
 const process_plays = async ({
   week = current_season.last_week_with_stats,
-  year = current_season.year,
-  seas_type = current_season.nfl_seas_type,
+  season_year = current_season.year,
+  season_type = current_season.nfl_seas_type,
   esbid = null,
   overwrite_existing = false,
   dry_run = false,
@@ -142,9 +142,9 @@ const process_plays = async ({
   }
   // Get completed games first
   let completed_game_esbids = await get_completed_games({
-    year,
+    season_year,
     week,
-    seas_type
+    season_type
   })
 
   // Filter to specific game if esbid provided. Coerce both sides to string
@@ -157,7 +157,7 @@ const process_plays = async ({
   }
 
   log(
-    `Found ${completed_game_esbids.length} completed games for ${year} week ${week}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
+    `Found ${completed_game_esbids.length} completed games for ${season_year} week ${week}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
   )
 
   result.games_processed = completed_game_esbids.length
@@ -171,7 +171,7 @@ const process_plays = async ({
   await preload_active_players({ all_players })
 
   // Fetch play_stats for enrichment
-  const play_stats = await get_play_stats({ year, week, seas_type })
+  const play_stats = await get_play_stats({ season_year, week, season_type })
 
   // Filter play stats to only include completed games
   const filtered_play_stats = play_stats.filter((stat) =>
@@ -182,9 +182,9 @@ const process_plays = async ({
 
   const plays = await db('nfl_plays')
     .select('nfl_plays.*')
-    .where('nfl_plays.season_year', year)
+    .where('nfl_plays.season_year', season_year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.season_type', seas_type)
+    .where('nfl_plays.season_type', season_type)
     .whereIn('nfl_plays.esbid', completed_game_esbids)
 
   const games = await db('nfl_games').whereIn('esbid', completed_game_esbids)
@@ -327,7 +327,7 @@ const process_plays = async ({
 
   // Post-processing: populate qb_pid using snap-based identification
   try {
-    await populate_qb_pid({ year, esbids: completed_game_esbids })
+    await populate_qb_pid({ year: season_year, esbids: completed_game_esbids })
   } catch (err) {
     log(`Warning: qb_pid population failed: ${err.message}`)
   }
@@ -375,12 +375,12 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year
+    const season_year = argv.year
     const week = argv.week
     // yargs exposes --seas-type as seasType; reading argv.seas_type was a silent
     // bug that fell back to current_season.nfl_seas_type and produced 0 completed
     // games for any backfill run outside the live REG window.
-    const seas_type = argv.seasType || current_season.nfl_seas_type
+    const season_type = argv.seasType || current_season.nfl_seas_type
     const dry_run = argv.dry
     const overwrite_existing = argv.overwriteExisting || argv.force
     const skip_changelog = argv.skipChangelog
@@ -394,29 +394,31 @@ const main = async () => {
         .groupBy('season_year')
         .orderBy('season_year', 'desc')
 
-      let years = results.map((r) => r.season_year)
+      let season_years = results.map((r) => r.season_year)
       if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
+        season_years = season_years.filter((value) => value >= argv.start)
       }
 
-      log(`processing plays for ${years.length} years`)
+      log(`processing plays for ${season_years.length} years`)
 
-      for (const year of years) {
-        for (const seas_type of nfl_season_types) {
+      for (const season_year of season_years) {
+        for (const season_type of nfl_season_types) {
           const weeks = await db('nfl_plays')
             .select('week')
-            .where({ season_year: year, season_type: seas_type })
+            .where({ season_year, season_type })
             .groupBy('week')
             .orderBy('week', 'asc')
           log(
-            `processing plays for ${weeks.length} weeks in ${year} (${seas_type})`
+            `processing plays for ${weeks.length} weeks in ${season_year} (${season_type})`
           )
           for (const { week } of weeks) {
-            log(`processing plays for week ${week} in ${year} (${seas_type})`)
+            log(
+              `processing plays for week ${week} in ${season_year} (${season_type})`
+            )
             await process_plays({
-              year,
+              season_year,
               week,
-              seas_type,
+              season_type,
               dry_run,
               overwrite_existing,
               skip_changelog,
@@ -426,18 +428,20 @@ const main = async () => {
           }
         }
       }
-    } else if (year && !week) {
+    } else if (season_year && !week) {
       const weeks = await db('nfl_plays')
         .select('week')
-        .where({ season_year: year, season_type: seas_type })
+        .where({ season_year, season_type })
         .groupBy('week')
-      log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
+      log(
+        `processing plays for ${season_year} ${season_type}: ${weeks.length} weeks`
+      )
       for (const { week } of weeks) {
-        log(`processing plays for week ${week} in ${year}`)
+        log(`processing plays for week ${week} in ${season_year}`)
         await process_plays({
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           dry_run,
           overwrite_existing,
           skip_changelog,
@@ -447,9 +451,9 @@ const main = async () => {
       }
     } else {
       await process_plays({
-        year: argv.year,
+        season_year: argv.year,
         week: argv.week,
-        seas_type,
+        season_type,
         esbid: argv.esbid,
         dry_run,
         overwrite_existing,
@@ -463,7 +467,7 @@ const main = async () => {
     if (!dry_run) {
       log('Refreshing nfl_year_week_timestamp materialized view...')
       try {
-        const refresh_year = year || current_season.year
+        const refresh_year = season_year || current_season.year
         await populate_nfl_year_week_timestamp({ year: refresh_year })
         log('Successfully refreshed nfl_year_week_timestamp')
       } catch (refresh_error) {

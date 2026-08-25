@@ -14,20 +14,20 @@ const initialize_cli = () => {
 
 const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   const years = 2
-  let year = current_season.year - years
+  let season_year = current_season.year - years
 
   const data = {}
 
-  for (; year < current_season.year; year++) {
-    const { players } = await calculate_points_added({ year, league })
+  for (; season_year < current_season.year; season_year++) {
+    const { players } = await calculate_points_added({ season_year, league })
     const values = Object.values(players)
     const byPosition = groupBy(values, 'primary_position')
     for (const pos in byPosition) {
       if (data[pos]) {
-        data[pos][year] = byPosition[pos]
+        data[pos][season_year] = byPosition[pos]
       } else {
         data[pos] = {
-          [year]: byPosition[pos]
+          [season_year]: byPosition[pos]
         }
       }
     }
@@ -37,8 +37,8 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   for (const pos in data) {
     const byPosition = data[pos]
     const sums = {}
-    for (const year in byPosition) {
-      const players = byPosition[year]
+    for (const season_year in byPosition) {
+      const players = byPosition[season_year]
       for (const player of players) {
         if (sums[player.position_rank]) {
           sums[player.position_rank].pts_added += player.pts_added_earned

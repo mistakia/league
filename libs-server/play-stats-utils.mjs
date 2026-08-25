@@ -1,6 +1,6 @@
 import db from '#db'
 
-export const get_play_stats = async ({ year, week, seas_type }) => {
+export const get_play_stats = async ({ season_year, week, season_type }) => {
   return db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
@@ -21,17 +21,17 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_games.home_nfl_team',
       'nfl_games.away_nfl_team',
       'nfl_games.esbid',
-      'nfl_games.season_year as year'
+      'nfl_games.season_year'
     )
     .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
     .join('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_play_stats.esbid')
       this.andOn('nfl_plays.play_id', '=', 'nfl_play_stats.play_id')
     })
-    .where('nfl_plays.season_year', year)
+    .where('nfl_plays.season_year', season_year)
     .where('nfl_plays.week', week)
     .where('nfl_play_stats.is_valid', true)
-    .where('nfl_plays.season_type', seas_type)
+    .where('nfl_plays.season_type', season_type)
 }
 
 export const is_successful_play = ({
@@ -113,10 +113,14 @@ export const get_play_type_nfl = (play_type_nfl) => {
   }
 }
 
-export const get_completed_games = async ({ year, week, seas_type }) => {
+export const get_completed_games = async ({
+  season_year,
+  week,
+  season_type
+}) => {
   const completed_games = await db('nfl_games')
     .select('esbid')
-    .where({ season_year: year, week, season_type: seas_type })
+    .where({ season_year, week, season_type })
     .where(function () {
       // Method 1: Games with END_GAME play
       this.whereExists(function () {

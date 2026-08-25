@@ -19,7 +19,9 @@ const initialize_cli = () => {
 const log = debug('generate-season-dates')
 enable_debug_namespaces('generate-season-dates')
 
-const generateSeasonDates = async ({ year = current_season.year } = {}) => {
+const generateSeasonDates = async ({
+  season_year = current_season.year
+} = {}) => {
   const result = {
     openingDay: null,
     start: null,
@@ -33,10 +35,10 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
 
   const games = await db('nfl_games')
     .whereIn('season_type', ['REG', 'POST'])
-    .where({ season_year: year })
+    .where({ season_year })
 
   if (!games.length) {
-    log(`found no games for ${year} season`)
+    log(`found no games for ${season_year} season`)
     return result
   }
 
@@ -62,7 +64,7 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
   const super_bowl = games.find((g) => g.day === 'SB')
   if (!super_bowl || !super_bowl.kickoff_at) {
     result.end = dayjs
-      .tz(`${year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
+      .tz(`${season_year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
       .utc()
       .utcOffset(-5)
       .startOf('week')
@@ -78,12 +80,12 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
   // previous season super bowl
   const previous_super_bowl_query = await db('nfl_games').where({
     day: 'SB',
-    season_year: year - 1
+    season_year: season_year - 1
   })
   const previous_super_bowl = previous_super_bowl_query[0]
   if (!previous_super_bowl || !previous_super_bowl.kickoff_at) {
     result.offseason = dayjs
-      .tz(`${year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
+      .tz(`${season_year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
       .utc()
       .utcOffset(-5)
       .startOf('week')
@@ -112,7 +114,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await generateSeasonDates({ year: argv.year })
+    await generateSeasonDates({ season_year: argv.year })
   } catch (err) {
     error = err
     log(error)
