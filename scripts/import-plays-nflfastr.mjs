@@ -683,22 +683,22 @@ const build_match_criteria = (esbid, formatted_play, item) => {
 }
 
 /**
- * Check if the data is available for the given year
+ * Check if the data is available for the given season year
  */
-const is_data_available = (year) => {
+const is_data_available = (season_year) => {
   if (
-    year === current_season.year &&
+    season_year === current_season.year &&
     (!current_season.week || current_season.now.isAfter(current_season.end))
   ) {
-    log(`${year} season has not started yet`)
+    log(`${season_year} season has not started yet`)
     return false
   }
 
-  if (year === current_season.year && current_season.week === 1) {
+  if (season_year === current_season.year && current_season.week === 1) {
     const current_day = dayjs().day()
     // Week 1 data not available until Friday (day 5)
     if (current_day < 5 && current_day > 1) {
-      log(`${year} week 1 data is not available until Friday`)
+      log(`${season_year} week 1 data is not available until Friday`)
       return false
     }
   }
@@ -709,8 +709,8 @@ const is_data_available = (year) => {
 /**
  * Download the play-by-play CSV file from nflverse
  */
-const download_file = async ({ year, force_download }) => {
-  const filename = `play_by_play_${year}.csv`
+const download_file = async ({ season_year, force_download }) => {
+  const filename = `play_by_play_${season_year}.csv`
   const path = `${os.tmpdir()}/${filename}`
   const url = `https://github.com/nflverse/nflverse-data/releases/download/pbp/${filename}`
 
@@ -736,7 +736,7 @@ const download_file = async ({ year, force_download }) => {
  */
 const process_play = async ({
   item,
-  year,
+  season_year,
   overwrite_existing,
   dry_mode,
   overwrite_fields,
@@ -785,8 +785,8 @@ const process_play = async ({
   }
 
   if (db_play) {
-    // Temporary workaround: ignore discrepancies in current year data
-    if (year >= 2022) {
+    // Temporary workaround: ignore discrepancies in current season year data
+    if (season_year >= 2022) {
       delete formatted_play.game_clock_end
     }
 
@@ -839,7 +839,7 @@ const log_match_criteria = (match_criteria) => {
 // ============================================================================
 
 const run = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   overwrite_existing = false,
   force_download = false,
   dry_mode = false,
@@ -856,17 +856,17 @@ const run = async ({
     plays_multiple_matches: 0
   }
 
-  // Check if data is available for this year
-  if (!is_data_available(year)) {
+  // Check if data is available for this season year
+  if (!is_data_available(season_year)) {
     return result
   }
 
   log(
-    `${dry_mode ? '[DRY MODE] ' : ''}Importing plays for year ${year}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
+    `${dry_mode ? '[DRY MODE] ' : ''}Importing plays for season_year=${season_year}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
   )
 
   // Download the CSV file
-  const file_path = await download_file({ year, force_download })
+  const file_path = await download_file({ season_year, force_download })
 
   // Load CSV data
   let data = await readCSV(file_path, {
@@ -874,10 +874,13 @@ const run = async ({
   })
 
   // Resolve nflfastR games to our esbids before anything reads a game id. The
-  // resolver is built once per year and reused by the --esbid filter and by
+  // resolver is built once per season year and reused by the --esbid filter and by
   // every play, so both agree on what game a feed row belongs to.
-  const resolver = await build_nflfastr_game_resolver({ year })
-  log(`Loaded ${resolver.game_count} nfl_games rows for ${year}`)
+  // `year:` is the resolver's own unconformed parameter name, not this script's
+  // vocabulary. It is the boundary to a libs-server module the season_year
+  // conform has not reached yet, deliberately left out of this lane's scope.
+  const resolver = await build_nflfastr_game_resolver({ year: season_year })
+  log(`Loaded ${resolver.game_count} nfl_games rows for ${season_year}`)
 
   // Filter by esbid if specified. Filtering on old_game_id here is the same
   // defect as matching on it: for 2021 week 15 it selects a different game's
@@ -896,8 +899,8 @@ const run = async ({
   }
 
   // Preload plays into cache for efficient contextual matching
-  log(`Preloading plays for year ${year}...`)
-  await preload_plays({ years: [year] })
+  log(`Preloading plays for season_year=${season_year}...`)
+  await preload_plays({ years: [season_year] })
   log(`Plays preloaded`)
 
   // Process each play
@@ -918,7 +921,7 @@ const run = async ({
   for (const item of data) {
     const play_result = await process_play({
       item,
-      year,
+      season_year,
       overwrite_existing,
       dry_mode,
       overwrite_fields,
@@ -1146,7 +1149,7 @@ const run = async ({
         field,
         existing: `${count} conflicts`,
         new_value: 'nflfastr values',
-        play_info: { year },
+        play_info: { season_year },
         source: 'nflfastr'
       })
     }
@@ -1165,17 +1168,17 @@ const run = async ({
 // CLI Entry Point
 // ============================================================================
 
-// Per-year match-rate oracle. Catches wholesale matching regressions (e.g.
+// Per-season-year match-rate oracle. Catches wholesale matching regressions (e.g.
 // upstream schema drift breaking play resolution) while tolerating typical
 // 1-5% unmatched plays. Skipped when plays_processed=0 (no data available
-// for the year or filtered-to-empty by --esbid).
+// for the season year or filtered-to-empty by --esbid).
 const MATCH_RATE_FLOOR = 0.9
 
-const check_match_rate = ({ year, result }) => {
+const check_match_rate = ({ season_year, result }) => {
   if (!result || !result.plays_processed) return null
   const match_rate = result.plays_matched / result.plays_processed
   if (match_rate >= MATCH_RATE_FLOOR) return null
-  return `year=${year}: plays_matched/plays_processed=${result.plays_matched}/${result.plays_processed}=${match_rate.toFixed(3)} (floor=${MATCH_RATE_FLOOR})`
+  return `season_year=${season_year}: plays_matched/plays_processed=${result.plays_matched}/${result.plays_processed}=${match_rate.toFixed(3)} (floor=${MATCH_RATE_FLOOR})`
 }
 
 // Per-game match-rate oracle. The season-grained floor above cannot see this
@@ -1185,7 +1188,7 @@ const check_match_rate = ({ year, result }) => {
 // floor is set well above the per-season tolerance.
 const GAME_MATCH_RATE_FLOOR = 0.75
 
-const check_game_resolution = ({ year, result }) => {
+const check_game_resolution = ({ season_year, result }) => {
   if (!result || !result.plays_processed) return null
 
   const problems = []
@@ -1203,7 +1206,7 @@ const check_game_resolution = ({ year, result }) => {
   }
 
   if (!problems.length) return null
-  return `year=${year}: ${problems.join('; ')}`
+  return `season_year=${season_year}: ${problems.join('; ')}`
 }
 
 const main = async () => {
@@ -1213,7 +1216,7 @@ const main = async () => {
     enable_debug_namespaces(
       'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
     )
-    const year = argv.year || current_season.year
+    const season_year = argv.year || current_season.year
     const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
     const dry_mode = argv.dry || argv.dry_mode
@@ -1249,14 +1252,14 @@ const main = async () => {
     if (all) {
       // Import all years from 1999 to current season
       for (
-        let import_year = 1999;
-        import_year <= current_season.stats_season_year;
-        import_year++
+        let import_season_year = 1999;
+        import_season_year <= current_season.stats_season_year;
+        import_season_year++
       ) {
-        // Reset cache between years to ensure each year's plays are loaded
+        // Reset cache between years to ensure each season year's plays are loaded
         reset_cache()
         result = await run({
-          year: import_year,
+          season_year: import_season_year,
           overwrite_existing,
           force_download,
           dry_mode,
@@ -1264,18 +1267,21 @@ const main = async () => {
           overwrite_fields,
           log_conflicts
         })
-        const shortfall = check_match_rate({ year: import_year, result })
+        const shortfall = check_match_rate({
+          season_year: import_season_year,
+          result
+        })
         if (shortfall) match_rate_shortfalls.push(shortfall)
         const game_shortfall = check_game_resolution({
-          year: import_year,
+          season_year: import_season_year,
           result
         })
         if (game_shortfall) match_rate_shortfalls.push(game_shortfall)
       }
     } else {
-      // Import single year
+      // Import single season year
       result = await run({
-        year,
+        season_year,
         overwrite_existing,
         force_download,
         dry_mode,
@@ -1283,14 +1289,14 @@ const main = async () => {
         overwrite_fields,
         log_conflicts
       })
-      const shortfall = check_match_rate({ year, result })
+      const shortfall = check_match_rate({ season_year, result })
       if (shortfall) match_rate_shortfalls.push(shortfall)
-      const game_shortfall = check_game_resolution({ year, result })
+      const game_shortfall = check_game_resolution({ season_year, result })
       if (game_shortfall) match_rate_shortfalls.push(game_shortfall)
     }
     if (result) {
       console.log(
-        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nflfastr', year: all ? 'all' : year, ...result })}`
+        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nflfastr', season_year: all ? 'all' : season_year, ...result })}`
       )
     }
     if (!dry_mode) {

@@ -108,7 +108,7 @@ const finalize_week = async () => {
     fn: () =>
       import_plays_nfl_v1({
         week,
-        seas_type: season_type,
+        season_type,
         force_update: true,
         ignore_cache: true,
         skip_finalization: true // Per-game finalization already done during live import
