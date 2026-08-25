@@ -72,34 +72,6 @@
     },
     {
       "caller": "libs-server/finalize-game.mjs",
-      "callee": "generate_player_gamelogs",
-      "key": "seas_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "generate_player_gamelogs",
-      "key": "year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "generate_player_snaps_for_week",
-      "key": "seas_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "generate_player_snaps_for_week",
-      "key": "year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
       "callee": "report_job",
       "key": "reason",
       "verdict": "pre-existing-defect",
@@ -141,53 +113,11 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "scripts/generate-league-format-player-gamelogs.mjs",
-      "callee": "calculate_points_added",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/generate-league-player-seasonlogs.mjs",
-      "callee": "generateSeasonDates",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
       "caller": "scripts/generate-league-player-seasonlogs.mjs",
       "callee": "getAcquisitionTransaction",
       "key": "season_year",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/generate-player-gamelogs.mjs",
-      "callee": "get_play_stats",
-      "key": "season_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/generate-player-gamelogs.mjs",
-      "callee": "get_play_stats",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/generate-scoring-format-player-gamelogs.mjs",
-      "callee": "calculate_points",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "backfill_play_stats_gsisid",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
     },
     {
       "caller": "scripts/import-full-season.mjs",
@@ -198,31 +128,10 @@
     },
     {
       "caller": "scripts/import-full-season.mjs",
-      "callee": "export_data_nfl_plays",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
       "callee": "export_data_player_gamelogs",
       "key": "season_year",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "import_dvoa_sheets",
-      "key": "season_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "import_dvoa_sheets",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
     },
     {
       "caller": "scripts/import-full-season.mjs",
@@ -330,39 +239,11 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "process_plays",
-      "key": "season_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "process_plays",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "recompute_route_share",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
-    },
-    {
       "caller": "scripts/import-games-sportradar.mjs",
       "callee": "get_games_schedule",
       "key": "ignore_cache",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-games-sportradar.mjs",
-      "callee": "get_games_schedule",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
     },
     {
       "caller": "scripts/process-extensions.mjs",
