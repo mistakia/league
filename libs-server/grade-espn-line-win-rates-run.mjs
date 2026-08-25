@@ -1,0 +1,225 @@
+// Output oracle for scripts/import-espn-line-win-rates.mjs.
+//
+// The importer declared success on "main() did not throw" plus two aggregate
+// row-count floors, which between them could not see any of the three ways this
+// feed actually broke:
+//
+//   1. WRONG SEASON. `espn_line_win_rates_url` is a season-pinned ESPN article
+//      (.../id/46138675/2025-nfl-win-rates-...), but the row's season_year came
+//      from the clock. Four runs in March 2026 scraped the 2025 article and
+//      wrote it as season_year 2026 -- 32 team rows and 108 player rows of a
+//      season that had not been played. Both floors passed; the values were
+//      near-identical to the 2025 rows they duplicated.
+//   2. COARSE GRAIN. One floor of 50 covered all four player categories
+//      summed. RUN_STOP and RUN_BLOCK run 19-20 rows each, so either could
+//      collapse to zero and the other three would still clear 50 -- the
+//      per-week/per-game lesson from import-plays-nflfastr, one level up.
+//   3. NOTHING GRADED THE VALUES. Row count says nothing about whether the
+//      cells parsed. `parse_percentage` read `/(\d+)%/`, which matches "5%"
+//      inside "62.5%" and yields 0.05 -- populated, wrong, and invisible to
+//      any presence or count rule. The distinct-value and range rules below
+//      are what catch that class.
+//
+// Grain: per FEED. The team table and each of the four player categories are
+// graded on their own, because that is the grain at which this page breaks --
+// ESPN restructures one table at a time.
+//
+// Pure: takes counters the run already keeps and returns a verdict plus the
+// line to print, so the caller decides how to surface it. Every calibrated
+// bound is injectable, so the spec can drive real behaviour rather than fight
+// production-scale constants.
+
+// ESPN's team table lists every NFL team, always. This is a structural
+// invariant rather than a calibrated floor: a table with 31 teams is a parse
+// failure, not a quiet week.
+export const EXPECTED_TEAM_COUNT = 32
+
+// Per-category player floor, measured from espn_player_win_rates_history on
+// league_production (2026-08-25). Rows written per run, per category:
+//
+//   PASS_RUSH  38-40 | PASS_BLOCK 32-40 | RUN_STOP 19-20 | RUN_BLOCK 19-20
+//
+// ESPN publishes a leaders and a laggards table per category; the run/stop and
+// run/block pairs are the smaller ones and set the floor. Healthy minimum is
+// 19, parse collapse is 0-2, so 10 splits the gap with room on both sides.
+export const MINIMUM_CATEGORY_PLAYERS = 10
+
+// Of the players a category listed, the share that must resolve to a pid.
+// Deliberately absent: no fetched-vs-matched figure has ever been recorded for
+// this feed (unmatched players are dropped before insert, so the index cannot
+// answer it retroactively), and a floor picked without sampling the residual is
+// a commitment to keep losing whoever is in it. The run REPORTS its match rate
+// and fails only at zero matched; set `minimum_match_rate` once a live --dry
+// run has characterized the unmatched set.
+export const MINIMUM_MATCH_RATE = 0
+
+// Win rates are percentages in [0, 1] after parsing. Every rate ESPN has ever
+// published for these metrics sits between 0.19 and 0.85; the bound here is
+// deliberately looser than the observed range because its job is to catch a
+// decimal-place error (0.05 for 62.5%, or 62.5 for an unscaled read), not to
+// police the distribution.
+export const MINIMUM_PLAUSIBLE_RATE = 0.05
+export const MAXIMUM_PLAUSIBLE_RATE = 0.99
+
+const format_rate = (rate) => `${(rate * 100).toFixed(1)}%`
+
+// Derive the season the page is ABOUT from the URL it was fetched from.
+// `espn_line_win_rates_url` is a per-season ESPN article whose slug carries the
+// year, so the season is a property of the source and never of the clock. A URL
+// that does not carry one returns null, which the grader treats as a failure --
+// an unrecognized URL shape means we no longer know what season we just wrote.
+export const parse_season_year_from_url = (url) => {
+  const match = String(url || '').match(/\/(\d{4})-nfl-win-rates/)
+  return match ? Number(match[1]) : null
+}
+
+// Build one feed entry from the rows a feed is about to write, so every counter
+// comes off the SAME collection at the SAME grain. `fetched` stays a caller
+// argument because only the caller knows how many entries the page offered
+// before matching; for the team feed fetched and matched are the same rows.
+export const summarize_win_rate_feed = ({ label, fetched, rows, rate_key }) => {
+  const rates = rows
+    .map((row) => row[rate_key])
+    .filter((rate) => rate != null && !Number.isNaN(rate))
+  return {
+    label,
+    fetched,
+    matched: rows.length,
+    with_rate: rates.length,
+    distinct_rates: new Set(rates).size,
+    min_rate: rates.length ? Math.min(...rates) : null,
+    max_rate: rates.length ? Math.max(...rates) : null
+  }
+}
+
+export default function grade_espn_line_win_rates_run({
+  // The season derived from the source URL, and the season the run was
+  // expected to be importing. These must agree: they are the whole defense
+  // against a season-pinned URL that nobody updated when the season rolled.
+  source_season_year,
+  expected_season_year,
+  source_url,
+  // [{ label, fetched, matched, with_rate, distinct_rates, min_rate, max_rate }]
+  feeds = [],
+  expected_team_count = EXPECTED_TEAM_COUNT,
+  minimum_category_players = MINIMUM_CATEGORY_PLAYERS,
+  minimum_match_rate = MINIMUM_MATCH_RATE,
+  minimum_plausible_rate = MINIMUM_PLAUSIBLE_RATE,
+  maximum_plausible_rate = MAXIMUM_PLAUSIBLE_RATE
+}) {
+  const failures = []
+
+  if (source_season_year == null) {
+    failures.push(
+      `could not derive a season from espn_line_win_rates_url (${source_url}) -- the article slug no longer carries one, so the season this run wrote is unknown`
+    )
+  } else if (source_season_year !== expected_season_year) {
+    // The March 2026 incident, made loud. ESPN publishes a new article each
+    // season and the config row has to be repointed at it; until someone does,
+    // the old article keeps serving last season's final numbers.
+    failures.push(
+      `espn_line_win_rates_url is the ${source_season_year} article but this run is importing ${expected_season_year} -- repoint config.espn_config.espn_line_win_rates_url at the ${expected_season_year} article`
+    )
+  }
+
+  if (!feeds.length) {
+    failures.push('no feeds ingested')
+  }
+
+  for (const feed of feeds) {
+    const {
+      label,
+      fetched = 0,
+      matched = 0,
+      with_rate,
+      distinct_rates,
+      min_rate,
+      max_rate,
+      is_team_feed = false
+    } = feed
+
+    if (fetched === 0) {
+      // "Produced nothing" and "had nothing to produce" must not share an
+      // outcome. This page is never legitimately empty inside the window the
+      // job runs, so zero rows is a restructured table, not a quiet week.
+      failures.push(`feed ${label} returned 0 rows`)
+      continue
+    }
+
+    if (is_team_feed) {
+      if (fetched !== expected_team_count) {
+        failures.push(
+          `feed ${label} returned ${fetched} team(s), expected exactly ${expected_team_count}`
+        )
+      }
+    } else if (fetched < minimum_category_players) {
+      failures.push(
+        `feed ${label} returned only ${fetched} player(s) (floor ${minimum_category_players})`
+      )
+    }
+
+    if (matched === 0) {
+      failures.push(`feed ${label} matched 0 of ${fetched} row(s)`)
+      continue
+    }
+
+    const match_rate = matched / fetched
+    if (minimum_match_rate > 0 && match_rate < minimum_match_rate) {
+      failures.push(
+        `feed ${label} match rate ${format_rate(match_rate)} below ${format_rate(minimum_match_rate)} (${matched} of ${fetched})`
+      )
+    }
+
+    // Rows can be written and carry nothing: a renamed column or a moved cell
+    // index parses to null for every entry, which any presence check reads as
+    // healthy because the rows exist. Every feed on this page fills at 100%,
+    // so anything short of complete is a parse fault.
+    if (with_rate !== undefined && with_rate < matched) {
+      failures.push(
+        `feed ${label} wrote ${matched} row(s) but only ${with_rate} carried a win rate`
+      )
+    }
+
+    // A feed can be complete, fully matched and fully populated while carrying
+    // one repeated sentinel. Distinct-value collapse is the only rule that
+    // separates a real distribution from a constant.
+    if (distinct_rates !== undefined && with_rate > 0 && distinct_rates <= 1) {
+      failures.push(
+        `feed ${label} carries a single repeated win rate across ${with_rate} row(s) -- a sentinel or a dead cell, not a distribution`
+      )
+    }
+
+    // Range, which is what catches a decimal-place fault. A regex that reads
+    // "5" out of "62.5%" produces a perfectly well-formed distribution of
+    // wrong numbers, and every rule above passes it.
+    if (min_rate != null && min_rate < minimum_plausible_rate) {
+      failures.push(
+        `feed ${label} minimum win rate ${min_rate} is below ${minimum_plausible_rate} -- suspect a percentage parsed at the wrong scale`
+      )
+    }
+    if (max_rate != null && max_rate > maximum_plausible_rate) {
+      failures.push(
+        `feed ${label} maximum win rate ${max_rate} is above ${maximum_plausible_rate} -- suspect a percentage parsed at the wrong scale`
+      )
+    }
+  }
+
+  const feed_summaries = feeds.map((feed) => {
+    const rate = feed.fetched ? feed.matched / feed.fetched : 0
+    const distinct =
+      feed.distinct_rates === undefined
+        ? ''
+        : `, ${feed.distinct_rates} distinct`
+    const range =
+      feed.min_rate == null ? '' : `, range ${feed.min_rate}-${feed.max_rate}`
+    return `${feed.label}: ${feed.matched}/${feed.fetched} matched (${format_rate(rate)})${distinct}${range}`
+  })
+
+  const summary =
+    `oracle ${failures.length ? 'FAIL' : 'PASS'}: ` +
+    `espn line win rates ${source_season_year ?? 'unknown'} -- ${feeds.length} feed(s) ingested` +
+    (feed_summaries.length ? ` [${feed_summaries.join('; ')}]` : '') +
+    (failures.length ? ` -- ${failures.join('; ')}` : '')
+
+  return { passed: failures.length === 0, failures, summary }
+}
