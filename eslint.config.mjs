@@ -7,6 +7,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 import noUnproxiedFetchWithRetry from './eslint-rules/no-unproxied-fetch-with-retry.mjs'
 import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
 import noBareDebugEnable from './eslint-rules/no-bare-debug-enable.mjs'
+import noPrivateImportInCore from './eslint-rules/no-private-import-in-core.mjs'
 
 // One `local` plugin holding every rule in eslint-rules/. Registering a second
 // plugin object under the same name in a second config block would silently
@@ -15,7 +16,8 @@ const local_rules = {
   rules: {
     ...noUnproxiedFetchWithRetry.rules,
     ...noBareContainerJsdoc.rules,
-    ...noBareDebugEnable.rules
+    ...noBareDebugEnable.rules,
+    ...noPrivateImportInCore.rules
   }
 }
 
@@ -112,6 +114,29 @@ export default [
 
     rules: {
       'local/no-bare-debug-enable': 'off'
+    }
+  },
+  {
+    // The core/plugin layering: core never imports #private, scripts and jobs
+    // may. Scoped HERE rather than inside the rule so the rule stays a plain
+    // specifier check and the directory list is readable in one place.
+    //
+    // private/ is NOT in this list on purpose -- it is the plugin, and it
+    // imports its own siblings through #private freely.
+    files: [
+      'libs-server/**/*.mjs',
+      'libs-server/**/*.js',
+      'libs-shared/**/*.mjs',
+      'libs-shared/**/*.js',
+      'api/**/*.mjs',
+      'api/**/*.js',
+      'app/**/*.mjs',
+      'app/**/*.js',
+      'app/**/*.jsx'
+    ],
+
+    rules: {
+      'local/no-private-import-in-core': 'error'
     }
   },
   {

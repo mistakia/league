@@ -103,6 +103,8 @@ Webpack aliases: `@core` → `app/core`, `@libs-shared` → `libs-shared`, `@con
 
 **`libs-server/`** — server-only: data source integrations, roster operations, database helpers, external APIs.
 
+**`private/` is a downstream plugin, and dependencies run one way.** It is a submodule no workflow checks out, so on the runner and in any clone it is an empty directory. Core — `libs-shared/`, `libs-server/`, `api/`, `app/` — must never STATICALLY import `#private`, because a module that cannot resolve aborts the suite during load and reports zero tests rather than one failure. `scripts/` and `jobs/` are entry points the suite never loads and may import it freely; a vendor wrapper in core may reach it through a lazy `await import()` inside the function that needs it. Enforced by `local/no-private-import-in-core`, baseline-free. When a core module needs private, ask which half needs it and move that half to a script rather than deferring the import — see [docs/guides/test.md](docs/guides/test.md).
+
 **Database** — PostgreSQL, 80+ tables for fantasy operations plus NFL data (partitioned play tables) and betting markets. Managed via SQL dumps, not incremental migrations. `db/` is split by LIFECYCLE, not subject matter — read `db/README.md` before adding a file to it.
 
 **ES modules** — all server-side files are `.mjs`. Import aliases in the `package.json` imports field: `#config`, `#db`, `#libs-server`, `#libs-shared`, `#constants`.
