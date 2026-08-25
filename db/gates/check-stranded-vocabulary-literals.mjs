@@ -87,6 +87,10 @@ import {
   resolve_corpus,
   verdict_suffix
 } from './scan-corpus.mjs'
+import {
+  CONTROL_STAYED_GREEN_MARKER,
+  NEGATIVE_CONTROL_MARKER
+} from './negative-control.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
@@ -1071,9 +1075,20 @@ const main = () => {
     return 2
   }
   const failed_controls = controls.filter((control) => !control.passed)
-  console.log('NEGATIVE CONTROLS')
+  console.log(`${NEGATIVE_CONTROL_MARKER}S`)
   for (const control of controls) {
-    const verdict = control.expect === 'red' ? 'WENT RED' : 'STAYED SILENT'
+    // The word states what the control DID, not what it was expected to do.
+    // Deriving it from `expect` alone printed `[FAIL] WENT RED` over a control
+    // that had gone green, which reads as a firing control on the one surface
+    // a reader checks first -- and it withheld the STAYED GREEN token the
+    // cluster runner reads as a gate that cannot report.
+    const verdict = control.passed
+      ? control.expect === 'red'
+        ? 'WENT RED'
+        : 'STAYED SILENT'
+      : control.expect === 'red'
+        ? CONTROL_STAYED_GREEN_MARKER
+        : 'FALSE POSITIVE'
     console.log(
       `  [${control.passed ? 'ok' : 'FAIL'}] ${verdict}  ${control.name}`
     )
