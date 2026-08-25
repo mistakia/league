@@ -1024,19 +1024,25 @@ export const TABLE_STATE_RENAMES = {
           '?splits= cannot be rewritten, so this entry can never be retired.'
       }
     },
-    // No value of `row_axes` has ever been renamed, and the slot is declared
-    // empty rather than omitted because this is a live pending case rather than
-    // a hypothetical one: the `year` axis is adjudicated migrate-tracked in
-    // db/gates/rename-alias-residue-adjudications.json, and that adjudication's
-    // reason names the URL parse boundary as the consumer that fixes it.
+    // No value of `row_axes` has ever been renamed, and none is pending. The
+    // `year` axis is NOT being renamed: that was ruled on 2026-08-25 and the
+    // axis rename task was retired unstarted, with
+    // libs-server/data-views/physical-season-columns.mjs as the declared
+    // boundary instead. Do not read this slot as machinery aimed at that
+    // rename. (Note the reason text in
+    // db/gates/rename-alias-residue-adjudications.json still describes the
+    // rename as migrate-tracked and names a task that no longer exists; that
+    // file belongs to the axis-scope lane, not here.)
     //
-    // Neither param-coverage gate can ever see a value rename. Both walk KEYS
-    // (Object.keys(node.params) and parsed.searchParams.keys()), so both report
-    // GATE OK across one whether or not a rule exists. This registry and its
-    // coverage spec are the only oracle the class has.
+    // The slot is declared empty rather than omitted because the URL value
+    // surface had no mechanism AT ALL, and nothing can see that it is missing.
+    // Neither param-coverage gate can ever report a value rename: both walk
+    // KEYS (Object.keys(node.params) and parsed.searchParams.keys()), so both
+    // return GATE OK across one whether or not a rule exists. This registry and
+    // its coverage spec are the only oracle the class has.
     //
     // An entry takes the same shape as a legacy key plus its target:
-    //   year: { to: 'season_year', surfaces: [...], note: '...' }
+    //   <legacy_value>: { to: '<current>', surfaces: [...], note: '...' }
     legacy_values: {}
   },
   row_grain: {
