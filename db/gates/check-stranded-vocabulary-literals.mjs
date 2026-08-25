@@ -82,6 +82,11 @@ import {
   vocabulary_constrained_columns,
   vocabulary_index
 } from '../tools/vocabulary-constrained-columns.mjs'
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
@@ -938,11 +943,26 @@ const main = () => {
   const tables = parse_schema(
     fs.readFileSync(path.join(repo_root, 'db', 'schema.postgres.sql'), 'utf8')
   )
-  const server_roots = ['api', 'libs-server', 'scripts', 'jobs', 'app']
+  // `private` is a submodule NO workflow checks out, so on a runner it is a
+  // present but EMPTY directory that `walk_files` returns nothing for. The
+  // per-root counts below are what this run actually read, and they are what
+  // the CORPUS block reports -- an existence check cannot tell the two apart.
+  const server_roots = [
+    'api',
+    'libs-server',
+    'scripts',
+    'jobs',
+    'app',
+    'private'
+  ]
+  const files_by_root = new Map(server_roots.map((root) => [root, 0]))
   if (run_knex_half) {
     for (const file of walk_files(server_roots, ['.mjs', '.js'], repo_root)) {
       const source = fs.readFileSync(file, 'utf8')
       js_files_read += 1
+      const root = path.relative(repo_root, file).split(path.sep)[0]
+      if (files_by_root.has(root))
+        files_by_root.set(root, files_by_root.get(root) + 1)
       statements_read += collect_statements(source).length
       const result = scan_knex_source({
         source,
@@ -983,9 +1003,27 @@ const main = () => {
     }
   }
 
+  // Only the knex half has a code corpus. Under `--gate 2` nothing walks the
+  // server roots, so declaring them would report every root missing over a run
+  // that never claimed them.
+  const corpus = run_knex_half
+    ? resolve_corpus({
+        roots: server_roots,
+        repo_root,
+        counts: files_by_root
+      })
+    : { roots: [], present: [], missing: [], reasons: {} }
+
   if (options.json) {
-    console.log(JSON.stringify({ findings, zero_rows, files_read }, null, 2))
+    console.log(
+      JSON.stringify({ corpus, findings, zero_rows, files_read }, null, 2)
+    )
     return findings.length ? 1 : 0
+  }
+
+  if (run_knex_half) {
+    console.log(format_corpus({ corpus, counts: files_by_root }))
+    console.log('')
   }
 
   console.log('SURFACE')
@@ -1050,6 +1088,13 @@ const main = () => {
       `  ${row.file}:${row.line}  ${row.column} ${row.form} -- '${row.literal}' has no production row`
     )
   }
+
+  // The verdict line, stated rather than left to the exit code, so a run over a
+  // partly-read corpus says so where a reader will see it.
+  if (!findings.length && !failed_controls.length)
+    console.log(
+      `\nGATE OK -- no literal is stranded against its column's vocabulary${verdict_suffix(corpus)}`
+    )
 
   return findings.length || failed_controls.length ? 1 : 0
 }

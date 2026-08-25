@@ -38,6 +38,12 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 
@@ -128,7 +134,8 @@ const SCAN_DIRS = [
   'server',
   'api',
   'jobs',
-  'scripts'
+  'scripts',
+  'private'
 ]
 
 // Read the scanned tree once. Every dropped table is matched against the same
@@ -136,10 +143,18 @@ const SCAN_DIRS = [
 //
 // A file holding a NUL byte is skipped, matching ripgrep's binary handling: it
 // is not source, and a NUL makes the content untrustworthy to match against.
+//
+// The per-directory count is returned alongside, because it is the only
+// honest oracle for whether a declared root was READ. The existsSync filter
+// that used to stand here is exactly the check scan-corpus.mjs warns about: an
+// uninitialized submodule is a present, EMPTY mountpoint, so `private` passed
+// the filter, contributed zero files, and the gate then declared no dropped
+// table had a surviving consumer over a root it never opened.
 function load_corpus() {
-  const dirs = SCAN_DIRS.filter((d) => fs.existsSync(path.join(repo_root, d)))
   const corpus = []
-  for (const dir of dirs) {
+  const counts = new Map()
+  for (const dir of SCAN_DIRS) {
+    let read = 0
     for (const file of walk_all_files(path.join(repo_root, dir))) {
       let text
       try {
@@ -149,9 +164,11 @@ function load_corpus() {
       }
       if (text.includes('\x00')) continue
       corpus.push({ relative_path: path.relative(repo_root, file), text })
+      read += 1
     }
+    counts.set(dir, read)
   }
-  return corpus
+  return { corpus, counts }
 }
 
 function find_consumer_files(table, corpus) {
@@ -370,6 +387,17 @@ function main() {
     `dropped-table consumer check -- ${dropped.length} dropped tables`
   )
 
+  // The corpus block goes before every finding, so a reader who stops at the
+  // first one already knows which roots the verdict is scoped to.
+  const { corpus, counts } = load_corpus()
+  const corpus_coverage = resolve_corpus({
+    roots: SCAN_DIRS,
+    repo_root,
+    counts
+  })
+  console.log(format_corpus({ corpus: corpus_coverage, counts }))
+  console.log('')
+
   const errors = []
   // A dropped name that the schema defines again is a stale list, not a pass.
   for (const table of dropped) {
@@ -380,8 +408,7 @@ function main() {
     }
   }
 
-  const corpus = load_corpus()
-  console.log(`  scanned ${corpus.length} files under ${SCAN_DIRS.join(', ')}`)
+  console.log(`  scanned ${corpus.length} files in total`)
 
   for (const table of dropped) {
     const files = find_consumer_files(table, corpus)
@@ -419,7 +446,9 @@ function main() {
     process.exitCode = 1
     return
   }
-  console.log('\nno dropped table has a surviving consumer')
+  console.log(
+    `\nno dropped table has a surviving consumer${verdict_suffix(corpus_coverage)}`
+  )
 }
 
 main()

@@ -152,11 +152,28 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 const schema_path = path.join(repo_root, 'db', 'schema.postgres.sql')
 
-const SERVER_ROOTS = ['api', 'libs-server', 'libs-shared', 'scripts', 'jobs']
+// `private` holds real consumers of real columns and is a submodule NO workflow
+// checks out, so on a runner it is a present but EMPTY directory. `walk_files`
+// below swallows that silently, which is why the corpus is declared and
+// reported rather than inferred from the walk.
+const SERVER_ROOTS = [
+  'api',
+  'libs-server',
+  'libs-shared',
+  'scripts',
+  'jobs',
+  'private'
+]
 const SPA_ROOTS = ['app']
 
 // A CTE or subquery alias that shadows a real table name would produce a false
@@ -239,6 +256,12 @@ const walk_files = (roots, extensions) => {
   for (const root of roots) visit(path.join(repo_root, root))
   return files
 }
+
+// What each declared root actually yielded. A count is the authoritative
+// oracle for whether a root was read -- an existence check is not, because an
+// uninitialized submodule is a present, empty mountpoint.
+const count_files_by_root = (roots, extensions) =>
+  new Map(roots.map((root) => [root, walk_files([root], extensions).length]))
 
 const is_comment = (line) => {
   const trimmed = line.trim()
@@ -808,6 +831,14 @@ const main = () => {
   }
   const tables = parse_schema(fs.readFileSync(schema_path, 'utf8'))
 
+  const corpus_roots = [...SERVER_ROOTS, ...SPA_ROOTS]
+  const corpus_counts = count_files_by_root(corpus_roots, ['.mjs', '.js'])
+  const corpus = resolve_corpus({
+    roots: corpus_roots,
+    repo_root,
+    counts: corpus_counts
+  })
+
   const gate_1_findings = argv.gate === 2 ? [] : run_gate_1(tables)
   // Gate 2 has an acceptance test and a recorded adjudication-removal control
   // (see the header); these cover gate 1, so they run whenever gate 1 does.
@@ -840,6 +871,7 @@ const main = () => {
       JSON.stringify(
         {
           tables: tables.size,
+          corpus,
           gate_1: gate_1_findings,
           gate_1_controls,
           gate_2
@@ -850,6 +882,9 @@ const main = () => {
     )
   } else {
     console.log(`Parsed ${tables.size} tables from db/schema.postgres.sql\n`)
+
+    console.log(format_corpus({ corpus, counts: corpus_counts }))
+    console.log('')
 
     if (gate_1_controls.length) {
       console.log('NEGATIVE CONTROLS -- gate 1')
@@ -877,7 +912,8 @@ const main = () => {
         console.log(
           `\nGATE FAIL: ${all.length} finding(s) -- repoint before shipping.`
         )
-      else if (!failed_controls.length) console.log(`\nGATE OK.`)
+      else if (!failed_controls.length)
+        console.log(`\nGATE OK.${verdict_suffix(corpus)}`)
       if (control_summary) console.error(control_summary)
       process.exitCode = all.length || failed_controls.length ? 1 : 0
       return
@@ -935,7 +971,8 @@ const main = () => {
       console.log(
         `\nGATE FAIL: ${all.length} finding(s) -- repoint or adjudicate before shipping.`
       )
-    else if (!failed_controls.length) console.log(`\nGATE OK.`)
+    else if (!failed_controls.length)
+      console.log(`\nGATE OK.${verdict_suffix(corpus)}`)
     if (control_summary) console.error(control_summary)
   }
 

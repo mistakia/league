@@ -258,11 +258,28 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 const schema_path = path.join(repo_root, 'db', 'schema.postgres.sql')
 
-const SERVER_ROOTS = ['api', 'libs-server', 'libs-shared', 'scripts', 'jobs']
+// `private` holds real producers of real columns and is a submodule NO workflow
+// checks out, so on a runner it is a present but EMPTY directory that
+// `walk_files` below returns nothing for, silently. The corpus block is what
+// makes that narrowing visible instead.
+const SERVER_ROOTS = [
+  'api',
+  'libs-server',
+  'libs-shared',
+  'scripts',
+  'jobs',
+  'private'
+]
 const SPA_ROOTS = ['app']
 
 // Registry paths declare WIRE IDS rather than reading rows, so an alias there
@@ -380,6 +397,12 @@ const walk_files = (roots, extensions) => {
   for (const root of roots) visit(path.join(repo_root, root))
   return files
 }
+
+// What each declared root actually yielded. The count is the authoritative
+// oracle for whether a root was read; an existence check is not, because an
+// uninitialized submodule is a present, empty mountpoint.
+const count_files_by_root = (roots, extensions) =>
+  new Map(roots.map((root) => [root, walk_files([root], extensions).length]))
 
 const is_registry_path = (relative_path) =>
   REGISTRY_PATH_MARKERS.some((marker) => relative_path.includes(marker))
@@ -1850,6 +1873,20 @@ const main = () => {
     return 2
   }
 
+  // Resolved and printed before anything else this run says, so a reader who
+  // stops at the first finding already knows which roots the verdict covers.
+  const corpus_roots = [...SERVER_ROOTS, ...SPA_ROOTS]
+  const corpus_counts = count_files_by_root(corpus_roots, ['.mjs', '.js'])
+  const corpus = resolve_corpus({
+    roots: corpus_roots,
+    repo_root,
+    counts: corpus_counts
+  })
+  if (!argv.json) {
+    console.log(format_corpus({ corpus, counts: corpus_counts }))
+    console.log('')
+  }
+
   const control_failures = run_negative_control({ current_tables })
   console.log('')
 
@@ -1883,6 +1920,7 @@ const main = () => {
       JSON.stringify(
         {
           ...scan,
+          corpus,
           findings,
           not_exercised_adjudications: not_exercised.map((entry) => ({
             table: entry.table,
@@ -1966,7 +2004,7 @@ const main = () => {
     console.log(
       unadjudicated.length
         ? `\nGATE FAIL: ${unadjudicated.length} finding(s) -- migrate or adjudicate before shipping.`
-        : '\nGATE OK.'
+        : `\nGATE OK.${verdict_suffix(corpus)}`
     )
   }
 

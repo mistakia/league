@@ -92,8 +92,9 @@
 //   node db/gates/check-knex-column-resolution.mjs --unadjudicated
 //
 // Exit 1 on an unadjudicated finding, on a stale adjudication, on a failed
-// negative control, or on a declared corpus root contributing nothing. Exit 2 on a
-// missing schema file.
+// negative control, or on a declared corpus root that is PRESENT and contributing
+// nothing. A root that is not on disk at all narrows the verdict instead, through
+// the CORPUS block. Exit 2 on a missing schema file.
 //
 // ACCEPTANCE TEST -- proven, not asserted. In a worktree at `37cc9f36b~1` with
 // this gate and its adjudications copied in (the gate is a SCANNER, so the code
@@ -106,7 +107,7 @@
 // reports neither and exits 0.
 //
 // NEGATIVE CONTROLS run on EVERY invocation and a control reporting STAYED GREEN
-// fails the run, per the runner's rule. There are ten, and four of them run in
+// fails the run, per the runner's rule. There are eleven, and four of them run in
 // the OVER-EAGER direction, because half of what this gate does is decide that a
 // token is NOT a column reference and an over-eager filter fails in the direction
 // that looks like success. See run_negative_controls.
@@ -150,6 +151,11 @@ import {
   unwrap_array_argument,
   walk_files as walk_files_in
 } from './knex-statement-machinery.mjs'
+import {
+  format_corpus,
+  resolve_corpus,
+  verdict_suffix
+} from './scan-corpus.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
@@ -184,12 +190,18 @@ const adjudications_path = path.join(
 //
 // Nothing below is a measurement, so nothing here needs maintaining when coverage
 // changes. `SERVER_ROOTS` derives from it so the two cannot disagree.
+//
+// `private` is a submodule NO workflow checks out, so on a CI runner it is a
+// present, EMPTY directory rather than a root that went dark. That is the
+// distinction `evaluate_root_coverage` draws through the corpus below: unread
+// narrows the verdict, dark fails it.
 const ROOT_EXPECTATIONS = {
   api: { queries_the_database: true },
   'libs-server': { queries_the_database: true },
   'libs-shared': { queries_the_database: false },
   scripts: { queries_the_database: true },
-  jobs: { queries_the_database: true }
+  jobs: { queries_the_database: true },
+  private: { queries_the_database: true }
 }
 
 const SERVER_ROOTS = Object.keys(ROOT_EXPECTATIONS)
@@ -571,10 +583,25 @@ const run_scan = (tables, { source_override } = {}) => {
  * silently empties the scan set at exit 0. A root that queries the database must
  * additionally contribute at least one STATEMENT, and one that does not must
  * contribute exactly zero.
+ *
+ * `unread` carries the roots the corpus resolved as absent or empty, and those
+ * are EXCLUDED here rather than failed. The two conditions are different
+ * defects and want different verdicts: a root that is not on disk at all --
+ * `private`, an uninitialized submodule, on every CI runner -- narrows what
+ * this run can claim, which the CORPUS block states and `verdict_suffix`
+ * carries into the verdict line. A root that IS on disk and still contributes
+ * nothing is the scan failing to reach it, which is a real coverage failure.
+ * Collapsing the two would turn every CI run red on a condition CI is
+ * configured for.
+ *
+ * @param {object} by_root per-root { files, statements, resolved } counts
+ * @param {string[]} [unread] roots the corpus reports as never read
+ * @returns {string[]}
  */
-const evaluate_root_coverage = (by_root) => {
+const evaluate_root_coverage = (by_root, unread = []) => {
   const failures = []
   for (const [root, expectation] of Object.entries(ROOT_EXPECTATIONS)) {
+    if (unread.includes(root)) continue
     const counts = by_root[root]
     if (!counts) {
       failures.push(`${root} was not walked at all`)
@@ -638,7 +665,7 @@ const apply_adjudications = (findings, adjudications) => {
 // negative controls
 // ---------------------------------------------------------------------------
 
-// Ten controls, run on EVERY invocation. Four of them assert the gate stays
+// Eleven controls, run on EVERY invocation. Four of them assert the gate stays
 // SILENT on a mutation, because half of what this gate does is decide a token is
 // NOT a column reference -- and an over-eager filter fails in the direction that
 // looks like success. `check-league-schema-consumers` shipped exactly that:
@@ -984,6 +1011,27 @@ const run_negative_controls = (tables) => {
       detail: `synthetic -- darkened ${first_querying_root}, leaked into ${isomorphic_root}`,
       passed
     })
+
+    // 11. The UNREAD split, both directions on the same darkened input. A root
+    //    the corpus never read must be excluded from the coverage verdict --
+    //    it is reported by the CORPUS block and carried into the verdict line
+    //    instead -- while the identical counts for a root that WAS read must
+    //    still fail. Without this pair, passing `unread` could silently
+    //    suppress every coverage failure and the run would look healthier than
+    //    it is, which is the direction this gate's own header warns about.
+    const absent = { ...healthy }
+    delete absent[first_querying_root]
+    const excluded =
+      evaluate_root_coverage(absent, [first_querying_root]).length === 0
+    const still_reported_when_read =
+      evaluate_root_coverage(absent, []).length === 1
+    const unread_passed = excluded && still_reported_when_read
+    controls.push({
+      name: 'an UNREAD root is excluded from the coverage verdict, and the same root is reported when it was read',
+      result: unread_passed ? 'WENT RED' : 'STAYED GREEN',
+      detail: `synthetic -- ${first_querying_root} unread`,
+      passed: unread_passed
+    })
   }
 
   return controls
@@ -1017,18 +1065,41 @@ const main = () => {
   const controls = run_negative_controls(tables)
   const failed_controls = controls.filter((control) => !control.passed)
 
-  const coverage_failures = evaluate_root_coverage(stats.by_root)
+  // The file counts are what this run actually READ, so they outrank any
+  // filesystem probe: a root that yielded no file cannot produce a finding.
+  const files_by_root = new Map(
+    SERVER_ROOTS.map((root) => [root, stats.by_root[root]?.files ?? 0])
+  )
+  const corpus = resolve_corpus({
+    roots: SERVER_ROOTS,
+    repo_root,
+    counts: files_by_root
+  })
+  const coverage_failures = evaluate_root_coverage(
+    stats.by_root,
+    corpus.missing
+  )
 
   if (options.json) {
     console.log(
       JSON.stringify(
-        { stats, findings: applied, stale, controls, coverage_failures },
+        {
+          stats,
+          corpus,
+          findings: applied,
+          stale,
+          controls,
+          coverage_failures
+        },
         null,
         2
       )
     )
   } else {
     console.log(`Parsed ${tables.size} tables from db/schema.postgres.sql\n`)
+
+    console.log(format_corpus({ corpus, counts: files_by_root }))
+    console.log('')
 
     console.log('COVERAGE -- what this run could and could not check')
     console.log(
@@ -1101,7 +1172,7 @@ const main = () => {
             `${stale.length} stale adjudication(s), ` +
             `${failed_controls.length} failed control(s), ` +
             `${coverage_failures.length} coverage failure(s).`
-        : `\nGATE OK.`
+        : `\nGATE OK.${verdict_suffix(corpus)}`
     )
   }
 
