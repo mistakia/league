@@ -34,6 +34,10 @@ import * as chai from 'chai'
 import {
   physical_year_column,
   physical_seas_type_column,
+  physical_year_projection,
+  physical_year_projection_unqualified,
+  physical_seas_type_projection_unqualified,
+  physical_year_group_by,
   physical_table_names,
   tables_without_seas_type,
   tables_with_nfl_week_id
@@ -285,6 +289,119 @@ describe('physical season columns', () => {
       expect(
         physical_seas_type_column('t22c9a76f62c8a62fec52ad076663a982')
       ).to.equal('seas_type')
+    })
+  })
+
+  // The PROJECTION half of the boundary. The predicate half has been derived
+  // through this map since the conform; the projection half was hand-written at
+  // eleven sites across eight files until they were routed through
+  // physical_year_projection.
+  //
+  // This block is now the PRIMARY instrument for the projection class, and that
+  // is a deliberate transfer rather than an accident. db/gates/
+  // check-rename-alias-residue.mjs anchors on alias LITERALS, so a derived
+  // projection emits nothing for it to find and it reports these sites no more.
+  // What replaces it is stronger where it matters and weaker where it does not:
+  // the gate's candidate set comes from a schema diff against a base ref, so it
+  // only ever saw columns that moved in that window, while the scan below is
+  // absolute and catches a hand-written alias for any table at any time.
+  describe('the projection half is derived, not hand-written', () => {
+    it('projects each registered table through its mapped physical column', () => {
+      for (const table_name of physical_table_names()) {
+        const column = physical_year_column(table_name)
+        expect(physical_year_projection(table_name)).to.equal(
+          `${table_name}.${column} as year`
+        )
+        expect(physical_year_group_by(table_name)).to.equal(
+          `${table_name}.${column}`
+        )
+        expect(physical_year_projection_unqualified(table_name)).to.equal(
+          `${column} as year`
+        )
+      }
+    })
+
+    it('projects the unqualified seas_type shape from the same map', () => {
+      for (const table_name of physical_table_names()) {
+        if (tables_without_seas_type().has(table_name)) continue
+        expect(physical_seas_type_projection_unqualified(table_name)).to.equal(
+          `${physical_seas_type_column(table_name)} as seas_type`
+        )
+      }
+    })
+
+    it('refuses an unqualified seas_type projection for a table with none', () => {
+      // Same loud-failure contract as physical_seas_type_column: a table with no
+      // season-type column must throw rather than emit 'seas_type as seas_type'
+      // and 42703 at runtime.
+      for (const table_name of tables_without_seas_type()) {
+        expect(() =>
+          physical_seas_type_projection_unqualified(table_name)
+        ).to.throw()
+      }
+    })
+
+    it('names the same physical column in the projection and its GROUP BY', () => {
+      // Postgres rejects a statement whose GROUP BY does not name the projected
+      // column, so a resolver that derived one and left the other hardcoded
+      // would reintroduce the divergence this module exists to prevent.
+      for (const table_name of physical_table_names()) {
+        expect(physical_year_projection(table_name)).to.equal(
+          `${physical_year_group_by(table_name)} as year`
+        )
+      }
+    })
+
+    it('projects the vocabulary name for an unregistered CTE alias', () => {
+      // A CTE alias already aliases year back, so the fallback must project
+      // `<alias>.year as year` rather than erroring or inventing season_year.
+      const alias = 't22c9a76f62c8a62fec52ad076663a982'
+      expect(physical_year_projection(alias)).to.equal(`${alias}.year as year`)
+    })
+
+    // Direction 2 for projections, derived from source the same way the
+    // apply_scope_to_query call-site scan is. A hand-written alias literal is
+    // what the eleven routed sites were; this fails if one comes back.
+    it('leaves no hand-written season-year alias literal under data-views', () => {
+      const offenders = []
+      const walk = (directory) => {
+        for (const entry of fs.readdirSync(directory, {
+          withFileTypes: true
+        })) {
+          const full = path.join(directory, entry.name)
+          if (entry.isDirectory()) walk(full)
+          else if (entry.name.endsWith('.mjs')) scan(full)
+        }
+      }
+      const scan = (file) => {
+        // The module that DEFINES the boundary is not a violation of it.
+        if (file.endsWith('physical-season-columns.mjs')) return
+        const code = fs
+          .readFileSync(file, 'utf8')
+          .split('\n')
+          .filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line))
+          .join('\n')
+        if (/['"`][a-z0-9_]*\.?season_year\s+as\s+year['"`]/.test(code)) {
+          offenders.push(path.relative(process.cwd(), file))
+        }
+      }
+      walk(path.resolve(__dirname, '../libs-server/data-views'))
+      expect(
+        offenders,
+        `these files hand-write a season-year alias instead of calling physical_year_projection: ${offenders.join(', ')}`
+      ).to.deep.equal([])
+    })
+
+    it('can see the literal it is looking for', () => {
+      // Negative control for the scan above. A pattern that cannot match returns
+      // a confident zero, and this scan's whole value is its zero.
+      const pattern = /['"`][a-z0-9_]*\.?season_year\s+as\s+year['"`]/
+      expect(pattern.test(`query.select('nfl_plays.season_year as year')`)).to
+        .be.true
+      expect(pattern.test(`query.select('season_year as year')`)).to.be.true
+      expect(
+        pattern.test(`query.select(physical_year_projection('nfl_plays'))`)
+      ).to.be.false
     })
   })
 })

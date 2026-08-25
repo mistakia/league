@@ -13,6 +13,11 @@ import {
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import { is_team_identity } from '#libs-server/data-views/identities.mjs'
 import { resolve_team_join_target as resolve_team_rate_join_target } from '#libs-server/data-views/output-aggregator/aggregator-rate.mjs'
+import {
+  physical_year_projection,
+  physical_year_projection_unqualified,
+  physical_year_group_by
+} from '#libs-server/data-views/physical-season-columns.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
@@ -155,8 +160,8 @@ const add_player_per_game_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_games.season_year as year')
-      cte_query.groupBy('nfl_games.season_year')
+      cte_query.select(physical_year_projection('nfl_games'))
+      cte_query.groupBy(physical_year_group_by('nfl_games'))
     }
 
     if (row_axis === 'week') {
@@ -189,7 +194,8 @@ export const build_team_sides_union = ({
 }) => {
   const make_side = (team_col) => {
     const sub = db('nfl_games').select(`${team_col} as team`)
-    if (row_axes.includes('year')) sub.select('season_year as year')
+    if (row_axes.includes('year'))
+      sub.select(physical_year_projection_unqualified('nfl_games'))
     if (row_axes.includes('week')) sub.select('week')
     apply_scope_to_query({
       query: sub,

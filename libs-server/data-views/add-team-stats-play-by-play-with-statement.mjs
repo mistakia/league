@@ -11,6 +11,10 @@ import {
   is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { TEAM_UNIT_COLUMN } from '#libs-server/data-views/team-unit-column.mjs'
+import {
+  physical_year_projection,
+  physical_year_group_by
+} from '#libs-server/data-views/physical-season-columns.mjs'
 
 // Cross the resolved year basis with a year_offset range to the explicit
 // year-set the range covers: (min(year)+min(offset)) .. (max(year)+max(offset)).
@@ -110,8 +114,8 @@ export const add_team_stats_play_by_play_with_statement = ({
     // physical column back so downstream consumers of this CTE's own output
     // (create_player_team_stats_query, add_row_axes, etc.) keep reading
     // '<with_table_name>.year'.
-    with_query.select('nfl_plays.season_year as year')
-    with_query.groupBy('nfl_plays.season_year')
+    with_query.select(physical_year_projection('nfl_plays'))
+    with_query.groupBy(physical_year_group_by('nfl_plays'))
   }
 
   if (row_axes.includes('week') || player_variant_projection) {

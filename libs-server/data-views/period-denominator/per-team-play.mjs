@@ -22,6 +22,10 @@ import {
   get_wrap_cte_name
 } from './per-team-play-wrap.mjs'
 import { TEAM_UNIT_COLUMN } from '#libs-server/data-views/team-unit-column.mjs'
+import {
+  physical_year_projection,
+  physical_year_group_by
+} from '#libs-server/data-views/physical-season-columns.mjs'
 
 // Cache-key contract: the returned name is a within-query dedup identifier
 // (see `applied_output_ctes` in add_cte below), NOT a cross-query result-cache
@@ -129,10 +133,11 @@ export const add_per_team_play_cte = ({
   let year_grouped = false
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      // Grain axis stays 'year' in the row-axis vocabulary; alias the
-      // renamed physical column back so this CTE's own output is unchanged.
-      cte_query.select('nfl_plays.season_year as year')
-      cte_query.groupBy('nfl_plays.season_year')
+      // Grain axis stays 'year' in the row-axis vocabulary; the projection and
+      // its GROUP BY both resolve the physical column through
+      // physical-season-columns, so this CTE's own output is unchanged.
+      cte_query.select(physical_year_projection('nfl_plays'))
+      cte_query.groupBy(physical_year_group_by('nfl_plays'))
       year_grouped = true
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
@@ -146,8 +151,8 @@ export const add_per_team_play_cte = ({
   // total-across-years number and the historical-team-mode attribution is
   // lost. Idempotent against the row_axes-year branch above.
   if (force_year_grain && !year_grouped) {
-    cte_query.select('nfl_plays.season_year as year')
-    cte_query.groupBy('nfl_plays.season_year')
+    cte_query.select(physical_year_projection('nfl_plays'))
+    cte_query.groupBy(physical_year_group_by('nfl_plays'))
   }
 
   const denominator_params = get_output_denominator_params({ params })

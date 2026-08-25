@@ -8,6 +8,10 @@ import get_output_denominator_params, {
 } from '#libs-shared/get-output-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import {
+  physical_year_projection,
+  physical_year_group_by
+} from '#libs-server/data-views/physical-season-columns.mjs'
+import {
   resolve_year_offset_range,
   emit_year_match
 } from '#libs-server/data-views/param-utils.mjs'
@@ -97,11 +101,12 @@ export const add_per_player_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      // Grain axis stays 'year' in the row-axis vocabulary; alias the
-      // renamed physical column back so this CTE's own output ('year',
-      // referenced downstream as `${rate_type_table_name}.year`) is unchanged.
-      cte_query.select('nfl_plays.season_year as year')
-      cte_query.groupBy('nfl_plays.season_year')
+      // Grain axis stays 'year' in the row-axis vocabulary; the projection and
+      // its GROUP BY both resolve the physical column through
+      // physical-season-columns, so this CTE's own output ('year', referenced
+      // downstream as `${rate_type_table_name}.year`) is unchanged.
+      cte_query.select(physical_year_projection('nfl_plays'))
+      cte_query.groupBy(physical_year_group_by('nfl_plays'))
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
