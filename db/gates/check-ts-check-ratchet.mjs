@@ -32,6 +32,8 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { format_negative_controls } from './negative-control.mjs'
+
 const repo_root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
@@ -190,11 +192,10 @@ const main = () => {
   )
 
   const failed_controls = controls.filter((c) => !c.went_red)
-  for (const control of controls) {
-    console.log(
-      `  CONTROL ${control.went_red ? 'WENT RED' : 'STAYED GREEN'}: ${control.name}`
-    )
-  }
+  // Printed through the shared formatter rather than hand-rolled: this gate ran
+  // four healthy controls under its own `CONTROL WENT RED:` spelling, and the
+  // cluster runner -- which anchors on the declared header -- reported it BLIND.
+  console.log(format_negative_controls({ controls }))
 
   let failed = false
 

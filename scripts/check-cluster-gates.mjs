@@ -44,6 +44,10 @@ import { spawnSync } from 'child_process'
 import { fileURLToPath } from 'url'
 
 import { CORPUS_INCOMPLETE_MARKER } from '../db/gates/scan-corpus.mjs'
+import {
+  NEGATIVE_CONTROL_MARKER,
+  CONTROL_STAYED_GREEN_MARKER
+} from '../db/gates/negative-control.mjs'
 
 const repo_root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -295,13 +299,18 @@ export const evaluate_gate_result = ({
   declares_negative_control
 }) => {
   if (declares_negative_control) {
-    if (!output.includes('NEGATIVE CONTROL')) {
+    // Anchored on the marker DECLARED in db/gates/negative-control.mjs, not on
+    // a token spelled independently at each end. The gates' own control lines
+    // carry at least three phrasings (`RED as expected`, `WENT RED`,
+    // `RED (good)`); the header is the one thing they agree on, and it is
+    // agreement by convention until something declares it.
+    if (!output.includes(NEGATIVE_CONTROL_MARKER)) {
       return {
         verdict: 'BLIND',
         detail: 'declares a negative control and printed none'
       }
     }
-    if (output.includes('STAYED GREEN')) {
+    if (output.includes(CONTROL_STAYED_GREEN_MARKER)) {
       return {
         verdict: 'BLIND',
         detail: 'a negative control STAYED GREEN — this gate cannot report'
@@ -455,6 +464,41 @@ const CONTROLS = [
       declares_negative_control: true
     },
     expect: 'OK'
+  },
+  // The next three carry the ts-check-ratchet regression as a PAIR, and their
+  // strings are written out longhand rather than built from the imported marker
+  // -- a control that shares a constant with the code it drives cannot see that
+  // constant move, which is the whole failure being pinned here.
+  {
+    label: "the ts-check ratchet's real control block is OK, not BLIND",
+    input: {
+      exit_code: 0,
+      output:
+        'ts-check adoption: 34 file(s) checked\nNEGATIVE CONTROL\n  RED as expected  a listed file losing its pragma is reported\nGATE OK',
+      declares_negative_control: true
+    },
+    expect: 'OK'
+  },
+  {
+    label:
+      'controls printed under a gate-private spelling, with no declared header, are still BLIND',
+    input: {
+      exit_code: 0,
+      output:
+        'ts-check adoption: 34 file(s) checked\n  CONTROL WENT RED: a listed file losing its pragma is reported\nGATE OK',
+      declares_negative_control: true
+    },
+    expect: 'BLIND'
+  },
+  {
+    label: 'a ts-check-shaped block whose control did not fire is BLIND',
+    input: {
+      exit_code: 0,
+      output:
+        'ts-check adoption: 34 file(s) checked\nNEGATIVE CONTROL\n  STAYED GREEN  a listed file losing its pragma is reported\nGATE OK',
+      declares_negative_control: true
+    },
+    expect: 'BLIND'
   },
   {
     label: 'exit 0 over an incomplete corpus is not a plain OK',
