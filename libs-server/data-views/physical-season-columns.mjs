@@ -80,6 +80,45 @@ export const physical_has_seas_type = (table_name) =>
 export const physical_has_nfl_week_id = (table_name) =>
   TABLES_WITH_NFL_WEEK_ID.has(table_name)
 
+// The PROJECTION half of the boundary, single-sourced for the same reason the
+// predicate half is. apply_scope_to_query has defaulted its predicate columns
+// through the resolvers above since the conform, so a new physical table cannot
+// drift back to the pre-rename name in a WHERE clause. The projection side had
+// no such resolver: every CTE that emits the row axis hand-wrote
+// '<table>.season_year as year', which is the same drift surface with none of
+// the defence -- and build_period_cte imported this module four times while
+// still hand-writing the literal twice.
+//
+// `as year` is not a compatibility alias and must not be read as one. The
+// data-view row-axis vocabulary is 'year' because a short URL encodes it and a
+// short URL is IMMUTABLE once shared -- see the June 2026 splits -> row_axes
+// incident in the header of db/gates/check-data-view-url-param-coverage.mjs,
+// where 188 of 682 production URLs rendered at the wrong grain for six weeks.
+// The vocabulary stays; only the physical side moves. This function IS that
+// boundary, expressed once.
+//
+// Emit the GROUP BY through physical_year_group_by rather than hand-writing it
+// beside a derived projection: the two must name the same physical column or
+// Postgres rejects the statement, so deriving one and hardcoding the other
+// reintroduces exactly the divergence this module exists to prevent.
+// Two shapes, because the emitters genuinely have two. Most select a qualified
+// expression against a joined statement; a few interpolate into a raw column
+// list whose FROM is already the physical table, where a qualified name would
+// change the emitted SQL for no gain and this repo pins generated SQL in
+// query-match goldens. Pick the one matching the site rather than requalifying
+// it -- a golden churned for cosmetics is a golden nobody reads.
+export const physical_year_projection = (table_name) =>
+  `${table_name}.${physical_year_column(table_name)} as year`
+
+export const physical_year_projection_unqualified = (table_name) =>
+  `${physical_year_column(table_name)} as year`
+
+export const physical_seas_type_projection_unqualified = (table_name) =>
+  `${physical_seas_type_column(table_name)} as seas_type`
+
+export const physical_year_group_by = (table_name) =>
+  `${table_name}.${physical_year_column(table_name)}`
+
 export const physical_table_names = () => Object.keys(PHYSICAL_YEAR_COLUMN)
 
 export const tables_without_seas_type = () => new Set(TABLES_WITHOUT_SEAS_TYPE)

@@ -1,5 +1,6 @@
 import db from '#db'
 import { current_season } from '#constants'
+import { physical_year_projection } from '#libs-server/data-views/physical-season-columns.mjs'
 
 export const from = 'player_year'
 export const to = 'team_year'
@@ -70,7 +71,7 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
 
   const inner_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
-    .select('nfl_games.season_year as year')
+    .select(physical_year_projection('nfl_games'))
     .select('player_gamelogs.nfl_team')
     .count('* as game_count')
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')

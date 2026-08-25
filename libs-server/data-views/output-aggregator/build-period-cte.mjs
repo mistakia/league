@@ -14,7 +14,8 @@ import {
   physical_has_nfl_week_id,
   physical_has_seas_type,
   physical_seas_type_column,
-  physical_year_column
+  physical_year_column,
+  physical_year_projection
 } from '../physical-season-columns.mjs'
 import {
   FACT_SOURCES,
@@ -286,8 +287,8 @@ const build_role_union_period_cte = ({
     .havingRaw(`${measure_sql} > 0`)
   if (include_year) {
     outer
-      .select('nfl_games.season_year as year')
-      .groupByRaw('"nfl_games"."season_year"')
+      .select(physical_year_projection('nfl_games'))
+      .groupByRaw(`"nfl_games"."${physical_year_column('nfl_games')}"`)
   }
   if (!is_aggregate) {
     outer.select(db.raw(`${period_key} AS period_key`)).groupByRaw(period_key)
@@ -432,7 +433,7 @@ export const build_batched_period_cte = ({
   const include_year =
     !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
-  if (include_year) sub.select('nfl_games.season_year as year')
+  if (include_year) sub.select(physical_year_projection('nfl_games'))
   if (!is_aggregate) {
     sub.select(db.raw(`${period_key} AS period_key`))
   }

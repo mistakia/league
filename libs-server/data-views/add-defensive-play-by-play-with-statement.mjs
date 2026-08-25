@@ -5,6 +5,10 @@ import get_play_by_play_default_params from '#libs-server/data-views/get-play-by
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 import { apply_play_type_filter } from '#libs-server/data-views/apply-play-type-filter.mjs'
 import { normalize_career_year_range } from '#libs-server/data-views/param-utils.mjs'
+import {
+  physical_year_projection_unqualified,
+  physical_seas_type_projection_unqualified
+} from '#libs-server/data-views/physical-season-columns.mjs'
 
 export const add_defensive_play_by_play_with_statement = ({
   query,
@@ -64,14 +68,17 @@ export const add_defensive_play_by_play_with_statement = ({
 
   const select_columns = new Set([...stat_columns, ...base_columns])
 
-  // Grain axis stays 'year'/'seas_type' in the row-axis vocabulary; alias the
-  // renamed physical nfl_plays columns back so the derived 'defensive_plays'
-  // subquery's own output columns keep those names for every downstream
-  // consumer (row_axis interpolation, the career_year join, base_columns
-  // membership checks).
+  // Grain axis stays 'year'/'seas_type' in the row-axis vocabulary; the physical
+  // nfl_plays columns resolve through physical-season-columns so the derived
+  // 'defensive_plays' subquery's own output columns keep those names for every
+  // downstream consumer (row_axis interpolation, the career_year join,
+  // base_columns membership checks). Unqualified because these are interpolated
+  // into a raw column list whose FROM is already nfl_plays.
   const to_inner_select_expr = (column) => {
-    if (column === 'year') return 'season_year as year'
-    if (column === 'seas_type') return 'season_type as seas_type'
+    if (column === 'year')
+      return physical_year_projection_unqualified('nfl_plays')
+    if (column === 'seas_type')
+      return physical_seas_type_projection_unqualified('nfl_plays')
     return column
   }
 
