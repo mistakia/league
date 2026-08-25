@@ -374,7 +374,6 @@ export const nfl_week_id = {
   label: 'NFL Week',
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_year_reg_weeks' },
-  enable_multi_on_split: ['year', 'week'],
   format_value: format_nfl_week_id_value,
   dynamic_values: [
     {
@@ -402,7 +401,6 @@ export const nfl_week_id = {
 
 export const single_nfl_week_id = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  single: true,
   column_name: 'nfl_week_id',
   label: 'NFL Week',
   values: get_all_nfl_week_identifiers(),
