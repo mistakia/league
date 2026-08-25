@@ -42,15 +42,15 @@ const clear_live_plays = async () => {
  * since it's the final week - there's no "next week" to be in, and subtracting
  * would incorrectly re-process the Conference Championship.
  *
- * @returns {number} The target week number for the current seas_type
+ * @returns {number} The target week number for the current season_type
  */
 const get_finalize_target_week = () => {
   const day = dayjs().day()
   const current_nfl_week = current_season.nfl_seas_week
-  const seas_type = current_season.nfl_seas_type
+  const season_type = current_season.nfl_seas_type
 
   // Super Bowl (playoff week 4) is the final week - always finalize it directly
-  const is_super_bowl_week = seas_type === 'POST' && current_nfl_week === 4
+  const is_super_bowl_week = season_type === 'POST' && current_nfl_week === 4
   if (is_super_bowl_week) {
     return current_nfl_week
   }
@@ -86,16 +86,16 @@ const get_finalize_target_week = () => {
  */
 const finalize_week = async () => {
   const week = get_finalize_target_week()
-  const year = current_season.year
-  const seas_type = current_season.nfl_seas_type
+  const season_year = current_season.year
+  const season_type = current_season.nfl_seas_type
   const start_time = Date.now()
 
-  log(`Finalizing ${seas_type} week ${week} for ${year}`)
+  log(`Finalizing ${season_type} week ${week} for ${season_year}`)
 
   const results = {
     week,
-    year,
-    seas_type,
+    season_year,
+    season_type,
     steps_completed: [],
     steps_failed: []
   }
@@ -108,7 +108,7 @@ const finalize_week = async () => {
     fn: () =>
       import_plays_nfl_v1({
         week,
-        seas_type,
+        seas_type: season_type,
         force_update: true,
         ignore_cache: true,
         skip_finalization: true // Per-game finalization already done during live import
@@ -137,7 +137,7 @@ const finalize_week = async () => {
       name: `process_playoffs_${lid}`,
       results,
       logger: log,
-      fn: () => process_playoffs({ lid, year })
+      fn: () => process_playoffs({ lid, year: season_year })
     })
 
     await run_step({
@@ -155,9 +155,9 @@ const finalize_week = async () => {
     logger: log,
     fn: () =>
       process_market_results({
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
   })
 
@@ -168,9 +168,9 @@ const finalize_week = async () => {
     logger: log,
     fn: () =>
       update_market_settlement_status({
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
   })
 
@@ -181,7 +181,7 @@ const finalize_week = async () => {
     logger: log,
     fn: () =>
       calculate_team_historical_hit_rates({
-        season_year: year,
+        season_year,
         current_week_only: true
       })
   })
@@ -199,7 +199,7 @@ const finalize_week = async () => {
   // Example: If championship is week 17, this triggers when week 18 is finalized.
   // skip_play_import=true because playoff week plays were already imported in step 1.
   for (const lid of league_ids) {
-    const playoff_config = await get_season_playoff_weeks({ lid, year })
+    const playoff_config = await get_season_playoff_weeks({ lid, season_year })
     if (playoff_config.final_week && week === playoff_config.final_week + 1) {
       log(
         `Week ${week} follows final championship week ${playoff_config.final_week} for league ${lid}, triggering season finalization`
@@ -208,7 +208,8 @@ const finalize_week = async () => {
         name: `finalize_season_${lid}`,
         results,
         logger: log,
-        fn: () => finalize_season({ lid, year, skip_play_import: true })
+        fn: () =>
+          finalize_season({ lid, year: season_year, skip_play_import: true })
       })
     }
   }
@@ -233,21 +234,26 @@ const finalize_week = async () => {
  * process_matchups only populates scores during REG season (it caps at
  * regularSeasonFinalWeek). Skip the check during POST to avoid false positives.
  *
- * Oracle: matchups WHERE lid=$lid AND year=$year AND week=$week AND
+ * Oracle: matchups WHERE lid=$lid AND season_year=$season_year AND week=$week AND
  * home_points IS NOT NULL AND away_points IS NOT NULL must have at least
  * floor(team_count / 2) rows.
  *
  * @param {object} params
  * @param {number[]} params.league_ids
- * @param {number} params.year
+ * @param {number} params.season_year
  * @param {number} params.week  continuous week number (nfl_seas_week during REG)
- * @param {string} params.seas_type
+ * @param {string} params.season_type
  * @returns {Promise<string[]>} array of shortfall messages (empty = pass)
  */
-const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
+const verify_matchup_scores = async ({
+  league_ids,
+  season_year,
+  week,
+  season_type
+}) => {
   // process_matchups caps at regularSeasonFinalWeek; playoff weeks produce no
   // new matchup score rows, so there is nothing to verify.
-  if (seas_type === 'POST') {
+  if (season_type === 'POST') {
     return []
   }
 
@@ -256,12 +262,12 @@ const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
   for (const lid of league_ids) {
     const [scored_row, team_row] = await Promise.all([
       db('matchups')
-        .where({ lid, season_year: year, week })
+        .where({ lid, season_year, week })
         .whereNotNull('home_points')
         .whereNotNull('away_points')
         .count({ n: '*' })
         .first(),
-      db('teams').where({ lid, season_year: year }).count({ n: '*' }).first()
+      db('teams').where({ lid, season_year }).count({ n: '*' }).first()
     ])
 
     const scored = Number(scored_row?.n ?? 0)
@@ -270,7 +276,7 @@ const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
 
     if (scored < floor) {
       shortfalls.push(
-        `matchups oracle: lid=${lid} year=${year} week=${week} scored=${scored} < floor=${floor} (teams=${team_count})`
+        `matchups oracle: lid=${lid} season_year=${season_year} week=${week} scored=${scored} < floor=${floor} (teams=${team_count})`
       )
     }
   }
@@ -295,13 +301,13 @@ const main = async () => {
     // External post-condition oracle: independent of finalize_result.success.
     // Catches the silent case where internal success=true but scores were not
     // actually written to the matchups table.
-    const { week, year, seas_type } = finalize_result.results
+    const { week, season_year, season_type } = finalize_result.results
     const league_ids = await get_hosted_league_ids()
     const oracle_shortfalls = await verify_matchup_scores({
       league_ids,
-      year,
+      season_year,
       week,
-      seas_type
+      season_type
     })
     if (oracle_shortfalls.length > 0) {
       log(`matchups oracle FAILED: ${oracle_shortfalls.join('; ')}`)

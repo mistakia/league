@@ -69,8 +69,8 @@ const format_game = (game) => ({
   // behavior, and run it intentionally. ftn has no column either way.
 
   // total: game.total,
-  // year: game.season,
-  // seas_type: game.game_type,
+  // season_year: game.season,
+  // season_type: game.game_type,
   // week: game.week
 
   away_rest: format_number(game.away_rest),
@@ -96,8 +96,8 @@ const format_game = (game) => ({
 })
 
 const import_nfl_games_nflverse_nfldata = async ({
-  year = null,
-  seas_type = null,
+  season_year = null,
+  season_type = null,
   overwrite_existing = false,
   force_download = false,
   collector = null
@@ -138,22 +138,22 @@ const import_nfl_games_nflverse_nfldata = async ({
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
 
-  // Filter by year if specified
-  if (year) {
+  // Filter by season_year if specified
+  if (season_year) {
     const original_count = data.length
-    const year_num = Number(year)
-    data = data.filter((item) => Number(item.season) === year_num)
+    const season_year_num = Number(season_year)
+    data = data.filter((item) => Number(item.season) === season_year_num)
     log(
-      `Filtered to year ${year}: ${data.length} games (from ${original_count} total)`
+      `Filtered to season_year ${season_year}: ${data.length} games (from ${original_count} total)`
     )
   }
 
-  // Filter by seas_type if specified
-  if (seas_type) {
+  // Filter by season_type if specified
+  if (season_type) {
     const before_filter = data.length
-    data = data.filter((item) => item.game_type === seas_type)
+    data = data.filter((item) => item.game_type === season_type)
     log(
-      `Filtered to seas_type ${seas_type}: ${data.length} games (from ${before_filter})`
+      `Filtered to season_type ${season_type}: ${data.length} games (from ${before_filter})`
     )
   }
 
@@ -196,9 +196,9 @@ const import_nfl_games_nflverse_nfldata = async ({
     result.games_processed++
 
     const game_params = {
-      year: item.season,
+      season_year: item.season,
       week: item.week,
-      seas_type: item.game_type,
+      season_type: item.game_type,
       away_nfl_team: fixTeam(item.away_team),
       home_nfl_team: fixTeam(item.home_team)
     }
@@ -353,12 +353,12 @@ const main = async () => {
     const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
     const result = await import_nfl_games_nflverse_nfldata({
-      year: argv.year,
+      season_year: argv.year,
       overwrite_existing,
       force_download
     })
     console.log(
-      `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', year: argv.year || 'all', ...result })}`
+      `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', season_year: argv.year || 'all', ...result })}`
     )
     throw_if_shortfall(
       !argv.year && result.games_processed < NFLVERSE_GAMES_FLOOR_UNBOUNDED

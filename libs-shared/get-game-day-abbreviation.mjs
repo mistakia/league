@@ -4,9 +4,9 @@ export default function getGameDayAbbreviation({
   date,
   time_eastern,
   week_type,
-  seas_type
+  season_type
 }) {
-  if (seas_type === 'PRO') {
+  if (season_type === 'PRO') {
     return 'PRO'
   }
 

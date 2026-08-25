@@ -6,7 +6,7 @@ import { current_season } from '#constants'
  *
  * @param {object} params
  * @param {number} params.lid - League ID
- * @param {number} [params.year] - Season year (defaults to current season)
+ * @param {number} [params.season_year] - Season year (defaults to current season)
  * @returns {Promise<object>} Playoff week configuration
  *   - wildcard_week: First playoff week (wildcard round)
  *   - championship_weeks: Array of championship round weeks
@@ -15,9 +15,9 @@ import { current_season } from '#constants'
  */
 const get_season_playoff_weeks = async ({
   lid,
-  year = current_season.year
+  season_year = current_season.year
 }) => {
-  const season = await db('seasons').where({ lid, season_year: year }).first()
+  const season = await db('seasons').where({ lid, season_year }).first()
 
   if (!season) {
     return {
