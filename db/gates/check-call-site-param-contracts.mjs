@@ -946,8 +946,25 @@ const main = () => {
   console.log('')
   console.log(
     `${suppressed.length} finding(s) suppressed by ${ADJUDICATIONS_FILE}, ` +
-      'every one of them tracked debt rather than an approved shape.'
+      'none of them an approved shape.'
   )
+  // Broken out by verdict rather than totalled, because an OPEN REGRESSION is
+  // not debt and must not read as though it were. A count that merges the two
+  // is how a fresh break launders itself into the pre-existing set.
+  const by_verdict = new Map()
+  for (const entry of adjudications) {
+    by_verdict.set(entry.verdict, (by_verdict.get(entry.verdict) ?? 0) + 1)
+  }
+  for (const [verdict, count] of [...by_verdict].sort()) {
+    console.log(`  ${String(count).padStart(4)}  entries  ${verdict}`)
+  }
+  const open_regressions = by_verdict.get('open-regression') ?? 0
+  if (open_regressions) {
+    console.log(
+      `  ${open_regressions} OPEN REGRESSION(S) -- a rename that landed without its caller, ` +
+        'suppressed only to keep master pushable. Read their reasons.'
+    )
+  }
   console.log('')
   console.log('SKIPPED CALL SITES')
   for (const reason of Object.keys(SKIP_REASONS).sort()) {
