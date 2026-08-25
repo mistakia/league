@@ -545,6 +545,16 @@ const importPlaysForWeek = async ({
       )
       if (end_play_exists) {
         if (play_stat_inserts.length) {
+          // Oracle: count the stat rows this game currently holds as valid,
+          // BEFORE the reset below invalidates the whole game. The invalidation
+          // + re-insert pattern below strands any previously-valid row the
+          // source does not return this run at is_valid=0 -- the 2002 defect.
+          const prev_valid_row = await db('nfl_play_stats')
+            .where({ esbid: game.esbid, is_valid: 1 })
+            .count('* as n')
+            .first()
+          const prev_valid = Number(prev_valid_row.n)
+
           // reset final table playStats
           await db('nfl_play_stats')
             .update({ is_valid: 0 })
@@ -558,6 +568,21 @@ const importPlaysForWeek = async ({
             .insert(play_stat_inserts)
             .onConflict(['esbid', 'play_id', 'stat_id', 'player_name'])
             .merge()
+
+          // Oracle: every previously-valid row must be re-affirmed by this
+          // run. A shortfall means the source returned a partial stat set and
+          // the difference was left stranded invalid -- fail loud rather than
+          // letting it read as another silent partial re-import.
+          const revalidated_row = await db('nfl_play_stats')
+            .where({ esbid: game.esbid, is_valid: 1 })
+            .count('* as n')
+            .first()
+          const revalidated = Number(revalidated_row.n)
+          if (revalidated < prev_valid) {
+            throw new Error(
+              `is_valid oracle: ${game.esbid} revalidated ${revalidated} of ${prev_valid} previously-valid rows (${prev_valid - revalidated} stranded); a partial source returned fewer stats than the game already held`
+            )
+          }
         }
 
         if (play_inserts.length) {

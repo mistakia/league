@@ -1,4 +1,5 @@
 import { current_season } from '#constants'
+import { projected_career_year_select } from '#libs-shared/career-year-definition.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { single_year, seas_type } from '#libs-shared/common-column-params.mjs'
@@ -39,11 +40,12 @@ const player_seasonlogs_source = {
 // in (the career-game-counts generator skips the upcoming season), so under a
 // current-season row the column renders blank before the season's first game.
 // When the query's year scope includes the current season, project the value a
-// player enters the season with: distinct seasons played before the current
-// year, plus one. Only emitted when the current season is in scope, so
-// past-year-only queries stay byte-identical. Cast the projection to smallint
-// so the emitted column keeps career_year's int2 type (node-pg would otherwise
-// surface a count's bigint as a string).
+// player enters the season with via the single declared career-year definition
+// (distinct REG seasons before the current year, plus one -- see
+// libs-shared/career-year-definition.mjs). Only emitted when the current
+// season is in scope, so past-year-only queries stay byte-identical. Cast to
+// smallint so the emitted column keeps career_year's int2 type (node-pg would
+// otherwise surface a count's bigint as a string).
 const get_career_year_select_expression = ({
   table_name,
   params = {},
@@ -65,8 +67,7 @@ const get_career_year_select_expression = ({
   if (row_year === null) {
     return `${table_name}.career_year`
   }
-  const projected_career_year = `(SELECT (count(DISTINCT projected.season_year) + 1)::smallint FROM player_seasonlogs as projected WHERE projected.pid = player.pid AND projected.season_type = 'REG' AND projected.season_year < ${current_season.year})`
-  return `COALESCE(${table_name}.career_year, CASE WHEN ${row_year} = ${current_season.year} THEN ${projected_career_year} END)`
+  return `COALESCE(${table_name}.career_year, CASE WHEN ${row_year} = ${current_season.year} THEN ${projected_career_year_select()} END)`
 }
 
 export default {

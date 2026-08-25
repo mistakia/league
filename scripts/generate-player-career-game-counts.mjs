@@ -4,6 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { is_main, batch_insert } from '#libs-server'
+import { career_year_from_distinct_prior_reg_seasons } from '#libs-shared/career-year-definition.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
@@ -140,8 +141,74 @@ const generate_player_career_game_counts = async () => {
     }
   }
 
+  // Phase 2 -- preseason career_year. The loop above iterates
+  // whereIn('nfl_games.season_type', ['REG', 'POST']), so it materializes
+  // career_year for REG/POST seasonlog rows only. A PRE row is never touched by
+  // it and keeps whatever stale number it was last given (Wheatley Jr inherited
+  // his father's; 726 rows still read null/0). Under the single declared
+  // definition in libs-shared/career-year-definition.mjs, career_year is a
+  // function of season_year alone: a PRE row carries the same value as its
+  // season's REG row, and a preseason-only season gets `prior REG seasons + 1`
+  // rather than null/0. Set it here from each player's set of REG seasons. The
+  // same definition also covers season years with no REG/POST games at all
+  // (e.g. the in-progress preseason), which the year loop never reaches.
+  const reg_season_years_by_pid = {}
+  const reg_career_rows = await db('player_gamelogs')
+    .select('player_gamelogs.pid', 'nfl_games.season_year')
+    .innerJoin('nfl_games', function () {
+      this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid').andOn(
+        'nfl_games.season_year',
+        '=',
+        'player_gamelogs.season_year'
+      )
+    })
+    .where({ 'nfl_games.season_type': 'REG' })
+
+  for (const row of reg_career_rows) {
+    if (!reg_season_years_by_pid[row.pid]) {
+      reg_season_years_by_pid[row.pid] = new Set()
+    }
+    reg_season_years_by_pid[row.pid].add(Number(row.season_year))
+  }
+
+  const pre_seasonlogs = await db('player_seasonlogs')
+    .select('pid', 'season_year')
+    .where({ season_type: 'PRE' })
+
+  const pre_updates = []
+  for (const { pid, season_year } of pre_seasonlogs) {
+    const reg_seasons = reg_season_years_by_pid[pid]
+    let prior_reg_seasons = 0
+    if (reg_seasons) {
+      for (const y of reg_seasons) {
+        if (y < season_year) prior_reg_seasons++
+      }
+    }
+    pre_updates.push({
+      pid,
+      season_year,
+      season_type: 'PRE',
+      career_year:
+        career_year_from_distinct_prior_reg_seasons(prior_reg_seasons)
+    })
+  }
+
+  if (pre_updates.length) {
+    await batch_insert({
+      items: pre_updates,
+      save: async (batch) => {
+        await db('player_seasonlogs')
+          .insert(batch)
+          .onConflict(['pid', 'season_year', 'season_type'])
+          .merge(['career_year'])
+      },
+      batch_size: 500
+    })
+    log(`updated career year counts for ${pre_updates.length} PRE season rows`)
+  }
+
   log(
-    `totals: updated ${total_game_updates} game rows and ${total_season_updates} season rows`
+    `totals: updated ${total_game_updates} game rows and ${total_season_updates} season rows, ${pre_updates.length} PRE rows`
   )
 }
 
