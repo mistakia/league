@@ -4,11 +4,27 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { asyncBufferFromFile } from 'hyparquet'
+
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main, updatePlayer, createPlayer } from '#libs-server'
 import { CREATE_PLAYER_REQUIRED_FIELDS } from '#libs-server/create-player.mjs'
-import { load_source_records } from '#libs-server/player-identity-sources.mjs'
+import {
+  from_nfl_pro_row,
+  from_nflverse_row,
+  from_weekly_roster_row,
+  merge_record,
+  WEEKLY_ROSTER_FIRST_SEASON,
+  NFL_PRO_FIRST_SEASON
+} from '#libs-server/player-identity-sources.mjs'
+import {
+  download_players_file,
+  read_parquet_rows
+} from '#scripts/import-players-nflverse.mjs'
+import { download_weekly_roster_csv } from '#scripts/backfill-players-from-nflverse-weekly-rosters.mjs'
+import readCSV from '#libs-server/read-csv.mjs'
+import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
 import {
   missing_gsis_ids_sql,
   collision_preflight_sql,
@@ -21,6 +37,92 @@ const log = debug('repair-missing-player-gsis-ids')
 enable_debug_namespaces(
   'repair-missing-player-gsis-ids,create-player,update-player'
 )
+
+/*
+  The fetching half of the identity-source ladder. It lives HERE, in its only
+  consumer, rather than in libs-server, because it reaches NFL Pro through
+  #private/libs-server/nfl-pro.mjs -- and private/ is a git submodule no workflow
+  checks out. A core module that imports it cannot load on the runner or in a
+  public clone; this script is an entry point the test suite never loads, so the
+  dependency is honest here and fatal there. The pure row mappers it composes
+  stay in #libs-server/player-identity-sources.mjs, where a spec can reach them
+  without dragging a vendor in.
+
+  Ordering between the three rungs IS field precedence: `merge_record` fills only
+  the fields the base left null, so the parquet stays the spine, the weekly
+  rosters fill the deep history behind it, and NFL Pro -- which carries no
+  `pfr_id` at all -- fills last rather than pre-empting a source that does.
+*/
+export const load_source_records = async ({
+  nfl_pro_last_season,
+  include_nfl_pro = true,
+  include_weekly_rosters = true,
+  weekly_roster_last_season,
+  force_download = false
+} = {}) => {
+  const records = new Map()
+
+  const parquet_rows = await read_parquet_rows(
+    await asyncBufferFromFile(await download_players_file({ force_download }))
+  )
+  for (const row of parquet_rows) {
+    if (!row.gsis_id) continue
+    const record = from_nflverse_row(row)
+    record.sources = ['nflverse']
+    records.set(row.gsis_id, record)
+  }
+
+  if (include_weekly_rosters) {
+    const last_season = weekly_roster_last_season ?? nfl_pro_last_season
+    for (
+      let season = WEEKLY_ROSTER_FIRST_SEASON;
+      season <= last_season;
+      season++
+    ) {
+      const csv_path = await download_weekly_roster_csv({
+        year: season,
+        force_download
+      })
+      const rows = await readCSV(csv_path)
+      if (rows instanceof Error) throw rows
+
+      for (const row of rows) {
+        if (!row.gsis_id) continue
+        const record = from_weekly_roster_row(row)
+        const existing = records.get(row.gsis_id)
+        records.set(
+          row.gsis_id,
+          existing
+            ? merge_record(existing, record)
+            : { ...record, sources: ['nflverse_weekly_rosters'] }
+        )
+      }
+    }
+  }
+
+  if (!include_nfl_pro) return records
+
+  for (
+    let season = NFL_PRO_FIRST_SEASON;
+    season <= nfl_pro_last_season;
+    season++
+  ) {
+    const roster = await nfl_pro.get_teams_roster({ season })
+    for (const row of roster) {
+      if (!row.gsisId) continue
+      const record = from_nfl_pro_row(row)
+      const existing = records.get(row.gsisId)
+      records.set(
+        row.gsisId,
+        existing
+          ? merge_record(existing, record)
+          : { ...record, sources: ['nfl_pro'] }
+      )
+    }
+  }
+
+  return records
+}
 
 /*
   Closes the gap where a gsis id appears in the stat ledger with no `player`

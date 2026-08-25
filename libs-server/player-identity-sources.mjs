@@ -1,16 +1,20 @@
-import { asyncBufferFromFile } from 'hyparquet'
-
 import { formatHeight } from '#libs-shared'
-import {
-  download_players_file,
-  read_parquet_rows
-} from '#scripts/import-players-nflverse.mjs'
-import { download_weekly_roster_csv } from '#scripts/backfill-players-from-nflverse-weekly-rosters.mjs'
-import readCSV from '#libs-server/read-csv.mjs'
-import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
 
 /*
   The gsis-keyed biographical sources, normalized to one record shape.
+
+  PURE MAPPING ONLY -- this module reads nothing and fetches nothing, and its one
+  import is a formatter. That is deliberate and load-bearing. `private/` is a git
+  submodule no workflow checks out, so a core module that reaches into it cannot
+  be loaded on the runner or in a public clone: when a spec first imported this
+  file for one pure function, the static `#private/libs-server/nfl-pro.mjs` import
+  that used to sit here took the WHOLE suite to zero tests via ERR_MODULE_NOT_FOUND
+  -- a blackout, not a failing assertion. The fetching half now lives in
+  scripts/repair-missing-player-gsis-ids.mjs, its only consumer, where reaching a
+  vendor is normal and the test suite never loads it.
+
+  The rule, stated once: core (libs-server, libs-shared, api, app) never imports
+  #private; scripts and jobs may.
 
   Both sources here are keyed on the gsis id we already hold, which is the
   filter every candidate source has to pass: a source searchable only by name
@@ -34,7 +38,7 @@ import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
   name would write a wrong id into a column an attach then matches on, which is
   the worst available failure here.
 */
-const from_nfl_pro_row = (row) => ({
+export const from_nfl_pro_row = (row) => ({
   gsis_player_id: row.gsisId,
   esb_id: row.esbId || null,
   pfr_id: null,
@@ -58,7 +62,7 @@ const from_nfl_pro_row = (row) => ({
   source: 'nfl_pro'
 })
 
-const from_nflverse_row = (row) => ({
+export const from_nflverse_row = (row) => ({
   gsis_player_id: row.gsis_id,
   esb_id: row.esb_id || null,
   pfr_id: row.pfr_id || null,
@@ -128,7 +132,7 @@ export const from_weekly_roster_row = (row) => ({
   residue, and why adding it does not collapse that residue the way its raw id
   count might suggest.
 */
-const WEEKLY_ROSTER_FIRST_SEASON = 2002
+export const WEEKLY_ROSTER_FIRST_SEASON = 2002
 
 /*
   nflverse is the spine and NFL Pro fills in behind it, field by field rather
@@ -141,9 +145,9 @@ const WEEKLY_ROSTER_FIRST_SEASON = 2002
 
   Never issue an NFL Pro request for a season before 2016.
 */
-const NFL_PRO_FIRST_SEASON = 2016
+export const NFL_PRO_FIRST_SEASON = 2016
 
-const merge_record = (base, incoming) => {
+export const merge_record = (base, incoming) => {
   const merged = { ...base }
   for (const [key, value] of Object.entries(incoming)) {
     if (key === 'source') continue
@@ -153,82 +157,4 @@ const merge_record = (base, incoming) => {
     ...new Set([...(base.sources || [base.source]), incoming.source])
   ]
   return merged
-}
-
-export const load_source_records = async ({
-  nfl_pro_last_season,
-  include_nfl_pro = true,
-  include_weekly_rosters = true,
-  weekly_roster_last_season,
-  force_download = false
-} = {}) => {
-  const records = new Map()
-
-  const parquet_rows = await read_parquet_rows(
-    await asyncBufferFromFile(await download_players_file({ force_download }))
-  )
-  for (const row of parquet_rows) {
-    if (!row.gsis_id) continue
-    const record = from_nflverse_row(row)
-    record.sources = ['nflverse']
-    records.set(row.gsis_id, record)
-  }
-
-  /*
-    Ordered between the parquet and NFL Pro deliberately. `merge_record` fills
-    only the fields the base left null, so position in this sequence IS field
-    precedence: the parquet stays the spine, the weekly rosters fill the deep
-    history behind it, and NFL Pro -- which carries no `pfr_id` at all -- fills
-    last rather than pre-empting a source that does.
-  */
-  if (include_weekly_rosters) {
-    const last_season = weekly_roster_last_season ?? nfl_pro_last_season
-    for (
-      let season = WEEKLY_ROSTER_FIRST_SEASON;
-      season <= last_season;
-      season++
-    ) {
-      const csv_path = await download_weekly_roster_csv({
-        year: season,
-        force_download
-      })
-      const rows = await readCSV(csv_path)
-      if (rows instanceof Error) throw rows
-
-      for (const row of rows) {
-        if (!row.gsis_id) continue
-        const record = from_weekly_roster_row(row)
-        const existing = records.get(row.gsis_id)
-        records.set(
-          row.gsis_id,
-          existing
-            ? merge_record(existing, record)
-            : { ...record, sources: ['nflverse_weekly_rosters'] }
-        )
-      }
-    }
-  }
-
-  if (!include_nfl_pro) return records
-
-  for (
-    let season = NFL_PRO_FIRST_SEASON;
-    season <= nfl_pro_last_season;
-    season++
-  ) {
-    const roster = await nfl_pro.get_teams_roster({ season })
-    for (const row of roster) {
-      if (!row.gsisId) continue
-      const record = from_nfl_pro_row(row)
-      const existing = records.get(row.gsisId)
-      records.set(
-        row.gsisId,
-        existing
-          ? merge_record(existing, record)
-          : { ...record, sources: ['nfl_pro'] }
-      )
-    }
-  }
-
-  return records
 }
