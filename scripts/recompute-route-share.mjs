@@ -24,10 +24,10 @@ const argv = yargs(hideBin(process.argv)).argv
 
 const main = async () => {
   const esbids = argv.esbid ? [Number(argv.esbid)] : null
-  const year = argv.year ? Number(argv.year) : null
+  const season_year = argv.year ? Number(argv.year) : null
 
   const result = await recompute_route_share({
-    year,
+    season_year,
     esbids,
     dry_run: Boolean(argv.dry)
   })

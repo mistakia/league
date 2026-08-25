@@ -2079,7 +2079,7 @@ const options = {
               description: 'Week number',
               example: 13
             },
-            seas_type: {
+            season_type: {
               $ref: '#/components/schemas/SeasonTypeEnum'
             },
             day: {
@@ -2371,7 +2371,7 @@ const options = {
             'opponent_nfl_team',
             'season_year',
             'week',
-            'seas_type',
+            'season_type',
             'day',
             'date',
             'timestamp',

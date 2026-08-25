@@ -332,20 +332,20 @@ const nfl_play_fields = [
 ]
 
 const export_data_nfl_plays = async ({
-  year = current_season.year,
-  seas_type = 'REG',
+  season_year = current_season.year,
+  season_type = 'REG',
   collector = null
 } = {}) => {
-  log(`exporting plays for ${year} ${seas_type}`)
-  const plays_table = `nfl_plays_year_${year}`
+  log(`exporting plays for ${season_year} ${season_type}`)
+  const plays_table = `nfl_plays_year_${season_year}`
 
-  // Get esbids for the target year/seas_type first (small query)
+  // Get esbids for the target season_year/season_type first (small query)
   const games = await db('nfl_games')
     .select('esbid')
-    .where({ season_year: year, season_type: seas_type })
+    .where({ season_year, season_type })
     .orderBy('esbid', 'asc')
   const esbids = games.map((g) => g.esbid)
-  log(`found ${esbids.length} games for ${year} ${seas_type}`)
+  log(`found ${esbids.length} games for ${season_year} ${season_type}`)
 
   // Query plays in batches by game to avoid statement timeout
   const data = []
@@ -377,10 +377,10 @@ const export_data_nfl_plays = async ({
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convert_to_csv(csv_data_string)
 
-  await fs.mkdir(`${data_path}/nfl/plays/${year}`, { recursive: true })
+  await fs.mkdir(`${data_path}/nfl/plays/${season_year}`, { recursive: true })
 
-  // const json_file_path = `${data_path}/${year}.json`
-  const csv_file_path = `${data_path}/nfl/plays/${year}/${seas_type}.csv`
+  // const json_file_path = `${data_path}/${season_year}.json`
+  const csv_file_path = `${data_path}/nfl/plays/${season_year}/${season_type}.csv`
 
   // await fs.writeFile(json_file_path, JSON.stringify(data, null, 2))
   // log(`wrote json to ${json_file_path}`)
@@ -395,7 +395,7 @@ const main = async () => {
     const argv_year = process.argv.find(
       (_, i, arr) => i > 0 && arr[i - 1] === '--year'
     )
-    const target_year = argv_year ? parseInt(argv_year) : null
+    const target_season_year = argv_year ? parseInt(argv_year) : null
 
     const columns = await db('nfl_plays').columnInfo()
     const column_keys = Object.keys(columns)
@@ -407,22 +407,22 @@ const main = async () => {
       `Missing columns not included in nfl_play_fields: ${missing_columns.join(', ')}`
     )
 
-    let years
-    if (target_year) {
-      years = [target_year]
+    let season_years
+    if (target_season_year) {
+      season_years = [target_season_year]
     } else {
-      const years_query_results = await db('nfl_plays')
+      const season_years_query_results = await db('nfl_plays')
         .select('season_year')
         .groupBy('season_year')
         .orderBy('season_year', 'asc')
-      years = years_query_results.map((r) => r.season_year)
+      season_years = season_years_query_results.map((r) => r.season_year)
     }
 
-    const seas_types = ['PRE', 'REG', 'POST']
+    const season_types = ['PRE', 'REG', 'POST']
 
-    for (const year of years) {
-      for (const seas_type of seas_types) {
-        await export_data_nfl_plays({ year, seas_type })
+    for (const season_year of season_years) {
+      for (const season_type of season_types) {
+        await export_data_nfl_plays({ season_year, season_type })
       }
     }
   } catch (err) {

@@ -24,16 +24,16 @@ const log = debug('calculate-points-added')
 enable_debug_namespaces('calculate-points-added')
 
 const calculate_points_added = async ({
-  year,
+  season_year,
   rookie,
   league,
   week = 'ALL'
 }) => {
-  if (!Number.isInteger(year)) {
-    throw new Error(`${year} invalid year`)
+  if (!Number.isInteger(season_year)) {
+    throw new Error(`${season_year} invalid season_year`)
   }
 
-  log(`calculating Points Added for ${year}`)
+  log(`calculating Points Added for ${season_year}`)
 
   const query = db('scoring_format_player_gamelogs')
     .select(
@@ -52,7 +52,7 @@ const calculate_points_added = async ({
       'scoring_format_player_gamelogs.esbid'
     )
     .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
-    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_year', season_year)
     .where('nfl_games.season_type', 'REG')
     .whereIn('player.primary_position', fantasy_positions) // TODO - filter using player_gamelogs.pos
     .where(
@@ -69,7 +69,7 @@ const calculate_points_added = async ({
   // Fetch position_rank from player_seasonlogs in a separate query
   const pos_rnk_query = db('scoring_format_player_seasonlogs')
     .select('pid', 'points_position_rank')
-    .where('season_year', year)
+    .where('season_year', season_year)
     .where('scoring_format_id', league.scoring_format_id)
 
   const pos_rnk_rows = await pos_rnk_query
@@ -200,7 +200,7 @@ const calculate_points_added = async ({
   for (const player of players) {
     output[player.pid] = {
       player: player.short_name,
-      rookie: player.nfl_draft_year === year,
+      rookie: player.nfl_draft_year === season_year,
       primary_position: player.primary_position,
       position_rank: player.position_rank,
       pts_added_earned: player.pts_added.earned,
@@ -229,7 +229,7 @@ const calculate_points_added = async ({
 const main = async () => {
   try {
     const argv = initialize_cli()
-    const year = argv.year
+    const season_year = argv.year
     const rookie = argv.rookie
     const lid = argv.lid
     const week = argv.week
@@ -239,7 +239,7 @@ const main = async () => {
     }
     const league = await getLeague({ lid })
     const { players, baselineTotals, weeks } = await calculate_points_added({
-      year,
+      season_year,
       rookie,
       league,
       week
@@ -280,7 +280,7 @@ const main = async () => {
     }
     console.log(
       chalk.bold(
-        `${year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`
+        `${season_year} ${rookie ? 'Rookie ' : ''}Player end-of-season values`
       )
     )
     p.printTable()

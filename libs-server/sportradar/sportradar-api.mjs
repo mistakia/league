@@ -109,12 +109,12 @@ export const getPlayer = ({ sportradar_id }) =>
     return data
   })
 
-export const get_games_schedule = ({ year, season_type = 'REG' }) =>
+export const get_games_schedule = ({ season_year, season_type = 'REG' }) =>
   queue.add(async () => {
-    const cache_key = `/sportradar/schedule/${year}/${season_type}`
+    const cache_key = `/sportradar/schedule/${season_year}/${season_type}`
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
-      log(`Cache hit for schedule ${year}/${season_type}`)
+      log(`Cache hit for schedule ${season_year}/${season_type}`)
       return cache_value
     }
 
@@ -125,10 +125,10 @@ export const get_games_schedule = ({ year, season_type = 'REG' }) =>
     last_request = process.hrtime.bigint()
 
     const { api_key, base_url } = await get_sportradar_config()
-    const api_path = `games/${year}/${season_type}/schedule.json`
+    const api_path = `games/${season_year}/${season_type}/schedule.json`
     const url = `${base_url}/${api_path}?api_key=${api_key}`
 
-    log(`Fetching schedule: ${year}/${season_type}`)
+    log(`Fetching schedule: ${season_year}/${season_type}`)
     log(`URL: ${url.replace(api_key, 'REDACTED')}`)
     const res = await fetch(url)
 
@@ -141,7 +141,9 @@ export const get_games_schedule = ({ year, season_type = 'REG' }) =>
 
     const data = await res.json()
     await cache.set({ key: cache_key, value: data })
-    log(`Fetched ${data.weeks?.length || 0} weeks for ${year}/${season_type}`)
+    log(
+      `Fetched ${data.weeks?.length || 0} weeks for ${season_year}/${season_type}`
+    )
 
     return data
   })

@@ -14,18 +14,18 @@ const initialize_cli = () => {
 // const log = debug('script:calculate-rookie-pick-value')
 const LATEST_YEAR = 2020
 
-const calculateRookiePickValue = async ({ year }) => {
-  if (year > LATEST_YEAR) {
-    throw new Error(`invalid year ${year}`)
+const calculateRookiePickValue = async ({ season_year }) => {
+  if (season_year > LATEST_YEAR) {
+    throw new Error(`invalid season_year ${season_year}`)
   }
 
   // TODO get rookie position rank
   // get up to 4 seasons of data
   const seasons = {}
-  const limit = LATEST_YEAR - year + 1
+  const limit = LATEST_YEAR - season_year + 1
   for (let i = 1; i <= limit; i++) {
     const { players } = await calculate_points_added({
-      year: year + (i - 1),
+      season_year: season_year + (i - 1),
       rookie: i === 1
     })
     seasons[i] = players
@@ -65,8 +65,8 @@ if (is_main(import.meta.url)) {
   const main = async () => {
     try {
       const argv = initialize_cli()
-      const year = argv.year
-      const results = await calculateRookiePickValue({ year })
+      const season_year = argv.year
+      const results = await calculateRookiePickValue({ season_year })
       const sortedResults = Object.values(results).sort(
         (a, b) => b.value - a.value
       )
@@ -99,7 +99,9 @@ if (is_main(import.meta.url)) {
           }
         )
       }
-      console.log(chalk.bold(`Year-over-year Rookie Value starting in ${year}`))
+      console.log(
+        chalk.bold(`Year-over-year Rookie Value starting in ${season_year}`)
+      )
       p.printTable()
     } catch (e) {
       console.log(e)

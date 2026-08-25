@@ -216,7 +216,7 @@ describe('SCRIPTS recompute-route-share', function () {
   })
 
   it('fills route_share from the player own team dropbacks', async () => {
-    const result = await recompute_route_share({ year: season_year })
+    const result = await recompute_route_share({ season_year })
 
     expect(result.updated).to.be.at.least(2)
 
@@ -227,7 +227,7 @@ describe('SCRIPTS recompute-route-share', function () {
   })
 
   it('leaves route_share null when the dropback data cannot support it', async () => {
-    const result = await recompute_route_share({ year: season_year })
+    const result = await recompute_route_share({ season_year })
 
     expect(await get_route_share({ pid: excess_routes_pid })).to.equal(null)
     expect(
@@ -242,14 +242,14 @@ describe('SCRIPTS recompute-route-share', function () {
   })
 
   it('does not overwrite a route_share that is already set', async () => {
-    await recompute_route_share({ year: season_year })
+    await recompute_route_share({ season_year })
 
     expect(await get_route_share({ pid: already_shared_pid })).to.equal(12.34)
   })
 
   it('is idempotent -- a second run has nothing left to fill', async () => {
-    await recompute_route_share({ year: season_year })
-    const second_run = await recompute_route_share({ year: season_year })
+    await recompute_route_share({ season_year })
+    const second_run = await recompute_route_share({ season_year })
 
     expect(second_run.updated).to.equal(0)
     expect(await get_route_share({ pid: home_pid })).to.equal(50)
@@ -259,12 +259,12 @@ describe('SCRIPTS recompute-route-share', function () {
   // It must count every row carrying routes, not the unfilled subset, or a
   // fully-repaired corpus and a selector matching nothing read identically.
   it('reports the scanned population separately from the candidates', async () => {
-    const first_run = await recompute_route_share({ year: season_year })
+    const first_run = await recompute_route_share({ season_year })
 
     expect(first_run.scanned).to.be.at.least(first_run.candidates)
     expect(first_run.candidates).to.be.at.least(1)
 
-    const second_run = await recompute_route_share({ year: season_year })
+    const second_run = await recompute_route_share({ season_year })
 
     // The repair drained every FILLABLE candidate, so the candidate count
     // shrinks -- the rows that remain are the ones the healer deliberately
@@ -276,7 +276,7 @@ describe('SCRIPTS recompute-route-share', function () {
   })
 
   it('counts a row that already carries a share as scanned', async () => {
-    const result = await recompute_route_share({ year: season_year })
+    const result = await recompute_route_share({ season_year })
 
     // already_shared_pid is excluded from candidates but carries routes, so it
     // belongs to the scanned population.
@@ -285,7 +285,7 @@ describe('SCRIPTS recompute-route-share', function () {
 
   it('writes nothing on a dry run', async () => {
     const result = await recompute_route_share({
-      year: season_year,
+      season_year,
       dry_run: true
     })
 
