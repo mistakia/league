@@ -1,0 +1,438 @@
+{
+  "$comment": [
+    "Adjudicated PRE-EXISTING sites for db/gates/check-call-site-param-contracts.mjs.",
+    "",
+    "Read this before adding an entry: NOTHING HERE IS AN APPROVED SHAPE. Every",
+    "entry is a real mismatch -- a call passing an object key its callee does not",
+    "accept, so the callee silently uses its default. They are recorded because",
+    "the gate landed on a tree that already carried them, and a gate red on",
+    "standing debt makes master red and defers every session push. The gate is a",
+    "ratchet: it fails on anything NEW.",
+    "",
+    "Every entry is keyed on a SITE -- (caller, callee, key) -- and NEVER on the",
+    "argument key alone. A name-keyed entry would suppress that key at every",
+    "caller in the tree, which is the same stoplist failure that hid",
+    "scoring_format_player_projection_points.total from check-renamed-column-consumers.",
+    "",
+    "The LINE is deliberately not part of the key. Lane 1 shifted three findings",
+    "in finalize-game.mjs by fourteen lines without changing anything about them,",
+    "and an entry that goes stale on an unrelated edit above it teaches people to",
+    "regenerate this file wholesale rather than read it.",
+    "",
+    "An entry that suppresses nothing is reported as a STALE ADJUDICATION and",
+    "fails the gate, so a repaired site forces its entry out rather than leaving a",
+    "standing exemption. Removing an entry is the LAST step of a repair, in the",
+    "same commit.",
+    "",
+    "verdict = pre-existing-defect   a real mismatch predating this gate. The",
+    "                                reason must name where the repair is tracked."
+  ],
+  "adjudications": [
+    {
+      "caller": "api/routes/teams/transactions.mjs",
+      "callee": "getTransactionsSinceFreeAgent",
+      "key": "tid",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "db/adhoc/2026-08-24-regenerate-wheatley-split-derived-logs.mjs",
+      "callee": "generate_scoring_format_player_seasonlogs",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "db/fixtures/draft.mjs",
+      "callee": "getRoster",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "jobs/import-live-odds-worker.mjs",
+      "callee": "import_pinnacle_odds",
+      "key": "max_runtime_ms",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "jobs/import-live-odds-worker.mjs",
+      "callee": "report_job",
+      "key": "reason",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "jobs/import-live-odds-worker.mjs",
+      "callee": "report_job",
+      "key": "succ",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "generate_player_gamelogs",
+      "key": "seas_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "generate_player_gamelogs",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "generate_player_snaps_for_week",
+      "key": "seas_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "generate_player_snaps_for_week",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "report_job",
+      "key": "reason",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "report_job",
+      "key": "succ",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/finalize-game.mjs",
+      "callee": "report_job",
+      "key": "timestamp",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/format-data-generation/format-processor.mjs",
+      "callee": "check_format_data_exists",
+      "key": "format_hash",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/format-data-generation/format-processor.mjs",
+      "callee": "check_format_exists",
+      "key": "format_hash",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "libs-server/format-data-generation/format-processor.mjs",
+      "callee": "check_removal_safety",
+      "key": "format_hash",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/generate-league-format-player-gamelogs.mjs",
+      "callee": "calculate_points_added",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/generate-league-player-seasonlogs.mjs",
+      "callee": "generateSeasonDates",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/generate-league-player-seasonlogs.mjs",
+      "callee": "getAcquisitionTransaction",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/generate-player-gamelogs.mjs",
+      "callee": "get_play_stats",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/generate-player-gamelogs.mjs",
+      "callee": "get_play_stats",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/generate-scoring-format-player-gamelogs.mjs",
+      "callee": "calculate_points",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "backfill_play_stats_gsisid",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "export_data_nfl_games",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "export_data_nfl_plays",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "export_data_player_gamelogs",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_dvoa_sheets",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_dvoa_sheets",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_espn_receiving_tracking_metrics",
+      "key": "ignore_cache",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nfl",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nfl",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nflverse",
+      "key": "ignore_cache",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nflverse",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nflverse",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_nflverse",
+      "key": "week",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_ngs",
+      "key": "ignore_cache",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_ngs",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_ngs",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_nfl_games_ngs",
+      "key": "week",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_plays_nfl_v1",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_plays_nfl_v1",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_plays_nflfastr_ftn",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "import_plays_nflfastr",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "process_plays",
+      "key": "season_type",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "process_plays",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-full-season.mjs",
+      "callee": "recompute_route_share",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/import-games-sportradar.mjs",
+      "callee": "get_games_schedule",
+      "key": "ignore_cache",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/import-games-sportradar.mjs",
+      "callee": "get_games_schedule",
+      "key": "season_year",
+      "verdict": "pre-existing-defect",
+      "reason": "Repaired on branch lane-1-broken-call-sites (e9a0758f4), which predates this gate. REMOVE THIS ENTRY in the same commit that merges that branch -- it will be reported STALE otherwise."
+    },
+    {
+      "caller": "scripts/process-extensions.mjs",
+      "callee": "getExtensionAmount",
+      "key": "value",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "scripts/process-projections.mjs",
+      "callee": "calculatePlayerValuesRestOfSeason",
+      "key": "rosterRows",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/draft.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/leagues.restricted-free-agency.spec.mjs",
+      "callee": "insert_restricted_free_agency_bid",
+      "key": "succ",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/teams.activate.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/teams.add.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/teams.deactivate.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/teams.reserve.activate.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/teams.reserve.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    },
+    {
+      "caller": "test/trade.spec.mjs",
+      "callee": "checkLastTransaction",
+      "key": "year",
+      "verdict": "pre-existing-defect",
+      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
+    }
+  ]
+}

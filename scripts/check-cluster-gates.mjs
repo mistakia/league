@@ -226,6 +226,14 @@ const GATES = [
     oracle: 'each deliberately dropped table name has no surviving consumer'
   },
   {
+    id: 'call-site-param-contracts',
+    command: ['db/gates/check-call-site-param-contracts.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      "a cross-file call's object keys vs the callee's destructured parameter list, resolved through the IMPORT EDGE — the silent-default class no column-anchored or query-site-anchored gate here can see"
+  },
+  {
     id: 'ts-check-ratchet',
     command: ['db/gates/check-ts-check-ratchet.mjs'],
     requires: 'none',
