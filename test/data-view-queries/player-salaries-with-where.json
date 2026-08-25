@@ -2,17 +2,8 @@
   "name": "player_salaries with where",
   "description": "Test case for player_salaries with where",
   "request": {
-    "columns": [
-      {
-        "column_id": "player_dfs_salary"
-      }
-    ],
-    "sort": [
-      {
-        "column_id": "player_dfs_salary",
-        "desc": true
-      }
-    ],
+    "columns": [{ "column_id": "player_dfs_salary" }],
+    "sort": [{ "column_id": "player_dfs_salary", "desc": true }],
     "where": [
       {
         "column_id": "player_dfs_salary",
@@ -22,7 +13,7 @@
       }
     ]
   },
-  "expected_query": "with \"td499c6d9b0d86f7aa539f7f2cd4570c8\" as (with \"dfs_base\" as (select \"player_salaries\".\"pid\", \"player_salaries\".\"salary\", \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\", \"player_salaries\".\"source_id\", \"player_salaries\".\"source_contest_id\", \"player_salaries\".\"esbid\" from \"player_salaries\" inner join \"nfl_games\" on \"player_salaries\".\"esbid\" = \"nfl_games\".\"esbid\" where \"player_salaries\".\"source_id\" in ('DRAFTKINGS') and \"nfl_games\".\"nfl_week_id\" in ('2025_REG_WEEK_1')), \"dfs_slate_sizes\" as (select \"source_id\", \"source_contest_id\", count(distinct \"esbid\") as \"slate_size\" from \"dfs_base\" group by \"source_id\", \"source_contest_id\") select distinct on (\"dfs_base\".\"pid\", \"dfs_base\".\"year\", \"dfs_base\".\"week\") \"dfs_base\".\"pid\", \"dfs_base\".\"salary\", \"dfs_base\".\"year\", \"dfs_base\".\"week\" from \"dfs_base\" inner join \"dfs_slate_sizes\" on \"dfs_base\".\"source_id\" = \"dfs_slate_sizes\".\"source_id\" and \"dfs_base\".\"source_contest_id\" = \"dfs_slate_sizes\".\"source_contest_id\" order by \"dfs_base\".\"pid\" asc, \"dfs_base\".\"year\" asc, \"dfs_base\".\"week\" asc, \"dfs_slate_sizes\".\"slate_size\" desc, \"dfs_base\".\"source_contest_id\" asc) select \"player\".\"pid\", \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"salary\" AS \"dfs_salary_0\", \"player\".\"primary_position\" from \"player\" inner join \"td499c6d9b0d86f7aa539f7f2cd4570c8\" on \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"pid\" = \"player\".\"pid\" where td499c6d9b0d86f7aa539f7f2cd4570c8.salary >= '5000' group by \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"td499c6d9b0d86f7aa539f7f2cd4570c8\" as (with \"dfs_base\" as (select \"player_salaries\".\"pid\", \"player_salaries\".\"salary\", \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\", \"player_salaries\".\"source_id\", \"player_salaries\".\"source_contest_id\", \"player_salaries\".\"esbid\" from \"player_salaries\" inner join \"nfl_games\" on \"player_salaries\".\"esbid\" = \"nfl_games\".\"esbid\" where \"player_salaries\".\"source_id\" in ('DRAFTKINGS') and \"nfl_games\".\"nfl_week_id\" in ('2025_REG_WEEK_1')), \"dfs_ranked\" as (select \"dfs_base\".*, dense_rank() over (partition by \"source_id\", \"source_contest_id\" order by \"esbid\") + dense_rank() over (partition by \"source_id\", \"source_contest_id\" order by \"esbid\" desc) - 1 as \"slate_size\" from \"dfs_base\") select distinct on (\"dfs_ranked\".\"pid\", \"dfs_ranked\".\"year\", \"dfs_ranked\".\"week\") \"dfs_ranked\".\"pid\", \"dfs_ranked\".\"salary\", \"dfs_ranked\".\"year\", \"dfs_ranked\".\"week\" from \"dfs_ranked\" order by \"dfs_ranked\".\"pid\" asc, \"dfs_ranked\".\"year\" asc, \"dfs_ranked\".\"week\" asc, \"dfs_ranked\".\"slate_size\" desc, \"dfs_ranked\".\"source_contest_id\" asc) select \"player\".\"pid\", \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"salary\" AS \"dfs_salary_0\", \"player\".\"primary_position\" from \"player\" inner join \"td499c6d9b0d86f7aa539f7f2cd4570c8\" on \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"pid\" = \"player\".\"pid\" where td499c6d9b0d86f7aa539f7f2cd4570c8.salary >= '5000' group by \"td499c6d9b0d86f7aa539f7f2cd4570c8\".\"salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "filters", "sorting", "cte"],
   "timeout_ms": 40000
 }

@@ -122,36 +122,48 @@ const player_dfs_salaries_source = {
     }
 
     // slate_size = distinct games each (source_id, contest) covers in the
-    // requested window. Computed as a plain grouped aggregate (Postgres forbids
-    // DISTINCT inside a window aggregate), joined back to rank each row's slate.
-    const slate_sizes = db('dfs_base')
-      .select('source_id', 'source_contest_id')
-      .countDistinct('esbid as slate_size')
-      .groupBy('source_id', 'source_contest_id')
+    // requested window, used only to rank a player's slates so the main-slate
+    // price wins. Postgres forbids DISTINCT inside a window aggregate, so the
+    // count is expressed as the dense_rank identity: within any partition,
+    // count(distinct x) = dense_rank() ascending + dense_rank() descending - 1.
+    //
+    // Computing it as a window over dfs_base rather than as a grouped aggregate
+    // joined back to dfs_base is load-bearing for the PLAN, not just for
+    // tidiness. The self-join's keys (source_id, source_contest_id) are
+    // perfectly correlated by construction, but the planner treats them as
+    // independent and multiplies the selectivities, collapsing the estimate to
+    // rows=1 against ~30k actual. That estimate propagates through the DISTINCT
+    // ON, and the outer query then picks a nested loop that re-executes this
+    // whole CTE once per outer row.
+    //
+    // The identity is exact only while the ranked column has no NULLs
+    // (dense_rank ranks a NULL, count(distinct) ignores it). esbid is the inner
+    // join key to nfl_games above, so it cannot be NULL here.
+    const slate_size_expr = db.raw(
+      'dense_rank() over (partition by "source_id", "source_contest_id" order by "esbid")' +
+        ' + dense_rank() over (partition by "source_id", "source_contest_id" order by "esbid" desc)' +
+        ' - 1 as "slate_size"'
+    )
+
+    const ranked_query = db('dfs_base').select('dfs_base.*', slate_size_expr)
 
     const cte_query = db
       .with('dfs_base', base_query)
-      .with('dfs_slate_sizes', slate_sizes)
-      .distinctOn('dfs_base.pid', 'dfs_base.year', 'dfs_base.week')
+      .with('dfs_ranked', ranked_query)
+      .distinctOn('dfs_ranked.pid', 'dfs_ranked.year', 'dfs_ranked.week')
       .select(
-        'dfs_base.pid',
-        'dfs_base.salary',
-        'dfs_base.year',
-        'dfs_base.week'
+        'dfs_ranked.pid',
+        'dfs_ranked.salary',
+        'dfs_ranked.year',
+        'dfs_ranked.week'
       )
-      .from('dfs_base')
-      .join('dfs_slate_sizes', function () {
-        this.on('dfs_base.source_id', 'dfs_slate_sizes.source_id').andOn(
-          'dfs_base.source_contest_id',
-          'dfs_slate_sizes.source_contest_id'
-        )
-      })
+      .from('dfs_ranked')
       .orderBy([
-        { column: 'dfs_base.pid' },
-        { column: 'dfs_base.year' },
-        { column: 'dfs_base.week' },
-        { column: 'dfs_slate_sizes.slate_size', order: 'desc' },
-        { column: 'dfs_base.source_contest_id' }
+        { column: 'dfs_ranked.pid' },
+        { column: 'dfs_ranked.year' },
+        { column: 'dfs_ranked.week' },
+        { column: 'dfs_ranked.slate_size', order: 'desc' },
+        { column: 'dfs_ranked.source_contest_id' }
       ])
 
     players_query.with(cte_name, cte_query)
