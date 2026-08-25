@@ -7,8 +7,15 @@ import {
 } from '#libs-shared/data-views-nfl-week-migration.mjs'
 import {
   apply_column_id_rename,
-  apply_dvoa_type_value_renames
+  apply_dvoa_type_value_renames,
+  apply_table_state_value_renames,
+  SHORT_URL_KEY_ALIASES
 } from '#libs-shared/data-views-saved-view-migration.mjs'
+
+// Every rename rule this parser applies is declared for the short_url surface
+// in TABLE_STATE_RENAMES, so a rule reaches a shared link by being declared
+// rather than by being remembered here.
+const SHORT_URL_SURFACE = ['short_url']
 
 // A share URL is rewritten by the nfl-week migration and by nothing else -- it
 // never enters the versioned chain in data-view-storage/migrations.mjs, because
@@ -50,13 +57,17 @@ const migrate_column_id_entries = (entries) => {
 // they rendered at the wrong grain silently, and the three that also sorted on
 // the lost axis emitted an unreachable reference and produced unexecutable SQL.
 //
+// This is now DERIVED from `TABLE_STATE_RENAMES`, which is the one place a
+// top-level key rename is declared, so this surface can no longer be forgotten
+// by a rename that lands in the registry. It stays a named export here because
+// it is this parser's accepted set, and the gate below reads the parser rather
+// than the registry so the two cannot drift.
+//
 // `db/gates/check-data-view-url-param-coverage.mjs` is the gate that makes the
 // next such rename loud. It reads this map as its set of accepted legacy keys,
-// so an entry deleted here becomes a reported finding there — which is also how
-// that gate's negative control works.
-export const LEGACY_URL_PARAM_ALIASES = {
-  splits: 'row_axes'
-}
+// so an entry that stops being declared for the short_url surface becomes a
+// reported finding there — which is also how that gate's negative control works.
+export const LEGACY_URL_PARAM_ALIASES = SHORT_URL_KEY_ALIASES
 
 const is_empty_for_type = (value, type) => {
   if (type === 'array') return !Array.isArray(value) || value.length === 0
@@ -103,6 +114,25 @@ export default function parse_table_state_from_url(search_params) {
 
   const table_state = apply_legacy_aliases(search_params, parsed_table_state)
 
+  // Top-level VALUE renames, which no gate can see: both param-coverage gates
+  // walk KEYS, so a shared link carrying a renamed axis value stays accepted
+  // and renders at the wrong grain. Applied after the key aliases above so a
+  // URL carrying the legacy KEY gets its values rewritten too.
+  const { table_state: axes } = apply_table_state_value_renames(
+    {
+      // The schema parser's array branch falls back to `[]` only for absent or
+      // unparseable input, so a well-formed non-array (`row_axes={"week":true}`)
+      // flows straight through as an object and every downstream axis consumer
+      // reads garbage. Guard it here for the current and the aliased key alike.
+      row_axes: Array.isArray(table_state.row_axes) ? table_state.row_axes : [],
+      row_grain:
+        Array.isArray(table_state.row_grain) && table_state.row_grain.length
+          ? table_state.row_grain
+          : ['player']
+    },
+    { surfaces: SHORT_URL_SURFACE }
+  )
+
   return {
     columns: migrate_column_id_entries(
       migrate_dvoa_type_entries(migrate_entries_array(table_state.columns))
@@ -118,15 +148,8 @@ export default function parse_table_state_from_url(search_params) {
     // `sort` carries a column_id too, so it has to follow the rename or a shared
     // link sorts on an id no column supplies.
     sort: migrate_column_id_entries(migrate_sort_array(table_state.sort)),
-    // The schema parser's array branch falls back to `[]` only for absent or
-    // unparseable input, so a well-formed non-array (`row_axes={"week":true}`)
-    // flows straight through as an object and every downstream axis consumer
-    // reads garbage. Guard it here for the current and the aliased key alike.
-    row_axes: Array.isArray(table_state.row_axes) ? table_state.row_axes : [],
-    row_grain:
-      Array.isArray(table_state.row_grain) && table_state.row_grain.length
-        ? table_state.row_grain
-        : ['player'],
+    row_axes: axes.row_axes,
+    row_grain: axes.row_grain,
     q: table_state.q,
     rank_aggregation: table_state.rank_aggregation,
     scatter_plot_options: table_state.scatter_plot_options,
