@@ -71,27 +71,6 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "report_job",
-      "key": "reason",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "report_job",
-      "key": "succ",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "libs-server/finalize-game.mjs",
-      "callee": "report_job",
-      "key": "timestamp",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
       "caller": "libs-server/format-data-generation/format-processor.mjs",
       "callee": "check_format_data_exists",
       "key": "format_hash",
@@ -113,20 +92,6 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "private/libs-server/pro-football-reference.mjs",
-      "callee": "getGameDayAbbreviation",
-      "key": "seas_type",
-      "verdict": "open-regression",
-      "reason": "OPEN REGRESSION, not debt. 7e7b21882 conformed this callee onto season_year in core and did not carry the private/ caller, because private/ is an empty mountpoint in a worktree and no lane sees it. Owned by lane-1-followups. Repair the caller and delete this entry; do not let it age into the pre-existing set."
-    },
-    {
-      "caller": "private/scripts/finalize-season.mjs",
-      "callee": "get_season_playoff_weeks",
-      "key": "year",
-      "verdict": "open-regression",
-      "reason": "OPEN REGRESSION, not debt. 7e7b21882 conformed this callee onto season_year in core and did not carry the private/ caller, because private/ is an empty mountpoint in a worktree and no lane sees it. Owned by lane-1-followups. Repair the caller and delete this entry; do not let it age into the pre-existing set."
-    },
-    {
       "caller": "private/scripts/finalize-season.mjs",
       "callee": "process_matchups",
       "key": "week",
@@ -144,20 +109,6 @@
       "caller": "private/scripts/import-fanduel-odds.mjs",
       "callee": "report_job",
       "key": "market_count",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
-    },
-    {
-      "caller": "private/test/finalize-season.spec.mjs",
-      "callee": "get_season_playoff_weeks",
-      "key": "year",
-      "verdict": "open-regression",
-      "reason": "OPEN REGRESSION, not debt. 7e7b21882 conformed this callee onto season_year in core and did not carry the private/ caller, because private/ is an empty mountpoint in a worktree and no lane sees it. Owned by lane-1-followups. Repair the caller and delete this entry; do not let it age into the pre-existing set."
-    },
-    {
-      "caller": "private/test/import-gameday-rosters.spec.mjs",
-      "callee": "build_gamelog_inserts",
-      "key": "year",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
     },

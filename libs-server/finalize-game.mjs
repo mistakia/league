@@ -159,11 +159,10 @@ export const finalize_game = async ({
 
   await report_job({
     job_type: job_types.FINALIZE_GAME,
-    succ: success,
-    reason: success
+    job_success: success,
+    job_reason: success
       ? `Finalized game ${esbid} in ${total_duration}ms`
-      : `Finalized game ${esbid} with ${results.steps_failed.length} failures`,
-    timestamp: Math.round(start_time / 1000)
+      : `Finalized game ${esbid} with ${results.steps_failed.length} failures`
   })
 
   log(
