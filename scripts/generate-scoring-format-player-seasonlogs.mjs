@@ -17,7 +17,7 @@ const log = debug('generate-scoring-format-player-seasonlogs')
 enable_debug_namespaces('generate-scoring-format-player-seasonlogs')
 
 const generate_scoring_format_player_seasonlogs = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   scoring_format_id,
   dry = false
 }) => {
@@ -25,7 +25,7 @@ const generate_scoring_format_player_seasonlogs = async ({
     throw new Error('scoring_format_id required')
   }
   log(
-    `generating player seasonlogs for scoring_format ${scoring_format_id} in ${year}`
+    `generating player seasonlogs for scoring_format ${scoring_format_id} in ${season_year}`
   )
 
   // get scoring format player gamelogs for season
@@ -38,7 +38,7 @@ const generate_scoring_format_player_seasonlogs = async ({
       'nfl_games.esbid'
     )
     .where({
-      'nfl_games.season_year': year,
+      'nfl_games.season_year': season_year,
       'nfl_games.season_type': 'REG',
       'scoring_format_player_gamelogs.scoring_format_id': scoring_format_id
     })
@@ -59,7 +59,7 @@ const generate_scoring_format_player_seasonlogs = async ({
     // process / create inserts
     inserts.push({
       pid,
-      season_year: year,
+      season_year,
       scoring_format_id,
       pos,
       points,
@@ -117,7 +117,7 @@ const generate_scoring_format_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('scoring_format_player_seasonlogs')
-      .where({ scoring_format_id, season_year: year })
+      .where({ scoring_format_id, season_year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -153,7 +153,7 @@ const main = async () => {
           'nfl_games.esbid',
           'scoring_format_player_gamelogs.esbid'
         )
-        .select('nfl_games.season_year as year')
+        .select('nfl_games.season_year')
         .where('nfl_games.season_type', 'REG')
         .where(
           'scoring_format_player_gamelogs.scoring_format_id',
@@ -162,22 +162,22 @@ const main = async () => {
         .groupBy('nfl_games.season_year')
         .orderBy('nfl_games.season_year', 'asc')
 
-      let years = results.map((r) => r.year)
+      let years = results.map((r) => r.season_year)
       if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
+        years = years.filter((season_year) => season_year >= argv.start)
       }
 
       log(`generating player seasonlogs for ${years.length} years`)
 
-      for (const year of years) {
+      for (const season_year of years) {
         await generate_scoring_format_player_seasonlogs({
-          year,
+          season_year,
           scoring_format_id
         })
       }
     } else {
       await generate_scoring_format_player_seasonlogs({
-        year: argv.year,
+        season_year: argv.year,
         scoring_format_id,
         dry: argv.dry
       })

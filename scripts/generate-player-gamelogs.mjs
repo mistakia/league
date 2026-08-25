@@ -62,16 +62,17 @@ const initialize_cli = () => {
         type: 'string',
         describe: 'Generate gamelogs for a specific game ID only'
       })
-      // `seasType` was never declared, and yargs' camel-case expansion maps
-      // `--seas-type` but NOT `--seas_type` -- so the underscore spelling, which
-      // is what every other flag and every column in this repo uses, silently
-      // parsed to a key nothing read and left the run on the REG default. A
-      // 298-game preseason-inclusive backfill lost all 47 of its PRE games that
-      // way: each threw "no play stats for esbid", the throw was caught by
-      // handle_season_args_for_script, and the process still exited 0. Declaring
-      // the alias makes both spellings work; `choices` makes a typo loud.
-      .option('seasType', {
-        alias: 'seas_type',
+      // yargs' camel-case expansion maps `--season-type` but NOT
+      // `--season_type`, and the underscore spelling is what every other flag
+      // and every column in this repo uses. Undeclared, it parses to a key
+      // nothing reads and leaves the run on the REG default. A 298-game
+      // preseason-inclusive backfill lost all 47 of its PRE games that way:
+      // each threw "no play stats for esbid", main() below caught the throw
+      // into `error`, and its bare process.exit() exited 0 regardless.
+      // Declaring the alias makes both spellings work; `choices` makes a typo
+      // loud.
+      .option('seasonType', {
+        alias: 'season_type',
         type: 'string',
         choices: nfl_season_types,
         describe: 'Season type (PRE, REG, POST)'
@@ -320,7 +321,7 @@ const format_receiving_gamelog = ({
   esbid,
   pid,
   stats,
-  year,
+  season_year,
   team_stats,
   player_routes,
   team_dropbacks,
@@ -347,14 +348,14 @@ const format_receiving_gamelog = ({
   ) {
     // qb_dropback is not properly populated in nfl_plays for this game
     log(
-      `WARNING: team_dropbacks (${team_dropbacks}) < player_routes (${player_routes}) for pid=${pid}, esbid=${esbid}, year=${year} - setting route_share to null`
+      `WARNING: team_dropbacks (${team_dropbacks}) < player_routes (${player_routes}) for pid=${pid}, esbid=${esbid}, season_year=${season_year} - setting route_share to null`
     )
   }
 
   const receiving_gamelog = {
     esbid,
     pid,
-    season_year: year,
+    season_year,
     longest_reception: stats.longest_reception,
     receiving_yards_15_plus_count: stats.receiving_yards_15_plus_count,
     team_target_share,
@@ -372,7 +373,7 @@ const format_receiving_gamelog = ({
       receiving_gamelog.team_target_share > DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX
     ) {
       log(
-        `OVERFLOW: team_target_share = ${receiving_gamelog.team_target_share} (max ${DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+        `OVERFLOW: team_target_share = ${receiving_gamelog.team_target_share} (max ${DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, season_year=${season_year}`
       )
       log(
         `  stats.targets=${stats.targets}, team_stats.targets=${team_stats.targets}`
@@ -384,7 +385,7 @@ const format_receiving_gamelog = ({
         DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX
     ) {
       log(
-        `OVERFLOW: team_air_yard_share = ${receiving_gamelog.team_air_yard_share} (max ${DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+        `OVERFLOW: team_air_yard_share = ${receiving_gamelog.team_air_yard_share} (max ${DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, season_year=${season_year}`
       )
       log(
         `  stats.targeted_air_yards=${stats.targeted_air_yards}, team_stats.passing_air_yards=${team_stats.passing_air_yards}`
@@ -395,7 +396,7 @@ const format_receiving_gamelog = ({
       receiving_gamelog.route_share > DB_CONSTRAINTS.ROUTE_SHARE_MAX
     ) {
       log(
-        `OVERFLOW: route_share = ${receiving_gamelog.route_share} (max ${DB_CONSTRAINTS.ROUTE_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+        `OVERFLOW: route_share = ${receiving_gamelog.route_share} (max ${DB_CONSTRAINTS.ROUTE_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, season_year=${season_year}`
       )
       log(`  player_routes=${player_routes}, team_dropbacks=${team_dropbacks}`)
     }
@@ -405,7 +406,7 @@ const format_receiving_gamelog = ({
         DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX
     ) {
       log(
-        `OVERFLOW: weighted_opportunity_rating = ${receiving_gamelog.weighted_opportunity_rating} (max ${DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+        `OVERFLOW: weighted_opportunity_rating = ${receiving_gamelog.weighted_opportunity_rating} (max ${DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX}) for pid=${pid}, esbid=${esbid}, season_year=${season_year}`
       )
       log(
         `  team_target_share=${team_target_share}, team_air_yard_share=${team_air_yard_share}`
@@ -416,7 +417,13 @@ const format_receiving_gamelog = ({
   return receiving_gamelog
 }
 
-const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
+const format_rushing_gamelog = ({
+  esbid,
+  pid,
+  stats,
+  season_year,
+  team_stats
+}) => {
   const rush_share = team_stats.rushing_attempts
     ? stats.rushing_attempts / team_stats.rushing_attempts
     : null
@@ -430,7 +437,7 @@ const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
   return {
     esbid,
     pid,
-    season_year: year,
+    season_year,
     longest_rush: stats.longest_rush,
     rush_share,
     weighted_opportunity,
@@ -471,7 +478,7 @@ const generate_receiving_gamelog = ({
     const receiving_gamelog = format_receiving_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
-      year: player_gamelog.season_year,
+      season_year: player_gamelog.season_year,
       stats,
       team_stats: team_gamelog,
       player_routes,
@@ -497,7 +504,7 @@ const generate_rushing_gamelog = ({
     const rushing_gamelog = format_rushing_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
-      year: player_gamelog.season_year,
+      season_year: player_gamelog.season_year,
       stats,
       team_stats: team_gamelog
     })
@@ -511,7 +518,7 @@ const generate_rushing_gamelog = ({
  */
 const generate_snap_based_gamelogs = async ({
   unique_esbids,
-  year,
+  season_year,
   player_gamelog_inserts
 }) => {
   log('Checking for players with snaps but no stats...')
@@ -529,7 +536,7 @@ const generate_snap_based_gamelogs = async ({
     )
     .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_player_id')
     .whereIn('nfl_snaps.esbid', unique_esbids)
-    .where('nfl_snaps.season_year', year)
+    .where('nfl_snaps.season_year', season_year)
     .groupBy(
       'player.pid',
       'player.primary_position',
@@ -550,7 +557,7 @@ const generate_snap_based_gamelogs = async ({
   // filter the snap path writes that gamelog no matter what the play-stat
   // resolver decided, since it never consults it.
   const players_with_snaps = snap_candidates.filter((candidate) =>
-    player_could_have_played({ player: candidate, season_year: year })
+    player_could_have_played({ player: candidate, season_year })
   )
 
   const era_rejected = snap_candidates.length - players_with_snaps.length
@@ -611,7 +618,7 @@ const generate_snap_based_gamelogs = async ({
 
   const resolve_snap_gamelog_team = await create_snap_gamelog_team_resolver({
     candidates: players_with_snaps,
-    season_year: year
+    season_year
   })
 
   let added_count = 0
@@ -685,7 +692,7 @@ const generate_snap_based_gamelogs = async ({
         player_position: snap_player.primary_position,
         nfl_team: team,
         opponent_nfl_team: opponent,
-        season_year: year,
+        season_year,
         is_active: true,
         source: PLAY_STATS_GAMELOG_SOURCE
         // All counting stats default to NULL/0
@@ -715,11 +722,11 @@ const generate_snap_based_gamelogs = async ({
 /**
  * Load player routes data for given games
  */
-const load_player_routes = async ({ unique_esbids, year }) => {
+const load_player_routes = async ({ unique_esbids, season_year }) => {
   const player_routes_query = await db('player_receiving_gamelogs')
     .select('pid', 'esbid', 'routes')
     .whereIn('esbid', unique_esbids)
-    .where({ season_year: year })
+    .where({ season_year })
     .whereNotNull('routes')
 
   log(`loaded routes data for ${player_routes_query.length} players`)
@@ -794,7 +801,7 @@ export const group_play_stats_by_pid = ({
       play_stat,
       players_by_smart_player_id,
       players_by_gsis_player_id,
-      season_year: play_stat.year
+      season_year: play_stat.season_year
     })
 
     if (!resolution.pid) {
@@ -862,7 +869,7 @@ const process_player_gamelogs = ({
       nfl_team: fixTeam(play_stat.nfl_team),
       opponent_nfl_team: opp,
       esbid: play_stat.esbid,
-      season_year: play_stat.year,
+      season_year: play_stat.season_year,
       stats
     })
     player_gamelog_inserts.push(player_gamelog)
@@ -908,7 +915,7 @@ const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
       esbid: play_stat.esbid,
       nfl_team: fixTeam(team),
       opponent_nfl_team: opp,
-      season_year: play_stat.year
+      season_year: play_stat.season_year
     }
     team_gamelog_inserts.push(team_gamelog)
   }
@@ -960,7 +967,7 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
       pos: 'DST',
       nfl_team: team,
       esbid: play.esbid,
-      season_year: play.year,
+      season_year: play.season_year,
       opponent_nfl_team: fixTeam(opp),
       stats
     })
@@ -1198,7 +1205,7 @@ export const prune_unreferenced_gamelogs = async ({
   unique_esbids,
   player_gamelog_inserts,
   unseparable_by_esbid = new Map(),
-  year,
+  season_year,
   dry_run
 }) => {
   // See the third bound in the docstring. A game whose play stats did not all
@@ -1261,7 +1268,7 @@ export const prune_unreferenced_gamelogs = async ({
       .whereIn('pid', [...new Set(unproduced.map((row) => row.pid))])
 
     for (const player of players) {
-      if (!player_could_have_played({ player, season_year: year })) {
+      if (!player_could_have_played({ player, season_year })) {
         era_rejected_pids.add(player.pid)
       }
     }
@@ -1417,17 +1424,21 @@ const save_gamelogs = async ({
  */
 const generate_player_gamelogs = async ({
   week = current_season.last_week_with_stats,
-  year = current_season.year,
-  seas_type = current_season.nfl_seas_type,
+  season_year = current_season.year,
+  season_type = current_season.nfl_seas_type,
   esbid = null,
   dry_run = false,
   collector = null
 }) => {
   log(
-    `loading plays for ${year} week ${week}${esbid ? ` (esbid: ${esbid})` : ''}`
+    `loading plays for ${season_year} week ${week}${esbid ? ` (esbid: ${esbid})` : ''}`
   )
 
-  const all_play_stats = await get_play_stats({ year, week, seas_type })
+  const all_play_stats = await get_play_stats({
+    season_year,
+    week,
+    season_type
+  })
 
   // `--esbid` has to narrow playStats itself, not just unique_esbids: every
   // collection below (player, team, defense gamelogs) is derived from
@@ -1442,7 +1453,7 @@ const generate_player_gamelogs = async ({
 
   if (esbid && !playStats.length) {
     throw new Error(
-      `no play stats for esbid ${esbid} in ${year} week ${week} ${seas_type} -- check the year/week match the game`
+      `no play stats for esbid ${esbid} in ${season_year} week ${week} ${season_type} -- check the year/week match the game`
     )
   }
 
@@ -1463,7 +1474,7 @@ const generate_player_gamelogs = async ({
   // Load supporting data
   const player_routes_by_game = await load_player_routes({
     unique_esbids,
-    year
+    season_year
   })
   const team_dropbacks_by_game = await load_team_dropbacks({ unique_esbids })
 
@@ -1525,7 +1536,7 @@ const generate_player_gamelogs = async ({
   // Generate gamelogs for players who played snaps but didn't record any counting stats
   await generate_snap_based_gamelogs({
     unique_esbids,
-    year,
+    season_year,
     player_gamelog_inserts
   })
 
@@ -1547,13 +1558,13 @@ const generate_player_gamelogs = async ({
     log(player_rushing_gamelog_inserts[0])
     log(team_gamelog_inserts[0])
     log(
-      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
+      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${season_year} week ${week}`
     )
     await prune_unreferenced_gamelogs({
       unique_esbids,
       player_gamelog_inserts,
       unseparable_by_esbid,
-      year,
+      season_year,
       dry_run
     })
     return
@@ -1574,7 +1585,7 @@ const generate_player_gamelogs = async ({
     unique_esbids,
     player_gamelog_inserts,
     unseparable_by_esbid,
-    year,
+    season_year,
     dry_run
   })
 }
@@ -1587,23 +1598,23 @@ const main = async () => {
       argv,
       script_name: 'generate-player-gamelogs',
       script_function: generate_player_gamelogs,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('nfl_games')
-          .select('season_year as year')
-          .where({ season_type: seas_type })
+          .select('season_year')
+          .where({ season_type })
           .groupBy('season_year')
           .orderBy('season_year', 'asc'),
-      week_query: ({ year, seas_type = 'REG' }) =>
+      week_query: ({ season_year, season_type = 'REG' }) =>
         db('nfl_games')
           .select('week')
-          .where({ season_year: year, season_type: seas_type })
+          .where({ season_year, season_type })
           .groupBy('week')
           .orderBy('week', 'asc'),
       script_args: {
         dry_run: argv.dry,
         esbid: argv.esbid
       },
-      seas_type: argv.seasType
+      season_type: argv.seasonType
     })
   } catch (err) {
     error = err

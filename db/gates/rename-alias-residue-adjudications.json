@@ -140,14 +140,6 @@
       "file": "scripts/process-projections-for-league-format.mjs",
       "verdict": "keep-aliased",
       "reason": "The second producer of the same shape, and its own comment records why: get_player_week_total reads .total, so an unaliased select hands every player NaN which becomes the -999 sentinel, and the writer below deletes by (league_format_id, year) before inserting. Both producers OF THE points-map SHAPE agree. The gate reports this as SPLIT PRODUCERS rather than UNIFORM as of 2026-08-06, naming libs-server/simulation/load-projection-data.mjs:128 -- which selects the physical name for a different downstream shape and is exactly the site the SCOPE CAUTION below already named by hand. The bare producer does not feed the points map, so the verdict stands. See the SCOPE CAUTION on the libs-server/get-players.mjs entry for this same column: two further query sites in libs-server/simulation/ use other vocabularies and are not covered by either entry."
-    },
-    {
-      "table": "nfl_games",
-      "column": "year",
-      "new_column": "season_year",
-      "file": "private/scripts/import-gameday-rosters.mjs",
-      "verdict": "keep-aliased",
-      "reason": "The consumer that fixes this is libs-server/handle-season-args-for-script.mjs, which reads the row as `results.map((r) => r.year)`. The alias is the row shape that helper's `year_query` callback is DEFINED to return, not residue from the nfl_games conform, so migrating this one site alone hands the helper a row with no `year` key and every `--all` invocation of the importer silently iterates an array of undefined. The contract is unanimous across all 14 public callers in scripts/ -- 10 alias `season_year as year` off nfl_games or a join to it, and 4 return a literal `[{ year: current_season.year }]` -- so retiring it means moving the helper and all 14 in one change, which is a public-repo migration this private site cannot lead. Adjudicated here rather than filtered because the gate is right that the alias exists: it is a boundary translation to a shared helper, which is exactly what keep-aliased is for. WHY THIS ENTRY IS ALONE: the other eight private/ findings at this rename window were MIGRATED in the same change rather than adjudicated. Six had readers local to their own file (`game.year`, `game.seas_type`, `nfl_game.year`, a destructured `year` written straight back to a season_year field) and were repointed to the physical names; two aliases -- `season_type as seas_type` in import-caesars-odds-v4.mjs and `season_year as year` in import-plays-playerprofiler.mjs -- had NO reader at all and were simply dropped. So this file being the only private/ entry is a verdict about the helper contract, not a general exemption for private/."
     }
   ]
 }

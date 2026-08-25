@@ -111,8 +111,8 @@ const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
-const discover_contests = async ({ year, dry_run = false }) => {
-  log('discovering DraftKings NFL contests for year %d', year)
+const discover_contests = async ({ season_year, dry_run = false }) => {
+  log('discovering DraftKings NFL contests for year %d', season_year)
 
   const lobby_contests = await draftkings.get_draftkings_nfl_lobby_contests()
   log('found %d Classic NFL contests in lobby', lobby_contests.length)
@@ -170,7 +170,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
       max_entries: contest.m,
       game_type: contest.gameType || 'Classic',
       sport: 'NFL',
-      season_year: year,
+      season_year,
       week: null, // will be filled from nfl_games if needed
       start_date,
       is_guaranteed
@@ -204,7 +204,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
 }
 
 const import_ownership = async ({
-  year,
+  season_year,
   dry_run = false,
   contest_id = null,
   week = null
@@ -218,8 +218,8 @@ const import_ownership = async ({
   if (contest_id) {
     query = query.where('source_contest_id', String(contest_id))
   }
-  if (year) {
-    query = query.where('season_year', year)
+  if (season_year) {
+    query = query.where('season_year', season_year)
   }
   if (week) {
     query = query.where('week', week)
@@ -461,13 +461,13 @@ const import_ownership = async ({
 
 const import_draftkings_dfs_ownership = async ({
   dry_run = false,
-  year,
+  season_year,
   week,
   contest_id,
   discover_only = false
 } = {}) => {
   // Phase 1: discover contests from lobby
-  await discover_contests({ year, dry_run })
+  await discover_contests({ season_year, dry_run })
 
   if (discover_only) {
     log('discover_only mode -- skipping ownership import')
@@ -475,7 +475,7 @@ const import_draftkings_dfs_ownership = async ({
   }
 
   // Phase 2: import ownership from unimported contests
-  await import_ownership({ year, week, dry_run, contest_id })
+  await import_ownership({ season_year, week, dry_run, contest_id })
 }
 
 const main = async () => {
@@ -490,7 +490,7 @@ const main = async () => {
       argv,
       script_name: 'import-draftkings-dfs-ownership',
       script_function: import_draftkings_dfs_ownership,
-      year_query: async () => [{ year: current_season.year }],
+      year_query: async () => [{ season_year: current_season.year }],
       script_args: { dry_run, contest_id, discover_only },
       season_only: true
     })

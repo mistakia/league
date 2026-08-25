@@ -39,25 +39,25 @@ const main = async () => {
       argv,
       script_name: 'generate-league-format-player-logs',
       script_function: generate_league_format_player_gamelogs,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-          .select('nfl_games.season_year as year')
-          .where('nfl_games.season_type', seas_type)
+          .select('nfl_games.season_year')
+          .where('nfl_games.season_type', season_type)
           .groupBy('nfl_games.season_year')
           .orderBy('nfl_games.season_year', 'asc'),
-      week_query: ({ year, seas_type = 'REG' }) =>
+      week_query: ({ season_year, season_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
-          .where('nfl_games.season_type', seas_type)
-          .where('nfl_games.season_year', year)
+          .where('nfl_games.season_type', season_type)
+          .where('nfl_games.season_year', season_year)
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc'),
       script_args: { league_format_id },
-      post_year_function: async ({ year, league_format_id }) => {
+      post_year_function: async ({ season_year, league_format_id }) => {
         await generate_league_format_player_seasonlogs({
-          year,
+          season_year,
           league_format_id
         })
       },

@@ -22,7 +22,10 @@ const initialize_cli = () => {
 const log = debug('import-draftkings-salaries')
 enable_debug_namespaces('import-draftkings-salaries,draft-kings,update-player')
 
-const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
+const import_draftkings_salaries = async ({
+  dry_run = false,
+  season_year
+} = {}) => {
   await preload_active_players({
     all_players: false,
     include_otc_id_index: false,
@@ -34,7 +37,7 @@ const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
   log(`importing ${draft_groups.length} draft groups`)
 
   const nfl_games = await db('nfl_games').where({
-    season_year: year
+    season_year
   })
 
   const salary_inserts = []
@@ -205,7 +208,7 @@ const main = async () => {
       argv,
       script_name: 'import-draftkings-salaries',
       script_function: import_draftkings_salaries,
-      year_query: async () => [{ year: current_season.year }],
+      year_query: async () => [{ season_year: current_season.year }],
       script_args: { dry_run },
       season_only: true
     })

@@ -23,8 +23,8 @@ const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
-const discover_contests = async ({ year, dry_run = false }) => {
-  log('discovering FanDuel DFS contests for year %d', year)
+const discover_contests = async ({ season_year, dry_run = false }) => {
+  log('discovering FanDuel DFS contests for year %d', season_year)
 
   // load FD fixture list IDs from player_salaries
   const fixture_lists = await db('player_salaries')
@@ -88,7 +88,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
       max_entries: largest.max_entries || largest.size,
       game_type: largest.game_type || 'GPP',
       sport: 'NFL',
-      season_year: year,
+      season_year,
       week: null,
       is_guaranteed: largest.is_guaranteed || false
     })
@@ -118,7 +118,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
 }
 
 const import_ownership = async ({
-  year,
+  season_year,
   dry_run = false,
   fixture_list_id = null,
   week = null,
@@ -132,8 +132,8 @@ const import_ownership = async ({
   if (fixture_list_id) {
     query = query.where('source_draft_group_id', String(fixture_list_id))
   }
-  if (year) {
-    query = query.where('season_year', year)
+  if (season_year) {
+    query = query.where('season_year', season_year)
   }
   if (week) {
     query = query.where('week', week)
@@ -355,13 +355,19 @@ const import_ownership = async ({
 
 const import_fanduel_dfs_ownership = async ({
   dry_run = false,
-  year,
+  season_year,
   week,
   fixture_list_id,
   sample_size = 2000
 } = {}) => {
-  await discover_contests({ year, dry_run })
-  await import_ownership({ year, week, dry_run, fixture_list_id, sample_size })
+  await discover_contests({ season_year, dry_run })
+  await import_ownership({
+    season_year,
+    week,
+    dry_run,
+    fixture_list_id,
+    sample_size
+  })
 }
 
 const main = async () => {
@@ -376,7 +382,7 @@ const main = async () => {
       argv,
       script_name: 'import-fanduel-dfs-ownership',
       script_function: import_fanduel_dfs_ownership,
-      year_query: async () => [{ year: current_season.year }],
+      year_query: async () => [{ season_year: current_season.year }],
       script_args: { dry_run, fixture_list_id, sample_size },
       season_only: true
     })

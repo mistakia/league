@@ -308,20 +308,16 @@ const get_stat_key = (base, { seasonlogs_type } = {}) =>
   (seasonlogs_type ? `${base}_${seasonlogs_type}` : base).toUpperCase()
 
 const generate_seasonlogs = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   seasonlogs_type
 } = {}) => {
   // tm='INA' is the nflverse placeholder for inactive game-day players, not a
   // real team. Excluding it prevents a phantom 33rd team row in every position
   // rollup.
   const gamelogs_query = db('player_gamelogs')
-    .select(
-      'player_gamelogs.*',
-      'nfl_games.week',
-      'nfl_games.season_year as year'
-    )
+    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.season_year')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_year', season_year)
     .where('nfl_games.season_type', 'REG')
     .whereNot('player_gamelogs.nfl_team', 'INA')
     .whereNot('player_gamelogs.opponent_nfl_team', 'INA')
@@ -384,7 +380,7 @@ const generate_seasonlogs = async ({
 
   const weeks = [...new Set(merged_gamelogs.map((g) => g.week))]
   log(
-    `loaded ${merged_gamelogs.length} gamelogs for ${year} REG weeks: ${weeks}`
+    `loaded ${merged_gamelogs.length} gamelogs for ${season_year} REG weeks: ${weeks}`
   )
 
   const positions = groupBy(merged_gamelogs, 'player_position')
@@ -497,7 +493,7 @@ const generate_seasonlogs = async ({
         team_seasonlog_inserts.push({
           stat_key,
           nfl_team: opp,
-          season_year: year,
+          season_year,
           ...to_nfl_team_seasonlogs_stats(
             sanitize_passing_stats_for_position(stats, position)
           )
@@ -531,7 +527,7 @@ const generate_seasonlogs = async ({
         team_seasonlog_inserts.push({
           stat_key,
           nfl_team: tm,
-          season_year: year,
+          season_year,
           ...to_nfl_team_seasonlogs_stats(
             sanitize_passing_stats_for_position(stats, position)
           )
@@ -606,7 +602,7 @@ const generate_seasonlogs = async ({
         const rank = index + 1
         league_team_seasonlog_inserts.push({
           lid: leagueId,
-          season_year: year,
+          season_year,
           points_rank: rank,
           ...item
         })
@@ -657,12 +653,12 @@ const main = async () => {
     await handle_season_args_for_script({
       argv,
       script_name: 'generate-nfl-team-seasonlogs',
-      script_function: async ({ year }) => {
-        await generate_seasonlogs({ year })
+      script_function: async ({ season_year }) => {
+        await generate_seasonlogs({ season_year })
       },
       year_query: () =>
         db('nfl_games')
-          .select('season_year as year')
+          .select('season_year')
           .where({ season_type: 'REG' })
           .groupBy('season_year')
           .orderBy('season_year', 'asc'),
@@ -673,19 +669,25 @@ const main = async () => {
     // weeks are derived from `current_season.week`, so they are nonsensical
     // for historical years. Skip them whenever a specific year was requested.
     if (!argv.year && !argv.all) {
-      const year = current_season.year
+      const season_year = current_season.year
       const week = current_season.week
 
       if (week > 3) {
-        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_THREE' })
+        await generate_seasonlogs({
+          season_year,
+          seasonlogs_type: 'LAST_THREE'
+        })
       }
 
       if (week > 4) {
-        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_FOUR' })
+        await generate_seasonlogs({ season_year, seasonlogs_type: 'LAST_FOUR' })
       }
 
       if (week > 8) {
-        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_EIGHT' })
+        await generate_seasonlogs({
+          season_year,
+          seasonlogs_type: 'LAST_EIGHT'
+        })
       }
     }
   } catch (err) {

@@ -18,18 +18,18 @@ const log = debug('process-player-seasonlogs')
 enable_debug_namespaces('process-player-seasonlogs')
 
 const processPlayerSeasonlogs = async ({
-  year = current_season.year,
-  seas_type = 'REG',
+  season_year = current_season.year,
+  season_type = 'REG',
   collector = null
 } = {}) => {
-  log(`Processing player seasonlogs for ${year}, ${seas_type}`)
+  log(`Processing player seasonlogs for ${season_year}, ${season_type}`)
 
   // get league player gamelogs for season
   const gamelogs = await db('player_gamelogs')
     .select('player_gamelogs.*')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where('nfl_games.season_year', year)
-    .where('nfl_games.season_type', seas_type)
+    .where('nfl_games.season_year', season_year)
+    .where('nfl_games.season_type', season_type)
 
   const inserts = []
 
@@ -47,14 +47,16 @@ const processPlayerSeasonlogs = async ({
 
     inserts.push({
       pid,
-      season_year: year,
-      season_type: seas_type,
+      season_year,
+      season_type,
       ...season_stats
     })
   }
 
   if (inserts.length) {
-    log(`updating ${inserts.length} player seasonlogs for ${year} ${seas_type}`)
+    log(
+      `updating ${inserts.length} player seasonlogs for ${season_year} ${season_type}`
+    )
     await batch_insert({
       items: inserts,
       save: async (batch) => {
@@ -67,7 +69,7 @@ const processPlayerSeasonlogs = async ({
     })
   }
 
-  log(`Processed player seasonlogs for ${year}, ${seas_type}`)
+  log(`Processed player seasonlogs for ${season_year}, ${season_type}`)
 }
 
 const main = async () => {
@@ -78,15 +80,15 @@ const main = async () => {
       argv,
       script_name: 'process-player-seasonlogs',
       script_function: processPlayerSeasonlogs,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-          .select('nfl_games.season_year as year')
-          .where('nfl_games.season_type', seas_type)
+          .select('nfl_games.season_year')
+          .where('nfl_games.season_type', season_type)
           .groupBy('nfl_games.season_year')
           .orderBy('nfl_games.season_year', 'asc'),
       season_only: true,
-      seas_type: argv.seas_type || 'REG'
+      season_type: argv.season_type || 'REG'
     })
   } catch (err) {
     error = err

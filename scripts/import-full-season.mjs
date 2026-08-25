@@ -223,10 +223,10 @@ const STAGE_SOURCES = {
 /**
  * Get week range for a season type
  */
-const get_season_weeks = (seas_type, start_week = null, end_week = null) => {
-  const config = SEASON_WEEK_CONFIG[seas_type]
+const get_season_weeks = (season_type, start_week = null, end_week = null) => {
+  const config = SEASON_WEEK_CONFIG[season_type]
   if (!config) {
-    throw new Error(`Invalid seas_type: ${seas_type}`)
+    throw new Error(`Invalid season_type: ${season_type}`)
   }
 
   const start = start_week ?? config.start
@@ -370,23 +370,26 @@ const validate_stage_config = ({
  * Import player data from all sources
  * Must run before games/plays to ensure current_nfl_team and external IDs are current
  */
-const run_players = async ({ year, ignore_cache, collector }) => {
-  collector.start_stage('players', { year })
+const run_players = async ({ season_year, ignore_cache, collector }) => {
+  collector.start_stage('players', { season_year })
 
   // Sleeper players (public)
   try {
     await import_players_sleeper()
   } catch (error) {
-    collector.add_error(error, { script: 'import_players_sleeper', year })
+    collector.add_error(error, {
+      script: 'import_players_sleeper',
+      season_year
+    })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   // NGS players (private)
   if (import_players_ngs) {
     try {
-      await import_players_ngs({ season: year, ignore_cache })
+      await import_players_ngs({ season: season_year, ignore_cache })
     } catch (error) {
-      collector.add_error(error, { script: 'import_players_ngs', year })
+      collector.add_error(error, { script: 'import_players_ngs', season_year })
     }
   }
 
@@ -397,20 +400,20 @@ const run_players = async ({ year, ignore_cache, collector }) => {
  * Import gameday rosters for all weeks in a season type
  * Must run after games (needs game schedule) and players (needs current IDs)
  */
-const run_rosters = async ({ year, seas_type, collector }) => {
-  collector.start_stage('rosters', { year, seas_type })
+const run_rosters = async ({ season_year, season_type, collector }) => {
+  collector.start_stage('rosters', { season_year, season_type })
 
   if (import_gameday_rosters) {
-    const weeks = get_season_weeks(seas_type)
+    const weeks = get_season_weeks(season_type)
     for (const week of weeks) {
       try {
-        await import_gameday_rosters({ year, week, seas_type })
+        await import_gameday_rosters({ season_year, week, season_type })
       } catch (error) {
         collector.add_error(error, {
           script: 'import_gameday_rosters',
-          year,
+          season_year,
           week,
-          seas_type
+          season_type
         })
       }
       await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -424,19 +427,19 @@ const run_rosters = async ({ year, seas_type, collector }) => {
  * Import games from all sources for a season
  */
 const import_games_for_season = async ({
-  year,
-  seas_type,
+  season_year,
+  season_type,
   ignore_cache,
   dry,
   collector,
   skip_sources = []
 }) => {
-  collector.start_stage('game_imports', { year, seas_type })
+  collector.start_stage('game_imports', { season_year, season_type })
 
-  const weeks = get_season_weeks(seas_type)
+  const weeks = get_season_weeks(season_type)
 
   for (const week of weeks) {
-    log(`Importing games for ${year} ${seas_type} Week ${week}`)
+    log(`Importing games for ${season_year} ${season_type} Week ${week}`)
 
     // 1. NFL Games (base game structure)
     if (
@@ -448,18 +451,18 @@ const import_games_for_season = async ({
     ) {
       try {
         await import_nfl_games_nfl({
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           ignore_cache,
           collector
         })
       } catch (error) {
         collector.add_error(error, {
           script: 'import_nfl_games_nfl',
-          year,
+          season_year,
           week,
-          seas_type
+          season_type
         })
       }
       await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -477,18 +480,18 @@ const import_games_for_season = async ({
     ) {
       try {
         await import_nfl_games_ngs({
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           ignore_cache,
           collector
         })
       } catch (error) {
         collector.add_error(error, {
           script: 'import_nfl_games_ngs',
-          year,
+          season_year,
           week,
-          seas_type
+          season_type
         })
       }
       await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -506,18 +509,18 @@ const import_games_for_season = async ({
     ) {
       try {
         await import_nfl_games_nflverse({
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           ignore_cache,
           collector
         })
       } catch (error) {
         collector.add_error(error, {
           script: 'import_nfl_games_nflverse',
-          year,
+          season_year,
           week,
-          seas_type
+          season_type
         })
       }
       await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -535,18 +538,18 @@ const import_games_for_season = async ({
     ) {
       try {
         await import_games_sportradar({
-          year,
+          season_year,
           week,
-          seas_type,
+          season_type,
           ignore_cache,
           collector
         })
       } catch (error) {
         collector.add_error(error, {
           script: 'import_games_sportradar',
-          year,
+          season_year,
           week,
-          seas_type
+          season_type
         })
       }
     } else {
@@ -565,15 +568,19 @@ const import_games_for_season = async ({
  * Import plays from all sources for a single week
  */
 const import_plays_for_week = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   ignore_cache,
   dry,
   collector,
   skip_sources = []
 }) => {
-  collector.start_stage(`play_imports_week_${week}`, { year, week, seas_type })
+  collector.start_stage(`play_imports_week_${week}`, {
+    season_year,
+    week,
+    season_type
+  })
 
   // 1. NFL v1 (base structure)
   if (
@@ -581,18 +588,18 @@ const import_plays_for_week = async ({
   ) {
     try {
       await import_plays_nfl_v1({
-        year,
+        season_year,
         week,
-        seas_type,
+        season_type,
         ignore_cache,
         collector
       })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_plays_nfl_v1',
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -607,18 +614,18 @@ const import_plays_for_week = async ({
   ) {
     try {
       await import_plays_nfl_pro({
-        year,
+        season_year,
         week,
-        seas_type,
+        season_type,
         ignore_cache,
         collector
       })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_plays_nfl_pro',
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -639,18 +646,18 @@ const import_plays_for_week = async ({
   ) {
     try {
       await import_plays_sportradar({
-        year,
+        season_year,
         week,
-        seas_type,
+        season_type,
         ignore_cache,
         collector
       })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_plays_sportradar',
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
     }
   } else {
@@ -668,12 +675,12 @@ const import_plays_for_week = async ({
  * once and not reloaded between weeks.
  */
 const import_nflverse_plays_for_season = async ({
-  year,
+  season_year,
   ignore_cache,
   collector,
   skip_sources = []
 }) => {
-  collector.start_stage('nflverse_play_imports', { year })
+  collector.start_stage('nflverse_play_imports', { season_year })
 
   // 1. nflfastR (EPA, WPA, probability metrics) - full season CSV
   if (
@@ -683,17 +690,17 @@ const import_nflverse_plays_for_season = async ({
       skip_sources
     })
   ) {
-    log(`Importing nflfastr plays for entire ${year} season`)
+    log(`Importing nflfastr plays for entire ${season_year} season`)
     try {
       await import_plays_nflfastr({
-        year,
+        season_year,
         force_download: ignore_cache,
         collector
       })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_plays_nflfastr',
-        year
+        season_year
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -706,17 +713,17 @@ const import_nflverse_plays_for_season = async ({
   if (
     should_run_source({ stage_name: 'plays', source_name: 'ftn', skip_sources })
   ) {
-    log(`Importing FTN charting data for entire ${year} season`)
+    log(`Importing FTN charting data for entire ${season_year} season`)
     try {
       await import_plays_nflfastr_ftn({
-        year,
+        season_year,
         force_download: ignore_cache,
         collector
       })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_plays_nflfastr_ftn',
-        year
+        season_year
       })
     }
   } else {
@@ -730,26 +737,32 @@ const import_nflverse_plays_for_season = async ({
  * Process plays for a single week (enrichment)
  */
 const process_plays_for_week = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   dry,
   collector
 }) => {
   collector.start_stage(`play_processing_week_${week}`, {
-    year,
+    season_year,
     week,
-    seas_type
+    season_type
   })
 
   try {
-    await process_plays({ year, week, seas_type, dry_run: dry, collector })
+    await process_plays({
+      season_year,
+      week,
+      season_type,
+      dry_run: dry,
+      collector
+    })
   } catch (error) {
     collector.add_error(error, {
       script: 'process_plays',
-      year,
+      season_year,
       week,
-      seas_type
+      season_type
     })
   }
 
@@ -760,33 +773,33 @@ const process_plays_for_week = async ({
  * Generate player gamelogs for a single week
  */
 const generate_gamelogs_for_week = async ({
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   dry,
   collector,
   skip_sources = []
 }) => {
   collector.start_stage(`gamelog_generation_week_${week}`, {
-    year,
+    season_year,
     week,
-    seas_type
+    season_type
   })
 
   try {
     await generate_player_gamelogs({
-      year,
+      season_year,
       week,
-      seas_type,
+      season_type,
       dry_run: dry,
       collector
     })
   } catch (error) {
     collector.add_error(error, {
       script: 'generate_player_gamelogs',
-      year,
+      season_year,
       week,
-      seas_type
+      season_type
     })
   }
 
@@ -801,13 +814,13 @@ const generate_gamelogs_for_week = async ({
   ) {
     await wait(DELAYS.BETWEEN_SCRIPTS)
     try {
-      await import_gamelogs_ngs({ year, week, seas_type, collector })
+      await import_gamelogs_ngs({ season_year, week, season_type, collector })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_gamelogs_ngs',
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
     }
   } else if (import_gamelogs_ngs) {
@@ -821,16 +834,16 @@ const generate_gamelogs_for_week = async ({
   // it is a no-op when the routes were already present at generation time.
   if (!dry) {
     try {
-      const route_share_result = await recompute_route_share({ year })
+      const route_share_result = await recompute_route_share({ season_year })
       log(
         `recomputed route_share for ${route_share_result.updated} of ${route_share_result.candidates} candidate rows`
       )
     } catch (error) {
       collector.add_error(error, {
         script: 'recompute_route_share',
-        year,
+        season_year,
         week,
-        seas_type
+        season_type
       })
     }
   }
@@ -841,18 +854,18 @@ const generate_gamelogs_for_week = async ({
 /**
  * Run aggregation scripts (seasonlogs, careerlogs)
  */
-const run_aggregation = async ({ year, seas_types, dry, collector }) => {
-  collector.start_stage('aggregation', { year, seas_types })
+const run_aggregation = async ({ season_year, seas_types, dry, collector }) => {
+  collector.start_stage('aggregation', { season_year, seas_types })
 
   // Process player seasonlogs for each season type
-  for (const seas_type of seas_types) {
+  for (const season_type of seas_types) {
     try {
-      await process_player_seasonlogs({ year, seas_type, collector })
+      await process_player_seasonlogs({ season_year, season_type, collector })
     } catch (error) {
       collector.add_error(error, {
         script: 'process_player_seasonlogs',
-        year,
-        seas_type
+        season_year,
+        season_type
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -865,12 +878,12 @@ const run_aggregation = async ({ year, seas_types, dry, collector }) => {
  * Run advanced stats imports (PFF, Football Outsiders, ESPN)
  */
 const run_advanced_stats = async ({
-  year,
+  season_year,
   ignore_cache,
   collector,
   skip_sources = []
 }) => {
-  collector.start_stage('advanced_stats', { year })
+  collector.start_stage('advanced_stats', { season_year })
 
   // ESPN Receiving Tracking Metrics (public)
   if (
@@ -885,7 +898,7 @@ const run_advanced_stats = async ({
     } catch (error) {
       collector.add_error(error, {
         script: 'import_espn_receiving_tracking_metrics',
-        year
+        season_year
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
@@ -903,9 +916,9 @@ const run_advanced_stats = async ({
     })
   ) {
     try {
-      await import_pff_grades({ year, collector })
+      await import_pff_grades({ season_year, collector })
     } catch (error) {
-      collector.add_error(error, { script: 'import_pff_grades', year })
+      collector.add_error(error, { script: 'import_pff_grades', season_year })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
   } else if (import_pff_grades) {
@@ -922,9 +935,12 @@ const run_advanced_stats = async ({
     })
   ) {
     try {
-      await import_pff_seasonlogs({ year, collector })
+      await import_pff_seasonlogs({ season_year, collector })
     } catch (error) {
-      collector.add_error(error, { script: 'import_pff_seasonlogs', year })
+      collector.add_error(error, {
+        script: 'import_pff_seasonlogs',
+        season_year
+      })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
   }
@@ -939,9 +955,16 @@ const run_advanced_stats = async ({
     })
   ) {
     try {
-      await import_pff_team_grades({ year, include_weeks: true, collector })
+      await import_pff_team_grades({
+        season_year,
+        include_weeks: true,
+        collector
+      })
     } catch (error) {
-      collector.add_error(error, { script: 'import_pff_team_grades', year })
+      collector.add_error(error, {
+        script: 'import_pff_team_grades',
+        season_year
+      })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
   }
@@ -955,9 +978,9 @@ const run_advanced_stats = async ({
     })
   ) {
     try {
-      await import_dvoa_sheets({ year, seas_type: 'REG', collector })
+      await import_dvoa_sheets({ season_year, season_type: 'REG', collector })
     } catch (error) {
-      collector.add_error(error, { script: 'import_dvoa_sheets', year })
+      collector.add_error(error, { script: 'import_dvoa_sheets', season_year })
     }
   } else {
     log(`Skipping advanced.dvoa (in skip list)`)
@@ -969,13 +992,13 @@ const run_advanced_stats = async ({
 /**
  * Run validation against PFR
  */
-const run_validation = async ({ year, ignore_cache, collector }) => {
-  collector.start_stage('validation', { year })
+const run_validation = async ({ season_year, ignore_cache, collector }) => {
+  collector.start_stage('validation', { season_year })
 
   try {
-    await audit_player_gamelogs({ year, ignore_cache, collector })
+    await audit_player_gamelogs({ season_year, ignore_cache, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'audit_player_gamelogs', year })
+    collector.add_error(error, { script: 'audit_player_gamelogs', season_year })
   }
 
   collector.end_stage()
@@ -984,8 +1007,8 @@ const run_validation = async ({ year, ignore_cache, collector }) => {
 /**
  * Run data exports
  */
-const run_exports = async ({ year, collector }) => {
-  collector.start_stage('exports', { year })
+const run_exports = async ({ season_year, collector }) => {
+  collector.start_stage('exports', { season_year })
 
   const data_dir = path.resolve(__dirname, '..', 'data')
   if (!fs.existsSync(data_dir)) {
@@ -995,46 +1018,55 @@ const run_exports = async ({ year, collector }) => {
   }
 
   try {
-    await export_data_nfl_plays({ year, collector })
+    await export_data_nfl_plays({ season_year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_nfl_plays', year })
+    collector.add_error(error, { script: 'export_data_nfl_plays', season_year })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_nfl_games({ year, collector })
+    await export_data_nfl_games({ season_year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_nfl_games', year })
+    collector.add_error(error, { script: 'export_data_nfl_games', season_year })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_player_gamelogs({ year, collector })
+    await export_data_player_gamelogs({ season_year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_player_gamelogs', year })
+    collector.add_error(error, {
+      script: 'export_data_player_gamelogs',
+      season_year
+    })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_league_matchups({ year, collector })
+    await export_data_league_matchups({ season_year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_league_matchups', year })
+    collector.add_error(error, {
+      script: 'export_data_league_matchups',
+      season_year
+    })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_league_playoffs({ year, collector })
+    await export_data_league_playoffs({ season_year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_league_playoffs', year })
+    collector.add_error(error, {
+      script: 'export_data_league_playoffs',
+      season_year
+    })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_league_team_seasonlogs({ year, collector })
+    await export_data_league_team_seasonlogs({ season_year, collector })
   } catch (error) {
     collector.add_error(error, {
       script: 'export_data_league_team_seasonlogs',
-      year
+      season_year
     })
   }
 
@@ -1045,10 +1077,10 @@ const run_exports = async ({ year, collector }) => {
  * Main import pipeline
  */
 const import_full_season = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   dry = false,
   ignore_cache = false,
-  seas_type = null,
+  season_type = null,
   start_week = null,
   end_week = null,
   start_stage = null,
@@ -1059,14 +1091,14 @@ const import_full_season = async ({
   // Validate stage configuration
   validate_stage_config({ start_stage, end_stage, skip_stages })
 
-  const collector = create_import_collector(year)
+  const collector = create_import_collector(season_year)
 
   // Build stage config for helper functions
   const stage_config = { start_stage, end_stage, skip_stages }
 
-  log(`Starting full season import for ${year}`)
+  log(`Starting full season import for ${season_year}`)
   log(
-    `Options: dry=${dry}, ignore_cache=${ignore_cache}, seas_type=${seas_type || 'ALL'}`
+    `Options: dry=${dry}, ignore_cache=${ignore_cache}, season_type=${season_type || 'ALL'}`
   )
 
   // Log active stages
@@ -1083,12 +1115,12 @@ const import_full_season = async ({
   }
 
   // Determine which season types to process
-  const seas_types = seas_type ? [seas_type] : ['PRE', 'REG', 'POST']
+  const seas_types = season_type ? [season_type] : ['PRE', 'REG', 'POST']
 
   // Players stage: Import player data (IDs, teams) before games/plays
   if (should_run_stage({ stage_name: 'players', ...stage_config })) {
     log('=== Players: Player Imports ===')
-    await run_players({ year, ignore_cache, collector })
+    await run_players({ season_year, ignore_cache, collector })
     await wait(DELAYS.BETWEEN_STAGES)
   } else {
     log('=== Players: Player Imports (SKIPPED) ===')
@@ -1099,8 +1131,8 @@ const import_full_season = async ({
     log('=== Games: Game Imports ===')
     for (const st of seas_types) {
       await import_games_for_season({
-        year,
-        seas_type: st,
+        season_year,
+        season_type: st,
         ignore_cache,
         dry,
         collector,
@@ -1116,7 +1148,7 @@ const import_full_season = async ({
   if (should_run_stage({ stage_name: 'rosters', ...stage_config })) {
     log('=== Rosters: Gameday Roster Imports ===')
     for (const st of seas_types) {
-      await run_rosters({ year, seas_type: st, collector })
+      await run_rosters({ season_year, season_type: st, collector })
       await wait(DELAYS.BETWEEN_STAGES)
     }
   } else {
@@ -1140,14 +1172,14 @@ const import_full_season = async ({
       const weeks = get_season_weeks(st, start_week, end_week)
 
       for (const week of weeks) {
-        log(`Processing ${year} ${st} Week ${week}`)
+        log(`Processing ${season_year} ${st} Week ${week}`)
 
         // Import plays for week
         if (run_plays) {
           await import_plays_for_week({
-            year,
+            season_year,
             week,
-            seas_type: st,
+            season_type: st,
             ignore_cache,
             dry,
             collector,
@@ -1159,9 +1191,9 @@ const import_full_season = async ({
         // Process plays for week
         if (run_processing) {
           await process_plays_for_week({
-            year,
+            season_year,
             week,
-            seas_type: st,
+            season_type: st,
             dry,
             collector
           })
@@ -1171,9 +1203,9 @@ const import_full_season = async ({
         // Generate gamelogs for week
         if (run_gamelogs) {
           await generate_gamelogs_for_week({
-            year,
+            season_year,
             week,
-            seas_type: st,
+            season_type: st,
             dry,
             collector,
             skip_sources
@@ -1189,7 +1221,7 @@ const import_full_season = async ({
     if (run_plays) {
       log('=== nflverse Full-Season Play Imports (nflfastr, ftn) ===')
       await import_nflverse_plays_for_season({
-        year,
+        season_year,
         ignore_cache,
         collector,
         skip_sources
@@ -1207,25 +1239,25 @@ const import_full_season = async ({
         log('=== Charting Data Imports (players, plays, matchup stats) ===')
         try {
           // 1. Establish player ID mappings
-          await import_players_charting({ year, collector })
+          await import_players_charting({ season_year, collector })
           await wait(DELAYS.BETWEEN_SCRIPTS)
 
           // 2. Import charting play-by-play data
-          await import_plays_charting({ year, collector })
+          await import_plays_charting({ season_year, collector })
           await wait(DELAYS.BETWEEN_SCRIPTS)
 
           // 3. Import matchup stats. The import skips games that already have
           // matchup rows, so a re-run of a season costs nothing; --ignore-cache
           // is what asks for those games to be fetched again.
           await import_matchup_stats_charting({
-            year,
+            season_year,
             collector,
             force: ignore_cache
           })
         } catch (error) {
           collector.add_error(error, {
             script: 'charting_data_imports',
-            year
+            season_year
           })
         }
         await wait(DELAYS.BETWEEN_STAGES)
@@ -1237,7 +1269,7 @@ const import_full_season = async ({
     // Backfill null gsis_player_id on play_stats before aggregation
     if (run_processing) {
       log('=== gsis_player_id Backfill ===')
-      await backfill_play_stats_gsisid({ year, dry_run: dry })
+      await backfill_play_stats_gsisid({ season_year, dry_run: dry })
       await wait(DELAYS.BETWEEN_STAGES)
     }
   } else {
@@ -1247,7 +1279,7 @@ const import_full_season = async ({
   // Stage 5: Aggregation (once at end)
   if (should_run_stage({ stage_name: 'aggregation', ...stage_config })) {
     log('=== Stage 5: Aggregation ===')
-    await run_aggregation({ year, seas_types, dry, collector })
+    await run_aggregation({ season_year, seas_types, dry, collector })
     await wait(DELAYS.BETWEEN_STAGES)
   } else {
     log('=== Stage 5: Aggregation (SKIPPED) ===')
@@ -1256,7 +1288,12 @@ const import_full_season = async ({
   // Stage 6: Advanced Stats
   if (should_run_stage({ stage_name: 'advanced', ...stage_config })) {
     log('=== Stage 6: Advanced Stats ===')
-    await run_advanced_stats({ year, ignore_cache, collector, skip_sources })
+    await run_advanced_stats({
+      season_year,
+      ignore_cache,
+      collector,
+      skip_sources
+    })
     await wait(DELAYS.BETWEEN_STAGES)
   } else {
     log('=== Stage 6: Advanced Stats (SKIPPED) ===')
@@ -1265,7 +1302,7 @@ const import_full_season = async ({
   // Stage 7: Validation
   if (should_run_stage({ stage_name: 'validation', ...stage_config })) {
     log('=== Stage 7: Validation ===')
-    await run_validation({ year, ignore_cache, collector })
+    await run_validation({ season_year, ignore_cache, collector })
     await wait(DELAYS.BETWEEN_STAGES)
   } else {
     log('=== Stage 7: Validation (SKIPPED) ===')
@@ -1274,7 +1311,7 @@ const import_full_season = async ({
   // Stage 8: Exports
   if (should_run_stage({ stage_name: 'exports', ...stage_config })) {
     log('=== Stage 8: Exports ===')
-    await run_exports({ year, collector })
+    await run_exports({ season_year, collector })
   } else {
     log('=== Stage 8: Exports (SKIPPED) ===')
   }
@@ -1348,10 +1385,10 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     await import_full_season({
-      year: argv.year,
+      season_year: argv.year,
       dry: argv.dry,
       ignore_cache: argv['ignore-cache'],
-      seas_type: argv['seas-type'],
+      season_type: argv['seas-type'],
       start_week: argv['start-week'],
       end_week: argv['end-week'],
       start_stage: argv['start-stage'],

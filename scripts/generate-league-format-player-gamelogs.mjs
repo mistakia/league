@@ -19,7 +19,7 @@ enable_debug_namespaces('generate-league-format-player-gamelogs')
 
 const generate_league_format_player_gamelogs = async ({
   league_format_id,
-  year = current_season.year,
+  season_year = current_season.year,
   week = current_season.week,
   dry = false
 } = {}) => {
@@ -31,7 +31,7 @@ const generate_league_format_player_gamelogs = async ({
 
   const result = await calculate_points_added({
     league: league_format,
-    year,
+    season_year,
     week
   })
   const inserts = []
@@ -71,13 +71,13 @@ const generate_league_format_player_gamelogs = async ({
         'nfl_games.esbid'
       )
       .where('nfl_games.week', week)
-      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_year', season_year)
       .where('nfl_games.season_type', 'REG')
       .where('league_format_player_gamelogs.league_format_id', league_format_id)
       .whereNotIn('league_format_player_gamelogs.pid', pids)
       .del()
     log(
-      `Deleted ${deleted_count} excess player gamelogs for league_format ${league_format_id} in week ${week} ${year}`
+      `Deleted ${deleted_count} excess player gamelogs for league_format ${league_format_id} in week ${week} ${season_year}`
     )
 
     await db('league_format_player_gamelogs')
@@ -85,7 +85,7 @@ const generate_league_format_player_gamelogs = async ({
       .onConflict(['pid', 'esbid', 'league_format_id'])
       .merge()
     log(
-      `Updated ${inserts.length} player gamelogs for league_format ${league_format_id} in week ${week} ${year}`
+      `Updated ${inserts.length} player gamelogs for league_format ${league_format_id} in week ${week} ${season_year}`
     )
   }
 }
@@ -107,19 +107,19 @@ const main = async () => {
       argv,
       script_name: 'generate-league-format-player-gamelogs',
       script_function: generate_league_format_player_gamelogs,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-          .select('nfl_games.season_year as year')
-          .where('nfl_games.season_type', seas_type)
+          .select('nfl_games.season_year')
+          .where('nfl_games.season_type', season_type)
           .groupBy('nfl_games.season_year')
           .orderBy('nfl_games.season_year', 'asc'),
-      week_query: ({ year, seas_type = 'REG' }) =>
+      week_query: ({ season_year, season_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
-          .where('nfl_games.season_type', seas_type)
-          .where('nfl_games.season_year', year)
+          .where('nfl_games.season_type', season_type)
+          .where('nfl_games.season_year', season_year)
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc'),
       script_args: { league_format_id, dry: argv.dry }

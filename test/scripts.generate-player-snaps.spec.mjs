@@ -167,9 +167,9 @@ describe('SCRIPTS generate-player-snaps', function () {
 
   const run = () =>
     generate_player_snaps_for_week({
-      year: season_year,
+      season_year,
       week,
-      seas_type: season_type,
+      season_type,
       dry_run: false
     })
 

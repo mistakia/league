@@ -30,7 +30,7 @@ enable_debug_namespaces(
 const import_fanduel_salaries = async ({
   dry_run = false,
   ignore_cache = false,
-  year
+  season_year
 } = {}) => {
   // get slates
   const fanduel_slate_data = await fanduel.get_dfs_fixtures({ ignore_cache })
@@ -54,7 +54,7 @@ const import_fanduel_salaries = async ({
   log(`Found ${filtered_fanduel_slates.length} fanduel slates of interest`)
 
   const nfl_games = await db('nfl_games').where({
-    season_year: year
+    season_year
   })
 
   await wait(10000)
@@ -257,7 +257,7 @@ const main = async () => {
       argv,
       script_name: 'import-fanduel-salaries',
       script_function: import_fanduel_salaries,
-      year_query: async () => [{ year: current_season.year }],
+      year_query: async () => [{ season_year: current_season.year }],
       script_args: { dry_run, ignore_cache },
       season_only: true
     })

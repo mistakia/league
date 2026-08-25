@@ -77,7 +77,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
       unique_esbids: [esbid],
       player_gamelog_inserts: produced.map((pid) => ({ esbid, pid })),
       unseparable_by_esbid,
-      year: season_year,
+      season_year,
       dry_run: false
     })
 

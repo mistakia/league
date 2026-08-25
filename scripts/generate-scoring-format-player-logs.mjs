@@ -34,36 +34,36 @@ const main = async () => {
       log('Generating all logs for scoring format', scoring_format_id)
       const results = await db('player_gamelogs')
         .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-        .select('nfl_games.season_year as year')
+        .select('nfl_games.season_year')
         .where('nfl_games.season_type', 'REG')
         .groupBy('nfl_games.season_year')
         .orderBy('nfl_games.season_year', 'asc')
 
-      let years = results.map((r) => r.year)
+      let years = results.map((r) => r.season_year)
       if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
+        years = years.filter((season_year) => season_year >= argv.start)
       }
 
-      for (const year of years) {
+      for (const season_year of years) {
         log(
-          `Generating all logs for scoring format ${scoring_format_id} for year ${year}`
+          `Generating all logs for scoring format ${scoring_format_id} for year ${season_year}`
         )
         const weeks = await db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
           .where('nfl_games.season_type', 'REG')
-          .where('nfl_games.season_year', year)
+          .where('nfl_games.season_year', season_year)
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc')
         for (const { week } of weeks) {
           await generate_scoring_format_player_gamelogs({
-            year,
+            season_year,
             week,
             scoring_format_id
           })
         }
         await generate_scoring_format_player_seasonlogs({
-          year,
+          season_year,
           scoring_format_id
         })
       }
@@ -82,24 +82,24 @@ const main = async () => {
         .orderBy('nfl_games.week', 'asc')
       for (const { week } of weeks) {
         await generate_scoring_format_player_gamelogs({
-          year: argv.year,
+          season_year: argv.year,
           week,
           scoring_format_id
         })
       }
       await generate_scoring_format_player_seasonlogs({
-        year: argv.year,
+        season_year: argv.year,
         scoring_format_id
       })
       await generate_scoring_format_player_careerlogs({ scoring_format_id })
     } else if (argv.week) {
       await generate_scoring_format_player_gamelogs({
-        year: argv.year,
+        season_year: argv.year,
         week: argv.week,
         scoring_format_id
       })
       await generate_scoring_format_player_seasonlogs({
-        year: argv.year,
+        season_year: argv.year,
         scoring_format_id
       })
       await generate_scoring_format_player_careerlogs({ scoring_format_id })

@@ -29,19 +29,19 @@ const create_quarter_snap_sets = () => ({
 })
 
 const generate_player_snaps_for_week = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   week = current_season.nfl_seas_week,
-  seas_type = current_season.nfl_seas_type,
+  season_type = current_season.nfl_seas_type,
   dry_run = false
 }) => {
   log(
-    `generating player snaps for week ${week} year ${year} seas_type ${seas_type} (dry_run: ${dry_run})`
+    `generating player snaps for week ${week} season_year ${season_year} season_type ${season_type} (dry_run: ${dry_run})`
   )
   const player_snap_inserts = []
 
   const nfl_game_rows = await db('nfl_games')
     .select('esbid')
-    .where({ week, season_year: year, season_type: seas_type })
+    .where({ week, season_year, season_type })
   const esbids = nfl_game_rows.map((i) => i.esbid)
 
   const gamelogs = await db('player_gamelogs')
@@ -53,9 +53,9 @@ const generate_player_snaps_for_week = async ({
     )
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_year', season_year)
     .where('nfl_games.week', week)
-    .where('nfl_games.season_type', seas_type)
+    .where('nfl_games.season_type', season_type)
 
   await db.raw('SET statement_timeout = 0')
 
@@ -357,7 +357,7 @@ const generate_player_snaps_for_week = async ({
       esbid,
       pid: player_row.pid,
       is_active: true,
-      season_year: year,
+      season_year,
       opponent_nfl_team,
       player_position,
       snaps_offense,
@@ -515,29 +515,29 @@ const main = async () => {
       argv,
       script_name: 'generate-player-snaps',
       script_function: generate_player_snaps_for_week,
-      year_query: ({ seas_type = 'REG' }) => {
+      year_query: ({ season_type = 'REG' }) => {
         const query = db('nfl_games')
-          .select('season_year as year')
+          .select('season_year')
           .groupBy('season_year')
           .orderBy('season_year', 'asc')
-        if (seas_type !== 'ALL') {
-          query.where({ season_type: seas_type })
+        if (season_type !== 'ALL') {
+          query.where({ season_type })
         }
         return query
       },
-      week_query: ({ year, seas_type = 'REG' }) => {
+      week_query: ({ season_year, season_type = 'REG' }) => {
         const query = db('nfl_games')
           .select('week')
-          .where({ season_year: year })
+          .where({ season_year })
           .groupBy('week')
           .orderBy('week', 'asc')
-        if (seas_type !== 'ALL') {
-          query.where({ season_type: seas_type })
+        if (season_type !== 'ALL') {
+          query.where({ season_type })
         }
         return query
       },
       script_args: { dry_run: argv.dry },
-      seas_type: argv.seas_type || 'ALL'
+      season_type: argv.season_type || 'ALL'
     })
   } catch (err) {
     error = err

@@ -18,7 +18,7 @@ const log = debug('generate-league-player-seasonlogs')
 enable_debug_namespaces('generate-league-player-seasonlogs')
 
 const generate_league_player_seasonlogs = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   lid,
   league_format_id
 }) => {
@@ -30,9 +30,9 @@ const generate_league_player_seasonlogs = async ({
     throw new Error('league_format_id required')
   }
 
-  log(`generating player seasonlogs for leagueId ${lid} in ${year}`)
+  log(`generating player seasonlogs for leagueId ${lid} in ${season_year}`)
 
-  const season_dates = await generateSeasonDates({ year })
+  const season_dates = await generateSeasonDates({ season_year })
 
   // get league player gamelogs for season
   const gamelogs = await db('league_format_player_gamelogs')
@@ -40,7 +40,7 @@ const generate_league_player_seasonlogs = async ({
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
     .where({
-      'nfl_games.season_year': year,
+      'nfl_games.season_year': season_year,
       'nfl_games.season_type': 'REG',
       'league_format_player_gamelogs.league_format_id': league_format_id
     })
@@ -55,14 +55,14 @@ const generate_league_player_seasonlogs = async ({
     const rosters_start = await db('rosters_players')
       .where('lid', lid)
       .where('pid', pid)
-      .where('season_year', year)
+      .where('season_year', season_year)
       .where('week', 0)
     const start_tid = rosters_start.length ? rosters_start[0].tid : null
 
     let salary = null
     if (start_tid) {
       const salary_query = await db('transactions')
-        .where({ lid, pid, season_year: year, week: 0, tid: start_tid })
+        .where({ lid, pid, season_year, week: 0, tid: start_tid })
         .orderBy('occurred_at', 'desc')
         .limit(1)
 
@@ -73,7 +73,7 @@ const generate_league_player_seasonlogs = async ({
     const rosters_end = await db('rosters_players')
       .where('lid', lid)
       .where('pid', pid)
-      .where('season_year', year)
+      .where('season_year', season_year)
       .where('week', season_dates.finalWeek)
     const end_tid = rosters_end.length ? rosters_end[0].tid : null
 
@@ -84,7 +84,7 @@ const generate_league_player_seasonlogs = async ({
         lid,
         pid,
         tid: start_tid,
-        year
+        season_year
       })
 
       if (acquisition_transaction) {
@@ -99,7 +99,7 @@ const generate_league_player_seasonlogs = async ({
         lid,
         pid,
         tid: end_tid,
-        year,
+        season_year,
         week: season_dates.finalWeek
       })
 
@@ -111,7 +111,7 @@ const generate_league_player_seasonlogs = async ({
     // process / create inserts
     inserts.push({
       pid,
-      season_year: year,
+      season_year,
       lid,
       salary,
       start_tid,
@@ -125,7 +125,7 @@ const generate_league_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_player_seasonlogs')
-      .where({ lid, season_year: year })
+      .where({ lid, season_year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -151,15 +151,15 @@ const main = async () => {
       script_name: 'generate-league-player-seasonlogs',
       script_function: generate_league_player_seasonlogs,
       season_only: true,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('league_format_player_gamelogs')
           .join(
             'nfl_games',
             'nfl_games.esbid',
             'league_format_player_gamelogs.esbid'
           )
-          .select('nfl_games.season_year as year')
-          .where('nfl_games.season_type', seas_type)
+          .select('nfl_games.season_year')
+          .where('nfl_games.season_type', season_type)
           .where(
             'league_format_player_gamelogs.league_format_id',
             league_format_id

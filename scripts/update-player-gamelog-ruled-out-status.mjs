@@ -113,10 +113,10 @@ const get_following_wednesday_timestamp = (game_timestamp) => {
  * @param {string} params.seas_type - Season type (PRE, REG, POST)
  * @returns {Promise<NflGamesRow[]>} Array of game objects
  */
-const load_games = async ({ year, week, seas_type }) => {
+const load_games = async ({ season_year, week, season_type }) => {
   const query = db('nfl_games')
     .select('esbid', 'kickoff_at', 'week', 'home_nfl_team', 'away_nfl_team')
-    .where({ season_year: year, season_type: seas_type })
+    .where({ season_year, season_type })
     .whereNotNull('kickoff_at')
 
   if (week) {
@@ -126,7 +126,7 @@ const load_games = async ({ year, week, seas_type }) => {
   const games = await query.orderBy('week', 'asc')
 
   log(
-    `Loaded ${games.length} games for ${year} ${seas_type} ${week ? `week ${week}` : 'all weeks'}`
+    `Loaded ${games.length} games for ${season_year} ${season_type} ${week ? `week ${week}` : 'all weeks'}`
   )
 
   return games
@@ -329,9 +329,9 @@ const apply_updates = async (updates, dry_run) => {
 // ----------------------------
 
 const run = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   week = null,
-  seas_type = 'REG',
+  season_type = 'REG',
   dry_run = false
 } = {}) => {
   // Default to target week when no week specified
@@ -340,11 +340,11 @@ const run = async ({
   }
 
   log(
-    `Starting ruled out status detection for ${year} ${seas_type} week ${week} (dry_run: ${dry_run})`
+    `Starting ruled out status detection for ${season_year} ${season_type} week ${week} (dry_run: ${dry_run})`
   )
 
   // Load games
-  const games = await load_games({ year, week, seas_type })
+  const games = await load_games({ season_year, week, season_type })
 
   if (!games.length) {
     log('No games found')
@@ -440,19 +440,19 @@ const main = async () => {
         dry_run: argv.dry
       },
       default_week: get_target_week(), // Default to target week
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('nfl_games')
-          .select('season_year as year')
-          .where({ season_type: seas_type })
+          .select('season_year')
+          .where({ season_type })
           .groupBy('season_year')
           .orderBy('season_year', 'asc'),
-      week_query: ({ year, seas_type = 'REG' }) =>
+      week_query: ({ season_year, season_type = 'REG' }) =>
         db('nfl_games')
           .select('week')
-          .where({ season_year: year, season_type: seas_type })
+          .where({ season_year, season_type })
           .groupBy('week')
           .orderBy('week', 'asc'),
-      seas_type: argv.seas_type || 'REG'
+      season_type: argv.season_type || 'REG'
     })
 
     if (!argv.dry) {

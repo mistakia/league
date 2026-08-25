@@ -3,34 +3,43 @@ import { current_season } from '#constants'
 
 const log = debug('handle-season-args-for-script')
 
+// The callbacks below are handed `season_year` and `season_type`, matching the
+// physical nfl_games columns. `week` keeps its bare name because no column was
+// ever renamed to season_week. `argv.*` and `current_season.*` are the CLI and
+// constants namespaces and keep their own spellings; this helper is the
+// boundary that translates between them.
 export default async function handle_season_args_for_script({
   argv,
   script_name,
   script_function,
   year_query,
-  default_year = current_season.year,
+  default_season_year = current_season.year,
   default_week = current_season.week,
   script_args = {},
   week_query = null,
   post_year_function = null,
   post_all_function = null,
-  seas_type = 'REG',
+  season_type = 'REG',
   season_only = false
 }) {
-  const process_year_week = async ({ year, week, current_seas_type }) => {
+  const process_year_week = async ({
+    season_year,
+    week,
+    current_season_type
+  }) => {
     await script_function({
-      year,
+      season_year,
       week,
-      seas_type: current_seas_type,
+      season_type: current_season_type,
       ...script_args
     })
   }
 
-  const process_year = async ({ year, current_seas_type }) => {
-    if (current_seas_type === 'ALL') {
+  const process_year = async ({ season_year, current_season_type }) => {
+    if (current_season_type === 'ALL') {
       // Process all season types
       for (const type of ['PRE', 'REG', 'POST']) {
-        await process_year({ year, current_seas_type: type })
+        await process_year({ season_year, current_season_type: type })
       }
       return
     }
@@ -38,8 +47,8 @@ export default async function handle_season_args_for_script({
     if (season_only) {
       // For season-only scripts, call the script function once per year
       await script_function({
-        year,
-        seas_type: current_seas_type,
+        season_year,
+        season_type: current_season_type,
         ...script_args
       })
     } else {
@@ -48,75 +57,85 @@ export default async function handle_season_args_for_script({
         throw new Error('week_query is required')
       }
 
-      const weeks = await week_query({ year, seas_type: current_seas_type })
+      const weeks = await week_query({
+        season_year,
+        season_type: current_season_type
+      })
       for (const { week } of weeks) {
         await process_year_week({
-          year,
+          season_year,
           week,
-          current_seas_type
+          current_season_type
         })
       }
     }
 
     if (post_year_function) {
       await post_year_function({
-        year,
-        seas_type: current_seas_type,
+        season_year,
+        season_type: current_season_type,
         ...script_args
       })
     }
   }
 
   if (argv.all) {
-    const results = await year_query({ seas_type })
+    const results = await year_query({ season_type })
 
-    let years = results.map((r) => r.year)
+    let season_years = results.map((r) => r.season_year)
     if (argv.start) {
-      years = years.filter((year) => year >= argv.start)
+      season_years = season_years.filter(
+        (season_year) => season_year >= argv.start
+      )
     }
     if (argv.end) {
-      years = years.filter((year) => year <= argv.end)
+      season_years = season_years.filter(
+        (season_year) => season_year <= argv.end
+      )
     }
 
-    log(`${script_name}: processing ${years.length} years`)
+    log(`${script_name}: processing ${season_years.length} years`)
 
-    for (const year of years) {
-      if (seas_type === 'ALL') {
+    for (const season_year of season_years) {
+      if (season_type === 'ALL') {
         for (const type of ['PRE', 'REG', 'POST']) {
-          await process_year({ year, current_seas_type: type })
+          await process_year({ season_year, current_season_type: type })
         }
       } else {
-        await process_year({ year, current_seas_type: seas_type })
+        await process_year({ season_year, current_season_type: season_type })
       }
     }
   } else if (argv.year && argv.week) {
     await process_year_week({
-      year: argv.year,
+      season_year: argv.year,
       week: argv.week,
-      current_seas_type: seas_type
+      current_season_type: season_type
     })
   } else if (argv.year) {
-    await process_year({ year: argv.year, current_seas_type: seas_type })
+    await process_year({
+      season_year: argv.year,
+      current_season_type: season_type
+    })
   } else if (argv.week) {
     if (season_only) {
       // For season-only scripts, ignore week and process the year
       await script_function({
-        year: default_year,
-        seas_type,
+        season_year: default_season_year,
+        season_type,
         ...script_args
       })
     } else {
       await process_year_week({
-        year: default_year,
+        season_year: default_season_year,
         week: argv.week,
-        current_seas_type: seas_type
+        current_season_type: season_type
       })
     }
 
     if (post_year_function) {
       await post_year_function({
-        year: default_year,
-        seas_type,
+        season_year: default_season_year,
+        season_type,
         ...script_args
       })
     }
@@ -124,22 +143,22 @@ export default async function handle_season_args_for_script({
     if (season_only) {
       // For season-only scripts, process the default year
       await script_function({
-        year: default_year,
-        seas_type,
+        season_year: default_season_year,
+        season_type,
         ...script_args
       })
     } else {
       await process_year_week({
-        year: default_year,
+        season_year: default_season_year,
         week: default_week,
-        current_seas_type: seas_type
+        current_season_type: season_type
       })
     }
 
     if (post_year_function) {
       await post_year_function({
-        year: default_year,
-        seas_type,
+        season_year: default_season_year,
+        season_type,
         ...script_args
       })
     }

@@ -17,7 +17,7 @@ const log = debug('generate-league-format-player-seasonlogs')
 enable_debug_namespaces('generate-league-format-player-seasonlogs')
 
 const generate_league_format_player_seasonlogs = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   league_format_id,
   dry = false
 }) => {
@@ -25,7 +25,7 @@ const generate_league_format_player_seasonlogs = async ({
     throw new Error('league_format_id required')
   }
   log(
-    `generating player seasonlogs for league_format ${league_format_id} in ${year}`
+    `generating player seasonlogs for league_format ${league_format_id} in ${season_year}`
   )
   const league_format = await db('league_formats')
     .where({ id: league_format_id })
@@ -41,7 +41,7 @@ const generate_league_format_player_seasonlogs = async ({
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
     .where({
-      'nfl_games.season_year': year,
+      'nfl_games.season_year': season_year,
       'nfl_games.season_type': 'REG',
       'league_format_player_gamelogs.league_format_id': league_format_id
     })
@@ -65,7 +65,7 @@ const generate_league_format_player_seasonlogs = async ({
     // process / create inserts
     inserts.push({
       pid,
-      season_year: year,
+      season_year,
       league_format_id,
       pos,
       points_added_earned,
@@ -152,7 +152,7 @@ const generate_league_format_player_seasonlogs = async ({
   // the caller legitimately has no gamelogs for stays quiet.
   if (gamelogs.length && !inserts.length) {
     throw new Error(
-      `league_format ${league_format_id} ${year}: loaded ${gamelogs.length} gamelogs and produced 0 seasonlogs`
+      `league_format ${league_format_id} ${season_year}: loaded ${gamelogs.length} gamelogs and produced 0 seasonlogs`
     )
   }
 
@@ -176,12 +176,12 @@ const generate_league_format_player_seasonlogs = async ({
   for (const [column, priced_count] of Object.entries(priced_counts)) {
     if (pricing_model === 'auction' && inserts.length && !priced_count) {
       throw new Error(
-        `league_format ${league_format_id} ${year}: pricing_model is auction but 0 of ${inserts.length} seasonlogs carry ${column}`
+        `league_format ${league_format_id} ${season_year}: pricing_model is auction but 0 of ${inserts.length} seasonlogs carry ${column}`
       )
     }
     if (pricing_model !== 'auction' && priced_count) {
       throw new Error(
-        `league_format ${league_format_id} ${year}: pricing_model is ${pricing_model} but ${priced_count} seasonlogs carry ${column}`
+        `league_format ${league_format_id} ${season_year}: pricing_model is ${pricing_model} but ${priced_count} seasonlogs carry ${column}`
       )
     }
   }
@@ -207,7 +207,7 @@ const generate_league_format_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_format_player_seasonlogs')
-      .where({ league_format_id, season_year: year })
+      .where({ league_format_id, season_year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -237,15 +237,15 @@ const main = async () => {
       argv,
       script_name: 'generate-league-format-player-seasonlogs',
       script_function: generate_league_format_player_seasonlogs,
-      year_query: ({ seas_type = 'REG' }) =>
+      year_query: ({ season_type = 'REG' }) =>
         db('league_format_player_gamelogs')
           .join(
             'nfl_games',
             'nfl_games.esbid',
             'league_format_player_gamelogs.esbid'
           )
-          .select('nfl_games.season_year as year')
-          .where('nfl_games.season_type', seas_type)
+          .select('nfl_games.season_year')
+          .where('nfl_games.season_type', season_type)
           .where(
             'league_format_player_gamelogs.league_format_id',
             league_format_id
