@@ -1806,11 +1806,20 @@ CREATE TABLE public.control_parent_default (
     }
   }
 
-  console.log('NEGATIVE CONTROL')
-  for (const note of notes) console.log(`  note            ${note}`)
+  // STDERR, not stdout, and unconditionally. The control is ALWAYS-ON, so it
+  // cannot be suppressed under `--json` the way the corpus block is: a `--json`
+  // run that hid this block would hide a STAYED GREEN with it, which is the one
+  // direction a control must never fail. But it printed to stdout ahead of the
+  // JSON payload, so `--json` never parsed -- the whole flag was dead. stderr
+  // satisfies both: stdout under `--json` carries the payload and nothing else,
+  // and the block still reaches a terminal on every run. The cluster runner
+  // reads `stdout + stderr` concatenated, so its BLIND and STAYED GREEN rules
+  // are unaffected by which stream this lands on.
+  console.error('NEGATIVE CONTROL')
+  for (const note of notes) console.error(`  note            ${note}`)
   const failures = []
   for (const [label, passed] of cases) {
-    console.log(`  ${passed ? 'RED as expected' : 'STAYED GREEN'}  ${label}`)
+    console.error(`  ${passed ? 'RED as expected' : 'STAYED GREEN'}  ${label}`)
     if (!passed) failures.push(label)
   }
   return failures
@@ -1892,7 +1901,7 @@ const main = () => {
   }
 
   const control_failures = run_negative_control({ current_tables })
-  console.log('')
+  console.error('')
 
   const lost_columns = derive_lost_columns({
     base_tables: parse_schema(base_sql),
