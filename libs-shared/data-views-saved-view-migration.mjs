@@ -966,6 +966,151 @@ export const migrate_plays_view_table_state = (table_state) => {
   return migrate_column_entries_and_params(table_state)
 }
 
+// The three surfaces that persist a table_state, and the whole vocabulary the
+// registry below may name. They differ in ONE property that decides everything
+// else: whether a stored state can be rewritten.
+//
+//   saved_view     user_data_views / user_plays_views rows. Rewritable by
+//                  scripts/migrate-data-views-saved.mjs, which is idempotent.
+//   local_storage  browser snapshots, versioned. Rewritten on read, so drained
+//                  once every browser holding one has loaded the app again.
+//   short_url      somebody's bookmark, chat message or email. IMMUTABLE.
+export const RENAME_SURFACES = ['saved_view', 'local_storage', 'short_url']
+
+// The surfaces migrate_table_state serves. It is the saved-view read path AND
+// the v1_to_v2 step of the localStorage chain (libs-shared/data-view-storage/
+// migrations.mjs), so it applies anything declared on either.
+const PERSISTED_SURFACES = ['saved_view', 'local_storage']
+
+const reaches_surface = (declaration, surfaces) =>
+  declaration.surfaces.some((surface) => surfaces.includes(surface))
+
+// THE declared registry for renames of a top-level `table_state` key, and of
+// the VALUES inside one. Keyed by the key the state carries TODAY, so a rename
+// is one edit under one key and every consumer derives from it: this module's
+// saved-view read path, the localStorage chain that calls it, the URL parser's
+// LEGACY_URL_PARAM_ALIASES, scripts/migrate-data-views-saved.mjs (which calls
+// migrate_table_state), and both coverage gates.
+//
+// This class had no declared home until now, and it is the class the June 2026
+// incident belongs to. `splits` -> `row_axes` was written out three separate
+// times, in three unrelated files, so a rename had to be REMEMBERED three
+// times. The URL one was forgotten and 188 of 682 production data-view URLs
+// rendered at the wrong grain for six weeks.
+//
+// `surfaces` is the whole of the retirement answer, and it is deliberately not
+// paired with a `permanent` boolean that could disagree with it. A legacy name
+// is permanent exactly when `short_url` is in its set, because a shared link
+// cannot be rewritten by any read-time rule. Everything else drains: a
+// saved_view name once the one-shot migration has run, a local_storage name
+// once every browser has loaded once.
+//
+// A surface is listed only when a legacy name can actually REACH it, which is
+// why the two entries below differ. Both the URL alias set and the wiring in
+// this file derive from these lists, so an entry that stops naming a surface
+// stops being wired to it, and test/data-views.table-state-renames.spec.mjs
+// fails rather than the surface going quietly uncovered.
+export const TABLE_STATE_RENAMES = {
+  row_axes: {
+    legacy_keys: {
+      splits: {
+        surfaces: ['saved_view', 'local_storage', 'short_url'],
+        note:
+          'Renamed by cabf950de (June 2026). PERMANENT. The rename shipped a ' +
+          'compat rule only on the localStorage path, so 188 of 682 production ' +
+          'data-view URLs silently rendered at the wrong grain for six weeks ' +
+          'and three sorted on the lost axis and produced unexecutable SQL for ' +
+          'real users; repaired reactively in 924dfe328. A shared link carrying ' +
+          '?splits= cannot be rewritten, so this entry can never be retired.'
+      }
+    },
+    // No value of `row_axes` has ever been renamed, and the slot is declared
+    // empty rather than omitted because this is a live pending case rather than
+    // a hypothetical one: the `year` axis is adjudicated migrate-tracked in
+    // db/gates/rename-alias-residue-adjudications.json, and that adjudication's
+    // reason names the URL parse boundary as the consumer that fixes it.
+    //
+    // Neither param-coverage gate can ever see a value rename. Both walk KEYS
+    // (Object.keys(node.params) and parsed.searchParams.keys()), so both report
+    // GATE OK across one whether or not a rule exists. This registry and its
+    // coverage spec are the only oracle the class has.
+    //
+    // An entry takes the same shape as a legacy key plus its target:
+    //   year: { to: 'season_year', surfaces: [...], note: '...' }
+    legacy_values: {}
+  },
+  row_grain: {
+    legacy_keys: {
+      subjects: {
+        surfaces: ['saved_view', 'local_storage'],
+        note:
+          'Renamed by 1a446a90b. NOT a short-URL surface, and that omission is ' +
+          'measured rather than forgotten: the ?subjects= fallback shipped in ' +
+          'e1cf78e71 and was removed four commits later by 4d7d9a5e4 on the ' +
+          'finding that subjects never shipped publicly, so no share link can ' +
+          'carry it. RETIRABLE once user_data_views and user_plays_views have ' +
+          'been drained by scripts/migrate-data-views-saved.mjs and no browser ' +
+          'holds a pre-v2 snapshot.'
+      }
+    },
+    legacy_values: {}
+  }
+}
+
+// The legacy top-level keys a short URL can carry, mapped to the key that
+// replaced them. Derived, so the URL surface cannot be forgotten by a rename
+// that lands in the registry, and cannot drift from it either.
+export const SHORT_URL_KEY_ALIASES = Object.fromEntries(
+  Object.entries(TABLE_STATE_RENAMES).flatMap(([current_key, entry]) =>
+    Object.entries(entry.legacy_keys)
+      .filter(([, declaration]) => declaration.surfaces.includes('short_url'))
+      .map(([legacy_key]) => [legacy_key, current_key])
+  )
+)
+
+// A legacy name is permanent exactly when a short URL can carry it. Derived
+// rather than declared, per the note on TABLE_STATE_RENAMES.
+export const is_permanent_legacy_name = (declaration) =>
+  declaration.surfaces.includes('short_url')
+
+// Rewrites the VALUES of every top-level key the registry declares values for,
+// on a table_state whose legacy KEYS have already been resolved. The array
+// shape is preserved and an unrecognised value is left alone, since it is one
+// of the values the rename does not touch.
+//
+// `registry` is injectable for exactly one reason: every declared value map is
+// empty today, so against the real registry this function is a no-op and a spec
+// over it would assert nothing at all. The coverage spec passes a synthetic
+// registry to prove the mechanism rewrites, and asserts separately that the
+// real one changes nothing. That pair is what makes an empty mechanism verified
+// rather than merely unexercised.
+export const apply_table_state_value_renames = (
+  table_state,
+  { surfaces, registry = TABLE_STATE_RENAMES } = {}
+) => {
+  let next = table_state
+  let changed = false
+
+  for (const [current_key, entry] of Object.entries(registry)) {
+    const raw = next[current_key]
+    if (!Array.isArray(raw)) continue
+
+    const mapped = raw.map((value) => {
+      const declaration = entry.legacy_values?.[value]
+      if (!declaration) return value
+      if (surfaces && !reaches_surface(declaration, surfaces)) return value
+      return declaration.to
+    })
+
+    if (mapped.some((value, index) => value !== raw[index])) {
+      next = { ...next, [current_key]: mapped }
+      changed = true
+    }
+  }
+
+  return { table_state: next, changed }
+}
+
 export const migrate_table_state = (table_state) => {
   if (!table_state || typeof table_state !== 'object') {
     return { changed: false, table_state }
@@ -974,29 +1119,32 @@ export const migrate_table_state = (table_state) => {
     migrate_column_entries_and_params(table_state)
   let changed = entries_changed
 
-  if (Object.prototype.hasOwnProperty.call(next, 'splits')) {
-    const legacy = next.splits
-    delete next.splits
-    if (
-      !Array.isArray(next.row_axes) &&
-      Array.isArray(legacy) &&
-      legacy.length > 0
-    ) {
-      next.row_axes = legacy
+  // The legacy key is always dropped, and its value is adopted only when the
+  // current key holds no array at all. A current key that is present but empty
+  // is a deliberate empty state and outranks the legacy copy.
+  for (const [current_key, entry] of Object.entries(TABLE_STATE_RENAMES)) {
+    for (const [legacy_key, declaration] of Object.entries(entry.legacy_keys)) {
+      if (!reaches_surface(declaration, PERSISTED_SURFACES)) continue
+      if (!Object.prototype.hasOwnProperty.call(next, legacy_key)) continue
+
+      const legacy = next[legacy_key]
+      delete next[legacy_key]
+      if (
+        !Array.isArray(next[current_key]) &&
+        Array.isArray(legacy) &&
+        legacy.length > 0
+      ) {
+        next[current_key] = legacy
+      }
+      changed = true
     }
-    changed = true
   }
 
-  if (Object.prototype.hasOwnProperty.call(next, 'subjects')) {
-    const legacy = next.subjects
-    delete next.subjects
-    if (
-      !Array.isArray(next.row_grain) &&
-      Array.isArray(legacy) &&
-      legacy.length > 0
-    ) {
-      next.row_grain = legacy
-    }
+  const values_result = apply_table_state_value_renames(next, {
+    surfaces: PERSISTED_SURFACES
+  })
+  if (values_result.changed) {
+    Object.assign(next, values_result.table_state)
     changed = true
   }
 
