@@ -570,9 +570,9 @@ const importPlaysForWeek = async ({
           try {
             await finalize_game({
               esbid: game.esbid,
-              year,
+              season_year: year,
               week,
-              seas_type
+              season_type: seas_type
             })
             log(`Game finalization completed for esbid: ${game.esbid}`)
           } catch (finalize_err) {

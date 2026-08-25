@@ -210,7 +210,7 @@ const process_team_line_yards = async (worksheet, { dry_run, observed_at }) => {
 
 const process_team_run_pass_week = async (
   worksheet,
-  { dry_run, observed_at, year }
+  { dry_run, observed_at, season_year }
 ) => {
   log(`Processing teamRunPassWeek worksheet`)
 
@@ -242,7 +242,7 @@ const process_team_run_pass_week = async (
             nfl_team,
             week,
             observed_at,
-            season_year: year
+            season_year
           }
 
           if (current_category === 'PASSING OFFENSE') {
@@ -677,7 +677,7 @@ const process_team_down_play = async (worksheet, { dry_run, observed_at }) => {
 
 const process_week_by_week = async (
   worksheet,
-  { dry_run, observed_at, year }
+  { dry_run, observed_at, season_year }
 ) => {
   log(`Processing Week by Week worksheet`)
 
@@ -707,7 +707,7 @@ const process_week_by_week = async (
           const entry = {
             nfl_team,
             week,
-            season_year: year,
+            season_year,
             observed_at
           }
 
@@ -1011,14 +1011,14 @@ const get_dvoa_config = async () => {
 const import_dvoa_sheets = async ({
   dry_run = false,
   filepath,
-  year: cli_year,
-  seas_type,
+  season_year: cli_season_year,
+  season_type,
   collector = null
 } = {}) => {
   if (!filepath) {
-    const effective_seas_type = seas_type || current_season.nfl_seas_type
-    if (effective_seas_type !== 'REG') {
-      log(`Skipping import of DVOA sheets for ${effective_seas_type} season`)
+    const effective_season_type = season_type || current_season.nfl_seas_type
+    if (effective_season_type !== 'REG') {
+      log(`Skipping import of DVOA sheets for ${effective_season_type} season`)
       return { skipped: true, observed_at: null }
     }
 
@@ -1029,7 +1029,7 @@ const import_dvoa_sheets = async ({
     }
 
     const current_date = dayjs()
-    const download_year = cli_year || current_date.year()
+    const download_year = cli_season_year || current_date.year()
     const month = current_date.format('MM')
 
     // Get NFL week to determine versioning logic
@@ -1147,12 +1147,13 @@ const import_dvoa_sheets = async ({
   const worksheets = xlsx.parse(filepath)
   log(`loaded ${worksheets.length} worksheets`)
 
-  const year = worksheets.find((ws) => ws.name === 'teamDefvsRec')?.data[1][0]
+  const season_year = worksheets.find((ws) => ws.name === 'teamDefvsRec')
+    ?.data[1][0]
 
-  log(`year: ${year}`)
+  log(`season_year: ${season_year}`)
 
-  if (!year) {
-    throw new Error('year not found')
+  if (!season_year) {
+    throw new Error('season_year not found')
   }
 
   for (const worksheet of worksheets) {
@@ -1179,7 +1180,7 @@ const import_dvoa_sheets = async ({
         await process_team_run_pass_week(worksheet, {
           dry_run,
           observed_at,
-          year
+          season_year
         })
         break
       case 'teamHomeRoad':
@@ -1207,7 +1208,11 @@ const import_dvoa_sheets = async ({
         await process_team_down_play(worksheet, { dry_run, observed_at })
         break
       case 'Week by Week':
-        await process_week_by_week(worksheet, { dry_run, observed_at, year })
+        await process_week_by_week(worksheet, {
+          dry_run,
+          observed_at,
+          season_year
+        })
         break
       case 'PGWE':
         await process_pgwe(worksheet, { dry_run, observed_at })
@@ -1229,7 +1234,7 @@ const import_dvoa_sheets = async ({
     }
   }
 
-  return { skipped: false, observed_at, year }
+  return { skipped: false, observed_at, season_year }
 }
 
 // Per-run floor on rows written to the primary DVOA history table at this
@@ -1246,8 +1251,8 @@ const main = async () => {
     const result = await import_dvoa_sheets({
       filepath: argv.filepath,
       dry_run: argv.dry,
-      year: argv.year,
-      seas_type: argv.seas_type
+      season_year: argv.year,
+      season_type: argv.seas_type
     })
 
     if (result && !result.skipped && !argv.dry) {
@@ -1257,7 +1262,7 @@ const main = async () => {
       const count = Number(row?.cnt || 0)
       throw_if_shortfall(
         count < DVOA_HISTORY_FLOOR_PER_RUN
-          ? `dvoa_team_unit_seasonlogs_history row-count shortfall at observed_at=${result.observed_at} year=${result.year}: ${count} rows (floor=${DVOA_HISTORY_FLOOR_PER_RUN})`
+          ? `dvoa_team_unit_seasonlogs_history row-count shortfall at observed_at=${result.observed_at} season_year=${result.season_year}: ${count} rows (floor=${DVOA_HISTORY_FLOOR_PER_RUN})`
           : null
       )
     }

@@ -114,7 +114,7 @@ const apply_updates = async ({ updates }) => {
  * selector that has stopped matching anything.
  */
 export const recompute_route_share = async ({
-  year = null,
+  season_year = null,
   esbids = null,
   dry_run = false
 } = {}) => {
@@ -129,8 +129,8 @@ export const recompute_route_share = async ({
       })
       .whereNotNull('rg.routes')
 
-    if (year) {
-      query.where('rg.season_year', year)
+    if (season_year) {
+      query.where('rg.season_year', season_year)
     }
 
     if (esbids && esbids.length) {

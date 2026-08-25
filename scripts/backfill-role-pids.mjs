@@ -34,16 +34,20 @@ const ROLE_COLS = [
 
 const norm = (v) => (v === undefined ? null : v)
 
-const backfill_week = async ({ year, week, seas_type, dry_run }) => {
-  const completed = await get_completed_games({ year, week, seas_type })
+const backfill_week = async ({ season_year, week, season_type, dry_run }) => {
+  const completed = await get_completed_games({
+    season_year,
+    week,
+    season_type
+  })
   if (!completed.length) return { plays: 0, updates: 0 }
 
-  const play_stats = await get_play_stats({ year, week, seas_type })
+  const play_stats = await get_play_stats({ season_year, week, season_type })
   const filtered = play_stats.filter((s) => completed.includes(s.esbid))
 
   const plays = await db('nfl_plays')
     .select('*')
-    .where({ season_year: year, week, season_type: seas_type })
+    .where({ season_year, week, season_type })
     .whereIn('esbid', completed)
 
   // This script passed no snap roster until 2026-08-04, so it silently ran
@@ -88,7 +92,7 @@ const backfill_week = async ({ year, week, seas_type, dry_run }) => {
   }
 
   log(
-    `${year} ${seas_type} wk ${week}: ${updates.length}/${plays.length} plays ${dry_run ? 'WOULD update' : 'updated'}`
+    `${season_year} ${season_type} wk ${week}: ${updates.length}/${plays.length} plays ${dry_run ? 'WOULD update' : 'updated'}`
   )
   return { plays: plays.length, updates: updates.length }
 }
@@ -118,11 +122,11 @@ const main = async () => {
 
   let total_plays = 0
   let total_updates = 0
-  for (const { season_year: year, season_type: seas_type, week } of rows) {
+  for (const { season_year, season_type, week } of rows) {
     const { plays, updates } = await backfill_week({
-      year,
+      season_year,
       week,
-      seas_type,
+      season_type,
       dry_run
     })
     total_plays += plays

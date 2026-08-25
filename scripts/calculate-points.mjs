@@ -45,7 +45,7 @@ const BIG_PLAY_ROLES = {
   }
 }
 
-const load_big_play_yards = async ({ league, year, week }) => {
+const load_big_play_yards = async ({ league, season_year, week }) => {
   const rules = Array.isArray(league.bonuses) ? league.bonuses : []
   const stats_needed = [
     ...new Set(
@@ -72,7 +72,7 @@ const load_big_play_yards = async ({ league, year, week }) => {
         db.raw(`array_agg(nfl_plays.${yards_column}) as yards`)
       )
       .join('nfl_games', 'nfl_games.esbid', 'nfl_plays.esbid')
-      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_year', season_year)
       .where('nfl_games.season_type', 'REG')
       .whereIn('nfl_plays.play_type', stat_countable_play_types)
       .whereNotNull(`nfl_plays.${pid_column}`)
@@ -97,13 +97,13 @@ const load_big_play_yards = async ({ league, year, week }) => {
 }
 
 const calculate_points = async ({
-  year,
+  season_year,
   lid,
   scoring_format_id,
   week = 'ALL'
 }) => {
-  if (!Number.isInteger(year)) {
-    throw new Error(`${year} invalid year`)
+  if (!Number.isInteger(season_year)) {
+    throw new Error(`${season_year} invalid season_year`)
   }
 
   let league
@@ -120,9 +120,9 @@ const calculate_points = async ({
     throw new Error(`${lid} or ${scoring_format_id} is missing or invalid`)
   }
 
-  log(`calculating Points for ${year}`)
+  log(`calculating Points for ${season_year}`)
 
-  // get player stats for year
+  // get player stats for season_year
   const query = db('player_gamelogs')
     .select(
       'player_gamelogs.*',
@@ -133,7 +133,7 @@ const calculate_points = async ({
       'nfl_games.week'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_year', season_year)
     .where('nfl_games.season_type', 'REG')
     .whereIn('player.primary_position', fantasy_positions)
     .join('player', 'player_gamelogs.pid', 'player.pid')
@@ -143,7 +143,11 @@ const calculate_points = async ({
   }
 
   const rows = await query
-  const big_play_yards = await load_big_play_yards({ league, year, week })
+  const big_play_yards = await load_big_play_yards({
+    league,
+    season_year,
+    week
+  })
   const weeks = [...new Set(rows.map((r) => r.week))]
   const grouped_by_pid = groupBy(rows, 'pid')
 
@@ -202,7 +206,7 @@ const calculate_points = async ({
   for (const player of players) {
     output[player.pid] = {
       player: player.short_name,
-      rookie: player.nfl_draft_year === year,
+      rookie: player.nfl_draft_year === season_year,
       position_rank:
         points_by_position[player.primary_position].indexOf(
           player.total_points
@@ -220,7 +224,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const result = await calculate_points({
-      year: argv.year,
+      season_year: argv.year,
       lid: argv.lid,
       scoring_format_id: argv.scoring_format_id,
       week: argv.week

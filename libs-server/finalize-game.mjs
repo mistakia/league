@@ -35,27 +35,29 @@ enable_debug_namespaces('finalize-game')
  *
  * @param {object} params
  * @param {string} params.esbid - Game identifier
- * @param {number} params.year - Season year
+ * @param {number} params.season_year - Season year
  * @param {number} params.week - Week number
- * @param {string} params.seas_type - Season type (PRE, REG, POST)
+ * @param {string} params.season_type - Season type (PRE, REG, POST)
  * @param {boolean} params.update_aggregates - If true, also update seasonlogs and careerlogs (default: false)
  * @returns {Promise<object>} - Processing results
  */
 export const finalize_game = async ({
   esbid,
-  year,
+  season_year,
   week,
-  seas_type,
+  season_type,
   update_aggregates = false
 }) => {
   const start_time = Date.now()
-  log(`Starting game finalization for esbid: ${esbid}, ${year} week ${week}`)
+  log(
+    `Starting game finalization for esbid: ${esbid}, ${season_year} week ${week}`
+  )
 
   const results = {
     esbid,
-    year,
+    season_year,
     week,
-    seas_type,
+    season_type,
     steps_completed: [],
     steps_failed: []
   }
@@ -67,8 +69,13 @@ export const finalize_game = async ({
     logger: log,
     fn: () =>
       Promise.all([
-        import_nfl_games_nfl({ year, week, seas_type, ignore_cache: true }),
-        import_nfl_games_ngs({ year })
+        import_nfl_games_nfl({
+          year: season_year,
+          week,
+          seas_type: season_type,
+          ignore_cache: true
+        }),
+        import_nfl_games_ngs({ year: season_year })
       ])
   })
 
@@ -77,7 +84,7 @@ export const finalize_game = async ({
     name: 'process_plays',
     results,
     logger: log,
-    fn: () => process_plays({ year, week, seas_type, esbid })
+    fn: () => process_plays({ season_year, week, season_type, esbid })
   })
 
   // Step 3: Generate base player gamelogs
@@ -85,7 +92,8 @@ export const finalize_game = async ({
     name: 'generate_gamelogs',
     results,
     logger: log,
-    fn: () => generate_player_gamelogs({ year, week, seas_type, esbid })
+    fn: () =>
+      generate_player_gamelogs({ season_year, week, season_type, esbid })
   })
 
   // Step 4: Process scoring and league format gamelogs
@@ -101,7 +109,7 @@ export const finalize_game = async ({
     name: 'generate_snaps',
     results,
     logger: log,
-    fn: () => generate_player_snaps_for_week({ year, week, seas_type })
+    fn: () => generate_player_snaps_for_week({ season_year, week, season_type })
   })
 
   // Step 6: Process market results
@@ -109,7 +117,13 @@ export const finalize_game = async ({
     name: 'process_markets',
     results,
     logger: log,
-    fn: () => process_market_results({ year, week, seas_type, esbids: [esbid] })
+    fn: () =>
+      process_market_results({
+        year: season_year,
+        week,
+        seas_type: season_type,
+        esbids: [esbid]
+      })
   })
 
   // Step 7: Update market settlement status
