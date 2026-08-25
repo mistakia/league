@@ -212,28 +212,7 @@
     },
     {
       "caller": "scripts/import-full-season.mjs",
-      "callee": "import_plays_nfl_v1",
-      "key": "season_type",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "import_plays_nfl_v1",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
       "callee": "import_plays_nflfastr_ftn",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "import_plays_nflfastr",
       "key": "season_year",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
