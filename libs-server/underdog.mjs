@@ -9,8 +9,23 @@ const log = debug('underdog')
 let _underdog_session_manager = null
 const load_underdog_session_manager = async () => {
   if (!_underdog_session_manager) {
-    ;({ underdog_session_manager: _underdog_session_manager } =
-      await import('#private/libs-server/underdog/underdog-session-manager.mjs'))
+    try {
+      ;({ underdog_session_manager: _underdog_session_manager } =
+        await import('#private/libs-server/underdog/underdog-session-manager.mjs'))
+    } catch (err) {
+      // Every export in this module needs the session manager, so unlike
+      // resolve-player-match.mjs and import-full-season.mjs there is no degraded
+      // mode to fall back to and this rethrows. It only restates the cause: a
+      // bare ERR_MODULE_NOT_FOUND names the specifier and not the reason it is
+      // missing, which is almost always an uninitialized submodule.
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new Error(
+          'underdog requires the private submodule, which is not checked out. Run `git submodule update --init private`.',
+          { cause: err }
+        )
+      }
+      throw err
+    }
   }
   return _underdog_session_manager
 }
