@@ -12,7 +12,7 @@ const router = express.Router()
  *     NFLGame:
  *       type: object
  *       properties:
- *         year:
+ *         season_year:
  *           type: integer
  *           minimum: 2020
  *           maximum: 2030
@@ -44,7 +44,7 @@ const router = express.Router()
  *           description: Home team abbreviation (NFL team code)
  *           example: "BUF"
  *       required:
- *         - year
+ *         - season_year
  *         - week
  *         - date
  *         - time_eastern
@@ -66,13 +66,13 @@ const router = express.Router()
  *           items:
  *             $ref: '#/components/schemas/NFLGame'
  *           example:
- *             - year: 2024
+ *             - season_year: 2024
  *               week: 1
  *               date: "2024-09-08"
  *               time_eastern: "13:00"
  *               away_nfl_team: "ARI"
  *               home_nfl_team: "BUF"
- *             - year: 2024
+ *             - season_year: 2024
  *               week: 2
  *               date: "2024-09-15"
  *               time_eastern: "16:25"
@@ -90,7 +90,7 @@ const router = express.Router()
  *         ARI:
  *           bye: 11
  *           games:
- *             - year: 2024
+ *             - season_year: 2024
  *               week: 1
  *               date: "2024-09-08"
  *               time_eastern: "13:00"
@@ -99,7 +99,7 @@ const router = express.Router()
  *         KC:
  *           bye: 6
  *           games:
- *             - year: 2024
+ *             - season_year: 2024
  *               week: 1
  *               date: "2024-09-05"
  *               time_eastern: "20:20"
@@ -155,13 +155,13 @@ const router = express.Router()
  *                   ARI:
  *                     bye: 11
  *                     games:
- *                       - year: 2024
+ *                       - season_year: 2024
  *                         week: 1
  *                         date: "2024-09-08"
  *                         time_eastern: "13:00"
  *                         away_nfl_team: "ARI"
  *                         home_nfl_team: "BUF"
- *                       - year: 2024
+ *                       - season_year: 2024
  *                         week: 2
  *                         date: "2024-09-15"
  *                         time_eastern: "16:25"
@@ -170,13 +170,13 @@ const router = express.Router()
  *                   KC:
  *                     bye: 6
  *                     games:
- *                       - year: 2024
+ *                       - season_year: 2024
  *                         week: 1
  *                         date: "2024-09-05"
  *                         time_eastern: "20:20"
  *                         away_nfl_team: "BAL"
  *                         home_nfl_team: "KC"
- *                       - year: 2024
+ *                       - season_year: 2024
  *                         week: 2
  *                         date: "2024-09-12"
  *                         time_eastern: "17:00"
@@ -189,7 +189,7 @@ const router = express.Router()
  *                   TB:
  *                     bye: 11
  *                     games:
- *                       - year: 2024
+ *                       - season_year: 2024
  *                         week: 1
  *                         date: "2024-09-08"
  *                         time_eastern: "13:00"
@@ -210,7 +210,7 @@ router.get('/?', async (req, res) => {
     const teams = {}
     const games = await db('nfl_games')
       .select(
-        'season_year as year',
+        'season_year',
         'week',
         'date',
         'time_eastern',

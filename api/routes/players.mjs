@@ -581,9 +581,9 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
- *                     seas_type: "REG"
+ *                     season_type: "REG"
  *                     timestamp: "2024-01-14T18:00:00Z"
- *                     year: 2024
+ *                     season_year: 2024
  *                     snaps: 65
  *               quarterback_detailed:
  *                 summary: QB game log with passing and rushing stats
@@ -597,9 +597,9 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
- *                     seas_type: "REG"
+ *                     season_type: "REG"
  *                     timestamp: "2024-01-14T18:00:00Z"
- *                     year: 2024
+ *                     season_year: 2024
  *                     snaps: 65
  *                     pa: 35
  *                     pc: 25
@@ -622,9 +622,9 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
- *                     seas_type: "REG"
+ *                     season_type: "REG"
  *                     timestamp: "2024-01-14T18:00:00Z"
- *                     year: 2024
+ *                     season_year: 2024
  *                     snaps: 58
  *                     ra: 22
  *                     ry: 112
@@ -718,7 +718,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       'nfl_games.day',
       'nfl_games.date',
       'nfl_games.week',
-      'nfl_games.season_type as seas_type',
+      'nfl_games.season_type',
       'nfl_games.kickoff_at'
     )
 

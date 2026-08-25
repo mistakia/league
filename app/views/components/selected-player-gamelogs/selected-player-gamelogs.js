@@ -174,7 +174,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
       rows.push(
         <PlayerSelectedRow
           key={`${yearIndex}/${gameIndex}`}
-          className={game.seas_type}
+          className={game.season_type}
           stats={game}
           lead={lead}
           pos={position}

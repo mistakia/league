@@ -146,9 +146,9 @@ const load_nfl_games = async (esbids) => {
   return await db('nfl_games')
     .select(
       'esbid',
-      'season_year as year',
+      'season_year',
       'week',
-      'season_type as seas_type',
+      'season_type',
       'date',
       'home_nfl_team',
       'away_nfl_team',
