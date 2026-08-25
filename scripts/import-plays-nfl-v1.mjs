@@ -116,7 +116,7 @@ const parse_clock_time = (clockTime, quarter) => {
   return time_fields
 }
 
-const getPlayData = ({ play, year, week, seas_type, game }) => {
+const getPlayData = ({ play, season_year, week, season_type, game }) => {
   const play_type_nfl = clean_string(play.playType)
 
   // Parse clock time and calculate time-related fields
@@ -175,8 +175,8 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     yard_line_start: clean_string(play.yardLine),
     is_first_down: play.firstDown,
     is_goal_to_go: play.goalToGo,
-    season_year: year,
-    season_type: seas_type,
+    season_year,
+    season_type,
     week,
     next_play_type: clean_string(play.nextPlayType),
     sequence: play.orderSequence,
@@ -281,9 +281,9 @@ const getPlayStatData = (playStat) => ({
 })
 
 const importPlaysForWeek = async ({
-  year = current_season.year,
+  season_year = current_season.year,
   week = current_season.nfl_seas_week,
-  seas_type = current_season.nfl_seas_type,
+  season_type = current_season.nfl_seas_type,
   ignore_cache = false,
   force_update = false,
   skip_finalization = false,
@@ -298,11 +298,11 @@ const importPlaysForWeek = async ({
   week = week ?? current_season.last_week_with_stats
   const is_current_week =
     !force_update &&
-    year === current_season.year &&
+    season_year === current_season.year &&
     week === current_season.last_week_with_stats
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
+    `importing plays for week ${week} ${season_year} ${season_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
   )
 
   const result = {
@@ -336,9 +336,9 @@ const importPlaysForWeek = async ({
   )
 
   const games = await db('nfl_games').where({
-    season_year: year,
+    season_year,
     week,
-    season_type: seas_type
+    season_type
   })
 
   let skip_count = 0
@@ -401,7 +401,13 @@ const importPlaysForWeek = async ({
     for (const play of data.data.viewer.gameDetail.plays) {
       result.plays_processed++
       const { playId } = play
-      const playData = getPlayData({ play, year, week, seas_type, game })
+      const playData = getPlayData({
+        play,
+        season_year,
+        week,
+        season_type,
+        game
+      })
 
       // Extract timeout team from playStats for TIMEOUT plays
       // Team timeouts have a playStat entry with statId 68 and team attribution
@@ -570,9 +576,9 @@ const importPlaysForWeek = async ({
           try {
             await finalize_game({
               esbid: game.esbid,
-              season_year: year,
+              season_year,
               week,
-              season_type: seas_type
+              season_type
             })
             log(`Game finalization completed for esbid: ${game.esbid}`)
           } catch (finalize_err) {
@@ -646,8 +652,8 @@ const importPlaysForWeek = async ({
 }
 
 const importPlaysForYear = async ({
-  year = current_season.year,
-  seas_type = 'REG',
+  season_year = current_season.year,
+  season_type = 'REG',
   force_update = false,
   ignore_cache = false,
   skip_finalization = true,
@@ -656,7 +662,7 @@ const importPlaysForYear = async ({
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
-    .where({ season_year: year, season_type: seas_type })
+    .where({ season_year, season_type })
     .groupBy('week')
     .orderBy('week', 'asc')
 
@@ -676,13 +682,15 @@ const importPlaysForYear = async ({
     missing_gsisids: 0
   }
 
-  log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
+  log(
+    `processing plays for ${weeks.length} weeks in ${season_year} (${season_type})`
+  )
   for (const { week } of weeks) {
-    log(`loading plays for week: ${week} (${seas_type})`)
+    log(`loading plays for week: ${week} (${season_type})`)
     const week_result = await importPlaysForWeek({
-      year,
+      season_year,
       week,
-      seas_type,
+      season_type,
       force_update,
       ignore_cache,
       skip_finalization,
@@ -706,7 +714,7 @@ const importPlaysForYear = async ({
 const importAllPlays = async ({
   start,
   end,
-  seas_type = 'ALL',
+  season_type = 'ALL',
   force_update,
   ignore_cache = false,
   skip_finalization = true,
@@ -717,23 +725,25 @@ const importAllPlays = async ({
     .groupBy('season_year')
     .orderBy('season_year', 'asc')
 
-  let years = nfl_games_result.map((i) => i.season_year)
+  let season_years = nfl_games_result.map((i) => i.season_year)
   if (start) {
-    years = years.filter((year) => year >= start)
+    season_years = season_years.filter((season_year) => season_year >= start)
   }
   if (end) {
-    years = years.filter((year) => year <= end)
+    season_years = season_years.filter((season_year) => season_year <= end)
   }
 
-  for (const year of years) {
+  for (const season_year of season_years) {
     const token = await nfl.get_session_token_v3()
-    log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
-    const is_seas_type_all = seas_type.toLowerCase() === 'all'
+    log(
+      `loading plays for season_year: ${season_year}, season_type: ${season_type}`
+    )
+    const is_season_type_all = season_type.toLowerCase() === 'all'
 
-    if (is_seas_type_all || seas_type.toLowerCase() === 'pre') {
+    if (is_season_type_all || season_type.toLowerCase() === 'pre') {
       await importPlaysForYear({
-        year,
-        seas_type: 'PRE',
+        season_year,
+        season_type: 'PRE',
         force_update,
         ignore_cache,
         skip_finalization,
@@ -743,10 +753,10 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (is_seas_type_all || seas_type.toLowerCase() === 'reg') {
+    if (is_season_type_all || season_type.toLowerCase() === 'reg') {
       await importPlaysForYear({
-        year,
-        seas_type: 'REG',
+        season_year,
+        season_type: 'REG',
         force_update,
         ignore_cache,
         skip_finalization,
@@ -756,10 +766,10 @@ const importAllPlays = async ({
       await wait(3000)
     }
 
-    if (is_seas_type_all || seas_type.toLowerCase() === 'post') {
+    if (is_season_type_all || season_type.toLowerCase() === 'post') {
       await importPlaysForYear({
-        year,
-        seas_type: 'POST',
+        season_year,
+        season_type: 'POST',
         force_update,
         ignore_cache,
         skip_finalization,
@@ -789,8 +799,8 @@ const main = async () => {
       // imports an unplayed week. Sweeping all weeks is week-agnostic, and
       // already-final games are skipped, so the cost is one cheap pass.
       result = await importPlaysForYear({
-        year: argv.year || current_season.year,
-        seas_type: argv.seas_type,
+        season_year: argv.year || current_season.year,
+        season_type: argv.seas_type,
         ignore_cache: argv.ignore_cache,
         force_update: argv.final,
         skip_finalization: argv.skip_finalization,
@@ -801,7 +811,7 @@ const main = async () => {
       await importAllPlays({
         start: argv.start,
         end: argv.end,
-        seas_type: argv.seas_type,
+        season_type: argv.seas_type,
         ignore_cache: argv.ignore_cache,
         force_update: argv.final,
         skip_finalization: true,
@@ -811,9 +821,9 @@ const main = async () => {
       if (argv.week) {
         // Specific week: allow CLI control
         result = await importPlaysForWeek({
-          year: argv.year,
+          season_year: argv.year,
           week: argv.week,
-          seas_type: argv.seas_type,
+          season_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
           force_update: argv.final,
           skip_finalization: argv.skip_finalization,
@@ -822,8 +832,8 @@ const main = async () => {
       } else {
         // Year backfill: skip finalization by default
         await importPlaysForYear({
-          year: argv.year,
-          seas_type: argv.seas_type,
+          season_year: argv.year,
+          season_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
           force_update: argv.final,
           skip_finalization: true,
@@ -839,7 +849,7 @@ const main = async () => {
         log(`running import count: ${loop_count}`)
         result = await importPlaysForWeek({
           week: argv.week,
-          seas_type: argv.seas_type,
+          season_type: argv.seas_type,
           ignore_cache: true,
           force_update: argv.final,
           skip_finalization: argv.skip_finalization,
@@ -852,7 +862,7 @@ const main = async () => {
       log('start')
       result = await importPlaysForWeek({
         week: argv.week,
-        seas_type: argv.seas_type,
+        season_type: argv.seas_type,
         ignore_cache: true,
         force_update: argv.final,
         skip_finalization: argv.skip_finalization,
@@ -862,7 +872,7 @@ const main = async () => {
     }
     if (result) {
       console.log(
-        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nfl-v1', year: argv.year || 'current', week: argv.week || 'current', ...result })}`
+        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nfl-v1', season_year: argv.year || 'current', week: argv.week || 'current', ...result })}`
       )
     }
     // Cron oracle: when at least one game wasn't skipped, plays_processed
@@ -872,7 +882,7 @@ const main = async () => {
     if (result && !result.all_games_skipped && !dry_run && !argv.live) {
       throw_if_shortfall(
         !result.plays_processed
-          ? `import-plays-nfl-v1: plays_processed=0 across non-skipped games (year=${argv.year || 'current'}, week=${argv.week || 'current'})`
+          ? `import-plays-nfl-v1: plays_processed=0 across non-skipped games (season_year=${argv.year || 'current'}, week=${argv.week || 'current'})`
           : null
       )
     }
