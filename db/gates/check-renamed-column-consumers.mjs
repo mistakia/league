@@ -831,7 +831,13 @@ const main = () => {
   }
   const tables = parse_schema(fs.readFileSync(schema_path, 'utf8'))
 
-  const corpus_roots = [...SERVER_ROOTS, ...SPA_ROOTS]
+  // The SPA roots belong to GATE 2 only -- gate 1 resolves table-qualified
+  // literals in server code and never opens `app`. Declaring them on a
+  // `--gate 1` run, which is how the cluster manifest invokes this gate, would
+  // print `scanned app` over a root this run does not read: the exact
+  // inversion of the defect the corpus block exists to prevent.
+  const corpus_roots =
+    argv.gate === 1 ? [...SERVER_ROOTS] : [...SERVER_ROOTS, ...SPA_ROOTS]
   const corpus_counts = count_files_by_root(corpus_roots, ['.mjs', '.js'])
   const corpus = resolve_corpus({
     roots: corpus_roots,

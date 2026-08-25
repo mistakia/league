@@ -584,9 +584,9 @@ const run_scan = (tables, { source_override } = {}) => {
  * additionally contribute at least one STATEMENT, and one that does not must
  * contribute exactly zero.
  *
- * `unread` carries the roots the corpus resolved as absent or empty, and those
- * are EXCLUDED here rather than failed. The two conditions are different
- * defects and want different verdicts: a root that is not on disk at all --
+ * `unread` carries the roots that are ABSENT OR EMPTY ON DISK, and those are
+ * excluded here rather than failed. The two conditions are different defects
+ * and want different verdicts: a root that is not on disk at all --
  * `private`, an uninitialized submodule, on every CI runner -- narrows what
  * this run can claim, which the CORPUS block states and `verdict_suffix`
  * carries into the verdict line. A root that IS on disk and still contributes
@@ -594,12 +594,30 @@ const run_scan = (tables, { source_override } = {}) => {
  * Collapsing the two would turn every CI run red on a condition CI is
  * configured for.
  *
+ * `unread` must therefore be resolved from the FILESYSTEM, never from this
+ * run's own file counts. Deriving it from counts is what the first version of
+ * this wiring did, and it silently disabled both branches below: a
+ * zero-file root lands in the counts-derived missing set by construction, so
+ * every root that could fail was skipped before it was tested. Nothing in the
+ * output changed -- the gate kept printing GATE OK, and the path-depth
+ * regression the paragraph above exists to catch went back to exiting 0.
+ * Control 11 drives this distinction on the live path.
+ *
+ * Every root being unread is NOT a narrowed verdict, it is the path-depth
+ * failure itself, so it fails rather than qualifying.
+ *
  * @param {object} by_root per-root { files, statements, resolved } counts
- * @param {string[]} [unread] roots the corpus reports as never read
+ * @param {string[]} [unread] roots absent or empty ON DISK
  * @returns {string[]}
  */
 const evaluate_root_coverage = (by_root, unread = []) => {
   const failures = []
+  const roots = Object.keys(ROOT_EXPECTATIONS)
+  if (roots.every((root) => unread.includes(root)))
+    failures.push(
+      'no declared root is readable at all -- the scan is not reaching the ' +
+        'repository (check the repo root this file resolves)'
+    )
   for (const [root, expectation] of Object.entries(ROOT_EXPECTATIONS)) {
     if (unread.includes(root)) continue
     const counts = by_root[root]
@@ -625,6 +643,22 @@ const evaluate_root_coverage = (by_root, unread = []) => {
   }
   return failures
 }
+
+/**
+ * The ONLY source of the coverage verdict's exclusion set, resolved from the
+ * filesystem and deliberately taking no counts.
+ *
+ * It is a named function with exactly two callers -- `main` and control 11 --
+ * so that rewiring it to this run's file counts, which is the mistake that
+ * silently disabled the whole assertion once, fails the control rather than
+ * passing quietly. A control that reached for `resolve_corpus` itself would
+ * pin the module's behavior instead of this gate's choice, and stay green over
+ * exactly that rewiring.
+ *
+ * @returns {string[]} declared roots that are absent or empty on disk
+ */
+const coverage_exclusions = () =>
+  resolve_corpus({ roots: SERVER_ROOTS, repo_root }).missing
 
 // ---------------------------------------------------------------------------
 // adjudication
@@ -1012,24 +1046,59 @@ const run_negative_controls = (tables) => {
       passed
     })
 
-    // 11. The UNREAD split, both directions on the same darkened input. A root
-    //    the corpus never read must be excluded from the coverage verdict --
-    //    it is reported by the CORPUS block and carried into the verdict line
-    //    instead -- while the identical counts for a root that WAS read must
-    //    still fail. Without this pair, passing `unread` could silently
-    //    suppress every coverage failure and the run would look healthier than
-    //    it is, which is the direction this gate's own header warns about.
-    const absent = { ...healthy }
-    delete absent[first_querying_root]
-    const excluded =
-      evaluate_root_coverage(absent, [first_querying_root]).length === 0
-    const still_reported_when_read =
-      evaluate_root_coverage(absent, []).length === 1
-    const unread_passed = excluded && still_reported_when_read
+    // 11. WHERE `unread` COMES FROM, driven on the live filesystem rather than
+    //    on a hand-built argument. This is the control that would have caught
+    //    the first version of this wiring, which derived `unread` from this
+    //    run's own file COUNTS: a zero-count root lands in the counts-derived
+    //    missing set by construction, so it was skipped before it could be
+    //    tested and both file-count failures went dead with no output change.
+    //
+    //    The two resolutions must DISAGREE for a root that is on disk but read
+    //    nothing, and the coverage verdict must follow the on-disk one. A
+    //    control asserting only the exclusion would stay green over exactly
+    //    that collapse.
+    const zeroed = {
+      ...healthy,
+      [first_querying_root]: { files: 0, statements: 0, resolved: 0 }
+    }
+    const zero_count = new Map([[first_querying_root, 0]])
+    const counts_view = resolve_corpus({
+      roots: [first_querying_root],
+      repo_root,
+      counts: zero_count
+    })
+    // Read through the SAME function main uses, not resolve_corpus directly,
+    // so a rewiring of the exclusion set fails this control.
+    const exclusions = coverage_exclusions()
+
+    // The root is on disk -- this gate is running out of it -- so the two
+    // views must differ, and the coverage verdict must follow the disk.
+    const views_disagree =
+      counts_view.missing.includes(first_querying_root) &&
+      !exclusions.includes(first_querying_root)
+    const reports_a_present_root_that_read_nothing = evaluate_root_coverage(
+      zeroed,
+      exclusions
+    ).some((failure) =>
+      failure.startsWith(`${first_querying_root} contributed no files`)
+    )
+    const excludes_an_absent_root =
+      evaluate_root_coverage(zeroed, [first_querying_root]).length === 0
+    // Every root unread is the path-depth failure, not a narrowed verdict.
+    const fails_when_nothing_is_readable = evaluate_root_coverage(
+      healthy,
+      Object.keys(ROOT_EXPECTATIONS)
+    ).some((failure) => failure.startsWith('no declared root is readable'))
+
+    const unread_passed =
+      views_disagree &&
+      reports_a_present_root_that_read_nothing &&
+      excludes_an_absent_root &&
+      fails_when_nothing_is_readable
     controls.push({
-      name: 'an UNREAD root is excluded from the coverage verdict, and the same root is reported when it was read',
+      name: 'unread is resolved from the FILESYSTEM: a present root that read nothing still fails, an absent one only narrows, and an all-unread corpus fails',
       result: unread_passed ? 'WENT RED' : 'STAYED GREEN',
-      detail: `synthetic -- ${first_querying_root} unread`,
+      detail: `live -- ${first_querying_root} on disk, zero files read`,
       passed: unread_passed
     })
   }
@@ -1065,8 +1134,17 @@ const main = () => {
   const controls = run_negative_controls(tables)
   const failed_controls = controls.filter((control) => !control.passed)
 
-  // The file counts are what this run actually READ, so they outrank any
-  // filesystem probe: a root that yielded no file cannot produce a finding.
+  // TWO resolutions, because this gate asks two different questions of the
+  // same roots and one answer cannot serve both.
+  //
+  // The REPORTED corpus is counts-driven: what this run actually read is
+  // authoritative about what it could have gone red on, which is exactly what
+  // the CORPUS block and the verdict suffix claim.
+  //
+  // The COVERAGE verdict needs the other question -- is the root on disk at
+  // all -- so it resolves WITHOUT counts and lets readdirSync draw the line.
+  // Feeding it the counts-derived set makes its input identical to its own
+  // failure condition, which disables it silently; see evaluate_root_coverage.
   const files_by_root = new Map(
     SERVER_ROOTS.map((root) => [root, stats.by_root[root]?.files ?? 0])
   )
@@ -1077,7 +1155,7 @@ const main = () => {
   })
   const coverage_failures = evaluate_root_coverage(
     stats.by_root,
-    corpus.missing
+    coverage_exclusions()
   )
 
   if (options.json) {

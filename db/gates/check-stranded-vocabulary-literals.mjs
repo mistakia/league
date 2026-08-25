@@ -1091,10 +1091,19 @@ const main = () => {
 
   // The verdict line, stated rather than left to the exit code, so a run over a
   // partly-read corpus says so where a reader will see it.
-  if (!findings.length && !failed_controls.length)
+  //
+  // Under `--gate 2` the knex half never runs, so there is no code corpus to
+  // qualify against and `verdict_suffix` would return an empty string over a
+  // run that read zero JS -- an unqualified GATE OK meaning something narrower
+  // than the same words mean on a full run. Name the half instead.
+  if (!findings.length && !failed_controls.length) {
+    const scope = run_knex_half
+      ? verdict_suffix(corpus)
+      : ' (gate 2 only -- the knex half did not run, so no JS was read)'
     console.log(
-      `\nGATE OK -- no literal is stranded against its column's vocabulary${verdict_suffix(corpus)}`
+      `\nGATE OK -- no literal is stranded against its column's vocabulary${scope}`
     )
+  }
 
   return findings.length || failed_controls.length ? 1 : 0
 }
