@@ -76,9 +76,17 @@ const generate_player_career_game_counts = async () => {
         return a.week - b.week
       })
 
+      // Declared career_year for this (pid, season_year): distinct REG seasons
+      // the player has played before this season, plus one (single definition,
+      // libs-shared/career-year-definition.mjs). Computed once per season so
+      // every seasonlog row of the season -- PRE, REG or POST -- carries the
+      // same value.
+      const season_career_year = career_year_from_distinct_prior_reg_seasons(
+        player_career_years[pid].size
+      )
+
       for (const game of games) {
         player_career_games[pid]++
-        player_career_years[pid].add(game.season_year)
 
         game_updates.push({
           pid: game.pid,
@@ -95,9 +103,16 @@ const generate_player_career_game_counts = async () => {
           season_updates[season_key] = {
             pid: game.pid,
             season_year: game.season_year,
-            career_year: player_career_years[pid].size,
+            career_year: season_career_year,
             season_type: game.season_type
           }
+        }
+
+        // Only a REG game marks this season in the career set; a POST-only or
+        // PRE-only season is not counted, matching the declared definition
+        // (career_year = distinct REG seasons < season_year + 1).
+        if (game.season_type === 'REG') {
+          player_career_years[pid].add(game.season_year)
         }
       }
     }
