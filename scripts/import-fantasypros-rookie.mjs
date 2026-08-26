@@ -60,7 +60,7 @@ const import_individual_fantasypros_rookie_rankings = async ({
     throw new Error('failed to fetch data')
   }
 
-  const inserts = []
+  let inserts = []
   const missing = []
   for (const item of data.players) {
     const params = {
@@ -92,6 +92,28 @@ const import_individual_fantasypros_rookie_rankings = async ({
       ...ranking
     })
   }
+
+  // Collapse duplicate rows within this batch before the insert. The source
+  // (FantasyPros) sometimes lists the same player twice in one response,
+  // resolving both entries to the same pid, and Postgres raises 23505 on a
+  // duplicate conflict target WITHIN a single multi-row INSERT even with
+  // ON CONFLICT DO UPDATE -- the merge only dedupes across commands. Seek by the
+  // same tuple the UNIQUE constraint and the merge use; keep the first entry.
+  const deduped_inserts = []
+  const seen_keys = new Set()
+  for (const insert of inserts) {
+    const key = `${insert.season_year}|${insert.source_id}|${insert.ranking_type}|${insert.pid}`
+    if (!seen_keys.has(key)) {
+      seen_keys.add(key)
+      deduped_inserts.push(insert)
+    }
+  }
+  if (deduped_inserts.length !== inserts.length) {
+    log(
+      `Dropped ${inserts.length - deduped_inserts.length} duplicate row(s) from this batch`
+    )
+  }
+  inserts = deduped_inserts
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) =>
