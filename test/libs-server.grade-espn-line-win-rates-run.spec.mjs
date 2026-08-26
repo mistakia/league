@@ -16,12 +16,21 @@ const SOURCE_URL =
 // Per-category shapes measured from espn_player_win_rates_history on
 // league_production (2026-08-25): PASS_RUSH 38-40, PASS_BLOCK 32-40,
 // RUN_STOP 19-20, RUN_BLOCK 19-20 rows written per run.
-const player_feed = ({ label, fetched, matched = fetched }) => ({
+// `with_rate` tracks FETCHED, not matched: an unmatched row is written with a
+// null pid and carries a win rate like any other, so a feed that matched 38 of
+// 40 still fills 40 rates.
+const player_feed = ({
+  label,
+  fetched,
+  matched = fetched,
+  unmatched = []
+}) => ({
   label,
   fetched,
   matched,
-  with_rate: matched,
-  distinct_rates: Math.min(matched, 12),
+  unmatched,
+  with_rate: fetched,
+  distinct_rates: Math.min(fetched, 12),
   min_rate: 0.19,
   max_rate: 0.85
 })
@@ -101,7 +110,6 @@ describe('LIBS-SERVER summarize_win_rate_feed', function () {
   it('counts fill, distinctness and range off the rows it is handed', () => {
     const summary = summarize_win_rate_feed({
       label: 'run_block',
-      fetched: 20,
       rows: [
         { pid: 'A', run_block_win_rate: 0.71 },
         { pid: 'B', run_block_win_rate: 0.71 },
@@ -112,8 +120,9 @@ describe('LIBS-SERVER summarize_win_rate_feed', function () {
     })
     expect(summary).to.deep.equal({
       label: 'run_block',
-      fetched: 20,
+      fetched: 4,
       matched: 4,
+      unmatched: [],
       with_rate: 3,
       distinct_rates: 2,
       min_rate: 0.68,
@@ -121,10 +130,30 @@ describe('LIBS-SERVER summarize_win_rate_feed', function () {
     })
   })
 
+  // The denominator now comes off the SAME collection as everything else,
+  // because unmatched rows are no longer removed from it before this is called.
+  it('derives fetched from the rows and subtracts the unmatched for matched', () => {
+    const summary = summarize_win_rate_feed({
+      label: 'pass_rush',
+      rows: [
+        { pid: 'A', pass_rush_win_rate: 0.22 },
+        { pid: null, pass_rush_win_rate: 0.21 }
+      ],
+      rate_key: 'pass_rush_win_rate',
+      unmatched: ['Chukwuma Okorafor (LV, espn 3121009)']
+    })
+    expect(summary.fetched).to.equal(2)
+    expect(summary.matched).to.equal(1)
+    expect(summary.unmatched).to.deep.equal([
+      'Chukwuma Okorafor (LV, espn 3121009)'
+    ])
+    // The unmatched row still carries its rate -- it was kept, not dropped.
+    expect(summary.with_rate).to.equal(2)
+  })
+
   it('reports nulls rather than NaN when nothing carries a rate', () => {
     const summary = summarize_win_rate_feed({
       label: 'run_block',
-      fetched: 20,
       rows: [{ pid: 'A', run_block_win_rate: null }],
       rate_key: 'run_block_win_rate'
     })
@@ -222,19 +251,55 @@ describe('LIBS-SERVER grade_espn_line_win_rates_run', function () {
     expect(grade.failures[0]).to.include('feed pass_rush matched 0 of 40')
   })
 
-  it('leaves the match rate ungated until one has been measured', () => {
+  // The rule that replaced the match-rate floor. A threshold is a decision to
+  // keep losing whoever sits under it; this fails on a single miss and says who.
+  it('fails a single unmatched player and names them', () => {
     const feeds = healthy_run().feeds
-    feeds[0] = player_feed({ label: 'pass_rush', fetched: 40, matched: 4 })
-    expect(
-      grade_espn_line_win_rates_run({ ...healthy_run(), feeds }).passed
-    ).to.equal(true)
-    expect(
-      grade_espn_line_win_rates_run({
-        ...healthy_run(),
-        feeds,
-        minimum_match_rate: 0.5
-      }).passed
-    ).to.equal(false)
+    feeds[0] = player_feed({
+      label: 'pass_rush',
+      fetched: 40,
+      matched: 39,
+      unmatched: ['Tedarrell Slaton (GB, espn 4241397)']
+    })
+    const grade = grade_espn_line_win_rates_run({ ...healthy_run(), feeds })
+    expect(grade.passed).to.equal(false)
+    expect(grade.match_failures).to.have.lengthOf(1)
+    expect(grade.match_failures[0]).to.include('matched 39 of 40')
+    expect(grade.match_failures[0]).to.include('Tedarrell Slaton')
+  })
+
+  // The split that lets the rows land anyway. A missing pid must not throw away
+  // a correct leaderboard -- that is the drop-the-row defect one level up.
+  it('does not block the write on a missing pid, but still fails the run', () => {
+    const feeds = healthy_run().feeds
+    feeds[0] = player_feed({
+      label: 'pass_rush',
+      fetched: 40,
+      matched: 39,
+      unmatched: ['Sam Cosmi (WAS, espn 4241432)']
+    })
+    const grade = grade_espn_line_win_rates_run({ ...healthy_run(), feeds })
+    expect(grade.write_blocked).to.equal(false)
+    expect(grade.data_failures).to.deep.equal([])
+    expect(grade.passed).to.equal(false)
+  })
+
+  // The other half of the split, and the control that proves the test above is
+  // not just reading a field that is always false: a wrong season must stop the
+  // write even though the rows themselves parse perfectly.
+  it('blocks the write on a data failure', () => {
+    const grade = grade_espn_line_win_rates_run({
+      ...healthy_run(),
+      expected_season_year: 2026
+    })
+    expect(grade.write_blocked).to.equal(true)
+    expect(grade.match_failures).to.deep.equal([])
+  })
+
+  it('passes a run that matched every published player', () => {
+    const grade = grade_espn_line_win_rates_run(healthy_run())
+    expect(grade.match_failures).to.deep.equal([])
+    expect(grade.write_blocked).to.equal(false)
   })
 
   // Rows present, values absent: a moved cell index parses null for everyone
