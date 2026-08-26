@@ -1,3 +1,38 @@
+// ESPN line win rates: what these columns cover, and the one comparability
+// break a reader has to know about before using them across seasons.
+//
+// COVERAGE. Team grain runs 2018-2025, which is every season ESPN has
+// published -- the metrics launched September 2018 and no leaderboard exists in
+// markup before that. Player grain runs 2023-2025 only, and that ceiling is
+// upstream rather than a gap to be filled: the 2020-2022 articles render each
+// player Top-10 as an infographic IMAGE, and the 2018-2019 player lists are
+// plain text carrying no ESPN player id, which is the matching key.
+//
+// RUN BLOCK AND RUN STOP ARE NULL FOR 2018 AND 2019, and that is canonical
+// rather than missing. Those two metrics did not exist until 2020; both source
+// articles carry exactly two leaderboards. A consumer that treats null here as
+// "not yet backfilled" and substitutes pass block would be reproducing a known
+// defect in a reference spreadsheet this data was checked against.
+//
+// WIN RATES 2.0 BREAKS COMPARABILITY WITH ESPN'S OWN CURRENT NUMBERS, not just
+// with future seasons. ESPN rewrote the pass-rush and pass-block formulas
+// entering the 2026 season (story id/49672562). Everything stored here was
+// computed under the ORIGINAL formulas, so:
+//
+//   - 2018-2025 are comparable WITH EACH OTHER. That series is internally
+//     consistent and is the one to use for cross-season work.
+//   - They are NOT comparable with what espn.com serves for those same seasons
+//     today. ESPN's 2.0 write-up restates 2025 player figures under the new
+//     formula and the restatement is large: it puts Nick Herbig's 2025 edge
+//     pass-rush win rate at 14.3%, against the 25% stored here. Team figures
+//     move far less -- 2025 CHI pass block reads 73.6% there and 0.74 here.
+//   - 2026 onward, once the importer is repointed, will be 2.0 and therefore
+//     discontinuous with every row before it.
+//
+// Nothing here converts between the two. The break is recorded rather than
+// papered over, because a silent rescale is the failure mode that would make
+// every cross-season comparison quietly wrong.
+
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
