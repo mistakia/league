@@ -605,6 +605,22 @@
       "column": "recv_yards",
       "kind": "history",
       "reason": "Accurate past-tense record of what the 2026-08-18 recv -> receiving conform DID. The sentence says the sweep correctly rewrote every nfl_plays.recv_yards and the only residue was the metric alias, so the pre-rename spelling is cited deliberately as the column that moved. The column is now receiving_yards."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/gates.md",
+      "table": "seasons",
+      "column": "year",
+      "kind": "history",
+      "reason": "Accurate past-tense record of what the season_grain conform DID, cited as the worked cost of an incomplete corpus: private/test was still updating seasons.year long after the rename, because every consumer sweep that would have caught it ran over a corpus private/ was not in. The sentence names the successor itself -- 'the conform renamed the column to season_year' -- so the dead spelling is the subject of the incident rather than a live claim about the schema. Confirmed against the dump: seasons.season_year is present and seasons.year is absent. Remove this entry if the private-corpus paragraph is ever rewritten to drop the incident."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/scripts.md",
+      "table": "player_seasonlogs",
+      "column": "player_position",
+      "kind": "history",
+      "reason": "The paragraph's own parenthetical retires the column it names: 'a later conform renamed them to player_position, and 1ac03580e then dropped player_seasonlogs.player_position outright because nothing read it. Only player_gamelogs.player_position still exists.' The pair is cited to carry the uncontrolled-vocabulary incident, which spanned BOTH position columns at the time, so naming the dropped one is the record rather than an instruction. Confirmed against the dump: player_gamelogs.player_position is present and player_seasonlogs.player_position is absent. One entry covers both mentions on the line, since gate 1 keys on (path, table, column) and not on the occurrence."
     }
   ]
 }
