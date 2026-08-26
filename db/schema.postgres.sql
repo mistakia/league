@@ -210,6 +210,8 @@ DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_combination;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_lookup;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_esbid;
 DROP INDEX IF EXISTS public.idx_selection_combination_definitions_active;
+DROP INDEX IF EXISTS public.idx_season_projections_history_pid;
+DROP INDEX IF EXISTS public.idx_season_projections_history_natural_key;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_season_year_id;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_season_projection_points_pid;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_rest_of_season_projection_points_pid;
@@ -764,6 +766,7 @@ DROP TABLE IF EXISTS public.selection_combination_odds_history;
 DROP SEQUENCE IF EXISTS public.selection_combination_definitions_combination_id_seq;
 DROP TABLE IF EXISTS public.selection_combination_definitions;
 DROP TABLE IF EXISTS public.seasons;
+DROP TABLE IF EXISTS public.season_projections_history;
 DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_season_projection_points;
 DROP TABLE IF EXISTS public.scoring_format_player_rest_of_season_projection_points;
@@ -27053,6 +27056,61 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 
 
 --
+-- Name: season_projections_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.season_projections_history (
+    pid character varying(25) NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    season_year smallint NOT NULL,
+    generated_at timestamp with time zone NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1)
+);
+
+
+--
+-- Name: TABLE season_projections_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.season_projections_history IS 'Season-long raw projections per source, stored change-only: one row per distinct value run, stamped with the first generated_at at which the forecast took that value. Split out of the projections_history week = 0 sentinel.';
+
+
+--
 -- Name: seasons; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -32724,6 +32782,20 @@ CREATE INDEX idx_scoring_format_player_season_projection_points_pid ON public.sc
 --
 
 CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_season_year_id ON public.scoring_format_player_seasonlogs USING btree (pid, season_year, scoring_format_id);
+
+
+--
+-- Name: idx_season_projections_history_natural_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_season_projections_history_natural_key ON public.season_projections_history USING btree (source_id, pid, season_year, generated_at);
+
+
+--
+-- Name: idx_season_projections_history_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_season_projections_history_pid ON public.season_projections_history USING btree (pid);
 
 
 --
@@ -60761,6 +60833,13 @@ GRANT SELECT ON TABLE public.scoring_format_player_season_projection_points TO l
 --
 
 GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_reader;
+
+
+--
+-- Name: TABLE season_projections_history; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.season_projections_history TO league_reader;
 
 
 --
