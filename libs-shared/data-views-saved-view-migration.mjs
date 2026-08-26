@@ -817,7 +817,20 @@ export const RENAME_REGISTRY = [
       player_season_projected_salary_adjusted_points_added:
         'player_season_projected_points_added_positive_including_cap_savings',
       player_rest_of_season_projected_salary_adjusted_points_added:
-        'player_rest_of_season_projected_points_added_positive_including_cap_savings'
+        'player_rest_of_season_projected_points_added_positive_including_cap_savings',
+      // The projection period split, 2026-08-26. The WEEKLY market salary is
+      // withdrawn rather than renamed: a market salary is a share of the
+      // discretionary cap for the YEAR, so a per-week one was never a quantity
+      // anybody could act on, and the column it read is dropped.
+      //
+      // It maps to the SEASON price rather than to nothing. A missing entry is
+      // not neutral here -- the SPA skips an unresolvable column id and reports
+      // an error, so the one production saved view carrying this would lose its
+      // "Market" column and emit a client error on every load. The season price
+      // is the quantity that header was always reaching for, and it is the one
+      // supersession this split creates.
+      player_week_projected_market_salary:
+        'player_season_projected_market_salary'
     }
   },
 

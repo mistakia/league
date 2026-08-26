@@ -14,7 +14,6 @@ export const SINGLE_WEEK_COLUMNS = new Set([
   'player_practice_designation_friday',
   'player_practice_designation_saturday',
   'player_practice_designation_sunday',
-  'player_week_projected_market_salary',
   'player_league_roster_status',
   'player_game_prop_line_from_betting_markets',
   'player_game_prop_american_odds_from_betting_markets',

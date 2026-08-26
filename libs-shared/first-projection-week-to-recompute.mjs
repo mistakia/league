@@ -24,10 +24,14 @@ import { current_season } from '#constants'
  * to preserve, and a rebuild is expected to cover the whole season.
  *
  * NOT frozen by this bound, and NOT safe to treat as point-in-time:
- *   - week `0` (season-long). In the offseason `current_season.week` IS 0, so
- *     week 0 sits inside the recompute range and is rewritten every run.
- *   - `ros` / `ros_net`, which are recomputed from the remaining weeks by
- *     construction.
+ *   - week `0`. In the offseason `current_season.week` IS 0, so week 0 sits
+ *     inside the recompute range and is rewritten every run. This return value
+ *     is therefore also the SEASON PERIOD's write gate: the season projection
+ *     row is written exactly while this is 0, which seals it at the start of
+ *     week 1 and is what makes the season net -- a sum over weeks 1..18 --
+ *     summable from a complete board.
+ *   - the rest-of-season period, which is recomputed from the remaining weeks
+ *     by construction.
  *
  * See user:text/league/projection-history-system.md for the full semantic.
  *

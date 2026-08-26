@@ -67,7 +67,7 @@ export default function AuctionTargets({
     if (lineupPlayerIds.includes(pid)) classNames.push('optimal')
     const salary = rosterSlot
       ? rosterSlot.player_salary
-      : player_map.getIn(['market_salary', '0'], 0)
+      : player_map.getIn(['market_salary', 'season'], 0)
 
     return (
       <div {...{ key, style }}>

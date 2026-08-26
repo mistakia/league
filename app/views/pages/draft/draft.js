@@ -177,8 +177,8 @@ export default function DraftPage({
 
   const sorted = players.sort(
     (a, b) =>
-      b.getIn(['pts_added', '0'], default_points_added) -
-      a.getIn(['pts_added', '0'], default_points_added)
+      b.getIn(['pts_added', 'season'], default_points_added) -
+      a.getIn(['pts_added', 'season'], default_points_added)
   )
 
   // Every token has to land somewhere, so "hunter col" narrows rather than

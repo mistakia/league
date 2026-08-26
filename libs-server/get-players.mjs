@@ -363,8 +363,12 @@ export default async function ({
   }
 
   if (scoring_format_id) {
-    // include projected fantasy point values
-    const leaguePointsProj = await db('scoring_format_player_projection_points')
+    // Three periods, three tables, three payload keys. The `points.season` and
+    // `points.rest_of_season` keys used to exist only because the per-week table
+    // carried '0' and 'ros' in its week column and this loop assigned by that
+    // column DYNAMICALLY -- so nothing here ever named them, and repointing the
+    // week read alone would have made both keys vanish with no SQL error.
+    const weekly_points = await db('scoring_format_player_projection_points')
       .select('pid', 'week', 'projected_points_total as total')
       .where({
         scoring_format_id,
@@ -372,40 +376,113 @@ export default async function ({
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const pointProjection of leaguePointsProj) {
-      players_by_pid[pointProjection.pid].points[pointProjection.week] =
-        pointProjection
+    for (const point_projection of weekly_points) {
+      players_by_pid[point_projection.pid].points[point_projection.week] =
+        point_projection
+    }
+
+    const season_points = await db(
+      'scoring_format_player_season_projection_points'
+    )
+      .select('pid', 'projected_points_total as total')
+      .where({
+        scoring_format_id,
+        season_year: current_season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
+
+    for (const point_projection of season_points) {
+      players_by_pid[point_projection.pid].points.season = point_projection
+    }
+
+    const rest_of_season_points = await db(
+      'scoring_format_player_rest_of_season_projection_points'
+    )
+      .select('pid', 'projected_points_total as total')
+      .where({
+        scoring_format_id,
+        season_year: current_season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
+
+    for (const point_projection of rest_of_season_points) {
+      players_by_pid[point_projection.pid].points.rest_of_season =
+        point_projection
     }
   }
 
   if (league_format_id) {
-    // include points added and market salary
-    const league_format_values = await db(
-      'league_format_player_projection_values'
-    )
+    // The variant token appears on exactly the keys that HAVE a variant. A
+    // weekly points-added is one signed number, so it carries none; the two
+    // period aggregates each publish a positive and a net, and their two market
+    // salaries are shares of different POOLS rather than a signed pair.
+    //
+    // The weekly MARKET SALARY is gone. A price is a season-context quantity --
+    // a share of the discretionary cap for the year -- so a per-week one was
+    // never a useful number, and it is dropped rather than repointed.
+    const weekly_values = await db('league_format_player_projection_values')
+      .select('pid', 'week', 'projected_points_added')
       .where({
         league_format_id,
         season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const row of league_format_values) {
-      const { pid, week, projected_points_added, market_salary } = row
+    for (const { pid, week, projected_points_added } of weekly_values) {
       // The COLUMN is projected_points_added; the in-memory player property
       // stays `pts_added` -- it is the API shape the SPA reads.
       players_by_pid[pid].pts_added[week] = projected_points_added
-      players_by_pid[pid].market_salary[week] = market_salary
+    }
+
+    const period_tables = [
+      {
+        table: 'league_format_player_season_projection_values',
+        prefix: 'season'
+      },
+      {
+        table: 'league_format_player_rest_of_season_projection_values',
+        prefix: 'rest_of_season'
+      }
+    ]
+
+    for (const { table, prefix } of period_tables) {
+      const rows = await db(table)
+        .select(
+          'pid',
+          'projected_points_added_positive',
+          'projected_points_added_net',
+          'market_salary_positive',
+          'market_salary_net'
+        )
+        .where({
+          league_format_id,
+          season_year: current_season.year
+        })
+        .whereIn('pid', returnedPlayerIds)
+
+      for (const row of rows) {
+        const player = players_by_pid[row.pid]
+        // The BARE period key is the positive variant and `_net` is the signed
+        // one, matching the data-view field ids for the same two columns
+        // (player_season_projected_points_added and its _net sibling). One
+        // convention across every period map means a caller can hold ONE period
+        // token and index all of them with it, which is what the SPA's period
+        // conditionals do.
+        player.pts_added[prefix] = row.projected_points_added_positive
+        player.pts_added[`${prefix}_net`] = row.projected_points_added_net
+        player.market_salary[prefix] = row.market_salary_positive
+        player.market_salary[`${prefix}_net`] = row.market_salary_net
+      }
     }
   }
 
   if (leagueId) {
-    // include salary adjusted points added and inflation adjusted market salary
-    // Three periods, three tables, since the period sentinels were hoisted out
-    // of the week column. The payload KEYS are deliberately unchanged -- '0' for
-    // the season snapshot and 'ros' for rest of season -- because the SPA period
-    // conditionals (trade-player.js:11, player-roster.js:67 and siblings) index
-    // this map by those strings. Renaming the keys is a separate coordinated
-    // change; doing it here would break the client without a matching bundle.
+    // include salary adjusted points added and available-cap market salary.
+    // Three periods, three tables, and three named payload keys. The period keys
+    // used to be the literal strings '0' and 'ros'; they are named here in the
+    // same coordinated deploy that renames them in the SPA, since a bundle
+    // reading one vocabulary against a server emitting the other blanks the
+    // roster surfaces with no error on either side.
     const leagueValuesProj = await db('league_player_projection_values')
       .where({
         lid: leagueId,
@@ -437,9 +514,10 @@ export default async function ({
       projected_points_added_positive_including_cap_savings,
       projected_positive_salary_at_available_cap
     } of league_season_values) {
-      players_by_pid[pid].projected_points_added_positive_including_cap_savings[
-        '0'
-      ] = projected_points_added_positive_including_cap_savings
+      players_by_pid[
+        pid
+      ].projected_points_added_positive_including_cap_savings.season =
+        projected_points_added_positive_including_cap_savings
       players_by_pid[pid].projected_positive_salary_at_available_cap =
         projected_positive_salary_at_available_cap
     }
@@ -459,12 +537,12 @@ export default async function ({
     } of league_rest_of_season_values) {
       players_by_pid[
         pid
-      ].projected_points_added_positive_including_cap_savings.ros =
+      ].projected_points_added_positive_including_cap_savings.rest_of_season =
         projected_points_added_positive_including_cap_savings
     }
   }
 
-  // include player season, week and ros projections
+  // include player weekly and rest-of-season raw projections
   const projections = await db('projections_index')
     .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
@@ -473,7 +551,7 @@ export default async function ({
     // projections data source publishes REG-only; POST projections intentionally omitted
     // (see user:task/league/close-reg-post-week-encoding-gaps.md Out of Scope)
     .where('season_type', 'REG')
-  const rosProjections = await db('ros_projections')
+  const rest_of_season_projections = await db('ros_projections')
     .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
     .whereIn('pid', returnedPlayerIds)
@@ -482,8 +560,9 @@ export default async function ({
     players_by_pid[projection.pid].projection[projection.week] = projection
   }
 
-  for (const rosProjection of rosProjections) {
-    players_by_pid[rosProjection.pid].projection.ros = rosProjection
+  for (const rest_of_season_projection of rest_of_season_projections) {
+    players_by_pid[rest_of_season_projection.pid].projection.rest_of_season =
+      rest_of_season_projection
   }
 
   if (

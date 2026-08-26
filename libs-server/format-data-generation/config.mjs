@@ -64,7 +64,11 @@ export const generation_scripts = {
     description: 'Process projections for scoring format',
     args: ['--scoring_format_id', '{scoring_format_id}', '--all'],
     dependencies: [],
-    tables: ['scoring_format_player_projection_points'],
+    tables: [
+      'scoring_format_player_projection_points',
+      'scoring_format_player_season_projection_points',
+      'scoring_format_player_rest_of_season_projection_points'
+    ],
     per_format: 'scoring'
   },
 
@@ -105,7 +109,11 @@ export const generation_scripts = {
     description: 'Process projections for league format',
     args: ['--league_format_id', '{league_format_id}', '--all'],
     dependencies: ['scoring_format_projections'],
-    tables: ['league_format_player_projection_values'],
+    tables: [
+      'league_format_player_projection_values',
+      'league_format_player_season_projection_values',
+      'league_format_player_rest_of_season_projection_values'
+    ],
     per_format: 'league'
   },
 

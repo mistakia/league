@@ -668,8 +668,8 @@ describe('rename-map target liveness', () => {
     expect(param_key_froms.length).to.equal(190)
   })
 
-  it('carries a rule for each of the 45 column ids that moved', () => {
-    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(45)
+  it('carries a rule for each of the 46 column ids that moved', () => {
+    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(46)
   })
 
   // LEGACY_OUTPUT keys rewrite to names this module's generic loop treats as a

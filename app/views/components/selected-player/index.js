@@ -33,7 +33,7 @@ const map_state_to_props = createSelector(
     const remaining_pts_added =
       auction_info.pts_added.total - auction_info.pts_added.rostered
     const rate = league_available_salary_space / remaining_pts_added
-    const player_pts_added = player_map.getIn(['pts_added', '0'], 0)
+    const player_pts_added = player_map.getIn(['pts_added', 'season'], 0)
     // The LIVE auction price: what the player costs given the cap space and
     // value still on the board right now. Distinct from the persisted
     // projected_positive_salary_at_available_cap, which is the same question answered at cron time.

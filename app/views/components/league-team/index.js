@@ -54,7 +54,9 @@ const map_state_to_props = createSelector(
     teams,
     restricted_free_agency_players
   ) => {
-    const projectionType = current_season.isRegularSeason ? 'ros' : '0'
+    const projectionType = current_season.isRegularSeason
+      ? 'rest_of_season'
+      : 'season'
     const items = []
     players.players.forEach((p) => {
       const player_salary = p.get('player_salary', 0)
@@ -71,7 +73,7 @@ const map_state_to_props = createSelector(
       const extensions = p.get('extensions', 0)
       const pos = p.get('primary_position')
       const slot = p.get('slot')
-      const market_salary = p.getIn(['market_salary', '0'], 0)
+      const market_salary = p.getIn(['market_salary', 'season'], 0)
       const extendedSalary = getExtensionAmount({
         pos,
         slot,
@@ -130,7 +132,7 @@ const map_state_to_props = createSelector(
         ),
         projected_salary: p.getIn(['market_salary', projectionType], 0),
         pts_added: p.getIn(['pts_added', projectionType], 0),
-        pts_added_net: p.getIn(['pts_added', 'ros_net'], 0),
+        pts_added_net: p.getIn(['pts_added', 'rest_of_season_net'], 0),
         projected_starts: p.getIn(['lineups', 'starts'], 0),
         projected_points_added_positive_including_cap_savings: p.getIn(
           [

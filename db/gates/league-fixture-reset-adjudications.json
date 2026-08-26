@@ -30,7 +30,12 @@
   "tables": [
     {
       "table": "league_baselines",
-      "reason": "Derived baseline values, written only by the offline generator scripts/generate-league-baselines.mjs. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "reason": "Derived baseline values, written only by the hourly projection cron (scripts/process-projections.mjs). No suite-reachable writer; held no rows at any fixture entry across a full suite run. The reason previously named scripts/generate-league-baselines.mjs, which does not exist in the tree.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_season_baselines",
+      "reason": "The season-period half of league_baselines, on exactly the same footing as its week-grain sibling directly above: derived values written only by the hourly projection cron (scripts/process-projections.mjs), which routes the season-long baseline here instead of into a week=\"0\" row. No suite-reachable writer, so it holds no rows at fixture entry.",
       "writer_roots": ["scripts"]
     },
     {

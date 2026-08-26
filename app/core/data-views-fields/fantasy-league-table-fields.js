@@ -3,9 +3,6 @@ import React from 'react'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '#libs-shared'
-
-const { single_nfl_week_id } = common_column_params
 
 export default function ({ week, is_logged_in, fantasy_teams = [] }) {
   const fields = {
@@ -81,22 +78,6 @@ export default function ({ week, is_logged_in, fantasy_teams = [] }) {
       header_label: 'Over Market',
       size: 90,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    },
-
-    player_week_projected_market_salary: {
-      column_title: 'Projected Market Salary',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.FANTASY_LEAGUE
-      ],
-      header_label: 'Market',
-      player_value_path: 'week_projected_market_salary',
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-      column_params: {
-        single_nfl_week_id
-      }
     },
 
     player_season_projected_positive_salary_at_available_cap: {

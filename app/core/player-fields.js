@@ -182,11 +182,15 @@ function PlayerFields({ week, opponent_time_period, state }) {
       csv_header: 'Projected Value',
       player_value_path: `projected_points_added_positive_including_cap_savings.${week}`
     },
-    'market_salary.week': {
+    // A market salary is a season-context quantity -- a share of the
+    // discretionary cap for the YEAR -- so there is no weekly variant to offer.
+    // The `market_salary.week` field this replaces read a column that no longer
+    // exists.
+    'market_salary.season': {
       category: 'management',
       column_header: 'Market',
-      csv_header: 'Projected Market Salary',
-      player_value_path: `market_salary.${week}`
+      csv_header: 'Projected Market Salary (Season)',
+      player_value_path: 'market_salary.season'
     },
     projected_positive_salary_at_available_cap: {
       category: 'management',
@@ -195,18 +199,36 @@ function PlayerFields({ week, opponent_time_period, state }) {
       player_value_path: 'projected_positive_salary_at_available_cap'
     },
 
-    'pts_added.ros': {
+    // The bare period key is the POSITIVE variant and `_net` is the signed one,
+    // the same convention the period tables' columns and the data-view field
+    // ids use. Positive is what a player adds when you can bench him below
+    // replacement; net is what he adds when you must start him every week. They
+    // bracket reality rather than competing.
+    'pts_added.rest_of_season': {
       category: 'fantasy',
       column_header: 'Pts+',
       csv_header: 'Projected Points Added (Rest-Of-Season)',
-      player_value_path: 'pts_added.ros',
+      player_value_path: 'pts_added.rest_of_season',
       fixed: 1
     },
-    'pts_added.0': {
+    'pts_added.rest_of_season_net': {
+      category: 'fantasy',
+      column_header: 'Pts+ Net',
+      csv_header: 'Projected Points Added Net (Rest-Of-Season)',
+      player_value_path: 'pts_added.rest_of_season_net',
+      fixed: 1
+    },
+    'pts_added.season': {
       category: 'fantasy',
       column_header: 'Pts+',
       csv_header: 'Projected Points Added (Season)',
-      player_value_path: 'pts_added.0'
+      player_value_path: 'pts_added.season'
+    },
+    'pts_added.season_net': {
+      category: 'fantasy',
+      column_header: 'Pts+ Net',
+      csv_header: 'Projected Points Added Net (Season)',
+      player_value_path: 'pts_added.season_net'
     },
     'pts_added.week': {
       category: `Week ${week}`,
@@ -223,18 +245,18 @@ function PlayerFields({ week, opponent_time_period, state }) {
       player_value_path: `points.${week}.total`,
       fixed: 1
     },
-    'points.ros.total': {
+    'points.rest_of_season.total': {
       category: 'fantasy',
       column_header: 'Proj',
       csv_header: 'Projected Points (Rest-Of-Season)',
-      player_value_path: 'points.ros.total',
+      player_value_path: 'points.rest_of_season.total',
       fixed: 1
     },
-    'points.0.total': {
+    'points.season.total': {
       category: 'fantasy',
       column_header: 'Proj',
       csv_header: 'Projected Points (Season)',
-      player_value_path: 'points.0.total',
+      player_value_path: 'points.season.total',
       fixed: 1
     },
 
@@ -292,30 +314,30 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.ros.passing_attempts': {
+    'projection.rest_of_season.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Projected Passing Attempts (Rest-Of-Season)',
-      player_value_path: 'projection.ros.passing_attempts'
+      player_value_path: 'projection.rest_of_season.passing_attempts'
     },
-    'projection.ros.passing_yards': {
+    'projection.rest_of_season.passing_yards': {
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.passing_yards',
+      player_value_path: 'projection.rest_of_season.passing_yards',
       category: 'passing'
     },
-    'projection.ros.passing_touchdowns': {
+    'projection.rest_of_season.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Projected Passing Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.passing_touchdowns',
+      player_value_path: 'projection.rest_of_season.passing_touchdowns',
       fixed: 1
     },
-    'projection.ros.passing_interceptions': {
+    'projection.rest_of_season.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Projected Interceptions (Rest-Of-Season)',
-      player_value_path: 'projection.ros.passing_interceptions',
+      player_value_path: 'projection.rest_of_season.passing_interceptions',
       fixed: 1
     },
 
@@ -373,30 +395,30 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.ros.rushing_attempts': {
+    'projection.rest_of_season.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Projected Rushing Attempts (Rest-Of-Season)',
-      player_value_path: 'projection.ros.rushing_attempts'
+      player_value_path: 'projection.rest_of_season.rushing_attempts'
     },
-    'projection.ros.rushing_yards': {
+    'projection.rest_of_season.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Projected Rushing Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.rushing_yards'
+      player_value_path: 'projection.rest_of_season.rushing_yards'
     },
-    'projection.ros.rushing_touchdowns': {
+    'projection.rest_of_season.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Projected Rushing Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.rushing_touchdowns',
+      player_value_path: 'projection.rest_of_season.rushing_touchdowns',
       fixed: 1
     },
-    'projection.ros.fumbles_lost': {
+    'projection.rest_of_season.fumbles_lost': {
       category: 'rushing',
       column_header: 'FUM',
       csv_header: 'Projected Fumbles (Rest-Of-Season)',
-      player_value_path: 'projection.ros.fumbles_lost',
+      player_value_path: 'projection.rest_of_season.fumbles_lost',
       fixed: 1
     },
 
@@ -456,31 +478,31 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.ros.targets': {
+    'projection.rest_of_season.targets': {
       category: 'receiving',
       column_header: 'TAR',
       csv_header: 'Projected Targets (Rest-Of-Season)',
-      player_value_path: 'projection.ros.targets',
+      player_value_path: 'projection.rest_of_season.targets',
       fixed: 1
     },
-    'projection.ros.receptions': {
+    'projection.rest_of_season.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Projected Receptions (Rest-Of-Season)',
-      player_value_path: 'projection.ros.receptions',
+      player_value_path: 'projection.rest_of_season.receptions',
       fixed: 1
     },
-    'projection.ros.receiving_yards': {
+    'projection.rest_of_season.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Projected Receiving Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.receiving_yards'
+      player_value_path: 'projection.rest_of_season.receiving_yards'
     },
-    'projection.ros.receiving_touchdowns': {
+    'projection.rest_of_season.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Projected Receiving Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.receiving_touchdowns',
+      player_value_path: 'projection.rest_of_season.receiving_touchdowns',
       fixed: 1
     },
 

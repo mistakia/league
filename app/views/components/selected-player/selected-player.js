@@ -116,12 +116,16 @@ export default function SelectedPlayer({
     if (element) element.scrollIntoView({ behavior: 'smooth' })
   }, [value])
 
-  const blacklist = ['0', 'ros']
+  // Count real projected WEEKS. The projection map is keyed by numeric week
+  // alongside the season snapshot ('0') and the named rest-of-season period, so
+  // the filter is "is a fantasy week" rather than a blacklist of the period keys
+  // that exist today -- a blacklist goes stale silently the next time a period
+  // is added, and it goes stale in the direction that inflates the count.
   const projWks = player_map
     .get('projection', new Map())
     .keySeq()
     .toArray()
-    .filter((week) => !blacklist.includes(week)).length
+    .filter((week) => Number(week) >= 1).length
 
   const pos = player_map.get('primary_position')
   const tid = player_map.get('tid', false)
@@ -130,13 +134,20 @@ export default function SelectedPlayer({
   const draftYear = player_map.get('nfl_draft_year')
   const draftRound = player_map.get('draft_round')
   const playerValue = player_map.get('player_salary')
-  const rosPoints = player_map.getIn(['points', 'ros', 'total'], 0)
+  const rosPoints = player_map.getIn(['points', 'rest_of_season', 'total'], 0)
 
-  // Both rest-of-season, so the pair is comparable: `ros` floors each remaining
-  // week at the baseline, `ros_net` subtracts the weeks below it. There is no
-  // season-grain net, which is why neither follows the season phase.
-  const pts_added_positive = player_map.getIn(['pts_added', 'ros'], null)
-  const pts_added_net = player_map.getIn(['pts_added', 'ros_net'], null)
+  // Both rest-of-season, so the pair is comparable: the positive variant floors
+  // each remaining week at the baseline, the net one subtracts the weeks below
+  // it. Both are sums over the same weekly board, which is what makes them a
+  // pair rather than two answers to different questions.
+  const pts_added_positive = player_map.getIn(
+    ['pts_added', 'rest_of_season'],
+    null
+  )
+  const pts_added_net = player_map.getIn(
+    ['pts_added', 'rest_of_season_net'],
+    null
+  )
 
   const external_button_items = []
 
@@ -340,7 +351,7 @@ export default function SelectedPlayer({
                 {current_season.isOffseason && (
                   <div className='selected__player-header-item'>
                     <label>Market</label>$
-                    {player_map.getIn(['market_salary', '0'], 0)}
+                    {player_map.getIn(['market_salary', 'season'], 0)}
                   </div>
                 )}
                 {is_logged_in &&
