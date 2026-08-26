@@ -50,12 +50,19 @@
 // these comments, so a later refresh of the reference fails loudly instead of
 // silently checking a column against itself or reintroducing the bad row.
 //
-// Run:  NODE_ENV=production node db/adhoc/2026-08-25-backfill-espn-team-win-rates-2020-2024.mjs [--dry]
+// RUN. The archive and the database are not reachable from the same machine:
+// web.archive.org serves a workstation and returns 429 to the league host,
+// while production postgres is reachable only from the host. So this runs in
+// two halves, each re-running the full oracle:
+//
+//   workstation:  node db/adhoc/2026-08-25-backfill-espn-team-win-rates-2020-2024.mjs --emit /tmp/espn-win-rates.json
+//   league host:  NODE_ENV=production node db/adhoc/2026-08-25-backfill-espn-team-win-rates-2020-2024.mjs --from /tmp/espn-win-rates.json [--dry]
 
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as cheerio from 'cheerio'
+import { readFile, writeFile } from 'fs/promises'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
@@ -529,10 +536,14 @@ const assert_reference_shape = () => {
   }
 }
 
-const backfill = async ({ dry_run = false } = {}) => {
-  assert_reference_shape()
-  log('reference shape OK: run block distinct from pass block where used')
-
+// Resolve every season from the archive: fetch, parse, grade, cross-check.
+// Split from the write half because the two halves are not reachable from the
+// same place -- web.archive.org answers a workstation and returns 429 to the
+// league host, while the production database is reachable only from the host.
+// `--emit` runs this half and writes the payload; `--from` runs the write half
+// against it. Both halves re-run the oracle, so the payload is a transport, not
+// a trusted input.
+const resolve_from_archive = async () => {
   const resolved = []
 
   for (const [season_year_string, capture] of Object.entries(
@@ -584,6 +595,77 @@ const backfill = async ({ dry_run = false } = {}) => {
 
     resolved.push({ season_year, ...accepted })
     await wait(3000)
+  }
+
+  return resolved
+}
+
+// Re-grade a payload loaded from disk. The emitting run already graded it, but
+// a file is an input like any other -- it can be stale, hand-edited, or from a
+// different article entirely -- and the whole point of the oracle is that
+// nothing reaches the table ungraded.
+const regrade_payload = (resolved) => {
+  const seasons = Object.keys(ARCHIVE_CAPTURES).map(Number).sort()
+  const present = resolved.map((entry) => entry.season_year).sort()
+  if (JSON.stringify(seasons) !== JSON.stringify(present)) {
+    throw new Error(
+      `payload covers seasons ${present.join(', ')}, expected ${seasons.join(', ')}`
+    )
+  }
+
+  for (const { season_year, timestamp, rows } of resolved) {
+    if (!ARCHIVE_CAPTURES[season_year]?.timestamps.includes(timestamp)) {
+      throw new Error(
+        `payload season ${season_year} cites capture ${timestamp}, which is not a declared candidate`
+      )
+    }
+    const grade = grade_capture({ season_year, rows })
+    if (!grade.passed) {
+      throw new Error(
+        `payload season ${season_year} fails the oracle: ${grade.failures.join('; ')}`
+      )
+    }
+    const check = cross_check({ season_year, rows })
+    if (check.failures.length) {
+      throw new Error(
+        `payload season ${season_year} disagrees with the reference: ${check.failures.join('; ')}`
+      )
+    }
+    log(
+      `  ${season_year}@${timestamp} regraded OK: 32 teams, cross-checked ${check.pass_block_compared} pass block and ${check.run_block_compared} run block value(s)`
+    )
+  }
+}
+
+const backfill = async ({
+  dry_run = false,
+  emit_path = null,
+  from_path = null
+} = {}) => {
+  assert_reference_shape()
+  log('reference shape OK: run block distinct from pass block where used')
+
+  let resolved
+  if (from_path) {
+    const payload = JSON.parse(await readFile(from_path, 'utf8'))
+    resolved = payload.seasons
+    log(
+      `loaded payload emitted ${payload.generated_at} covering ${resolved.length} season(s)`
+    )
+    regrade_payload(resolved)
+  } else {
+    resolved = await resolve_from_archive()
+  }
+
+  if (emit_path) {
+    await writeFile(
+      emit_path,
+      `${JSON.stringify({ generated_at: new Date().toISOString(), seasons: resolved }, null, 2)}\n`
+    )
+    log(
+      `emitted ${resolved.length} season(s) to ${emit_path} -- nothing written to the database`
+    )
+    return { resolved }
   }
 
   // Every season resolved before anything is written. A backfill that writes as
@@ -668,7 +750,11 @@ const main = async () => {
   let error
   try {
     const argv = yargs(hideBin(process.argv)).argv
-    await backfill({ dry_run: Boolean(argv.dry) })
+    await backfill({
+      dry_run: Boolean(argv.dry),
+      emit_path: argv.emit || null,
+      from_path: argv.from || null
+    })
   } catch (err) {
     error = err
     console.log(`FAILED: ${err.message}`)
