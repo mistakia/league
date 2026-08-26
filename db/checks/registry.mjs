@@ -1062,6 +1062,130 @@ const registry = [
     min_denominator: 1000,
     repair_command:
       'Identify which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line and the runs ledger (`base run list --source service:league-import-<source>-adp`). If it ran and wrote nothing, its own oracle should have failed the run — read /var/log/league/import-<source>-adp.log for the `oracle FAIL` line. Whether a past season can be backfilled is PER VENDOR and must not be assumed either way: MFL serves it under PERIOD=ALL and ESPN under its per-season kona endpoint (2020 onward), while CBS, RTS and Yahoo scrape a live draft board that no longer exists for a closed season. Park a genuinely unreachable season as baselined debt rather than leaving the finding open.'
+  },
+
+  {
+    check_id: 'nfl-plays-game-coverage',
+    invariant:
+      'Every game nfl_games calls FINAL holds at least one nfl_plays row. Nothing else sees a game whose plays never landed: the play importers report per-run success, the season-agreement check compares plays that EXIST against their game, and every downstream aggregate inner-joins nfl_plays — so a missing game leaves no failed row and simply contributes nothing, which reads identically to a game nobody played.',
+    grain: ['season_year', 'season_type', 'week'],
+    rows: async () => {
+      // Grained by week rather than by game so one finding names a whole
+      // failed import run, which is how this defect actually arrives -- a week
+      // at a time, when the nightly job processed a different season_type.
+      const { rows } = await db.raw(
+        `
+        select
+          g.season_year,
+          g.season_type,
+          g.week,
+          count(*) as denominator,
+          count(*) filter (
+            where exists (select 1 from nfl_plays p where p.esbid = g.esbid)
+          ) as numerator
+        from nfl_games g
+        where g.season_year >= 2015
+          and g.week is not null
+          and g.status like 'FINAL%'
+        group by 1, 2, 3
+        `
+      )
+
+      return rows.map((/** @type {Record<string, any>} */ row) => ({
+        season_year: row.season_year,
+        season_type: row.season_type,
+        week: row.week,
+        numerator: Number(row.numerator),
+        denominator: Number(row.denominator)
+      }))
+    },
+    // A week holding fewer than 8 final games is mid-week or a scheduling
+    // artifact, not a gradeable population. Declared rather than filtered out
+    // of `rows` so a week that COLLAPSED to three games is reported
+    // un-gradeable instead of vanishing from the scan entirely.
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      row.denominator >= 8,
+    min_rate: 1.0,
+    calibration:
+      'EXACT, not a tolerance: a FINAL game either has plays or it does not, so the healthy reading is 1.0 and min_rate 1.0 is a live invariant. Measured 2026-08-26 across the full 2001-onward corpus of 498 gradeable weeks, of which this check grades the 229 from 2015: median 1.0000, fifth percentile 1.0000, and only SIX weeks short of full coverage in the entire corpus. Four of the six are 2014 PRE weeks 1-4, all at 0.0000 — the same era gap the nfl-plays-games-season-agreement calibration already names for 2013 and 2014 preseason, where the feed predates our coverage. THAT is why this check floors at season_year 2015 rather than parking four permanent findings: an era with no data at all is a different condition with a different owner, and putting four un-closeable rows in front of the live one is how a detector stops being read. The remaining two are the defects this was written for: 2025 PRE week 3 at 0.0625, one game of sixteen, and 2021 PRE week 3 at 0.9375, fifteen of sixteen. Both are preseason, which is the season_type every scheduled path treats as optional. The 2015 floor and the eight-game precondition together leave 229 gradeable weeks of the 286 in range.',
+    min_gradeable_units: 180,
+    repair_command:
+      'Re-import the week: node scripts/import-plays-nfl-v1.mjs --year <year> --week <week> --season_type <type>. Confirm the games are genuinely absent rather than carrying a different esbid before importing — a game whose esbid moved is a repoint, not a re-import, and importing over it doubles the plays.'
+  },
+
+  {
+    check_id: 'play-type-enrichment-coverage',
+    invariant:
+      'Every graded week carries the derived play_type on nearly all of its plays. play_type is written by the enrichment pass in scripts/process-plays.mjs, NOT by the play importers, so a week whose plays imported cleanly and were never enriched holds a full set of rows with the derived column NULL. No importer oracle can see that — the import succeeded — and every consumer filters on play_type, so the week silently contributes zero offensive plays instead of raising.',
+    grain: ['season_year', 'season_type', 'week'],
+    rows: async () =>
+      db('nfl_plays')
+        .select('season_year', 'season_type', 'week')
+        .count('* as denominator')
+        .select(db.raw('count(play_type) as numerator'))
+        .where('season_year', '>=', 2001)
+        .whereNotNull('week')
+        .groupBy('season_year', 'season_type', 'week'),
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      Number(row.denominator) >= 100,
+    min_rate: 0.5,
+    calibration:
+      'Measured 2026-08-26 across 644 gradeable weeks: median 1.0000, first percentile 0.9021, fifth percentile 0.9177. The healthy floor is 0.8564 (2023 PRE week 0) and the whole low band is preseason, which carries a higher share of structural rows — TIMEOUT, END_QUARTER, GAME_START — that legitimately hold no derived play_type. Exactly ONE unit in the corpus sits below that band, and it is the defect: 2024 PRE week 3 at 0.0000, all 2,964 plays unenriched including 1,884 the NFL feed itself labels PASS or RUSH, with play_stats present for every one of them. The floor is set on that gap — 35 points under the worst healthy reading and 50 above the defect — deliberately far from the healthy band, because this detector exists to catch an enrichment pass that never RAN, not to police the ordinary structural-row share. A week drifting to 0.7 is unattested in 25 years of corpus and would be a new condition worth reading rather than a threshold to loosen. NOTE the sibling column play_type_nfl cannot be used as this probe: it is absent for all of 2023 preseason and for 2022 PRE week 3, so grading on it would report a decade of false findings.',
+    min_gradeable_units: 500,
+    repair_command:
+      'Re-run the enrichment pass for the week: node scripts/process-plays.mjs --year <year> --week <week> --season_type <type>. Confirm nfl_play_stats holds rows for those games first — enrichment derives play_type from play stats, so it is a no-op against a week whose stats never imported, and that is a plays-import repair rather than this one.'
+  },
+
+  {
+    check_id: 'gamelog-snaps-unaggregated',
+    invariant:
+      'Every player_gamelogs row whose player took a recorded snap in that same game carries a snap count. The snap columns are written by ONE script (scripts/generate-player-snaps.mjs) in a pass separate from the one that creates the rows, and they are NULL both when that pass fails and when it was never invoked for the week at all. Every consumer reads NULL as zero participation, so an unaggregated week does not error, does not log and does not read as missing — it reads as a week in which nobody played a snap.',
+    grain: ['season_year', 'season_type', 'week'],
+    rows: async () => {
+      // The denominator is deliberately the RESOLVABLE population, not every
+      // gamelog row: a row whose player carries no gsis_it_player_id, or who
+      // took no snap in that game, is one the generator cannot write and must
+      // not be graded against. Anchoring on the same esbid rather than on the
+      // week keeps a player who changed teams mid-week from matching the wrong
+      // game.
+      const { rows } = await db.raw(
+        `
+        with snap_players as (
+          select distinct esbid, gsis_it_player_id from nfl_snaps
+        )
+        select
+          g.season_year,
+          g.season_type,
+          g.week,
+          count(*) as denominator,
+          count(pg.snaps_offense) as numerator
+        from nfl_games g
+        join player_gamelogs pg on pg.esbid = g.esbid
+        join player pl on pl.pid = pg.pid and pl.gsis_it_player_id is not null
+        join snap_players sp
+          on sp.esbid = pg.esbid
+         and sp.gsis_it_player_id = pl.gsis_it_player_id
+        where g.week is not null
+        group by 1, 2, 3
+        `
+      )
+
+      return rows.map((/** @type {Record<string, any>} */ row) => ({
+        season_year: row.season_year,
+        season_type: row.season_type,
+        week: row.week,
+        numerator: Number(row.numerator),
+        denominator: Number(row.denominator)
+      }))
+    },
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      Number(row.denominator) >= 100,
+    min_rate: 0.9,
+    calibration:
+      'Measured 2026-08-26 across 236 gradeable weeks: median 1.0000, fifth percentile 0.9923, and the healthy band bottoms out at 0.9277. Below it sit six units in two distinct shapes. The TOTAL failures are 2024 PRE weeks 1, 2 and 3 and 2026 PRE week 1, every one of them exactly 0.0000 — the generator never ran for those weeks, and the 2026 reading was LIVE when this check was written, two years after the 2024 one went unnoticed. The PARTIAL failures are 2023 POST week 1 at 0.7684 and 2023 REG week 18 at 0.8745. The floor sits three points under the healthy minimum and thirteen above the worst partial, which is the gap it is calibrated on. The 2025 REG cluster at 0.9277-0.9351 (weeks 5, 7, 10 and 14) is deliberately left GREEN: four weeks in one season sharing one narrow band reads as roster churn within the resolvable population rather than a failed pass, and pulling the floor above it would trade one real class for four rows nobody can repair. A reading of exactly 0.0000 is never ambiguous and is what this check exists for.',
+    min_gradeable_units: 180,
+    repair_command:
+      'Re-run the aggregation for the week: node scripts/generate-player-snaps.mjs --year <year> --week <week> --season_type <type>. It upserts on (esbid, pid, season_year) and merges, so re-running a healthy week is safe. If the rate comes back 0.0000 again, check that nfl_plays holds ENRICHED rows for those games first — the generator left-joins nfl_plays and filters `whereNot play_type NOPL`, which under three-valued logic drops every snap whose play row is missing or unenriched, so an enrichment gap presents here as a snap gap. play-type-enrichment-coverage owns that upstream condition.'
   }
 ]
 

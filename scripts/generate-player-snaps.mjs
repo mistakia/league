@@ -5,8 +5,8 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { groupBy } from '#libs-shared'
 import { current_season } from '#constants'
-import { is_main, batch_insert } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { is_main, batch_insert, report_job } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -544,7 +544,21 @@ const main = async () => {
     log(error)
   }
 
-  process.exit()
+  // Until 2026-08-26 this script reported NOTHING: no job type, no report_job,
+  // and a bare process.exit() that returned 0 whether or not the run threw. The
+  // snap columns it owns are the only evidence it ever ran, and they are NULL
+  // both when it fails and when it was never invoked -- so a whole season_type
+  // could sit unaggregated with no failed row, no signal and no non-zero exit
+  // anywhere. 2024 PRE sat that way for two years and 2026 PRE was doing it
+  // live. Reporting the job and exiting non-zero is what makes a broken run
+  // distinguishable from a run that never happened; the coverage gap that
+  // neither can see is owned by the gamelog-snaps-unaggregated data check.
+  await report_job({
+    job_type: job_types.GENERATE_PLAYER_SNAPS,
+    error
+  })
+
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
