@@ -876,10 +876,7 @@ const run = async ({
   // Resolve nflfastR games to our esbids before anything reads a game id. The
   // resolver is built once per season year and reused by the --esbid filter and by
   // every play, so both agree on what game a feed row belongs to.
-  // `year:` is the resolver's own unconformed parameter name, not this script's
-  // vocabulary. It is the boundary to a libs-server module the season_year
-  // conform has not reached yet, deliberately left out of this lane's scope.
-  const resolver = await build_nflfastr_game_resolver({ year: season_year })
+  const resolver = await build_nflfastr_game_resolver({ season_year })
   log(`Loaded ${resolver.game_count} nfl_games rows for ${season_year}`)
 
   // Filter by esbid if specified. Filtering on old_game_id here is the same

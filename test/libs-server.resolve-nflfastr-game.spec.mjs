@@ -140,7 +140,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     })
 
     it('resolves a game whose old_game_id agrees with the matchup', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const result = resolver.resolve(
         feed_row({ home: 'LAC', away: 'KC', old_game_id: 2021121600 })
       )
@@ -152,7 +152,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     // so an absence-only fallback never fires and the plays match the wrong
     // game rather than failing to match.
     it('corrects a cross-match where old_game_id names a real but wrong game', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const result = resolver.resolve(
         feed_row({ home: 'DET', away: 'ARI', old_game_id: 2021121903 })
       )
@@ -167,7 +167,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     })
 
     it('resolves a game whose old_game_id names nothing at all', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const result = resolver.resolve(
         feed_row({ home: 'NYG', away: 'DAL', old_game_id: 2021121907 })
       )
@@ -176,7 +176,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     })
 
     it('resolves all nine 2021 week 15 disagreements to the right esbid', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       for (const [esbid, home, away, old_game_id] of WEEK_15_GAMES) {
         const result = resolver.resolve(feed_row({ home, away, old_game_id }))
         expect(result.esbid, `${away}@${home}`).to.equal(esbid)
@@ -191,7 +191,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     // reports one correction per play, and games_refused -- which feeds the
     // import's per-game oracle -- over-reports by three orders of magnitude.
     it('counts corrections per game rather than per call', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const row = feed_row({
         home: 'DET',
         away: 'ARI',
@@ -205,7 +205,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     })
 
     it('refuses rather than guessing when the matchup is absent', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const result = resolver.resolve(
         feed_row({ home: 'SEA', away: 'LA', old_game_id: 2021121600 })
       )
@@ -217,7 +217,7 @@ describe('libs-server resolve-nflfastr-game', function () {
     })
 
     it('refuses a feed row carrying no old_game_id and no known matchup', async () => {
-      const resolver = await build_nflfastr_game_resolver({ year: 2021 })
+      const resolver = await build_nflfastr_game_resolver({ season_year: 2021 })
       const result = resolver.resolve(
         feed_row({ home: 'SEA', away: 'LA', old_game_id: null })
       )

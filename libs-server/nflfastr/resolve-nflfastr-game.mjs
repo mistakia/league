@@ -82,9 +82,9 @@ const game_matchup_key = (game) =>
  * logged. When the matchup cannot pick exactly one game the resolver refuses
  * rather than guessing.
  */
-export const build_nflfastr_game_resolver = async ({ year }) => {
+export const build_nflfastr_game_resolver = async ({ season_year }) => {
   const games = await db('nfl_games')
-    .where({ season_year: year })
+    .where({ season_year })
     .whereIn('season_type', ['REG', 'POST'])
     .select(
       'esbid',
