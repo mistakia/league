@@ -2123,12 +2123,12 @@ export const get_data_view_results_query = async ({
   // gate lives client-side (where column data_type is known); the server has no
   // column type information, and an unused hidden column is harmless.
   if (query_context.row_grain_id !== 'team' && row_axes.includes('week')) {
-    const { seas_types } = decompose_nfl_weeks({
+    const { seas_types: season_types } = decompose_nfl_weeks({
       nfl_weeks: query_context.nfl_week_ids
     })
     const is_reg_scope =
-      seas_types.length > 0 &&
-      seas_types.every((seas_type) => seas_type === 'REG')
+      season_types.length > 0 &&
+      season_types.every((season_type) => season_type === 'REG')
 
     if (is_reg_scope && data_view_options.year_range.length) {
       const { pid_reference, week_reference } = data_view_options
