@@ -250,6 +250,16 @@ const import_sleeper_adp_and_projections = async ({
   // which the rate rule cannot interpret. This is why the other five sources
   // use summarize_adp_feed and this one does not; its rows are not its
   // population.
+  // Sleeper's projection feed lists the whole player pool, whose large majority
+  // reports adp=999 ("undrafted") and is dropped by create_adp_entries above, by
+  // design. The ADP fill rate is therefore measured over distinct MATCHED players
+  // but only the draftable subset can ever carry a real position, so the fill
+  // rate is structurally ~25-30% in the draft window, far under the 90% the other
+  // five feeds hold. Grade it against its own deliberate-undrafted floor instead
+  // of the universal one; last measured 08-26 (late-window, near-minimal draft
+  // pool) at 25.6-27.6%, and 0.15 clears that with headroom while still catching
+  // a genuine collapse to ~0 if the ADP parse breaks.
+  const SLEEPER_ADP_FILL_FLOOR = 0.15
   const players_with_adp = new Set(
     adp_inserts
       .filter((insert) => insert.average_draft_position != null)
@@ -261,6 +271,7 @@ const import_sleeper_adp_and_projections = async ({
     feeds: [
       {
         label: 'ALL_FORMATS',
+        minimum_adp_fill_rate: SLEEPER_ADP_FILL_FLOOR,
         fetched: projections_considered,
         matched: matched_sleeper_ids.size,
         with_adp: players_with_adp.size,

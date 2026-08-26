@@ -21086,6 +21086,49 @@ export interface ScoringFormatPlayerSeasonlogsRow {
   scoring_format_id: string
 }
 
+export interface SeasonProjectionsHistoryRow {
+  pid: string
+  source_id: number
+  season_year: number
+  generated_at: Date
+  passing_attempts: number | null
+  passing_completions: number | null
+  passing_yards: number | null
+  passing_interceptions: number | null
+  passing_touchdowns: number | null
+  rushing_attempts: number | null
+  rushing_yards: number | null
+  rushing_touchdowns: number | null
+  targets: number | null
+  receptions: number | null
+  receiving_yards: number | null
+  receiving_touchdowns: number | null
+  fumbles_lost: number | null
+  two_point_conversions: number | null
+  field_goals_made: number | null
+  field_goal_yards: number | null
+  field_goals_made_0_19_yards: number | null
+  field_goals_made_20_29_yards: number | null
+  field_goals_made_30_39_yards: number | null
+  field_goals_made_40_49_yards: number | null
+  field_goals_made_50_plus_yards: number | null
+  extra_points_made: number | null
+  defensive_sacks: number | null
+  defensive_interceptions: number | null
+  defensive_forced_fumbles: number | null
+  defensive_recovered_fumbles: number | null
+  defensive_three_and_outs: number | null
+  defensive_fourth_down_stops: number | null
+  defensive_points_against: number | null
+  defensive_yards_against: number | null
+  defensive_blocked_kicks: number | null
+  defensive_safeties: number | null
+  defensive_two_point_returns: number | null
+  defensive_touchdowns: number | null
+  kickoff_return_touchdowns: number | null
+  punt_return_touchdowns: number | null
+}
+
 export interface SeasonsRow {
   lid: number
   season_year: number

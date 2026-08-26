@@ -26,8 +26,6 @@ export {
   api_get_league,
   api_put_team,
   api_put_source,
-  api_put_projection,
-  api_delete_projection,
   api_put_setting,
   api_get_plays,
   api_get_play_stats,

@@ -234,14 +234,6 @@ export const api = {
     )}`
     return { url }
   },
-  put_projection(data) {
-    const url = `${API_URL}/projections/${data.pid}`
-    return { url, ...PUT(data) }
-  },
-  del_projection(data) {
-    const url = `${API_URL}/projections/${data.pid}`
-    return { url, ...DELETE(data) }
-  },
   put_setting(data) {
     const url = `${API_URL}/me`
     return { url, ...PUT(data) }

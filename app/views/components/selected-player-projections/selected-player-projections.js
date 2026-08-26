@@ -17,7 +17,6 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
   render = () => {
     const { player_map } = this.props
 
-    const pid = player_map.get('pid')
     const pos = player_map.get('primary_position')
     const loading_projections = player_map.get('loading_projections')
     const tables = []
@@ -63,7 +62,6 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
           key={week}
           week={week}
           projections={projections_by_week[week]}
-          pid={pid}
           pos={pos}
           projection={average_projections}
         />

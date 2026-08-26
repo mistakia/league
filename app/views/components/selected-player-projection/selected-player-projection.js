@@ -1,50 +1,26 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Icon from '@components/icon'
 import Source from '@components/source'
 import SelectedPlayerProjectionRow from '@components/selected-player-projection-row'
 import SelectedPlayerProjectionRowHeader from '@components/selected-player-projection-row-header'
 import { current_season } from '#constants'
 
 export default function SelectedPlayerProjection({
-  pid,
   week,
   projections,
   projection,
-  pos,
-  delete_projection
+  pos
 }) {
-  const handle_clear_click = () => {
-    delete_projection({ pid, week })
-  }
-
-  const rows = []
-  let has_action = false
-  projections.forEach((p, index) => {
-    const isUser = !p.source_id
-    const title = isUser ? 'User' : <Source sourceId={p.source_id} />
-    const action = isUser && (
-      <div className='row__action'>
-        <div onClick={handle_clear_click}>
-          <Icon name='clear' />
-        </div>
-      </div>
-    )
-    has_action = Boolean(has_action || action)
-
-    const item = (
-      <SelectedPlayerProjectionRow
-        key={index}
-        stats={p}
-        title={title}
-        action={action}
-        pos={pos}
-        fixed={1}
-      />
-    )
-    rows.push(item)
-  })
+  const rows = projections.map((p, index) => (
+    <SelectedPlayerProjectionRow
+      key={index}
+      stats={p}
+      title={<Source sourceId={p.source_id} />}
+      pos={pos}
+      fixed={1}
+    />
+  ))
 
   if (projection) {
     rows.push(
@@ -55,7 +31,6 @@ export default function SelectedPlayerProjection({
         title='Average'
         pos={pos}
         fixed={1}
-        action={has_action ? <div className='row__action' /> : null}
       />
     )
   }
@@ -72,7 +47,6 @@ export default function SelectedPlayerProjection({
       <div className='selected__table-header'>
         <div className='table__cell text'>Source</div>
         <SelectedPlayerProjectionRowHeader pos={pos} />
-        {has_action ? <div className='row__action' /> : null}
       </div>
       {rows}
     </div>
@@ -80,8 +54,6 @@ export default function SelectedPlayerProjection({
 }
 
 SelectedPlayerProjection.propTypes = {
-  pid: PropTypes.string,
-  delete_projection: PropTypes.func,
   pos: PropTypes.string,
   week: PropTypes.number,
   projections: PropTypes.array,

@@ -131,6 +131,47 @@ describe('LIBS-SERVER grade_adp_import_run', function () {
     )
   })
 
+  it('honors a per-feed fill floor that the universal one would fail', () => {
+    // Sleeper filters its undrafted (adp=999) sentinel before grading, so its
+    // fill rate is structurally ~25-30% -- far under the universal 0.9 -- yet a
+    // genuine parse collapse still drives it toward 0. A per-feed floor lets the
+    // healthy state pass while preserving the collapse guard.
+    const grade = grade_adp_import_run({
+      source_id: 'SLEEPER',
+      year: 2026,
+      feeds: [
+        {
+          label: 'ALL_FORMATS',
+          fetched: 9414,
+          matched: 8371,
+          with_adp: 2143,
+          distinct_adp: 3604,
+          minimum_adp_fill_rate: 0.15
+        }
+      ]
+    })
+    expect(grade.passed).to.equal(true)
+  })
+
+  it('still fails a collapsed feed even under a low per-feed floor', () => {
+    const grade = grade_adp_import_run({
+      source_id: 'SLEEPER',
+      year: 2026,
+      feeds: [
+        {
+          label: 'ALL_FORMATS',
+          fetched: 9414,
+          matched: 8371,
+          with_adp: 42,
+          distinct_adp: 9,
+          minimum_adp_fill_rate: 0.15
+        }
+      ]
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.failures[0]).to.include('adp fill rate 0.5%')
+  })
+
   it('fails a fully populated feed carrying one repeated sentinel', () => {
     // ESPN's per-season endpoint answers 2025 with averageDraftPosition 170.00
     // for all 500 players. Complete, fully matched, fully filled, and garbage:
