@@ -372,10 +372,10 @@ const import_sleeper_adp_and_projections = async ({
 
   return {
     skipped: false,
-    year: current_season.year,
+    season_year: current_season.year,
     week: 0,
     source_id: external_data_sources.SLEEPER,
-    seas_type: 'REG'
+    season_type: 'REG'
   }
 }
 

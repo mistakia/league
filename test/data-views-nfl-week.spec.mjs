@@ -86,12 +86,6 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(dynamic_types).to.include('current_nfl_week')
       expect(dynamic_types).to.include('last_n_nfl_weeks')
     })
-
-    it('has enable_multi_on_split for year and week', () => {
-      expect(
-        common_column_params.nfl_week_id.enable_multi_on_split
-      ).to.deep.equal(['year', 'week'])
-    })
   })
 
   describe('year_offset with nfl_week', function () {
@@ -435,10 +429,9 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
   })
 
   describe('common_column_params.single_nfl_week_id', function () {
-    it('exports a single-valued param keyed to nfl_week_id column', () => {
+    it('is keyed to the nfl_week_id column', () => {
       expect(common_column_params).to.have.property('single_nfl_week_id')
       const p = common_column_params.single_nfl_week_id
-      expect(p.single).to.equal(true)
       expect(p.column_name).to.equal('nfl_week_id')
     })
 

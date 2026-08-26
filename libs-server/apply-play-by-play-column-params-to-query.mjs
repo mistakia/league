@@ -115,28 +115,29 @@ export default function ({
         : [param_value]
       if (column_values.length) {
         if (column_param_key === 'nfl_week_id') {
-          const { years, seas_types } = decompose_nfl_weeks({
+          const { years: season_years, seas_types: season_types } =
+            decompose_nfl_weeks({
+              nfl_weeks: column_values
+            })
+          const covers_full_year_season_type = is_full_year_seas_type_coverage({
             nfl_weeks: column_values
           })
-          const covers_full_year_seas_type = is_full_year_seas_type_coverage({
-            nfl_weeks: column_values
-          })
-          if (!covers_full_year_seas_type) {
+          if (!covers_full_year_season_type) {
             query.whereIn(`${param_table}.${column_name}`, column_values)
           }
           // Only emit derived year IN when `year` is not set as a param of its
           // own -- the year column_param iteration emits it independently and
           // a duplicate predicate is cosmetic noise.
-          if (years.length && params.year == null) {
+          if (season_years.length && params.year == null) {
             query.whereIn(
               `${param_table}.${physical_year_column(param_table)}`,
-              years
+              season_years
             )
           }
-          if (seas_types.length) {
+          if (season_types.length) {
             query.whereIn(
               `${param_table}.${physical_seas_type_column(param_table)}`,
-              seas_types
+              season_types
             )
           }
         } else {

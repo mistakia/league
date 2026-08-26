@@ -8,7 +8,7 @@ import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve
  *   or absent. The narrowing below is what turns that into a seas_type list.
  */
 export default ({ params }) => {
-  const seas_type = Array.isArray(params.seas_type)
+  const season_type = Array.isArray(params.seas_type)
     ? params.seas_type
     : params.seas_type
       ? [params.seas_type]
@@ -16,12 +16,12 @@ export default ({ params }) => {
 
   const nfl_week_id = resolve_nfl_week_id_from_year_param({
     ...params,
-    seas_type
+    seas_type: season_type
   })
 
   return {
     ...params,
-    seas_type,
+    seas_type: season_type,
     ...(nfl_week_id.length && !params.nfl_week_id ? { nfl_week_id } : {})
   }
 }

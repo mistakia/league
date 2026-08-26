@@ -28,7 +28,7 @@ const log = debug('import-draft-kings')
  * @returns {object|null} - Matching NFL game or null
  */
 const find_matching_nfl_game = (draftkings_event, nfl_games) => {
-  const { week, seas_type } = current_season.calculate_week(
+  const { week, seas_type: season_type } = current_season.calculate_week(
     dayjs(draftkings_event.startEventDate)
   )
 
@@ -44,7 +44,7 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
   let nfl_game = nfl_games.find(
     (game) =>
       game.week === week &&
-      game.season_type === seas_type &&
+      game.season_type === season_type &&
       game.season_year === current_season.year &&
       game.away_nfl_team === visitor_team &&
       game.home_nfl_team === home_team
@@ -55,7 +55,7 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
     nfl_game = nfl_games.find(
       (game) =>
         game.week === week &&
-        game.season_type === seas_type &&
+        game.season_type === season_type &&
         game.season_year === current_season.year &&
         game.away_nfl_team === home_team &&
         game.home_nfl_team === visitor_team
@@ -64,7 +64,7 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
 
   if (!nfl_game) {
     log(
-      `No NFL game found for: ${visitor_team} @ ${home_team} (week ${week}, season ${seas_type})`
+      `No NFL game found for: ${visitor_team} @ ${home_team} (week ${week}, season ${season_type})`
     )
     log(`Event: ${draftkings_event?.name}`)
   }

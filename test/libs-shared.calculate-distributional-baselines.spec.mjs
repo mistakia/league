@@ -3,8 +3,10 @@ import * as chai from 'chai'
 
 import calculate_distributional_baselines, {
   build_league_starting_slots,
+  default_draw_seed,
   fill_starting_slots
 } from '#libs-shared/calculate-distributional-baselines.mjs'
+import { seeded_random } from '#libs-shared/seeded-random.mjs'
 import calculate_projection_dispersion, {
   dispersion_model
 } from '#libs-shared/calculate-projection-dispersion.mjs'
@@ -310,6 +312,60 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       const second = run()
       expect(first.baselines).to.deep.equal(second.baselines)
       expect(first.expected_surplus).to.deep.equal(second.expected_surplus)
+    })
+
+    // The DEFAULT source must be seeded, which is a stronger claim than the
+    // spec above: that one passes for any injected source and so said nothing
+    // about production, which passes none. An unseeded default published a new
+    // board on every hourly run with no input change behind it, and change-only
+    // history recorded each re-roll as though a projection had moved.
+    //
+    // Guarded by a negative control, because a run that produced an empty pool
+    // or a constant generator would satisfy the equality vacuously.
+    it('is deterministic with no random source supplied', () => {
+      const run = () =>
+        calculate_distributional_baselines({
+          players: flat_board,
+          league: two_team_league,
+          week: 0,
+          draws: 50,
+          dispersion_by_pid: flat_dispersion(flat_board, 40)
+        })
+
+      const first = run()
+      const second = run()
+
+      // Negative control: the assertions below are only meaningful if the pool
+      // is non-empty and the draws actually move the board off its means.
+      expect(Object.keys(first.expected_surplus)).to.not.be.empty
+      expect(first.total_pts_added).to.be.greaterThan(0)
+
+      expect(first.baselines).to.deep.equal(second.baselines)
+      expect(first.expected_surplus).to.deep.equal(second.expected_surplus)
+      expect(first.expected_net_surplus).to.deep.equal(
+        second.expected_net_surplus
+      )
+    })
+
+    // The seed must reach the draws. Without this, a default that ignored its
+    // seed entirely would pass the determinism spec above.
+    it('produces a different board under a different seed', () => {
+      const run = (random) =>
+        calculate_distributional_baselines({
+          players: flat_board,
+          league: two_team_league,
+          week: 0,
+          draws: 50,
+          random,
+          dispersion_by_pid: flat_dispersion(flat_board, 40)
+        })
+
+      const seeded = run(seeded_random(default_draw_seed))
+      const alternate = run(seeded_random(default_draw_seed + 1))
+
+      expect(seeded.expected_surplus).to.not.deep.equal(
+        alternate.expected_surplus
+      )
     })
 
     // The payoff max(X - baseline, 0) is convex in X, so by Jensen the expected

@@ -302,9 +302,9 @@ const make_league_player_projection_source = () => ({
       join_year: true,
       join_year_column: 'season_year',
       join_week: true,
-      // This table's week is character varying(3); week_reference is smallint,
-      // and Postgres will not compare them.
-      cast_join_week_to_string: true,
+      // This table's week was narrowed to smallint, so it compares to the
+      // smallint week_reference directly -- casting either side to VARCHAR is
+      // what breaks it.
       additional_conditions() {
         this.andOn(`${table_alias}.lid`, '=', db.raw('?', [league_id]))
       }

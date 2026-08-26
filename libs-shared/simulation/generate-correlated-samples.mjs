@@ -6,6 +6,8 @@
 import jstat from 'jstat'
 import { CholeskyDecomposition, Matrix } from 'ml-matrix'
 
+import { seeded_random } from '../seeded-random.mjs'
+
 /**
  * Standard normal CDF (cumulative distribution function).
  * Transforms a standard normal value to uniform [0,1].
@@ -69,21 +71,6 @@ export function generate_standard_normals({ n_simulations, n_players, seed }) {
   }
 
   return result
-}
-
-/**
- * Simple seeded PRNG (mulberry32).
- *
- * @param {number} seed - Seed value
- * @returns {() => number} Random function that returns values in [0,1)
- */
-function seeded_random(seed) {
-  return function () {
-    let t = (seed += 0x6d2b79f5)
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
 }
 
 /**

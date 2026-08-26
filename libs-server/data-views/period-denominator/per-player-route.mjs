@@ -120,7 +120,7 @@ export const add_per_player_route_cte = ({
       table_name: 'nfl_plays_receiver',
       query_context,
       column_params: params,
-      has_seas_type: false,
+      has_season_type: false,
       has_nfl_week_id: false
     })
   }

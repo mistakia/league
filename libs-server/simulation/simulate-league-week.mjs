@@ -83,7 +83,7 @@ export async function simulate_league_week({
       year,
       current_week: current_season.week
     }),
-    load_nfl_schedule({ year, week })
+    load_nfl_schedule({ season_year: year, week })
   ])
 
   if (matchups.length === 0) {

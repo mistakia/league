@@ -4,8 +4,8 @@ import { is_offseason } from '#constants'
 import throw_if_shortfall from './throw-if-shortfall.mjs'
 
 // Post-run oracle for projection imports: counts rows in projections_index
-// for the (year, week, source_id|sourceids, seas_type) tuple and surfaces a
-// shortfall through throw_if_shortfall when below the floor. Default floor
+// for the (season_year, week, source_id|sourceids, season_type) tuple and
+// surfaces a shortfall through throw_if_shortfall when below the floor. Default floor
 // is 50 for season totals (week=0) and 30 for weekly.
 //
 // Offseason short-circuit: during offseason (week=0) season-total projections
@@ -14,11 +14,11 @@ import throw_if_shortfall from './throw-if-shortfall.mjs'
 // positives. Matches the ESPN seasonal-import guard (§891) and the nflverse
 // zero-UFA in-season-only guard (league 56ee6942).
 export default async function check_projections_index_floor({
-  year,
+  season_year,
   week,
   source_id,
   sourceids,
-  seas_type,
+  season_type,
   floor
 }) {
   if (is_offseason) {
@@ -26,9 +26,9 @@ export default async function check_projections_index_floor({
   }
 
   const query = db('projections_index').where({
-    season_year: year,
+    season_year,
     week,
-    season_type: seas_type
+    season_type
   })
   if (sourceids) query.whereIn('source_id', sourceids)
   else query.where({ source_id })
@@ -40,7 +40,7 @@ export default async function check_projections_index_floor({
 
   throw_if_shortfall(
     count < effective_floor
-      ? `projections_index row-count shortfall for source_id=${source_label} (season_year=${year}, week=${week}, season_type=${seas_type}): ${count} rows (floor=${effective_floor})`
+      ? `projections_index row-count shortfall for source_id=${source_label} (season_year=${season_year}, week=${week}, season_type=${season_type}): ${count} rows (floor=${effective_floor})`
       : null
   )
 }

@@ -351,12 +351,14 @@ function create_player_team_stats_query({
     const nfl_week = Array.isArray(default_params.nfl_week_id)
       ? default_params.nfl_week_id
       : [default_params.nfl_week_id]
-    const { seas_types } = decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    const { seas_types: season_types } = decompose_nfl_weeks({
+      nfl_weeks: nfl_week
+    })
     if (!is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })) {
       player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
     }
-    if (seas_types.length) {
-      player_team_stats_query.whereIn('nfl_games.season_type', seas_types)
+    if (season_types.length) {
+      player_team_stats_query.whereIn('nfl_games.season_type', season_types)
     }
   } else {
     player_team_stats_query.whereIn(

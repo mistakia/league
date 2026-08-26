@@ -21,8 +21,6 @@ const player_contract_field = (props) => ({
         )
       ],
       default_value: current_season.year
-      // TODO enable multi-year
-      // enable_multi_on_split: ['year']
     }
 
     // TODO enable career_year param

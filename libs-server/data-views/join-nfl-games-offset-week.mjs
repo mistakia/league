@@ -10,7 +10,7 @@ export default function apply_nfl_games_offset_week_join({
   const params = nfl_week_identifier.nfl_week_offset_params({ offset })
   if (!params) return query
 
-  const { year, seas_type, week } = params
+  const { year: season_year, seas_type: season_type, week } = params
   const table_expr = `nfl_games as ${alias}`
 
   query.leftJoin(table_expr, function () {
@@ -21,8 +21,8 @@ export default function apply_nfl_games_offset_week_join({
         team_column
       )
     })
-      .andOn(`${alias}.season_year`, '=', db.raw('?::int', [year]))
-      .andOn(`${alias}.season_type`, '=', db.raw('?::text', [seas_type]))
+      .andOn(`${alias}.season_year`, '=', db.raw('?::int', [season_year]))
+      .andOn(`${alias}.season_type`, '=', db.raw('?::text', [season_type]))
       .andOn(`${alias}.week`, '=', db.raw('?::int', [week]))
   })
 

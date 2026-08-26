@@ -51,16 +51,20 @@ export const NFL_TEAMS = [
  * Delegates to load_nfl_schedules_for_weeks for a single week.
  *
  * @param {object} params
- * @param {number} params.year - NFL year
+ * @param {number} params.season_year - NFL year
  * @param {number} params.week - NFL week
- * @param {string} [params.seas_type='REG'] - Season type (REG or POST)
+ * @param {string} [params.season_type='REG'] - Season type (REG or POST)
  * @returns {Promise<object>} Schedule object: { [team_abbrev]: { opponent, esbid, is_home } }
  */
-export async function load_nfl_schedule({ year, week, seas_type = 'REG' }) {
+export async function load_nfl_schedule({
+  season_year,
+  week,
+  season_type = 'REG'
+}) {
   const schedules = await load_nfl_schedules_for_weeks({
-    year,
+    season_year,
     weeks: [week],
-    seas_type
+    season_type
   })
   return schedules.get(week)
 }
@@ -69,22 +73,22 @@ export async function load_nfl_schedule({ year, week, seas_type = 'REG' }) {
  * Load NFL schedule for multiple weeks in a single query.
  *
  * @param {object} params
- * @param {number} params.year - NFL year
+ * @param {number} params.season_year - NFL year
  * @param {number[]} params.weeks - Array of NFL weeks
- * @param {string} [params.seas_type='REG'] - Season type (REG or POST)
+ * @param {string} [params.season_type='REG'] - Season type (REG or POST)
  * @returns {Promise<Map<number, object>>} Map of week -> schedule object
  */
 export async function load_nfl_schedules_for_weeks({
-  year,
+  season_year,
   weeks,
-  seas_type = 'REG'
+  season_type = 'REG'
 }) {
-  log(`Loading NFL schedules for year ${year}, weeks ${weeks.join(',')}`)
+  log(`Loading NFL schedules for year ${season_year}, weeks ${weeks.join(',')}`)
 
   const games = await db('nfl_games')
-    .where({ season_year: year })
+    .where({ season_year })
     .whereIn('week', weeks)
-    .whereIn('season_type', seas_type === 'POST' ? ['POST'] : ['REG', 'POST'])
+    .whereIn('season_type', season_type === 'POST' ? ['POST'] : ['REG', 'POST'])
     .select(
       'away_nfl_team',
       'home_nfl_team',
@@ -142,11 +146,11 @@ export async function load_nfl_schedules_for_weeks({
  *
  * @param {object} params
  * @param {string} params.team - NFL team abbreviation
- * @param {number} params.year - NFL year
+ * @param {number} params.season_year - NFL year
  * @param {number} params.week - NFL week
  * @returns {Promise<string|null>} Opponent team abbreviation or null if on bye
  */
-export async function get_team_opponent({ team, year, week }) {
-  const schedule = await load_nfl_schedule({ year, week })
+export async function get_team_opponent({ team, season_year, week }) {
+  const schedule = await load_nfl_schedule({ season_year, week })
   return schedule[team]?.opponent || null
 }

@@ -156,7 +156,10 @@ const run_season_forecast = async (lid) => {
 // See user:text/league/projection-history-system.md for the full rationale.
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   log(`processing projections for year ${year} and seas_type ${seas_type}`)
-  const projections = await get_player_projections({ year, seas_type })
+  const projections = await get_player_projections({
+    season_year: year,
+    season_type: seas_type
+  })
   log(`fetched ${projections.length} projections`)
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)

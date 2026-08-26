@@ -35,8 +35,8 @@ export default async function ({ team_id, league_id }) {
     })
 
     const fallback_week = fallback_params.week
-    const fallback_year = fallback_params.year
-    const fallback_seas_type = fallback_params.seas_type
+    const fallback_season_year = fallback_params.year
+    const fallback_season_type = fallback_params.seas_type
 
     player_query.leftJoin('nfl_games as reference_week_game', function () {
       this.on(function () {
@@ -63,7 +63,7 @@ export default async function ({ team_id, league_id }) {
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
-            [fallback_year, prior_week_params.year]
+            [fallback_season_year, prior_week_params.year]
           )
         )
         .andOn(
@@ -71,7 +71,7 @@ export default async function ({ team_id, league_id }) {
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::text ELSE ?::text END`,
-            [fallback_seas_type, prior_week_params.seas_type]
+            [fallback_season_type, prior_week_params.seas_type]
           )
         )
     })

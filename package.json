@@ -15,6 +15,7 @@
     "check:cluster": "node scripts/check-cluster-gates.mjs",
     "check:types": "node db/tools/generate-schema-types.mjs --check && node node_modules/typescript/bin/tsc --noEmit",
     "check:jsdoc-baseline": "node eslint-rules/generate-bare-container-jsdoc-baseline.mjs --check",
+    "check:private-tests": "node db/gates/check-private-tests.mjs",
     "generate:schema-types": "node db/tools/generate-schema-types.mjs",
     "measure:seams": "node db/tools/measure-cross-module-seams.mjs --coverage",
     "test:private": "LEAGUE_SUITE_SUBSET=1 LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit 'private/test/**/*.spec.mjs' --require test/global.mjs",
