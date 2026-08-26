@@ -609,4 +609,6 @@ Tables with weekly NFL data include a `nfl_week_id` stored generated column that
 | `projections_index`   | Same as `projections_history`                                                                    | Current state; partitioned by `season_year`; requires partition pruning hint                           |
 | `practice`            | `season_year::text \|\| '_' \|\| season_type \|\| '_WEEK_' \|\| week::text`                      | `season_type` column added with `DEFAULT 'REG'`                                                        |
 
+**`season_projections_history` deliberately has NO `nfl_week_id`, and that is the point of the table.** The season-long raw projection series used to live under a `week = 0` sentinel in `projections_history`, which generated 2.43 million `YYYY_REG_WEEK_0` identifiers — a spelling the season vocabulary does not admit, minted only because a mixed table demanded a week. The series is keyed `(source_id, pid, season_year, generated_at)` and carries no `week`, `season_type`, `nfl_week_id` or `user_id`. Do not add one: a season-long projection has no week to identify.
+
 **Utility Module**: `libs-shared/nfl-week-identifier.mjs` provides parsing, formatting, validation, and generation functions for nfl_week_id values.

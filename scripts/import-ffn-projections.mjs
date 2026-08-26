@@ -4,7 +4,12 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  record_projection_history
+} from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -122,9 +127,7 @@ const run = async ({ dry = false } = {}) => {
       'season_type'
     ])
     .merge()
-  await db('projections_history').insert(
-    inserts.map((i) => ({ ...i, generated_at }))
-  )
+  await record_projection_history({ inserts, generated_at })
 }
 
 const main = async () => {

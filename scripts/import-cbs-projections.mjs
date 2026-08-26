@@ -9,7 +9,8 @@ import {
   is_main,
   find_player_row,
   report_job,
-  check_projections_index_floor
+  check_projections_index_floor,
+  record_projection_history
 } from '#libs-server'
 import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -193,9 +194,7 @@ const run = async ({ season = false, dry = false } = {}) => {
         'season_type'
       ])
       .merge()
-    await db('projections_history').insert(
-      inserts.map((i) => ({ ...i, generated_at }))
-    )
+    await record_projection_history({ inserts, generated_at })
   }
 
   return {

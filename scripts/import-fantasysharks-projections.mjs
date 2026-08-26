@@ -9,7 +9,8 @@ import {
   find_player_row,
   report_job,
   fetch_with_retry,
-  check_projections_index_floor
+  check_projections_index_floor,
+  record_projection_history
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -130,9 +131,7 @@ const run = async ({ season = false, dry = false } = {}) => {
         'season_type'
       ])
       .merge()
-    await db('projections_history').insert(
-      inserts.map((i) => ({ ...i, generated_at }))
-    )
+    await record_projection_history({ inserts, generated_at })
   }
 
   return {

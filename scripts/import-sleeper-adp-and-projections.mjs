@@ -10,7 +10,8 @@ import {
   batch_insert,
   check_projections_index_floor,
   find_or_create_adp_format,
-  grade_adp_import_run
+  grade_adp_import_run,
+  record_projection_history
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -372,12 +373,9 @@ const import_sleeper_adp_and_projections = async ({
           .merge()
       }
     })
-    await batch_insert({
-      items: projection_inserts.map((i) => ({ ...i, generated_at })),
-      batch_size: BATCH_SIZE,
-      save: async (batch) => {
-        await db('projections_history').insert(batch)
-      }
+    await record_projection_history({
+      inserts: projection_inserts,
+      generated_at
     })
   }
 
