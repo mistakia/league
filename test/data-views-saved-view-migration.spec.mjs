@@ -6,21 +6,45 @@ import * as chai from 'chai'
 
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
-import * as migration_module from '#libs-shared/data-views-saved-view-migration.mjs'
 import {
-  BOOLEAN_PREFIX_PARAM_RENAMES,
+  RENAME_REGISTRY,
   COLUMN_ID_RENAMES,
-  COUNTING_STAT_PARAM_RENAMES,
-  MARKETS_PARAM_RENAMES,
-  PLAYS_LOCAL_PARAM_RENAMES,
-  RECEIVING_PREFIX_PARAM_RENAMES,
-  SHORTHAND_PARAM_RENAMES,
   apply_column_id_rename,
   migrate_column_entry,
   migrate_table_state
 } from '#libs-shared/data-views-saved-view-migration.mjs'
 
 const { expect } = chai
+
+// The live `nfl_plays` param-key registry (plus nfl_games), used as the liveness
+// oracle below. The ADP table's `number_quarterback` is the one legacy key whose
+// target is not on nfl_plays -- it lives on the ADP table, whose registry is in
+// an `app/` module that imports extensionless paths and so cannot be imported
+// here. Read from source.
+const adp_source = fs.readFileSync(
+  new URL(
+    '../app/core/data-views-fields/player-adp-table-fields.js',
+    import.meta.url
+  ),
+  'utf8'
+)
+const is_adp_param = (name) =>
+  new RegExp(`^\\s{4}${name}: \\{$`, 'm').test(adp_source)
+
+const is_live_param = (name) =>
+  Object.prototype.hasOwnProperty.call(nfl_plays_column_params, name) ||
+  is_adp_param(name)
+
+// Every record in the `param_key` half of the registry, in declared order.
+// This is the same data the client migration and the server boundary both run;
+// the specs below iterate it directly so a rename can no longer be declared in
+// one place and forgotten in a second.
+const param_key_batches = RENAME_REGISTRY.filter(
+  (batch) => batch.level === 'param_key'
+)
+const param_key_froms = param_key_batches.flatMap((batch) =>
+  Object.keys(batch.records)
+)
 
 describe('data-views saved-view migrator', () => {
   describe('rate_type -> output', () => {
@@ -73,36 +97,55 @@ describe('data-views saved-view migrator', () => {
     })
   })
 
-  describe('ngs play-filter param renames (8a4b6e4a)', () => {
-    it('renames every legacy _ngs key, preserving the value', () => {
-      const result = migrate_column_entry({
-        column_id: 'team_pass_attempts_from_plays',
-        params: {
-          route_ngs: ['GO'],
-          cov_type_ngs: ['COVER_1'],
-          man_zone_ngs: ['MAN_COVERAGE'],
-          time_to_throw_ngs: [0, 3],
-          air_yards_ngs: [5, 20],
-          pru_ngs: [1, 4],
-          box_ngs: [6, 8]
+  describe('param-key renames (registry)', () => {
+    // The registry key IS the persisted key, and
+    // apply_play_by_play_column_params_to_query skips an unrecognised one
+    // silently -- so a missing rule is a dropped filter with no error and no
+    // other failing test. This iterates the RECORDS, so a rename that lands in
+    // the registry is carried here automatically; the count assertions below
+    // are what catch a rule DELETED from the registry (a loop over records
+    // cannot see an entry that is no longer iterated).
+    it('migrates every param_key legacy key to a single live registry key', () => {
+      for (const batch of param_key_batches) {
+        if (batch.id === 'LEGACY_OUTPUT') continue
+        for (const legacy_key of Object.keys(batch.records)) {
+          const result = migrate_column_entry({
+            column_id: 'player_pass_attempts_from_plays',
+            params: { [legacy_key]: [1] }
+          })
+          expect(result.changed, legacy_key).to.equal(true)
+          const resolved = Object.keys(result.params)
+          expect(resolved.length, legacy_key).to.equal(1)
+          const [current_key] = resolved
+          expect(
+            is_live_param(current_key),
+            `${legacy_key} -> ${current_key} is not a registry key`
+          ).to.equal(true)
         }
-      })
-      expect(result.changed).to.equal(true)
-      // route and pru are NOT terminal: the 2026-08-05 shorthand sweep moved
-      // both again, so each resolves through two rules in this single pass.
-      expect(result.params).to.deep.equal({
-        charted_route: ['GO'],
-        coverage_type_ngs: ['COVER_1'],
-        man_zone: ['MAN_COVERAGE'],
-        time_to_throw: [0, 3],
-        air_yards: [5, 20],
-        ngs_pass_rushers: [1, 4],
-        box_defenders: [6, 8]
-      })
+      }
     })
 
-    // qb_pressure and qb_pressure_tracking both exist in the registry today and
-    // are different params. The legacy qb_pressure_ngs is the tracking one.
+    // The registry is declared in a load-bearing order; collapsing a rename's
+    // intermediate hop changes the both-keys-present edge case (see the
+    // route_ngs + route test below), so these chains are asserted exactly.
+    it('chains route_ngs through to charted_route', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_targets_from_plays',
+        params: { route_ngs: ['GO'] }
+      })
+      expect(result.params).to.deep.equal({ charted_route: ['GO'] })
+    })
+
+    it('chains pru_ngs through to ngs_pass_rushers', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { pru_ngs: [4] }
+      })
+      expect(result.params).to.deep.equal({ ngs_pass_rushers: [4] })
+    })
+
+    // qb_pressure and qb_pressure_tracking both exist in the registry today
+    // and are different params. The legacy qb_pressure_ngs is the tracking one.
     // Both were then boolean-prefixed, so this is the one key that migrates
     // through two rules in a single pass.
     it('chains qb_pressure_ngs through to is_qb_pressure_tracking', () => {
@@ -122,75 +165,28 @@ describe('data-views saved-view migrator', () => {
       expect(result.params).to.deep.equal({ is_qb_pressure_tracking: false })
     })
 
-    it('keeps the current key when both are present', () => {
+    it('chains cov_type_ngs through to coverage_type_ngs', () => {
       const result = migrate_column_entry({
-        column_id: 'team_pass_attempts_from_plays',
-        params: { route_ngs: ['GO'], route: ['SLANT'] }
+        column_id: 'player_targets_from_plays',
+        params: { cov_type_ngs: ['COVER_1'] }
       })
-      expect(result.changed).to.equal(true)
-      // route_ngs is dropped because route is already present; the surviving
-      // route is then carried to charted_route by the shorthand map.
-      expect(result.params).to.deep.equal({ charted_route: ['SLANT'] })
+      expect(result.params).to.deep.equal({ coverage_type_ngs: ['COVER_1'] })
     })
 
-    // box_defenders is ambiguous across that commit (box_ngs became
-    // box_defenders while the old box_defenders became box_defenders_charted),
-    // so it must pass through untouched rather than be guessed at.
-    it('leaves a bare box_defenders key alone', () => {
+    it('chains ret_yds through to return_yards', () => {
       const result = migrate_column_entry({
-        column_id: 'team_pass_attempts_from_plays',
-        params: { box_defenders: [6, 8] }
+        column_id: 'player_pass_attempts_from_plays',
+        params: { ret_yds: [1] }
       })
-      expect(result.changed).to.equal(false)
-      expect(result.params).to.deep.equal({ box_defenders: [6, 8] })
-    })
-  })
-
-  describe('boolean-prefix param renames (2026-08-04 conformance sweep)', () => {
-    // The registry key IS the persisted key, and
-    // apply_play_by_play_column_params_to_query skips an unrecognised one
-    // silently -- so a missing rule is a dropped filter with no error and no
-    // other failing test. The second assertion below is the real gate: it fails
-    // when a registry key that MOVED still has no rule. The first cannot catch a
-    // rule deleted from the map -- it iterates the map under test, so an absent
-    // entry is simply not iterated. Proven by mutation: deleting a rule leaves
-    // this file fully green.
-    it('migrates every legacy key to a key the registry still carries', () => {
-      for (const [legacy_key, current_key] of Object.entries(
-        BOOLEAN_PREFIX_PARAM_RENAMES
-      )) {
-        const result = migrate_column_entry({
-          column_id: 'player_pass_attempts_from_plays',
-          params: { [legacy_key]: true }
-        })
-        expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({
-          [current_key]: true
-        })
-        expect(
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            current_key
-          ),
-          `${current_key} is not a registry key`
-        ).to.equal(true)
-      }
+      expect(result.params).to.deep.equal({ return_yards: [1] })
     })
 
-    it('leaves no renamed key still present in the registry', () => {
-      const stranded = Object.keys(BOOLEAN_PREFIX_PARAM_RENAMES).filter((key) =>
-        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
-      )
-      expect(stranded).to.deep.equal([])
-    })
-
-    // Both assertions above iterate the map under test, so neither can see a
-    // rule DELETED from it. This count is what catches that: 81 registry keys
-    // moved in the 2026-08-04 boolean-prefix rename and each needs exactly one
-    // rule. If a future rename adds rules here, raise this number deliberately
-    // rather than deleting the assertion.
-    it('carries a rule for each of the 81 registry keys that moved', () => {
-      expect(Object.keys(BOOLEAN_PREFIX_PARAM_RENAMES)).to.have.lengthOf(81)
+    it('chains recv_yds through to receiving_yards', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { recv_yds: [60, 99] }
+      })
+      expect(result.params).to.deep.equal({ receiving_yards: [60, 99] })
     })
 
     // nfl_games.ot is the one renamed column outside nfl_plays; it is a
@@ -201,83 +197,6 @@ describe('data-views saved-view migrator', () => {
         params: { ot: true }
       })
       expect(result.params).to.deep.equal({ is_overtime: true })
-    })
-
-    it('preserves a non-boolean value vocabulary unchanged', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_pass_attempts_from_plays',
-        params: { motion: [true, false] }
-      })
-      expect(result.params).to.deep.equal({ is_motion: [true, false] })
-    })
-
-    it('keeps the current key when a view carries both', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_pass_attempts_from_plays',
-        params: { motion: true, is_motion: false }
-      })
-      expect(result.params).to.deep.equal({ is_motion: false })
-    })
-  })
-
-  describe('shorthand param renames (2026-08-05 conformance sweep)', () => {
-    // Same failure mode as the boolean-prefix block above, and the same gate
-    // structure: assertion one proves each rule lands on a key the registry
-    // still carries, assertion two proves no legacy key survived the rename,
-    // and the count is what catches a rule DELETED from the map (the first two
-    // iterate the map under test, so an absent entry is simply not iterated).
-    it('migrates every legacy key to a key the registry still carries', () => {
-      for (const [legacy_key, current_key] of Object.entries(
-        SHORTHAND_PARAM_RENAMES
-      )) {
-        const result = migrate_column_entry({
-          column_id: 'player_pass_attempts_from_plays',
-          params: { [legacy_key]: [1] }
-        })
-        expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({ [current_key]: [1] })
-        expect(
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            current_key
-          ),
-          `${current_key} is not a registry key`
-        ).to.equal(true)
-      }
-    })
-
-    it('leaves no renamed key still present in the registry', () => {
-      const stranded = Object.keys(SHORTHAND_PARAM_RENAMES).filter((key) =>
-        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
-      )
-      expect(stranded).to.deep.equal([])
-    })
-
-    // 18 of the 204 renamed columns were also registry keys. If a future rename
-    // adds rules here, raise this number deliberately rather than deleting the
-    // assertion.
-    it('carries a rule for each of the 18 registry keys that moved', () => {
-      expect(Object.keys(SHORTHAND_PARAM_RENAMES)).to.have.lengthOf(18)
-    })
-
-    // The two keys whose rewrite is a CHAIN: an _ngs key renamed in 8a4b6e4a
-    // lands on a shorthand key that the 2026-08-05 sweep then moved again. The
-    // single migrate_params pass resolves this only because the shorthand map is
-    // merged after PLAY_FILTER_PARAM_RENAMES.
-    it('chains route_ngs through to charted_route', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_targets_from_plays',
-        params: { route_ngs: ['GO'] }
-      })
-      expect(result.params).to.deep.equal({ charted_route: ['GO'] })
-    })
-
-    it('chains pru_ngs through to ngs_pass_rushers', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_pass_attempts_from_plays',
-        params: { pru_ngs: [4] }
-      })
-      expect(result.params).to.deep.equal({ ngs_pass_rushers: [4] })
     })
 
     // `dot` is the depth-of-target param whose COLUMN moved to depth_of_target
@@ -294,171 +213,67 @@ describe('data-views saved-view migrator', () => {
       ).to.equal(true)
     })
 
-    it('keeps the current key when a view carries both', () => {
+    // box_defenders is ambiguous across the 2025-07-24 rename (box_ngs became
+    // box_defenders while the old box_defenders became box_defenders_charted),
+    // so it must pass through untouched rather than be guessed at. The registry
+    // deliberately declares no box_defenders FROM rule.
+    it('leaves a bare box_defenders key alone', () => {
+      const result = migrate_column_entry({
+        column_id: 'team_pass_attempts_from_plays',
+        params: { box_defenders: [6, 8] }
+      })
+      expect(result.changed).to.equal(false)
+      expect(result.params).to.deep.equal({ box_defenders: [6, 8] })
+    })
+
+    it('leaves no renamed param key still present in the registry', () => {
+      const stranded = param_key_froms.filter((key) => is_live_param(key))
+      expect(stranded).to.deep.equal([])
+    })
+
+    it('carries a rule for each of the 190 param keys that moved', () => {
+      expect(param_key_froms.length).to.equal(190)
+    })
+  })
+
+  describe('both-keys-present rule', () => {
+    // A view carrying BOTH spellings keeps the "current" one: the legacy key is
+    // the stale copy by construction. When an intermediate hop is present, the
+    // surviving value still chains to the live terminal.
+    it('keeps the current key when route_ngs and route are both present', () => {
+      const result = migrate_column_entry({
+        column_id: 'team_pass_attempts_from_plays',
+        params: { route_ngs: ['GO'], route: ['SLANT'] }
+      })
+      expect(result.changed).to.equal(true)
+      // route_ngs is dropped because route is already present; the surviving
+      // route is then carried to charted_route by the shorthand batch.
+      expect(result.params).to.deep.equal({ charted_route: ['SLANT'] })
+    })
+
+    it('keeps the current key when motion and is_motion are both present', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { motion: true, is_motion: false }
+      })
+      expect(result.params).to.deep.equal({ is_motion: false })
+    })
+
+    it('keeps the current key when qtr and quarter are both present', () => {
       const result = migrate_column_entry({
         column_id: 'player_pass_attempts_from_plays',
         params: { qtr: [1], quarter: [4] }
       })
       expect(result.params).to.deep.equal({ quarter: [4] })
     })
-  })
 
-  describe('plays-local param renames (2026-08-16 conform sweep)', () => {
-    // Same failure mode and gate structure as the shorthand block: assertion
-    // one proves each rule lands on a key the registry still carries, assertion
-    // two proves no legacy key survived, and the count catches a rule DELETED
-    // from the map. 28 of the 91 renamed plays-local columns were also registry
-    // keys, and the registry key IS the persisted key.
-    // ret_yds is the one rule here whose target was itself renamed again, by
-    // the 2026-08-17 counting-stat conform (ret_yds -> return_yds ->
-    // return_yards), so the loop resolves that hop rather than asserting on this
-    // map's declared target. Same shape as the route_ngs and pru_ngs chains
-    // above, and it means a rule that stops chaining correctly still fails here.
-    it('migrates every legacy key to a key the registry still carries', () => {
-      for (const [legacy_key, current_key] of Object.entries(
-        PLAYS_LOCAL_PARAM_RENAMES
-      )) {
-        const counting_key =
-          COUNTING_STAT_PARAM_RENAMES[current_key] ?? current_key
-        const final_key = MARKETS_PARAM_RENAMES[counting_key] ?? counting_key
-        const result = migrate_column_entry({
-          column_id: 'player_pass_attempts_from_plays',
-          params: { [legacy_key]: [1] }
-        })
-        expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({ [final_key]: [1] })
-        expect(
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            final_key
-          ),
-          `${final_key} is not a registry key`
-        ).to.equal(true)
-      }
-    })
-
-    it('chains ret_yds through to return_yards', () => {
+    it('keeps the current key when sec_rem_qtr and seconds_remaining_quarter are both present', () => {
       const result = migrate_column_entry({
         column_id: 'player_pass_attempts_from_plays',
-        params: { ret_yds: [1] }
+        params: { sec_rem_qtr: [30], seconds_remaining_quarter: [60] }
       })
-      expect(result.params).to.deep.equal({ return_yards: [1] })
+      expect(result.params).to.deep.equal({ seconds_remaining_quarter: [60] })
     })
-  })
-
-  describe('counting-stat param renames (2026-08-17 conform sweep)', () => {
-    // Same failure mode and gate structure as the blocks above: assertion one
-    // proves each rule lands on a key the registry still carries, assertion two
-    // proves no legacy key survived, and the count catches a rule DELETED from
-    // the map. 29 of the 148 renamed columns were live registry keys.
-    it('migrates every legacy key to a key the registry still carries', () => {
-      for (const [legacy_key, current_key] of Object.entries(
-        COUNTING_STAT_PARAM_RENAMES
-      )) {
-        const final_key = MARKETS_PARAM_RENAMES[current_key] ?? current_key
-        const result = migrate_column_entry({
-          column_id: 'player_pass_attempts_from_plays',
-          params: { [legacy_key]: [1] }
-        })
-        expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({ [final_key]: [1] })
-        expect(
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            final_key
-          ),
-          `${final_key} is not a registry key`
-        ).to.equal(true)
-      }
-    })
-
-    it('leaves no renamed key still present in the registry', () => {
-      const stranded = Object.keys(COUNTING_STAT_PARAM_RENAMES).filter((key) =>
-        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
-      )
-      expect(stranded).to.deep.equal([])
-    })
-
-    it('carries a rule for each of the 29 registry keys that moved', () => {
-      expect(Object.keys(COUNTING_STAT_PARAM_RENAMES)).to.have.lengthOf(29)
-    })
-
-    it('chains recv_yds through to receiving_yards', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_pass_attempts_from_plays',
-        params: { recv_yds: [60, 99] }
-      })
-      expect(result.params).to.deep.equal({ receiving_yards: [60, 99] })
-    })
-
-    // cov_type takes its SOURCE QUALIFIER back rather than the plain expansion,
-    // because nfl_plays already carries a coverage_type enum from the
-    // PlayerProfiler charting mapping. Its sibling cov_type_charted is not a
-    // registry key, so only this one appears in the map.
-    it('chains cov_type_ngs through to coverage_type_ngs', () => {
-      const result = migrate_column_entry({
-        column_id: 'player_targets_from_plays',
-        params: { cov_type_ngs: ['COVER_1'] }
-      })
-      expect(result.params).to.deep.equal({ coverage_type_ngs: ['COVER_1'] })
-    })
-
-    it('leaves no renamed key still present in the registry', () => {
-      const stranded = Object.keys(PLAYS_LOCAL_PARAM_RENAMES).filter((key) =>
-        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
-      )
-      expect(stranded).to.deep.equal([])
-    })
-
-    it('carries a rule for each of the 28 registry keys that moved', () => {
-      expect(Object.keys(PLAYS_LOCAL_PARAM_RENAMES)).to.have.lengthOf(28)
-    })
-  })
-
-  describe('receiving-prefix param renames (2026-08-18 conform sweep)', () => {
-    // Same failure mode and gate structure as the blocks above. Exactly ONE of
-    // the 41 renamed columns was also a registry key -- nfl_plays.recv_yards --
-    // and the registry key IS the persisted key, so a saved view carrying it
-    // would silently lose its filter rather than error.
-    it('migrates every legacy key to a key the registry still carries', () => {
-      for (const [legacy_key, current_key] of Object.entries(
-        RECEIVING_PREFIX_PARAM_RENAMES
-      )) {
-        const result = migrate_column_entry({
-          column_id: 'player_pass_attempts_from_plays',
-          params: { [legacy_key]: [1] }
-        })
-        expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({ [current_key]: [1] })
-        expect(
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            current_key
-          ),
-          `${current_key} is not a registry key`
-        ).to.equal(true)
-      }
-    })
-
-    it('leaves no renamed key still present in the registry', () => {
-      const stranded = Object.keys(RECEIVING_PREFIX_PARAM_RENAMES).filter(
-        (key) =>
-          Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
-      )
-      expect(stranded).to.deep.equal([])
-    })
-
-    it('carries a rule for the 1 registry key that moved', () => {
-      expect(Object.keys(RECEIVING_PREFIX_PARAM_RENAMES)).to.have.lengthOf(1)
-    })
-  })
-
-  it('keeps the current key when a view carries both', () => {
-    const result = migrate_column_entry({
-      column_id: 'player_pass_attempts_from_plays',
-      params: { sec_rem_qtr: [30], seconds_remaining_quarter: [60] }
-    })
-    expect(result.params).to.deep.equal({ seconds_remaining_quarter: [60] })
   })
 
   describe('scoring_format_hash -> scoring_format_id (44cf7fd9)', () => {
@@ -502,8 +317,8 @@ describe('data-views saved-view migrator', () => {
       expect(result.params).to.deep.equal({ scoring_format_id: 'draftkings' })
     })
 
-    // Dropping an unknown hash would turn a filter the coverage oracle can still
-    // find into one it cannot.
+    // Dropping an unknown hash would turn a filter the coverage oracle can
+    // still find into one it cannot.
     it('leaves an unrecognised hash in place rather than dropping the filter', () => {
       const params = { scoring_format_hash: ['deadbeef'] }
       const result = migrate_column_entry({
@@ -541,6 +356,21 @@ describe('data-views saved-view migrator', () => {
       expect(result.params).to.deep.equal({
         output_match_column_params: ['year', 'week'],
         output_column_params: { year: [2023] }
+      })
+    })
+
+    it('declares both keys once, in the LEGACY_OUTPUT batch', () => {
+      // The registry is the only declaration of this rename; the second copy
+      // in data-views-output-tokens is gone. Pinned by VALUE rather than
+      // against that copy, because an assertion comparing two declarations
+      // proves only that they agree -- it goes vacuous the moment one is
+      // derived from the other, which is exactly what happened here.
+      const declared = RENAME_REGISTRY.find(
+        (batch) => batch.id === 'LEGACY_OUTPUT'
+      ).records
+      expect(declared).to.deep.equal({
+        rate_type_column_params: 'output_column_params',
+        rate_type_match_column_params: 'output_match_column_params'
       })
     })
   })
@@ -771,49 +601,20 @@ describe('data-views saved-view migrator', () => {
   })
 })
 
-// Every legacy param key must RESOLVE to a name a live registry carries today.
-//
-// This is the file-wide form of the rule stated beside PLAYS_LOCAL_PARAM_RENAMES:
-// a map whose target is itself legacy is one reordering away from resolving to a
-// key nothing recognises, and a saved view carrying it then loses its filter
-// silently. The per-map specs above cover four of the eight maps by hand, which
-// is why three stale targets shipped during the 2026-08-17 conform campaign --
-// `pos_to_rem` and `ydl_num` (repointed with the long-tail batch) and `num_qb`,
-// whose target sat stale with no spec covering POSITION_CODE_PARAM_RENAMES at all.
+// Every legacy key must RESOLVE to a name a live registry carries today.
 //
 // Resolution rather than the raw target is the assertion, because CHAINS are
-// legitimate here: eight entries deliberately target another map's legacy key and
-// the merge order resolves them in one pass (fg_prob -> field_goal_prob ->
-// field_goal_probability). Asserting on the raw target would forbid those.
+// legitimate here (route_ngs -> route -> charted_route; fg_prob ->
+// field_goal_prob -> field_goal_probability): asserting on the raw `to` would
+// forbid those. This is the spec mirror of the rename-target-liveness gate in
+// db/, which enforces the same thing over the same RENAME_REGISTRY data as a
+// durable cluster gate.
 describe('rename-map target liveness', () => {
-  // `num_qb` is the one legacy key whose column is not on nfl_plays -- it is the
-  // ADP table's, whose registry lives in an `app/` module that imports
-  // extensionless paths and so cannot be imported here. Read from source.
-  const adp_source = fs.readFileSync(
-    new URL(
-      '../app/core/data-views-fields/player-adp-table-fields.js',
-      import.meta.url
-    ),
-    'utf8'
-  )
-  const is_adp_param = (name) =>
-    new RegExp(`^\\s{4}${name}: \\{$`, 'm').test(adp_source)
-
-  const rename_maps = Object.entries(migration_module).filter(
-    ([name, value]) =>
-      name.endsWith('_PARAM_RENAMES') && value && typeof value === 'object'
-  )
-
-  it('covers every exported rename map', () => {
-    // A map added without being exported, or renamed out of the suffix
-    // convention, would silently leave this whole check asserting nothing.
-    expect(rename_maps.length).to.equal(9)
-  })
-
-  it('resolves every legacy key to a live registry key', () => {
+  it('resolves every param_key legacy key to a live registry key', () => {
     const stranded = []
-    for (const [map_name, map] of rename_maps) {
-      for (const legacy_key of Object.keys(map)) {
+    for (const batch of param_key_batches) {
+      if (batch.id === 'LEGACY_OUTPUT') continue
+      for (const legacy_key of Object.keys(batch.records)) {
         const result = migrate_column_entry({
           column_id: 'player_pass_attempts_from_plays',
           params: { [legacy_key]: [1] }
@@ -821,18 +622,13 @@ describe('rename-map target liveness', () => {
         const resolved = Object.keys(result.params)
         if (resolved.length !== 1) {
           stranded.push(
-            `${map_name}.${legacy_key} resolved to ${resolved.length} keys`
+            `${batch.id}.${legacy_key} resolved to ${resolved.length} keys`
           )
           continue
         }
         const [current_key] = resolved
-        const is_live =
-          Object.prototype.hasOwnProperty.call(
-            nfl_plays_column_params,
-            current_key
-          ) || is_adp_param(current_key)
-        if (!is_live) {
-          stranded.push(`${map_name}.${legacy_key} -> ${current_key}`)
+        if (!is_live_param(current_key)) {
+          stranded.push(`${batch.id}.${legacy_key} -> ${current_key}`)
         }
       }
     }
@@ -865,15 +661,41 @@ describe('rename-map target liveness', () => {
     ).to.deep.equal([])
   })
 
-  // The assertion above iterates the map under test, so it cannot see a rule
-  // DELETED from it. This count is what catches that. If a future rename adds
-  // rules here, raise this number deliberately rather than deleting the
-  // assertion.
+  // The assertions above iterate the registry under test, so they cannot see a
+  // record DELETED from it. These counts are what catch that; raise a number
+  // deliberately when a rename legitimately adds or removes entries.
+  it('carries a rule for each of the 190 param keys that moved', () => {
+    expect(param_key_froms.length).to.equal(190)
+  })
+
+  it('carries a rule for each of the 45 column ids that moved', () => {
+    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(45)
+  })
+
+  // LEGACY_OUTPUT keys rewrite to names this module's generic loop treats as a
+  // separate vocabulary (output_column_params etc. are not nfl_plays registry
+  // keys), so they are asserted here rather than in the generic param loop.
+  it('resolves every LEGACY_OUTPUT key to its canonical output key', () => {
+    const legacy_output_records = RENAME_REGISTRY.find(
+      (batch) => batch.id === 'LEGACY_OUTPUT'
+    ).records
+    for (const [legacy_key, current_key] of Object.entries(
+      legacy_output_records
+    )) {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { [legacy_key]: { year: [2023] } }
+      })
+      expect(result.changed, legacy_key).to.equal(true)
+      expect(result.params, legacy_key).to.deep.equal({
+        [current_key]: { year: [2023] }
+      })
+    }
+  })
+
   describe('adj retirement column-id renames (2026-08-18)', () => {
     // Both halves of the retirement change their persisted id, so a saved view
-    // carrying either old spelling needs a rule. The market_salary_adj half is
-    // the one an earlier plan revision claimed needed none, on the grounds that
-    // its id already spelled the target -- it does not, and did not.
+    // carrying either old spelling needs a rule.
     const cases = [
       [
         'player_season_projected_inflation_adjusted_market_salary',
@@ -947,9 +769,5 @@ describe('rename-map target liveness', () => {
         ).to.equal(false)
       }
     })
-  })
-
-  it('carries a rule for each of the 45 column ids that moved', () => {
-    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(45)
   })
 })
