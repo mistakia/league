@@ -105,29 +105,35 @@ export default function resolve_single_nfl_week_id({ params = {} } = {}) {
   const multi_value = first_scalar(params.nfl_week_id)
   if (multi_value) return multi_value
 
-  const year = Array.isArray(params.year) ? params.year[0] : params.year
+  const season_year = Array.isArray(params.year) ? params.year[0] : params.year
   const week = Array.isArray(params.week) ? params.week[0] : params.week
-  const seas_type_param = Array.isArray(params.seas_type)
+  const season_type_param = Array.isArray(params.seas_type)
     ? params.seas_type[0]
     : params.seas_type
-  if (year != null && week != null) {
-    let seas_type
-    if (seas_type_param) {
-      seas_type = seas_type_param
+  if (season_year != null && week != null) {
+    let season_type
+    if (season_type_param) {
+      season_type = season_type_param
     } else {
       const current = current_nfl_week_params()
-      if (year === current.year && week === current.week) {
-        seas_type = current.seas_type
+      if (season_year === current.year && week === current.week) {
+        season_type = current.seas_type
       } else {
-        seas_type = 'REG'
+        season_type = 'REG'
       }
     }
-    return format_nfl_week_identifier({ year, seas_type, week })
+    return format_nfl_week_identifier({
+      year: season_year,
+      seas_type: season_type,
+      week
+    })
   }
   // Year-only intent: honor the saved view's year rather than silently
   // returning the live current week.
-  if (year != null) {
-    const year_params = last_meaningful_reg_week_params_for_year({ year })
+  if (season_year != null) {
+    const year_params = last_meaningful_reg_week_params_for_year({
+      year: season_year
+    })
     if (year_params) return format_nfl_week_identifier(year_params)
   }
   return current_nfl_week_identifier()

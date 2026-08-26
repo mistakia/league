@@ -11,7 +11,7 @@ const CTE_NAME = 'player_year_teams'
 // Mirror resolve_nfl_week_id_from_year_param's seas_type default: when no
 // explicit value is supplied, REG is the canonical fallback. Reading from
 // params lets a future "POST plays" data view flow through unchanged.
-const resolve_seas_type = (params = {}) => {
+const resolve_season_type = (params = {}) => {
   if (Array.isArray(params.seas_type) && params.seas_type.length) {
     return params.seas_type
   }
@@ -75,7 +75,7 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
     .select('player_gamelogs.nfl_team')
     .count('* as game_count')
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.season_type', resolve_seas_type(params))
+    .whereIn('nfl_games.season_type', resolve_season_type(params))
     .whereIn('nfl_games.season_year', year_range)
     .whereIn('player_gamelogs.season_year', year_range)
     .groupBy(

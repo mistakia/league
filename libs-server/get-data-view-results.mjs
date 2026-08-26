@@ -1785,8 +1785,8 @@ export const get_data_view_results_query = async ({
           players_query,
           table_name: 'current_week_opponents',
           week: current_season.nfl_seas_week,
-          year: current_season.year,
-          seas_type: current_season.nfl_seas_type
+          season_year: current_season.year,
+          season_type: current_season.nfl_seas_type
         })
         players_query.join(
           'current_week_opponents',
@@ -1803,15 +1803,15 @@ export const get_data_view_results_query = async ({
         break
 
       case 'next_week_opponent_total': {
-        const { seas_type: next_week_seas_type, week: next_week } =
+        const { seas_type: next_week_season_type, week: next_week } =
           current_season.calculate_week(current_season.now.add(1, 'week'))
 
         add_week_opponent_cte_tables({
           players_query,
           table_name: 'next_week_opponents',
           week: next_week,
-          year: current_season.year,
-          seas_type: next_week_seas_type
+          season_year: current_season.year,
+          season_type: next_week_season_type
         })
         players_query.join(
           'next_week_opponents',

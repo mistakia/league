@@ -24,13 +24,13 @@ export default function resolve_nfl_week_id_from_year_param(params = {}) {
       .map((y) => parseInt(y, 10))
       .filter((y) => !isNaN(y))
     if (valid_years.length) {
-      const seas_type_array = Array.isArray(params.seas_type)
+      const season_type_array = Array.isArray(params.seas_type)
         ? params.seas_type
         : params.seas_type
           ? [params.seas_type]
           : ['REG']
       nfl_week = valid_years.flatMap((y) =>
-        seas_type_array.flatMap((st) =>
+        season_type_array.flatMap((st) =>
           get_nfl_week_identifiers_for_year({ year: y, seas_type: st })
         )
       )
