@@ -5,7 +5,7 @@ import {
   calculate_projection_values,
   getOptimizerPositionConstraints,
   optimizeLineup,
-  calculatePlayerValuesRestOfSeason
+  calculate_player_period_values
 } from '#libs-shared'
 import solver from 'javascript-lp-solver'
 import {
@@ -68,9 +68,9 @@ export function calculatePlayerValues(payload) {
       player.market_salary[week] = {}
     }
 
-    if (player.projection.ros) {
-      player.points.ros = calculatePoints({
-        stats: player.projection.ros,
+    if (player.projection.rest_of_season) {
+      player.points.rest_of_season = calculatePoints({
+        stats: player.projection.rest_of_season,
         position: player.primary_position,
         league
       })
@@ -88,7 +88,12 @@ export function calculatePlayerValues(payload) {
     baselinesByWeek[week] = baselines
   }
 
-  calculatePlayerValuesRestOfSeason({ players, rosterRows, league })
+  // After the weekly loop, never inside it: both period nets are sums over the
+  // weekly boards above. This publishes the same aggregate keys the API payload
+  // carries -- `season`, `season_net`, `rest_of_season`, `rest_of_season_net` --
+  // so a recompute after a roster mutation replaces the server's values in
+  // place rather than writing a second vocabulary beside them.
+  calculate_player_period_values({ players, league })
 
   return { baselines: baselinesByWeek, players }
 }

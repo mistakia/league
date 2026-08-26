@@ -117,25 +117,36 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     dynasty_rows.map((row) => [row.player_id, row])
   )
 
-  // Season-long projection, week '0'. Two columns with two distinct uses:
-  //   projected_points_added — the worth floor on the franchise screen; sign only.
-  //   market_salary — a single-season price, carried ONLY for the auction
-  //                   supply view, where the horizon matches. It must never sit
-  //                   beside a franchise or rookie price as a surplus; those
-  //                   are multi-year decisions this column cannot price.
-  const projection_rows = await db('league_format_player_projection_values')
-    .select('pid', 'projected_points_added', 'market_salary')
+  // Season-long projection, from the season period table. Two columns with two
+  // distinct uses:
+  //   projected_points_added_net — the worth floor on the franchise screen, and
+  //                   a CONTINUOUS signal below replacement. It must be the NET
+  //                   variant: build-tag-board.mjs keeps this column precisely
+  //                   because it does not clip at the bottom the way a price
+  //                   does, so it still separates -6.9 from -83.9. The positive
+  //                   variant is floored by construction and would collapse
+  //                   that ordering to a single value, silently.
+  //   market_salary_positive — a single-season price, carried ONLY for the
+  //                   auction supply view, where the horizon matches. It must
+  //                   never sit beside a franchise or rookie price as a surplus;
+  //                   those are multi-year decisions this column cannot price.
+  const projection_rows = await db(
+    'league_format_player_season_projection_values'
+  )
+    .select('pid', 'projected_points_added_net', 'market_salary_positive')
     .where({
       league_format_id: season.league_format_id,
-      season_year: year,
-      week: '0'
+      season_year: year
     })
     .whereIn('pid', pids)
   const projected_points_added = new Map(
-    projection_rows.map((row) => [row.pid, Number(row.projected_points_added)])
+    projection_rows.map((row) => [
+      row.pid,
+      Number(row.projected_points_added_net)
+    ])
   )
   const projected_market_salary = new Map(
-    projection_rows.map((row) => [row.pid, Number(row.market_salary)])
+    projection_rows.map((row) => [row.pid, Number(row.market_salary_positive)])
   )
 
   const player_rows = await db('player')

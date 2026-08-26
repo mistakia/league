@@ -48,7 +48,9 @@ const auction_league_format_id_param = {
 const extra_column_params_by_base_name = {
   points: { scoring_format_id: scoring_format_id_param },
   points_added: { league_format_id: league_format_id_param },
-  market_salary: { league_format_id: auction_league_format_id_param }
+  points_added_net: { league_format_id: league_format_id_param },
+  market_salary: { league_format_id: auction_league_format_id_param },
+  market_salary_net: { league_format_id: auction_league_format_id_param }
 }
 
 // These columns are derived into league_format_*/league_* valuation tables that
@@ -58,7 +60,9 @@ const extra_column_params_by_base_name = {
 // alongside its scoring-format picker, like every raw-stat projection column.
 const computed_base_names = new Set([
   'points_added',
+  'points_added_net',
   'market_salary',
+  'market_salary_net',
   'points_added_positive_including_cap_savings'
 ])
 
@@ -113,7 +117,47 @@ export default function ({ week }) {
       groups,
       label,
       base_name,
-      options: { week: 'ros', ...options }
+      options
+    })
+  })
+
+  // Season and rest-of-season only. Two families are period-scoped rather than
+  // week-scoped and have no week sibling to register:
+  //
+  //   market_salary  A price is a share of the discretionary cap for the YEAR,
+  //                  so there is no weekly one. The retired
+  //                  `player_week_projected_market_salary` was the only one of
+  //                  this family ever registered on the client, which left the
+  //                  two period columns reachable from the server registry and
+  //                  from no picker.
+  //
+  //   *_net          A weekly points-added is one signed number, so it has no
+  //                  positive/net split to expose. The split exists only at
+  //                  period grain, where the positive variant is what a player
+  //                  adds when you can bench him and the net is what he adds
+  //                  when you must start him every week.
+  const create_period_field = ({
+    base_name,
+    title,
+    groups,
+    label,
+    options = {}
+  }) => ({
+    [`player_season_projected_${base_name}`]: create_projection_field({
+      title,
+      period: 'Season',
+      groups,
+      label,
+      base_name,
+      options
+    }),
+    [`player_rest_of_season_projected_${base_name}`]: create_projection_field({
+      title,
+      period: 'Rest-Of-Season',
+      groups,
+      label,
+      base_name,
+      options
     })
   })
 
@@ -169,6 +213,25 @@ export default function ({ week }) {
       groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
       label: 'Pts+',
       options: { fixed: 1 }
+    }),
+    ...create_period_field({
+      base_name: 'points_added_net',
+      title: 'Points Added Net',
+      groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      label: 'Pts+ Net',
+      options: { fixed: 1 }
+    }),
+    ...create_period_field({
+      base_name: 'market_salary',
+      title: 'Market Salary',
+      groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      label: 'Market'
+    }),
+    ...create_period_field({
+      base_name: 'market_salary_net',
+      title: 'Market Salary Net',
+      groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      label: 'Market Net'
     }),
     ...create_field({
       base_name: 'points',

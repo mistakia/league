@@ -12,6 +12,7 @@ const expect = chai.expect
 chai.should()
 
 const VALUES_TABLE = 'league_format_player_projection_values'
+const SEASON_VALUES_TABLE = 'league_format_player_season_projection_values'
 const POINTS_TABLE = 'scoring_format_player_projection_points'
 const YEAR = 2024
 const WEEKS = [0, 1, 2, 3]
@@ -49,6 +50,9 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     }
 
     await knex(VALUES_TABLE)
+      .where({ league_format_id, season_year: YEAR })
+      .del()
+    await knex(SEASON_VALUES_TABLE)
       .where({ league_format_id, season_year: YEAR })
       .del()
     await knex(POINTS_TABLE)
@@ -96,13 +100,14 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   // carry it, so every player fell back to the sentinel and the delete-then-
   // reinsert writer replaced a whole year with -999.
   it('writes non-sentinel values when scoring-format points exist', async () => {
-    // Numeric weeks only. The 'ros'/'ros_net' aggregates SKIP the sentinel and
-    // so land at 0, which reads as a real value -- asserting over every row
-    // passes at the broken revision and proves nothing.
+    // The WEEKLY table only. The period aggregates SKIP the sentinel and so
+    // land at 0, which reads as a real value -- asserting over them passes at
+    // the broken revision and proves nothing. Since the period split that is a
+    // different TABLE rather than a week-key predicate, so the exclusion can no
+    // longer be got wrong.
     const rows = await knex(VALUES_TABLE)
       .select('projected_points_added')
       .where({ league_format_id, season_year: YEAR })
-      .whereRaw("week ~ '^[0-9]+$'")
 
     expect(rows.length).to.be.greaterThan(0)
 
@@ -116,15 +121,50 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   })
 
   it('spreads values across the board rather than collapsing to one number', async () => {
-    const rows = await knex(VALUES_TABLE)
-      .select('projected_points_added')
-      .where({ league_format_id, season_year: YEAR, week: '0' })
-      .whereNot({ projected_points_added: default_points_added })
+    const rows = await knex(SEASON_VALUES_TABLE)
+      .select('projected_points_added_positive')
+      .where({ league_format_id, season_year: YEAR })
+      .whereNot({ projected_points_added_positive: default_points_added })
 
     const distinct = new Set(
-      rows.map((row) => Number(row.projected_points_added))
+      rows.map((row) => Number(row.projected_points_added_positive))
     )
     expect(distinct.size).to.be.greaterThan(1)
+  })
+
+  // The weekly board has to actually be COMPUTED, not just the season one. The
+  // loop bound came from `nfl_games` through a truthiness check that could never
+  // reach its fallback, so a year with no games rows ran exactly one iteration
+  // at week 0 -- producing a season row and no weekly board, which looks like a
+  // successful run from every angle. This fixture has no 2024 nfl_games, so it
+  // is the case that reproduces it.
+  it('computes a full weekly board for a year with no nfl_games rows', async () => {
+    const weeks = await knex(VALUES_TABLE)
+      .distinct('week')
+      .where({ league_format_id, season_year: YEAR })
+    const week_numbers = weeks
+      .map((row) => Number(row.week))
+      .sort((a, b) => a - b)
+
+    expect(week_numbers).to.not.include(0)
+    expect(week_numbers[0]).to.equal(1)
+    expect(week_numbers.length).to.be.greaterThan(1)
+  })
+
+  // The period split's own invariant: nothing that is not a fantasy week may
+  // reach the week table. A regression here is what the destructive half's
+  // `week smallint CHECK (week BETWEEN 1 AND 18)` would reject outright.
+  it('writes only fantasy weeks to the week table', async () => {
+    const weeks = await knex(VALUES_TABLE)
+      .distinct('week')
+      .where({ league_format_id, season_year: YEAR })
+
+    for (const { week } of weeks) {
+      expect(Number(week), `week ${week} is not a fantasy week`).to.be.within(
+        1,
+        18
+      )
+    }
   })
 
   // The oracle's negative control. Without this, "no throw" is indistinguishable

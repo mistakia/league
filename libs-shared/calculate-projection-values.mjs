@@ -4,7 +4,7 @@ import calculateValues from './calculate-values.mjs'
 import calculatePrices from './calculate-prices.mjs'
 import calculate_distributional_baselines, {
   assign_expected_surplus,
-  season_net_projection_key,
+  season_aggregate_key,
   season_projection_week
 } from './calculate-distributional-baselines.mjs'
 
@@ -47,9 +47,13 @@ import calculate_distributional_baselines, {
 // the same week, so the pairing was open-coded four times and a caller could
 // compute an aggregate it never priced -- which is exactly what happened to the
 // net variants. Pricing beside the computation means every aggregate this module
-// writes leaves it priced, and the season board's two variants cannot come apart.
-// The denominator for each is derived inside calculate-prices.mjs from the
-// aggregate key; nothing is passed in.
+// writes leaves it priced. The denominator for each is derived inside
+// calculate-prices.mjs from the aggregate key; nothing is passed in.
+//
+// The two PERIOD aggregates -- season and rest-of-season -- are not written
+// here. Their net variants are sums over the weekly boards this function
+// produces, so they cannot exist until the weekly loop has finished;
+// calculate-player-period-values.mjs owns them and prices them the same way.
 const calculate_projection_values = ({
   players,
   league,
@@ -62,18 +66,10 @@ const calculate_projection_values = ({
   }
 
   if (week === season_projection_week) {
-    const {
-      baselines: drawn_baselines,
-      expected_surplus,
-      expected_net_surplus
-    } = calculate_distributional_baselines({ players, league, week })
+    const { baselines: drawn_baselines, expected_surplus } =
+      calculate_distributional_baselines({ players, league, week })
 
-    assign_expected_surplus({
-      players,
-      expected_surplus,
-      expected_net_surplus,
-      week
-    })
+    assign_expected_surplus({ players, expected_surplus })
 
     for (const position of fantasy_positions) {
       const points = drawn_baselines[position]
@@ -84,14 +80,14 @@ const calculate_projection_values = ({
         points === null ? null : { pid: null, points }
     }
 
-    // The season board publishes both variants, so both are priced, each
-    // against the sum of its OWN positive parts. The net one is signed and sums
-    // negative across the board.
-    calculatePrices({ league_format: league, players, aggregate_key: week })
+    // One aggregate at season grain, so one price. The season NET is a sum of
+    // weekly-grain nets and therefore cannot be computed here -- the weekly
+    // boards do not exist yet -- so it and its price belong to
+    // calculate-player-period-values.mjs, which runs after the weekly loop.
     calculatePrices({
       league_format: league,
       players,
-      aggregate_key: season_net_projection_key
+      aggregate_key: season_aggregate_key
     })
 
     return { baselines }

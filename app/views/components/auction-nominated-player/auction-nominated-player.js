@@ -41,7 +41,8 @@ export default function AuctionNominatedPlayer({
       </div>
       <div className='nominated__player-details'>
         <div className='selected__player-header-item'>
-          <label>Market</label>${player_map.getIn(['market_salary', '0'], 0)}
+          <label>Market</label>$
+          {player_map.getIn(['market_salary', 'season'], 0)}
         </div>
         <div className='selected__player-header-item'>
           <label>Auction</label>${auction_adjusted_salary}

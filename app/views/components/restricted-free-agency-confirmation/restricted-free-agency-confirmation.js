@@ -129,7 +129,10 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       return null
     }
 
-    const market_salary = this.props.player_map.getIn(['market_salary', '0'])
+    const market_salary = this.props.player_map.getIn([
+      'market_salary',
+      'season'
+    ])
     return market_salary === null || market_salary === undefined
       ? null
       : Number(market_salary)

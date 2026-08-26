@@ -531,7 +531,9 @@ export function* export_rosters() {
   const league = yield select(get_current_league)
   const rosters = yield select(get_rosters_for_current_league)
   const playerMaps = yield select(get_player_maps)
-  const projectionType = current_season.isRegularSeason ? 'ros' : '0'
+  const projectionType = current_season.isRegularSeason
+    ? 'rest_of_season'
+    : 'season'
 
   const data = []
   for (const [tid, roster] of rosters.entrySeq()) {

@@ -181,33 +181,38 @@ const load_indexes = async ({
     }
   }
 
-  // projections: keyed `${pid}__${format_id}__${year}` -> projected_points_added.
+  // projections: keyed `${pid}__${format_id}__${year}` -> season points added.
   //
-  // Uses week='0' (preseason rest-of-season) rather than week='ros'. The 'ros'
-  // rows are a current-state rollup that is only refreshed for the active
-  // year of each league_format_id, so historical holdings never matched and
-  // projected_points_added_at_acquisition stayed NULL across all 2020-2025 player
-  // holdings. week='0' is a per-year preseason ros snapshot that exists for
-  // every historical year and is the projection the market was looking at the
-  // start of the season -- the correct "what was knowable" oracle for the
-  // offseason/early-season acquisitions that dominate the holding population.
-  // The -999 sentinel indicates "no projection available" and is dropped.
+  // The SEASON period table, not the rest-of-season one. Rest-of-season is a
+  // current-state rollup only refreshed for the active year of each
+  // league_format_id, so historical holdings never matched and
+  // projected_points_added_at_acquisition stayed NULL across all 2020-2025
+  // player holdings. The season row exists for every historical year and is
+  // the projection the market was looking at the start of the season -- the
+  // correct "what was knowable" oracle for the offseason and early-season
+  // acquisitions that dominate the holding population. It seals at week 1, so
+  // it does not drift under a holding after the fact.
+  //
+  // The NET variant, for coverage rather than preference: it is the column the
+  // migrated week='0' rows landed in, so it is the only one populated for
+  // 2020-2025. Reading the positive variant here would return NULL for every
+  // historical holding and silently reinstate the regression this comment
+  // records. The -999 sentinel means "no projection available" and is dropped.
   idx.projections = new Map()
   if (player_ids.length && format_ids.length && years.length) {
-    const proj_rows = await db('league_format_player_projection_values')
+    const proj_rows = await db('league_format_player_season_projection_values')
       .select(
         'pid',
         'league_format_id',
         'season_year',
-        'projected_points_added'
+        'projected_points_added_net'
       )
       .whereIn('pid', player_ids)
       .whereIn('league_format_id', format_ids)
       .whereIn('season_year', years)
-      .where('week', '0')
     for (const r of proj_rows) {
-      if (r.projected_points_added == null) continue
-      const v = Number(r.projected_points_added)
+      if (r.projected_points_added_net == null) continue
+      const v = Number(r.projected_points_added_net)
       if (v <= -900) continue
       const k = `${r.pid}__${r.league_format_id}__${r.season_year}`
       idx.projections.set(k, v)

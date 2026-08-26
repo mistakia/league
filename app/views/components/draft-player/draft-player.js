@@ -28,7 +28,7 @@ export default class DraftPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
-    const value = player_map.getIn(['market_salary', '0'])
+    const value = player_map.getIn(['market_salary', 'season'])
 
     return (
       <div style={style}>
@@ -43,7 +43,7 @@ export default class DraftPlayer extends React.Component {
           </div>
           <div className='player-draft__item-metric'>
             {value
-              ? `$${Math.round(player_map.getIn(['market_salary', '0']))}`
+              ? `$${Math.round(player_map.getIn(['market_salary', 'season']))}`
               : null}
           </div>
         </div>

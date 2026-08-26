@@ -258,8 +258,8 @@ export const get_auction_target_players = createSelector(
     }
     return filtered.sort(
       (a, b) =>
-        b.getIn(['pts_added', '0'], default_points_added) -
-        a.getIn(['pts_added', '0'], default_points_added)
+        b.getIn(['pts_added', 'season'], default_points_added) -
+        a.getIn(['pts_added', 'season'], default_points_added)
     )
   }
 )
@@ -297,21 +297,21 @@ export const get_auction_info_for_position = createSelector(
 
     const available_players_above_baseline = playerMaps.filter(
       (pMap) =>
-        pMap.getIn(['pts_added', '0'], 0) > 0 &&
+        pMap.getIn(['pts_added', 'season'], 0) > 0 &&
         !rostered_pids.includes(pMap.get('pid'))
     )
 
     const total_pts_added = playerMaps.reduce(
-      (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
+      (a, b) => a + Math.max(b.getIn(['pts_added', 'season']) || 0, 0),
       0
     )
     const rostered_pts_added = rostered.reduce(
-      (a, b) => a + Math.max(b.getIn(['pts_added', '0']) || 0, 0),
+      (a, b) => a + Math.max(b.getIn(['pts_added', 'season']) || 0, 0),
       0
     )
     const retail = active_rostered.reduce(
       (sum, player_map) =>
-        sum + (player_map.getIn(['market_salary', '0']) || 0),
+        sum + (player_map.getIn(['market_salary', 'season']) || 0),
       0
     )
     const actual = active_rostered.reduce(
@@ -1072,7 +1072,7 @@ export function getPlayersByPosition(state, { position }) {
   // `p.get('primary_position')`. Left as-is to avoid a behavior change in the
   // column-rename linchpin; flagged for follow-up.
   const filtered = playerMaps.filter((p) => p.primary_position === position)
-  const period = !current_season.week ? '0' : 'ros'
+  const period = !current_season.week ? 'season' : 'rest_of_season'
   return filtered
     .sort(
       (a, b) =>
@@ -1978,7 +1978,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
       values.rosters[roster.tid] = {}
     }
 
-    const seasonType = current_season.isOffseason ? '0' : 'ros'
+    const seasonType = current_season.isOffseason ? 'season' : 'rest_of_season'
     for (const position of fantasy_positions) {
       // skip positions that don't start in the current league
       if (!league[starter_slot_league_columns[roster_slot_types[position]]]) {
@@ -3616,7 +3616,9 @@ function getTeamTradeSummary(
   draft_pick_values,
   { lineups, playerMaps, picks }
 ) {
-  const pts_added_type = current_season.isOffseason ? '0' : 'ros'
+  const pts_added_type = current_season.isOffseason
+    ? 'season'
+    : 'rest_of_season'
   const get_draft_pick_value = (pick) => {
     if (!pick || !draft_pick_values) return 0
     const rank = get_rookie_draft_pick_rank(pick)

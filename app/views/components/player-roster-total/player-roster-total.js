@@ -18,7 +18,7 @@ export default class PlayerRosterTotal extends React.Component {
 
     const { isOffseason, isRegularSeason } = current_season
     const week = Math.max(current_season.week, 1)
-    const projectionType = isRegularSeason ? 'ros' : '0'
+    const projectionType = isRegularSeason ? 'rest_of_season' : 'season'
 
     let baseSalaryTotal = 0
     let extendedSalaryTotal = 0
@@ -85,7 +85,8 @@ export default class PlayerRosterTotal extends React.Component {
       // is the cost of the weeks a player is below baseline, and flooring each
       // player would discard exactly that.
       pts_added_net_total =
-        pts_added_net_total + player_map.getIn(['pts_added', 'ros_net'], 0)
+        pts_added_net_total +
+        player_map.getIn(['pts_added', 'rest_of_season_net'], 0)
       valueAdjTotal =
         valueAdjTotal +
         player_map.getIn(

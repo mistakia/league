@@ -8,7 +8,7 @@ import {
   Roster,
   weightProjections,
   calculate_projection_values,
-  calculatePlayerValuesRestOfSeason,
+  calculate_player_period_values,
   named_scoring_formats,
   named_league_formats
 } from '#libs-shared'
@@ -29,7 +29,8 @@ import {
   report_job,
   simulation,
   emit_signal,
-  record_league_format_projection_value_history
+  record_league_format_projection_value_history,
+  build_league_format_period_inserts
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
@@ -37,7 +38,11 @@ import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-proje
 import { process_scoring_format_year } from './process-projections-for-scoring-format.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
-import { season_net_projection_key } from '#libs-shared/calculate-distributional-baselines.mjs'
+import {
+  season_aggregate_key,
+  season_projection_week
+} from '#libs-shared/calculate-distributional-baselines.mjs'
+import { rest_of_season_aggregate_key } from '#libs-shared/calculate-player-period-values.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 dayjs.extend(dayOfYear)
@@ -242,7 +247,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       }
 
       player_row.proj_wks = proj_wks
-      player_row.projection.ros = ros
+      player_row.projection.rest_of_season = ros
 
       rosProjectionInserts.push({
         pid: player_row.pid,
@@ -313,7 +318,8 @@ const process_league_format = async ({
 
   // The baselines this loop computes are not persisted for a league FORMAT --
   // only process_league writes league_baselines, and it computes its own.
-  let week = first_projection_week_to_recompute({ year })
+  const first_week = first_projection_week_to_recompute({ year })
+  let week = first_week
   for (; week <= current_season.nflFinalWeek; week++) {
     calculate_projection_values({
       players: player_rows,
@@ -322,46 +328,37 @@ const process_league_format = async ({
     })
   }
 
-  calculatePlayerValuesRestOfSeason({
+  // After the weekly loop, never inside it: both period nets are sums over the
+  // weekly boards above.
+  calculate_player_period_values({
     players: player_rows,
     league: league_format
   })
 
-  const valueInserts = []
-  for (const player_row of player_rows) {
-    for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
-      // season_net has no column yet -- it lands with the period split. Writing
-      // it here would add a THIRD sentinel to the mixed week key this task
-      // exists to retire, and the history table would then carry it too.
-      if (week === season_net_projection_key) continue
+  const {
+    weekly_value_inserts,
+    season_value_inserts,
+    rest_of_season_value_inserts
+  } = build_league_format_period_inserts({
+    player_rows,
+    league_format_id,
+    season_year: current_season.year,
+    first_week
+  })
 
-      const params = {
-        pid: player_row.pid,
-        season_year: current_season.year,
-        league_format_id,
-        week,
-        // Shorthand would key this `pts_added`, which is no longer the column.
-        // `player_row.pts_added` is the in-memory aggregate map and keeps its
-        // name; the COLUMN is projected_points_added. The write below is
-        // delete-then-reinsert, so an unknown key here empties the table.
-        projected_points_added: pts_added,
-        market_salary: player_row.market_salary?.[week] ?? null
-      }
-
-      valueInserts.push(params)
-    }
-  }
-
-  if (valueInserts.length) {
-    // Record the dated observation BEFORE the destructive rewrite below. The
-    // current-state table is delete-then-reinsert, so history has to be captured
-    // from the computed values rather than read back afterwards.
+  // Record the dated observations BEFORE the destructive rewrites below. The
+  // current-state tables are delete-then-reinsert, so history has to be captured
+  // from the computed values rather than read back afterwards.
+  if (weekly_value_inserts.length || rest_of_season_value_inserts.length) {
     await record_league_format_projection_value_history({
       league_format_id,
       year: current_season.year,
-      value_rows: valueInserts
+      weekly_value_rows: weekly_value_inserts,
+      rest_of_season_value_rows: rest_of_season_value_inserts
     })
+  }
 
+  if (weekly_value_inserts.length) {
     // Scoped to the year being rewritten. This delete was previously unscoped and
     // wiped every prior season's values for the format on each hourly run, while
     // the reinsert below only ever restores current_season.year.
@@ -369,12 +366,42 @@ const process_league_format = async ({
       .del()
       .where({ league_format_id, season_year: current_season.year })
     await batch_insert({
-      items: valueInserts,
+      items: weekly_value_inserts,
       save: (items) =>
         db('league_format_player_projection_values').insert(items),
       batch_size: 100
     })
-    log(`processed and saved ${valueInserts.length} player values`)
+    log(`processed and saved ${weekly_value_inserts.length} weekly values`)
+  }
+
+  if (season_value_inserts.length) {
+    await db('league_format_player_season_projection_values')
+      .del()
+      .where({ league_format_id, season_year: current_season.year })
+    await batch_insert({
+      items: season_value_inserts,
+      save: (items) =>
+        db('league_format_player_season_projection_values').insert(items),
+      batch_size: 100
+    })
+    log(`processed and saved ${season_value_inserts.length} season values`)
+  }
+
+  if (rest_of_season_value_inserts.length) {
+    await db('league_format_player_rest_of_season_projection_values')
+      .del()
+      .where({ league_format_id, season_year: current_season.year })
+    await batch_insert({
+      items: rest_of_season_value_inserts,
+      save: (items) =>
+        db('league_format_player_rest_of_season_projection_values').insert(
+          items
+        ),
+      batch_size: 100
+    })
+    log(
+      `processed and saved ${rest_of_season_value_inserts.length} rest of season values`
+    )
   }
 }
 
@@ -447,18 +474,19 @@ const process_league = async ({ year, lid }) => {
     baselines[week] = week_baselines
   }
 
-  calculatePlayerValuesRestOfSeason({
+  // After the weekly loop, never inside it: both period nets are sums over the
+  // weekly boards above.
+  calculate_player_period_values({
     players: player_rows,
-    rosterRows,
     league
   })
 
   let league_available_pts_added = 0
   for (const player_row of player_rows) {
     const is_available = !rostered_pids.includes(player_row.pid)
-    if (is_available && player_row.pts_added[0] > 0) {
-      league_available_pts_added =
-        league_available_pts_added + player_row.pts_added[0]
+    const season_pts_added = player_row.pts_added[season_aggregate_key]
+    if (is_available && season_pts_added > 0) {
+      league_available_pts_added = league_available_pts_added + season_pts_added
     }
   }
 
@@ -474,19 +502,22 @@ const process_league = async ({ year, lid }) => {
     const league_adjusted_rate = is_available
       ? league_available_salary_space / league_available_pts_added
       : (league_available_salary_space + player_row.player_salary) /
-        (league_available_pts_added + Math.max(player_row.pts_added[0], 0))
+        (league_available_pts_added +
+          Math.max(player_row.pts_added[season_aggregate_key], 0))
     const projected_positive_salary_at_available_cap = Math.max(
-      Math.round(league_adjusted_rate * player_row.pts_added[0]) || 0,
+      Math.round(
+        league_adjusted_rate * player_row.pts_added[season_aggregate_key]
+      ) || 0,
       0
     )
     player_row.projected_positive_salary_at_available_cap =
       projected_positive_salary_at_available_cap
 
     // The period sentinels are no longer written into the week column. The loop
-    // below was period-blind by construction -- calculatePlayerValuesRestOfSeason
-    // adds a 'ros' key and calculatePrices adds a '0' key to the same map the
-    // numeric weeks live in -- which is exactly what let the sentinels
-    // accumulate. Each period now routes to its own table.
+    // below was period-blind by construction -- calculate_player_period_values
+    // adds the rest-of-season keys and calculatePrices adds the season week key
+    // to the same map the numeric weeks live in -- which is exactly what let the
+    // sentinels accumulate. Each period now routes to its own table.
     //
     // Only the POSITIVE variant lands as a named column. The net siblings were
     // dropped 2026-08-18: calculate-prices.mjs floors this quantity at zero for
@@ -503,7 +534,7 @@ const process_league = async ({ year, lid }) => {
     const by_aggregate_key =
       player_row.projected_points_added_positive_including_cap_savings
 
-    const season_positive = by_aggregate_key['0']
+    const season_positive = by_aggregate_key[season_aggregate_key]
     if (season_positive !== undefined) {
       season_value_inserts.push({
         pid: player_row.pid,
@@ -514,13 +545,15 @@ const process_league = async ({ year, lid }) => {
       })
     }
 
-    const ros_positive = by_aggregate_key.ros
-    if (ros_positive !== undefined) {
+    const rest_of_season_positive =
+      by_aggregate_key[rest_of_season_aggregate_key]
+    if (rest_of_season_positive !== undefined) {
       rest_of_season_value_inserts.push({
         pid: player_row.pid,
         season_year: current_season.year,
         lid,
-        projected_points_added_positive_including_cap_savings: ros_positive
+        projected_points_added_positive_including_cap_savings:
+          rest_of_season_positive
       })
     }
 
@@ -528,26 +561,17 @@ const process_league = async ({ year, lid }) => {
       week,
       projected_points_added_positive_including_cap_savings
     ] of Object.entries(by_aggregate_key)) {
-      // Every period key is excluded here, not just the two that already had a
-      // home. league_player_projection_values.week is varchar(3) and the table
-      // is written delete-by-lid THEN batch_insert, so letting 'ros_net' through
-      // means the delete commits, the insert throws, and the table is left EMPTY
-      // rather than stale -- blanking the available-cap salary on league-home,
-      // the auction nomination panel and the selected-player panel for a full
-      // cron cycle.
-      //
-      // The exclusion still names both net keys even though their columns are
-      // gone. calculatePrices and calculatePlayerValuesRestOfSeason still WRITE
-      // those keys into this map, so dropping the guard would let 'ros_net'
-      // reach the varchar(3) week column and empty the table.
-      if (
-        week === '0' ||
-        week === 'ros' ||
-        week === 'ros_net' ||
-        week === season_net_projection_key
-      ) {
-        continue
-      }
+      // `!Number(week)` drops the season week key (0) and every named aggregate
+      // key (NaN) in one test, which is the same partition every period-bearing
+      // writer here makes. It replaces an enumeration of the period keys, which
+      // had to be extended by hand each time calculatePrices learned to price a
+      // new aggregate -- and a missed one is not a stale row: this table is
+      // written delete-by-lid THEN batch_insert, so an out-of-range week means
+      // the delete commits, the insert throws on the 1..18 CHECK, and the table
+      // is left EMPTY, blanking the available-cap salary on league-home, the
+      // auction nomination panel and the selected-player panel for a full cron
+      // cycle.
+      if (!Number(week)) continue
 
       valueInserts.push({
         pid: player_row.pid,
@@ -559,15 +583,24 @@ const process_league = async ({ year, lid }) => {
     }
   }
 
+  // Baselines carry the same period overload the projection values did: week 0
+  // means the season-long replacement level rather than a week. It splits the
+  // same way, into league_season_baselines.
+  //
+  // The season table also FIXES A KEY DEFECT rather than mirroring one. The
+  // week table's unique index is (lid, week, player_position, type) and omits
+  // season_year, so one (lid, position, type) can hold only ONE row across all
+  // years and each season silently overwrites the last; the season table keys
+  // on (lid, season_year, player_position, type).
   const baselineInserts = []
+  const season_baseline_inserts = []
   for (const [week, positions] of Object.entries(baselines)) {
     for (const [position, types] of Object.entries(positions)) {
       for (const [type, baseline] of Object.entries(types)) {
         if (!baseline) continue
 
-        baselineInserts.push({
+        const row = {
           lid,
-          week,
           season_year: current_season.year,
           player_position: position,
           // Null for the season 'starter' baseline, which is an expectation over
@@ -575,7 +608,13 @@ const process_league = async ({ year, lid }) => {
           pid: baseline.pid,
           points: baseline.points,
           type
-        })
+        }
+
+        if (Number(week) === season_projection_week) {
+          season_baseline_inserts.push(row)
+        } else {
+          baselineInserts.push({ ...row, week })
+        }
       }
     }
   }
@@ -590,7 +629,20 @@ const process_league = async ({ year, lid }) => {
           .merge(),
       batch_size: 100
     })
-    log(`saved ${baselineInserts.length} baselines`)
+    log(`saved ${baselineInserts.length} weekly baselines`)
+  }
+
+  if (season_baseline_inserts.length) {
+    await batch_insert({
+      items: season_baseline_inserts,
+      save: (items) =>
+        db('league_season_baselines')
+          .insert(items)
+          .onConflict(['lid', 'season_year', 'player_position', 'type'])
+          .merge(),
+      batch_size: 100
+    })
+    log(`saved ${season_baseline_inserts.length} season baselines`)
   }
 
   if (valueInserts.length) {

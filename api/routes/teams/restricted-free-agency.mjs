@@ -398,11 +398,12 @@ router.post('/?', async (req, res) => {
       }
 
       // make sure bid is within $10 of market salary
-      const market_salary = await db('league_format_player_projection_values')
-        .select('market_salary')
+      const market_salary = await db(
+        'league_format_player_season_projection_values'
+      )
+        .select('market_salary_positive as market_salary')
         .where({
           pid,
-          week: 0,
           season_year: current_season.year,
           league_format_id: league.league_format_id
         })
@@ -1058,11 +1059,12 @@ router.put('/?', async (req, res) => {
       roster.update_player_salary(pid, bid)
 
       // check that the bid is within 10 dollars of the market salary
-      const market_salary = await db('league_format_player_projection_values')
-        .select('market_salary')
+      const market_salary = await db(
+        'league_format_player_season_projection_values'
+      )
+        .select('market_salary_positive as market_salary')
         .where({
           pid,
-          week: 0,
           season_year: current_season.year,
           league_format_id: league.league_format_id
         })

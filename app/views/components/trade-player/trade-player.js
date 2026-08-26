@@ -9,7 +9,9 @@ import { current_season } from '#constants'
 export default class TradePlayer extends React.Component {
   render = () => {
     const { player_map } = this.props
-    const pts_added_type = current_season.isOffseason ? '0' : 'ros'
+    const pts_added_type = current_season.isOffseason
+      ? 'season'
+      : 'rest_of_season'
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>

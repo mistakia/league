@@ -80,9 +80,10 @@ const get_positive_part_total = ({ players, aggregate_key }) => {
 }
 
 // `aggregate_key` is an aggregation key rather than a week number. It takes the
-// numeric weeks, `0` for the season board, and the named season aggregates
-// ('earned', 'earned_net', 'ros', 'ros_net') -- it was called `week` while only
-// the first of those was true.
+// numeric weeks, `0` for the season board, and the named period aggregates
+// ('season', 'season_net', 'rest_of_season', 'rest_of_season_net', and the
+// realized 'earned' family) -- it was called `week` while only the first of
+// those was true.
 const calculatePrices = ({ league_format, players, aggregate_key }) => {
   const pricing_model = league_format.pricing_model || 'auction'
   if (pricing_model !== 'auction') {

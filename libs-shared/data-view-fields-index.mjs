@@ -30,8 +30,6 @@ export default {
     "The player's next-year salary in the fantasy league. Once the season's extensions are processed, this is the settled salary the roster carries. Before then it is projected, applying the extension formula (current salary + (extensions + 1) * $5), franchise-tag values, rookie-tag carryover, and slot-based zeroing",
   player_league_extended_salary_over_market:
     "The player's extended salary minus their projected market salary. Positive means the contract is priced above what one season of the player is worth. Populated only for a regular roster tag. Null for franchise and rookie tags, because market salary prices a single season and those are multi-year commitments; null for restricted free agency, because the auction settles that contract and the offer is blind. Also null where no market projection exists for the player",
-  player_week_projected_market_salary:
-    'The projected market salary for the player in a specific week',
   player_season_projected_positive_salary_at_available_cap:
     'The projected market salary for the player for the entire season, adjusted for inflation',
   player_week_projected_points_added_positive_including_cap_savings:
@@ -434,11 +432,22 @@ export default {
 
   player_week_projected_points_added:
     'Projected Points Added for the week. Signed — a projection below replacement returns a negative value.',
-  player_season_projected_points_added: 'Projected Points Added for the season',
+  player_season_projected_points_added:
+    'Projected Points Added for the season, as an expectation over seasons drawn from the projection dispersion — what a player adds when you can bench him in his bad weeks. Never negative.',
+  player_season_projected_points_added_net:
+    'Projected Points Added for the season, summed over every week including those below replacement — what a player adds when you start him every week. Can be negative.',
   player_rest_of_season_projected_points_added:
     'Projected Points Added for the rest of the season, counting only weeks above replacement — what a player adds when you can bench him in his bad weeks.',
   player_rest_of_season_projected_points_added_net:
     'Projected Points Added for the rest of the season, counting every remaining week including those below replacement — what a player adds when you start him every week. Can be negative.',
+  player_season_projected_market_salary:
+    'The projected market salary for the season: the discretionary cap allocated in proportion to season Points Added. Auction formats only.',
+  player_season_projected_market_salary_net:
+    'The season market salary priced against the NET board rather than the positive one. The token names which pool the share is of, not a sign — every price is floored at zero.',
+  player_rest_of_season_projected_market_salary:
+    'The projected market salary for the rest of the season, priced against the positive rest-of-season board. Auction formats only.',
+  player_rest_of_season_projected_market_salary_net:
+    'The rest-of-season market salary priced against the NET board rather than the positive one. The token names which pool the share is of, not a sign.',
   player_week_projected_points: 'Projected Fantasy Points for the week',
   player_season_projected_points: 'Projected Fantasy Points for the season',
   player_rest_of_season_projected_points:

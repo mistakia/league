@@ -6,6 +6,7 @@ import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
+import { season_projection_week } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
@@ -15,14 +16,15 @@ const initialize_cli = () => {
 const log = debug('process-projections-for-scoring-format')
 enable_debug_namespaces('process-projections-for-scoring-format')
 
-// Re-derive scoring_format_player_projection_points for one (scoring_format,
-// year) slice entirely from the authoritative projections_index /
-// ros_projections AVERAGE rows. This is the SINGLE source-of-truth path shared
+// Re-derive the three scoring-format projected-points tables for one
+// (scoring_format, year) slice entirely from the authoritative projections_index
+// / ros_projections AVERAGE rows. This is the SINGLE source-of-truth path shared
 // by the 30-min process-projections cron and the ad-hoc / reconciliation
 // backfill, so the precomputed cache can never silently drift from
-// projections_index: delete the whole (format, year) slice and reinsert every
-// numeric REG week plus the rest-of-season row, scored by calculatePoints (the
-// exact arithmetic the in-query data-view scorer mirrors). Settled weeks are
+// projections_index: delete each period's (format, year) slice and reinsert
+// every numeric REG week, the season snapshot and the rest-of-season row, scored
+// by calculatePoints (the exact arithmetic the in-query data-view scorer
+// mirrors). Settled weeks are
 // re-read from projections_index each run, so the cache tracks the frozen
 // as-of-gametime projection instead of freezing at whenever-it-was-last-current.
 // See task projected-points-in-query-scoring-source-selection.
@@ -57,7 +59,24 @@ export const process_scoring_format_year = async ({
   const players = await db('player').whereIn('pid', pids)
   const players_by_pid = groupBy(players, 'pid')
 
-  const points_inserts = []
+  // One list per PERIOD. The single mixed list this replaces wrote the season
+  // snapshot and the rest-of-season aggregate into the same `week` column as the
+  // numeric weeks, which is the sentinel encoding the period tables remove.
+  const weekly_points_inserts = []
+  const season_points_inserts = []
+  const rest_of_season_points_inserts = []
+
+  const score = (stats, position) =>
+    // Only the total is persisted. calculatePoints also returns a per-stat
+    // breakdown of point contributions, but nothing reads it -- see
+    // db/adhoc/2026-07-30-drop-dead-projection-contribution-columns.sql.
+    calculatePoints({
+      stats,
+      position,
+      league: league_scoring_format,
+      use_projected_stats: true
+    }).total
+
   for (const pid of pids) {
     const player = (players_by_pid[pid] || [])[0]
     if (!player) {
@@ -66,58 +85,76 @@ export const process_scoring_format_year = async ({
 
     for (const proj of projections_by_pid[pid] || []) {
       const { week, ...stats } = proj
-      // Only `total` is persisted. calculatePoints also returns a per-stat
-      // breakdown of point contributions, but nothing reads it -- see
-      // db/adhoc/2026-07-30-drop-dead-projection-contribution-columns.sql.
-      const { total } = calculatePoints({
-        stats,
-        position: player.primary_position,
-        league: league_scoring_format,
-        use_projected_stats: true
-      })
-      points_inserts.push({
+      const row = {
         pid,
         season_year: year,
         scoring_format_id,
-        week,
-        projected_points_total: total
-      })
+        projected_points_total: score(stats, player.primary_position)
+      }
+
+      // projections_index.week is smallint, and its week 0 IS the season-long
+      // projection -- so the season snapshot is derived here rather than being
+      // absent. It seals on its own: process-projections stops recomputing week
+      // 0 once week 1 opens, so re-deriving it after that reproduces the same
+      // frozen input.
+      if (week === season_projection_week) {
+        season_points_inserts.push(row)
+      } else {
+        weekly_points_inserts.push({ ...row, week })
+      }
     }
 
-    const ros_row = (ros_by_pid[pid] || [])[0]
-    if (ros_row) {
-      const { total } = calculatePoints({
-        stats: ros_row,
-        position: player.primary_position,
-        league: league_scoring_format,
-        use_projected_stats: true
-      })
-      points_inserts.push({
+    const rest_of_season_row = (ros_by_pid[pid] || [])[0]
+    if (rest_of_season_row) {
+      rest_of_season_points_inserts.push({
         pid,
         season_year: year,
         scoring_format_id,
-        week: 'ros',
-        projected_points_total: total
+        projected_points_total: score(
+          rest_of_season_row,
+          player.primary_position
+        )
       })
     }
   }
 
-  if (points_inserts.length) {
-    await db('scoring_format_player_projection_points')
-      .del()
-      .where({ scoring_format_id, season_year: year })
+  // Each period table is refreshed with the same delete-then-reinsert shape the
+  // single table used, scoped to its own (format, year) slice, so a player
+  // dropping out of the projection set leaves no stale row behind.
+  const refresh = async ({ table, items, label }) => {
+    if (!items.length) return
+    await db(table).del().where({ scoring_format_id, season_year: year })
     await batch_insert({
-      items: points_inserts,
-      save: (items) =>
-        db('scoring_format_player_projection_points').insert(items),
+      items,
+      save: (rows) => db(table).insert(rows),
       batch_size: 100
     })
     log(
-      `re-derived ${points_inserts.length} ${scoring_format_id} points for year ${year}`
+      `re-derived ${items.length} ${scoring_format_id} ${label} points for year ${year}`
     )
   }
 
-  return points_inserts.length
+  await refresh({
+    table: 'scoring_format_player_projection_points',
+    items: weekly_points_inserts,
+    label: 'weekly'
+  })
+  await refresh({
+    table: 'scoring_format_player_season_projection_points',
+    items: season_points_inserts,
+    label: 'season'
+  })
+  await refresh({
+    table: 'scoring_format_player_rest_of_season_projection_points',
+    items: rest_of_season_points_inserts,
+    label: 'rest of season'
+  })
+
+  return (
+    weekly_points_inserts.length +
+    season_points_inserts.length +
+    rest_of_season_points_inserts.length
+  )
 }
 
 const process_projections_for_scoring_format = async ({

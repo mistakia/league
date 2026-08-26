@@ -73,7 +73,7 @@ class PlayerRoster extends Player {
           player_salary,
           bid
         })
-    const projectionType = isRegularSeason ? 'ros' : '0'
+    const projectionType = isRegularSeason ? 'rest_of_season' : 'season'
     const hasProjections = player_map.hasIn(['market_salary', projectionType])
     const market_salary = player_map.getIn(['market_salary', projectionType], 0)
     const get_savings = () => {
@@ -86,10 +86,15 @@ class PlayerRoster extends Player {
     const savings = get_savings()
 
     const pts_added = player_map.getIn(['pts_added', projectionType], 0)
-    // The net variant exists only at rest-of-season grain -- there is no
-    // season-grain net, so this reads `ros_net` in every phase rather than
-    // following `projectionType`.
-    const pts_added_net = player_map.getIn(['pts_added', 'ros_net'], null)
+    // Deliberately NOT following `projectionType`. The season net is a sum over
+    // all 18 weeks and the rest-of-season net a sum over the remaining ones, so
+    // in the offseason they are the same number and in-season the
+    // rest-of-season one is what a roster decision turns on. Pairing it with a
+    // period-following positive is what makes the two cells comparable.
+    const pts_added_net = player_map.getIn(
+      ['pts_added', 'rest_of_season_net'],
+      null
+    )
     const points_added_including_cap_savings = player_map.getIn(
       ['projected_points_added_positive_including_cap_savings', projectionType],
       0

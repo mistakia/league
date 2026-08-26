@@ -18,7 +18,8 @@ export default class EditableProjection extends React.Component {
   render = () => {
     const { player_map, type, week } = this.props
 
-    const decimal = week === 'ros' || week === '0' ? 0 : 1
+    // Season-scale figures render whole; a single week gets a decimal.
+    const decimal = week === 'rest_of_season' || week === '0' ? 0 : 1
     const value = parseFloat(
       player_map.getIn(['projection', `${week}`, type], 0).toFixed(decimal)
     )

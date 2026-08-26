@@ -26,6 +26,9 @@ const get_format_tables = ({ format_type }) => {
         'league_format_draft_pick_value',
         'league_format_player_projection_values',
         'league_format_player_projection_values_history',
+        'league_format_player_season_projection_values',
+        'league_format_player_rest_of_season_projection_values',
+        'league_format_player_rest_of_season_projection_values_history',
         'league_format_player_careerlogs',
         'league_format_player_seasonlogs',
         'league_format_player_gamelogs'
@@ -36,6 +39,8 @@ const get_format_tables = ({ format_type }) => {
       hash_column: 'scoring_format_id',
       tables: [
         'scoring_format_player_projection_points',
+        'scoring_format_player_season_projection_points',
+        'scoring_format_player_rest_of_season_projection_points',
         'scoring_format_player_careerlogs',
         'scoring_format_player_seasonlogs',
         'scoring_format_player_gamelogs'
@@ -96,7 +101,9 @@ export const discover_all_format_hashes = async () => {
     'scoring_format_player_gamelogs',
     'scoring_format_player_seasonlogs',
     'scoring_format_player_careerlogs',
-    'scoring_format_player_projection_points'
+    'scoring_format_player_projection_points',
+    'scoring_format_player_season_projection_points',
+    'scoring_format_player_rest_of_season_projection_points'
   ]
 
   const league_tables = [
@@ -104,6 +111,8 @@ export const discover_all_format_hashes = async () => {
     'league_format_player_seasonlogs',
     'league_format_player_careerlogs',
     'league_format_player_projection_values',
+    'league_format_player_season_projection_values',
+    'league_format_player_rest_of_season_projection_values',
     'league_format_draft_pick_value'
   ]
 

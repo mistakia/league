@@ -7,50 +7,56 @@ const season_projections_view = {
   name: current_season.isOffseason
     ? 'Season Projections'
     : 'Rest of Season Projections',
-  order_by: current_season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+  order_by: current_season.isOffseason
+    ? 'pts_added.season'
+    : 'pts_added.rest_of_season',
   fields: [
     // TODO player salary
     // TODO player points+
     // TODO player market salary
     // TODO player market adjusted salary
-    current_season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
-    current_season.isOffseason ? 'points.0.total' : 'points.ros.total',
+    current_season.isOffseason
+      ? 'pts_added.season'
+      : 'pts_added.rest_of_season',
+    current_season.isOffseason
+      ? 'points.season.total'
+      : 'points.rest_of_season.total',
     current_season.isOffseason
       ? 'projection.0.passing_attempts'
-      : 'projection.ros.passing_attempts',
+      : 'projection.rest_of_season.passing_attempts',
     current_season.isOffseason
       ? 'projection.0.passing_yards'
-      : 'projection.ros.passing_yards',
+      : 'projection.rest_of_season.passing_yards',
     current_season.isOffseason
       ? 'projection.0.passing_touchdowns'
-      : 'projection.ros.passing_touchdowns',
+      : 'projection.rest_of_season.passing_touchdowns',
     current_season.isOffseason
       ? 'projection.0.passing_interceptions'
-      : 'projection.ros.passing_interceptions',
+      : 'projection.rest_of_season.passing_interceptions',
     current_season.isOffseason
       ? 'projection.0.rushing_attempts'
-      : 'projection.ros.rushing_attempts',
+      : 'projection.rest_of_season.rushing_attempts',
     current_season.isOffseason
       ? 'projection.0.rushing_yards'
-      : 'projection.ros.rushing_yards',
+      : 'projection.rest_of_season.rushing_yards',
     current_season.isOffseason
       ? 'projection.0.rushing_touchdowns'
-      : 'projection.ros.rushing_touchdowns',
+      : 'projection.rest_of_season.rushing_touchdowns',
     current_season.isOffseason
       ? 'projection.0.fumbles_lost'
-      : 'projection.ros.fumbles_lost',
+      : 'projection.rest_of_season.fumbles_lost',
     current_season.isOffseason
       ? 'projection.0.targets'
-      : 'projection.ros.targets',
+      : 'projection.rest_of_season.targets',
     current_season.isOffseason
       ? 'projection.0.receptions'
-      : 'projection.ros.receptions',
+      : 'projection.rest_of_season.receptions',
     current_season.isOffseason
       ? 'projection.0.receiving_yards'
-      : 'projection.ros.receiving_yards',
+      : 'projection.rest_of_season.receiving_yards',
     current_season.isOffseason
       ? 'projection.0.receiving_touchdowns'
-      : 'projection.ros.receiving_touchdowns'
+      : 'projection.rest_of_season.receiving_touchdowns'
   ]
 }
 

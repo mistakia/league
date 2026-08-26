@@ -34,9 +34,16 @@ const get_scope = ({ params = {} } = {}) => ({
   })
 })
 
-// The market price a single season of this player is worth, read at week 0 --
-// the season-long figure, the same table and period `generate-tag-board.mjs`
-// reads (scripts/generate-tag-board.mjs:115-118).
+// The market price a single season of this player is worth, read from the
+// season period table -- the same table and column `generate-tag-board.mjs`
+// reads for its auction supply view.
+//
+// `market_salary_positive` rather than `market_salary_net`: the two are shares
+// of different POOLS, and the positive one is the share of the drawn season
+// board -- the quantity that has always answered "what is a season of this
+// player worth", and the one restricted free agency, franchise schedules and
+// rookie schedules price off. The net variant prices a format with no viable
+// bench and would understate every contract compared against it.
 //
 // Emitted as a correlated scalar subquery rather than by attaching the
 // `player_week_projected_market_salary` source. A column belongs to exactly one
@@ -45,10 +52,10 @@ const get_scope = ({ params = {} } = {}) => ({
 // on the same alias whenever a view also carries the market column itself,
 // which Postgres rejects outright ("table name specified more than once").
 // The subquery is a single lookup on the table's UNIQUE
-// (pid, league_format_id, week, year) index and cannot fan out a row.
+// (pid, league_format_id, season_year) index and cannot fan out a row.
 const market_salary_sql = ({ params, data_view_options }) => {
   const { year, league_format_id } = get_scope({ params })
-  return `(SELECT market_salary FROM league_format_player_projection_values WHERE pid = ${data_view_options.pid_reference} AND league_format_id = '${league_format_id}' AND season_year = ${year} AND week = '0')`
+  return `(SELECT market_salary_positive FROM league_format_player_season_projection_values WHERE pid = ${data_view_options.pid_reference} AND league_format_id = '${league_format_id}' AND season_year = ${year})`
 }
 
 // Read through a correlated subquery for the same reason: `rosters_players` is

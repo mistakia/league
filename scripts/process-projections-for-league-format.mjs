@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import {
   calculate_projection_values,
-  calculatePlayerValuesRestOfSeason,
+  calculate_player_period_values,
   groupBy
 } from '#libs-shared'
 import {
@@ -13,12 +13,13 @@ import {
   default_points_added,
   external_data_sources
 } from '#constants'
-import { season_net_projection_key } from '#libs-shared/calculate-distributional-baselines.mjs'
+import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
 import {
   is_main,
   batch_insert,
   get_league_format,
-  record_league_format_projection_value_history
+  record_league_format_projection_value_history,
+  build_league_format_period_inserts
 } from '#libs-server'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -53,16 +54,27 @@ const process_league_format_year = async ({
     `processing league format ${league_format_id} for year ${year} (${pricing_model})`
   )
 
-  let week = 0
+  // Routed through the shared helper rather than a literal 0, so the backfill
+  // and the hourly cron partition by the same rule. For a past year it returns
+  // 0, which is what makes the season period write unconditionally here; for the
+  // current year it returns current_season.week, so an in-season invocation
+  // respects the same week-1 seal the cron does.
+  const first_week = first_projection_week_to_recompute({ year })
+  let week = first_week
 
   const final_week_result = await db('nfl_games')
     .where({ season_year: year, season_type: 'REG' })
     .max('week as final_week')
     .first()
 
-  const final_week = final_week_result
-    ? final_week_result.final_week
-    : current_season.nflFinalWeek
+  // `?? `, not a truthiness check on the RESULT. `.max()` always returns a row,
+  // so `final_week_result` is truthy even for a year with no games and the
+  // fallback could never fire -- `final_week` came back null, `week <= null`
+  // coerced to `0 <= 0`, and the loop ran exactly ONCE at week 0. Every year
+  // without nfl_games rows therefore got a season row and no weekly board at
+  // all, silently, because a season row is a plausible-looking result.
+  const final_week =
+    final_week_result?.final_week ?? current_season.nflFinalWeek
 
   // Baselines are not persisted for a league FORMAT -- only process_league
   // writes league_baselines, and it computes its own.
@@ -74,34 +86,23 @@ const process_league_format_year = async ({
     })
   }
 
-  calculatePlayerValuesRestOfSeason({
+  // After the weekly loop, never inside it: both period nets are sums over the
+  // weekly boards above.
+  calculate_player_period_values({
     players: player_rows,
     league: league_format
   })
 
-  const value_inserts = []
-  for (const player_row of player_rows) {
-    for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
-      // season_net has no column yet -- it lands with the period split. Writing
-      // it here would add a THIRD sentinel to the mixed week key this task
-      // exists to retire, and the history table would then carry it too.
-      if (week === season_net_projection_key) continue
-
-      const params = {
-        pid: player_row.pid,
-        season_year: year,
-        league_format_id,
-        week,
-        // Shorthand would key this `pts_added`, which is no longer the column.
-        // `player_row.pts_added` is the in-memory aggregate map and keeps its
-        // name; the COLUMN is projected_points_added.
-        projected_points_added: pts_added,
-        market_salary: player_row.market_salary?.[week] ?? null
-      }
-
-      value_inserts.push(params)
-    }
-  }
+  const {
+    weekly_value_inserts,
+    season_value_inserts,
+    rest_of_season_value_inserts
+  } = build_league_format_period_inserts({
+    player_rows,
+    league_format_id,
+    season_year: year,
+    first_week
+  })
 
   // Output oracle, asserted BEFORE the destructive rewrite below rather than
   // after it -- the write is delete-then-reinsert by (league_format_id, year),
@@ -117,56 +118,91 @@ const process_league_format_year = async ({
   // `projected_points_total as total` alias this guards against. Both counts
   // are logged so a zero denominator is visible rather than inferred.
   //
-  // Count only the NUMERIC week rows. The 'ros'/'ros_net' aggregates are sums
-  // that SKIP the sentinel rather than carrying it, so they land at 0 -- a
-  // non-sentinel value -- even on a run where every real week was sentinel.
-  // Counting them defeats the check exactly when it is needed: a wiped year
-  // still shows two aggregate rows per player and the oracle stays quiet.
-  const weekly_inserts = value_inserts.filter(({ week }) =>
-    Number.isFinite(Number(week))
-  )
-  const real_value_count = weekly_inserts.filter(
+  // Count only the WEEKLY rows. The period aggregates are sums that SKIP the
+  // sentinel rather than carrying it, so they land at 0 -- a non-sentinel
+  // value -- even on a run where every real week was sentinel. Counting them
+  // defeats the check exactly when it is needed: a wiped year still shows the
+  // period rows per player and the oracle stays quiet. The period split makes
+  // that filter structural rather than a predicate on the week key.
+  const real_value_count = weekly_value_inserts.filter(
     ({ projected_points_added }) =>
       projected_points_added !== default_points_added
   ).length
   log(
-    `year ${year}: ${source_point_row_count} scoring-format point rows in, ${value_inserts.length} values out, ${weekly_inserts.length} weekly, ${real_value_count} non-sentinel`
+    `year ${year}: ${source_point_row_count} scoring-format point rows in, ` +
+      `${weekly_value_inserts.length} weekly, ${season_value_inserts.length} season, ` +
+      `${rest_of_season_value_inserts.length} rest of season, ${real_value_count} non-sentinel`
   )
 
   if (
     source_point_row_count > 0 &&
-    weekly_inserts.length &&
+    weekly_value_inserts.length &&
     !real_value_count
   ) {
     throw new Error(
       `refusing to write league format ${league_format_id} year ${year}: ` +
         `${source_point_row_count} scoring-format point rows were read but all ` +
-        `${weekly_inserts.length} computed weekly values are the ${default_points_added} sentinel. ` +
+        `${weekly_value_inserts.length} computed weekly values are the ${default_points_added} sentinel. ` +
         'Existing values left untouched.'
     )
   }
 
-  if (value_inserts.length) {
-    // Record the dated observation BEFORE the destructive rewrite below. The
-    // current-state table is delete-then-reinsert, so history has to be captured
-    // from the computed values rather than read back afterwards.
+  // Record the dated observations BEFORE the destructive rewrites below. The
+  // current-state tables are delete-then-reinsert, so history has to be captured
+  // from the computed values rather than read back afterwards.
+  if (weekly_value_inserts.length || rest_of_season_value_inserts.length) {
     await record_league_format_projection_value_history({
       league_format_id,
       year,
-      value_rows: value_inserts
+      weekly_value_rows: weekly_value_inserts,
+      rest_of_season_value_rows: rest_of_season_value_inserts
     })
+  }
 
+  if (weekly_value_inserts.length) {
     await db('league_format_player_projection_values')
       .del()
       .where({ league_format_id, season_year: year })
     await batch_insert({
-      items: value_inserts,
+      items: weekly_value_inserts,
       save: (items) =>
         db('league_format_player_projection_values').insert(items),
       batch_size: 100
     })
     log(
-      `processed and saved ${value_inserts.length} player values for year ${year}`
+      `processed and saved ${weekly_value_inserts.length} weekly values for year ${year}`
+    )
+  }
+
+  if (season_value_inserts.length) {
+    await db('league_format_player_season_projection_values')
+      .del()
+      .where({ league_format_id, season_year: year })
+    await batch_insert({
+      items: season_value_inserts,
+      save: (items) =>
+        db('league_format_player_season_projection_values').insert(items),
+      batch_size: 100
+    })
+    log(
+      `processed and saved ${season_value_inserts.length} season values for year ${year}`
+    )
+  }
+
+  if (rest_of_season_value_inserts.length) {
+    await db('league_format_player_rest_of_season_projection_values')
+      .del()
+      .where({ league_format_id, season_year: year })
+    await batch_insert({
+      items: rest_of_season_value_inserts,
+      save: (items) =>
+        db('league_format_player_rest_of_season_projection_values').insert(
+          items
+        ),
+      batch_size: 100
+    })
+    log(
+      `processed and saved ${rest_of_season_value_inserts.length} rest of season values for year ${year}`
     )
   }
 }

@@ -162,13 +162,6 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "scripts/process-projections.mjs",
-      "callee": "calculatePlayerValuesRestOfSeason",
-      "key": "rosterRows",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
       "caller": "test/draft.spec.mjs",
       "callee": "checkLastTransaction",
       "key": "year",

@@ -142,23 +142,34 @@ const league_player_rest_of_season_projection_values_table_alias = ({
   )
 }
 
-// The period sentinel has to be part of the alias key. This table stores every
-// period in one `week` column ('0', a numeric week, 'ros', 'ros_net'), and each
-// period column pins its own value in `extra_predicates` / `attach`. Two columns
-// that hash to the same alias collapse into ONE join group, and that join
-// carries only the seeding column's predicate -- so a view holding both the
-// week and the rest-of-season variant of the same stat rendered one period's
-// value under the other's header, with no error and no failing test. Measured
-// 2026-08-04 at HEAD: `[week, ros]` emitted `week = 'ros'` for both, `[ros,
-// week]` emitted `week = '0'` for both. Nothing pinned it -- no golden exercises
-// any rest-of-season projected column.
-const league_format_player_projection_values_table_alias_for =
-  ({ period_week = null } = {}) =>
+// The per-week table's alias keys on the request's week, as it always did.
+//
+// It used to need a PERIOD component too, because every period lived in this
+// one table's `week` column and each period column pinned its own sentinel:
+// two columns hashing to the same alias collapse into ONE join group carrying
+// only the seeding column's predicate, so a view holding both the week and the
+// rest-of-season variant of a stat rendered one period's value under the
+// other's header, with no error and no failing test. That whole class is gone
+// -- each period is a different TABLE now, and two different tables cannot
+// share a join group.
+const league_format_player_projection_values_table_alias = ({
+  params = {}
+}) => {
+  const p = get_default_params({ params })
+  return get_table_hash(
+    `league_format_player_projection_values_${get_alias_key(p)}_${p.league_format_id}`
+  )
+}
+
+// The two league-format period tables carry no week column, so their aliases
+// key on year and format only. Including the week dimension the way the week
+// table's alias does would split one join into one-per-requested-week for no
+// benefit -- the same reasoning as the league_player period aliases above.
+const league_format_period_projection_values_table_alias_for =
+  (table) =>
   ({ params = {} }) => {
     const p = get_default_params({ params })
-    return get_table_hash(
-      `league_format_player_projection_values_${get_alias_key(p)}_period_${period_week ?? 'week_param'}_${p.league_format_id}`
-    )
+    return get_table_hash(`${table}_${p.year}_${p.league_format_id}`)
   }
 
 // Year and week predicates follow query_context references when the cell
@@ -362,12 +373,11 @@ const make_league_player_rest_of_season_projection_source =
     table: 'league_player_rest_of_season_projection_values'
   })
 
-// `period_week` pins the period sentinel this source reads ('ros', 'ros_net').
-// Left null the source follows the request's week param, which is what the
-// `week` and `season` prefixes do.
-const make_league_format_player_projection_source = ({
-  period_week = null
-} = {}) => ({
+// The PER-WEEK league-format source. It follows the request's week param and
+// nothing else -- the season and rest-of-season periods are their own tables
+// below, so this source no longer carries a period parameter and cannot be
+// pointed at a sentinel.
+const make_league_format_player_projection_source = () => ({
   grain: 'player',
   table: 'league_format_player_projection_values',
   // Conformed to season_year -- see the note on the league_player source above.
@@ -378,7 +388,7 @@ const make_league_format_player_projection_source = ({
     const { league_format_id, week } = get_default_params({ params })
     return [
       { column: 'league_format_id', value: league_format_id },
-      { column: 'week', value: period_week ?? String(week) }
+      { column: 'week', value: String(week) }
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
@@ -391,9 +401,13 @@ const make_league_format_player_projection_source = ({
       join_table_clause: `league_format_player_projection_values as ${table_alias}`,
       join_year: true,
       join_year_column: 'season_year',
-      join_week: !period_week,
+      join_week: true,
       // This table's week is character varying(10); week_reference is smallint,
-      // and Postgres will not compare them.
+      // and Postgres will not compare them. It narrows to smallint with the
+      // destructive half of this cutover, at which point the flag comes off --
+      // an explicit cast to the OLD type is exactly what a varchar-to-numeric
+      // retype breaks, and it is the one shape no consumer gate can see,
+      // because the column NAME still resolves either way.
       cast_join_week_to_string: true,
       additional_conditions() {
         this.andOn(
@@ -401,13 +415,59 @@ const make_league_format_player_projection_source = ({
           '=',
           db.raw('?', [league_format_id])
         )
-        if (period_week) {
-          this.andOn(`${table_alias}.week`, '=', db.raw('?', [period_week]))
-        }
       }
     })
   }
 })
+
+// Season and rest-of-season share a shape: grained (pid, league_format_id,
+// season_year) with no week column. `join_week: false` is load-bearing rather
+// than tidy -- apply_projected_join defaults it to true and falls back to
+// `params.week || 0`, so omitting it emits a week predicate against a column
+// that does not exist. Mirrors make_league_player_period_projection_source.
+const make_league_format_player_period_projection_source =
+  ({ table }) =>
+  () => ({
+    grain: 'player',
+    table,
+    attach_owns_join: true,
+    key_columns: { year: 'season_year' },
+    year_default: (params) => [get_default_params({ params }).year],
+    extra_predicates: (params) => {
+      const { league_format_id } = get_default_params({ params })
+      return [{ column: 'league_format_id', value: league_format_id }]
+    },
+    attach: ({ query_context, params, table_alias, join_type }) => {
+      const { league_format_id } = get_default_params({ params })
+      apply_projected_join({
+        query_context,
+        params,
+        table_alias,
+        join_type,
+        join_table_clause: `${table} as ${table_alias}`,
+        join_year: true,
+        join_week: false,
+        join_year_column: 'season_year',
+        additional_conditions() {
+          this.andOn(
+            `${table_alias}.league_format_id`,
+            '=',
+            db.raw('?', [league_format_id])
+          )
+        }
+      })
+    }
+  })
+
+const make_league_format_player_season_projection_source =
+  make_league_format_player_period_projection_source({
+    table: 'league_format_player_season_projection_values'
+  })
+
+const make_league_format_player_rest_of_season_projection_source =
+  make_league_format_player_period_projection_source({
+    table: 'league_format_player_rest_of_season_projection_values'
+  })
 
 const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   grain: 'player',
@@ -666,16 +726,119 @@ const projection_points_year_offset_range_sql = ({
   return `(SELECT SUM(${expression}) FROM ${inner_table} WHERE ${predicates.join(' AND ')})`
 }
 
-const player_projected_points_added = {
-  column_name: 'projected_points_added',
-  table_alias_factory: league_format_player_projection_values_table_alias_for,
-  source_factory: make_league_format_player_projection_source
-}
+// The league-format valuation columns, registered EXPLICITLY per period rather
+// than fanned out by create_projected_stat. Three reasons, and the first two are
+// forced:
+//
+//   Each period is a different TABLE, so there is no single source factory to
+//   fan. The fan-out shares one alias and one source across all three prefixes,
+//   which is precisely what produced the latent defect the league_player block
+//   below records -- every prefix resolved to whatever params.week was.
+//
+//   Each period carries a different COLUMN. A weekly points-added is one signed
+//   number; the two period aggregates each publish a positive and a net, and
+//   their two market salaries are shares of different pools.
+//
+//   And the WEEK period has no market salary at all. A price is a
+//   season-context quantity -- a share of the discretionary cap for the year --
+//   so `player_week_projected_market_salary` is retired rather than repointed.
+//   Any saved view carrying it drops that one column; nothing else in the view
+//   is affected.
+const make_league_format_projection_column = ({
+  column_name,
+  select_as,
+  table_alias,
+  source
+}) => ({
+  column_name,
+  table_alias,
+  select_as: () => select_as,
+  source,
+  get_cache_info: get_cache_info_for_player_projected_stats
+})
 
-const player_projected_market_salary = {
-  column_name: 'market_salary',
-  table_alias_factory: league_format_player_projection_values_table_alias_for,
-  source_factory: make_league_format_player_projection_source
+const league_format_season_alias =
+  league_format_period_projection_values_table_alias_for(
+    'league_format_player_season_projection_values'
+  )
+
+const league_format_rest_of_season_alias =
+  league_format_period_projection_values_table_alias_for(
+    'league_format_player_rest_of_season_projection_values'
+  )
+
+// Positive is the perfect-optionality bound -- what a player adds when you can
+// bench him below replacement. Net is the no-optionality bound -- what he adds
+// when you start him every week and eat the bad ones. They bracket reality
+// rather than competing, and they are not a rescale of one another: a player can
+// carry a positive positive and a negative net. The unsuffixed id is the
+// positive one, which is the convention this family already used for
+// rest-of-season.
+const league_format_period_column_definitions = {
+  player_week_projected_points_added: make_league_format_projection_column({
+    column_name: 'projected_points_added',
+    select_as: 'week_projected_points_added',
+    table_alias: league_format_player_projection_values_table_alias,
+    source: make_league_format_player_projection_source()
+  }),
+  player_season_projected_points_added: make_league_format_projection_column({
+    column_name: 'projected_points_added_positive',
+    select_as: 'season_projected_points_added',
+    table_alias: league_format_season_alias,
+    source: make_league_format_player_season_projection_source()
+  }),
+  player_season_projected_points_added_net:
+    make_league_format_projection_column({
+      column_name: 'projected_points_added_net',
+      select_as: 'season_projected_points_added_net',
+      table_alias: league_format_season_alias,
+      source: make_league_format_player_season_projection_source()
+    }),
+  player_rest_of_season_projected_points_added:
+    make_league_format_projection_column({
+      column_name: 'projected_points_added_positive',
+      select_as: 'rest_of_season_projected_points_added',
+      table_alias: league_format_rest_of_season_alias,
+      source: make_league_format_player_rest_of_season_projection_source()
+    }),
+  player_rest_of_season_projected_points_added_net:
+    make_league_format_projection_column({
+      column_name: 'projected_points_added_net',
+      select_as: 'rest_of_season_projected_points_added_net',
+      table_alias: league_format_rest_of_season_alias,
+      source: make_league_format_player_rest_of_season_projection_source()
+    }),
+  // The token on a market salary names WHICH POOL the share is of, not a sign.
+  // get_positive_part_total builds every denominator from positive values only,
+  // and calculate-prices floors every price at zero, so the net variant is a
+  // share of the positive-net pool and is still non-negative.
+  player_season_projected_market_salary: make_league_format_projection_column({
+    column_name: 'market_salary_positive',
+    select_as: 'season_projected_market_salary',
+    table_alias: league_format_season_alias,
+    source: make_league_format_player_season_projection_source()
+  }),
+  player_season_projected_market_salary_net:
+    make_league_format_projection_column({
+      column_name: 'market_salary_net',
+      select_as: 'season_projected_market_salary_net',
+      table_alias: league_format_season_alias,
+      source: make_league_format_player_season_projection_source()
+    }),
+  player_rest_of_season_projected_market_salary:
+    make_league_format_projection_column({
+      column_name: 'market_salary_positive',
+      select_as: 'rest_of_season_projected_market_salary',
+      table_alias: league_format_rest_of_season_alias,
+      source: make_league_format_player_rest_of_season_projection_source()
+    }),
+  player_rest_of_season_projected_market_salary_net:
+    make_league_format_projection_column({
+      column_name: 'market_salary_net',
+      select_as: 'rest_of_season_projected_market_salary_net',
+      table_alias: league_format_rest_of_season_alias,
+      source: make_league_format_player_rest_of_season_projection_source()
+    })
 }
 
 // Registered explicitly per period below rather than fanned out by
@@ -782,26 +945,22 @@ const projections_index_base = (column_name) => ({
   source_factory: make_projections_index_source
 })
 
+// The RAW-STAT fan-out. Every column it builds reads projections_index or
+// rest-of-season raw projections, where the three prefixes genuinely are one
+// table shape under a period switch. The league-format valuation columns are
+// NOT fanned out here -- see league_format_period_column_definitions above for
+// why they cannot be.
 const create_projected_stat = (base, stat_name) => {
-  const { source_factory, method_factories, table_alias_factory, ...rest } =
-    base
+  const { source_factory, method_factories, ...rest } = base
   const prefixes = ['week', 'season', 'rest_of_season']
   return prefixes.reduce((acc, prefix) => {
     const is_rest_of_season = prefix === 'rest_of_season'
-    // Only the rest-of-season prefix reads a period sentinel. `week` and
-    // `season` both follow the request's week param, which is pre-existing
-    // behaviour on this table and NOT changed here -- see the note on
-    // player_projected_points_added_including_cap_savings_periods.
-    const period_week = is_rest_of_season ? 'ros' : null
     const select_as = () => `${prefix}_projected_${stat_name}`
     const definition = {
       ...rest,
       select_as,
-      source: source_factory({ is_rest_of_season, period_week }),
+      source: source_factory({ is_rest_of_season }),
       get_cache_info: get_cache_info_for_player_projected_stats
-    }
-    if (table_alias_factory) {
-      definition.table_alias = table_alias_factory({ period_week })
     }
     // Columns that emit prefix-aware methods (player_projected_points) bind them
     // here so each prefix gets the right select alias / projection table. Other
@@ -816,35 +975,9 @@ const create_projected_stat = (base, stat_name) => {
   }, {})
 }
 
-// The signed rest-of-season aggregate, registered explicitly rather than fanned
-// out: it is a VARIANT of the rest-of-season period, not a fourth period, so it
-// has no week or season sibling. `scripts/process-projections.mjs` has written
-// it as a `week = 'ros_net'` row for months and
-// `libs-shared/calculate-player-values-rest-of-season.mjs` prices it, but until
-// now nothing could read it.
-//
-// Positive (`ros`) is the perfect-optionality bound -- what a player adds when
-// you can bench him below replacement. Net (`ros_net`) is the no-optionality
-// bound -- what he adds when you start him every week and eat the bad ones. They
-// bracket reality rather than competing, and they are not a rescale of one
-// another: a player can carry a positive `ros` and a negative `ros_net`.
-const player_rest_of_season_projected_points_added_net = {
-  column_name: 'projected_points_added',
-  table_alias: league_format_player_projection_values_table_alias_for({
-    period_week: 'ros_net'
-  }),
-  select_as: () => 'rest_of_season_projected_points_added_net',
-  source: make_league_format_player_projection_source({
-    period_week: 'ros_net'
-  }),
-  get_cache_info: get_cache_info_for_player_projected_stats
-}
-
 const projected_stat_column_defintions = {
-  ...create_projected_stat(player_projected_market_salary, 'market_salary'),
+  ...league_format_period_column_definitions,
   ...player_projected_points_added_including_cap_savings_periods,
-  ...create_projected_stat(player_projected_points_added, 'points_added'),
-  player_rest_of_season_projected_points_added_net,
   ...create_projected_stat(player_projected_points, 'points'),
   ...create_projected_stat(
     projections_index_base('passing_attempts'),
