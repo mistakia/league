@@ -10,7 +10,7 @@ const log = debug('play-enrichment:team-assignment')
  * game's home/visitor teams.
  *
  * @param {object[]} plays - Array of play objects with esbid and possession_nfl_team
- * @param {Map<number, object>|object} games_map - Map or object of game data keyed by esbid with h (home) and v (visitor) properties
+ * @param {Map<number, object>|object} games_map - Map or object of game data keyed by esbid with home_nfl_team and away_nfl_team properties
  * @returns {object[]} Plays with offense_nfl_team and defense_nfl_team fields populated
  */
 export const enrich_team_assignments = (plays, games_map) => {
@@ -36,15 +36,28 @@ export const enrich_team_assignments = (plays, games_map) => {
       return play
     }
 
-    if (!game.h || !game.v) {
-      log(`Invalid game data for esbid: ${play.esbid} - missing h or v`)
+    // These read the PHYSICAL nfl_games column names. They were `h` and `v`
+    // until 8619abb2b (2026-07-29) renamed the team roles, and this module was
+    // missed by that sweep -- no spec executes it, so nothing went red. The
+    // failure was silent by construction: an undefined property is falsy, so
+    // every play took the skip branch below, logged one debug line on a cron
+    // job nobody reads, and returned unchanged with offense_nfl_team NULL. All
+    // 6,027 plays of the 2026 preseason landed that way, which is what starved
+    // generate-player-snaps of the team totals it keys on.
+    if (!game.home_nfl_team || !game.away_nfl_team) {
+      log(
+        `Invalid game data for esbid: ${play.esbid} - missing home_nfl_team or away_nfl_team`
+      )
       skipped_count++
       return play
     }
 
     // Calculate team assignments
     const offense_nfl_team = play.possession_nfl_team
-    const defense_nfl_team = offense_nfl_team === game.h ? game.v : game.h
+    const defense_nfl_team =
+      offense_nfl_team === game.home_nfl_team
+        ? game.away_nfl_team
+        : game.home_nfl_team
 
     enriched_count++
 
