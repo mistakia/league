@@ -57,10 +57,16 @@ const import_espn_line_win_rates = async ({
 
   const observed_at = new Date()
 
-  // Preload player cache for fast lookups
+  // Preload the cache with EVERY player, retired included. The roster-status
+  // overrides at the lookup sites below are inert without this: a player absent
+  // from the cache cannot be un-filtered, so `ignore_retired: false` against an
+  // active-only cache is a no-op that reads like a fix.
+  //
+  // These leaderboards run to the end of the season and are re-read afterwards,
+  // by which point some of the players on them have retired or been cut.
   log('Preloading player cache...')
-  await preload_active_players()
-  log('Player cache initialized')
+  await preload_active_players({ all_players: true })
+  log('Player cache initialized with all players (retired included)')
 
   const espn_config = await espn.get_espn_config()
   const { espn_line_win_rates_url } = espn_config
@@ -88,29 +94,40 @@ const import_espn_line_win_rates = async ({
     team: []
   }
 
-  // Players the page LISTED, per category, before matching. The matched arrays
-  // above cannot answer this -- an unmatched player is dropped -- and without
-  // the denominator a category whose every player stopped resolving is
-  // indistinguishable from a category ESPN stopped publishing.
-  const fetched_counts = {
-    pass_rush: 0,
-    pass_block: 0,
-    run_stop: 0,
-    run_block: 0
+  // Players the page listed but whose identity we could not resolve, per
+  // category. The ROWS are kept either way -- see below -- so this is the list
+  // of names the oracle fails on, not a count of what was thrown away.
+  const unmatched_by_category = {
+    pass_rush: [],
+    pass_block: [],
+    run_stop: [],
+    run_block: []
   }
 
   const process_player_table = async ({ table, data_key, win_rate_key }) => {
     const players = []
     for (const row of $(table).find('tbody tr').get()) {
-      fetched_counts[data_key]++
       const cells = $(row).find('td')
       const player_link = $(cells[1]).find('a')
       const href = player_link.attr('href')
       const espn_id = href ? href.split('/id/')[1]?.split('/')[0] : null
 
+      // `espn_player_id` is NOT NULL on both tables, so a row without one is
+      // not writable at all. This used to be invisible: such a row failed the
+      // id lookup, sometimes matched by name, and was dropped whenever it did
+      // not. Now that unmatched rows are KEPT, it would reach the insert and
+      // fail on the constraint instead. Raise here, where the cause is legible
+      // -- a page that stopped linking its players is a restructure worth
+      // failing on, not a row worth losing.
+      if (!Number(espn_id)) {
+        throw new Error(
+          `${data_key} row "${player_link.text().trim() || $(cells[1]).text().trim()}" carries no ESPN player id -- the page no longer links players, which is a restructure`
+        )
+      }
+
       const player_data = {
         player_name: player_link.text(),
-        espn_id: Number(espn_id) || null,
+        espn_id: Number(espn_id),
         team: fixTeam($(cells[2]).text()),
         wins: Number($(cells[3]).text()),
         plays: Number($(cells[4]).text()),
@@ -118,26 +135,37 @@ const import_espn_line_win_rates = async ({
         double_team_percentage: parseFloat($(cells[6]).text()) / 100
       }
 
-      // Try espn_id lookup first, then fallback to name+team lookup
-      let player_row = null
-      if (player_data.espn_id) {
-        player_row = find_player({
-          espn_player_id: player_data.espn_id
-        })
-      }
+      // Try espn_id lookup first, then fallback to name+team lookup.
+      //
+      // Roster-status filters stay OFF on every route. `find_player` defaults
+      // `ignore_retired` and `ignore_free_agent` to true, which asks a question
+      // about the player's CURRENT employment in the middle of establishing who
+      // this row is about. A leaderboard row is a historical fact; a player who
+      // has since retired or been cut is still the same person. The archive
+      // backfills have always overridden both, and the live importer not doing
+      // so is why it loses players the backfill keeps.
+      let player_row = find_player({
+        espn_player_id: player_data.espn_id,
+        ignore_retired: false,
+        ignore_free_agent: false
+      })
 
       // Fallback to name+team lookup if espn_id lookup failed
       if (!player_row) {
         player_row = find_player({
           name: player_data.player_name,
-          teams: player_data.team ? [player_data.team] : []
+          teams: player_data.team ? [player_data.team] : [],
+          ignore_retired: false,
+          ignore_free_agent: false
         })
       }
 
       // Retry without team constraint if team-based lookup failed
       if (!player_row && player_data.team) {
         player_row = find_player({
-          name: player_data.player_name
+          name: player_data.player_name,
+          ignore_retired: false,
+          ignore_free_agent: false
         })
         if (player_row) {
           log(
@@ -146,14 +174,19 @@ const import_espn_line_win_rates = async ({
         }
       }
 
-      if (player_row) {
-        player_data.pid = player_row.pid
-      } else {
+      // AN UNMATCHED PLAYER IS KEPT, WITH A NULL pid. Dropping the row lost two
+      // things at once: the published leaderboard entry, and the denominator
+      // that would have said how many were lost -- which is why no
+      // fetched-vs-matched figure existed for this feed until a backfill
+      // measured one. The column is nullable and the table already holds
+      // null-pid rows. The oracle fails the run and names whoever is missing,
+      // so the identity gap gets closed instead of silently repeating weekly.
+      player_data.pid = player_row ? player_row.pid : null
+      if (!player_row) {
         result.players_not_matched++
-        result.unmatched_players.push(
-          `${player_data.player_name} (${player_data.team})`
-        )
-        continue
+        const descriptor = `${player_data.player_name} (${player_data.team}, espn ${player_data.espn_id})`
+        result.unmatched_players.push(descriptor)
+        unmatched_by_category[data_key].push(descriptor)
       }
 
       players.push(player_data)
@@ -286,9 +319,9 @@ const import_espn_line_win_rates = async ({
       ...Object.entries(player_win_rate_types).map(([data_key]) =>
         summarize_win_rate_feed({
           label: data_key,
-          fetched: fetched_counts[data_key],
           rows: extracted_data[data_key],
-          rate_key: `${data_key}_win_rate`
+          rate_key: `${data_key}_win_rate`,
+          unmatched: unmatched_by_category[data_key]
         })
       ),
       // The team table carries four independent rate columns read from four
@@ -302,7 +335,6 @@ const import_espn_line_win_rates = async ({
       ].map((rate_key) => ({
         ...summarize_win_rate_feed({
           label: `team ${rate_key}`,
-          fetched: extracted_data.team.length,
           rows: extracted_data.team,
           rate_key
         }),
@@ -314,12 +346,22 @@ const import_espn_line_win_rates = async ({
   // console.log, not the debug logger: a scheduled job's verdict must not
   // depend on winning a DEBUG namespace negotiation against the import graph.
   console.log(grade.summary)
-  if (!grade.passed) throw new Error(grade.summary)
+
+  // Only a DATA failure stops the write. A missing pid means the leaderboard is
+  // right and one identity link is absent, and refusing to write on that would
+  // throw away a correct season over a rookie -- the drop-the-row defect moved
+  // up a level. Those rows land with a null pid and the run fails afterwards,
+  // below, so the names still reach someone.
+  if (grade.write_blocked) throw new Error(grade.summary)
 
   if (dry_run) {
     log(
       `Dry run: ${player_history_inserts.length} player rows, ${team_history_inserts.length} team rows for ${source_season_year}`
     )
+    // A dry run reports the same verdict a real one would. A --dry that returns
+    // green on a run the scheduler would fail is worse than no dry run at all,
+    // because it is used to decide whether the real one is safe.
+    if (!grade.passed) throw new Error(grade.summary)
     return { ...result, dry_run: true }
   }
 
@@ -359,6 +401,12 @@ const import_espn_line_win_rates = async ({
       players_not_matched: result.players_not_matched
     })
   }
+
+  // The rows are down, and they are right. What is missing is one or more
+  // identity links, which the run fails on so somebody attaches them. Thrown
+  // AFTER the write on purpose: the data is worth keeping either way, and a
+  // green run here would mean the same players go unmatched every week forever.
+  if (!grade.passed) throw new Error(grade.summary)
 
   return result
 }

@@ -20,6 +20,14 @@
 //      any presence or count rule. The distinct-value and range rules below
 //      are what catch that class.
 //
+//   4. UNMATCHED PLAYERS WERE DROPPED, AND SO WAS THE EVIDENCE THEY EXISTED.
+//      A player the importer could not resolve to a pid had their row discarded
+//      before insert, which lost the published leaderboard entry AND the
+//      denominator that would have said how many were lost. The 2025 season's
+//      final observation wrote 108 rows against the 120 ESPN published, and
+//      nothing in the run said so. Rows are now kept with a null pid and every
+//      miss is named -- see MATCHING IS GRADED AT 100% below.
+//
 // Grain: per FEED. The team table and each of the four player categories are
 // graded on their own, because that is the grain at which this page breaks --
 // ESPN restructures one table at a time.
@@ -44,14 +52,23 @@ export const EXPECTED_TEAM_COUNT = 32
 // 19, parse collapse is 0-2, so 10 splits the gap with room on both sides.
 export const MINIMUM_CATEGORY_PLAYERS = 10
 
-// Of the players a category listed, the share that must resolve to a pid.
-// Deliberately absent: no fetched-vs-matched figure has ever been recorded for
-// this feed (unmatched players are dropped before insert, so the index cannot
-// answer it retroactively), and a floor picked without sampling the residual is
-// a commitment to keep losing whoever is in it. The run REPORTS its match rate
-// and fails only at zero matched; set `minimum_match_rate` once a live --dry
-// run has characterized the unmatched set.
-export const MINIMUM_MATCH_RATE = 0
+// MATCHING IS GRADED AT 100%, AND THERE IS DELIBERATELY NO THRESHOLD.
+//
+// A match-rate floor is a decision to keep losing whoever falls under it. Set it
+// at 0.8 and the four players who never resolve are permanently invisible: the
+// run goes green, nobody is named, and the same four are dropped every week for
+// as long as the feed exists. A floor set from a measured rate is worse, because
+// it launders the residual into a number that looks like evidence.
+//
+// So every published row must resolve to a pid, and any that does not fails the
+// run BY NAME. The residual is small and finite -- it has been three players
+// with a fixable cause (a missing espn_player_id plus a legal name ESPN does not
+// use) -- and naming them is what makes it fixable rather than permanent.
+//
+// This is affordable only because an unmatched row is no longer DROPPED. The
+// importer writes it with a null pid, so the published leaderboard and the
+// denominator both survive, and the failure is about the missing identity link
+// rather than about missing data. See the data/match split in the grader below.
 
 // Win rates are percentages in [0, 1] after parsing. Every rate ESPN has ever
 // published for these metrics sits between 0.19 and 0.85; the bound here is
@@ -86,17 +103,30 @@ export const parse_season_year_from_url = (url) => {
 }
 
 // Build one feed entry from the rows a feed is about to write, so every counter
-// comes off the SAME collection at the SAME grain. `fetched` stays a caller
-// argument because only the caller knows how many entries the page offered
-// before matching; for the team feed fetched and matched are the same rows.
-export const summarize_win_rate_feed = ({ label, fetched, rows, rate_key }) => {
+// comes off the SAME collection at the SAME grain.
+//
+// `rows` is now every row the page LISTED, matched or not, which is what lets
+// `fetched` be derived here rather than tracked by the caller in a parallel
+// counter. That parallel counter existed only because unmatched rows were
+// dropped from `rows` before this was called, and a denominator kept apart from
+// the collection it describes is a denominator that drifts from it.
+//
+// `unmatched` carries the DESCRIPTORS of the rows with no pid, not just a count,
+// because the whole point of grading matching at 100% is naming who is missing.
+export const summarize_win_rate_feed = ({
+  label,
+  rows,
+  rate_key,
+  unmatched = []
+}) => {
   const rates = rows
     .map((row) => row[rate_key])
     .filter((rate) => rate != null && !Number.isNaN(rate))
   return {
     label,
-    fetched,
-    matched: rows.length,
+    fetched: rows.length,
+    matched: rows.length - unmatched.length,
+    unmatched,
     with_rate: rates.length,
     distinct_rates: new Set(rates).size,
     min_rate: rates.length ? Math.min(...rates) : null,
@@ -115,27 +145,39 @@ export default function grade_espn_line_win_rates_run({
   feeds = [],
   expected_team_count = EXPECTED_TEAM_COUNT,
   minimum_category_players = MINIMUM_CATEGORY_PLAYERS,
-  minimum_match_rate = MINIMUM_MATCH_RATE,
   minimum_plausible_rate = MINIMUM_PLAUSIBLE_RATE,
   maximum_plausible_rate = MAXIMUM_PLAUSIBLE_RATE
 }) {
-  const failures = []
+  // TWO KINDS OF FAILURE, BECAUSE THEY WANT DIFFERENT REMEDIES.
+  //
+  // `data_failures` mean the numbers themselves are wrong or unknown -- the
+  // wrong season, a collapsed table, a percentage read at the wrong scale. Rows
+  // like that must not reach the tables at all, so these block the write.
+  //
+  // `match_failures` mean the numbers are RIGHT and one identity link is
+  // missing. Refusing to write on those would discard a correct leaderboard
+  // over a rookie who has no espn_player_id on his player row yet, and would
+  // reintroduce the drop-the-row behaviour one level up. So they do not block
+  // the write -- the rows land with a null pid -- but they still fail the run,
+  // which is what puts the names in front of someone.
+  const data_failures = []
+  const match_failures = []
 
   if (source_season_year == null) {
-    failures.push(
+    data_failures.push(
       `could not derive a season from espn_line_win_rates_url (${source_url}) -- the article slug no longer carries one, so the season this run wrote is unknown`
     )
   } else if (source_season_year !== expected_season_year) {
     // The March 2026 incident, made loud. ESPN publishes a new article each
     // season and the config row has to be repointed at it; until someone does,
     // the old article keeps serving last season's final numbers.
-    failures.push(
+    data_failures.push(
       `espn_line_win_rates_url is the ${source_season_year} article but this run is importing ${expected_season_year} -- repoint config.espn_config.espn_line_win_rates_url at the ${expected_season_year} article`
     )
   }
 
   if (!feeds.length) {
-    failures.push('no feeds ingested')
+    data_failures.push('no feeds ingested')
   }
 
   for (const feed of feeds) {
@@ -143,6 +185,7 @@ export default function grade_espn_line_win_rates_run({
       label,
       fetched = 0,
       matched = 0,
+      unmatched = [],
       with_rate,
       distinct_rates,
       min_rate,
@@ -154,31 +197,33 @@ export default function grade_espn_line_win_rates_run({
       // "Produced nothing" and "had nothing to produce" must not share an
       // outcome. This page is never legitimately empty inside the window the
       // job runs, so zero rows is a restructured table, not a quiet week.
-      failures.push(`feed ${label} returned 0 rows`)
+      data_failures.push(`feed ${label} returned 0 rows`)
       continue
     }
 
     if (is_team_feed) {
       if (fetched !== expected_team_count) {
-        failures.push(
+        data_failures.push(
           `feed ${label} returned ${fetched} team(s), expected exactly ${expected_team_count}`
         )
       }
     } else if (fetched < minimum_category_players) {
-      failures.push(
+      data_failures.push(
         `feed ${label} returned only ${fetched} player(s) (floor ${minimum_category_players})`
       )
     }
 
     if (matched === 0) {
-      failures.push(`feed ${label} matched 0 of ${fetched} row(s)`)
+      data_failures.push(`feed ${label} matched 0 of ${fetched} row(s)`)
       continue
     }
 
-    const match_rate = matched / fetched
-    if (minimum_match_rate > 0 && match_rate < minimum_match_rate) {
-      failures.push(
-        `feed ${label} match rate ${format_rate(match_rate)} below ${format_rate(minimum_match_rate)} (${matched} of ${fetched})`
+    // Every published row must resolve to a pid, and the ones that do not are
+    // named. No threshold -- see the MATCHING IS GRADED AT 100% note above.
+    if (matched < fetched) {
+      const named = unmatched.length ? `: ${unmatched.join(', ')}` : ''
+      match_failures.push(
+        `feed ${label} matched ${matched} of ${fetched} row(s) -- ${fetched - matched} published player(s) have no pid${named}`
       )
     }
 
@@ -186,9 +231,13 @@ export default function grade_espn_line_win_rates_run({
     // index parses to null for every entry, which any presence check reads as
     // healthy because the rows exist. Every feed on this page fills at 100%,
     // so anything short of complete is a parse fault.
-    if (with_rate !== undefined && with_rate < matched) {
-      failures.push(
-        `feed ${label} wrote ${matched} row(s) but only ${with_rate} carried a win rate`
+    //
+    // Graded against FETCHED rather than matched, because an unmatched row is
+    // written now rather than dropped, and it carries a win rate like any other.
+    // Comparing against matched would let a null rate hide behind a null pid.
+    if (with_rate !== undefined && with_rate < fetched) {
+      data_failures.push(
+        `feed ${label} carried ${fetched} row(s) but only ${with_rate} carried a win rate`
       )
     }
 
@@ -196,7 +245,7 @@ export default function grade_espn_line_win_rates_run({
     // one repeated sentinel. Distinct-value collapse is the only rule that
     // separates a real distribution from a constant.
     if (distinct_rates !== undefined && with_rate > 0 && distinct_rates <= 1) {
-      failures.push(
+      data_failures.push(
         `feed ${label} carries a single repeated win rate across ${with_rate} row(s) -- a sentinel or a dead cell, not a distribution`
       )
     }
@@ -205,12 +254,12 @@ export default function grade_espn_line_win_rates_run({
     // "5" out of "62.5%" produces a perfectly well-formed distribution of
     // wrong numbers, and every rule above passes it.
     if (min_rate != null && min_rate < minimum_plausible_rate) {
-      failures.push(
+      data_failures.push(
         `feed ${label} minimum win rate ${min_rate} is below ${minimum_plausible_rate} -- suspect a percentage parsed at the wrong scale`
       )
     }
     if (max_rate != null && max_rate > maximum_plausible_rate) {
-      failures.push(
+      data_failures.push(
         `feed ${label} maximum win rate ${max_rate} is above ${maximum_plausible_rate} -- suspect a percentage parsed at the wrong scale`
       )
     }
@@ -227,11 +276,25 @@ export default function grade_espn_line_win_rates_run({
     return `${feed.label}: ${feed.matched}/${feed.fetched} matched (${format_rate(rate)})${distinct}${range}`
   })
 
+  // Data failures first, so the reason the rows were refused leads the line
+  // rather than trailing a list of names.
+  const failures = [...data_failures, ...match_failures]
+
   const summary =
     `oracle ${failures.length ? 'FAIL' : 'PASS'}: ` +
     `espn line win rates ${source_season_year ?? 'unknown'} -- ${feeds.length} feed(s) ingested` +
     (feed_summaries.length ? ` [${feed_summaries.join('; ')}]` : '') +
     (failures.length ? ` -- ${failures.join('; ')}` : '')
 
-  return { passed: failures.length === 0, failures, summary }
+  return {
+    passed: failures.length === 0,
+    failures,
+    data_failures,
+    match_failures,
+    // The caller writes when the DATA is sound, and fails the run afterwards if
+    // identity links are missing. Named on the verdict rather than recomputed at
+    // the call site, so the two cannot drift apart.
+    write_blocked: data_failures.length > 0,
+    summary
+  }
 }
