@@ -23,30 +23,47 @@ describe('LIBS-SERVER report_job should_emit_log_error', function () {
       should_emit_log_error({
         job_success: true,
         job_id: 'league-import-pinnacle-odds',
-        api_url: 'https://signals.example'
+        base_cli: '/root/.base/bin/base'
       })
     ).to.equal(false)
   })
 
   it('suppresses the log_error twin when a resolvable pipeline_failure is emitted', () => {
-    // job_id + api_url both present -> `base run report` emits a resolvable
+    // job_id + a runnable CLI -> `base run report` emits a resolvable
     // pipeline_failure that auto-resolves on recovery, so the emit-only
     // log_error twin would be permanently-open noise.
     expect(
       should_emit_log_error({
         job_success: false,
         job_id: 'league-import-pinnacle-odds',
-        api_url: 'https://signals.example'
+        base_cli: '/root/.base/bin/base'
       })
     ).to.equal(false)
   })
 
-  it('emits the log_error when the API URL is unconfigured (no runs-primitive twin)', () => {
+  it('still reports on the writer host, where BASE_API_URL is deliberately absent', () => {
+    // The regression this replaced: the second condition was BASE_API_URL, and
+    // base's job-wrapper STRIPS that variable on a host with a local base-api
+    // UDS so `base run report` writes over the socket instead. Reading its
+    // absence as "unreportable" is what made every league job scheduled on
+    // base-storage report nowhere for eleven days -- and it suppressed the
+    // log_error fallback too, so the failure had no channel at all. Nothing
+    // about the environment here names an API url, which is the point.
+    expect(
+      should_emit_log_error({
+        job_success: false,
+        job_id: 'league-import-nfl-pro-plays',
+        base_cli: '/home/user/bin/base'
+      })
+    ).to.equal(false)
+  })
+
+  it('emits the log_error when no base CLI is runnable (no runs-primitive twin)', () => {
     expect(
       should_emit_log_error({
         job_success: false,
         job_id: 'league-import-pinnacle-odds',
-        api_url: undefined
+        base_cli: null
       })
     ).to.equal(true)
   })
@@ -56,17 +73,17 @@ describe('LIBS-SERVER report_job should_emit_log_error', function () {
       should_emit_log_error({
         job_success: false,
         job_id: undefined,
-        api_url: 'https://signals.example'
+        base_cli: '/root/.base/bin/base'
       })
     ).to.equal(true)
   })
 
-  it('emits the log_error when neither a mapped job nor an API URL is present', () => {
+  it('emits the log_error when neither a mapped job nor a runnable CLI is present', () => {
     expect(
       should_emit_log_error({
         job_success: false,
         job_id: undefined,
-        api_url: undefined
+        base_cli: null
       })
     ).to.equal(true)
   })

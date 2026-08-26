@@ -1,5 +1,7 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
+import { accessSync, constants } from 'fs'
+import { join } from 'path'
 
 import db from '#db'
 
@@ -90,7 +92,33 @@ export const with_connection_retry = async (
 // env does not include ~/.base/bin, so a bare `base` spawn ENOENTs and every run
 // report is silently lost. Mirrors report-run-outcome.mjs and the base
 // job-wrapper.sh absolute-path resolution. See user:text/base/machine-token-auth.md.
-const BASE_CLI = process.env.BASE_CLI_PATH || '/root/.base/bin/base'
+//
+// PROBE THE CANDIDATES rather than hardcoding one. The single `/root/...` path
+// this replaced is why a league job scheduled on base-storage reported nowhere:
+// that host runs jobs as `user`, whose base lives at ~/bin/base, and /root is
+// not merely the wrong path there but unreadable — so the spawn ENOENTs, the
+// catch logs to a cron stderr nobody reads, and the run silently never reaches
+// the ledger. It worked on the league host only because that one happens to run
+// as root. `accessSync` is the right probe precisely because it fails the same
+// way for "absent" and "unreadable", which are the same fact for a spawn.
+const BASE_CLI_CANDIDATES = [
+  process.env.BASE_CLI_PATH,
+  '/root/.base/bin/base',
+  process.env.HOME && join(process.env.HOME, '.base/bin/base'),
+  process.env.HOME && join(process.env.HOME, 'bin/base')
+].filter(Boolean)
+
+const resolve_base_cli = () => {
+  for (const candidate of BASE_CLI_CANDIDATES) {
+    try {
+      accessSync(candidate, constants.X_OK)
+      return candidate
+    } catch {
+      // Not present, or not executable by this uid. Either way, unusable.
+    }
+  }
+  return null
+}
 
 const build_job_type_to_id = () => {
   const map = {}
@@ -108,17 +136,27 @@ const build_job_type_to_id = () => {
 const job_type_to_id = build_job_type_to_id()
 
 // A resolvable pipeline_failure is emitted below via `base run report` only when
-// the job maps to a runs-primitive source (job_id) AND the base API URL is
-// configured; that signal auto-resolves on the next successful run. The
-// emit-only log_error twin from report_error carries no dedup-to-resolution and
-// never auto-clears, so emitting it alongside a resolvable twin leaves a
+// the job maps to a runs-primitive source (job_id) AND a base CLI is actually
+// runnable; that signal auto-resolves on the next successful run. The emit-only
+// log_error twin from report_error carries no dedup-to-resolution and never
+// auto-clears, so emitting it alongside a resolvable twin leaves a
 // permanently-open signal after a self-healing transient (e.g. the single-proxy
 // pinnacle degradation) recovers and the pipeline_failure twin auto-resolves.
 // Emit the log_error twin only when no resolvable failure will carry the
-// outcome — i.e. an unmapped job_type or an unconfigured API URL, where the
-// log_error is the sole escalation channel.
-export const should_emit_log_error = ({ job_success, job_id, api_url }) =>
-  !job_success && !(job_id && api_url)
+// outcome — i.e. an unmapped job_type or no runnable CLI, where the log_error is
+// the sole escalation channel.
+//
+// The second condition used to be BASE_API_URL, which was wrong in the one
+// direction that costs the most: absent BASE_API_URL does not mean "unreportable",
+// it means "this host IS the writer". base's own job-wrapper deliberately STRIPS
+// BASE_API_URL where a local base-api UDS exists, so `base run report` writes
+// over that socket instead. Gating on the variable therefore made every league
+// job on the writer host return before reporting — the failure did not even
+// reach the log_error fallback, because the same variable suppressed that too.
+// Transport selection belongs to `base run report`; this only decides whether
+// there is a CLI to hand it to.
+export const should_emit_log_error = ({ job_success, job_id, base_cli }) =>
+  !job_success && !(job_id && base_cli)
 
 export default async function report_job({
   job_type,
@@ -158,13 +196,13 @@ export default async function report_job({
   }
 
   const job_id = job_type_to_id[job_type]
-  const api_url = process.env.BASE_API_URL
+  const base_cli = resolve_base_cli()
 
-  if (should_emit_log_error({ job_success, job_id, api_url })) {
+  if (should_emit_log_error({ job_success, job_id, base_cli })) {
     await report_error({ job_type, message: job_reason })
   }
 
-  if (!job_id || !api_url) {
+  if (!job_id || !base_cli) {
     return
   }
 
@@ -226,7 +264,7 @@ export default async function report_job({
   }
 
   try {
-    await exec_file(BASE_CLI, [...args, ...schedule_args], { timeout: 5000 })
+    await exec_file(base_cli, [...args, ...schedule_args], { timeout: 5000 })
   } catch (err) {
     // Cadence flags must never be able to break reporting. yargs .strict()
     // rejects an unknown flag with rc=1, which is how the --schedule rollout
@@ -237,7 +275,7 @@ export default async function report_job({
     if (schedule_args.length && /unknown argument/i.test(err.message || '')) {
       console.error('run report rejected cadence flags; retrying without them')
       try {
-        await exec_file(BASE_CLI, args, { timeout: 5000 })
+        await exec_file(base_cli, args, { timeout: 5000 })
         return
       } catch (retry_err) {
         console.error(`run report failed: ${retry_err.message}`)
