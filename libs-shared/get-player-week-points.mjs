@@ -13,8 +13,18 @@
 // it is NOT a zero and NOT a low score -- it is a player who cannot be ranked at
 // all. Returning null rather than undefined is what carries that into arithmetic
 // instead of losing it.
-export const get_player_week_total = ({ player, week }) => {
-  const week_points = player.points ? player.points[week] : null
+//
+// `points_key` is the key into the points map, NOT necessarily a week. The map
+// carries the numeric fantasy weeks alongside the named periods `season` and
+// `rest_of_season` (get-players.mjs fills all three from three tables), so a
+// caller on the season path passes `season_aggregate_key` and a caller on the
+// weekly path passes the week. The parameter was called `week` while only the
+// second was true, and that is exactly how the season board came to read
+// `points[0]` after the period split moved the season points to `points.season`
+// -- a key that no longer existed, so every player fell through to the -999
+// sentinel with no error anywhere. Name the axis, not one of its values.
+export const get_player_week_total = ({ player, points_key }) => {
+  const week_points = player.points ? player.points[points_key] : null
   if (!week_points) return null
   const total = Number(week_points.total)
   return Number.isFinite(total) ? total : null
@@ -37,9 +47,9 @@ export const get_player_week_total = ({ player, week }) => {
 // Callers should filter unprojected players out before sorting, since a player
 // who cannot be ranked usually should not be in the population either. This
 // orders them last rather than trusting that they did.
-export const compare_player_week_points_desc = (week) => (a, b) => {
-  const a_total = get_player_week_total({ player: a, week })
-  const b_total = get_player_week_total({ player: b, week })
+export const compare_player_week_points_desc = (points_key) => (a, b) => {
+  const a_total = get_player_week_total({ player: a, points_key })
+  const b_total = get_player_week_total({ player: b, points_key })
 
   if (a_total === null && b_total === null) return 0
   if (a_total === null) return 1

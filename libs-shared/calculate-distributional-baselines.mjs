@@ -210,7 +210,7 @@ export const fill_starting_slots = ({ values, positions, slots }) => {
   return baseline
 }
 
-// players: [{ pid, primary_position, points: { [week]: { total } } }]
+// players: [{ pid, primary_position, points: { season: { total } } }]
 //
 // Returns expected replacement points per position, expected floored surplus
 // per player, and their total -- the denominator calculate-prices divides the
@@ -218,10 +218,19 @@ export const fill_starting_slots = ({ values, positions, slots }) => {
 // `dispersion_by_pid` is an override for specs, alongside `draws` and `random`.
 // Production never passes it -- the model derives dispersion from the board it
 // is pricing.
+//
+// This reads the SEASON board and takes no week. It used to take one and pass it
+// straight through as the points-map key, which was the same number
+// (`season_projection_week`) that selects this code path at the call site -- so
+// the week that DISPATCHED here was silently reused as the key to READ with.
+// Once the period split moved the season points to `points.season`, that key
+// matched nothing, every player fell through to the -999 sentinel, and
+// calculate-prices then early-returned on its positive-total guard without ever
+// setting a season market_salary. Nothing threw. Removing the parameter is what
+// makes the two roles impossible to conflate again.
 const calculate_distributional_baselines = ({
   players,
   league,
-  week,
   draws = 1000,
   random = null,
   dispersion_by_pid: dispersion_override = null
@@ -234,7 +243,10 @@ const calculate_distributional_baselines = ({
   // calculate-projection-dispersion.mjs.
   const dispersion_by_pid =
     dispersion_override ??
-    calculate_projection_dispersion({ players, week }).dispersion_by_pid
+    calculate_projection_dispersion({
+      players,
+      points_key: season_aggregate_key
+    }).dispersion_by_pid
 
   const pids = []
   const positions = []
@@ -244,7 +256,10 @@ const calculate_distributional_baselines = ({
     const position = player.primary_position
     if (!fantasy_positions.includes(position)) continue
     if (!slots.some((slot) => slot_accepts(slot, position))) continue
-    const total = get_player_week_total({ player, week })
+    const total = get_player_week_total({
+      player,
+      points_key: season_aggregate_key
+    })
     if (!(total > 0)) continue
     pids.push(player.pid)
     positions.push(position)

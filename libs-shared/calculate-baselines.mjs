@@ -50,7 +50,7 @@ const getWorseStarterForPosition = ({
       // number.
       const starter_week_points = get_player_week_total({
         player: starter,
-        week
+        points_key: week
       })
       if (starter_week_points > 0 && starter_week_points < minTotal) {
         minTotal = starter_week_points
@@ -74,7 +74,9 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   // process-projections reuses the same array for every week of the run, so
   // sorting it here made each week start from the previous week's ordering.
   const data = players
-    .filter((player) => get_player_week_total({ player, week }) !== null)
+    .filter(
+      (player) => get_player_week_total({ player, points_key: week }) !== null
+    )
     .sort(compare_player_week_points_desc(week))
 
   const rows = []

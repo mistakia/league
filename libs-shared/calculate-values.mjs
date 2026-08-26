@@ -34,7 +34,10 @@ const calculateValues = ({ players, baselines, week }) => {
       continue
     }
 
-    const player_week_points = get_player_week_total({ player, week })
+    const player_week_points = get_player_week_total({
+      player,
+      points_key: week
+    })
     if (player_week_points && baselines[primary_position].starter) {
       player.pts_added[week] =
         player_week_points -

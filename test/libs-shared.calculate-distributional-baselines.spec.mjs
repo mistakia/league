@@ -4,7 +4,8 @@ import * as chai from 'chai'
 import calculate_distributional_baselines, {
   build_league_starting_slots,
   default_draw_seed,
-  fill_starting_slots
+  fill_starting_slots,
+  season_aggregate_key
 } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { seeded_random } from '#libs-shared/seeded-random.mjs'
 import calculate_projection_dispersion, {
@@ -28,10 +29,20 @@ const two_team_league = {
   starter_slots_defense_special_teams: 0
 }
 
-const make_player = ({ pid, position, total, week = 0 }) => ({
+// Defaults to the SEASON key, because that is the board these two functions
+// read. The fixture previously defaulted to week 0 and every call site passed
+// `week: 0` to match -- which is why the whole suite stayed green while
+// production wrote a full board of sentinels: the fixture encoded the retired
+// key, so the input could not tell the old rule from the new one.
+const make_player = ({
+  pid,
+  position,
+  total,
+  points_key = season_aggregate_key
+}) => ({
   pid,
   primary_position: position,
-  points: { [week]: { total } }
+  points: { [points_key]: { total } }
 })
 
 // Dispersion is derived from the board in production. These specs pin it so the
@@ -65,7 +76,7 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
   it('anchors on the mean of the position’s top projections', () => {
     const { scale_by_position } = calculate_projection_dispersion({
       players: board,
-      week: 0
+      points_key: season_aggregate_key
     })
     expect(scale_by_position.QB).to.equal(300)
     expect(scale_by_position.RB).to.equal(200)
@@ -74,7 +85,7 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
   it('is affine in the projection, not proportional to it', () => {
     const { dispersion_by_pid } = calculate_projection_dispersion({
       players: board,
-      week: 0
+      points_key: season_aggregate_key
     })
     const { top_projection_share, projection_slope } = dispersion_model.QB
 
@@ -98,13 +109,20 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
   // constants dimensionless and lets one measurement serve every scoring format.
   // Doubling the whole board must double every dispersion exactly.
   it('scales linearly with the board, so it travels across scoring formats', () => {
-    const single = calculate_projection_dispersion({ players: board, week: 0 })
+    const single = calculate_projection_dispersion({
+      players: board,
+      points_key: season_aggregate_key
+    })
     const doubled = calculate_projection_dispersion({
       players: board.map((player) => ({
         ...player,
-        points: { 0: { total: player.points[0].total * 2 } }
+        points: {
+          [season_aggregate_key]: {
+            total: player.points[season_aggregate_key].total * 2
+          }
+        }
       })),
-      week: 0
+      points_key: season_aggregate_key
     })
 
     for (const pid of Object.keys(single.dispersion_by_pid)) {
@@ -118,7 +136,7 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
   it('reads each position off its own scale', () => {
     const { dispersion_by_pid } = calculate_projection_dispersion({
       players: board,
-      week: 0
+      points_key: season_aggregate_key
     })
     expect(dispersion_by_pid.rb1).to.be.closeTo(
       dispersion_model.RB.top_projection_share * 200 +
@@ -127,15 +145,33 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
     )
   })
 
-  it('ignores players with no projection for the week', () => {
+  it('ignores players with no projection for the period', () => {
     const { dispersion_by_pid } = calculate_projection_dispersion({
       players: [
         ...board,
         make_player({ pid: 'absent', position: 'QB', total: 0 })
       ],
-      week: 0
+      points_key: season_aggregate_key
     })
     expect(dispersion_by_pid).to.not.have.property('absent')
+  })
+
+  // The control for the whole rename. A board published under the RETIRED week-0
+  // key must come back empty rather than silently priced, because that is the
+  // exact production shape that wrote 27,168 sentinel rows while every spec here
+  // stayed green. Without this, the assertions above pass identically whether
+  // the function reads the season key or the week.
+  it('measures nothing when the board is published under the retired week key', () => {
+    const { dispersion_by_pid, scale_by_position } =
+      calculate_projection_dispersion({
+        players: board.map((player) => ({
+          ...player,
+          points: { 0: player.points[season_aggregate_key] }
+        })),
+        points_key: season_aggregate_key
+      })
+    expect(Object.keys(dispersion_by_pid)).to.have.lengthOf(0)
+    expect(Object.keys(scale_by_position)).to.have.lengthOf(0)
   })
 
   // A constant drifting outside the range the measurement reported across six
@@ -275,7 +311,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
         calculate_distributional_baselines({
           players: flat_board,
           league: two_team_league,
-          week: 0,
           draws: 5,
           dispersion_by_pid: flat_dispersion(flat_board, 0)
         })
@@ -303,7 +338,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
         calculate_distributional_baselines({
           players: flat_board,
           league: two_team_league,
-          week: 0,
           draws: 50,
           random: make_sequence_random([0.11, 0.37, 0.68, 0.92, 0.24, 0.55]),
           dispersion_by_pid: flat_dispersion(flat_board, 40)
@@ -327,7 +361,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
         calculate_distributional_baselines({
           players: flat_board,
           league: two_team_league,
-          week: 0,
           draws: 50,
           dispersion_by_pid: flat_dispersion(flat_board, 40)
         })
@@ -354,7 +387,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
         calculate_distributional_baselines({
           players: flat_board,
           league: two_team_league,
-          week: 0,
           draws: 50,
           random,
           dispersion_by_pid: flat_dispersion(flat_board, 40)
@@ -375,14 +407,12 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       const point_estimate = calculate_distributional_baselines({
         players: flat_board,
         league: two_team_league,
-        week: 0,
         draws: 1,
         dispersion_by_pid: flat_dispersion(flat_board, 0)
       })
       const drawn = calculate_distributional_baselines({
         players: flat_board,
         league: two_team_league,
-        week: 0,
         draws: 4000,
         dispersion_by_pid: flat_dispersion(flat_board, 45)
       })
@@ -396,7 +426,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       const { baselines } = calculate_distributional_baselines({
         players: [make_player({ pid: 'qb1', position: 'QB', total: 400 })],
         league: two_team_league,
-        week: 0,
         draws: 3
       })
       expect(baselines.DST).to.equal(null)
@@ -409,7 +438,6 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
           make_player({ pid: 'absent', position: 'RB', total: 0 })
         ],
         league: two_team_league,
-        week: 0,
         draws: 3
       })
       expect(expected_surplus).to.not.have.property('absent')
@@ -423,13 +451,11 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       const derived = calculate_distributional_baselines({
         players: flat_board,
         league: two_team_league,
-        week: 0,
         draws: 3000
       })
       const point_estimate = calculate_distributional_baselines({
         players: flat_board,
         league: two_team_league,
-        week: 0,
         draws: 1,
         dispersion_by_pid: flat_dispersion(flat_board, 0)
       })
