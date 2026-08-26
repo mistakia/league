@@ -224,6 +224,60 @@ jobs:
           yarn lint
           yarn test
 
-# Failing beacuse virtual framebuffer not installed
-#          yarn build-e2e
-#          yarn test-e2e
+  # Failing beacuse virtual framebuffer not installed
+  #          yarn build-e2e
+  #          yarn test-e2e
+
+  private-tests:
+    # The gate that owns the `yarn test:private` suite (db/gates/
+    # check-private-tests.mjs). The runner CANNOT execute the private suite: the
+    # `private` submodule is `git@github.com:mistakia/league-private.git`, an SSH
+    # URL into a PRIVATE repo, and `mistakia/league` is PUBLIC, so the runner has
+    # no deploy key and no workflow initializes submodules -- on this runner
+    # `private` is an empty directory. Checking it out would be an operator
+    # security decision (provision SSH credentials onto a public-repo runner),
+    # not a wiring one.
+    #
+    # So this job does the honest thing a runner CAN see: it runs the gate, which
+    # reports `CORPUS INCOMPLETE -- not scanned: private` (not a qualified green)
+    # when the submodule is absent -- the state CI always reaches -- and the
+    # assertions below REQUIRE that marker to be PRESENT, so a version of the
+    # gate that silently passes over a corpus it cannot see fails the job instead.
+    # The real suite runs where `private` IS present, via `yarn check:private-tests`
+    # and the check:cluster manifest on a workstation.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+
+      # No `yarn install`: the private-absent path of the gate imports only Node
+      # builtins and the gate's own module, so nothing is needed to prove it
+      # reports its blind state. (If CI ever DOES check out private, this job
+      # grows an install and the gate then runs the real suite.)
+      - name: Assert the private-tests gate reports its blind state, not a green
+        run: |
+          set -uo pipefail
+          out=$(mktemp)
+          set +e
+          node db/gates/check-private-tests.mjs >"$out" 2>&1
+          code=$?
+          set -e
+          echo "private-tests gate exit code: $code"
+          cat "$out"
+          # Each assertion names something that MUST be present -- absence would
+          # also be what a deleted or broken gate produces, so a green relies on
+          # none of them.
+          grep -q 'CORPUS INCOMPLETE -- not scanned: private' "$out"
+          grep -q 'NEGATIVE CONTROL' "$out"
+          grep -q 'RED as expected' "$out"
+          grep -q 'GATE OK' "$out"
+          # The only state CI reaches is private-absent, which must exit 0 (a
+          # scoped OK). Any other exit -- a tooling error, a silent pass -- fails.
+          [ "$code" -eq 0 ]
+          echo 'private-tests gate reports its blind state honestly.'

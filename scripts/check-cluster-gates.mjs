@@ -234,6 +234,14 @@ const GATES = [
       "a cross-file call's object keys vs the callee's destructured parameter list, resolved through the IMPORT EDGE — the silent-default class no column-anchored or query-site-anchored gate here can see"
   },
   {
+    id: 'private-tests',
+    command: ['db/gates/check-private-tests.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'the private suite (yarn test:private) ONCE, where the submodule is present; reports CORPUS INCOMPLETE where it is absent, so a green locally and a green in CI stop being the same claim'
+  },
+  {
     id: 'ts-check-ratchet',
     command: ['db/gates/check-ts-check-ratchet.mjs'],
     requires: 'none',

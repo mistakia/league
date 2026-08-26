@@ -25,6 +25,7 @@
     "libs-server/simulation/load-simulation-data.mjs",
     "libs-server/simulation/simulation-helpers.mjs",
     "libs-server/wager-analysis/wager-calculations.mjs",
+    "libs-shared/career-year-definition.mjs",
     "libs-shared/constants/season-constants.mjs",
     "libs-shared/constants/stats-constants.mjs",
     "libs-shared/get-free-agent-period.mjs",

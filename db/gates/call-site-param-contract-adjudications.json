@@ -121,27 +121,6 @@
     },
     {
       "caller": "scripts/import-full-season.mjs",
-      "callee": "export_data_nfl_games",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "export_data_player_gamelogs",
-      "key": "season_year",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
-      "callee": "import_espn_receiving_tracking_metrics",
-      "key": "ignore_cache",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "scripts/import-full-season.mjs",
       "callee": "import_nfl_games_nflverse",
       "key": "ignore_cache",
       "verdict": "pre-existing-defect",

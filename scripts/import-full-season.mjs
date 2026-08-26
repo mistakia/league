@@ -894,7 +894,12 @@ const run_advanced_stats = async ({
     })
   ) {
     try {
-      await import_espn_receiving_tracking_metrics({ ignore_cache, collector })
+      // The callee spells its cache-bypass flag force_download, not ignore_cache
+      // (it caches the RTM payload under os.tmpdir() unless force_downloaded).
+      await import_espn_receiving_tracking_metrics({
+        force_download: ignore_cache,
+        collector
+      })
     } catch (error) {
       collector.add_error(error, {
         script: 'import_espn_receiving_tracking_metrics',
@@ -1025,14 +1030,19 @@ const run_exports = async ({ season_year, collector }) => {
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_nfl_games({ season_year, collector })
+    // Full-snapshot export: writes every nfl_games row to data/nfl/games.json,
+    // so it is all-seasons by design and deliberately takes no season_year.
+    await export_data_nfl_games({ collector })
   } catch (error) {
     collector.add_error(error, { script: 'export_data_nfl_games', season_year })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_player_gamelogs({ season_year, collector })
+    // Full-snapshot export: writes every player_gamelog, grouped into
+    // data/nfl/player_gamelogs/<year>.json for all years, so it is all-seasons
+    // by design and deliberately takes no season_year.
+    await export_data_player_gamelogs({ collector })
   } catch (error) {
     collector.add_error(error, {
       script: 'export_data_player_gamelogs',
