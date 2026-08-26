@@ -7,7 +7,8 @@ import {
   is_main,
   report_job,
   four_for_four,
-  check_projections_index_floor
+  check_projections_index_floor,
+  record_projection_history
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import db from '#db'
@@ -158,9 +159,7 @@ const run = async ({
         'season_type'
       ])
       .merge()
-    await db('projections_history').insert(
-      inserts.map((i) => ({ ...i, generated_at }))
-    )
+    await record_projection_history({ inserts, generated_at })
   }
 
   return {

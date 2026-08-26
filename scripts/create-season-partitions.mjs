@@ -42,6 +42,16 @@ const PARTITIONED_TABLES = [
     partition_column: 'season_year'
   },
   {
+    // Absent from this list since the table was partitioned on 2026-07-29, so
+    // the next season rollover would have routed its rows to the _default
+    // partition -- and creating the real partition afterwards needs a move-and-
+    // restore under ACCESS EXCLUSIVE rather than a bare CREATE.
+    parent_table: 'projections_history',
+    // TODO change name format from `y` to `year_`
+    partition_prefix: 'projections_history_y',
+    partition_column: 'season_year'
+  },
+  {
     parent_table: 'nfl_snaps',
     partition_prefix: 'nfl_snaps_year_',
     partition_column: 'season_year'
