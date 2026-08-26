@@ -14,6 +14,7 @@ import {
   external_data_sources
 } from '#constants'
 import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 import {
   is_main,
   batch_insert,
@@ -257,7 +258,24 @@ const process_projections_for_league_format = async ({
       })
       .whereIn('pid', projection_pids)
 
+    // The SEASON board lives in its own table since the period split, and it is
+    // what the distributional model prices off. Loading only the weekly table
+    // above leaves `points.season` absent, which is not an error anywhere -- the
+    // model simply finds no player above replacement and writes a full board of
+    // -999. Mirror get-players.mjs, which fills the same three keys from the
+    // same three tables.
+    const scoring_format_season_points = await db(
+      'scoring_format_player_season_projection_points'
+    )
+      .select('pid', 'projected_points_total as total')
+      .where({
+        season_year: process_year,
+        scoring_format_id: league_format.scoring_format_id
+      })
+      .whereIn('pid', projection_pids)
+
     const points_by_pid = groupBy(scoring_format_points, 'pid')
+    const season_points_by_pid = groupBy(scoring_format_season_points, 'pid')
 
     const player_rows = players.map((player) => {
       const player_projections = projections_by_pid[player.pid] || []
@@ -272,6 +290,11 @@ const process_projections_for_league_format = async ({
       const player_points = points_by_pid[player.pid] || []
       for (const point of player_points) {
         points[point.week] = point
+      }
+
+      const season_point = (season_points_by_pid[player.pid] || [])[0]
+      if (season_point) {
+        points[season_aggregate_key] = season_point
       }
 
       return {

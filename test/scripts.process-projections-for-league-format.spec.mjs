@@ -14,8 +14,16 @@ chai.should()
 const VALUES_TABLE = 'league_format_player_projection_values'
 const SEASON_VALUES_TABLE = 'league_format_player_season_projection_values'
 const POINTS_TABLE = 'scoring_format_player_projection_points'
+const SEASON_POINTS_TABLE = 'scoring_format_player_season_projection_points'
 const YEAR = 2024
-const WEEKS = [0, 1, 2, 3]
+
+// Fantasy weeks ONLY. The season board is not week 0 of this table any more --
+// it is its own table, and the fixture has to say so. It previously wrote week 0
+// here, which is a shape production stopped producing at the period split, and
+// that is precisely why this file stayed green while the live season board went
+// entirely to the sentinel: the fixture supplied the retired key the reader was
+// still looking for.
+const WEEKS = [1, 2, 3]
 
 // Enough of a board that calculateBaselines can fill a starting lineup and
 // produce a `starter` at each position -- without one, calculateValues leaves
@@ -58,10 +66,35 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     await knex(POINTS_TABLE)
       .where({ scoring_format_id, season_year: YEAR })
       .del()
+    await knex(SEASON_POINTS_TABLE)
+      .where({ scoring_format_id, season_year: YEAR })
+      .del()
 
     const projection_rows = []
     const point_rows = []
+    const season_point_rows = []
     seeded_pids.forEach((pid, index) => {
+      // projections_index keeps its week 0 -- that is the RAW season projection
+      // and is a separate retirement from this one. What moved is the SCORED
+      // season board below.
+      const season_total = 300 - index * 5
+      projection_rows.push({
+        pid,
+        source_id: external_data_sources.AVERAGE,
+        week: 0,
+        season_year: YEAR,
+        season_type: 'REG',
+        passing_yards: season_total * 2,
+        rushing_yards: season_total,
+        receiving_yards: season_total
+      })
+      season_point_rows.push({
+        pid,
+        scoring_format_id,
+        season_year: YEAR,
+        projected_points_total: season_total
+      })
+
       for (const week of WEEKS) {
         // A descending spread so the board has a real ordering to rank; a flat
         // board would make every projected_points_added identical and hide an inversion.
@@ -88,6 +121,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
 
     await knex('projections_index').insert(projection_rows)
     await knex(POINTS_TABLE).insert(point_rows)
+    await knex(SEASON_POINTS_TABLE).insert(season_point_rows)
 
     await process_projections_for_league_format({
       year: YEAR,

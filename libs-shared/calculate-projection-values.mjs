@@ -67,7 +67,7 @@ const calculate_projection_values = ({
 
   if (week === season_projection_week) {
     const { baselines: drawn_baselines, expected_surplus } =
-      calculate_distributional_baselines({ players, league, week })
+      calculate_distributional_baselines({ players, league })
 
     assign_expected_surplus({ players, expected_surplus })
 

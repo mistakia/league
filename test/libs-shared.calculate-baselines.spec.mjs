@@ -3,7 +3,10 @@ import * as chai from 'chai'
 
 import calculateBaselines from '#libs-shared/calculate-baselines.mjs'
 import calculate_projection_values from '#libs-shared/calculate-projection-values.mjs'
-import { season_projection_week } from '#libs-shared/calculate-distributional-baselines.mjs'
+import {
+  season_projection_week,
+  season_aggregate_key
+} from '#libs-shared/calculate-distributional-baselines.mjs'
 
 const expect = chai.expect
 
@@ -282,7 +285,11 @@ describe('LIBS-SHARED calculate-projection-values', function () {
         pid: player.pid,
         position: player.primary_position,
         total: player.points[1].total,
-        week: season_projection_week
+        // The season board is published under the season KEY, while
+        // `season_projection_week` remains the week that DISPATCHES to it below.
+        // Writing the board under the week is what production did after the
+        // period split, and it priced every player at the sentinel.
+        week: season_aggregate_key
       })
     )
 

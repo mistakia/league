@@ -7,6 +7,10 @@ import {
   optimizeLineup,
   calculate_player_period_values
 } from '#libs-shared'
+import {
+  season_aggregate_key,
+  season_projection_week
+} from '#libs-shared/calculate-distributional-baselines.mjs'
 import solver from 'javascript-lp-solver'
 import {
   current_season,
@@ -71,6 +75,20 @@ export function calculatePlayerValues(payload) {
     if (player.projection.rest_of_season) {
       player.points.rest_of_season = calculatePoints({
         stats: player.projection.rest_of_season,
+        position: player.primary_position,
+        league
+      })
+    }
+
+    // The SEASON board, under the same named key the API payload uses. The
+    // weekly loop above writes points[0] from projection[0], and that used to be
+    // what the distributional model read -- so this key was never needed here.
+    // It is now: the model reads points.season, and a recompute that does not
+    // publish it prices the whole board at the sentinel on the first roster
+    // mutation, with the server's correct values replaced in place.
+    if (player.projection[season_projection_week]) {
+      player.points[season_aggregate_key] = calculatePoints({
+        stats: player.projection[season_projection_week],
         position: player.primary_position,
         league
       })

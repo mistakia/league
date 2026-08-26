@@ -106,7 +106,11 @@ export const calculate_position_scale = ({ projections }) => {
   return mean_of(top)
 }
 
-// players: [{ pid, primary_position, points: { [week]: { total } } }]
+// players: [{ pid, primary_position, points: { [points_key]: { total } } }]
+//
+// `points_key` selects which board to measure. Its only production caller is
+// calculate-distributional-baselines, which passes the SEASON key -- a named
+// period, not a week number.
 //
 // Returns the estimated realized dispersion per pid, in the same points the
 // board is scored in, plus the per-position scale anchors for inspection.
@@ -116,7 +120,7 @@ export const calculate_position_scale = ({ projections }) => {
 // different source weights -- which is exactly what the SPA's client-side worker
 // does -- must carry the dispersion that goes with THAT board, not the one the
 // cron happened to persist.
-export const calculate_projection_dispersion = ({ players, week }) => {
+export const calculate_projection_dispersion = ({ players, points_key }) => {
   const projections_by_position = {}
   const projection_by_pid = {}
   const position_by_pid = {}
@@ -124,7 +128,7 @@ export const calculate_projection_dispersion = ({ players, week }) => {
   for (const player of players) {
     const position = player.primary_position
     if (!fantasy_positions.includes(position)) continue
-    const total = get_player_week_total({ player, week })
+    const total = get_player_week_total({ player, points_key })
     if (!(total > 0)) continue
     projection_by_pid[player.pid] = total
     position_by_pid[player.pid] = position
