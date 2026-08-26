@@ -68,7 +68,6 @@ const get_stat_fields = (pos) => {
 export default function PlayerSelectedProjectionRow({
   title,
   stats,
-  action,
   className,
   games,
   lead,
@@ -119,7 +118,6 @@ export default function PlayerSelectedProjectionRow({
       {lead || <div className='table__cell text'>{title}</div>}
       {games && <div className='table__cell metric'>{games}</div>}
       {items}
-      {action}
     </div>
   )
 }
@@ -127,7 +125,6 @@ export default function PlayerSelectedProjectionRow({
 PlayerSelectedProjectionRow.propTypes = {
   title: PropTypes.node,
   stats: PropTypes.object,
-  action: PropTypes.element,
   className: PropTypes.string,
   games: PropTypes.number,
   lead: PropTypes.element,

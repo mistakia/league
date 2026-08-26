@@ -98,34 +98,6 @@ export function players_reducer(state = initialState, { payload, type }) {
     case player_actions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
 
-    case player_actions.SET_PROJECTION:
-    case player_actions.PUT_PROJECTION_FULFILLED: {
-      const { value, type, week, pid, userId } = payload.opts
-      const key = state
-        .get('items')
-        .get(pid)
-        .get('projections')
-        .findKey((p) => !p.source_id)
-      if (typeof key !== 'undefined') {
-        return state.setIn(['items', pid, 'projections', key, type], value)
-      }
-      const newProj = { [type]: value, user_id: userId, week, pid }
-      return state.updateIn(['items', pid, 'projections'], (arr) =>
-        arr.push(newProj)
-      )
-    }
-
-    case player_actions.REMOVE_PROJECTION:
-    case player_actions.DEL_PROJECTION_FULFILLED: {
-      const { pid, week } = payload.opts
-      return state.setIn(
-        ['items', pid, 'projections'],
-        state
-          .getIn(['items', pid, 'projections'])
-          .filter((p) => p.source_id || p.week !== week)
-      )
-    }
-
     case player_actions.PLAYERS_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 

@@ -90,7 +90,7 @@ payloads and is served only from the authenticated pause route.
 ### Player Projections
 
 - `GET /projections` - Get player projections
-- `POST /projections` - Update projections (admin only)
+- `GET /projections/{pid}` - Get all projections for one player
 
 ### Statistics
 
