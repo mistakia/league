@@ -27,17 +27,17 @@ const normalize_array = (value) => {
 
 // Expand a (year + seas_type) cross-product into nfl_week_id strings.
 // Year-only inputs default seas_type to REG.
-const expand_year_seas_type = ({ year, seas_type }) => {
-  const years = normalize_array(year)
+const expand_year_season_type = ({ season_year, season_type }) => {
+  const season_years = normalize_array(season_year)
     .map((y) => parseInt(y, 10))
     .filter((y) => Number.isFinite(y))
-  if (!years.length) return []
-  const seas_types = normalize_array(seas_type).length
-    ? normalize_array(seas_type)
+  if (!season_years.length) return []
+  const season_types = normalize_array(season_type).length
+    ? normalize_array(season_type)
     : DEFAULT_SEAS_TYPE
   const out = []
-  for (const y of years) {
-    for (const st of seas_types) {
+  for (const y of season_years) {
+    for (const st of season_types) {
       out.push(...get_nfl_week_identifiers_for_year({ year: y, seas_type: st }))
     }
   }
@@ -59,9 +59,9 @@ const resolve_params_contribution = (params) => {
   let nfl_week_ids = resolve_explicit_nfl_week_ids({ params })
 
   if (!nfl_week_ids.length) {
-    nfl_week_ids = expand_year_seas_type({
-      year: params.year,
-      seas_type: params.seas_type
+    nfl_week_ids = expand_year_season_type({
+      season_year: params.year,
+      season_type: params.seas_type
     })
   }
 

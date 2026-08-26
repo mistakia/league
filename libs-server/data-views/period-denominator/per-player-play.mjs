@@ -131,7 +131,7 @@ export const add_per_player_play_cte = ({
       table_name: 'nfl_snaps',
       query_context,
       column_params: params,
-      has_seas_type: false,
+      has_season_type: false,
       has_nfl_week_id: false
     })
   }

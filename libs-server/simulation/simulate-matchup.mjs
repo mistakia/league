@@ -113,7 +113,7 @@ export async function simulate_matchup({
   // Load player info and schedule first to categorize players
   const [player_info, schedule] = await Promise.all([
     load_player_info({ player_ids: all_player_ids }),
-    load_nfl_schedule({ year, week })
+    load_nfl_schedule({ season_year: year, week })
   ])
 
   // Categorize players into locked (completed games) vs pending

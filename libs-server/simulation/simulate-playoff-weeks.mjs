@@ -68,7 +68,10 @@ export async function simulate_playoff_weeks_correlated({
   const league_settings = await load_scoring_format({ scoring_format_id })
 
   // Load schedules for all weeks
-  const schedules = await load_nfl_schedules_for_weeks({ year, weeks })
+  const schedules = await load_nfl_schedules_for_weeks({
+    season_year: year,
+    weeks
+  })
 
   // Load rosters for all teams across all weeks using unified loader
   // For current/past weeks: uses actual roster slots

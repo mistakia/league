@@ -137,10 +137,10 @@ const run = async ({ season = false, dry = false } = {}) => {
 
   return {
     skipped: false,
-    year,
+    season_year: year,
     week,
     source_id: external_data_sources.FANTASY_SHARKS,
-    seas_type: 'REG'
+    season_type: 'REG'
   }
 }
 

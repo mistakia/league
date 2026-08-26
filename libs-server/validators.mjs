@@ -37,13 +37,13 @@ const week_schema = {
 
 export const week_validator = v.compile(week_schema)
 
-const seas_type_schema = {
+const season_type_schema = {
   type: 'string',
   enum: ['PRE', 'REG', 'POST'],
   $$root: true
 }
 
-export const seas_type_validator = v.compile(seas_type_schema)
+export const season_type_validator = v.compile(season_type_schema)
 
 const view_name_schema = {
   $$root: true,

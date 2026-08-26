@@ -66,9 +66,9 @@ const run = async ({
         : 'REG'
 
   const data = await four_for_four.get_4for4_projections({
-    year,
+    season_year: year,
     week,
-    seas_type,
+    season_type: seas_type,
     is_regular_season_projection,
     ignore_cache: true
   })
@@ -165,10 +165,10 @@ const run = async ({
 
   return {
     skipped: false,
-    year,
+    season_year: year,
     week,
     source_id: external_data_sources['4FOR4'],
-    seas_type
+    season_type: seas_type
   }
 }
 

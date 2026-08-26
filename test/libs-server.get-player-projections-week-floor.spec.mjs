@@ -89,11 +89,11 @@ describe('LIBS-SERVER get_player_projections week floor', function () {
     })
 
     it('returns the season row', async function () {
-      expect(await weeks_returned({ seas_type: 'REG' })).to.eql([0, 1])
+      expect(await weeks_returned({ season_type: 'REG' })).to.eql([0, 1])
     })
 
     it('still honors an explicit week floor', async function () {
-      expect(await weeks_returned({ seas_type: 'REG', week: 1 })).to.eql([1])
+      expect(await weeks_returned({ season_type: 'REG', week: 1 })).to.eql([1])
     })
   })
 
@@ -124,7 +124,7 @@ describe('LIBS-SERVER get_player_projections week floor', function () {
     })
 
     it('returns the current playoff week', async function () {
-      expect(await weeks_returned({ seas_type: 'POST' })).to.eql([
+      expect(await weeks_returned({ season_type: 'POST' })).to.eql([
         current_season.nfl_seas_week
       ])
     })

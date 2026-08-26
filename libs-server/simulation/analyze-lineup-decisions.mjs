@@ -80,7 +80,7 @@ export async function analyze_lineup_decisions({
   }
 
   // Load schedule to identify locked players (games already completed)
-  const schedule = await load_nfl_schedule({ year, week })
+  const schedule = await load_nfl_schedule({ season_year: year, week })
 
   // Get base win probability with current lineup
   const base_result = await simulate_matchup({
