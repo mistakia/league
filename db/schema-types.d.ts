@@ -1724,7 +1724,7 @@ export interface LeaguePausesRow {
 
 export interface LeaguePlayerProjectionValuesRow {
   pid: string | null
-  week: string
+  week: number
   season_year: number | null
   lid: number
   projected_points_added_positive_including_cap_savings: number | null
