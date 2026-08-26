@@ -8,7 +8,7 @@
     },
     "disposition": "adjudicated",
     "reason": "One reception PFR credits that our feed does not, in a week otherwise matching exactly. Verified against the game book rather than inferred from the aggregate.",
-    "evidence": "635 ours against 636 PFR, a ratio of 0.9984 — the tightest disagreement in the whole 2022 season.",
+    "evidence": "635 ours against 636 PFR, a ratio of 0.9984 \u2014 the tightest disagreement in the whole 2022 season.",
     "validated_at": "2026-08-13"
   },
   {
@@ -19,7 +19,7 @@
       "stat": "targets"
     },
     "disposition": "adjudicated",
-    "reason": "The target paired with the week 8 reception disagreement above — the same play, counted once on each side of the ledger.",
+    "reason": "The target paired with the week 8 reception disagreement above \u2014 the same play, counted once on each side of the ledger.",
     "evidence": "913 ours against 914 PFR.",
     "validated_at": "2026-08-13"
   },
@@ -55,7 +55,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Rich and Ron Saul are twin brothers, both of whom played in the NFL. Two people, so the rows must stay apart.",
-    "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows — the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
+    "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows \u2014 the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
     "validated_at": "2026-08-15"
   },
   {
@@ -66,7 +66,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Raleigh and Reggie McKenzie are identical twin brothers, both of whom played in the NFL. Two people.",
-    "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows — an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
+    "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows \u2014 an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
     "validated_at": "2026-08-15"
   },
   {
@@ -77,7 +77,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Harold and Herbert Shoener are brothers, both of whom played in the NFL. Two people.",
-    "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows — an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
+    "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows \u2014 an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
     "validated_at": "2026-08-15"
   },
   {
@@ -88,7 +88,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Colton Taylor and Dylan Taylor are two different Texas A&M players in the same class. NO veto can reach this pair, because both rows carry the 0000-00-00 sentinel, so there is no birth date to disagree on and no identifier held on both sides.",
-    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. A prior aside here claimed Daijun/Sevarian Edwards (Georgia 2024) was also a known two-person pair; that was WRONG — Sevarian Daijun Edwards is one person and the two rows were merged on 2026-08-17 in db/adhoc/2026-08-17-merge-nickname-legal-name-player-rows.sql. The aside is corrected here so it does not mislead a future adjudicator.",
+    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule \u2014 an attach would have merged them silently. A prior aside here claimed Daijun/Sevarian Edwards (Georgia 2024) was also a known two-person pair; that was WRONG \u2014 Sevarian Daijun Edwards is one person and the two rows were merged on 2026-08-17 in db/adhoc/2026-08-17-merge-nickname-legal-name-player-rows.sql. The aside is corrected here so it does not mislead a future adjudicator.",
     "validated_at": "2026-08-15"
   },
   {
@@ -148,7 +148,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Christopher Jones, WR, born 1971-08-07, Miami (Fla.), entered 1995, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
-    "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire — and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
+    "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire \u2014 and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
     "validated_at": "2026-08-16"
   },
   {
@@ -197,7 +197,7 @@
       "pid": "DAVI-JONE-008821"
     },
     "disposition": "adjudicated",
-    "reason": "David Jones, DE, born 1938-12-09, South Carolina State, entered 1961 — this is Deacon Jones — and David Jones, T, born 1988-05-08, entered 2011. Two people.",
+    "reason": "David Jones, DE, born 1938-12-09, South Carolina State, entered 1961 \u2014 this is Deacon Jones \u2014 and David Jones, T, born 1988-05-08, entered 2011. Two people.",
     "evidence": "50 years between the birth dates. The twin holds no college, so the college veto could not fire.",
     "validated_at": "2026-08-16"
   },
@@ -278,7 +278,7 @@
     },
     "disposition": "adjudicated",
     "reason": "William Glass, DE, born 1935-08-16, entered 1957, and William Glass, G, born 1957-12-21, drafted 1980 pick 86. Two people, both Baylor.",
-    "evidence": "22 years between the birth dates — the younger row was born the year the elder entered the league.",
+    "evidence": "22 years between the birth dates \u2014 the younger row was born the year the elder entered the league.",
     "validated_at": "2026-08-16"
   },
   {
@@ -289,7 +289,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Josh Johnson and Tyler Johnson are two different Louisiana-Monroe players in the same class. Two people.",
-    "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman — six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
+    "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman \u2014 six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
     "validated_at": "2026-08-16"
   },
   {
@@ -345,5 +345,41 @@
     },
     "disposition": "baselined",
     "owner": "Unrecoverable, not deferred: this vendor scrapes a live draft board (CBS, RTS, Yahoo) or has shut its fantasy product down (NFL.com, retired in b12b2dcb4), and player_adp_history holds no 2025 observation, so no backfill can clear it. Cause is league 242976665, which re-enabled the secondary ADP crontab lines for 2026 after they sat disabled through the whole 2025 draft season. The guard against a recurrence is this check plus the per-run oracle in libs-server/grade-adp-import-run.mjs."
+  },
+  {
+    "check_id": "nfl-snaps-game-coverage",
+    "grain": {
+      "season_year": 2021,
+      "season_type": "PRE",
+      "week": 3
+    },
+    "disposition": "adjudicated",
+    "reason": "NFL Pro holds no play data at all for the one uncovered game, so the sole writer of nfl_snaps has nothing to derive snaps from. Not a failed import: the source is empty.",
+    "evidence": "2021082855 (ARI@NO, FINAL 2021-08-28) returns plays=0 from pro.nfl.com/api/secured/plays/playlist/game, measured 2026-08-26 on a live NFL_PLUS_PREMIUM token. The other fifteen games in the week carry snaps. A --final force re-import reached the game and threw 'could not find seas_type in play data', which is the empty payload surfacing as a misleading field error rather than as 'no plays'.",
+    "validated_at": "2026-08-26"
+  },
+  {
+    "check_id": "nfl-plays-game-coverage",
+    "grain": {
+      "season_year": 2021,
+      "season_type": "PRE",
+      "week": 3
+    },
+    "disposition": "adjudicated",
+    "reason": "The same empty upstream game as the nfl-snaps-game-coverage entry above. nfl_plays cannot be filled from a payload that carries no plays.",
+    "evidence": "2021082855 (ARI@NO) returns plays=0 from the NFL Pro playlist endpoint, measured 2026-08-26. Both checks strand on this single game, which is why they are parked together.",
+    "validated_at": "2026-08-26"
+  },
+  {
+    "check_id": "nfl-snaps-game-coverage",
+    "grain": {
+      "season_year": 2016,
+      "season_type": "PRE",
+      "week": 4
+    },
+    "disposition": "adjudicated",
+    "reason": "NFL Pro carries this game's plays but not its participation data, so no snap rows are derivable. Distinct from the 2021 case: there the payload is empty, here it is present and complete except for the one array snaps are built from.",
+    "evidence": "2016083151 (WAS@TB, FINAL 2016-09-01) returns 176 plays, every one carrying an nflIds field, and every one of those arrays EMPTY -- total_nflIds=0. Same-week siblings measured the same way return 3,123 (2016090151) and 3,814 (2016090152), matching their stored snap counts exactly, so the measurement is sound and the gap is specific to this game rather than to the 2016 era. A --final force re-import re-saved all 176 plays and logged '0 unique snaps from 0 total nflIds'.",
+    "validated_at": "2026-08-26"
   }
 ]
