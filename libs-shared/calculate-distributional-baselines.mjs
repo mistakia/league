@@ -1,4 +1,5 @@
 import { fantasy_positions, default_points_added } from '#constants'
+import { seeded_random } from './seeded-random.mjs'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import calculate_projection_dispersion from './calculate-projection-dispersion.mjs'
 import { get_player_week_total } from './get-player-week-points.mjs'
@@ -66,7 +67,33 @@ export const season_net_projection_key = 'season_net'
 // thin roster forces him to start. The roster-aware question is a different one
 // and belongs to the `available` baseline.
 
-const default_random = () => Math.random()
+// The draw source is SEEDED, and the seed is a fixed constant rather than a
+// clock or a per-run value. A Monte Carlo estimate carries sampling error, and
+// an unseeded one re-rolls that error every pass -- so the published board moved
+// on every hourly run with no input change behind it. Measured on the 2026
+// `ppr_10_team` season board over three days: absolute error roughly flat at
+// 0.4-3.3 points while relative error fell from 26% at the bottom of the board
+// to 2% at the top, which is the signature of sampling noise and not of
+// projections arriving. Downstream, that noise was the dominant write load on
+// the projection history table, where change-only capture recorded every re-roll
+// as though a forecast had changed.
+//
+// Seeding does not change what this estimator estimates. It fixes WHICH draw
+// realization is published, so identical inputs give identical output and a
+// changed value means a changed projection. The residual sampling error is now
+// fixed rather than fluctuating, which is the honest trade: reducing it is a
+// question about `draws`, and `draws` is bounded by the cron budget described
+// above, so the two decisions are kept apart.
+//
+// One seed for every board, deliberately. Formats that share a player pool then
+// share a draw realization, so a cross-format comparison reflects the formats
+// differing rather than the draws differing.
+//
+// The generator is constructed per invocation and never held at module scope: it
+// carries mutable state, so a single shared instance would hand each successive
+// board a different stretch of the sequence and make a run's SECOND format
+// depend on its first.
+export const default_draw_seed = 0x5eed
 
 // Box-Muller, caching the second deviate. Takes an injectable uniform source so
 // specs can pin the draws.
@@ -173,11 +200,11 @@ const calculate_distributional_baselines = ({
   league,
   week,
   draws = 1000,
-  random = default_random,
+  random = null,
   dispersion_by_pid: dispersion_override = null
 }) => {
   const slots = build_league_starting_slots({ league })
-  const normal = make_normal_source(random)
+  const normal = make_normal_source(random ?? seeded_random(default_draw_seed))
 
   // Dispersion is derived from this board, not read off a persisted column, so
   // a reweighted board carries the dispersion that belongs to it. See
