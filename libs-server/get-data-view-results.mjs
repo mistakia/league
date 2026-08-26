@@ -1,7 +1,10 @@
 import db from '#db'
 import debug from 'debug'
 import { named_scoring_formats, named_league_formats } from '#libs-shared'
-import { LEGACY_OUTPUT_PARAM_KEYS } from '#libs-shared/data-views-output-tokens.mjs'
+import {
+  build_param_key_rewrite,
+  RATE_TYPE_RENAMES
+} from '#libs-shared/data-views-saved-view-migration.mjs'
 import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier,
@@ -78,39 +81,16 @@ const derive_supported_row_axes_from_source = (column_definition) => {
 const is_team_column_definition = (column_definition) =>
   Boolean(column_definition.source?.grain?.startsWith('team'))
 
-let column_param_backwards_compatibility_mappings = {}
-
-try {
-  column_param_backwards_compatibility_mappings = (
-    await import(
-      '#private/column-param-backwards-compatibility-mappings.json',
-      { with: { type: 'json' } }
-    )
-  ).default
-} catch (error) {
-  // File does not exist or failed to load
-  console.warn(
-    'Backwards compatibility mappings file not found, using empty mapping'
-  )
-  column_param_backwards_compatibility_mappings = {}
-}
-
 const log = debug('data-views')
 
-const rename_rate_type = (rate_type) => {
-  const rate_type_mapping = {
-    per_team_def_play: 'per_team_play',
-    per_team_def_drive: 'per_team_drive',
-    per_team_def_series: 'per_team_series',
-    per_team_off_play: 'per_team_play',
-    per_team_off_pass_play: 'per_team_pass_play',
-    per_team_off_rush_play: 'per_team_rush_play',
-    per_team_off_drive: 'per_team_drive',
-    per_team_off_series: 'per_team_series'
-  }
-
-  return rate_type_mapping[rate_type] || rate_type
-}
+// The pre-identity rate_type VALUE vocabulary. Declared once in the rename
+// registry (level `rate_type`) and derived here, so a rate-type rename lives in
+// the same registry as every other rename rather than as a second hardcoded
+// copy. The canonical `per_*` vocabulary's translation to an `output` object is
+// RATE_TYPE_TO_OUTPUT in data-views-output-tokens; this map only folds the
+// retired off/def spellings onto the canonical tokens.
+const rename_rate_type = (rate_type) =>
+  RATE_TYPE_RENAMES[rate_type] || rate_type
 
 // The request boundary for the pre-identity `rate_type` vocabulary: both the
 // legacy TOKEN spellings and the legacy param KEYS are rewritten onto the
@@ -122,6 +102,12 @@ const rename_rate_type = (rate_type) => {
 // the denominator-params helper, so every future reader of that key had to
 // remember the second spelling. Downstream of here the canonical key is the
 // only one that exists.
+//
+// The legacy output param KEYS (rate_type_column_params ->
+// output_column_params, etc.) were rewritten here in a standalone loop; since
+// the widening they are covered by the same all-190 param-key rewrite the
+// column handler applies, so this function only folds the retired rate_type
+// VALUE tokens.
 const process_rate_type_backwards_compatibility = (params) => {
   if (params.rate_type) {
     if (Array.isArray(params.rate_type)) {
@@ -131,21 +117,6 @@ const process_rate_type_backwards_compatibility = (params) => {
     }
   }
 
-  for (const [legacy_key, current_key] of Object.entries(
-    LEGACY_OUTPUT_PARAM_KEYS
-  )) {
-    if (!Object.prototype.hasOwnProperty.call(params, legacy_key)) continue
-    const { [legacy_key]: value, ...rest } = params
-    log(
-      `Legacy output param key: rewriting "${legacy_key}" to "${current_key}"`
-    )
-    // A request carrying both keys keeps the canonical one; the legacy key is
-    // the stale copy by construction. Matches the saved-view migrator's rule.
-    params = Object.prototype.hasOwnProperty.call(rest, current_key)
-      ? rest
-      : { ...rest, [current_key]: value }
-  }
-
   return params
 }
 
@@ -153,23 +124,34 @@ const process_column_param_backwards_compatibility = (params) => {
   if (!params || typeof params !== 'object') return params
 
   const transformed_params = { ...params }
-  const mappings = column_param_backwards_compatibility_mappings
+  // Every param_key rename in the registry, resolved through each key's chain
+  // to the LIVE terminal and applied in one pass. This is the widening: a raw
+  // API caller with ANY legacy param-key spelling gets it rewritten here,
+  // where before only the nine folded compat keys were. Safe because none of
+  // the 190 legacy keys is itself a live param name (verified against the
+  // 260-key union of the plays, games, team and common param modules), so no
+  // currently valid request changes behavior.
+  const mappings = build_param_key_rewrite()
 
-  // Apply backwards compatibility transformations
-  Object.entries(mappings).forEach(
-    ([legacy_param_name, current_param_name]) => {
-      if (legacy_param_name in transformed_params) {
-        // Log for monitoring deprecated parameter usage
-        log(
-          `Column parameter backwards compatibility: transforming "${legacy_param_name}" to "${current_param_name}"`
-        )
+  for (const [legacy_param_name, current_param_name] of mappings) {
+    if (!Object.hasOwn(transformed_params, legacy_param_name)) continue
 
-        transformed_params[current_param_name] =
-          transformed_params[legacy_param_name]
-        delete transformed_params[legacy_param_name]
-      }
+    // Log for monitoring deprecated parameter usage
+    log(
+      `Column parameter backwards compatibility: transforming "${legacy_param_name}" to "${current_param_name}"`
+    )
+
+    // A request carrying BOTH spellings keeps the canonical one; the legacy
+    // key is the stale copy by construction. This is the saved-view
+    // migrator's rule (migrate_params, "a view that somehow carries both
+    // keys"), and the boundary now states it once for all 190 keys rather
+    // than canonical-wins for the output keys and legacy-wins for the rest.
+    if (!Object.hasOwn(transformed_params, current_param_name)) {
+      transformed_params[current_param_name] =
+        transformed_params[legacy_param_name]
     }
-  )
+    delete transformed_params[legacy_param_name]
+  }
 
   return transformed_params
 }
@@ -489,7 +471,11 @@ const process_dynamic_single_week_param = (single_week_param) => {
   return single_week
 }
 
-const process_params_with_backwards_compatibility = (params) => {
+// Exported for test/data-views-server-request-boundary.spec.mjs: this is the
+// whole compat surface a raw API caller hits, and the precedence rule below
+// (canonical wins when a request carries both spellings) had no oracle before
+// the widening put all 190 registry keys through it.
+export const process_params_with_backwards_compatibility = (params) => {
   if (!params || typeof params !== 'object') return params
 
   return process_column_param_backwards_compatibility(

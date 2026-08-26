@@ -258,6 +258,14 @@ const GATES = [
       'consumer code vs a rename map — ANCHORED ON NINE HARDCODED TABLES, so a zero is a floor'
   },
   {
+    id: 'rename-target-liveness',
+    command: ['db/gates/check-rename-target-liveness.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'every data-view rename registry target, resolved THROUGH its chain, is a live param/column/rate-type key — covers param_key, column_id and rate_type only; table_state, scoring_format and dvoa_type have their own specs and a zero here says nothing about them'
+  },
+  {
     id: 'renamed-column-consumers-gate-2',
     command: ['db/gates/check-renamed-column-consumers.mjs', '--gate', '2'],
     requires: 'base-ref',
