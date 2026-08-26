@@ -12,7 +12,15 @@ const expect = chai.expect
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 
-const FIELDS_INDEX = path.join(ROOT, 'app/core/data-views-fields/index.js')
+// Deliberately not named for the file it points at: `data_view_fields_index`
+// is already a symbol in this codebase -- a column-id-to-description lookup
+// exported from libs-shared and imported by this very module -- so a constant
+// called FIELDS_INDEX here would name two unrelated things. This is named for
+// what the file is read FOR.
+const COLUMN_PARAM_COMPONENT_BINDING_PATH = path.join(
+  ROOT,
+  'app/core/data-views-fields/index.js'
+)
 
 // WHAT A COLUMN PARAM IS
 //
@@ -51,16 +59,18 @@ const FIELDS_INDEX = path.join(ROOT, 'app/core/data-views-fields/index.js')
 // guards the derivation the second one depends on. All three were verified to
 // go red by injecting the fault each is meant to catch.
 
-// Keys only react-table's generic select filter reads -- that is, keys read
-// AFTER the component dispatch, which a custom-rendered param never reaches.
+// Named for the MEMBERSHIP CRITERION rather than for the component that
+// happens to read these today, because the criterion is what decides whether a
+// new key belongs on the list: is it consumed after the component dispatch,
+// where a custom-rendered param never arrives?
 //
-// The distinction is where in the render path the key is consumed, not whether
-// it sounds row-axis related. `enable_on_row_axes` reads like a sibling of
-// `enable_multi_on_split` and deliberately is NOT listed here: both param call
-// sites consult it near the top of the function, BEFORE they short-circuit on
-// a custom `component`, so it applies to custom-rendered params too and is
-// perfectly valid on one.
-const GENERIC_FILTER_ONLY_KEYS = [
+// Naming it for the reader instead ("generic filter keys") invites the mistake
+// of adding anything that sounds related. `enable_on_row_axes` reads exactly
+// like a sibling of `enable_multi_on_split` and deliberately is NOT here: both
+// param call sites consult it near the top of the function, BEFORE they
+// short-circuit on a custom `component`, so it reaches custom-rendered params
+// and is perfectly valid on one.
+const KEYS_READ_ONLY_AFTER_COMPONENT_DISPATCH = [
   'single',
   'enable_multi_on_split',
   'preset_values',
@@ -76,15 +86,21 @@ const GENERIC_FILTER_ONLY_KEYS = [
 // has no harness for, so the binding site cannot be imported and is read as
 // source instead -- the same approach as app.connected-component-prop-contract
 // and app.action-type-registration.
-const read_custom_rendered_params = () => {
-  const source = fs.readFileSync(FIELDS_INDEX, 'utf8')
-  const names = [
+// `parse`, not `read`: this recovers structure from source text with a regex,
+// and the caller has to treat the result as fallible. A name suggesting a
+// plain file read would understate why the coverage check below exists.
+const parse_custom_rendered_params = () => {
+  const source = fs.readFileSync(COLUMN_PARAM_COMPONENT_BINDING_PATH, 'utf8')
+  const custom_rendered_param_names = [
     ...source.matchAll(/column_params\.([a-z_0-9]+)\.component\s*=/g)
   ].map((match) => match[1])
-  const total_component_assignments = (source.match(/\.component\s*=/g) || [])
+  const component_assignment_count = (source.match(/\.component\s*=/g) || [])
     .length
 
-  return { names: [...new Set(names)], total_component_assignments }
+  return {
+    custom_rendered_param_names: [...new Set(custom_rendered_param_names)],
+    component_assignment_count
+  }
 }
 
 describe('data-views column param UI contract', () => {
@@ -93,11 +109,14 @@ describe('data-views column param UI contract', () => {
   // derived list silently shrinks and the second check passes over nothing.
   // A gate covering part of a surface while reading as full coverage is worse
   // than no gate, so the parse has to prove it saw everything it should have.
-  it('parses every component binding in the fields index', () => {
-    const { names, total_component_assignments } = read_custom_rendered_params()
+  it('parses every component binding at the binding site', () => {
+    const { custom_rendered_param_names, component_assignment_count } =
+      parse_custom_rendered_params()
 
-    expect(names.length).to.be.greaterThan(0)
-    expect(names.length).to.equal(total_component_assignments)
+    expect(custom_rendered_param_names.length).to.be.greaterThan(0)
+    expect(custom_rendered_param_names.length).to.equal(
+      component_assignment_count
+    )
   })
 
   // `enable_multi_on_split` does exactly one thing: it un-sets `single` when a
@@ -119,17 +138,18 @@ describe('data-views column param UI contract', () => {
   })
 
   // A custom-rendered param never reaches the generic filter, so every key in
-  // GENERIC_FILTER_ONLY_KEYS is inert on it -- including `single` on its own,
-  // which the check above deliberately allows for generic-rendered params.
-  it('no custom-rendered param declares a key only the generic filter reads', () => {
-    const { names } = read_custom_rendered_params()
+  // KEYS_READ_ONLY_AFTER_COMPONENT_DISPATCH is inert on it -- including
+  // `single` on its own, which the check above deliberately allows for
+  // generic-rendered params.
+  it('no custom-rendered param declares a key read only after component dispatch', () => {
+    const { custom_rendered_param_names } = parse_custom_rendered_params()
     const offenders = []
 
-    for (const param_name of names) {
+    for (const param_name of custom_rendered_param_names) {
       const definition = common_column_params[param_name]
       if (!definition || typeof definition !== 'object') continue
 
-      for (const key of GENERIC_FILTER_ONLY_KEYS) {
+      for (const key of KEYS_READ_ONLY_AFTER_COMPONENT_DISPATCH) {
         if (definition[key] !== undefined) {
           offenders.push(`${param_name}.${key}`)
         }
