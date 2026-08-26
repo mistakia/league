@@ -1,11 +1,10 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import { accessSync, constants } from 'fs'
-import { join } from 'path'
 
 import db from '#db'
 
 import report_error from './report-error.mjs'
+import { resolve_base_cli } from './resolve-base-cli.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const exec_file = promisify(execFile)
@@ -86,38 +85,6 @@ export const with_connection_retry = async (
     }
   }
   throw last_error
-}
-
-// Resolve base by absolute path, not bare `base` on PATH: the pm2 worker process
-// env does not include ~/.base/bin, so a bare `base` spawn ENOENTs and every run
-// report is silently lost. Mirrors report-run-outcome.mjs and the base
-// job-wrapper.sh absolute-path resolution. See user:text/base/machine-token-auth.md.
-//
-// PROBE THE CANDIDATES rather than hardcoding one. The single `/root/...` path
-// this replaced is why a league job scheduled on base-storage reported nowhere:
-// that host runs jobs as `user`, whose base lives at ~/bin/base, and /root is
-// not merely the wrong path there but unreadable — so the spawn ENOENTs, the
-// catch logs to a cron stderr nobody reads, and the run silently never reaches
-// the ledger. It worked on the league host only because that one happens to run
-// as root. `accessSync` is the right probe precisely because it fails the same
-// way for "absent" and "unreadable", which are the same fact for a spawn.
-const BASE_CLI_CANDIDATES = [
-  process.env.BASE_CLI_PATH,
-  '/root/.base/bin/base',
-  process.env.HOME && join(process.env.HOME, '.base/bin/base'),
-  process.env.HOME && join(process.env.HOME, 'bin/base')
-].filter(Boolean)
-
-const resolve_base_cli = () => {
-  for (const candidate of BASE_CLI_CANDIDATES) {
-    try {
-      accessSync(candidate, constants.X_OK)
-      return candidate
-    } catch {
-      // Not present, or not executable by this uid. Either way, unusable.
-    }
-  }
-  return null
 }
 
 const build_job_type_to_id = () => {

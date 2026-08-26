@@ -1,9 +1,9 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 
-const exec_file = promisify(execFile)
+import { resolve_base_cli } from './resolve-base-cli.mjs'
 
-const BASE_CLI = process.env.BASE_CLI_PATH || '/root/.base/bin/base'
+const exec_file = promisify(execFile)
 
 const VALID_OUTCOMES = new Set([
   'success',
@@ -23,8 +23,12 @@ export default async function report_run_outcome({
     throw new Error(`outcome must be one of ${[...VALID_OUTCOMES].join(', ')}`)
   }
 
-  const api_url = process.env.BASE_API_URL
-  if (!api_url) return false
+  // Gate on a runnable CLI, NOT on BASE_API_URL. An absent BASE_API_URL does
+  // not mean "unreportable" -- on the writer host base's job-wrapper STRIPS it
+  // so `base run report` writes over the local base-api UDS instead. Transport
+  // selection belongs to the CLI; this only decides whether there is one.
+  const base_cli = resolve_base_cli()
+  if (!base_cli) return false
 
   // Single canonical client: `base run report` owns transport + machine-token
   // auth + host identity. Supports the mid-run `alive` outcome the live odds
@@ -34,7 +38,7 @@ export default async function report_run_outcome({
   if (reason) args.push('--reason', reason)
 
   try {
-    await exec_file(BASE_CLI, args, { timeout: 10000 })
+    await exec_file(base_cli, args, { timeout: 10000 })
     return true
   } catch {
     return false
