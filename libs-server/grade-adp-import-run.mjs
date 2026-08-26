@@ -121,14 +121,19 @@ export default function grade_adp_import_run({
     // because the rows exist. Fill-rate is the separate assertion, and it has
     // to be a RATE -- a rule that only fires at exactly zero passes a feed that
     // is half empty, which is the state Yahoo shipped in for two months.
+    //
+    // The floor is per-feed so a source that deliberately drops its vendor's
+    // undrafted sentinel can grade against its own structurally-lower fill. A
+    // feed whose importer omits with_adp entirely skips the rule below.
+    const feed_fill_floor = feed.minimum_adp_fill_rate ?? minimum_adp_fill_rate
     if (with_adp !== undefined) {
       if (with_adp === 0) {
         failures.push(
           `feed ${label} matched ${matched} player(s) but none carried an average draft position`
         )
-      } else if (with_adp / matched < minimum_adp_fill_rate) {
+      } else if (with_adp / matched < feed_fill_floor) {
         failures.push(
-          `feed ${label} adp fill rate ${format_rate(with_adp / matched)} below ${format_rate(minimum_adp_fill_rate)} (${with_adp} of ${matched})`
+          `feed ${label} adp fill rate ${format_rate(with_adp / matched)} below ${format_rate(feed_fill_floor)} (${with_adp} of ${matched})`
         )
       }
     }
