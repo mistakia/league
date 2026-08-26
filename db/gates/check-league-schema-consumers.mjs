@@ -789,6 +789,95 @@ const has_identifier_placeholder = (raw_sql) =>
     return false
   })
 
+// A placeholder inside a QUOTED span, in the two shapes where no substitution
+// can produce runnable SQL. The substitution model replaces a placeholder with
+// `NULL` -- an EXPRESSION -- and inside quotes that is not an expression at all
+// but four literal characters, so the gate is judging a statement it wrote
+// rather than one the corpus ships. Reporting it blames the corpus for the
+// gate's own substitution, the same false positive case 18 exists to prevent.
+//
+// "Inside quotes" ALONE is too wide, and the existing control 5 is what says
+// so: `player.pid = '<pid>'` substitutes to `player.pid = 'NULL'`, an ordinary
+// string literal that EXPLAINs perfectly and must stay checked. Two narrower
+// syntactic rules separate that from the unrunnable pair:
+//
+//   DOUBLE-quoted, anywhere inside -- `FROM "${table}"`. A double-quoted span
+//   is a quoted IDENTIFIER, so the substitution names a relation or column
+//   called NULL and Postgres answers 42P01. This is case 18's shape reaching
+//   the gate through quotes instead of through juxtaposition.
+//
+//   SINGLE-quoted and only PART of the literal -- `ANY('{${pids}}')`. The
+//   characters around the placeholder give the literal an internal structure
+//   (here a Postgres array), and NULL does not satisfy it: 22P02, malformed
+//   array literal. A placeholder that fills the WHOLE literal has no such
+//   structure to break, which is exactly the `'<pid>'` case, and is left alone.
+//
+// Nothing here reads a placeholder's NAME, a surrounding keyword, or anything
+// about what the statement means -- only where the quotes fall.
+//
+// The strict `>` is load-bearing. A quoted SCREAMING_CASE marker (`'GAME_ESBID'`)
+// is itself a placeholder pattern whose match STARTS at the opening quote, and
+// the gate substitutes it whole, quotes included. Such a marker is checkable and
+// must not be declined; starting AT the quote rather than after it is exactly
+// what separates the two.
+const quoted_spans = (sql) => {
+  const spans = []
+  let index = 0
+  while (index < sql.length) {
+    const quote = sql[index]
+    if (quote !== "'" && quote !== '"') {
+      index++
+      continue
+    }
+    const start = index
+    index++
+    while (index < sql.length) {
+      if (sql[index] !== quote) {
+        index++
+        continue
+      }
+      // A doubled quote is an escaped quote, not the close.
+      if (sql[index + 1] === quote) {
+        index += 2
+        continue
+      }
+      index++
+      break
+    }
+    spans.push([start, index])
+  }
+  return spans
+}
+
+const has_quoted_literal_placeholder = (raw_sql) => {
+  const sql = strip_block_comments(raw_sql).replace(/--[^\n]*/g, '')
+  const spans = quoted_spans(sql)
+  if (!spans.length) return false
+  return PLACEHOLDER_PATTERNS.some((pattern) => {
+    const scan = new RegExp(pattern.source, 'gi')
+    let match
+    while ((match = scan.exec(sql))) {
+      const span = spans.find(
+        ([start, end]) => match.index > start && match.index < end
+      )
+      if (!span) continue
+      const [start, end] = span
+      if (sql[start] === '"') return true
+      // A single-quoted literal the placeholder does not fill on its own: the
+      // surrounding characters are structure that NULL cannot satisfy.
+      const interior_start = start + 1
+      const interior_end = end - 1
+      if (
+        match.index !== interior_start ||
+        match.index + match[0].length !== interior_end
+      ) {
+        return true
+      }
+    }
+    return false
+  })
+}
+
 const substitute_placeholders = (sql) => {
   let out = sql
   let substitutions = 0
@@ -1144,6 +1233,16 @@ const collect_sql_blocks = (
           })
           continue
         }
+        if (has_quoted_literal_placeholder(raw)) {
+          uncovered.push({
+            path: relative,
+            line,
+            reason:
+              'template placeholder sits inside a quoted SQL literal; substitution puts ' +
+              'an expression inside the quotes, so no substitution can make this EXPLAINable'
+          })
+          continue
+        }
         // `raw` stays the doc's own text — it is what a finding quotes and what
         // a gate-2 adjudication keys on, so the completion must not leak into it.
         const { sql, substitutions } = substitute_placeholders(
@@ -1415,6 +1514,14 @@ const push_extracted_statements = ({
         path: relative,
         line,
         reason: `${shape}: interpolation sits inside an identifier; no substitution can make this EXPLAINable`
+      })
+      continue
+    }
+    if (has_quoted_literal_placeholder(raw)) {
+      uncovered.push({
+        path: relative,
+        line,
+        reason: `${shape}: interpolation sits inside a quoted SQL literal; substitution puts an expression inside the quotes, so no substitution can make this EXPLAINable`
       })
       continue
     }
@@ -2916,6 +3023,35 @@ const run_negative_control = async ({
         ? `gate 4 reports a corpus .sql statement pointed at a table that does not exist (${victim.path}:${victim.line})`
         : 'gate 4 reports a corpus .sql statement pointed at a table that does not exist -- NO .sql SQL IN CORPUS',
       reported
+    ])
+  }
+
+  // 20. A placeholder inside a QUOTED literal is uncheckable for the same reason
+  //     as case 18's identifier, and the widening that declines it is the one
+  //     that can go too far. Both directions on one shape, because the decline
+  //     alone would pass just as well if the predicate declined EVERYTHING:
+  //     the quoted form must reach the uncovered bucket, and the expression form
+  //     -- the ordinary `= ${year}` that substitutes to `= NULL` and EXPLAINs --
+  //     must still be extracted and checked. Widen the predicate past "inside
+  //     quotes" and the second half goes STAYED GREEN.
+  {
+    const quoted = collect_sql_file_blocks(
+      sql_file_entry(LEAGUE_DATABASE),
+      () =>
+        'SELECT pid\nFROM player\n' +
+        `WHERE pid = ANY('{${placeholder('pids')}}')\n`
+    )
+    const expression = collect_sql_file_blocks(
+      sql_file_entry(LEAGUE_DATABASE),
+      () => sql_file_source
+    )
+    cases.push([
+      'gate 4 files a placeholder inside a quoted literal as UNCOVERED while still checking one in expression position',
+      quoted.statements.length === 0 &&
+        quoted.uncovered.length === 1 &&
+        /inside a quoted SQL literal/.test(quoted.uncovered[0].reason) &&
+        expression.statements.length === 1 &&
+        expression.uncovered.length === 0
     ])
   }
 
