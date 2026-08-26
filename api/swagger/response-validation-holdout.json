@@ -150,6 +150,15 @@
     "messages": ["/response/*/pid must have required property 'pid'"]
   },
   {
+    "operation": "GET /api/projections",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-26",
+    "messages": [
+      "/response/*/source_id must be equal to one of the allowed values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30"
+    ]
+  },
+  {
     "operation": "GET /api/scoreboard",
     "status": 200,
     "class": "missing_required",
