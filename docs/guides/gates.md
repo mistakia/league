@@ -92,6 +92,19 @@ The corollary is the case the counts view gets backwards. **An ALL-unread corpus
 
 **A declared root whose extensions cannot match is worse than an undeclared one.** `check-z-index-scale` listed `private` while reading only `.styl`/`.js`/`.jsx`; that submodule is 64 `.mjs` files, two `.json` and a cron, so the root contributed a permanent zero that read as coverage. It was removed rather than reported missing forever. Print the per-root file count so a root that stops contributing is visible rather than silent.
 
+## A coverage threshold is a decision about who you keep losing
+
+**A floor on a match rate, fill rate or any other coverage ratio is a standing decision to lose whoever falls under it, and setting it from a MEASURED rate is the version that looks most defensible and is worst.** The residual gets laundered into a number that reads like calibration, the gate goes green forever, and nobody is ever named. The importer keeps dropping the same rows every week for as long as the feed exists.
+
+The ESPN line win-rate feed ran this exact arc. Unmatched players were dropped before insert, which lost the row AND the denominator that would have said how many were lost, so no fetched-vs-matched figure existed at all. A backfill then measured 236/240 and the obvious next move was to set the floor from it. **The rate was removed instead, and the gate now fails on a single unresolved row and names it.** Forcing that rule red immediately surfaced a real player nobody had listed, blocked because two players share his name and the fallback route could not choose. A 0.8 floor would have hidden him permanently.
+
+Two conditions make the strict rule affordable, and without them it is just a broken job:
+
+- **Keep the unresolvable row rather than dropping it.** Write it with a null foreign key. The published data and the denominator both survive, and the failure becomes about a missing link rather than missing data. A gate that forces the run to discard good rows will be relaxed, correctly, the first time it fires.
+- **Split the verdict by REMEDY, not by severity.** A data failure — wrong season, collapsed table, a percentage at the wrong scale — means the numbers are wrong and must not land, so it blocks the write. A coverage failure means the numbers are right and one identity link is absent, so the rows land and the run fails afterwards. Collapsing the two into one boolean forces a choice between discarding a correct season over one new player and going green on a feed that is quietly shedding rows. Name the distinction on the verdict object (`write_blocked`) rather than recomputing it at the call site, so the two cannot drift apart.
+
+A ratio is the right shape only where the population genuinely has an unrecoverable tail. Where the residual is small, finite and fixable — which is the usual case for identity matching against a roster you control — enumerate it.
+
 ## The cluster gate runner
 
 **The cluster gates run as ONE command — `yarn check:cluster`.** Every durable gate below is in its manifest (`scripts/check-cluster-gates.mjs`), ordered cheapest-first, and a gate whose prerequisite is missing SKIPS LOUDLY naming what it needs rather than being silently absent from the run. Add `--base <pre-cluster-ref>` to include the gates that diff against a base revision; `--list` prints the manifest and each gate's oracle without running anything. This exists because the recurring failure here was never a gate returning the wrong answer — it was a gate nobody ran, and the invocation list living only in this guide is what made skipping one invisible. The 18 renamed param keys that dropped filters on 45 saved views are the standing example, and this guide's own verdict on them is that what was missing was running the check at all.
