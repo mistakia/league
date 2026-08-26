@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-26 against league_production
 --
 -- 2026-08-25: Relabel the ESPN line-win-rate rows that were written as season
 -- 2026 but are the 2025 season's data.

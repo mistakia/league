@@ -1,4 +1,4 @@
-// STATUS: PENDING
+// STATUS: APPLIED 2026-08-26 against league_production (160 team rows, oracle PASS)
 //
 // 2026-08-25: Backfill ESPN team line win rates for 2020-2023, and replace the
 // week-2 partial we hold for 2024.
