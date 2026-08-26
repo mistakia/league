@@ -6,7 +6,7 @@
 // the vocabulary names (the CTE aliases them back), while a query built directly
 // against one of these physical tables must emit the conformed names.
 //
-// apply_scope_to_query DEFAULTS its year_column / seas_type_column through these
+// apply_scope_to_query DEFAULTS its season_year_column / season_type_column through these
 // resolvers, so a new physical-table emitter cannot silently drift back to the
 // pre-rename names by simply forgetting to pass them. That drift is not
 // hypothetical: build_role_union_period_cte emitted nfl_plays.year against the
@@ -42,7 +42,7 @@ const PHYSICAL_SEAS_TYPE_COLUMN = {
 // explicitly rather than merely omitted so that asking for their seas_type column
 // is a loud error instead of a silent fall back to 'seas_type' and a 42703 at
 // runtime: a seas_type predicate against them is a bug in the caller. Callers
-// that target these tables pass has_seas_type: false, and apply_scope_to_query
+// that target these tables pass has_season_type: false, and apply_scope_to_query
 // only resolves the seas_type column when it is actually going to emit one.
 const TABLES_WITHOUT_SEAS_TYPE = new Set([
   'nfl_plays_passer',
@@ -68,7 +68,7 @@ export const physical_year_column = (table_name) =>
 export const physical_seas_type_column = (table_name) => {
   if (TABLES_WITHOUT_SEAS_TYPE.has(table_name)) {
     throw new Error(
-      `${table_name} has no season-type column; pass has_seas_type: false rather than filtering it by seas_type`
+      `${table_name} has no season-type column; pass has_season_type: false rather than filtering it by seas_type`
     )
   }
   return PHYSICAL_SEAS_TYPE_COLUMN[table_name] || 'seas_type'

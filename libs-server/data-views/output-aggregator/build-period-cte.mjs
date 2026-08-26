@@ -70,17 +70,17 @@ const apply_scope_to_fact_relation = ({
   query_context,
   params
 }) => {
-  const has_seas_type = physical_has_seas_type(table_name)
+  const has_season_type = physical_has_seas_type(table_name)
   const scope_table_name = alias || table_name
   apply_scope_to_query({
     query,
     table_name: scope_table_name,
     query_context,
     column_params: params,
-    has_seas_type,
+    has_season_type,
     has_nfl_week_id: physical_has_nfl_week_id(table_name),
-    year_column: physical_year_column(table_name),
-    seas_type_column: has_seas_type
+    season_year_column: physical_year_column(table_name),
+    season_type_column: has_season_type
       ? physical_seas_type_column(table_name)
       : null
   })
@@ -303,8 +303,8 @@ const build_role_union_period_cte = ({
     table_name: 'nfl_games',
     query_context,
     column_params: params,
-    has_year: false,
-    has_seas_type: !physical_has_seas_type(source_table),
+    has_season_year: false,
+    has_season_type: !physical_has_seas_type(source_table),
     has_nfl_week_id: !physical_has_nfl_week_id(source_table)
   })
   // career_year / career_game: legacy with_func joined player_seasonlogs on
@@ -522,8 +522,8 @@ export const build_batched_period_cte = ({
     table_name: 'nfl_games',
     query_context,
     column_params: params,
-    has_year: false,
-    has_seas_type: !physical_has_seas_type(source_table),
+    has_season_year: false,
+    has_season_type: !physical_has_seas_type(source_table),
     has_nfl_week_id: !physical_has_nfl_week_id(source_table)
   })
 

@@ -17,7 +17,7 @@
 //   - nfl_week_id IN (effective) only when narrower than (year x seas_type)
 //     full coverage (is_full_year_seas_type_coverage short-circuit)
 //
-// has_seas_type / has_nfl_week_id flags let callers opt out for tables that
+// has_season_type / has_nfl_week_id flags let callers opt out for tables that
 // only carry year (e.g. legacy aggregates).
 
 import {
@@ -105,7 +105,7 @@ export const compute_effective_scope = ({
   return sort_deterministic(column_contribution.filter((x) => view_set.has(x)))
 }
 
-// year_column / seas_type_column default to NULL rather than to the vocabulary
+// season_year_column / season_type_column default to NULL rather than to the vocabulary
 // names, and are resolved through physical-season-columns below. Hardcoded
 // vocabulary defaults were the drift hazard this helper exists to close: an
 // emitter targeting a physical table that simply omitted them got
@@ -113,7 +113,7 @@ export const compute_effective_scope = ({
 // regenerated query-match goldens happily blessed. Resolving by table name makes
 // forgetting them the CORRECT behaviour instead of a silent defect. The explicit
 // arguments remain for the cases the map cannot know about.
-// has_year exists for the one caller that has already emitted the scope on
+// has_season_year exists for the one caller that has already emitted the scope on
 // ANOTHER relation joined to this one: a duplicate predicate is not free, it
 // changes the plan. Emitting year on both nfl_plays and the nfl_games it joins
 // flipped the per-period CTE off a hash join and onto a 35,198-iteration nested
@@ -123,20 +123,22 @@ export const apply_scope_to_query = ({
   table_name,
   query_context,
   column_params = null,
-  has_year = true,
-  has_seas_type = true,
+  has_season_year = true,
+  has_season_type = true,
   has_nfl_week_id = true,
-  year_column = null,
-  seas_type_column = null
+  season_year_column = null,
+  season_type_column = null
 }) => {
   const effective = compute_effective_scope({ query_context, column_params })
   if (!effective.length) return
 
-  const { years, seas_types } = decompose_nfl_weeks({ nfl_weeks: effective })
+  const { years: season_years, seas_types: season_types } = decompose_nfl_weeks(
+    { nfl_weeks: effective }
+  )
   // Sort decomposed components for deterministic SQL output regardless of the
   // upstream nfl_week_id list ordering.
-  const sorted_years = [...years].sort((a, b) => a - b)
-  const sorted_seas_types = [...seas_types].sort()
+  const sorted_season_years = [...season_years].sort((a, b) => a - b)
+  const sorted_season_types = [...season_types].sort()
 
   // Emission order mirrors the legacy apply_play_by_play_column_params_to_query
   // nfl_week_id branch: nfl_week_id IN (narrow), then seas_type, then year.
@@ -147,20 +149,24 @@ export const apply_scope_to_query = ({
   ) {
     query.whereIn(`${table_name}.nfl_week_id`, effective)
   }
-  if (has_seas_type && sorted_seas_types.length) {
+  if (has_season_type && sorted_season_types.length) {
     // Resolved here rather than in the parameter list so that a caller passing
-    // has_seas_type: false against a table with no season-type column never
+    // has_season_type: false against a table with no season-type column never
     // reaches physical_seas_type_column's guard.
-    const resolved_seas_type_column =
-      seas_type_column || physical_seas_type_column(table_name)
+    const resolved_season_type_column =
+      season_type_column || physical_seas_type_column(table_name)
     query.whereIn(
-      `${table_name}.${resolved_seas_type_column}`,
-      sorted_seas_types
+      `${table_name}.${resolved_season_type_column}`,
+      sorted_season_types
     )
   }
-  if (has_year && sorted_years.length) {
-    const resolved_year_column = year_column || physical_year_column(table_name)
-    query.whereIn(`${table_name}.${resolved_year_column}`, sorted_years)
+  if (has_season_year && sorted_season_years.length) {
+    const resolved_season_year_column =
+      season_year_column || physical_year_column(table_name)
+    query.whereIn(
+      `${table_name}.${resolved_season_year_column}`,
+      sorted_season_years
+    )
   }
 }
 
