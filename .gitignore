@@ -41,6 +41,11 @@ current
 source
 .deploys
 tmp
+# `deploy:sourcemaps` mkdir -p's this on the host and rsyncs *.js.map into it, so
+# every deploy manufactured an untracked path in the production checkout that
+# `git pull` could collide with -- the same class of failure that aborted the
+# 2026-08-25 deploy. `dist/` was ignored and its sourcemap sibling was not.
+sourcemaps/
 
 # Cached git worktree used by scripts/data-view-regression-check.mjs
 .cache/
