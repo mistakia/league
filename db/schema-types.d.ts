@@ -1642,7 +1642,8 @@ export interface LeagueFormatPlayerRestOfSeasonProjectionValuesRow {
   season_year: number
   projected_points_added_positive: number | null
   projected_points_added_net: number | null
-  market_salary: number | null
+  market_salary_positive: number | null
+  market_salary_net: number | null
 }
 
 export interface LeagueFormatPlayerRestOfSeasonProjectionValuesHistoryRow {
@@ -1651,9 +1652,10 @@ export interface LeagueFormatPlayerRestOfSeasonProjectionValuesHistoryRow {
   season_year: number
   projected_points_added_positive: number | null
   projected_points_added_net: number | null
-  market_salary: number | null
+  market_salary_positive: number | null
   is_removed: boolean
   observed_at: Date
+  market_salary_net: number | null
 }
 
 export interface LeagueFormatPlayerSeasonProjectionValuesRow {
@@ -1662,7 +1664,8 @@ export interface LeagueFormatPlayerSeasonProjectionValuesRow {
   season_year: number
   projected_points_added_positive: number | null
   projected_points_added_net: number | null
-  market_salary: number | null
+  market_salary_net: number | null
+  market_salary_positive: number | null
 }
 
 export interface LeagueFormatPlayerSeasonlogsRow {
@@ -1836,6 +1839,15 @@ export interface LeagueScoringFormatsRow {
   tight_end_receiving_first_downs: number
   touchdown_is_first_down: boolean
   config_digest: string | null
+}
+
+export interface LeagueSeasonBaselinesRow {
+  lid: number
+  season_year: number
+  pid: string | null
+  type: string
+  player_position: string
+  points: number | null
 }
 
 export interface LeagueTeamCareerlogsRow {

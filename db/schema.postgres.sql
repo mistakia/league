@@ -610,6 +610,7 @@ ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXIS
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_season_baselines DROP CONSTRAINT IF EXISTS league_season_baselines_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_scoring_formats DROP CONSTRAINT IF EXISTS league_scoring_formats_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_player_season_projection_values DROP CONSTRAINT IF EXISTS league_player_season_projection_values_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_player_rest_of_season_projection_values DROP CONSTRAINT IF EXISTS league_player_rest_of_season_projection_values_pkey;
@@ -979,6 +980,7 @@ DROP TABLE IF EXISTS public.league_team_lineup_contribution_weeks;
 DROP TABLE IF EXISTS public.league_team_forecast;
 DROP TABLE IF EXISTS public.league_team_daily_values;
 DROP TABLE IF EXISTS public.league_team_careerlogs;
+DROP TABLE IF EXISTS public.league_season_baselines;
 DROP TABLE IF EXISTS public.league_scoring_formats;
 DROP TABLE IF EXISTS public.league_player_seasonlogs;
 DROP TABLE IF EXISTS public.league_player_season_projection_values;
@@ -4357,7 +4359,8 @@ CREATE TABLE public.league_format_player_rest_of_season_projection_values (
     season_year smallint NOT NULL,
     projected_points_added_positive numeric(7,2),
     projected_points_added_net numeric(7,2),
-    market_salary numeric(6,2)
+    market_salary_positive numeric(6,2),
+    market_salary_net numeric(6,2)
 );
 
 
@@ -4371,9 +4374,10 @@ CREATE TABLE public.league_format_player_rest_of_season_projection_values_histor
     season_year smallint NOT NULL,
     projected_points_added_positive numeric(7,2),
     projected_points_added_net numeric(7,2),
-    market_salary numeric(6,2),
+    market_salary_positive numeric(6,2),
     is_removed boolean DEFAULT false NOT NULL,
-    observed_at timestamp with time zone NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    market_salary_net numeric(6,2)
 );
 
 
@@ -4387,7 +4391,8 @@ CREATE TABLE public.league_format_player_season_projection_values (
     season_year smallint NOT NULL,
     projected_points_added_positive numeric(7,2),
     projected_points_added_net numeric(7,2),
-    market_salary numeric(6,2)
+    market_salary_net numeric(6,2),
+    market_salary_positive numeric(6,2)
 );
 
 
@@ -4702,6 +4707,21 @@ CREATE TABLE public.league_scoring_formats (
     tight_end_receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     touchdown_is_first_down boolean DEFAULT true NOT NULL,
     config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((tight_end_receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((is_excluding_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((touchdown_is_first_down)::text, ''::text)) || '|'::text) || COALESCE((bonuses)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
+);
+
+
+--
+-- Name: league_season_baselines; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_season_baselines (
+    lid integer NOT NULL,
+    season_year smallint NOT NULL,
+    pid character varying(25),
+    type character varying(10) NOT NULL,
+    player_position character varying(4) NOT NULL,
+    points numeric(6,2),
+    CONSTRAINT league_season_baselines_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY (ARRAY['QB'::text, 'RB'::text, 'FB'::text, 'WR'::text, 'TE'::text, 'OL'::text, 'T'::text, 'G'::text, 'C'::text, 'DL'::text, 'DE'::text, 'DT'::text, 'NT'::text, 'EDGE'::text, 'LB'::text, 'OLB'::text, 'ILB'::text, 'MLB'::text, 'DB'::text, 'CB'::text, 'S'::text, 'K'::text, 'P'::text, 'LS'::text, 'DST'::text]))))
 );
 
 
@@ -29535,6 +29555,14 @@ ALTER TABLE ONLY public.league_player_season_projection_values
 
 ALTER TABLE ONLY public.league_scoring_formats
     ADD CONSTRAINT league_scoring_formats_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: league_season_baselines league_season_baselines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_season_baselines
+    ADD CONSTRAINT league_season_baselines_pkey UNIQUE (lid, season_year, player_position, type);
 
 
 --
@@ -59175,6 +59203,13 @@ GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.league_scoring_formats TO league_reader;
+
+
+--
+-- Name: TABLE league_season_baselines; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.league_season_baselines TO league_reader;
 
 
 --

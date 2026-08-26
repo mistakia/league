@@ -107,6 +107,7 @@ import type {
   LeaguePlayerSeasonProjectionValuesRow,
   LeaguePlayerSeasonlogsRow,
   LeagueScoringFormatsRow,
+  LeagueSeasonBaselinesRow,
   LeagueTeamCareerlogsRow,
   LeagueTeamDailyValuesRow,
   LeagueTeamForecastRow,
@@ -423,6 +424,7 @@ declare module 'knex/types/tables' {
     league_player_season_projection_values: LeaguePlayerSeasonProjectionValuesRow
     league_player_seasonlogs: LeaguePlayerSeasonlogsRow
     league_scoring_formats: LeagueScoringFormatsRow
+    league_season_baselines: LeagueSeasonBaselinesRow
     league_team_careerlogs: LeagueTeamCareerlogsRow
     league_team_daily_values: LeagueTeamDailyValuesRow
     league_team_forecast: LeagueTeamForecastRow
