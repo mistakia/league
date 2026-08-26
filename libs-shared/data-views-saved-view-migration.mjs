@@ -1,7 +1,4 @@
-import {
-  translate_rate_type_to_output,
-  LEGACY_OUTPUT_PARAM_KEYS
-} from './data-views-output-tokens.mjs'
+import { translate_rate_type_to_output } from './data-views-output-tokens.mjs'
 
 const TEAM_FROM_PLAYS_RE = /^team_(.+)_from_plays$/
 
@@ -524,12 +521,22 @@ export const RENAME_REGISTRY = [
   },
 
   // -------------------------------------------------------------------------
-  // The pre-identity output vocabulary, declared in data-views-output-tokens
-  // so the server request boundary rewrites the same two keys from one source.
-  // Folded into the merged PARAM_KEY_RENAMES so they inherit the
-  // both-keys-present rule and land in MIGRATED_PARAM_KEYS, which the
-  // saved-view coverage gate reads -- it could not recognise either key
-  // before.
+  // The pre-identity output vocabulary's param KEYS.
+  //
+  // PERMANENT, not a deprecation window. Shared short URLs are immutable rows
+  // in the production `urls` table and carry these spellings forever, and the
+  // saved-view migrator runs against browser localStorage, so it cannot reach
+  // them -- a request carrying a legacy key arrives at the server indefinitely.
+  // `retirable: false` is that fact as data.
+  //
+  // These were declared a second time in data-views-output-tokens as
+  // LEGACY_OUTPUT_PARAM_KEYS, whose own comment claimed it was the single
+  // declaration; folding the registry in beside it made that false. The
+  // registry is the one home now, and both consumers derive: the client
+  // migrator through the merged PARAM_KEY_RENAMES, the server through
+  // build_param_key_rewrite. Being in the merge is also what lands them in
+  // MIGRATED_PARAM_KEYS, which the saved-view coverage gate reads -- it could
+  // not recognise either key before.
   // -------------------------------------------------------------------------
   {
     id: 'LEGACY_OUTPUT',
@@ -895,25 +902,16 @@ const batch = (id) => {
   return found
 }
 
-// The per-batch `from -> to` maps, derived so there is exactly one declaration
-// (inside the registry) and no second spelling can drift. These stay exported
-// for the handful of consumers that referenced them before the registry
-// existed; the registry is now the single source.
-export const BOOLEAN_PREFIX_PARAM_RENAMES = batch('BOOLEAN_PREFIX').records
-export const SHORTHAND_PARAM_RENAMES = batch('SHORTHAND').records
-export const PLAYS_LOCAL_PARAM_RENAMES = batch('PLAYS_LOCAL').records
-export const SIDE_PREFIX_PARAM_RENAMES = batch('SIDE_PREFIX').records
-export const POSITION_CODE_PARAM_RENAMES = batch('POSITION_CODE').records
-export const COUNTING_STAT_PARAM_RENAMES = batch('COUNTING_STAT').records
-export const MARKETS_PARAM_RENAMES = batch('MARKETS').records
-export const LONG_TAIL_PARAM_RENAMES = batch('LONG_TAIL').records
-export const RECEIVING_PREFIX_PARAM_RENAMES = batch('RECEIVING').records
+// The per-level `from -> to` maps that the migration logic and external
+// consumers read, derived from the registry so there is exactly one declaration
+// (inside the registry) and no second spelling can drift. Consumers that read a
+// param_KEY surface derive the whole `param_key` level (PARAM_KEY_RENAMES /
+// MIGRATED_PARAM_KEYS) rather than a per-batch map; these four exports are the
+// levels that are not a subset of that merge.
 export const DVOA_TYPE_VALUE_RENAMES = batch('DVOA_TYPE_VALUE').records
 export const COLUMN_ID_RENAMES = batch('COLUMN_ID').records
 export const SCORING_FORMAT_HASH_TO_ID = batch('SCORING_FORMAT').records
 export const RATE_TYPE_RENAMES = batch('RATE_TYPE').records
-
-const PLAY_FILTER_PARAM_RENAMES = batch('PLAY_FILTER').records
 
 // Merge order is load-bearing and is now the registry's declared order: every
 // `param_key` batch in array order, left to right. A legacy key may chain
@@ -944,47 +942,18 @@ export const MIGRATED_PARAM_KEYS = new Set(Object.keys(PARAM_KEY_RENAMES))
 // Derived views for consumers outside the migration path
 // ===========================================================================
 
-// The param keys the server request boundary rewrites for a raw API caller.
-// This was the private/column-param-backwards-compatibility-mappings.json
-// file, now folded into the registry: it was a stale direct copy of a subset of
-// the param_key batches, and deriving from the registry is what fixes its three
-// dead targets (pru_ngs->pru, route_ngs->route, qb_pressure_ngs->
-// qb_pressure_tracking all landed on names no registry carries; the derived
-// resolution walks each through its chain to the live terminal --
-// ngs_pass_rushers / charted_route / is_qb_pressure_tracking). Deliberately
-// keeps box_ngs -> box_defenders exactly as core always had it (there is no
-// box_defenders FROM rule; that key is ambiguous, per the PLAY_FILTER note).
-export const SERVER_PARAM_COMPAT_KEYS = [
-  'box_ngs',
-  'pru_ngs',
-  'air_yards_ngs',
-  'time_to_throw_ngs',
-  'route_ngs',
-  'man_zone_ngs',
-  'cov_type_ngs',
-  'cov_type',
-  'qb_pressure_ngs'
-]
-
-// Resolves a set of legacy param keys to the LIVE key each one rewrites to at
-// a given surface. Because the client's single-pass migration resolves CHAINS
-// in merge order, a persisted key like `pru_ngs` first becomes `pru` (PLAY
-// FILTER) and then `ngs_pass_rushers` (SHORTHAND); a consumer that applies a
-// rename in ONE hop -- the server request boundary, which replaces a legacy
-// key with its terminal in a single pass -- needs the terminal, not the
-// intermediate `to`. This walks each `from` through the ordered
-// PARAM_KEY_RENAMES chain to its fixpoint.
-//
-// With no `from` argument the whole `param_key` surface is resolved; this is
-// the "widen to 190" mode. With `from_keys` it resolves only those keys, which
-// is how the server applies exactly the folded private map's set.
-export const build_param_key_rewrite = ({ from = null } = {}) => {
+// Resolves every legacy param key to the LIVE key it rewrites to. Because the
+// client's single-pass migration resolves CHAINS in merge order, a persisted
+// key like `pru_ngs` first becomes `pru` (PLAY FILTER) and then
+// `ngs_pass_rushers` (SHORTHAND); a consumer that applies a rename in ONE hop
+// -- the server request boundary, which replaces a legacy key with its
+// terminal in a single pass -- needs the terminal, not the intermediate `to`.
+// This walks each `from` through the ordered PARAM_KEY_RENAMES chain to its
+// fixpoint.
+export const build_param_key_rewrite = () => {
   const rewrite = new Map()
-  const sources = from
-    ? from.filter((key) => Object.hasOwn(PARAM_KEY_RENAMES, key))
-    : Object.keys(PARAM_KEY_RENAMES)
 
-  for (const legacy of sources) {
+  for (const legacy of Object.keys(PARAM_KEY_RENAMES)) {
     let terminal = legacy
     const seen = new Set()
     while (Object.hasOwn(PARAM_KEY_RENAMES, terminal) && !seen.has(terminal)) {

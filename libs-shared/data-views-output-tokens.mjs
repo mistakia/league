@@ -37,24 +37,12 @@ export const RATE_TYPE_TO_OUTPUT = {
   per_player_route: { period: 'player_route', aggregation: 'rate' }
 }
 
-// Legacy request-path param KEYS from the pre-identity `rate_type` vocabulary.
-//
-// This map is PERMANENT, not a deprecation window. Shared short URLs are
-// immutable rows in the production `urls` table and carry these spellings
-// forever, and the saved-view migrator runs against browser localStorage, so it
-// cannot reach them -- a request carrying the legacy key arrives at the server
-// indefinitely.
-//
-// It is declared ONCE here so the two consumers cannot drift: the client-side
-// saved-view migrator folds it into PARAM_KEY_RENAMES, and the server rewrites
-// it at the request boundary in get-data-view-results. Everything downstream of
-// that boundary sees the canonical key only, so no read site has to carry a
-// second spelling -- the alternative is a `??` fallback at each reader, which is
-// how one legacy key ends up handled in four places and missed in a fifth.
-export const LEGACY_OUTPUT_PARAM_KEYS = {
-  rate_type_column_params: 'output_column_params',
-  rate_type_match_column_params: 'output_match_column_params'
-}
+// The legacy request-path param KEYS from the pre-identity `rate_type`
+// vocabulary used to be declared here as LEGACY_OUTPUT_PARAM_KEYS. They are a
+// RENAME, so they live in the rename registry with every other one -- the
+// LEGACY_OUTPUT batch in data-views-saved-view-migration. This file keeps the
+// canonical output VOCABULARY (RATE_TYPE_TO_OUTPUT and the helpers below),
+// which is a translation rather than a rename.
 
 export const translate_rate_type_to_output = (rate_type) => {
   const entry = RATE_TYPE_TO_OUTPUT[rate_type]
