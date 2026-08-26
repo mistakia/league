@@ -193,10 +193,10 @@ const run = async ({ dry_run = false } = {}) => {
 
   return {
     skipped: false,
-    year: current_season.year,
+    season_year: current_season.year,
     week,
     sourceids: Object.values(projectors),
-    seas_type: 'REG'
+    season_type: 'REG'
   }
 }
 

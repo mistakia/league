@@ -149,10 +149,10 @@ const run = async ({
 
   return {
     skipped: false,
-    year,
+    season_year: year,
     week,
     source_id: external_data_sources.ESPN,
-    seas_type: 'REG'
+    season_type: 'REG'
   }
 }
 

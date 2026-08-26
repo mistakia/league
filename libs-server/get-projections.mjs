@@ -24,13 +24,13 @@ import db from '#db'
 //
 // POST rows are the exception, and are keyed by `nfl_seas_week` (1..4) rather
 // than by a fantasy week, so the postseason floor still comes from there.
-const default_week_floor = (seas_type) =>
-  seas_type === 'POST' ? current_season.nfl_seas_week : current_season.week
+const default_week_floor = (season_type) =>
+  season_type === 'POST' ? current_season.nfl_seas_week : current_season.week
 
 export default async function get_player_projections({
-  year = current_season.year,
-  seas_type = 'REG',
-  week = default_week_floor(seas_type),
+  season_year = current_season.year,
+  season_type = 'REG',
+  week = default_week_floor(season_type),
   pids = [],
   include_averages = false
 } = {}) {
@@ -46,9 +46,9 @@ export default async function get_player_projections({
     .from('projections_index')
     .whereIn('pid', pids)
     .where({
-      season_year: year,
+      season_year,
       user_id: 0,
-      season_type: seas_type
+      season_type
     })
     .where('week', '>=', week)
 

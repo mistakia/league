@@ -26,7 +26,7 @@ export default async function ({
   columns = [],
   pids = [],
   include_all_active_players = false,
-  year = current_season.year
+  season_year = current_season.year
 }) {
   const league_roster_player_ids = []
 
@@ -109,8 +109,8 @@ export default async function ({
 
     // Reference week: if prior week was a bye, use two-weeks-prior, else prior
     const fallback_week = fallback_params.week
-    const fallback_year = fallback_params.year
-    const fallback_seas_type = fallback_params.seas_type
+    const fallback_season_year = fallback_params.year
+    const fallback_season_type = fallback_params.seas_type
 
     query.leftJoin('nfl_games as reference_week_game', function () {
       this.on(function () {
@@ -137,7 +137,7 @@ export default async function ({
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
-            [fallback_year, prior_week_params.year]
+            [fallback_season_year, prior_week_params.year]
           )
         )
         .andOn(
@@ -145,7 +145,7 @@ export default async function ({
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::text ELSE ?::text END`,
-            [fallback_seas_type, prior_week_params.seas_type]
+            [fallback_season_type, prior_week_params.seas_type]
           )
         )
     })
@@ -292,7 +292,7 @@ export default async function ({
     query
       .leftJoin('league_format_player_seasonlogs', function () {
         this.on('league_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('league_format_player_seasonlogs.season_year', year)
+        this.andOn('league_format_player_seasonlogs.season_year', season_year)
         this.andOn(
           db.raw(
             `league_format_player_seasonlogs.league_format_id = '${league_format_id}'`
@@ -316,7 +316,7 @@ export default async function ({
     query
       .leftJoin('scoring_format_player_seasonlogs', function () {
         this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('scoring_format_player_seasonlogs.season_year', year)
+        this.andOn('scoring_format_player_seasonlogs.season_year', season_year)
         this.andOn(
           db.raw(
             `scoring_format_player_seasonlogs.scoring_format_id = '${scoring_format_id}'`

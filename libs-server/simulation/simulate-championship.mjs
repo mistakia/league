@@ -98,7 +98,7 @@ export async function simulate_championship({
 
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({
-    year,
+    season_year: year,
     weeks: sorted_weeks
   })
 
