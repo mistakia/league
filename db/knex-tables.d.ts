@@ -92,6 +92,9 @@ import type {
   LeagueFormatPlayerGamelogsRow,
   LeagueFormatPlayerProjectionValuesRow,
   LeagueFormatPlayerProjectionValuesHistoryRow,
+  LeagueFormatPlayerRestOfSeasonProjectionValuesRow,
+  LeagueFormatPlayerRestOfSeasonProjectionValuesHistoryRow,
+  LeagueFormatPlayerSeasonProjectionValuesRow,
   LeagueFormatPlayerSeasonlogsRow,
   LeagueFormatsRow,
   LeagueMigrationsRow,
@@ -302,6 +305,8 @@ import type {
   ScoringFormatPlayerCareerlogsRow,
   ScoringFormatPlayerGamelogsRow,
   ScoringFormatPlayerProjectionPointsRow,
+  ScoringFormatPlayerRestOfSeasonProjectionPointsRow,
+  ScoringFormatPlayerSeasonProjectionPointsRow,
   ScoringFormatPlayerSeasonlogsRow,
   SeasonsRow,
   SelectionCombinationDefinitionsRow,
@@ -403,6 +408,9 @@ declare module 'knex/types/tables' {
     league_format_player_gamelogs: LeagueFormatPlayerGamelogsRow
     league_format_player_projection_values: LeagueFormatPlayerProjectionValuesRow
     league_format_player_projection_values_history: LeagueFormatPlayerProjectionValuesHistoryRow
+    league_format_player_rest_of_season_projection_values: LeagueFormatPlayerRestOfSeasonProjectionValuesRow
+    league_format_player_rest_of_season_projection_values_history: LeagueFormatPlayerRestOfSeasonProjectionValuesHistoryRow
+    league_format_player_season_projection_values: LeagueFormatPlayerSeasonProjectionValuesRow
     league_format_player_seasonlogs: LeagueFormatPlayerSeasonlogsRow
     league_formats: LeagueFormatsRow
     league_migrations: LeagueMigrationsRow
@@ -613,6 +621,8 @@ declare module 'knex/types/tables' {
     scoring_format_player_careerlogs: ScoringFormatPlayerCareerlogsRow
     scoring_format_player_gamelogs: ScoringFormatPlayerGamelogsRow
     scoring_format_player_projection_points: ScoringFormatPlayerProjectionPointsRow
+    scoring_format_player_rest_of_season_projection_points: ScoringFormatPlayerRestOfSeasonProjectionPointsRow
+    scoring_format_player_season_projection_points: ScoringFormatPlayerSeasonProjectionPointsRow
     scoring_format_player_seasonlogs: ScoringFormatPlayerSeasonlogsRow
     seasons: SeasonsRow
     selection_combination_definitions: SelectionCombinationDefinitionsRow

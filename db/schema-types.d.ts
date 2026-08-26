@@ -1636,6 +1636,35 @@ export interface LeagueFormatPlayerProjectionValuesHistoryRow {
   observed_at: Date
 }
 
+export interface LeagueFormatPlayerRestOfSeasonProjectionValuesRow {
+  pid: string
+  league_format_id: string
+  season_year: number
+  projected_points_added_positive: number | null
+  projected_points_added_net: number | null
+  market_salary: number | null
+}
+
+export interface LeagueFormatPlayerRestOfSeasonProjectionValuesHistoryRow {
+  pid: string
+  league_format_id: string
+  season_year: number
+  projected_points_added_positive: number | null
+  projected_points_added_net: number | null
+  market_salary: number | null
+  is_removed: boolean
+  observed_at: Date
+}
+
+export interface LeagueFormatPlayerSeasonProjectionValuesRow {
+  pid: string
+  league_format_id: string
+  season_year: number
+  projected_points_added_positive: number | null
+  projected_points_added_net: number | null
+  market_salary: number | null
+}
+
 export interface LeagueFormatPlayerSeasonlogsRow {
   pid: string
   season_year: number
@@ -21016,6 +21045,20 @@ export interface ScoringFormatPlayerProjectionPointsRow {
   season_year: number
   projected_points_total: number | null
   scoring_format_id: string
+}
+
+export interface ScoringFormatPlayerRestOfSeasonProjectionPointsRow {
+  pid: string
+  scoring_format_id: string
+  season_year: number
+  projected_points_total: number | null
+}
+
+export interface ScoringFormatPlayerSeasonProjectionPointsRow {
+  pid: string
+  scoring_format_id: string
+  season_year: number
+  projected_points_total: number | null
 }
 
 export interface ScoringFormatPlayerSeasonlogsRow {
