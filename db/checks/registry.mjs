@@ -1114,6 +1114,54 @@ const registry = [
   },
 
   {
+    check_id: 'nfl-snaps-game-coverage',
+    invariant:
+      'Every game nfl_games calls FINAL holds at least one nfl_snaps row. The snap rows are written as a SIDE EFFECT of private/scripts/import-gamelogs-ngs.mjs, inside a try/catch that logs to a debug namespace and continues, so a failed snap write leaves that run green. Nothing downstream can see the absence either: gamelog-snaps-unaggregated derives its denominator FROM nfl_snaps, so a game with no snap rows contributes no gradeable population and vanishes from that scan rather than failing it. This is the declared-scope companion to that check, and without it the two together would report a clean sweep over a week whose snaps never landed.',
+    grain: ['season_year', 'season_type', 'week'],
+    rows: async () => {
+      // The distinct-esbid CTE is load-bearing, not a stylistic choice. The
+      // obvious `exists (select 1 from nfl_snaps ...)` correlated per game
+      // times out against 11.6M rows across 27 partitions; collapsing to the
+      // ~3,300 distinct esbids first and joining runs in about a second.
+      const { rows } = await db.raw(
+        `
+        with snap_games as (
+          select distinct esbid from nfl_snaps
+        )
+        select
+          g.season_year,
+          g.season_type,
+          g.week,
+          count(*) as denominator,
+          count(sg.esbid) as numerator
+        from nfl_games g
+        left join snap_games sg on sg.esbid = g.esbid
+        where g.season_year >= 2016
+          and g.week is not null
+          and g.status like 'FINAL%'
+        group by 1, 2, 3
+        `
+      )
+
+      return rows.map((/** @type {Record<string, any>} */ row) => ({
+        season_year: row.season_year,
+        season_type: row.season_type,
+        week: row.week,
+        numerator: Number(row.numerator),
+        denominator: Number(row.denominator)
+      }))
+    },
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      Number(row.denominator) >= 8,
+    min_rate: 1.0,
+    calibration:
+      'EXACT, not a tolerance: a FINAL game either has snap rows or it does not. Measured 2026-08-26 across 208 gradeable weeks from 2016 (259 in range before the eight-game precondition): fifth percentile 1.0000, and only FOUR weeks short of full coverage. Two are the live defect this was written for — 2026 PRE week 2 at 0.0000, all sixteen games, and 2026 PRE week 1 at 0.6875, eleven of sixteen — where the NGS importer cannot run in production at all: it needs NFL Pro browser credentials at /root/user-base/config/browser-logins.sops.json and a cloak-browser binary, neither of which exists on the league host, so it fails at login every time and the try/catch keeps the run green. The other two are single stranded games, 2016 PRE week 4 and 2021 PRE week 3, both at 0.9375. The 2016 floor is where nfl_snaps coverage begins; grading earlier would report a decade of absence that no repair can clear. Every one of the four is PRESEASON, which is the season_type every scheduled path treats as optional.',
+    min_gradeable_units: 150,
+    repair_command:
+      'Re-import the week: node private/scripts/import-gamelogs-ngs.mjs --year <year> --week <week> --seas_type <type>. THIS DOES NOT RUN ON THE LEAGUE HOST as of 2026-08-26 — it authenticates to NFL Pro through cloak-browser using credentials that live only on the operator workstation, and the league host has neither, so it exits at login. Fixing that placement is prerequisite to clearing a live finding here, and is tracked in user:task/league/repair-preseason-snap-aggregation.md. After the snaps land, re-run node scripts/generate-player-snaps.mjs --year <year> --week <week> --season_type <type>, or the rows will import and stay unaggregated.'
+  },
+
+  {
     check_id: 'play-type-enrichment-coverage',
     invariant:
       'Every graded week carries the derived play_type on nearly all of its plays. play_type is written by the enrichment pass in scripts/process-plays.mjs, NOT by the play importers, so a week whose plays imported cleanly and were never enriched holds a full set of rows with the derived column NULL. No importer oracle can see that — the import succeeded — and every consumer filters on play_type, so the week silently contributes zero offensive plays instead of raising.',
