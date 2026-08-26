@@ -105,6 +105,8 @@ yarn test:db:down    # stop and remove the container (data volume persists)
 
 To run mocha directly against the :5433 container (e.g. a custom reporter or `--grep`), set the port override and the standard requires yourself — `yarn test:local` is just this with `test:db:up` chained in front:
 
+**Do not reach for `yarn test:local --grep <pattern>`: yarn swallows the flag and the run reports `0 passing`, which reads as a green subset rather than a filter that never applied.** It is the vacuous-green shape this repo's verification rule exists for — nothing errors, no spec name is printed, and the summary line is the same one a genuinely passing narrow run produces. Seen 2026-08-26, where `--grep "distributional|correlated"` reported `0 passing (1ms)` against a spec file that holds twenty tests and passes in full. Use the direct-mocha form below for any filtered run, and treat a `0 passing` summary as a filter that matched nothing until you have seen the run print at least one test name.
+
 ```
 LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 TZ=America/New_York NODE_ENV=test TEST=all \
   node_modules/.bin/mocha --exit --require test/global.mjs --reporter min test/<file>.spec.mjs
