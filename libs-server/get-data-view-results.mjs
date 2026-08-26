@@ -3,6 +3,11 @@ import debug from 'debug'
 import { named_scoring_formats, named_league_formats } from '#libs-shared'
 import { LEGACY_OUTPUT_PARAM_KEYS } from '#libs-shared/data-views-output-tokens.mjs'
 import {
+  build_param_key_rewrite,
+  SERVER_PARAM_COMPAT_KEYS,
+  RATE_TYPE_RENAMES
+} from '#libs-shared/data-views-saved-view-migration.mjs'
+import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier,
   apply_year_offset_to_nfl_weeks,
@@ -78,39 +83,16 @@ const derive_supported_row_axes_from_source = (column_definition) => {
 const is_team_column_definition = (column_definition) =>
   Boolean(column_definition.source?.grain?.startsWith('team'))
 
-let column_param_backwards_compatibility_mappings = {}
-
-try {
-  column_param_backwards_compatibility_mappings = (
-    await import(
-      '#private/column-param-backwards-compatibility-mappings.json',
-      { with: { type: 'json' } }
-    )
-  ).default
-} catch (error) {
-  // File does not exist or failed to load
-  console.warn(
-    'Backwards compatibility mappings file not found, using empty mapping'
-  )
-  column_param_backwards_compatibility_mappings = {}
-}
-
 const log = debug('data-views')
 
-const rename_rate_type = (rate_type) => {
-  const rate_type_mapping = {
-    per_team_def_play: 'per_team_play',
-    per_team_def_drive: 'per_team_drive',
-    per_team_def_series: 'per_team_series',
-    per_team_off_play: 'per_team_play',
-    per_team_off_pass_play: 'per_team_pass_play',
-    per_team_off_rush_play: 'per_team_rush_play',
-    per_team_off_drive: 'per_team_drive',
-    per_team_off_series: 'per_team_series'
-  }
-
-  return rate_type_mapping[rate_type] || rate_type
-}
+// The pre-identity rate_type VALUE vocabulary. Declared once in the rename
+// registry (level `rate_type`) and derived here, so a rate-type rename lives in
+// the same registry as every other rename rather than as a second hardcoded
+// copy. The canonical `per_*` vocabulary's translation to an `output` object is
+// RATE_TYPE_TO_OUTPUT in data-views-output-tokens; this map only folds the
+// retired off/def spellings onto the canonical tokens.
+const rename_rate_type = (rate_type) =>
+  RATE_TYPE_RENAMES[rate_type] || rate_type
 
 // The request boundary for the pre-identity `rate_type` vocabulary: both the
 // legacy TOKEN spellings and the legacy param KEYS are rewritten onto the
@@ -153,23 +135,26 @@ const process_column_param_backwards_compatibility = (params) => {
   if (!params || typeof params !== 'object') return params
 
   const transformed_params = { ...params }
-  const mappings = column_param_backwards_compatibility_mappings
+  // The legacy column/param-key spellings a raw API caller can still send are
+  // the private compat file's set, now derived from the registry and resolved
+  // through each key's chain to the LIVE terminal. In COMMIT 1 this stays
+  // scoped to those same keys (no widening): the server rewrites only what it
+  // rewrote before, but pru_ngs/route_ngs/qb_pressure_ngs now land on live
+  // targets instead of the dead names the stale private copy pointed at.
+  const mappings = build_param_key_rewrite({ from: SERVER_PARAM_COMPAT_KEYS })
 
-  // Apply backwards compatibility transformations
-  Object.entries(mappings).forEach(
-    ([legacy_param_name, current_param_name]) => {
-      if (legacy_param_name in transformed_params) {
-        // Log for monitoring deprecated parameter usage
-        log(
-          `Column parameter backwards compatibility: transforming "${legacy_param_name}" to "${current_param_name}"`
-        )
+  for (const [legacy_param_name, current_param_name] of mappings) {
+    if (legacy_param_name in transformed_params) {
+      // Log for monitoring deprecated parameter usage
+      log(
+        `Column parameter backwards compatibility: transforming "${legacy_param_name}" to "${current_param_name}"`
+      )
 
-        transformed_params[current_param_name] =
-          transformed_params[legacy_param_name]
-        delete transformed_params[legacy_param_name]
-      }
+      transformed_params[current_param_name] =
+        transformed_params[legacy_param_name]
+      delete transformed_params[legacy_param_name]
     }
-  )
+  }
 
   return transformed_params
 }
