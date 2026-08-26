@@ -27,14 +27,14 @@ export const get_4for4_projections = async ({
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
       log(
-        `cache hit for 4for4 projections for year: ${season_year}, season_type: ${season_type}, week: ${week}`
+        `cache hit for 4for4 projections for season_year: ${season_year}, season_type: ${season_type}, week: ${week}`
       )
       return cache_value
     }
   }
 
   log(
-    `fetching 4for4 projections for year: ${season_year}, season_type: ${season_type}, week: ${week}`
+    `fetching 4for4 projections for season_year: ${season_year}, season_type: ${season_type}, week: ${week}`
   )
   const url = is_regular_season_projection
     ? four_for_four_config.season_projections_url

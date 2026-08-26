@@ -4,8 +4,8 @@ import { is_offseason } from '#constants'
 import throw_if_shortfall from './throw-if-shortfall.mjs'
 
 // Post-run oracle for projection imports: counts rows in projections_index
-// for the (season_year, week, source_id|sourceids, season_type) tuple and surfaces a
-// shortfall through throw_if_shortfall when below the floor. Default floor
+// for the (season_year, week, source_id|sourceids, season_type) tuple and
+// surfaces a shortfall through throw_if_shortfall when below the floor. Default floor
 // is 50 for season totals (week=0) and 30 for weekly.
 //
 // Offseason short-circuit: during offseason (week=0) season-total projections

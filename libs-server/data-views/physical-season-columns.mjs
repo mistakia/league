@@ -6,8 +6,8 @@
 // the vocabulary names (the CTE aliases them back), while a query built directly
 // against one of these physical tables must emit the conformed names.
 //
-// apply_scope_to_query DEFAULTS its season_year_column / season_type_column through these
-// resolvers, so a new physical-table emitter cannot silently drift back to the
+// apply_scope_to_query DEFAULTS its season_year_column / season_type_column
+// through these resolvers, so a new physical-table emitter cannot drift back to the
 // pre-rename names by simply forgetting to pass them. That drift is not
 // hypothetical: build_role_union_period_cte emitted nfl_plays.year against the
 // renamed table and the regenerated query-match goldens blessed it, because a

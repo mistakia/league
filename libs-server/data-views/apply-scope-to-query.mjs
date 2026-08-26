@@ -105,16 +105,16 @@ export const compute_effective_scope = ({
   return sort_deterministic(column_contribution.filter((x) => view_set.has(x)))
 }
 
-// season_year_column / season_type_column default to NULL rather than to the vocabulary
-// names, and are resolved through physical-season-columns below. Hardcoded
+// season_year_column / season_type_column default to NULL rather than to the
+// vocabulary names, and are resolved through physical-season-columns below. Hardcoded
 // vocabulary defaults were the drift hazard this helper exists to close: an
 // emitter targeting a physical table that simply omitted them got
 // nfl_plays.year, which is a 42703 against the conformed schema and which the
 // regenerated query-match goldens happily blessed. Resolving by table name makes
 // forgetting them the CORRECT behaviour instead of a silent defect. The explicit
 // arguments remain for the cases the map cannot know about.
-// has_season_year exists for the one caller that has already emitted the scope on
-// ANOTHER relation joined to this one: a duplicate predicate is not free, it
+// has_season_year exists for the one caller that has already emitted the scope
+// on ANOTHER relation joined to this one: a duplicate predicate is not free, it
 // changes the plan. Emitting year on both nfl_plays and the nfl_games it joins
 // flipped the per-period CTE off a hash join and onto a 35,198-iteration nested
 // loop (5.98M buffer hits against 179K) -- see build-period-cte.mjs.
