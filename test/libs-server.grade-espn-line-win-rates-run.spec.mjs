@@ -58,6 +58,36 @@ describe('LIBS-SERVER parse_season_year_from_url', function () {
     expect(parse_season_year_from_url(SOURCE_URL)).to.equal(2025)
   })
 
+  // ESPN has renamed this article twice in six seasons. Every real slug it has
+  // used must resolve, or a rename becomes an outage.
+  it('reads the season out of every slug ESPN has actually used', () => {
+    const slugs = {
+      2020: '2020-nfl-pass-rushing-run-stopping-blocking-leaderboard-win-rate-rankings',
+      2021: '2021-nfl-pass-rushing-run-stopping-blocking-leaderboard-win-rate-rankings',
+      2022: '2022-nfl-pass-rushing-run-stopping-blocking-leaderboard-win-rate-rankings-top-players-teams',
+      2023: '2023-nfl-pass-rush-run-stop-blocking-win-rate-rankings-top-players-teams',
+      2024: '2024-nfl-win-rates-top-teams-players-rankings',
+      2025: '2025-nfl-win-rates-top-teams-players-rankings-pass-run-block'
+    }
+    for (const [season_year, slug] of Object.entries(slugs)) {
+      expect(
+        parse_season_year_from_url(
+          `https://www.espn.com/nfl/story/_/id/12345678/${slug}`
+        ),
+        slug
+      ).to.equal(Number(season_year))
+    }
+  })
+
+  // The numeric article id must not be mistaken for a season.
+  it('does not read a season out of the article id', () => {
+    expect(
+      parse_season_year_from_url(
+        'https://www.espn.com/nfl/story/_/id/2025678/some-other-story'
+      )
+    ).to.equal(null)
+  })
+
   it('returns null for a url that carries no season', () => {
     expect(
       parse_season_year_from_url('https://www.espn.com/nfl/story/_/id/46138675')

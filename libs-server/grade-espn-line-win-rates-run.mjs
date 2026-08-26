@@ -68,8 +68,20 @@ const format_rate = (rate) => `${(rate * 100).toFixed(1)}%`
 // year, so the season is a property of the source and never of the clock. A URL
 // that does not carry one returns null, which the grader treats as a failure --
 // an unrecognized URL shape means we no longer know what season we just wrote.
+//
+// Anchored on `<year>-nfl-` rather than on the rest of the slug, because ESPN
+// has renamed the article twice in six seasons and only the year prefix has
+// survived both:
+//
+//   2020-2022  <year>-nfl-pass-rushing-run-stopping-blocking-leaderboard-...
+//   2023       <year>-nfl-pass-rush-run-stop-blocking-win-rate-rankings-...
+//   2024-2025  <year>-nfl-win-rates-top-teams-players-rankings...
+//
+// Matching on `-nfl-win-rates` would have covered only the two most recent
+// namings and returned null for every earlier one -- fail-loud rather than
+// silently wrong, but a needless outage the next time ESPN renames.
 export const parse_season_year_from_url = (url) => {
-  const match = String(url || '').match(/\/(\d{4})-nfl-win-rates/)
+  const match = String(url || '').match(/\/(20\d{2})-nfl-/)
   return match ? Number(match[1]) : null
 }
 
