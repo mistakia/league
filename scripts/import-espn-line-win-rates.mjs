@@ -1,10 +1,10 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { fetch as fetch_http2 } from 'fetch-h2'
 import * as cheerio from 'cheerio'
 
 import db from '#db'
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 import {
   is_main,
   report_job,
@@ -24,6 +24,13 @@ import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mj
 
 const log = debug('import-espn-line-win-rates')
 enable_debug_namespaces('import-espn-line-win-rates,get-player')
+
+// The residential-egress pool this importer fetches over. Spelled as a literal
+// rather than imported from `#private/libs-server/nfl-pro/browser-task.mjs`,
+// which is where NFL Pro names the same pool: `private/` is a submodule that is
+// an EMPTY DIRECTORY in any clone and on the runner, and this feed has no other
+// reason to depend on it. The coupling is that both read the same config row.
+const ESPN_PROXY_POOL = 'nfl_pro'
 
 const import_espn_line_win_rates = async ({
   collector = null,
@@ -81,7 +88,58 @@ const import_espn_line_win_rates = async ({
   // to be importing, which is what catches a config row nobody repointed.
   const source_season_year = parse_season_year_from_url(espn_line_win_rates_url)
 
-  const response = await fetch_http2(espn_line_win_rates_url)
+  // www.espn.com sits behind AWS WAF, which rejects DATACENTER egress across
+  // the board -- not just this host. Measured 2026-08-26 against the same URL
+  // with the client held constant: Contabo (this host) gets a CloudFront 403,
+  // DigitalOcean and HostPapa get a 202 with an empty body, and only a
+  // residential address is served the article. The two actions are different
+  // and equally useless, since both parse to zero `table.inline-table`.
+  //
+  // So the fetch goes out over the `nfl_pro` pool -- three Geonode dedicated
+  // ISP (static residential) addresses, `selection: sticky`. The RESIDENTIAL
+  // tier is what matters, not proxying as such: the same call through the
+  // `default` toolip pool still returns the 202 challenge, which is the
+  // negative control this choice rests on.
+  //
+  // `requires_proxy` because proxy-manager is fail-open twice -- an unresolved
+  // pool name falls back to `default`, and an empty pool falls back to a DIRECT
+  // fetch out of the host WAN. Both of those silently land on exactly the
+  // datacenter egress this exists to avoid, and would look like the feed simply
+  // going empty.
+  //
+  // The pool is shared with the authenticated NFL Pro session that bought it.
+  // Justified by volume -- one unauthenticated GET of a public article per week
+  // -- but it is a shared blast radius: if ESPN ever flags these addresses the
+  // cost lands on NFL Pro. See
+  // [[user:guideline/software/vendor-egress-proxy-posture.md]].
+  const response = await fetch_with_retry({
+    url: espn_line_win_rates_url,
+    use_proxy: true,
+    requires_proxy: true,
+    proxy_pool: ESPN_PROXY_POOL
+  })
+
+  // This guard is specifically about the WAF's CHALLENGE action, not its block.
+  // A 403 never reaches here -- `fetch_with_retry` throws on a non-2xx status
+  // itself. The 202 challenge does reach here, and it is the dangerous one: an
+  // empty body dressed as success.
+  //
+  // So NOT `!response.ok`. 202 is inside the 2xx range, so `ok` is TRUE for the
+  // exact response this exists to catch, and that check would hand cheerio the
+  // empty body. Measured against the live URL on 2026-08-26: over the `default`
+  // pool it answers `status=202 ok=true tables=0`. A served article is 200 and
+  // nothing else.
+  //
+  // Failing here rather than downstream is what keeps the cause legible -- an
+  // unguarded challenge parses to zero tables and fails the oracle as "every
+  // feed is empty", which reads like ESPN restructuring the page, a materially
+  // different diagnosis from "our egress was refused".
+  if (response.status !== 200) {
+    throw new Error(
+      `ESPN returned ${response.status} for ${espn_line_win_rates_url} over the '${ESPN_PROXY_POOL}' proxy pool`
+    )
+  }
+
   const html = await response.text()
   const $ = cheerio.load(html)
 
