@@ -1,6 +1,5 @@
 import React from 'react'
 
-// import EditableProjection from '@components/editable-projection'
 import Position from '@components/position'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PercentileMetric from '@components/percentile-metric'

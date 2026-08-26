@@ -31,8 +31,6 @@ import {
   api_get_all_players,
   api_search_players,
   api_get_player,
-  api_put_projection,
-  api_delete_projection,
   api_put_setting,
   api_get_player_transactions,
   api_get_baselines,
@@ -152,28 +150,9 @@ export function* toggle_order({ payload }) {
   }
 }
 
-export function* save_projection({ payload }) {
-  const { token } = yield select(get_app)
-  const { value, type, pid, userId, week } = payload
-  if (token) yield call(api_put_projection, { value, type, pid, userId, week })
-  else
-    yield putResolve(
-      player_actions.set_projection({ value, type, pid, userId, week })
-    )
-  yield call(calculateValues)
-}
-
 export function* load_player({ payload }) {
   const { pid } = payload
   yield call(api_get_player, { pid })
-}
-
-export function* delete_projection({ payload }) {
-  const { pid, week } = payload
-  const { userId, token } = yield select(get_app)
-  if (token) yield call(api_delete_projection, { userId, week, pid })
-  else yield putResolve(player_actions.remove_projection({ pid, week }))
-  yield call(calculateValues)
 }
 
 export function* init({ payload }) {
@@ -350,10 +329,6 @@ export function* watch_players_page_order() {
   yield takeLatest(player_actions.TOGGLE_PLAYERS_PAGE_ORDER, toggle_order)
 }
 
-export function* watch_save_projection() {
-  yield takeLatest(player_actions.SAVE_PROJECTION, save_projection)
-}
-
 export function* watch_draft_select_player() {
   yield takeLatest(draft_actions.DRAFT_SELECT_PLAYER, load_player)
 }
@@ -380,10 +355,6 @@ export function* watch_set_source() {
 
 export function* watch_put_source_fulfilled() {
   yield takeLatest(source_actions.PUT_SOURCE_FULFILLED, calculateValues)
-}
-
-export function* watch_delete_projection() {
-  yield takeLatest(player_actions.DELETE_PROJECTION, delete_projection)
 }
 
 export function* watch_toggle_watchlist() {
@@ -486,13 +457,11 @@ export const player_sagas = [
   fork(watch_auth_failed),
   fork(watch_set_league),
   fork(watch_players_page_order),
-  fork(watch_save_projection),
   fork(watch_draft_select_player),
   fork(watch_select_player),
   fork(watch_put_league_fulfilled),
   fork(watch_set_source),
   fork(watch_put_source_fulfilled),
-  fork(watch_delete_projection),
   fork(watch_toggle_watchlist),
 
   fork(watch_search_players),

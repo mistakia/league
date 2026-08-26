@@ -8,8 +8,6 @@ export {
   team_players_request_actions,
   players_search_actions,
   get_player_actions,
-  put_projection_actions,
-  del_projection_actions,
   get_cutlist_actions,
   post_cutlist_actions,
   get_player_transactions_actions,

@@ -96,39 +96,6 @@ export const player_actions = {
   LOAD_PLAYER_TRANSACTIONS: 'LOAD_PLAYER_TRANSACTIONS',
   load_player_transactions: create_load_action('LOAD_PLAYER_TRANSACTIONS'),
 
-  SAVE_PROJECTION: 'SAVE_PROJECTION',
-  save_projection: ({ pid, value, type, userId, week }) => ({
-    type: player_actions.SAVE_PROJECTION,
-    payload: {
-      userId,
-      pid,
-      value,
-      type,
-      week
-    }
-  }),
-  DELETE_PROJECTION: 'DELETE_PROJECTION',
-  delete_projection: ({ pid, week }) => ({
-    type: player_actions.DELETE_PROJECTION,
-    payload: {
-      pid,
-      week
-    }
-  }),
-  SET_PROJECTION: 'SET_PROJECTION',
-  set_projection: (opts) => ({
-    type: player_actions.SET_PROJECTION,
-    payload: { opts }
-  }),
-  REMOVE_PROJECTION: 'REMOVE_PROJECTION',
-  remove_projection: (opts) => ({
-    type: player_actions.REMOVE_PROJECTION,
-    payload: { opts }
-  }),
-
-  ...create_api_action_types('PUT_PROJECTION'),
-  ...create_api_action_types('DEL_PROJECTION'),
-
   SELECT_PLAYERS_PAGE_VIEW: 'SELECT_PLAYERS_PAGE_VIEW',
   select_players_page_view: (view_key) => ({
     type: player_actions.SELECT_PLAYERS_PAGE_VIEW,
@@ -199,8 +166,6 @@ export const league_players_request_actions = create_api_actions(
 export const team_players_request_actions =
   create_api_actions('FETCH_TEAM_PLAYERS')
 export const get_player_actions = create_api_actions('GET_PLAYER')
-export const put_projection_actions = create_api_actions('PUT_PROJECTION')
-export const del_projection_actions = create_api_actions('DEL_PROJECTION')
 export const get_cutlist_actions = create_api_actions('GET_CUTLIST')
 export const post_cutlist_actions = create_api_actions('POST_CUTLIST')
 export const get_player_transactions_actions = create_api_actions(

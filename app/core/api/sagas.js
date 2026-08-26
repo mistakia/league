@@ -52,8 +52,6 @@ import {
   team_players_request_actions,
   players_search_actions,
   get_player_actions,
-  put_projection_actions,
-  del_projection_actions,
   get_cutlist_actions,
   post_cutlist_actions,
   get_player_transactions_actions,
@@ -421,17 +419,6 @@ export const api_get_players_gamelogs = fetch.bind(
   null,
   api.get_players_gamelogs,
   get_players_gamelogs_actions
-)
-
-export const api_put_projection = fetch.bind(
-  null,
-  api.put_projection,
-  put_projection_actions
-)
-export const api_delete_projection = fetch.bind(
-  null,
-  api.del_projection,
-  del_projection_actions
 )
 
 export const api_put_setting = fetch.bind(
