@@ -8,11 +8,12 @@ import {
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   get_all_nfl_week_identifiers,
-  format_nfl_week_param_values,
-  current_nfl_week_params,
-  nfl_week_offset_params,
-  format_nfl_week_identifier
+  format_nfl_week_param_values
 } from './nfl-week-identifier.mjs'
+import {
+  resolve_nfl_week_dynamic_value,
+  format_nfl_week_identifiers_label
+} from './nfl-week-dynamic-values.mjs'
 
 const format_year_value = ({ value, def }) => {
   const param_values = Array.isArray(value) ? value : [value]
@@ -60,7 +61,10 @@ const format_week_value = ({ value, def }) => {
       const current = current_season.week
       switch (v.dynamic_type) {
         case 'current_week':
-          return `${current}`
+          // Clamped exactly as single_week's default_value is. Week 0 is the
+          // season-long slot, so the unclamped label named a different week
+          // than the filter selected for the whole offseason.
+          return `${Math.max(current, 1)}`
         case 'last_n_weeks': {
           const end = current
           const start = Math.max(1, end - n + 1)
@@ -307,6 +311,11 @@ export const pff_seas_type = {
   default_value: 'REGPO'
 }
 
+// One measure, one presentation. This used to be a fourth copy of the resolver
+// switch that produced its own labels by hand -- and it anchored
+// last_n_nfl_years on current_season.year while the client notice anchored it
+// on the last completed season, so the chip and the notice described the same
+// filter as different spans for half the year.
 const resolve_nfl_week_dynamic = ({ dv, def }) => {
   const dynamic_def = def?.dynamic_values?.find(
     (d) => d.dynamic_type === dv.dynamic_type
@@ -315,37 +324,12 @@ const resolve_nfl_week_dynamic = ({ dv, def }) => {
     (dynamic_def?.label || dv.dynamic_type) +
     (dv.value != null ? ` (${dv.value})` : '')
 
-  switch (dv.dynamic_type) {
-    case 'current_year_reg_weeks':
-      return `${current_season.last_completed_season_year} REG`
-    case 'current_nfl_week': {
-      const params = current_nfl_week_params()
-      if (!params) return fallback
-      return format_nfl_week_param_values({
-        nfl_weeks: [format_nfl_week_identifier(params)]
-      })
-    }
-    case 'last_n_nfl_weeks': {
-      const n = parseInt(dv.value ?? dynamic_def?.default_value ?? 5, 10)
-      const ids = []
-      for (let i = 0; i < n; i++) {
-        const params = nfl_week_offset_params({ offset: -i })
-        if (!params) break
-        ids.push(format_nfl_week_identifier(params))
-      }
-      return ids.length
-        ? format_nfl_week_param_values({ nfl_weeks: ids })
-        : fallback
-    }
-    case 'last_n_nfl_years': {
-      const n = parseInt(dv.value ?? dynamic_def?.default_value ?? 3, 10)
-      const end = current_season.year
-      const start = Math.max(2000, end - n + 1)
-      return start === end ? `${end}` : `${start}-${end}`
-    }
-    default:
-      return fallback
-  }
+  const nfl_weeks = resolve_nfl_week_dynamic_value({
+    dynamic_type: dv.dynamic_type,
+    value: dv.value ?? dynamic_def?.default_value
+  })
+
+  return format_nfl_week_identifiers_label({ nfl_weeks }) || fallback
 }
 
 const format_nfl_week_id_value = ({ value, def }) => {

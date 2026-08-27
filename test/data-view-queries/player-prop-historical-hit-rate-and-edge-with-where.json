@@ -8,11 +8,7 @@
         "params": {
           "historical_range": "current_season",
           "hit_type": "hard",
-          "week": [
-            {
-              "dynamic_type": "current_week"
-            }
-          ]
+          "week": [{ "dynamic_type": "current_week" }]
         }
       },
       {
@@ -20,19 +16,12 @@
         "params": {
           "historical_range": "current_season",
           "hit_type": "hard",
-          "week": [
-            {
-              "dynamic_type": "current_week"
-            }
-          ]
+          "week": [{ "dynamic_type": "current_week" }]
         }
       }
     ],
     "sort": [
-      {
-        "column_id": "player_game_prop_historical_hit_rate",
-        "desc": true
-      }
+      { "column_id": "player_game_prop_historical_hit_rate", "desc": true }
     ],
     "where": [
       {
@@ -43,16 +32,12 @@
         "params": {
           "historical_range": "current_season",
           "hit_type": "hard",
-          "week": [
-            {
-              "dynamic_type": "current_week"
-            }
-          ]
+          "week": [{ "dynamic_type": "current_week" }]
         }
       }
     ]
   },
-  "expected_query": "with \"t3fe2567c0620672040bc9a62d3357bb5_markets\" as (select \"source_id\", \"source_market_id\", \"time_type\" from \"prop_markets_index\" where \"market_type\" = 'GAME_PASSING_YARDS' and \"time_type\" = 'CLOSE' and \"prop_markets_index\".\"season_year\" = ${constants.current_season.year} and \"source_id\" = 'FANDUEL'), \"t3fe2567c0620672040bc9a62d3357bb5\" as (select pms.selection_pid, pms.selection_metric_line, pms.current_season_hit_rate_hard, pms.current_season_edge_hard from \"t3fe2567c0620672040bc9a62d3357bb5_markets\" as \"m\" inner join \"prop_market_selections_index\" as \"pms\" on \"pms\".\"source_id\" = \"m\".\"source_id\" and \"pms\".\"source_market_id\" = \"m\".\"source_market_id\" and \"pms\".\"time_type\" = \"m\".\"time_type\" where \"pms\".\"selection_type\" in ('OVER') and pms.current_season_edge_hard >= '0') select \"player\".\"pid\", t3fe2567c0620672040bc9a62d3357bb5.current_season_hit_rate_hard as prop_historical_hit_rate_0, t3fe2567c0620672040bc9a62d3357bb5.current_season_edge_hard as prop_historical_edge_0, \"player\".\"primary_position\" from \"player\" inner join \"t3fe2567c0620672040bc9a62d3357bb5\" on \"t3fe2567c0620672040bc9a62d3357bb5\".\"selection_pid\" = \"player\".\"pid\" group by t3fe2567c0620672040bc9a62d3357bb5.current_season_hit_rate_hard, t3fe2567c0620672040bc9a62d3357bb5.current_season_edge_hard, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t79e13fe20c07b190ca39a73440b7d9a3_markets\" as (select \"source_id\", \"source_market_id\", \"time_type\" from \"prop_markets_index\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"prop_markets_index\".\"esbid\" and \"nfl_games\".\"season_year\" = \"prop_markets_index\".\"season_year\" and \"nfl_games\".\"season_type\" = 'PRE' and \"nfl_games\".\"week\" = 1 where \"market_type\" = 'GAME_PASSING_YARDS' and \"time_type\" = 'CLOSE' and \"prop_markets_index\".\"season_year\" = ${constants.current_season.year} and \"source_id\" = 'FANDUEL'), \"t79e13fe20c07b190ca39a73440b7d9a3\" as (select pms.selection_pid, pms.selection_metric_line, pms.current_season_hit_rate_hard, pms.current_season_edge_hard from \"t79e13fe20c07b190ca39a73440b7d9a3_markets\" as \"m\" inner join \"prop_market_selections_index\" as \"pms\" on \"pms\".\"source_id\" = \"m\".\"source_id\" and \"pms\".\"source_market_id\" = \"m\".\"source_market_id\" and \"pms\".\"time_type\" = \"m\".\"time_type\" where \"pms\".\"selection_type\" in ('OVER') and pms.current_season_edge_hard >= '0') select \"player\".\"pid\", t79e13fe20c07b190ca39a73440b7d9a3.current_season_hit_rate_hard as prop_historical_hit_rate_0, t79e13fe20c07b190ca39a73440b7d9a3.current_season_edge_hard as prop_historical_edge_0, \"player\".\"primary_position\" from \"player\" inner join \"t79e13fe20c07b190ca39a73440b7d9a3\" on \"t79e13fe20c07b190ca39a73440b7d9a3\".\"selection_pid\" = \"player\".\"pid\" group by t79e13fe20c07b190ca39a73440b7d9a3.current_season_hit_rate_hard, t79e13fe20c07b190ca39a73440b7d9a3.current_season_edge_hard, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
   "timeout_ms": 40000
 }

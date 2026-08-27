@@ -1,10 +1,4 @@
-import {
-  get_nfl_week_identifiers_for_year,
-  current_nfl_week_identifier,
-  nfl_week_offset_params,
-  format_nfl_week_identifier
-} from '#libs-shared/nfl-week-identifier.mjs'
-import { current_season } from '#constants'
+import { resolve_nfl_week_dynamic_value } from '#libs-shared/nfl-week-dynamic-values.mjs'
 
 const summarize_year_seas_set = (values) => {
   const years = new Set()
@@ -32,39 +26,15 @@ const format_resolved_values = (key, values) => {
   return values.length > 4 ? `${preview}, +${values.length - 4} more` : preview
 }
 
-const resolve_dynamic_nfl_week_id = (dv) => {
-  switch (dv.dynamic_type) {
-    case 'current_year_reg_weeks':
-      return get_nfl_week_identifiers_for_year({
-        year: current_season.last_completed_season_year,
-        seas_type: 'REG'
-      })
-    case 'current_nfl_week':
-      return [current_nfl_week_identifier()]
-    case 'last_n_nfl_weeks': {
-      const n = parseInt(dv.value || 5, 10)
-      const result = []
-      for (let i = 0; i < n; i++) {
-        const params = nfl_week_offset_params({ offset: -i })
-        if (!params) break
-        result.push(format_nfl_week_identifier(params))
-      }
-      return result
-    }
-    case 'last_n_nfl_years': {
-      const n = parseInt(dv.value || 3, 10)
-      const result = []
-      for (let i = 0; i < n; i++) {
-        const y = current_season.last_completed_season_year - i
-        if (y < 2000) break
-        result.push(...get_nfl_week_identifiers_for_year({ year: y }))
-      }
-      return result
-    }
-    default:
-      return null
-  }
-}
+// Delegates to the one shared resolver rather than carrying a fourth copy of
+// the same switch. The copies had already drifted: this one anchored
+// last_n_nfl_years on the last completed season while the server anchored it on
+// the current one, so the preview named a different span than the query used.
+const resolve_dynamic_nfl_week_id = (dv) =>
+  resolve_nfl_week_dynamic_value({
+    dynamic_type: dv.dynamic_type,
+    value: dv.value
+  })
 
 const resolve_param_values = (key, value) => {
   const list = Array.isArray(value) ? value : [value]

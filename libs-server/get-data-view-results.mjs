@@ -6,15 +6,12 @@ import {
   RATE_TYPE_RENAMES
 } from '#libs-shared/data-views-saved-view-migration.mjs'
 import {
-  format_nfl_week_identifier,
   parse_nfl_week_identifier,
   apply_year_offset_to_nfl_weeks,
   decompose_nfl_weeks,
-  get_nfl_week_identifiers_for_year,
-  get_max_weeks_for_season_type,
-  current_nfl_week_identifier,
-  nfl_week_offset_params
+  get_max_weeks_for_season_type
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { resolve_nfl_week_dynamic_value } from '#libs-shared/nfl-week-dynamic-values.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
@@ -355,7 +352,9 @@ const process_dynamic_week_param = (week_param, year_param) => {
           )
         }
         case 'current_week':
-          return [current_week]
+          // Same clamp as the single_week param's default. Week 0 is the
+          // season-long slot, not a week.
+          return [Math.max(current_week, 1)]
         default:
           return []
       }
@@ -376,39 +375,13 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
 
   nfl_weeks = nfl_weeks.flatMap((item) => {
     if (typeof item === 'object' && item !== null) {
-      switch (item.dynamic_type) {
-        case 'current_year_reg_weeks': {
-          return get_nfl_week_identifiers_for_year({
-            year: current_season.last_completed_season_year,
-            seas_type: 'REG'
-          })
-        }
-        case 'current_nfl_week': {
-          return [current_nfl_week_identifier()]
-        }
-        case 'last_n_nfl_weeks': {
-          const n = parseInt(item.value || 5, 10)
-          const result = []
-          for (let i = 0; i < n; i++) {
-            const params = nfl_week_offset_params({ offset: -i })
-            if (!params) break
-            result.push(format_nfl_week_identifier(params))
-          }
-          return result
-        }
-        case 'last_n_nfl_years': {
-          const n = parseInt(item.value || 3, 10)
-          const result = []
-          for (let i = 0; i < n; i++) {
-            const y = current_season.year - i
-            if (y < 2000) break
-            result.push(...get_nfl_week_identifiers_for_year({ year: y }))
-          }
-          return result
-        }
-        default:
-          return []
-      }
+      // One resolver, shared with the client notice, the filter chip and the
+      // single-week resolver. It THROWS on an unknown dynamic_type rather than
+      // answering an empty list -- see nfl-week-dynamic-values.mjs.
+      return resolve_nfl_week_dynamic_value({
+        dynamic_type: item.dynamic_type,
+        value: item.value
+      })
     }
 
     if (
@@ -483,7 +456,12 @@ const process_dynamic_single_week_param = (single_week_param) => {
   single_week = single_week.map((week) => {
     if (typeof week === 'object') {
       if (week.dynamic_type === 'current_week') {
-        return current_season.week
+        // Clamped the same way the param's own default_value is. The raw
+        // counter is 0 through the offseason, and week 0 is the SEASON-LONG
+        // slot rather than a neighbouring week -- so the dynamic and the
+        // default it is supposed to reproduce selected different rows for six
+        // months of the year.
+        return Math.max(current_season.week, 1)
       }
     }
     return week

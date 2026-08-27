@@ -5,17 +5,25 @@ import {
   last_meaningful_reg_week_params_for_year,
   parse_nfl_week_identifier
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { resolve_nfl_week_dynamic_value } from '#libs-shared/nfl-week-dynamic-values.mjs'
 
-// Resolves a `{dynamic_type: 'current_nfl_week'}` param object to a concrete
-// identifier. The `single_nfl_week_id` param in common-column-params defines
-// this as its default_value, so views that never pinned a specific week
-// arrive here with the raw dynamic object.
+// Resolves a dynamic param object to a concrete identifier. The
+// `single_nfl_week_id` param in common-column-params defines one as its
+// default_value, so views that never pinned a specific week arrive here with
+// the raw object.
+//
+// This used to handle `current_nfl_week` alone and answer null for everything
+// else -- a second, partial copy of the expander that made an unresolvable
+// dynamic indistinguishable from a resolvable one. It now goes through the one
+// shared resolver, which throws on an unknown type. A many-valued type collapses
+// to its FIRST element here, which is what "single" means at this call site.
 const resolve_dynamic_single_nfl_week = (value) => {
   if (value && typeof value === 'object' && value.dynamic_type) {
-    if (value.dynamic_type === 'current_nfl_week') {
-      return current_nfl_week_identifier()
-    }
-    return null
+    const resolved = resolve_nfl_week_dynamic_value({
+      dynamic_type: value.dynamic_type,
+      value: value.value
+    })
+    return resolved.length ? resolved[0] : null
   }
   return value
 }
