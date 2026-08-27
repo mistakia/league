@@ -1,21 +1,11 @@
-import crypto from 'crypto'
-import { existsSync, readFileSync } from 'fs'
 import debug from 'debug'
 
+import {
+  mint_machine_token,
+  resolve_instance_key_path
+} from '#libs-server/machine-token.mjs'
+
 const log = debug('emit-signal')
-
-const TOKEN_TTL_MS = 30 * 1000
-
-const sign_machine_token = ({ slug, key_path }) => {
-  if (!slug || !key_path || !existsSync(key_path)) return null
-  const private_key = crypto.createPrivateKey(readFileSync(key_path, 'utf8'))
-  const exp = Date.now() + TOKEN_TTL_MS
-  const payload = `${slug}.${exp}`
-  const sig = crypto
-    .sign(null, Buffer.from(payload), private_key)
-    .toString('base64url')
-  return `${payload}.${sig}`
-}
 
 // Shared transport for both arms below. Returns null rather than throwing on
 // every failure mode -- an oracle that can take down the run it instruments is
@@ -23,10 +13,15 @@ const sign_machine_token = ({ slug, key_path }) => {
 const post_to_signals_api = async ({ path, body, description }) => {
   const base_url = process.env.BASE_API_URL
   const slug = process.env.BASE_MACHINE_SLUG
-  const key_path = process.env.BASE_INSTANCE_KEY_FILE
-  if (!base_url || !slug || !key_path) {
+  // Resolved rather than demanded. This module required BASE_INSTANCE_KEY_FILE
+  // outright until 2026-08-27, which is stricter than the loader base-api
+  // verifies against -- and the fleet's full hosts deliberately set no such
+  // variable, so the strictness went mute on exactly the correctly-provisioned
+  // hosts. See user:guideline/auth/sign-machine-requests.md.
+  const key_path = resolve_instance_key_path()
+  if (!base_url || !slug) {
     log(
-      'BASE_API_URL/BASE_MACHINE_SLUG/BASE_INSTANCE_KEY_FILE unset; %s NOT sent: %s',
+      'BASE_API_URL/BASE_MACHINE_SLUG unset; %s NOT sent: %s',
       path,
       description
     )
@@ -34,7 +29,7 @@ const post_to_signals_api = async ({ path, body, description }) => {
   }
   let token
   try {
-    token = sign_machine_token({ slug, key_path })
+    token = mint_machine_token({ slug, key_path })
   } catch (err) {
     // Loud on stderr per user:guideline/auth/sign-machine-requests.md: a signer
     // that cannot sign must never no-op silently.
