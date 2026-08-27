@@ -66,15 +66,43 @@ describe('data-views nfl_week dynamic call sites', function () {
     expect(resolved).to.equal(`${current_season.year - 1}_POST_WEEK_4`)
   })
 
-  it('the current_week dynamic clamps the way its own param default does', function () {
+  it('the current_week dynamic clamps on single_week, matching its default', function () {
     set_offseason_date()
     const params = process_params_with_backwards_compatibility({
       single_week: [{ dynamic_type: 'current_week' }]
     })
-    // Week 0 is the season-long slot, not a week. The param default is
-    // Math.max(current_season.week, 1) and the dynamic returned the raw 0, so
-    // the two selected different rows for the whole offseason.
+    // single_week's default_value is Math.max(current_season.week, 1) and its
+    // dynamic returned the raw 0, so the two selected different rows for the
+    // whole offseason.
     expect(params.single_week).to.deep.equal([1])
+  })
+
+  // The other half of that pair, and the one that has to stay UNCLAMPED.
+  //
+  // On the multi week param 0 is the season-long slot, and
+  // player-betting-market-column-definitions gates its nfl_games join on
+  // `if (week || ...)`. Clamping it to 1 makes that join appear with
+  // seas_type = current_season.nfl_seas_type, so through the offseason every
+  // player-game-prop column rescoped to PRESEASON week 1 and inner-joined away
+  // every player without a PRE-1 game. Shipped 2026-08-27 and reverted the
+  // same day.
+  it('the current_week dynamic does NOT clamp on the multi week param', function () {
+    set_offseason_date()
+    const params = process_params_with_backwards_compatibility({
+      week: [{ dynamic_type: 'current_week' }]
+    })
+    expect(current_season.week).to.equal(0)
+    expect(params.week).to.deep.equal([0])
+  })
+
+  it('the two week params agree once the season is under way', function () {
+    set_date_for_week({ seas_type: 'REG', week: 4 })
+    const built = (key) =>
+      process_params_with_backwards_compatibility({
+        [key]: [{ dynamic_type: 'current_week' }]
+      })[key]
+    // The clamp is a floor, not an offset: it may only ever differ at 0.
+    expect(built('week')).to.deep.equal(built('single_week'))
   })
 
   it('the filter chip label agrees with the resolved span', function () {

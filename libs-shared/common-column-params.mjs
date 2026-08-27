@@ -61,10 +61,11 @@ const format_week_value = ({ value, def }) => {
       const current = current_season.week
       switch (v.dynamic_type) {
         case 'current_week':
-          // Clamped exactly as single_week's default_value is. Week 0 is the
-          // season-long slot, so the unclamped label named a different week
-          // than the filter selected for the whole offseason.
-          return `${Math.max(current, 1)}`
+          // Clamped for the SINGLE param only, matching both its
+          // default_value and its resolver. On the multi param 0 is the
+          // season-long slot and stays 0, so this label always names the week
+          // the filter actually selects.
+          return `${def?.single ? Math.max(current, 1) : current}`
         case 'last_n_weeks': {
           const end = current
           const start = Math.max(1, end - n + 1)

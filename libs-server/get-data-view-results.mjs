@@ -352,9 +352,18 @@ const process_dynamic_week_param = (week_param, year_param) => {
           )
         }
         case 'current_week':
-          // Same clamp as the single_week param's default. Week 0 is the
-          // season-long slot, not a week.
-          return [Math.max(current_week, 1)]
+          // NOT clamped, unlike the single_week twin below. On the MULTI week
+          // param, 0 is the season-long slot and is a meaningful selection --
+          // player-betting-market-column-definitions gates its nfl_games join
+          // on `if (week || ...)`, so 0 means "cover the whole season year"
+          // and 1 means "inner join to week 1 of the CURRENT seas_type".
+          //
+          // Clamping here for one day rescoped every player-game-prop column
+          // to PRESEASON week 1 in the offseason, dropping every player with
+          // no PRE-1 game -- the week clamped onto the REG track while
+          // seas_type stayed on the PRE track, which is this task's own
+          // two-halves-of-different-seasons defect on a different axis.
+          return [current_week]
         default:
           return []
       }
