@@ -258,6 +258,14 @@ const GATES = [
       'consumer code vs a rename map — ANCHORED ON NINE HARDCODED TABLES, so a zero is a floor'
   },
   {
+    id: 'data-view-description-coverage',
+    command: ['db/gates/check-data-view-description-coverage.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'the queryable column registry vs the prose description index, BOTH ways — an undescribed column and an orphaned description each fail; says nothing about whether a description is ACCURATE'
+  },
+  {
     id: 'rename-target-liveness',
     command: ['db/gates/check-rename-target-liveness.mjs'],
     requires: 'none',
