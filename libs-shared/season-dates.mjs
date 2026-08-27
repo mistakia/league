@@ -1,9 +1,9 @@
 const season_dates = {
   // use unix timestamp, start of day, new york timezone
-  // 2026 season (opening Thu Sep 10 2026, Super Bowl LX Feb 8 2027)
+  // 2026 season (opening Thu Sep 10 2026, Super Bowl LXI Sun Feb 14 2027)
 
-  // super bowl (after 2025 season)
-  offseason: 1770526800,
+  // midnight ending Super Bowl LX day, Sun Feb 8 2026 (after the 2025 season)
+  offseason: 1770613200,
 
   // Two Tuesdays before first game (Sep 1 2026)
   //
@@ -28,8 +28,14 @@ const season_dates = {
   // subtraction is the thing that can be verified.
   regular_season_start: 1788235200,
 
-  // super bowl (end of day to include game day, Feb 9 2027)
-  end: 1802149200,
+  // Midnight ending Super Bowl day, so the game itself is still inside the
+  // season -- `Season.year` flips here and five odds importers stop at it.
+  //
+  // Derive the date from the anchor, not from the header comment: the Super
+  // Bowl is POST week 4, which `calculate_week` places at
+  // `regular_season_start + (nflFinalWeek + superBowlByeWeeks + 4)` weeks.
+  // For 2026 that is Tue Feb 9, whose Sunday is Feb 14 2027.
+  end: 1802667600,
 
   // first game (Sep 10 2026)
   openingDay: 1789012800,

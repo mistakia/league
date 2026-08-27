@@ -292,6 +292,49 @@ describe('LIBS-SHARED Season', function () {
     ).to.equal(false)
   })
 
+  // `end` is the one anchor with no independently observable date on it -- it
+  // is not a game day, it is the midnight after one -- so it was set by hand
+  // from a header comment naming the wrong Super Bowl and landed five days
+  // early. The `year` test below could not report that: it took both its clock
+  // and its expectation from `end` itself, so it was green for any value.
+  //
+  // This derives the Super Bowl from `regular_season_start` the same way
+  // `calculate_week` does, which makes the assertion answerable against the
+  // NFL schedule rather than against the constant under test.
+  it('end is the midnight after Super Bowl Sunday', function () {
+    const { regular_season_start, end, nflFinalWeek, superBowlByeWeeks } =
+      current_season
+
+    const super_bowl_week = regular_season_start.add(
+      nflFinalWeek + superBowlByeWeeks + 4,
+      'week'
+    )
+    expect(current_season.calculate_week(super_bowl_week)).to.deep.equal({
+      seas_type: 'POST',
+      week: 4
+    })
+
+    // weeks begin Tuesday, so the game is that week's Sunday
+    const super_bowl_sunday = super_bowl_week.add(5, 'day')
+    expect(super_bowl_sunday.day()).to.equal(0)
+    expect(end.unix()).to.equal(super_bowl_sunday.add(1, 'day').unix())
+
+    // the season contains its own Super Bowl -- kickoff is hours before `end`,
+    // never after it
+    expect(super_bowl_sunday.isBefore(end)).to.equal(true)
+    expect(end.diff(super_bowl_sunday, 'hour')).to.equal(24)
+
+    // `offseason` is the same instant for the PRIOR season's Super Bowl, and
+    // the day after a Sunday game is always a Monday. The two fields drifted
+    // apart once already, with `offseason` at the start of game day and `end`
+    // at the start of Super Bowl week.
+    expect(current_season.offseason.day()).to.equal(1)
+    expect(end.day()).to.equal(1)
+  })
+
+  // The boundaries below are deliberately RELATIVE to `end`: the assertion
+  // above pins `end` to the schedule, so this one is free to test only what
+  // the getter does on either side of it.
   it('year', function () {
     const current_year = dayjs.unix(season_dates.offseason).year()
     const next_year = dayjs.unix(season_dates.end).year()
