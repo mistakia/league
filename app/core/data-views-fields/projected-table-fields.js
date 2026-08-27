@@ -55,7 +55,7 @@ const extra_column_params_by_base_name = {
 
 // These columns are derived into league_format_*/league_* valuation tables that
 // carry no source_id dimension, so they accept no source picker. `points` is NOT
-// among them: it is now computed in-query from projections_index/ros_projections
+// among them: it is now computed in-query from projections_index/rest_of_season_projections
 // (see player-projected-column-definitions.mjs) and so accepts a source picker
 // alongside its scoring-format picker, like every raw-stat projection column.
 const computed_base_names = new Set([

@@ -6,28 +6,19 @@
     "columns": [
       {
         "column_id": "player_week_projected_points_added",
-        "params": {
-          "year": [2023],
-          "week": [5]
-        }
+        "params": { "year": [2023], "week": [5] }
       },
       {
         "column_id": "player_rest_of_season_projected_points_added",
-        "params": {
-          "year": [2023],
-          "week": [5]
-        }
+        "params": { "year": [2023], "week": [5] }
       },
       {
         "column_id": "player_rest_of_season_projected_points_added_net",
-        "params": {
-          "year": [2023],
-          "week": [5]
-        }
+        "params": { "year": [2023], "week": [5] }
       }
     ],
     "where": []
   },
   "tags": ["projections", "points-added", "joins", "period-sentinel"],
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t5320ff70eea0d9816e3d9b056ea50e23\".\"projected_points_added\" AS \"week_projected_points_added_0\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_positive\" AS \"rest_of_season_projected_points_added_0\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_net\" AS \"rest_of_season_projected_points_added_net_0\", \"player\".\"primary_position\" from \"player\" left join \"league_format_player_projection_values\" as \"t5320ff70eea0d9816e3d9b056ea50e23\" on \"t5320ff70eea0d9816e3d9b056ea50e23\".\"pid\" = \"player\".\"pid\" and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"season_year\" = 2023 and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"week\" = '5' and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"league_format_id\" = 'genesis_10_team' left join \"league_format_player_rest_of_season_projection_values\" as \"t8be81158f410f995d036370de38e2fb8\" on \"t8be81158f410f995d036370de38e2fb8\".\"pid\" = \"player\".\"pid\" and \"t8be81158f410f995d036370de38e2fb8\".\"season_year\" = 2023 and \"t8be81158f410f995d036370de38e2fb8\".\"league_format_id\" = 'genesis_10_team' group by player.first_name, player.last_name, \"t5320ff70eea0d9816e3d9b056ea50e23\".\"projected_points_added\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_positive\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_net\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t5320ff70eea0d9816e3d9b056ea50e23\".\"projected_points_added_net\" AS \"week_projected_points_added_0\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_positive\" AS \"rest_of_season_projected_points_added_0\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_net\" AS \"rest_of_season_projected_points_added_net_0\", \"player\".\"primary_position\" from \"player\" left join \"league_format_player_projection_values\" as \"t5320ff70eea0d9816e3d9b056ea50e23\" on \"t5320ff70eea0d9816e3d9b056ea50e23\".\"pid\" = \"player\".\"pid\" and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"season_year\" = 2023 and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"week\" = '5' and \"t5320ff70eea0d9816e3d9b056ea50e23\".\"league_format_id\" = 'genesis_10_team' left join \"league_format_player_rest_of_season_projection_values\" as \"t8be81158f410f995d036370de38e2fb8\" on \"t8be81158f410f995d036370de38e2fb8\".\"pid\" = \"player\".\"pid\" and \"t8be81158f410f995d036370de38e2fb8\".\"season_year\" = 2023 and \"t8be81158f410f995d036370de38e2fb8\".\"league_format_id\" = 'genesis_10_team' group by player.first_name, player.last_name, \"t5320ff70eea0d9816e3d9b056ea50e23\".\"projected_points_added_net\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_positive\", \"t8be81158f410f995d036370de38e2fb8\".\"projected_points_added_net\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
 }

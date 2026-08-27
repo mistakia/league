@@ -122,7 +122,7 @@ export async function load_player_projections({
     .whereIn('pid', player_ids)
     .where({
       season_year: year,
-      week: String(week),
+      week,
       scoring_format_id
     })
     .select('pid', 'projected_points_total')

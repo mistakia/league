@@ -34,10 +34,6 @@ const make_rule = (identity_id) => ({
       if (!source_col || !cell_ref) continue
 
       const lhs = `${ref}.${source_col}`
-      if (key === 'week' && source.week_type === 'string') {
-        builder.andOn(db.raw(`${lhs} = CAST(${cell_ref} AS VARCHAR)`))
-        continue
-      }
       if (!first_emitted) {
         builder.on(lhs, '=', cell_ref)
         first_emitted = true

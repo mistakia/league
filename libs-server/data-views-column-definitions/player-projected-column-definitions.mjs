@@ -55,8 +55,9 @@ const get_default_params = ({ params = {} }) => {
   const league_format_id = params.league_format_id || DEFAULT_LEAGUE_FORMAT_ID
   const league_id = params.league_id || 1
 
-  // Projection source (projections_index / ros_projections only). Defaults to
-  // the AVERAGE consensus so a column with no `sourceid` param is unchanged.
+  // Projection source (projections_index / rest_of_season_projections only).
+  // Defaults to the AVERAGE consensus so a column with no `sourceid` param is
+  // unchanged.
   //
   // The persisted param KEY is `sourceid` and deliberately did NOT move with the
   // COLUMN, which is now `source_id`: saved views persist the key, so renaming it
@@ -183,7 +184,6 @@ const apply_projected_join = ({
   join_table_clause,
   join_year = true,
   join_week = true,
-  cast_join_week_to_string = false,
   join_year_column = 'year',
   additional_conditions
 }) => {
@@ -191,6 +191,15 @@ const apply_projected_join = ({
     query_context
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
   const year = params.year || current_season.year
+  // `|| 0` is a SENTINEL DEFAULT and the last one in this file: a week-scoped
+  // column with no resolvable week pins the join to a week the narrowed tables
+  // can no longer hold, so it matches nothing and the column reads blank. It
+  // survives this cutover deliberately. The fix is not another default and not
+  // a throw from inside this join callback -- it is for the week-scoped sources
+  // to declare `grain: 'player_year_week'` and be admitted by source-attach
+  // resolution, with the refusal raised at the request boundary next to
+  // ColumnRowGrainMismatch. That is a data-views change, not a projection-period
+  // one; it lands in the step that follows this file's cutover.
   const week = params.week || 0
 
   players_query[join_method](join_table_clause, function () {
@@ -241,18 +250,18 @@ const apply_projected_join = ({
 
     if (join_week) {
       if (week_reference) {
-        const week_clause = cast_join_week_to_string
-          ? `CAST(${week_reference} AS VARCHAR)`
-          : week_reference
-        this.andOn(db.raw(`${table_alias}.week = ${week_clause}`))
+        // The weekly tables are smallint since the period split, so the week
+        // reference compares directly with no VARCHAR cast on either side.
+        this.andOn(db.raw(`${table_alias}.week = ${week_reference}`))
         if (params.week) {
           const week_array = Array.isArray(week)
             ? week.map(String)
             : [String(week)]
           if (week_array.length) {
-            // Bound rather than interpolated so a varchar week column gets
-            // quoted literals; the bare integer list is the same type error the
-            // cast above exists to avoid.
+            // Bound rather than interpolated: every week column these sources
+            // reach is smallint now, and a bound unknown-typed literal is
+            // inferred to it, where a hand-built literal list is a shape each
+            // retype can break silently.
             this.andOn(
               db.raw(
                 `${table_alias}.week IN (${week_array.map(() => '?').join(',')})`,
@@ -402,13 +411,6 @@ const make_league_format_player_projection_source = () => ({
       join_year: true,
       join_year_column: 'season_year',
       join_week: true,
-      // This table's week is character varying(10); week_reference is smallint,
-      // and Postgres will not compare them. It narrows to smallint with the
-      // destructive half of this cutover, at which point the flag comes off --
-      // an explicit cast to the OLD type is exactly what a varchar-to-numeric
-      // retype breaks, and it is the one shape no consumer gate can see,
-      // because the column NAME still resolves either way.
-      cast_join_week_to_string: true,
       additional_conditions() {
         this.andOn(
           `${table_alias}.league_format_id`,
@@ -471,7 +473,7 @@ const make_league_format_player_rest_of_season_projection_source =
 
 const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   grain: 'player',
-  table: is_rest_of_season ? 'ros_projections' : 'projections_index',
+  table: is_rest_of_season ? 'rest_of_season_projections' : 'projections_index',
   attach_owns_join: true,
   // season_year, not year -- see select-string.mjs's source.key_columns.year
   // read (generic year_offset_range correlated-subquery path re-scans
@@ -480,8 +482,9 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
     const { seas_type, week, source_id } = get_default_params({ params })
-    // ros_projections is keyed (source_id, pid, year) — no week/seas_type
-    // discriminator — so the rest-of-season subquery pins source_id only.
+    // rest_of_season_projections is keyed (source_id, pid, year) — no
+    // week/seas_type discriminator — so the rest-of-season subquery pins
+    // source_id only.
     if (is_rest_of_season) {
       return [{ column: 'source_id', value: source_id }]
     }
@@ -497,7 +500,7 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { seas_type, nfl_week, source_id } = get_default_params({ params })
     const join_table_clause = is_rest_of_season
-      ? `ros_projections as ${table_alias}`
+      ? `rest_of_season_projections as ${table_alias}`
       : `projections_index as ${table_alias}`
     apply_projected_join({
       query_context,
@@ -535,7 +538,7 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
 // --- Projected fantasy points in-query scorer ------------------------------
 //
 // player_projected_points computes its value from the projections_index /
-// ros_projections raw-stat row using the selected scoring format's weights,
+// rest_of_season_projections raw-stat row using the selected scoring format's weights,
 // faithfully mirroring calculatePoints({ use_projected_stats: true }) in
 // #libs-shared/calculate-points.mjs.
 //
@@ -688,7 +691,7 @@ const projection_points_year_offset_range_sql = ({
     data_view_options
   })
   const inner_table = is_rest_of_season
-    ? 'ros_projections'
+    ? 'rest_of_season_projections'
     : 'projections_index'
 
   const expression = projection_fantasy_points_sql({
@@ -717,7 +720,7 @@ const projection_points_year_offset_range_sql = ({
     year_predicate,
     `${inner_table}.source_id = ${source_id}`
   ]
-  // ros_projections carries no week / seas_type discriminator.
+  // rest_of_season_projections carries no week / seas_type discriminator.
   if (!is_rest_of_season) {
     predicates.push(`${inner_table}.week = ${week}`)
     predicates.push(`${inner_table}.season_type = '${seas_type}'`)
@@ -776,7 +779,7 @@ const league_format_rest_of_season_alias =
 // rest-of-season.
 const league_format_period_column_definitions = {
   player_week_projected_points_added: make_league_format_projection_column({
-    column_name: 'projected_points_added',
+    column_name: 'projected_points_added_net',
     select_as: 'week_projected_points_added',
     table_alias: league_format_player_projection_values_table_alias,
     source: make_league_format_player_projection_source()
@@ -873,7 +876,7 @@ const player_projected_points_added_including_cap_savings_periods = {
 }
 
 // Projected fantasy points are computed in-query from the projections_index /
-// ros_projections raw-stat row (reusing the sourceid-keyed alias + source built
+// rest_of_season_projections raw-stat row (reusing the sourceid-keyed alias + source built
 // for the raw-stat columns), so points honor the source_id projection-source
 // param and stay self-consistent with the raw-stat columns. See task
 // projected-points-in-query-scoring-source-selection.
@@ -885,7 +888,7 @@ const player_projected_points = {
   register_ctes: register_projection_scoring_format,
   // Bound per prefix by create_projected_stat: main_select needs the
   // prefix-correct select alias; the year_offset override needs the
-  // prefix-correct table (projections_index vs ros_projections).
+  // prefix-correct table (projections_index vs rest_of_season_projections).
   method_factories: {
     main_select:
       ({ select_as }) =>

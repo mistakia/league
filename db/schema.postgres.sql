@@ -222,13 +222,13 @@ DROP INDEX IF EXISTS public.idx_rosters_tid_week_season_year;
 DROP INDEX IF EXISTS public.idx_rosters_tid;
 DROP INDEX IF EXISTS public.idx_rosters_players_season_year_week_lid_pid;
 DROP INDEX IF EXISTS public.idx_rosters_players_rid;
-DROP INDEX IF EXISTS public.idx_ros_projections_pid;
 DROP INDEX IF EXISTS public.idx_rfa_bids_lid_season_year_active;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_releases_bid_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_nominations_league_season;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_nominations_identity;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_nomination_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
+DROP INDEX IF EXISTS public.idx_rest_of_season_projections_pid;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_season_year_season_type_week;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
@@ -781,11 +781,11 @@ DROP TABLE IF EXISTS public.roster_asset_transformation;
 DROP TABLE IF EXISTS public.roster_asset_lineage_refresh_state;
 DROP SEQUENCE IF EXISTS public.roster_asset_holding_holding_id_seq;
 DROP TABLE IF EXISTS public.roster_asset_holding;
-DROP TABLE IF EXISTS public.ros_projections;
 DROP TABLE IF EXISTS public.restricted_free_agency_releases;
 DROP TABLE IF EXISTS public.restricted_free_agency_nominations;
 DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_bid_id_seq;
 DROP TABLE IF EXISTS public.restricted_free_agency_bids;
+DROP TABLE IF EXISTS public.rest_of_season_projections;
 DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
 DROP TABLE IF EXISTS public.props_index;
 DROP TABLE IF EXISTS public.props;
@@ -4225,13 +4225,14 @@ CREATE TABLE public.keeptradecut_valuations (
 
 CREATE TABLE public.league_baselines (
     lid integer NOT NULL,
-    week character varying(3) NOT NULL,
+    week smallint NOT NULL,
     season_year smallint,
     pid character varying(25),
     type character varying(10) NOT NULL,
     player_position character varying(4) NOT NULL,
     points numeric(6,2),
-    CONSTRAINT league_baselines_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT league_baselines_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
+    CONSTRAINT league_baselines_week_is_fantasy_week CHECK (((week >= 1) AND (week <= 18)))
 );
 
 
@@ -4328,11 +4329,11 @@ CREATE TABLE public.league_format_player_gamelogs (
 
 CREATE TABLE public.league_format_player_projection_values (
     pid character varying(25) NOT NULL,
-    week character varying(10) NOT NULL,
+    week smallint NOT NULL,
     season_year smallint NOT NULL,
-    projected_points_added numeric(7,2),
-    market_salary numeric(6,2),
-    league_format_id text NOT NULL
+    projected_points_added_net numeric(7,2),
+    league_format_id text NOT NULL,
+    CONSTRAINT league_format_player_projection_values_week_is_fantasy_week CHECK (((week >= 1) AND (week <= 18)))
 );
 
 
@@ -4343,12 +4344,12 @@ CREATE TABLE public.league_format_player_projection_values (
 CREATE TABLE public.league_format_player_projection_values_history (
     pid character varying(25) NOT NULL,
     league_format_id text NOT NULL,
-    week character varying(10) NOT NULL,
+    week smallint NOT NULL,
     season_year smallint NOT NULL,
-    projected_points_added numeric(7,2),
-    market_salary numeric(6,2),
+    projected_points_added_net numeric(7,2),
     is_removed boolean DEFAULT false NOT NULL,
-    observed_at timestamp with time zone NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    CONSTRAINT lf_player_projection_values_history_week_is_fantasy_week CHECK (((week >= 1) AND (week <= 18)))
 );
 
 
@@ -26557,6 +26558,53 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 
 
 --
+-- Name: rest_of_season_projections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.rest_of_season_projections (
+    pid character varying(25),
+    source_id integer NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_year smallint
+);
+
+
+--
 -- Name: restricted_free_agency_bids; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -26636,53 +26684,6 @@ ALTER TABLE public.restricted_free_agency_nominations ALTER COLUMN nomination_id
 CREATE TABLE public.restricted_free_agency_releases (
     restricted_free_agency_bid_id integer NOT NULL,
     pid character varying(25)
-);
-
-
---
--- Name: ros_projections; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ros_projections (
-    pid character varying(25),
-    source_id integer NOT NULL,
-    passing_attempts numeric(5,1),
-    passing_completions numeric(5,1),
-    passing_yards numeric(5,1),
-    passing_interceptions numeric(3,1),
-    passing_touchdowns numeric(3,1),
-    rushing_attempts numeric(4,1),
-    rushing_yards numeric(5,1),
-    rushing_touchdowns numeric(3,1),
-    targets numeric(4,1),
-    receptions numeric(4,1),
-    receiving_yards numeric(5,1),
-    receiving_touchdowns numeric(3,1),
-    fumbles_lost numeric(3,1),
-    two_point_conversions numeric(3,1),
-    field_goals_made numeric(4,1),
-    field_goal_yards integer DEFAULT 0,
-    field_goals_made_0_19_yards numeric(3,1),
-    field_goals_made_20_29_yards numeric(3,1),
-    field_goals_made_30_39_yards numeric(3,1),
-    field_goals_made_40_49_yards numeric(3,1),
-    field_goals_made_50_plus_yards numeric(3,1),
-    extra_points_made numeric(3,1),
-    defensive_sacks numeric(4,1),
-    defensive_interceptions numeric(4,1),
-    defensive_forced_fumbles numeric(4,1),
-    defensive_recovered_fumbles numeric(4,1),
-    defensive_three_and_outs numeric(4,1),
-    defensive_fourth_down_stops numeric(4,1),
-    defensive_points_against numeric(4,1),
-    defensive_yards_against numeric(5,1),
-    defensive_blocked_kicks numeric(4,1),
-    defensive_safeties numeric(4,1),
-    defensive_two_point_returns numeric(4,1),
-    defensive_touchdowns numeric(4,1),
-    kickoff_return_touchdowns numeric(4,1),
-    punt_return_touchdowns numeric(4,1),
-    season_year smallint
 );
 
 
@@ -27006,10 +27007,11 @@ CREATE TABLE public.scoring_format_player_gamelogs (
 
 CREATE TABLE public.scoring_format_player_projection_points (
     pid character varying(25) NOT NULL,
-    week character varying(3) NOT NULL,
+    week smallint NOT NULL,
     season_year smallint NOT NULL,
     projected_points_total numeric(5,2),
-    scoring_format_id text NOT NULL
+    scoring_format_id text NOT NULL,
+    CONSTRAINT scoring_format_player_projection_points_week_is_fantasy_week CHECK (((week >= 1) AND (week <= 18)))
 );
 
 
@@ -31234,7 +31236,7 @@ CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id,
 -- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (source_id, pid, season_year);
+CREATE UNIQUE INDEX idx_24990_sourceid ON public.rest_of_season_projections USING btree (source_id, pid, season_year);
 
 
 --
@@ -32666,6 +32668,13 @@ CREATE INDEX idx_props_index_hits_soft ON public.props_index USING btree (hits_s
 
 
 --
+-- Name: idx_rest_of_season_projections_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rest_of_season_projections_pid ON public.rest_of_season_projections USING btree (pid);
+
+
+--
 -- Name: idx_restricted_free_agency_bids_lid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32705,13 +32714,6 @@ CREATE INDEX idx_restricted_free_agency_releases_bid_id ON public.restricted_fre
 --
 
 CREATE INDEX idx_rfa_bids_lid_season_year_active ON public.restricted_free_agency_bids USING btree (lid, season_year) WHERE (cancelled IS NULL);
-
-
---
--- Name: idx_ros_projections_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_ros_projections_pid ON public.ros_projections USING btree (pid);
 
 
 --
@@ -60696,6 +60698,13 @@ GRANT SELECT ON SEQUENCE public.props_index_prop_id_seq TO league_reader;
 
 
 --
+-- Name: TABLE rest_of_season_projections; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.rest_of_season_projections TO league_reader;
+
+
+--
 -- Name: TABLE restricted_free_agency_bids; Type: ACL; Schema: public; Owner: -
 --
 
@@ -60728,13 +60737,6 @@ GRANT SELECT ON SEQUENCE public.restricted_free_agency_nominations_nomination_id
 --
 
 GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_reader;
-
-
---
--- Name: TABLE ros_projections; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.ros_projections TO league_reader;
 
 
 --

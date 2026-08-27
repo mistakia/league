@@ -18,7 +18,8 @@ enable_debug_namespaces('process-projections-for-scoring-format')
 
 // Re-derive the three scoring-format projected-points tables for one
 // (scoring_format, year) slice entirely from the authoritative projections_index
-// / ros_projections AVERAGE rows. This is the SINGLE source-of-truth path shared
+// / rest_of_season_projections AVERAGE rows. This is the SINGLE source-of-truth
+// path shared
 // by the 30-min process-projections cron and the ad-hoc / reconciliation
 // backfill, so the precomputed cache can never silently drift from
 // projections_index: delete each period's (format, year) slice and reinsert
@@ -41,7 +42,7 @@ export const process_scoring_format_year = async ({
     season_type: 'REG',
     source_id: external_data_sources.AVERAGE
   })
-  const ros_projections = await db('ros_projections').where({
+  const ros_projections = await db('rest_of_season_projections').where({
     season_year: year,
     source_id: external_data_sources.AVERAGE
   })

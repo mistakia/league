@@ -126,8 +126,8 @@ const process_league_format_year = async ({
   // period rows per player and the oracle stays quiet. The period split makes
   // that filter structural rather than a predicate on the week key.
   const real_value_count = weekly_value_inserts.filter(
-    ({ projected_points_added }) =>
-      projected_points_added !== default_points_added
+    ({ projected_points_added_net }) =>
+      projected_points_added_net !== default_points_added
   ).length
   log(
     `year ${year}: ${source_point_row_count} scoring-format point rows in, ` +

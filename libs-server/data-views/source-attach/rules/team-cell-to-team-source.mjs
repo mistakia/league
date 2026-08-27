@@ -36,12 +36,7 @@ const emit_team_year_predicate = ({
     })
   }
   if (include_week && key_columns.week && week_reference) {
-    const week_col = `${ref}.${key_columns.week}`
-    if (source.week_type === 'string') {
-      builder.andOn(db.raw(`${week_col} = CAST(${week_reference} AS VARCHAR)`))
-    } else {
-      builder.andOn(week_col, '=', week_reference)
-    }
+    builder.andOn(`${ref}.${key_columns.week}`, '=', week_reference)
   }
 }
 

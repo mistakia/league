@@ -421,17 +421,17 @@ export default async function ({
     // a share of the discretionary cap for the year -- so a per-week one was
     // never a useful number, and it is dropped rather than repointed.
     const weekly_values = await db('league_format_player_projection_values')
-      .select('pid', 'week', 'projected_points_added')
+      .select('pid', 'week', 'projected_points_added_net')
       .where({
         league_format_id,
         season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const { pid, week, projected_points_added } of weekly_values) {
-      // The COLUMN is projected_points_added; the in-memory player property
+    for (const { pid, week, projected_points_added_net } of weekly_values) {
+      // The COLUMN is projected_points_added_net; the in-memory player property
       // stays `pts_added` -- it is the API shape the SPA reads.
-      players_by_pid[pid].pts_added[week] = projected_points_added
+      players_by_pid[pid].pts_added[week] = projected_points_added_net
     }
 
     const period_tables = [
@@ -551,7 +551,7 @@ export default async function ({
     // projections data source publishes REG-only; POST projections intentionally omitted
     // (see user:task/league/close-reg-post-week-encoding-gaps.md Out of Scope)
     .where('season_type', 'REG')
-  const rest_of_season_projections = await db('ros_projections')
+  const rest_of_season_projections = await db('rest_of_season_projections')
     .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
     .whereIn('pid', returnedPlayerIds)

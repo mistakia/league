@@ -1553,7 +1553,7 @@ export interface KeeptradecutValuationsRow {
 
 export interface LeagueBaselinesRow {
   lid: number
-  week: string
+  week: number
   season_year: number | null
   pid: string | null
   type: string
@@ -1618,20 +1618,18 @@ export interface LeagueFormatPlayerGamelogsRow {
 
 export interface LeagueFormatPlayerProjectionValuesRow {
   pid: string
-  week: string
+  week: number
   season_year: number
-  projected_points_added: number | null
-  market_salary: number | null
+  projected_points_added_net: number | null
   league_format_id: string
 }
 
 export interface LeagueFormatPlayerProjectionValuesHistoryRow {
   pid: string
   league_format_id: string
-  week: string
+  week: number
   season_year: number
-  projected_points_added: number | null
-  market_salary: number | null
+  projected_points_added_net: number | null
   is_removed: boolean
   observed_at: Date
 }
@@ -20866,41 +20864,7 @@ export interface PropsIndexRow {
   prop_id: number
 }
 
-export interface RestrictedFreeAgencyBidsRow {
-  bid_id: number
-  pid: string | null
-  user_id: number
-  bid_amount: number | null
-  tid: number
-  season_year: number | null
-  lid: number
-  is_successful: boolean | null
-  submitted: Date
-  processed: Date | null
-  cancelled: Date | null
-  nomination_id: number | null
-  outcome: string | null
-  outcome_detail: string | null
-}
-
-export interface RestrictedFreeAgencyNominationsRow {
-  nomination_id: number
-  league_id: number
-  player_id: string
-  season_year: number
-  original_team_id: number
-  nominated_at: Date | null
-  announced_at: Date | null
-  processed_at: Date | null
-  winning_bid_id: number | null
-}
-
-export interface RestrictedFreeAgencyReleasesRow {
-  restricted_free_agency_bid_id: number
-  pid: string | null
-}
-
-export interface RosProjectionsRow {
+export interface RestOfSeasonProjectionsRow {
   pid: string | null
   source_id: number
   passing_attempts: number | null
@@ -20940,6 +20904,40 @@ export interface RosProjectionsRow {
   kickoff_return_touchdowns: number | null
   punt_return_touchdowns: number | null
   season_year: number | null
+}
+
+export interface RestrictedFreeAgencyBidsRow {
+  bid_id: number
+  pid: string | null
+  user_id: number
+  bid_amount: number | null
+  tid: number
+  season_year: number | null
+  lid: number
+  is_successful: boolean | null
+  submitted: Date
+  processed: Date | null
+  cancelled: Date | null
+  nomination_id: number | null
+  outcome: string | null
+  outcome_detail: string | null
+}
+
+export interface RestrictedFreeAgencyNominationsRow {
+  nomination_id: number
+  league_id: number
+  player_id: string
+  season_year: number
+  original_team_id: number
+  nominated_at: Date | null
+  announced_at: Date | null
+  processed_at: Date | null
+  winning_bid_id: number | null
+}
+
+export interface RestrictedFreeAgencyReleasesRow {
+  restricted_free_agency_bid_id: number
+  pid: string | null
 }
 
 export interface RosterAssetHoldingRow {
@@ -21053,7 +21051,7 @@ export interface ScoringFormatPlayerGamelogsRow {
 
 export interface ScoringFormatPlayerProjectionPointsRow {
   pid: string
-  week: string
+  week: number
   season_year: number
   projected_points_total: number | null
   scoring_format_id: string

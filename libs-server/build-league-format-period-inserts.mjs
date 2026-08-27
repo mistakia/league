@@ -69,7 +69,9 @@ const build_league_format_period_inserts = ({
     const pts_added = player_row.pts_added || {}
     const market_salary = player_row.market_salary || {}
 
-    for (const [week, projected_points_added] of Object.entries(pts_added)) {
+    for (const [week, projected_points_added_net] of Object.entries(
+      pts_added
+    )) {
       // `!Number(week)` drops the season week key (0) and every named aggregate
       // key (NaN) in one test. This is the guard whose absence let 'ros' and
       // 'ros_net' reach the week column.
@@ -82,10 +84,11 @@ const build_league_format_period_inserts = ({
         week,
         // Shorthand would key this `pts_added`, which is not the column.
         // `player_row.pts_added` is the in-memory aggregate map and keeps its
-        // name; the COLUMN is projected_points_added. The write is
-        // delete-then-reinsert, so an unknown key here empties the table.
-        projected_points_added,
-        market_salary: market_salary[week] ?? null
+        // name; the COLUMN is projected_points_added_net (a per-week points
+        // added is one signed number, so it is the net variant). The write is
+        // delete-then-reinsert, so an unknown key here empties the table. The
+        // weekly market salary is gone -- a price is a season-context quantity.
+        projected_points_added_net
       })
     }
 

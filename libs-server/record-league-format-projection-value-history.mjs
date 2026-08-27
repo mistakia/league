@@ -18,9 +18,10 @@ const log = debug('record-league-format-projection-value-history')
 // period split exists to remove. Operator ruling 2026-08-26.
 const WEEKLY = {
   table: 'league_format_player_projection_values_history',
-  // (pid, week): many weeks per player, one row per week.
+  // (pid, week): many weeks per player, one row per week. The weekly history
+  // records the single signed net value; the weekly market salary is gone.
   grain_columns: ['pid', 'week'],
-  value_columns: ['projected_points_added', 'market_salary']
+  value_columns: ['projected_points_added_net']
 }
 
 const REST_OF_SEASON = {
@@ -87,11 +88,10 @@ const record_period_history = async ({
   for (const value_row of value_rows) {
     const grain = {}
     for (const column of grain_columns) {
-      // `week` is character varying on the weekly table, so a numeric week has
-      // to arrive as its string spelling or it compares unequal to the stored
-      // one and every run reads as a change.
-      grain[column] =
-        column === 'week' ? String(value_row[column]) : value_row[column]
+      // week is smallint on the weekly table now; the raw value passes through
+      // unchanged. The grain_key below stringifies it for the change-detection
+      // map regardless.
+      grain[column] = value_row[column]
     }
 
     const key = grain_key({ row: grain, grain_columns })
@@ -191,7 +191,7 @@ const record_period_history = async ({
  * @param {string} params.league_format_id
  * @param {number} params.year
  * @param {Array<object>} params.weekly_value_rows - { pid, week,
- *   projected_points_added, market_salary }
+ *   projected_points_added_net }
  * @param {Array<object>} params.rest_of_season_value_rows - { pid,
  *   projected_points_added_positive, projected_points_added_net,
  *   market_salary_positive, market_salary_net }

@@ -24,13 +24,7 @@ const ALLEN = 'JOSH-ALLE-005788'
 const read_week_as_of = async ({ league_format_id, observed_at }) =>
   knex(WEEK_TABLE)
     .distinctOn('pid', 'week')
-    .select(
-      'pid',
-      'week',
-      'projected_points_added',
-      'market_salary',
-      'is_removed'
-    )
+    .select('pid', 'week', 'projected_points_added_net', 'is_removed')
     .where({ league_format_id, season_year: YEAR })
     .where('observed_at', '<=', observed_at)
     .orderBy([
@@ -54,11 +48,10 @@ const read_rest_of_season_as_of = async ({ league_format_id, observed_at }) =>
     .where('observed_at', '<=', observed_at)
     .orderBy([{ column: 'pid' }, { column: 'observed_at', order: 'desc' }])
 
-const week_row = (pid, week, projected_points_added, market_salary) => ({
+const week_row = (pid, week, projected_points_added_net) => ({
   pid,
   week,
-  projected_points_added,
-  market_salary
+  projected_points_added_net
 })
 
 const rest_of_season_row = (
@@ -113,8 +106,8 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     const result = await record({
       observed_at,
       weekly_value_rows: [
-        week_row(MAHOMES, '1', 2.25, 4),
-        week_row(MAHOMES, '2', 3.5, 5)
+        week_row(MAHOMES, '1', 2.25),
+        week_row(MAHOMES, '2', 3.5)
       ],
       rest_of_season_value_rows: [
         rest_of_season_row(MAHOMES, 42.5, 38.25, 31, 29)
@@ -140,7 +133,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
   })
 
   it('writes nothing when values are unchanged', async () => {
-    const weekly_value_rows = [week_row(MAHOMES, '1', 2.25, 4)]
+    const weekly_value_rows = [week_row(MAHOMES, '1', 2.25)]
     const rest_of_season_value_rows = [
       rest_of_season_row(MAHOMES, 42.5, 38.25, 31, 29)
     ]
@@ -192,17 +185,14 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
   it('appends only the grains that actually changed', async () => {
     await record({
       weekly_value_rows: [
-        week_row(MAHOMES, '1', 42.5, 31),
-        week_row(ALLEN, '1', 40, 29)
+        week_row(MAHOMES, '1', 42.5),
+        week_row(ALLEN, '1', 40)
       ],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
 
     const result = await record({
-      weekly_value_rows: [
-        week_row(MAHOMES, '1', 44, 33),
-        week_row(ALLEN, '1', 40, 29)
-      ],
+      weekly_value_rows: [week_row(MAHOMES, '1', 44), week_row(ALLEN, '1', 40)],
       observed_at: new Date('2026-07-02T04:00:00Z')
     })
 
@@ -258,8 +248,8 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
   it('tombstones a dropped grain in its OWN period, and only there', async () => {
     await record({
       weekly_value_rows: [
-        week_row(MAHOMES, '1', 2.25, 4),
-        week_row(ALLEN, '1', 1.5, 3)
+        week_row(MAHOMES, '1', 2.25),
+        week_row(ALLEN, '1', 1.5)
       ],
       rest_of_season_value_rows: [
         rest_of_season_row(MAHOMES, 42.5, 38.25, 31, 29),
@@ -271,8 +261,8 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     // Allen leaves the rest-of-season set and STAYS in the weekly one.
     const result = await record({
       weekly_value_rows: [
-        week_row(MAHOMES, '1', 2.25, 4),
-        week_row(ALLEN, '1', 1.5, 3)
+        week_row(MAHOMES, '1', 2.25),
+        week_row(ALLEN, '1', 1.5)
       ],
       rest_of_season_value_rows: [
         rest_of_season_row(MAHOMES, 42.5, 38.25, 31, 29)
@@ -299,12 +289,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     })
     const still_weekly = weekly.find((row) => row.pid === ALLEN)
     expect(still_weekly.is_removed).to.equal(false)
-    expect(Number(still_weekly.market_salary)).to.equal(3)
+    expect(Number(still_weekly.projected_points_added_net)).to.equal(1.5)
   })
 
   it('does not re-tombstone an already-removed grain', async () => {
     await record({
-      weekly_value_rows: [week_row(ALLEN, '1', 40, 29)],
+      weekly_value_rows: [week_row(ALLEN, '1', 40)],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
     await record({ observed_at: new Date('2026-07-02T04:00:00Z') })
@@ -323,7 +313,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
 
   it('records a grain returning after removal', async () => {
     await record({
-      weekly_value_rows: [week_row(ALLEN, '1', 40, 29)],
+      weekly_value_rows: [week_row(ALLEN, '1', 40)],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
     await record({ observed_at: new Date('2026-07-02T04:00:00Z') })
@@ -331,7 +321,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     // Same values as before the removal. A naive value-only comparison against the
     // last non-removed row would suppress this, leaving the grain tombstoned forever.
     const result = await record({
-      weekly_value_rows: [week_row(ALLEN, '1', 40, 29)],
+      weekly_value_rows: [week_row(ALLEN, '1', 40)],
       observed_at: new Date('2026-07-03T04:00:00Z')
     })
 
@@ -341,12 +331,13 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       observed_at: new Date('2026-07-04T00:00:00Z')
     })
     expect(as_of[0].is_removed).to.equal(false)
-    expect(Number(as_of[0].market_salary)).to.equal(29)
+    expect(Number(as_of[0].projected_points_added_net)).to.equal(40)
   })
 
-  it('handles a null market_salary without churning', async () => {
-    // Non-auction formats (pricing_model !== 'auction') write market_salary null.
-    const weekly_value_rows = [week_row(MAHOMES, '1', 42.5, null)]
+  it('handles a null projected_points_added_net without churning', async () => {
+    // A NULL value column is an observed state and must not read back as a
+    // change and churn a history row every run.
+    const weekly_value_rows = [week_row(MAHOMES, '1', 42.5)]
 
     await record({
       weekly_value_rows,

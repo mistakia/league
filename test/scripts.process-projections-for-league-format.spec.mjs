@@ -140,13 +140,13 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // different TABLE rather than a week-key predicate, so the exclusion can no
     // longer be got wrong.
     const rows = await knex(VALUES_TABLE)
-      .select('projected_points_added')
+      .select('projected_points_added_net')
       .where({ league_format_id, season_year: YEAR })
 
     expect(rows.length).to.be.greaterThan(0)
 
     const non_sentinel = rows.filter(
-      (row) => Number(row.projected_points_added) !== default_points_added
+      (row) => Number(row.projected_points_added_net) !== default_points_added
     )
     expect(
       non_sentinel.length,
@@ -207,7 +207,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   // denominator is nonzero, and none of them reach get_player_week_total.
   it('refuses to write, and preserves stored values, when points exist but no value is usable', async () => {
     const before_rows = await knex(VALUES_TABLE)
-      .select('pid', 'week', 'projected_points_added')
+      .select('pid', 'week', 'projected_points_added_net')
       .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(before_rows.length).to.be.greaterThan(0)
@@ -232,7 +232,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // The write is delete-then-reinsert, so the point of aborting before it is
     // that the prior year survives intact.
     const after_rows = await knex(VALUES_TABLE)
-      .select('pid', 'week', 'projected_points_added')
+      .select('pid', 'week', 'projected_points_added_net')
       .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(after_rows).to.deep.equal(before_rows)

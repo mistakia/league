@@ -144,7 +144,7 @@ const run_season_forecast = async (lid) => {
 }
 
 // The AVERAGE (source_id 18) consensus is deliberately CURRENT-STATE ONLY. It is
-// written to projections_index (and ros_projections) and NOT to
+// written to projections_index (and rest_of_season_projections) and NOT to
 // projections_history. This is a decision, not an oversight: giving it a real
 // generated_at at the hourly cadence this script runs at would append ~184M
 // rows/year to projections_history, and the consensus is exactly derivable from
@@ -286,7 +286,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     await batch_insert({
       items: rosProjectionInserts,
       save: (items) =>
-        db('ros_projections')
+        db('rest_of_season_projections')
           .insert(items)
           .onConflict(['source_id', 'pid', 'season_year'])
           .merge(),

@@ -143,9 +143,7 @@ export async function load_bench_players_with_fallback({
         'scoring_format_player_projection_points.pid'
       )
         .andOn(
-          db.raw('scoring_format_player_projection_points.week = ?', [
-            String(week)
-          ])
+          db.raw('scoring_format_player_projection_points.week = ?', [week])
         )
         .andOn(
           db.raw('scoring_format_player_projection_points.season_year = ?', [
@@ -188,7 +186,7 @@ export async function load_bench_players_with_fallback({
       )
         .whereIn('pid', missing_projection_pids)
         .where({
-          week: String(fallback_week),
+          week: fallback_week,
           season_year: year,
           scoring_format_id
         })
@@ -272,9 +270,7 @@ export async function load_bench_player_ids({
         'scoring_format_player_projection_points.pid'
       )
         .andOn(
-          db.raw('scoring_format_player_projection_points.week = ?', [
-            String(week)
-          ])
+          db.raw('scoring_format_player_projection_points.week = ?', [week])
         )
         .andOn(
           db.raw('scoring_format_player_projection_points.season_year = ?', [

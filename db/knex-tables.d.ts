@@ -294,10 +294,10 @@ import type {
   PropPairingsRow,
   PropsRow,
   PropsIndexRow,
+  RestOfSeasonProjectionsRow,
   RestrictedFreeAgencyBidsRow,
   RestrictedFreeAgencyNominationsRow,
   RestrictedFreeAgencyReleasesRow,
-  RosProjectionsRow,
   RosterAssetHoldingRow,
   RosterAssetLineageRefreshStateRow,
   RosterAssetTransformationRow,
@@ -612,10 +612,10 @@ declare module 'knex/types/tables' {
     prop_pairings: PropPairingsRow
     props: PropsRow
     props_index: PropsIndexRow
+    rest_of_season_projections: RestOfSeasonProjectionsRow
     restricted_free_agency_bids: RestrictedFreeAgencyBidsRow
     restricted_free_agency_nominations: RestrictedFreeAgencyNominationsRow
     restricted_free_agency_releases: RestrictedFreeAgencyReleasesRow
-    ros_projections: RosProjectionsRow
     roster_asset_holding: RosterAssetHoldingRow
     roster_asset_lineage_refresh_state: RosterAssetLineageRefreshStateRow
     roster_asset_transformation: RosterAssetTransformationRow
