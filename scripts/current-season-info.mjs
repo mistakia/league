@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
 import { current_season } from '#constants'
+import {
+  current_nfl_week_identifier,
+  last_completed_nfl_week_identifier
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 console.log('=== Current Season Information ===\n')
 
@@ -11,7 +15,18 @@ console.log(`  Fantasy Season Week: ${current_season.fantasy_season_week}`)
 console.log(`  NFL Season Week: ${current_season.nfl_seas_week}`)
 console.log(`  NFL Season Type: ${current_season.nfl_seas_type}`)
 console.log(`  Last Week with Stats: ${current_season.last_week_with_stats}`)
-console.log(`  Stats Season Year: ${current_season.last_completed_season_year}`)
+
+// The pair, side by side. They are EQUAL during the season and a whole season
+// apart for the six offseason months, so printing one without the other is how
+// a caller reaches for the wrong half and never notices.
+console.log('\nCurrent / Last Completed:')
+console.log(
+  `  Season:  ${current_season.year}  |  ${current_season.last_completed_season_year}`
+)
+console.log(
+  `  Week:    ${current_nfl_week_identifier()}  |  ${last_completed_nfl_week_identifier()}`
+)
+console.log('  (left = in play or next up, right = has results)')
 
 console.log('\nSeason Status:')
 console.log(`  Is Offseason: ${current_season.is_offseason}`)

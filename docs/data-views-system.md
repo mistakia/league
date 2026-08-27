@@ -385,10 +385,17 @@ The same transformation runs in the browser on localStorage snapshot restoration
 
 **Dynamic nfl_week_id Values** (resolved at query time):
 
-- `{ dynamic_type: "current_nfl_week" }` → Current NFL week identifier (e.g., `2024_REG_WEEK_5`)
-- `{ dynamic_type: "last_n_nfl_weeks", value: 5 }` → Last 5 NFL week identifiers
-- `{ dynamic_type: "last_n_nfl_years", value: 3 }` → All week identifiers for the last 3 NFL years
-- `{ dynamic_type: "next_n_nfl_years", value: 1 }` → All week identifiers for the next 1 NFL year
+All five resolve through ONE function, `resolve_nfl_week_dynamic_value` in `libs-shared/nfl-week-dynamic-values.mjs`, shared by the server expander, the client notice preview, the filter-chip label and the single-week resolver. It THROWS on an unrecognized type rather than answering an empty list — an unresolvable dynamic that still reads as an explicit time scope leaves the row axis unbounded, which is a fan-out with a correct-looking result set.
+
+Half of these are forward-looking and half retrospective, and the two halves differ only during the six offseason months:
+
+- `{ dynamic_type: "current_nfl_week" }` → the week in play or next up, anchored on `current_season.year` (e.g. `2024_REG_WEEK_5`; `<year>_REG_WEEK_1` in the offseason)
+- `{ dynamic_type: "last_completed_nfl_week" }` → one step back from that, anchored on `current_season.last_completed_season_year` (`<year-1>_POST_WEEK_4` in the offseason)
+- `{ dynamic_type: "current_year_reg_weeks" }` → every REG week of `current_season.year`, the season in play or about to start
+- `{ dynamic_type: "last_n_nfl_weeks", value: 5 }` → the last 5 week identifiers, walking backwards across the season boundary
+- `{ dynamic_type: "last_n_nfl_years", value: 3 }` → all week identifiers for the last 3 COMPLETED NFL years
+
+`next_n_nfl_years` was documented here and has never existed in any resolver. It now throws rather than resolving to nothing.
 
 **Centralized Preprocessing** (`resolve_nfl_week_params` in `get-data-view-results.mjs`):
 
@@ -1522,9 +1529,10 @@ Writers that touch week-scoped rows in tables lacking a source-driven `seas_type
 
 Canonical helpers live in `libs-shared/nfl-week-identifier.mjs`:
 
-- `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `last_completed_season_year`.
+- `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `current_season.year`. The FORWARD-looking half: the week in play or the next one up. It took its year from `last_completed_season_year` until 2026-08-27, which composed an identifier out of two different seasons and served the prior year's week 1 for the whole offseason.
+- `last_completed_nfl_week_params()` / `last_completed_nfl_week_identifier()` → the retrospective half, defined as one step back. Its year equals `current_season.last_completed_season_year`, which is the invariant pinning the pair (it holds everywhere except during live REG week 1, where the season getter reads ahead).
 - `current_nfl_week_identifier()` → formatted `nfl_week_id` string.
-- `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary. Returns `null` when stepping before REG week 1 of the current year. Throws on positive offsets.
+- `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary AND the season boundary: REG week 1 of year Y steps back to POST week 4 of Y-1. Returns `null` only below `MIN_YEAR` (2000). Throws on positive offsets. It used to stop dead at REG week 1, which truncated every `last_n_nfl_weeks` list to a single week for the whole offseason.
 - `reference_week_fallback_params()` → `{ prior_params, fallback_params }` (or `null`). Used by reserve / gamelog reference-week joins that need a one-week bye fallback; `fallback_params` is two-weeks-prior when it exists, else `prior_params`.
 
 Server code must never reconstruct identifiers locally. Column-def "current" fallbacks choose one of two choke-points:
@@ -1657,7 +1665,7 @@ Current notice codes:
 | `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                      |
 | `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key. |
 
-Rule #2 includes a minimal client-side resolver for the `nfl_week_id` `dynamic_type` values that `process_dynamic_params` handles server-side (`current_year_reg_weeks`, `current_nfl_week`, `last_n_nfl_weeks`, `last_n_nfl_years`); other dynamic types skip the check rather than risk false positives.
+Rule #2 resolves `nfl_week_id` `dynamic_type` values through the SAME `resolve_nfl_week_dynamic_value` the server expander uses, so the notice and the query cannot describe different spans — they did, before the consolidation, because the client anchored `last_n_nfl_years` on the last completed season and the server on the current one. Params other than `nfl_week_id` still skip the check rather than risk false positives.
 
 ### File map
 

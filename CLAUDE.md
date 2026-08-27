@@ -148,6 +148,8 @@ From `libs-shared/constants/season-constants.mjs`:
 
 Every member of `current_season` is snake_case, and every clock-dependent one is a GETTER. Read them off the object at the point of use; never copy one into a module-level const, which freezes it at import and never moves again.
 
+**Two week concepts, and they are a whole season apart for half the year.** The CURRENT week is the one in play or next up (`current_season.year`, `current_nfl_week_params()`); the LAST COMPLETED week is the most recent one with results (`current_season.last_completed_season_year`, `last_completed_nfl_week_params()`). They are equal during the season and differ for the six offseason months, so reaching for the wrong half is invisible from August to February and then silently serves the prior season. Anything forward-looking — salaries, projections, betting markets, practice reports, schedules — wants the current half.
+
 Never reconstruct an `nfl_week_id` locally — use the canonical helpers in `libs-shared/nfl-week-identifier.mjs`. See `docs/data-views-system.md` for the choke-point rules, and [docs/guides/scripts.md](docs/guides/scripts.md) for what these getters read in the offseason and preseason.
 
 ### Format identity
