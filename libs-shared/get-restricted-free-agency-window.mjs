@@ -27,6 +27,23 @@ export const league_timezone = 'America/New_York'
 // Boundaries are computed calendar-aware in the league timezone rather than by
 // epoch arithmetic, so a period spanning a DST transition keeps its wall-clock
 // announcement hour instead of sliding by an hour.
+//
+// That contract costs a window on spring-forward day, and the cost is real
+// rather than theoretical: 02:00-02:59 does not exist in America/New_York, so
+// a boundary asking for it resolves to 03:00 and collides with the boundary
+// that legitimately owns 03:00. The earlier of the two is then zero-length,
+// `get_restricted_free_agency_window_index` never returns it, and its
+// processing time (`start(N+1) - lead`) falls before its own opening -- so the
+// team holding it is silently skipped. A 23-hour day cannot hold 24 one-hour
+// wall-clock windows; keeping the announcement hour and keeping every window a
+// real `window_hours` long are not simultaneously satisfiable, and this module
+// chooses the announcement hour.
+//
+// No configured league can reach it today. Every restricted free agency period
+// on record runs between May and August at a 12- or 24-hour cadence, so none
+// spans a DST transition at all. `test/libs-shared.restricted-free-agency-
+// window.spec.mjs` pins the collapse for an hourly cadence so the trade-off is
+// a measured behavior rather than an assumption.
 
 const resolve_setting = (value, fallback) =>
   value === undefined || value === null ? fallback : Number(value)

@@ -154,6 +154,55 @@ describe('LIBS-SHARED restricted free agency windows', function () {
 
       expect(hours).to.deep.equal(['17:00', '17:00', '17:00', '17:00', '17:00'])
     })
+
+    // The other side of the wall-clock contract, and the one the fall-back
+    // case above cannot reach: spring-forward deletes an hour instead of
+    // repeating one, so a boundary asking for a time inside the gap resolves
+    // forward onto its neighbour. Asserted rather than fixed -- a 23-hour day
+    // cannot hold 24 distinct one-hour wall-clock windows, and the module
+    // chooses to keep the announcement hour. No configured league reaches it;
+    // every period on record runs May to August.
+    it('collapses a window whose boundary lands in the spring-forward gap', () => {
+      // 2026 spring-forward is Mar 8: 02:00-02:59 ET does not exist
+      const march_league = {
+        restricted_free_agency_first_window_at: et_date('2026-03-08 00:00'),
+        restricted_free_agency_window_hours: 1,
+        restricted_free_agency_processing_lead_hours: 0
+      }
+
+      const starts = [0, 1, 2, 3, 4].map((window_index) =>
+        get_restricted_free_agency_window_start({
+          league: march_league,
+          window_index
+        })
+      )
+
+      expect(starts.map(format_et)).to.deep.equal([
+        '2026-03-08 00:00',
+        '2026-03-08 01:00',
+        '2026-03-08 03:00',
+        '2026-03-08 03:00',
+        '2026-03-08 04:00'
+      ])
+
+      // window 2 is zero-length, so the index lookup at its own start returns
+      // window 3 and the team holding window 2 never has a current window
+      expect(starts[3] - starts[2]).to.equal(0)
+      expect(
+        get_restricted_free_agency_window_index({
+          league: march_league,
+          timestamp: starts[2]
+        })
+      ).to.equal(3)
+
+      // and its processing time falls an hour before it opens
+      expect(
+        get_restricted_free_agency_processing_time({
+          league: march_league,
+          window_index: 1
+        })
+      ).to.equal(starts[2])
+    })
   })
 
   describe('window index', function () {
