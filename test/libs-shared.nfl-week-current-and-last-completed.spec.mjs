@@ -151,4 +151,60 @@ describe('LIBS-SHARED current / last-completed NFL week pair', function () {
       ).to.equal(4)
     })
   })
+
+  // The cases above pin three hand-picked clocks. This sweeps every week of a
+  // whole season instead, which is what actually covers the boundaries -- the
+  // REG-to-POST step and the season rollover are one clock each, and picking
+  // them by hand is how they get missed. Cheap: 31 iterations, no database.
+  describe('the invariants hold at every clock, not just the picked ones', function () {
+    const rank = (params) =>
+      params.year * 1000 +
+      { PRE: 0, REG: 1, POST: 2 }[params.seas_type] * 100 +
+      params.week
+
+    it('sweeps a full season and holds ordering and monotonicity throughout', function () {
+      const start = current_season.regular_season_start
+      const problems = []
+
+      for (let offset = -4; offset <= 26; offset++) {
+        MockDate.set(start.add(offset, 'week').toISOString())
+        const label = `offset ${offset} (week ${current_season.week}, ${current_season.nfl_seas_type})`
+
+        const current = current_nfl_week_params()
+        if (current.year !== current_season.year) {
+          problems.push(`${label}: current year ${current.year}`)
+        }
+        if (current.week < 1) {
+          problems.push(`${label}: current week ${current.week} below 1`)
+        }
+
+        const last_completed = last_completed_nfl_week_params()
+        if (!last_completed) {
+          problems.push(`${label}: last completed is null`)
+          continue
+        }
+        if (rank(last_completed) >= rank(current)) {
+          problems.push(`${label}: last completed is not before current`)
+        }
+
+        // A ten-week walk must yield ten strictly decreasing weeks. This is
+        // the assertion that catches a boundary the walk cannot cross: it
+        // would either stop early or repeat a week.
+        let previous = null
+        for (let i = 0; i < 10; i++) {
+          const step = nfl_week_offset_params({ offset: -i })
+          if (!step) {
+            problems.push(`${label}: walk stopped at step ${i}`)
+            break
+          }
+          if (previous !== null && rank(step) >= previous) {
+            problems.push(`${label}: walk not decreasing at step ${i}`)
+          }
+          previous = rank(step)
+        }
+      }
+
+      expect(problems, problems.join('; ')).to.have.lengthOf(0)
+    })
+  })
 })

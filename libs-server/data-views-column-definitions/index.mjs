@@ -129,8 +129,14 @@ const player_league_roster_join = async ({
   params = {},
   data_view_options = {}
 }) => {
-  // Roster year defaults to current_season.year (current fantasy year),
-  // NOT the week-identifier year which tracks last_completed_season_year during offseason.
+  // Roster year defaults to current_season.year, the current fantasy year.
+  //
+  // This used to add "NOT the week-identifier year, which tracks
+  // last_completed_season_year during offseason" -- a note routing AROUND the
+  // defect rather than fixing it. There is no longer a divergence to route
+  // around: `current_nfl_week_params()` takes its year from
+  // `current_season.year` too, so both anchors agree. The retrospective anchor
+  // now has its own name, `last_completed_nfl_week_params()`.
   const { lid, year, week: scoped_week } = resolve_roster_scope({ params })
 
   let week
