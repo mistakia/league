@@ -220,6 +220,7 @@ export const run_evaluation = async ({
     let outcome = 'error'
     let error = null
     let error_message = null
+    let inexpressible_reason = null
 
     try {
       const result = await generate_data_view({
@@ -229,6 +230,11 @@ export const run_evaluation = async ({
       })
       outcome = result.outcome
       generated = result.table_state
+      // Every view in this corpus is provably buildable -- a human built it and
+      // the original is right there -- so an `inexpressible` here is always
+      // wrong, and the model's own reason is the only account of why. Over a
+      // full-corpus run it came back on 35 of 165, which is not a footnote.
+      inexpressible_reason = result.inexpressible_reason
     } catch (caught) {
       error = caught.code || caught.name
       error_message = caught.message
@@ -257,6 +263,7 @@ export const run_evaluation = async ({
       outcome,
       error,
       error_message,
+      inexpressible_reason,
       // Both states are kept because a component score of zero is otherwise
       // undiagnosable: it reads identically whether the model emitted nothing,
       // emitted a different shape, or emitted the right answer spelled another
