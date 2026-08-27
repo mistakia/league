@@ -55,8 +55,14 @@ import {
 export const RESOLVER_ERROR_CODES = {
   malformed_table_state: 'malformed_table_state',
   unknown_column_id: 'unknown_column_id',
-  invalid_param_value: 'invalid_param_value'
+  invalid_param_value: 'invalid_param_value',
+  unknown_row_axis: 'unknown_row_axis'
 }
+
+// The complete row-axis vocabulary. `year` (30 uses) and `week` (11) are the
+// only two values across all 189 production saved views, and
+// `get-row-axis-label-suffix.mjs` handles exactly these two and nothing else.
+export const ROW_AXES = ['year', 'week']
 
 // A column entry is either a bare id or `{ column_id, params }`. Both shapes are
 // live in production saved views, so both are accepted here.
@@ -222,11 +228,31 @@ export const resolve_generated_table_state = ({
 
   // A row axis is a legitimate sort and filter key and is NOT a registry
   // column: a view split by year sorts on `year`, which no column definition
-  // provides. Reading the axes off the request rather than from a fixed list is
-  // deliberate -- the axis vocabulary is the caller's own declaration, so a
-  // hardcoded {year, week} here would reject the next axis the product adds.
+  // provides. So an id named as an axis is exempt from the registry check --
+  // which means the axis list is a WHITELIST, and reading it off the request
+  // let the model exempt anything it liked by declaring it an axis. A measured
+  // instance: `row_axes: ['player_fantasy_points_per_game_from_seasonlogs']`,
+  // a measure column, accepted as a row dimension and rendered.
+  //
+  // The vocabulary is closed and known, so it is checked against ROW_AXES and
+  // only the recognised ones grant the exemption. Adding an axis to the product
+  // means adding it there, which is a one-line edit next to the constant that
+  // says so.
+  const declared_row_axes = Array.isArray(table_state.row_axes)
+    ? table_state.row_axes
+    : []
+
+  for (const axis of declared_row_axes) {
+    if (ROW_AXES.includes(axis)) continue
+    errors.push({
+      code: RESOLVER_ERROR_CODES.unknown_row_axis,
+      path: 'row_axes',
+      message: `'${axis}' is not a row axis -- the only axes are ${ROW_AXES.join(', ')}`
+    })
+  }
+
   const row_axes = new Set(
-    Array.isArray(table_state.row_axes) ? table_state.row_axes : []
+    declared_row_axes.filter((axis) => ROW_AXES.includes(axis))
   )
 
   const check_column_entry = ({ entry, path }) => {

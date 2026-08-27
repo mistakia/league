@@ -33,7 +33,8 @@ import { call_inference } from '#libs-server/inference/inference-client.mjs'
 import { get_data_view_generation_catalog } from './build-data-view-generation-catalog.mjs'
 import {
   resolve_generated_table_state,
-  format_resolver_errors
+  format_resolver_errors,
+  ROW_AXES
 } from './resolve-generated-table-state.mjs'
 
 const log = debug('generate-data-view')
@@ -88,7 +89,25 @@ export const generated_table_state_schema = {
     table_state: {
       type: 'object',
       additionalProperties: false,
+      // Measured against the 189 described production views: every one carries
+      // row_grain and prefix_columns, and the schema permitted neither, so no
+      // generated view could ever have the shape a real one has. `limit` was
+      // the mirror defect -- permitted, reached for by the model, and used by
+      // zero real views -- so it is gone rather than left as a field whose only
+      // effect is to truncate an answer nobody asked to truncate.
+      required: ['row_grain', 'prefix_columns', 'columns'],
       properties: {
+        // Which entity a row is. Everything else in the view is read against
+        // it, so it is not inferable after the fact from the column list.
+        row_grain: {
+          type: 'array',
+          items: { type: 'string', enum: ['player', 'team'] }
+        },
+        // Identity columns, pinned to the left. Bare column ids, no params.
+        prefix_columns: {
+          type: 'array',
+          items: { type: 'string' }
+        },
         columns: {
           type: 'array',
           items: {
@@ -128,8 +147,10 @@ export const generated_table_state_schema = {
             }
           }
         },
-        row_axes: { type: 'array', items: { type: 'string' } },
-        limit: { type: 'number' }
+        row_axes: {
+          type: 'array',
+          items: { type: 'string', enum: ROW_AXES }
+        }
       }
     }
   }
@@ -194,6 +215,67 @@ export const build_catalog_prompt = ({
   ].join('\n')
 }
 
+// The shape half of the prompt, and it was the missing half.
+//
+// The catalog teaches the model WHICH ids exist and nothing about how a
+// table_state is spelled, so the model was emitting bare column lists: across a
+// whole scored run it produced no `where` clause at all and left `params` empty
+// on nearly every column, against a corpus where 188 of 189 human views filter
+// and every one of them parameterises. It also invented param value shapes
+// wholesale -- `{"type":"TEMPLATED","value":"last_n_years","args":{"n":5}}`
+// where the real spelling is a one-element array carrying a `dynamic_type`.
+//
+// The example is synthetic on purpose. Real saved views are the user's own
+// content and this repository is public, so the demonstration is authored here
+// from real column ids and the measured param spellings rather than lifted from
+// the corpus. Counts below are from the 189 described production views.
+const SHAPE_PROMPT = [
+  '# Shape',
+  '',
+  'A param value is an ARRAY, even for a single value: {"year": [2024]}. Two exceptions:',
+  '- `output` is an OBJECT: {"period": "game", "aggregation": "rate", "threshold": null}. Use it whenever the instruction asks for a per-game or per-play rate rather than a total.',
+  '- A value that depends on when the view is read is an object inside the array: {"nfl_week_id": [{"dynamic_type": "current_nfl_week"}]}.',
+  '',
+  'Filters go in `where`, and most views have them — a request naming a position, a threshold, or a season is asking for a filter, not just a column. Operators, most used first: IN, >=, IS NOT NULL, >, =, <, !=, <=.',
+  '',
+  'A complete example:',
+  '',
+  JSON.stringify(
+    {
+      row_grain: ['player'],
+      prefix_columns: ['player_name', 'player_position', 'player_nfl_teams'],
+      columns: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          params: {
+            year: [2024],
+            output: { period: 'game', aggregation: 'rate', threshold: null }
+          }
+        },
+        { column_id: 'player_games_played', params: { year: [2024] } }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR'],
+          params: {}
+        },
+        {
+          column_id: 'player_games_played',
+          operator: '>=',
+          value: '8',
+          params: { year: [2024] }
+        }
+      ],
+      sort: [{ column_id: 'player_receiving_yards_from_plays', desc: true }],
+      row_axes: []
+    },
+    null,
+    2
+  )
+].join('\n')
+
 const SYSTEM_PROMPT = [
   'You build data view definitions for a fantasy football analytics table.',
   '',
@@ -203,10 +285,14 @@ const SYSTEM_PROMPT = [
   '- Use ONLY column ids that appear verbatim in the catalog. Never invent one, and never guess at a plausible-looking id.',
   '- Always build the view. Search the catalog for the closest columns and use them.',
   '- Set expressible to false ONLY when nothing in the catalog is even close — no measure, no proxy, no related column. This is a last resort, not an alternative to reading the catalog.',
-  '- Include identity columns (player_name, player_position, player_nfl_teams, or team_code and team_name for a team view) so the rows can be read.',
+  '- row_grain says whether a row is a player or a team, and every view needs one.',
+  '- Put identity columns in prefix_columns: player_name, player_position and player_nfl_teams for a player view, team_code and team_name for a team view.',
   '- Prefer fewer, well-chosen columns over many.',
-  '- row_axes splits rows by a dimension (for example year or week). Leave it out for a single-row-per-player view.',
-  '- sort on the column the instruction is really asking about, descending unless the instruction implies otherwise.'
+  '- Parameterise every measure column the instruction constrains — a season, a week, a per-game rate. An unparameterised measure answers a different question from the one asked.',
+  '- row_axes splits rows by a dimension and the only two are year and week. Leave it empty for a single-row-per-player view.',
+  '- sort on the column the instruction is really asking about, descending unless the instruction implies otherwise.',
+  '',
+  SHAPE_PROMPT
 ].join('\n')
 
 /**

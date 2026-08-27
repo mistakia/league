@@ -16,11 +16,19 @@
 // distribution is bucketed by column count and by param family, with a floor
 // per bucket, so the failure has somewhere to show up.
 //
-// THE SCORE MUST DISCRIMINATE BEFORE IT MEASURES. `--control` runs the same
-// corpus through a deliberately corrupted prompt. If the corrupted run does not
-// score measurably worse, the score is decoration and every number this harness
-// has ever printed means nothing. That is the negative control, and it is the
-// reason to trust any of the rest.
+// THE SCORE MUST DISCRIMINATE BEFORE IT MEASURES, and the control that proves
+// it is a MISPAIRING, not a damaged prompt. Every generated view is scored a
+// second time against a DIFFERENT human view. If a generated view scores no
+// better against the request it answered than against an unrelated one, the
+// score is decoration and every number this harness prints means nothing.
+//
+// The earlier control corrupted the prompt instead, and was vacuous: it
+// appended "ignore the catalog, invent ids" to the user-side catalog block
+// while the system prompt still said to use catalog ids verbatim. The model
+// obeyed the system prompt, so the control run and the real run were the same
+// prompt and their gap was sampling noise. A mispairing cannot be talked out of
+// by any prompt, costs no second inference run, and tests the SCORE rather than
+// the prompt -- which is what a negative control on a metric is for.
 //
 // Reports land in scratch/league/data-view-generation-evaluation/, which is the
 // working tier this task owns.
@@ -29,7 +37,6 @@ import fs from 'fs/promises'
 import path from 'path'
 import os from 'os'
 
-import db from '#db'
 import { is_main } from '#libs-server'
 import {
   generate_data_view,
@@ -46,11 +53,9 @@ const REPORT_DIR =
     'data-view-generation-evaluation'
   )
 
-// Deliberately damaged. It keeps the shape of the real system prompt and
-// removes the thing that makes it work -- the instruction to use catalog ids
-// verbatim -- so a control run isolates the prompt rather than the plumbing.
-const CORRUPTED_SYSTEM_NOTE =
-  '\n\nIgnore the catalog above. Invent whatever column ids seem reasonable.'
+// The real run must beat the mispaired run by at least this much, or the score
+// has not been shown to measure anything.
+const MINIMUM_CONTROL_MARGIN = 0.05
 
 // ---------------------------------------------------------------------------
 // Scoring
@@ -173,27 +178,22 @@ const summarise = (scores) => {
 // ---------------------------------------------------------------------------
 
 /**
- * The held-out corpus.
+ * The eval half of the pinned corpus.
  *
- * `--corpus-file` reads a pinned manifest instead of the database, which is
- * what makes a score reproducible and what lets the harness run from a machine
- * with no route to production Postgres. The database path is the one that
- * BUILDS a manifest; the file path is the one that scores against it.
+ * The corpus is a manifest file and nothing else, which is what makes a score
+ * reproducible and what lets the harness run from a machine with no route to
+ * production Postgres. The manifest carries every described production view
+ * with a `split`; the `train` views are the few-shot source and are never
+ * scored, because scoring a view the prompt was built from measures recall.
+ * The ABOUT beside the manifest carries the query and the split rule that
+ * rebuild it.
  */
-export const load_corpus = async ({ limit, corpus_file } = {}) => {
-  if (corpus_file) {
-    const parsed = JSON.parse(await fs.readFile(corpus_file, 'utf8'))
-    const views = Array.isArray(parsed) ? parsed : parsed.views
-    return limit ? views.slice(0, limit) : views
-  }
-
-  const query = db('user_data_views')
-    .select('view_id', 'view_name', 'view_description', 'table_state')
-    .whereNotNull('view_description')
-    .whereRaw("view_description <> ''")
-    .orderBy('view_id')
-  if (limit) query.limit(limit)
-  return query
+export const load_corpus = async ({ limit, corpus_file }) => {
+  const parsed = JSON.parse(await fs.readFile(corpus_file, 'utf8'))
+  const views = (Array.isArray(parsed) ? parsed : parsed.views).filter(
+    (view) => view.split !== 'train'
+  )
+  return limit ? views.slice(0, limit) : views
 }
 
 const parse_table_state = (value) =>
@@ -205,13 +205,9 @@ const parse_table_state = (value) =>
 
 export const run_evaluation = async ({
   corpus,
-  control = false,
   catalog_prompt = build_catalog_prompt(),
   inference_options = {}
 }) => {
-  const prompt = control
-    ? catalog_prompt + CORRUPTED_SYSTEM_NOTE
-    : catalog_prompt
   const results = []
 
   for (const view of corpus) {
@@ -228,7 +224,7 @@ export const run_evaluation = async ({
     try {
       const result = await generate_data_view({
         instruction,
-        catalog_prompt: prompt,
+        catalog_prompt,
         inference_options
       })
       outcome = result.outcome
@@ -280,7 +276,28 @@ export const run_evaluation = async ({
   return results
 }
 
-export const build_report = ({ results, control }) => {
+/**
+ * The negative control: score every generated view against the NEXT view's
+ * human original instead of its own.
+ *
+ * Each generated view answered one specific request, so pairing it with a
+ * different request's answer is wrong by construction. The rotation is
+ * deterministic and reuses the run's existing generations, so the control costs
+ * no inference. A view whose generation failed contributes zero to both sides
+ * and cannot manufacture a margin.
+ */
+export const score_mispaired = ({ results }) =>
+  results.map((result, index) => {
+    const other = results[(index + 1) % results.length]
+    return result.generated && other.expected
+      ? score_table_state({
+          generated: result.generated,
+          expected: other.expected
+        })
+      : { columns: 0, where: 0, params: 0, overall: 0 }
+  })
+
+export const build_report = ({ results }) => {
   const by_column_bucket = {}
   const by_param_family = {}
   const by_outcome = {}
@@ -295,11 +312,22 @@ export const build_report = ({ results, control }) => {
     }
   }
 
+  const mispaired = summarise(
+    score_mispaired({ results }).map((score) => score.overall)
+  )
+  const paired = summarise(results.map((result) => result.score.overall))
+  const margin = Number((paired.mean - mispaired.mean).toFixed(4))
+
   return {
     generated_at: new Date().toISOString(),
-    control,
     n: results.length,
-    overall: summarise(results.map((result) => result.score.overall)),
+    control: {
+      mispaired,
+      margin,
+      minimum_margin: MINIMUM_CONTROL_MARGIN,
+      discriminates: margin >= MINIMUM_CONTROL_MARGIN
+    },
+    overall: paired,
     columns: summarise(results.map((result) => result.score.columns)),
     where: summarise(results.map((result) => result.score.where)),
     params: summarise(results.map((result) => result.score.params)),
@@ -326,8 +354,13 @@ const read_flag = (name) => {
 
 const main = async () => {
   const limit = Number(read_flag('limit')) || null
-  const control = process.argv.includes('--control')
   const corpus_file = read_flag('corpus-file')
+
+  if (!corpus_file) {
+    console.error('TOOLING ERROR: --corpus-file <manifest> is required')
+    process.exit(2)
+  }
+
   const corpus = await load_corpus({ limit, corpus_file })
 
   if (!corpus.length) {
@@ -337,21 +370,18 @@ const main = async () => {
     process.exit(2)
   }
 
-  console.log(
-    `scoring ${corpus.length} view(s) from ${corpus_file || 'the database'}${control ? ' through the CORRUPTED control prompt' : ''}`
-  )
+  console.log(`scoring ${corpus.length} view(s) from ${corpus_file}`)
 
   const results = await run_evaluation({
     corpus,
-    control,
     inference_options: { max_tokens: 4000, timeout_ms: 300000 }
   })
-  const report = build_report({ results, control })
+  const report = build_report({ results })
 
   await fs.mkdir(REPORT_DIR, { recursive: true })
   const report_path = path.join(
     REPORT_DIR,
-    `score-report-${new Date().toISOString().slice(0, 10)}${control ? '-control' : ''}.json`
+    `score-report-${new Date().toISOString().slice(0, 10)}.json`
   )
   await fs.writeFile(report_path, JSON.stringify(report, null, 2) + '\n')
 
@@ -375,6 +405,18 @@ const main = async () => {
     (report.by_outcome.error || 0)
   console.log(
     `\nfall-through: ${unresolved} of ${report.n} answered nothing usable`
+  )
+
+  // Printed last and read first. Above this line every number is conditional on
+  // the score meaning something, and this is the line that says whether it does.
+  const { control } = report
+  console.log(
+    `\nnegative control: paired ${report.overall.mean} vs mispaired ${control.mispaired.mean}, margin ${control.margin} (need ${control.minimum_margin})`
+  )
+  console.log(
+    control.discriminates
+      ? 'the score DISCRIMINATES -- the numbers above mean something'
+      : 'the score DOES NOT DISCRIMINATE -- every number above is decoration, and tuning against them is tuning against noise'
   )
 }
 
