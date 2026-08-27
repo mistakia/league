@@ -28,7 +28,7 @@ const LEAGUE_TIMEZONE = 'America/New_York'
 // windows in `libs-server/gambet.mjs` and `import-caesars-odds-v4.mjs`, so the
 // drift would silently misfile an hour of betting events every week from
 // November on. A fixed offset has no DST and so cannot drift.
-const eastern = (unix_seconds) => {
+export const eastern = (unix_seconds) => {
   const instant = dayjs.unix(unix_seconds)
   return instant.utc().utcOffset(instant.tz(LEAGUE_TIMEZONE).utcOffset())
 }
