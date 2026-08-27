@@ -232,7 +232,7 @@ const finalize_week = async () => {
  * Verify matchup scores were written for the finalized week.
  *
  * process_matchups only populates scores during REG season (it caps at
- * regularSeasonFinalWeek). Skip the check during POST to avoid false positives.
+ * regular_season_final_week). Skip the check during POST to avoid false positives.
  *
  * Oracle: matchups WHERE lid=$lid AND season_year=$season_year AND week=$week AND
  * home_points IS NOT NULL AND away_points IS NOT NULL must have at least
@@ -251,7 +251,7 @@ const verify_matchup_scores = async ({
   week,
   season_type
 }) => {
-  // process_matchups caps at regularSeasonFinalWeek; playoff weeks produce no
+  // process_matchups caps at regular_season_final_week; playoff weeks produce no
   // new matchup score rows, so there is nothing to verify.
   if (season_type === 'POST') {
     return []

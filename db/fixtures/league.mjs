@@ -117,7 +117,7 @@ export default async function (knex, league_params = {}) {
       abbreviation: `TM${i}`
     })
 
-    for (let week = 0; week <= current_season.finalWeek; week++) {
+    for (let week = 0; week <= current_season.final_week; week++) {
       roster_rows.push({
         tid: i,
         lid: 1,
