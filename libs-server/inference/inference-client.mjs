@@ -59,10 +59,6 @@ const INFERENCE_REFUSAL_HEADER = 'x-inference-refusal'
 const DEFAULT_TIMEOUT_MS = 120 * 1000
 const DEFAULT_MAX_ATTEMPTS = 3
 
-// qwen3.8 accepts exactly these three and 400s on anything else, including the
-// OpenAI-familiar 'high'.
-const REASONING_EFFORTS = ['xhigh', 'medium', 'low']
-
 const STRUCTURED_OUTPUT_MODES = ['json_schema', 'guided_json']
 const AUTH_MODES = ['machine_token', 'api_key']
 
@@ -226,15 +222,14 @@ const build_body = ({ provider, system, prompt, schema, max_tokens }) => {
   if (provider.temperature !== undefined)
     body.temperature = provider.temperature
 
-  if (provider.reasoning_effort !== undefined) {
-    if (!REASONING_EFFORTS.includes(provider.reasoning_effort)) {
-      throw new InferenceError({
-        message: `reasoning_effort='${provider.reasoning_effort}' is rejected with a 400 by the provider -- must be one of ${REASONING_EFFORTS.join(', ')}`,
-        code: INFERENCE_ERROR_CODES.misconfigured
-      })
-    }
-    body.reasoning_effort = provider.reasoning_effort
-  }
+  // Thinking is suppressed by default. Generating a table_state is extraction
+  // over a catalog we supply, not a reasoning problem, and a thinking preamble
+  // is latency on an interactive path plus tokens the structured-output parse
+  // then has to survive. Sent on `chat_template_kwargs`, which is the knob the
+  // deepseek chat template honours; there is deliberately no `reasoning_effort`
+  // here, because that field's accepted vocabulary is per-model and a value one
+  // model rejects is a 400 rather than a degradation.
+  body.chat_template_kwargs = { enable_thinking: Boolean(provider.thinking) }
 
   if (schema) {
     if (provider.structured_output_mode === 'json_schema') {
