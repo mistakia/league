@@ -12,8 +12,8 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
   const default_league_params = create_default_league({ commissioner_user_id })
   const league_params = Object.assign({}, default_league_params, params)
 
-  // Article XII §2 (Amendment XXXV): the Free Agency Live Auction must be
-  // scheduled no earlier than ten (10) days and no later than two (2) days
+  // Article XII §2 (Amendment XLVII): the Free Agency Live Auction must be
+  // scheduled no earlier than ten (10) days and no later than two (2) hours
   // prior to the start of the Regular Season.
   if (league_params.free_agency_live_auction_start) {
     const auction_start = dayjs.unix(
@@ -24,10 +24,10 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
       'week'
     )
     const earliest = regular_season_first_day.subtract(10, 'days')
-    const latest = regular_season_first_day.subtract(2, 'days')
+    const latest = regular_season_first_day.subtract(2, 'hours')
     if (auction_start.isBefore(earliest) || auction_start.isAfter(latest)) {
       throw new Error(
-        'free_agency_live_auction_start must be no earlier than 10 days and no later than 2 days prior to the start of the Regular Season (Article XII §2)'
+        'free_agency_live_auction_start must be no earlier than 10 days and no later than 2 hours prior to the start of the Regular Season (Article XII §2)'
       )
     }
   }
