@@ -22,6 +22,7 @@ export default async function (league_id) {
     .select(
       'teams.*',
       'waivers.waiver_id as wid',
+      'waivers.lid',
       'waivers.pid',
       'waivers.tid',
       'waivers.user_id',
@@ -29,9 +30,10 @@ export default async function (league_id) {
     )
     .join('teams', 'waivers.tid', 'teams.team_id')
     .where('teams.season_year', current_season.year)
-    .whereNull('processed')
-    .whereNull('cancelled')
-    .where('type', waiver_types.POACH)
+    .where('waivers.lid', league_id)
+    .whereNull('waivers.processed')
+    .whereNull('waivers.cancelled')
+    .where('waivers.type', waiver_types.POACH)
     .orderBy([
       'teams.waiver_order',
       'waivers.priority_order',

@@ -1,41 +1,60 @@
-export default function (objArray) {
-  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
-
-  if (!array.length) {
+const format_value = (value) => {
+  if (value === null || value === undefined) {
     return ''
   }
 
+  // Dates and JSON columns arrive as objects on the array input path but as
+  // strings on the JSON input path; render both the same way so the two input
+  // modes produce identical output.
+  if (value instanceof Date) {
+    return value.toISOString()
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value)
+  }
+
+  return String(value)
+}
+
+/**
+ * Convert rows to CSV.
+ *
+ * Row 0 is the header object — a `{field: field}` map that both defines the
+ * column set for every subsequent row and renders as the header line. Keys
+ * present only in later rows are not emitted.
+ *
+ * @param {object[]|string} objArray - rows, or the JSON encoding of them
+ * @returns {string} CSV text, CRLF terminated
+ */
+export default function (objArray) {
+  const array = typeof objArray === 'string' ? JSON.parse(objArray) : objArray
+
+  if (!array?.length) {
+    return ''
+  }
+
+  const fields = Object.keys(array[0])
+
   let str = ''
-
-  // Get the header from the first row (which should be the header object)
-  const header = array[0]
-  const fields = Object.keys(header)
-
   for (let i = 0; i < array.length; i++) {
-    let line = ''
-    for (const field of fields) {
-      if (line !== '') line += ','
+    const cells = fields.map((field) => {
+      let value = format_value(array[i][field])
 
-      // Handle values that might contain commas, quotes, or newlines
-      let value = array[i][field]
-      if (value === null || value === undefined) {
-        value = ''
-      } else {
-        value = String(value)
-        // Escape quotes and wrap in quotes if value contains comma, quote, or newline
-        if (
-          value.includes(',') ||
-          value.includes('"') ||
-          value.includes('\n') ||
-          value.includes('\r')
-        ) {
-          value = '"' + value.replace(/"/g, '""') + '"'
-        }
+      // Escape quotes and wrap in quotes if value contains comma, quote, or newline
+      if (
+        value.includes(',') ||
+        value.includes('"') ||
+        value.includes('\n') ||
+        value.includes('\r')
+      ) {
+        value = '"' + value.replace(/"/g, '""') + '"'
       }
 
-      line += value
-    }
-    str += line + '\r\n'
+      return value
+    })
+
+    str += cells.join(',') + '\r\n'
   }
+
   return str
 }

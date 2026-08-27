@@ -1,54 +1,55 @@
-// Process-level uncaughtException and unhandledRejection handlers that
-// route through the per-repo logger wrapper. Every PM2-managed service
-// installs these so unhandled errors emit a log_error signal before the
-// process exits (or recovers, depending on caller behavior).
+// Process-level uncaughtException and unhandledRejection handlers for the
+// PM2-managed services (server.mjs and the jobs/*-worker.mjs entry points).
+//
+// Node's default for both events is to print the stack and exit non-zero.
+// Registering a listener REPLACES that default, so these handlers reproduce it
+// on purpose: stderr first, then a log_error signal, then a non-zero exit. A
+// handler that only logs would leave a service whose loop promise died sitting
+// "online" under PM2 forever, since autorestart only fires on process death.
 
-export const install_process_handlers = ({
-  service_name,
-  logger,
-  on_uncaught,
-  on_unhandled_rejection
-} = {}) => {
+const EXIT_CODE_UNHANDLED_ERROR = 1
+
+export const install_process_handlers = ({ service_name, logger } = {}) => {
   if (!logger || typeof logger.error !== 'function') {
     throw new Error('install_process_handlers requires a logger with .error()')
   }
 
-  const uncaught_handler = (error) => {
+  const report_and_exit = async ({ error, kind }) => {
     try {
-      logger.error(error, {
+      // stderr unconditionally and first: logger.error returns null without
+      // emitting anything whenever signal transport is unavailable (no
+      // signals_api_url, no BASE_MACHINE_SLUG, missing instance key file), and
+      // its own stderr warning is deduped once per process — so this write is
+      // the only trace guaranteed to survive.
+      process.stderr.write(
+        `[${kind}] ${service_name}: ${error.stack || error}\n`
+      )
+
+      const emission = logger.error(error, {
         severity: 'high',
-        context: { service: service_name || logger.service, kind: 'uncaught' }
+        context: { service: service_name, kind }
       })
-    } catch (_emit_error) {
-      // swallow
+
+      // The signal POST is fire-and-forget; exiting without awaiting it drops
+      // it. The transport carries its own 5s timeout, so this cannot hold the
+      // process open indefinitely.
+      if (emission) await emission.promise
+    } catch (_report_error) {
+      // The stack is already on stderr above. Reporting must never keep a
+      // process alive in an undefined state.
     }
-    if (typeof on_uncaught === 'function') on_uncaught(error)
+
+    process.exit(EXIT_CODE_UNHANDLED_ERROR)
   }
 
-  const rejection_handler = (reason) => {
-    const error_value =
-      reason instanceof Error ? reason : new Error(String(reason))
-    try {
-      logger.error(error_value, {
-        severity: 'high',
-        context: {
-          service: service_name || logger.service,
-          kind: 'unhandled_rejection'
-        }
-      })
-    } catch (_emit_error) {
-      // swallow
-    }
-    if (typeof on_unhandled_rejection === 'function') {
-      on_unhandled_rejection(reason)
-    }
-  }
+  process.on('uncaughtException', (error) => {
+    report_and_exit({ error, kind: 'uncaught' })
+  })
 
-  process.on('uncaughtException', uncaught_handler)
-  process.on('unhandledRejection', rejection_handler)
-
-  return () => {
-    process.off('uncaughtException', uncaught_handler)
-    process.off('unhandledRejection', rejection_handler)
-  }
+  process.on('unhandledRejection', (reason) => {
+    report_and_exit({
+      error: reason instanceof Error ? reason : new Error(String(reason)),
+      kind: 'unhandled_rejection'
+    })
+  })
 }

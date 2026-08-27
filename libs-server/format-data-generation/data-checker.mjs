@@ -10,29 +10,26 @@ import {
 
 import { generation_scripts, SCRIPT_CONFIG } from './config.mjs'
 
+const format_type_tables = {
+  scoring: 'league_scoring_formats',
+  league: 'league_formats'
+}
+
 /**
  * Check if a format exists in the database
  * @param {object} params - Parameters object
- * @param {string} params.format_id - Hash of the format to check
+ * @param {string} params.format_id - Id of the format to check
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @returns {Promise<boolean>}
  */
 export const check_format_exists = async ({ format_id, format_type }) => {
-  try {
-    if (format_type === 'scoring') {
-      const result = await db('league_scoring_formats')
-        .where('id', format_id)
-        .first()
-      return !!result
-    } else if (format_type === 'league') {
-      const result = await db('league_formats').where('id', format_id).first()
-      return !!result
-    }
+  const table_name = format_type_tables[format_type]
+  if (!table_name) {
     return false
-  } catch (error) {
-    console.warn(`Warning: Could not check format existence: ${error.message}`)
-    return true // Assume it exists to proceed
   }
+
+  const result = await db(table_name).where('id', format_id).first()
+  return Boolean(result)
 }
 
 /**
@@ -43,26 +40,23 @@ export const check_format_exists = async ({ format_id, format_type }) => {
  * @returns {object} Modified query object
  */
 export const build_step_query_conditions = ({ query, step_name }) => {
-  if (step_name.includes('gamelogs')) {
-    return query.limit(1)
-  } else if (step_name.includes('seasonlogs')) {
-    // Check if we have data for recent years
+  // Seasonlogs and projections span years, so a row from an old year is not
+  // evidence the step has run; every other step's tables are year-agnostic.
+  if (step_name.includes('seasonlogs')) {
     return query.where('year', '>=', SCRIPT_CONFIG.min_year_check).limit(1)
-  } else if (step_name.includes('careerlogs')) {
-    return query.limit(1)
-  } else if (step_name.includes('projections')) {
-    // Check for projections using the last year with stats
-    return query.where('year', current_season.stats_season_year).limit(1)
-  } else if (step_name === 'league_format_draft_values') {
-    return query.limit(1)
   }
-  return query
+
+  if (step_name.includes('projections')) {
+    return query.where('year', current_season.stats_season_year).limit(1)
+  }
+
+  return query.limit(1)
 }
 
 /**
  * Check if data exists for a format in a specific table
  * @param {object} params - Parameters object
- * @param {string} params.format_id - Hash of the format
+ * @param {string} params.format_id - Id of the format
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @param {string} params.step_name - Name of the generation step
  * @returns {Promise<boolean>}
@@ -73,12 +67,15 @@ export const check_format_data_exists = async ({
   step_name
 }) => {
   const config = generation_scripts[step_name]
-  if (!config || !config.tables || config.tables.length === 0) {
+  // Only per-format steps write tables carrying a format id column; asking
+  // whether a format has data in any other step's tables is meaningless.
+  if (!config || !config.per_format) {
     return false
   }
 
   try {
-    // Check the primary table for this step
+    // A step's tables are all written by the same script invocation, so the
+    // first one answers whether that step has run for this format.
     const table_name = config.tables[0]
     const hash_column =
       format_type === 'scoring' ? 'scoring_format_id' : 'league_format_id'
@@ -99,38 +96,13 @@ export const check_format_data_exists = async ({
 }
 
 /**
- * Check if format data removal is safe
- * @param {object} params - Parameters object
- * @param {string} params.format_id - Format hash to check
- * @returns {Promise<boolean>}
- */
-export const check_removal_safety = async ({ format_id }) => {
-  const active_season_count = await db('seasons')
-    .where('league_format_id', format_id)
-    .count('* as count')
-    .first()
-
-  return active_season_count.count === 0
-}
-
-/**
  * Check if a scoring format can be safely removed
  *
  * This gate and its league-format sibling stand in front of an unconditional
  * delete of a format's entire derived history, so both fail CLOSED: a check
- * that could not answer pushes a reason and blocks the removal. Every catch
- * here used to `console.warn` and fall through, which left `reasons` empty --
- * byte-identical to "verified unused", and the more dangerous half of a defect
- * that made both gates inert for as long as they have existed.
- *
- * The other half was the parameter name. Both call sites in cleanup-manager
- * passed `format_hash` while both functions destructure `format_id`, so
- * `format_id` was `undefined`: the named-format comparison could never match,
- * and each usage query bound undefined and threw straight into the swallowing
- * catch. Measured 2026-08-14 -- every orphaned format was reported `safe: true`
- * with an empty reason list, including ones the classifier had only cleared on
- * its own separate (and working) usage check. Nothing downstream noticed,
- * because a safety gate that always passes looks exactly like a safe corpus.
+ * that could not answer pushes a reason and blocks the removal. Never turn a
+ * catch here back into a warn-and-continue -- an empty `reasons` list is
+ * byte-identical to "verified unused" and makes the gate silently inert.
  *
  * @param {object} params - Parameters object
  * @param {string} params.format_id - Scoring format id to check
@@ -139,13 +111,10 @@ export const check_removal_safety = async ({ format_id }) => {
 export const check_scoring_format_removal_safety = async ({ format_id }) => {
   const reasons = []
 
-  // Check if it's a named format
-  if (named_scoring_formats) {
-    const is_named = Object.values(named_scoring_formats).some(
-      (f) => f.id === format_id
-    )
-    if (is_named) reasons.push('Format is a named scoring format')
-  }
+  const is_named = Object.values(named_scoring_formats).some(
+    (f) => f.id === format_id
+  )
+  if (is_named) reasons.push('Format is a named scoring format')
 
   // Check if used by league formats
   try {
@@ -157,7 +126,7 @@ export const check_scoring_format_removal_safety = async ({ format_id }) => {
       reasons.push(`Used by ${league_format_usage.count} league formats`)
     }
   } catch (error) {
-    // Fail CLOSED -- see the note on the league-format check below.
+    // Fail CLOSED -- see the note on check_scoring_format_removal_safety.
     reasons.push(`Could not check league format usage: ${error.message}`)
   }
 
@@ -183,20 +152,20 @@ export const check_scoring_format_removal_safety = async ({ format_id }) => {
 
 /**
  * Check if a league format can be safely removed
+ *
+ * Fails CLOSED -- see the note on check_scoring_format_removal_safety.
+ *
  * @param {object} params - Parameters object
- * @param {string} params.format_id - League format hash to check
+ * @param {string} params.format_id - League format id to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */
 export const check_league_format_removal_safety = async ({ format_id }) => {
   const reasons = []
 
-  // Check if it's a named format
-  if (named_league_formats) {
-    const is_named = Object.values(named_league_formats).some(
-      (f) => f.id === format_id
-    )
-    if (is_named) reasons.push('Format is a named league format')
-  }
+  const is_named = Object.values(named_league_formats).some(
+    (f) => f.id === format_id
+  )
+  if (is_named) reasons.push('Format is a named league format')
 
   // Check if used in active seasons
   try {

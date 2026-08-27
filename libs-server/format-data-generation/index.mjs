@@ -17,8 +17,7 @@ export {
   check_format_data_exists,
   check_scoring_format_removal_safety,
   check_league_format_removal_safety,
-  build_step_query_conditions,
-  check_removal_safety
+  build_step_query_conditions
 } from './data-checker.mjs'
 export {
   generate_format_data,
