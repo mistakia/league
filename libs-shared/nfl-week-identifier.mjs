@@ -285,7 +285,13 @@ export const get_postseason_week_label = ({ week }) => {
  * @returns {NflWeekParams}
  */
 export const current_nfl_week_params = () => {
-  const year = current_season.last_completed_season_year
+  // The FORWARD-looking half of the pair: the week in play, or the next one up.
+  // Its year is `current_season.year` and not `last_completed_season_year` --
+  // taking the retrospective one composed an identifier out of two different
+  // seasons, so the whole offseason resolved to the PRIOR year's REG week 1 and
+  // six column families served last season's opening week as "current".
+  // See `last_completed_nfl_week_params` for the other half.
+  const year = current_season.year
   const live_type = current_season.nfl_seas_type
   if (live_type === 'POST') {
     return {
@@ -295,8 +301,8 @@ export const current_nfl_week_params = () => {
     }
   }
   // REG and PRE (offseason) both default to the REG track. During offseason
-  // current_season.week is 0, which we clamp to REG week 1 as the last
-  // meaningful identifier for default queries.
+  // current_season.week is 0, which we clamp to REG week 1 -- the next week up
+  // in the current season, which is what every forward-looking consumer wants.
   return {
     year,
     seas_type: 'REG',
@@ -309,6 +315,39 @@ export const current_nfl_week_params = () => {
  */
 export const current_nfl_week_identifier = () => {
   return format_nfl_week_identifier(current_nfl_week_params())
+}
+
+/**
+ * The retrospective half of the pair, defined as ONE STEP BACK from
+ * `current_nfl_week_params()` -- the most recent week that has finished.
+ *
+ *   current (in play or next up)  |  last completed (has results)
+ *   ------------------------------|------------------------------
+ *   season: `current_season.year` |  `last_completed_season_year`
+ *   week:   current_nfl_week_*()  |  last_completed_nfl_week_*()
+ *
+ * Invariant: a week member's year equals the season member in its own column.
+ * It holds everywhere except during live REG week 1, where the season getter
+ * reads ahead -- `current_season.week` reaches 1 on the Tuesday BEFORE the
+ * Thursday opener, so the season half already names the new year while no game
+ * of it has finished. Pinned as its own case in
+ * `test/libs-shared.nfl-week-current-and-last-completed.spec.mjs`.
+ *
+ * Never null: the walk crosses the season boundary backwards and only runs out
+ * at `MIN_YEAR`.
+ *
+ * @returns {NflWeekParams | null}
+ */
+export const last_completed_nfl_week_params = () => {
+  return nfl_week_offset_params({ offset: -1 })
+}
+
+/**
+ * @returns {NflWeekIdentifier | null}
+ */
+export const last_completed_nfl_week_identifier = () => {
+  const params = last_completed_nfl_week_params()
+  return params ? format_nfl_week_identifier(params) : null
 }
 
 /**
@@ -325,7 +364,7 @@ export const nfl_week_offset_params = ({ offset }) => {
 
   const { year, seas_type, week } = current_nfl_week_params()
   const steps = -offset
-  const cur_year = year
+  let cur_year = year
   let cur_seas_type = seas_type
   let cur_week = week
 
@@ -341,7 +380,18 @@ export const nfl_week_offset_params = ({ offset }) => {
       if (cur_week > 1) {
         cur_week -= 1
       } else {
-        return null
+        // Cross the season boundary backwards: the week before REG week 1 of
+        // year Y is the last POST week of Y-1. Without this the walk stopped
+        // dead at REG week 1, so `last_n_nfl_weeks` collapsed to a single week
+        // for the whole offseason and all of live REG week 1 -- a shorter list
+        // than asked for, with nothing to say it had been truncated.
+        if (cur_year - 1 < MIN_YEAR) return null
+        cur_year -= 1
+        cur_seas_type = 'POST'
+        cur_week = get_max_weeks_for_season_type({
+          seas_type: 'POST',
+          year: cur_year
+        })
       }
     } else {
       return null

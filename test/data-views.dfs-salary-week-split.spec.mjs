@@ -3,6 +3,7 @@
 import * as chai from 'chai'
 
 import { get_data_view_results_query } from '#libs-server'
+import { current_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 const expect = chai.expect
 
@@ -77,7 +78,9 @@ describe('data-views player_dfs_salary week split', () => {
     const sql = query.toString()
     // no week split -> no week relation, single-week CTE, pid-only join
     expect(sql).to.not.include('player_years_weeks')
-    expect(sql).to.include("'2025_REG_WEEK_1'")
+    // The current-week default, derived rather than hardcoded -- a literal
+    // pinned this assertion to the clock it was written under.
+    expect(sql).to.include(`'${current_nfl_week_identifier()}'`)
     expect(sql).to.not.match(/\.week = player_years_weeks\.week/)
   })
 })

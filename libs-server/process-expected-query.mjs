@@ -1,4 +1,5 @@
 import * as constants from '#constants'
+import { current_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 /**
  * Process expected query with template literal syntax
@@ -36,6 +37,13 @@ export function process_expected_query(expected_query_string) {
 
     // Create a template literal by wrapping in backticks and evaluating
     // Provide both current_season (for new syntax) and constants (for old syntax compatibility)
+    // The nfl_week_id every current-week column family defaults to. Same
+    // reason as next_week above: a golden that hardcodes it is pinned to the
+    // clock it was blessed under and self-breaks at the next rollover that
+    // moves the week -- and it moved for every one of them when the current
+    // week stopped taking its year from the last completed season.
+    const current_nfl_week = current_nfl_week_identifier()
+
     // eslint-disable-next-line no-new-func
     const template_function = new Function(
       'current_season',
@@ -43,6 +51,7 @@ export function process_expected_query(expected_query_string) {
       'all_years',
       'last_3_years',
       'next_week',
+      'current_nfl_week',
       `return \`${expected_query_string}\``
     )
     return template_function(
@@ -50,7 +59,8 @@ export function process_expected_query(expected_query_string) {
       constants,
       all_years,
       last_3_years,
-      next_week
+      next_week,
+      current_nfl_week
     )
   }
 
