@@ -536,16 +536,18 @@ const keeptradecut_year_offset_range_select =
     const [min_off, max_off] = offset_range
     const pid_reference = data_view_options.pid_reference
     const is_superflex = is_superflex_from_params(params)
-    // `anchor` is interpolated raw into the SQL, so it must always be a real
-    // number: with no year_reference and no year param, Number(undefined) is NaN
-    // and the emitted `od_o.year = NaN` parses as a reference to a column named
-    // "nan" -- a 42703 on any year_offset range request that omits year. Default
-    // to the current season, matching get_default_params and every other year
-    // basis in this file.
+    // `anchor` is interpolated raw into the SQL in bare value position, so it
+    // must always be a real number. Two reasons, and the second is why the
+    // params branch is coerced rather than trusted: with no year_reference and
+    // no year param, Number(undefined) is NaN and the emitted `od_o.year = NaN`
+    // parses as a reference to a column named "nan" -- a 42703 on any
+    // year_offset range request that omits year; and `params.year` arrives
+    // unvalidated from the unauthenticated /data-views/search path, where a
+    // string closes this subquery and comments out the rest.
     const { year, as_of_month_day } = get_default_params({ params })
     const anchor = data_view_options.year_reference
       ? `(${data_view_options.year_reference})`
-      : year
+      : sql_integer_param({ value: year, param_name: 'year' })
 
     const per_offset_selects = []
     for (let off = min_off; off <= max_off; off++) {

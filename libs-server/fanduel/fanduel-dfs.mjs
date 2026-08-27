@@ -22,7 +22,12 @@ export const get_dfs_fixtures = async ({ ignore_cache = false } = {}) => {
   const url = `${fanduel_dfs_config.api_url}/fixture-lists`
 
   log(`fetching ${url}`)
-  log(fanduel_dfs_config.headers)
+  // Log which headers are being sent, never their values: these carry the DFS
+  // session cookie and bearer token, and
+  // scripts/import-fanduel-dfs-ownership.mjs enables this namespace
+  // unconditionally, so every ownership run would write live credentials into
+  // its job log.
+  log(`request headers: ${Object.keys(fanduel_dfs_config.headers).join(', ')}`)
   const res = await fetch_http2(url, {
     headers: fanduel_dfs_config.headers
   })

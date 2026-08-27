@@ -105,7 +105,11 @@ export const get_session_token_v3 = async () => {
   })
 
   const data = await fetch_json_with_context(NFL_V3_SESSION_URL, response)
-  log(data)
+  // Never log `data` itself -- it is the token-refresh body and carries a live
+  // bearer token. `enable_debug_namespaces('nfl')` above turns this namespace on
+  // whenever DEBUG is unset, so every unattended import run would write that
+  // token to stdout and into whatever captures the job's output.
+  log(`refreshed nfl access token, expires_in=${data.expiresIn ?? 'unknown'}`)
   return data.accessToken
 }
 

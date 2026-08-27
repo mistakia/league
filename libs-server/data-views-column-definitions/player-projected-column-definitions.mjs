@@ -5,8 +5,13 @@ import {
 import {
   current_season,
   external_data_sources,
+  nfl_season_types,
   projected_base_stats
 } from '#constants'
+import {
+  sql_enum_param,
+  sql_integer_param
+} from '#libs-server/data-views/sanitize-sql-param.mjs'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
@@ -230,7 +235,12 @@ const apply_projected_join = ({
           db.raw(`${table_alias}.${join_year_column} = ${year_reference}`)
         )
         if (params.year) {
-          const year_array = Array.isArray(year) ? year : [year]
+          // Spliced in bare value position from request params, so each entry
+          // is coerced to an integer here -- a non-integer is a 400 rather than
+          // reaching SQL text.
+          const year_array = (Array.isArray(year) ? year : [year]).map(
+            (value) => sql_integer_param({ value, param_name: 'year' })
+          )
           if (year_array.length) {
             this.andOn(
               db.raw(
@@ -685,7 +695,22 @@ const projection_points_year_offset_range_sql = ({
   is_rest_of_season = false
 }) => {
   const [min_offset, max_offset] = resolve_year_offset_range(params)
-  const { seas_type, week, source_id, year } = get_default_params({ params })
+  const {
+    seas_type: raw_seas_type,
+    week: raw_week,
+    source_id,
+    year
+  } = get_default_params({ params })
+  // `week` splices into BARE value position and `seas_type` inside quotes, both
+  // straight from request params on the unauthenticated /data-views/search
+  // path, so they are sanitized here rather than at each predicate below.
+  // `source_id` and `year` are already Number-coerced by get_default_params.
+  const week = sql_integer_param({ value: raw_week, param_name: 'week' })
+  const seas_type = sql_enum_param({
+    value: raw_seas_type,
+    param_name: 'seas_type',
+    allowed: nfl_season_types
+  })
   const scoring_format = get_projection_scoring_format({
     params,
     data_view_options

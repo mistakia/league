@@ -160,6 +160,33 @@ const where_operator_schema = {
   ]
 }
 
+// Defense-in-depth for `where[].value`, which libs-server/data-views/where-string.mjs
+// splices into single-quoted SQL text. The quote/semicolon/comment characters are
+// what actually stop a break-out; the keyword list is a second layer.
+//
+// A RegExp rather than a string so the `i` flag applies: as a string this was
+// compiled case-sensitively, so `drop` was rejected while `DROP` and `DeLeTe`
+// passed -- the lowercase-only spelling being the one an attacker would not use.
+// The flag makes the list mean what it says, at the cost of also rejecting a
+// benign value that merely CONTAINS a keyword ("Drop Kings"); values carrying an
+// apostrophe are already rejected by the same pattern, so that bar is not new.
+//
+// There was also a `match: /^[a-za-z0-9.]+$/` key on each rule. `match` is not a
+// fastest-validator string rule (the string rules are pattern/contains/enum/
+// alpha/alphanum/...), so it was silently ignored and enforced nothing. It is
+// removed rather than activated: as written it admits neither uppercase (the
+// range is a duplicated `a-z`) nor spaces, so switching it on would reject the
+// ordinary league and team names these filters run against.
+const where_value_pattern =
+  /^(?!.*(?:delete|drop|truncate|alter|update|insert|merge|exec|;|--|'|"|=|<|>)).*$/i
+
+const where_value_string_rule = {
+  type: 'string',
+  pattern: where_value_pattern,
+  min: 0,
+  max: 50
+}
+
 const where_schema = {
   type: 'array',
   items: {
@@ -171,26 +198,9 @@ const where_schema = {
         optional: true,
         type: 'multi',
         rules: [
-          {
-            type: 'string',
-            pattern:
-              '^(?!.*(?:delete|drop|truncate|alter|update|insert|merge|exec|;|--|\'|"|=|<|>)).*$',
-            min: 0,
-            max: 50,
-            match: /^[a-za-z0-9.]+$/
-          },
+          where_value_string_rule,
           { type: 'number' },
-          {
-            type: 'array',
-            items: {
-              type: 'string',
-              pattern:
-                '^(?!.*(?:delete|drop|truncate|alter|update|insert|merge|exec|;|--|\'|"|=|<|>)).*$',
-              min: 0,
-              max: 50,
-              match: /^[a-za-z0-9.]+$/
-            }
-          },
+          { type: 'array', items: where_value_string_rule },
           { type: 'array', items: { type: 'number' } }
         ]
       },

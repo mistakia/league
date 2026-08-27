@@ -48,6 +48,17 @@ export const sql_integer_param = ({ value, param_name }) => {
   return parsed
 }
 
+// Closed-set params (seas_type) spliced inside quotes. Membership is the whole
+// check: a value that is one of the listed literals cannot carry a quote or a
+// comment marker, so the enum IS the escaping. Compared case-sensitively, since
+// these splice into columns whose stored spelling is exact.
+export const sql_enum_param = ({ value, param_name, allowed }) => {
+  if (!allowed.includes(value)) {
+    invalid_param({ param_name })
+  }
+  return value
+}
+
 // Format ids (league_format_id, scoring_format_id) spliced inside quotes.
 // Production carries both shapes: 836 UUIDs and 22 slugs such as
 // `genesis_10_team`, so this admits the dash a UUID needs. It still cannot
