@@ -74,7 +74,7 @@ const generate_league_player_seasonlogs = async ({
       .where('lid', lid)
       .where('pid', pid)
       .where('season_year', season_year)
-      .where('week', season_dates.finalWeek)
+      .where('week', season_dates.final_week)
     const end_tid = rosters_end.length ? rosters_end[0].tid : null
 
     // get start team acquisition type
@@ -100,7 +100,7 @@ const generate_league_player_seasonlogs = async ({
         pid,
         tid: end_tid,
         season_year,
-        week: season_dates.finalWeek
+        week: season_dates.final_week
       })
 
       if (acquisition_transaction) {

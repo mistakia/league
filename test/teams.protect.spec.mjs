@@ -135,13 +135,13 @@ describe('API /teams - protect', function () {
     })
 
     it('rejects a protect one minute before the Regular Season begins', async () => {
-      // Both legs are pinned to `openingDay`, whose date is checkable against
+      // Both legs are pinned to `opening_day`, whose date is checkable against
       // the NFL schedule. This case used to pin
       // `regular_season_start.add(1, 'week')` and assert the route's separate
       // 'practice squad protection is not yet open' error, which no season can
       // produce: `regular_season_start` is the Tuesday nine days before the
-      // always-Thursday opener, so `+ 1 week` IS `openingDay - 2 days` -- the
-      // constitutional Regular Season start AND the instant `isRegularSeason`
+      // always-Thursday opener, so `+ 1 week` IS `opening_day - 2 days` -- the
+      // constitutional Regular Season start AND the instant `is_regular_season`
       // turns true. That guard was unreachable for its whole life and is gone;
       // `test/season.spec.mjs` now pins the identity the removal rests on.
       //
@@ -149,7 +149,7 @@ describe('API /teams - protect', function () {
       // `regular_season_start` was set a week early -- the same miscount that
       // unlinked every 2026 betting market from its game. Expressing a
       // boundary RELATIVE to the anchor under test is what hid both.
-      const constitutional_start = current_season.openingDay.subtract(
+      const constitutional_start = current_season.opening_day.subtract(
         '2',
         'day'
       )

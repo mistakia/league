@@ -14,7 +14,7 @@ import { current_season } from '#constants'
  */
 export default function is_before_extension_deadline({ league }) {
   if (!league || !league.extension_deadline_at) {
-    return !current_season.isRegularSeason
+    return !current_season.is_regular_season
   }
 
   return current_season.now.isBefore(dayjs(league.extension_deadline_at))

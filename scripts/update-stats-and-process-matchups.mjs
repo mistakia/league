@@ -127,9 +127,12 @@ const update_stats_and_process_matchups = async ({
   }
 
   // Validate week range
-  if (target_week < 1 || target_week > current_season.regularSeasonFinalWeek) {
+  if (
+    target_week < 1 ||
+    target_week > current_season.regular_season_final_week
+  ) {
     throw new Error(
-      `Invalid week: ${target_week}. Must be between 1 and ${current_season.regularSeasonFinalWeek}`
+      `Invalid week: ${target_week}. Must be between 1 and ${current_season.regular_season_final_week}`
     )
   }
 

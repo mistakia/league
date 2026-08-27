@@ -6,12 +6,12 @@ import { current_season } from '#constants'
 export default async function ({ league, pids }) {
   const now = dayjs()
   const is_before_restricted_free_agency_start =
-    (!current_season.isRegularSeason &&
+    (!current_season.is_regular_season &&
       !league.restricted_free_agency_period_start) ||
     (league.restricted_free_agency_period_start &&
       now.isBefore(dayjs(league.restricted_free_agency_period_start)))
   const is_before_restricted_free_agency_end =
-    (!current_season.isRegularSeason &&
+    (!current_season.is_regular_season &&
       !league.restricted_free_agency_period_end) ||
     (league.restricted_free_agency_period_end &&
       now.isBefore(dayjs(league.restricted_free_agency_period_end)))

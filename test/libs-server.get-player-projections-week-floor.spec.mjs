@@ -100,10 +100,10 @@ describe('LIBS-SERVER get_player_projections week floor', function () {
   describe('during the postseason, where the rows ARE keyed by the NFL week', function () {
     // POST rows carry nfl_seas_week (1..4) rather than a fantasy week, so the
     // postseason floor legitimately comes from there. current_season.week keeps
-    // counting past nflFinalWeek and would exclude every POST row.
+    // counting past nfl_final_week and would exclude every POST row.
     const postseason_instant = () =>
       current_season.regular_season_start
-        .add(current_season.nflFinalWeek + 2, 'weeks')
+        .add(current_season.nfl_final_week + 2, 'weeks')
         .toISOString()
 
     before(async function () {

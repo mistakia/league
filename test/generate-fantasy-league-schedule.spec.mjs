@@ -43,7 +43,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
   it('satisfies Article V Section 13(f) at ten teams and no divisions', () => {
     const schedule = generate_fantasy_league_schedule(ten_teams)
 
-    schedule.should.have.lengthOf(current_season.regularSeasonFinalWeek)
+    schedule.should.have.lengthOf(current_season.regular_season_final_week)
     for (const week of schedule) {
       week.should.have.lengthOf(5)
     }
@@ -128,7 +128,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
     }))
 
     const schedule = generate_fantasy_league_schedule(teams)
-    schedule.should.have.lengthOf(current_season.regularSeasonFinalWeek)
+    schedule.should.have.lengthOf(current_season.regular_season_final_week)
 
     const opponents = opponents_by_team(schedule, teams)
 

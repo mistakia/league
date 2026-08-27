@@ -749,7 +749,7 @@ router.post(
             current_slot: player.slot,
             roster: proposingTeamRoster,
             week: current_season.week,
-            is_regular_season: current_season.isRegularSeason
+            is_regular_season: current_season.is_regular_season
           })
 
         proposing_team_slots[pid] = assigned_slot
@@ -771,7 +771,7 @@ router.post(
             current_slot: player.slot,
             roster: acceptingTeamRoster,
             week: current_season.week,
-            is_regular_season: current_season.isRegularSeason
+            is_regular_season: current_season.is_regular_season
           })
 
         accepting_team_slots[pid] = assigned_slot
@@ -797,7 +797,7 @@ router.post(
         slot_assignments: proposing_team_slots,
         roster: proposingTeamRoster,
         week: current_season.week,
-        is_regular_season: current_season.isRegularSeason,
+        is_regular_season: current_season.is_regular_season,
         player_extensions: proposingPlayerExtensions
       })
 

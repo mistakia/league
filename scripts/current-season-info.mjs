@@ -14,9 +14,9 @@ console.log(`  Last Week with Stats: ${current_season.last_week_with_stats}`)
 console.log(`  Stats Season Year: ${current_season.last_completed_season_year}`)
 
 console.log('\nSeason Status:')
-console.log(`  Is Offseason: ${current_season.isOffseason}`)
-console.log(`  Is Regular Season: ${current_season.isRegularSeason}`)
-console.log(`  Is Waiver Period: ${current_season.isWaiverPeriod}`)
+console.log(`  Is Offseason: ${current_season.is_offseason}`)
+console.log(`  Is Regular Season: ${current_season.is_regular_season}`)
+console.log(`  Is Waiver Period: ${current_season.is_waiver_period}`)
 
 console.log('\nCurrent Time:')
 console.log(
@@ -28,7 +28,7 @@ console.log(
   `  Regular Season Start: ${current_season.regular_season_start.format('YYYY-MM-DD HH:mm:ss')}`
 )
 console.log(
-  `  Opening Day: ${current_season.openingDay.format('YYYY-MM-DD HH:mm:ss')}`
+  `  Opening Day: ${current_season.opening_day.format('YYYY-MM-DD HH:mm:ss')}`
 )
 console.log(`  End: ${current_season.end.format('YYYY-MM-DD HH:mm:ss')}`)
 console.log(
@@ -36,12 +36,12 @@ console.log(
 )
 
 console.log('\nWeek Configuration:')
-console.log(`  Final Fantasy Week: ${current_season.finalWeek}`)
-console.log(`  NFL Final Week: ${current_season.nflFinalWeek}`)
+console.log(`  Final Fantasy Week: ${current_season.final_week}`)
+console.log(`  NFL Final Week: ${current_season.nfl_final_week}`)
 console.log(
-  `  Regular Season Final Week: ${current_season.regularSeasonFinalWeek}`
+  `  Regular Season Final Week: ${current_season.regular_season_final_week}`
 )
-console.log(`  Wildcard Week: ${current_season.wildcardWeek}`)
+console.log(`  Wildcard Week: ${current_season.wildcard_week}`)
 
 console.log('\nWeek End:')
 console.log(

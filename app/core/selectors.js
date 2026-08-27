@@ -210,7 +210,7 @@ export const get_rosters_for_current_league = createSelector(
   (rosters, leagueId) => {
     const week = Math.min(
       current_season.fantasy_season_week,
-      current_season.finalWeek
+      current_season.final_week
     )
     const year = current_season.year
     const filtered = rosters.filter((w) => {
@@ -496,7 +496,7 @@ export const is_after_rookie_draft = createSelector(
   (state) => state.get('leagues'),
   get_rookie_draft_end,
   (league_id, leagues, rookie_draft_end) => {
-    if (current_season.isRegularSeason) {
+    if (current_season.is_regular_season) {
       return {
         after_rookie_draft: true,
         after_rookie_draft_waivers: true
@@ -590,7 +590,7 @@ function get_draft_pick_value(values, pick) {
       item.median_career_points_added_per_game) /
     4
   const weeks_remaining =
-    current_season.finalWeek - current_season.fantasy_season_week
+    current_season.final_week - current_season.fantasy_season_week
 
   return avg * weeks_remaining
 }
@@ -753,7 +753,7 @@ export const get_league_events = createSelector(
         detail: 'Regular Season Waivers Clear',
         date: firstWaiverDate
       })
-    } else if (current_season.isRegularSeason) {
+    } else if (current_season.is_regular_season) {
       const waiverDate = current_season.now.day(3).hour(15).minute(0)
       const nextWaiverDate = now.isBefore(waiverDate)
         ? waiverDate
@@ -765,10 +765,10 @@ export const get_league_events = createSelector(
       })
     }
 
-    if (now.isBefore(current_season.openingDay)) {
+    if (now.isBefore(current_season.opening_day)) {
       events.push({
         detail: 'NFL Opening Day',
-        date: current_season.openingDay
+        date: current_season.opening_day
       })
     }
 
@@ -925,8 +925,8 @@ export function get_selected_matchup_teams(state) {
   const teams = matchup.tids.map((tid) =>
     get_team_by_id_for_year(state, { tid, year: matchup.season_year })
   )
-  if (matchup.week === current_season.finalWeek) {
-    const prevWeek = current_season.finalWeek - 1
+  if (matchup.week === current_season.final_week) {
+    const prevWeek = current_season.final_week - 1
     return teams.map((teamRecord) => {
       const previousWeekScore = getPointsByTeamId(state, {
         tid: teamRecord.team_id,
@@ -1110,7 +1110,7 @@ export const isPlayerOnReleaseWaivers = createSelector(
 )
 
 export function isPlayerLocked(state, { player_map = new Map(), pid }) {
-  if (current_season.week > current_season.finalWeek) {
+  if (current_season.week > current_season.final_week) {
     return true
   }
 
@@ -1221,8 +1221,8 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   const isFreeAgent = isPlayerFreeAgent(state, { player_map })
   status.fa = isFreeAgent
   if (isFreeAgent) {
-    const { isWaiverPeriod, isRegularSeason } = current_season
-    if (isRegularSeason && isWaiverPeriod) {
+    const { is_waiver_period, is_regular_season } = current_season
+    if (is_regular_season && is_waiver_period) {
       status.waiver.active = true
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
         player_map
@@ -1240,11 +1240,11 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         player_map
       })
       if (onReleaseWaivers) {
-        if (isRegularSeason) status.waiver.active = true
+        if (is_regular_season) status.waiver.active = true
         if (rookie_draft_dates.after_rookie_draft && isPracticeSquadEligible)
           status.waiver.practice = true
       } else {
-        if (isRegularSeason && !status.locked) {
+        if (is_regular_season && !status.locked) {
           status.sign.active = true
         }
         if (isPracticeSquadEligible && !status.locked) {
@@ -1308,14 +1308,14 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       if (!isActive) {
         // can not activate long term reserve player during regular season
         status.eligible.activate = !(
-          current_season.isRegularSeason &&
+          current_season.is_regular_season &&
           playerSlot === roster_slot_types.RESERVE_LONG_TERM
         )
 
         // is regular season and is on practice squad && has no poaching claims
         const leaguePoaches = get_poaches_for_current_league(state)
         if (
-          current_season.isRegularSeason &&
+          current_season.is_regular_season &&
           (playerSlot === roster_slot_types.PS ||
             playerSlot === roster_slot_types.PSD) &&
           !leaguePoaches.has(playerId)
@@ -1330,7 +1330,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
       if (
         !status.protected &&
-        current_season.week <= current_season.finalWeek
+        current_season.week <= current_season.final_week
       ) {
         const reserve = get_reserve_eligibility_from_player_map({ player_map })
 
@@ -1358,7 +1358,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         if (
           reserve.cov &&
           playerSlot !== roster_slot_types.COV &&
-          current_season.isRegularSeason
+          current_season.is_regular_season
         ) {
           status.reserve.cov = true
         }
@@ -1434,7 +1434,7 @@ export function isPlayerPracticeSquadEligible(
   // - not on a nfl team
   if (
     !rosterInfo.tid && // not on a team
-    !current_season.isRegularSeason && // during the offseason
+    !current_season.is_regular_season && // during the offseason
     player_map.get('nfl_draft_year') !== current_season.year && // not a rookie
     player_map.get('team') !== 'INA' // not on a nfl team
   ) {
@@ -1743,7 +1743,7 @@ export const getRosterRecordByTeamId = createSelector(
     {
       week = Math.min(
         current_season.fantasy_season_week,
-        current_season.finalWeek
+        current_season.final_week
       )
     }
   ) => week,
@@ -1978,7 +1978,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
       values.rosters[roster.tid] = {}
     }
 
-    const seasonType = current_season.isOffseason ? 'season' : 'rest_of_season'
+    const seasonType = current_season.is_offseason ? 'season' : 'rest_of_season'
     for (const position of fantasy_positions) {
       // skip positions that don't start in the current league
       if (!league[starter_slot_league_columns[roster_slot_types[position]]]) {
@@ -2103,7 +2103,7 @@ export const getGroupedPlayersByTeamId = createSelector(
   (rosters, league, player_items, tid) => {
     const week = Math.min(
       current_season.fantasy_season_week,
-      current_season.finalWeek
+      current_season.final_week
     )
     const roster = rosters.getIn([tid, current_season.year, week])
     if (!roster) {
@@ -2291,10 +2291,10 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
 
   const championship_round_final_week =
     Math.max(...season.get('championship_round', [])) ||
-    current_season.finalWeek
+    current_season.final_week
   const championship_round_first_week =
     Math.min(...season.get('championship_round', [])) ||
-    current_season.finalWeek - 1
+    current_season.final_week - 1
   const is_championship_round = matchup.week === championship_round_final_week
 
   // For past matchups (before current week), use stored values
@@ -3149,7 +3149,7 @@ export function get_trade_is_valid(state) {
         current_slot,
         roster,
         week: current_season.week,
-        is_regular_season: current_season.isRegularSeason
+        is_regular_season: current_season.is_regular_season
       })
     }
 
@@ -3264,7 +3264,7 @@ export function get_trade_validation_details(state) {
         current_slot,
         roster,
         week: current_season.week,
-        is_regular_season: current_season.isRegularSeason
+        is_regular_season: current_season.is_regular_season
       })
     }
 
@@ -3441,7 +3441,7 @@ export const get_current_trade_players = createSelector(
 
     const week = Math.min(
       current_season.fantasy_season_week,
-      current_season.finalWeek
+      current_season.final_week
     )
     const year = current_season.year
 
@@ -3616,7 +3616,7 @@ function getTeamTradeSummary(
   draft_pick_values,
   { lineups, playerMaps, picks }
 ) {
-  const pts_added_type = current_season.isOffseason
+  const pts_added_type = current_season.is_offseason
     ? 'season'
     : 'rest_of_season'
   const get_draft_pick_value = (pick) => {
@@ -3631,7 +3631,7 @@ function getTeamTradeSummary(
         item.median_career_points_added_per_game) /
       4
     const weeks_remaining =
-      current_season.finalWeek - current_season.fantasy_season_week
+      current_season.final_week - current_season.fantasy_season_week
     return avg * weeks_remaining
   }
   const draft_value = picks.reduce(
@@ -3693,7 +3693,7 @@ export const get_current_trade_analysis = createSelector(
     const getRosterRecord = (tid) => {
       const week = Math.min(
         current_season.fantasy_season_week,
-        current_season.finalWeek
+        current_season.final_week
       )
       const year = current_season.year
       return rosters_state.getIn([tid, year, week]) || new RosterRecord()

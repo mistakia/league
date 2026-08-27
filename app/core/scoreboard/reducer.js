@@ -6,7 +6,7 @@ import { scoreboard_actions } from './actions'
 import { current_season } from '#constants'
 import { matchups_actions } from '@core/matchups'
 
-const current_week = Math.min(current_season.week, current_season.finalWeek)
+const current_week = Math.min(current_season.week, current_season.final_week)
 const initial_week = Math.max(
   dayjs().day() === 2 ? current_week - 1 : current_week,
   1

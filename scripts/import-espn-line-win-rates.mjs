@@ -46,7 +46,7 @@ const import_espn_line_win_rates = async ({
   // ESPN publishes these win rates only while a season is being played, and
   // `current_season.week` is a continuous counter from `regular_season_start`
   // that is CLAMPED AT ZERO before the opener. So the original guard --
-  // `week > nflFinalWeek` -- was dead through the entire offseason, which is
+  // `week > nfl_final_week` -- was dead through the entire offseason, which is
   // exactly the window it was written to cover: once the season constants roll
   // to the next season, its start is in the future, week reads 0, and 0 is not
   // greater than 18. Sixteen runs between 2025-12 and 2026-03 walked through it
@@ -54,10 +54,10 @@ const import_espn_line_win_rates = async ({
   // succeeded into the wrong season. Both bounds are needed.
   if (
     current_season.week === 0 ||
-    current_season.week > current_season.nflFinalWeek
+    current_season.week > current_season.nfl_final_week
   ) {
     log(
-      `Skipping — outside the regular season (week ${current_season.week}, final week ${current_season.nflFinalWeek})`
+      `Skipping — outside the regular season (week ${current_season.week}, final week ${current_season.nfl_final_week})`
     )
     return { ...result, skipped: true }
   }

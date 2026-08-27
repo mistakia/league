@@ -194,9 +194,9 @@ export default function StandingsPage({
   }, [year, lid, load_league_team_stats])
 
   const is_current_year = year === current_season.year
-  // Hide playoff/bye odds once playoffs begin (week > regularSeasonFinalWeek)
+  // Hide playoff/bye odds once playoffs begin (week > regular_season_final_week)
   const is_regular_season =
-    current_season.week <= current_season.regularSeasonFinalWeek
+    current_season.week <= current_season.regular_season_final_week
 
   // A single-division league has no division tables to draw -- the Overall
   // table above already lists every team.

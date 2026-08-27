@@ -5,7 +5,7 @@ import MockDate from 'mockdate'
 import { current_season } from '#constants'
 import { seed_nfl_games, clear_nfl_games } from './seed-nfl-games.mjs'
 
-const { regular_season_start, nflFinalWeek } = current_season
+const { regular_season_start, nfl_final_week } = current_season
 
 // Weekends after the final regular-season week, per the NFL playoff calendar:
 // wild card, divisional and conference run on consecutive weekends, and the
@@ -13,7 +13,7 @@ const { regular_season_start, nflFinalWeek } = current_season
 // `nfl_games` POST kickoffs for 2022, 2023 and 2024, where the conference-to-
 // Super Bowl gap is 14 days every year.
 //
-// These are literals rather than `superBowlByeWeeks + week` on purpose. That
+// These are literals rather than `super_bowl_bye_weeks + week` on purpose. That
 // expression is the algebraic inverse of `Season.postseason_week`, so a
 // fixture built from it pins whatever the getter currently does and cannot
 // tell a correct getter from a broken one -- which is how the uniform bye
@@ -26,7 +26,7 @@ export const week_offset_for_seas_type = (seas_type, week = 1) => {
     if (!weekends) {
       throw new Error(`no POST week ${week} in the NFL playoff calendar`)
     }
-    return nflFinalWeek + weekends
+    return nfl_final_week + weekends
   }
   return week
 }

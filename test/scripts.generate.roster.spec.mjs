@@ -160,7 +160,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({
         tid: teamId,
-        week: current_season.finalWeek,
+        week: current_season.final_week,
         year: current_season.year - 1
       })
       const roster1Players = roster1.players.map(
@@ -199,7 +199,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({
         tid: teamId,
-        week: current_season.finalWeek,
+        week: current_season.final_week,
         year: current_season.year - 1
       })
       const roster3Players = roster3.players.map(
@@ -236,7 +236,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       await draft(knex)
 
       const seed_year = current_season.year
-      const final_week = current_season.finalWeek
+      const final_week = current_season.final_week
       const team_id = 1
 
       const team_players = await knex('rosters_players')

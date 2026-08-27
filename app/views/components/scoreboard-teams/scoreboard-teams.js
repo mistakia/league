@@ -52,7 +52,7 @@ export default function ScoreboardTeams({
 }) {
   const [show_other_teams, set_show_other_teams] = useState(false)
 
-  const isWC = week === current_season.wildcardWeek
+  const isWC = week === current_season.wildcard_week
   const sorted = scoreboards.sort((a, b) => b.points - a.points)
   const cutoff = isWC
     ? sorted.get(1, new Scoreboard()).points

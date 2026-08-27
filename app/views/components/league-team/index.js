@@ -54,7 +54,7 @@ const map_state_to_props = createSelector(
     teams,
     restricted_free_agency_players
   ) => {
-    const projectionType = current_season.isRegularSeason
+    const projectionType = current_season.is_regular_season
       ? 'rest_of_season'
       : 'season'
     const items = []

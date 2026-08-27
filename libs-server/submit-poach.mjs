@@ -111,7 +111,7 @@ export default async function ({
   const tran = transactions[0]
   const playerPoachValue = tran.player_salary + 2
   if (
-    !current_season.isRegularSeason &&
+    !current_season.is_regular_season &&
     roster.availableCap - playerPoachValue < 0
   ) {
     throw new Error('not enough available cap')

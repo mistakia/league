@@ -39,7 +39,7 @@ export async function simulate_season_forecast({
 }) {
   const start_time = Date.now()
   const current_week = week || Math.max(current_season.week, 1)
-  const regular_season_final_week = current_season.regularSeasonFinalWeek
+  const regular_season_final_week = current_season.regular_season_final_week
 
   log(
     `Starting season forecast for league ${league_id}, week ${current_week}, year ${year}`

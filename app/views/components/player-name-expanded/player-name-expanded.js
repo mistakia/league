@@ -43,7 +43,7 @@ function getClock({ desc, game_clock_start, quarter }) {
 }
 
 function GameStatus({ status, player_map }) {
-  if (!current_season.isRegularSeason && !status) {
+  if (!current_season.is_regular_season && !status) {
     return null
   }
 

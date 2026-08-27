@@ -23,8 +23,12 @@ export default function optimizeLineup({
     : player_positions
   const constraints = getOptimizerPositionConstraints({ positions, league })
 
-  const finalWeek = current_season.finalWeek
-  for (let week = Math.max(current_season.week, 1); week <= finalWeek; week++) {
+  const final_week = current_season.final_week
+  for (
+    let week = Math.max(current_season.week, 1);
+    week <= final_week;
+    week++
+  ) {
     const variables = {}
     const ints = {}
 

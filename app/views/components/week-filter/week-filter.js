@@ -15,7 +15,7 @@ export default class WeekFilter extends React.Component {
 
     for (
       let week = Math.max(current_season.week, 1);
-      week <= current_season.finalWeek;
+      week <= current_season.final_week;
       week++
     ) {
       state.values.push({

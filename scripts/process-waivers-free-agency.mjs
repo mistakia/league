@@ -45,8 +45,8 @@ const run_active = async ({ daily = false }) => {
   // period (full cohort runs only off-period) and offseason non-daily ticks.
   // Mirror them here so a no-op tick with pending waivers does not alert.
   const is_inner_gated_skip =
-    (current_season.isRegularSeason && current_season.isWaiverPeriod) ||
-    (!current_season.isRegularSeason && !daily)
+    (current_season.is_regular_season && current_season.is_waiver_period) ||
+    (!current_season.is_regular_season && !daily)
 
   // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
   // nothing pending, this was a legitimate no-op — skip the shortfall check.
@@ -125,9 +125,9 @@ const run_practice = async ({ daily = false }) => {
   // conditions that must not register as shortfall: after the final NFL week,
   // offseason non-daily ticks, and regular-season waiver period.
   const is_inner_gated_skip =
-    current_season.week > current_season.finalWeek ||
-    (!current_season.isRegularSeason && !daily) ||
-    (current_season.isRegularSeason && current_season.isWaiverPeriod)
+    current_season.week > current_season.final_week ||
+    (!current_season.is_regular_season && !daily) ||
+    (current_season.is_regular_season && current_season.is_waiver_period)
 
   // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
   // nothing pending, this was a legitimate no-op — skip the shortfall check.

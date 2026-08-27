@@ -45,7 +45,7 @@ const generated_at = new Date()
 
 const run = async ({ dry_run = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (current_season.week > current_season.nflFinalWeek) {
+  if (current_season.week > current_season.nfl_final_week) {
     return { skipped: true }
   }
 

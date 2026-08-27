@@ -144,10 +144,10 @@ const player_league_roster_join = async ({
         : league.championship_round
       week = Math.min(
         current_season.week,
-        championship_round || current_season.finalWeek
+        championship_round || current_season.final_week
       )
     } else {
-      week = Math.min(current_season.week, current_season.finalWeek)
+      week = Math.min(current_season.week, current_season.final_week)
     }
   }
 

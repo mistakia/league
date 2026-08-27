@@ -16,9 +16,9 @@ export default class PlayerRosterTotal extends React.Component {
       is_team_manager
     } = this.props
 
-    const { isOffseason, isRegularSeason } = current_season
+    const { is_offseason, is_regular_season } = current_season
     const week = Math.max(current_season.week, 1)
-    const projectionType = isRegularSeason ? 'rest_of_season' : 'season'
+    const projectionType = is_regular_season ? 'rest_of_season' : 'season'
 
     let baseSalaryTotal = 0
     let extendedSalaryTotal = 0
@@ -120,18 +120,18 @@ export default class PlayerRosterTotal extends React.Component {
             <div className='metric table__cell'>
               ${baseSalaryTotal.toFixed(0)}
             </div>
-            {isOffseason && is_before_extension_deadline && (
+            {is_offseason && is_before_extension_deadline && (
               <div className='metric table__cell'>${extendedSalaryTotal}</div>
             )}
-            {/* {isOffseason && <div className='metric table__cell'>-</div>} */}
-            {isOffseason && (
+            {/* {is_offseason && <div className='metric table__cell'>-</div>} */}
+            {is_offseason && (
               <div className='metric table__cell'>
                 {projectedSalaryTotal
                   ? `$${projectedSalaryTotal.toFixed(0)}`
                   : '-'}
               </div>
             )}
-            {isOffseason && (
+            {is_offseason && (
               <div className='metric table__cell'>
                 {savingsTotal ? `$${savingsTotal.toFixed(0)}` : '-'}
               </div>
@@ -149,7 +149,7 @@ export default class PlayerRosterTotal extends React.Component {
             </div>
           </>
         )}
-        {!isOffseason && (
+        {!is_offseason && (
           <>
             <div className='row__group'>
               <div className='row__group-body'>
@@ -179,7 +179,7 @@ export default class PlayerRosterTotal extends React.Component {
             <div className='metric table__cell'>
               {pts_added_net_total ? pts_added_net_total.toFixed(1) : '-'}
             </div>
-            {isOffseason && (
+            {is_offseason && (
               <div className='metric table__cell'>
                 {valueAdjTotal ? valueAdjTotal.toFixed(1) : '-'}
               </div>
@@ -187,7 +187,7 @@ export default class PlayerRosterTotal extends React.Component {
             <div className='metric table__cell'>-</div>
           </div>
         </div>
-        {isRegularSeason && (
+        {is_regular_season && (
           <div className='metric table__cell'>
             {weekPointsTotal ? weekPointsTotal.toFixed(1) : '-'}
           </div>

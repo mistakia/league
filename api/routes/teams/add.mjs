@@ -200,7 +200,7 @@ router.post('/?', async (req, res) => {
     }
     const tid = Number(teamId)
 
-    if (current_season.week > current_season.finalWeek) {
+    if (current_season.week > current_season.final_week) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -215,7 +215,7 @@ router.post('/?', async (req, res) => {
     }
 
     // verify not in waiver period during the regular season
-    if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
+    if (current_season.is_regular_season && current_season.is_waiver_period) {
       return res.status(400).send({ error: 'player is on waivers' })
     }
 

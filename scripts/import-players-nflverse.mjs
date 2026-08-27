@@ -294,7 +294,7 @@ const import_players_nflverse = async ({
 
   const preflight = validate_response_shape({
     rows: data,
-    is_offseason: current_season.isOffseason
+    is_offseason: current_season.is_offseason
   })
   log(
     `preflight ok: ${preflight.rows} rows; status_counts=${JSON.stringify(preflight.status_counts)}`

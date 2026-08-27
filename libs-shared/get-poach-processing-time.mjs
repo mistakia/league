@@ -13,7 +13,7 @@ dayjs.extend(isBetween)
 // and rendered a year-58,000 processing time that passes isValid().
 export default function (submitted) {
   const submitted_timestamp = dayjs(submitted)
-  if (current_season.isOffseason) {
+  if (current_season.is_offseason) {
     return submitted_timestamp.add('48', 'hours')
   }
 

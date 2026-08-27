@@ -26,7 +26,7 @@ export default async function (lid) {
     return undefined
   }
 
-  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
+  if (current_season.is_regular_season && current_season.is_waiver_period) {
     return undefined
   }
 
@@ -79,7 +79,7 @@ export default async function (lid) {
       }
     ])
 
-  if (!current_season.isOffseason) {
+  if (!current_season.is_offseason) {
     query
       .select('nfl_games.date')
       .select('nfl_games.time_eastern')
@@ -142,7 +142,7 @@ export default async function (lid) {
 
   const waiver_rows = await query
 
-  if (!current_season.isOffseason) {
+  if (!current_season.is_offseason) {
     const now = dayjs()
     const filtered = waiver_rows.filter((waiver_row) => {
       if (!waiver_row.date) return true

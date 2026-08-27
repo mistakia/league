@@ -31,12 +31,12 @@ const generateSeasonDates = async ({
     offseason: null,
     regular_season_start: null,
     end: null,
-    openingDay: null,
-    finalWeek: null,
-    nflFinalWeek: null,
-    regularSeasonFinalWeek: null,
-    wildcardWeek: null,
-    superBowlByeWeeks: 1
+    opening_day: null,
+    final_week: null,
+    nfl_final_week: null,
+    regular_season_final_week: null,
+    wildcard_week: null,
+    super_bowl_bye_weeks: 1
   }
 
   const games = await db('nfl_games')
@@ -57,7 +57,7 @@ const generateSeasonDates = async ({
   )
 
   // first game day
-  result.openingDay = first_game_day.unix()
+  result.opening_day = first_game_day.unix()
 
   // two tuesdays before first game
   result.regular_season_start = first_game_day
@@ -70,7 +70,7 @@ const generateSeasonDates = async ({
   // miss `find_nfl_game` and write a null esbid. Check the gap, not the
   // calendar: the opener is always a Thursday, the anchor the Tuesday nine
   // days before it.
-  const anchor_gap_days = result.openingDay - result.regular_season_start
+  const anchor_gap_days = result.opening_day - result.regular_season_start
   if (anchor_gap_days !== 777600) {
     throw new Error(
       `regular_season_start is ${anchor_gap_days / 86400} days before the opener, expected 9`
@@ -110,12 +110,12 @@ const generateSeasonDates = async ({
       ? super_bowl_midnight(previous_super_bowl.kickoff_at)
       : placeholder_end
 
-  result.nflFinalWeek = Math.max(
+  result.nfl_final_week = Math.max(
     ...games.filter((g) => g.season_type === 'REG').map((g) => g.week)
   )
-  result.finalWeek = result.nflFinalWeek - 1
-  result.regularSeasonFinalWeek = result.finalWeek - 3
-  result.wildcardWeek = result.finalWeek - 2
+  result.final_week = result.nfl_final_week - 1
+  result.regular_season_final_week = result.final_week - 3
+  result.wildcard_week = result.final_week - 2
 
   log(result)
 

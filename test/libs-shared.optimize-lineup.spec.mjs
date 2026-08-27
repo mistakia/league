@@ -33,7 +33,7 @@ describe('LIBS-SHARED optimizeLineup', function () {
 
   it('scores the phantom starter at the supplied baseline points, not zero', function () {
     // Pin the clock inside the regular season so current_season.week and
-    // finalWeek both resolve to a small, deterministic range.
+    // final_week both resolve to a small, deterministic range.
     MockDate.set('2026-10-01T12:00:00Z')
 
     const baseline_points = {}

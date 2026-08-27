@@ -23,99 +23,99 @@ describe('LIBS-SHARED Season', function () {
     MockDate.reset()
   })
 
-  it('isRegularSeason', function () {
+  it('is_regular_season', function () {
     // 5 weeks before start of week 1
     MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
-    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.is_regular_season).to.equal(false)
 
     // 1 minute before start of week 1
     MockDate.set(
       regular_season_start.add('7', 'day').subtract('1', 'minute').toISOString()
     )
-    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.is_regular_season).to.equal(false)
 
     // start of week 1
     MockDate.set(regular_season_start.add('1', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
 
     // start of week 4
     MockDate.set(regular_season_start.add('4', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
 
     // start of week 16
     MockDate.set(regular_season_start.add('16', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
 
     // start of week 17
     MockDate.set(regular_season_start.add('17', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
 
     // start of week 18
     MockDate.set(regular_season_start.add('18', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.is_regular_season).to.equal(false)
   })
 
   // test before regular season waiver period
-  it('isWaiverPeriod', function () {
+  it('is_waiver_period', function () {
     // start of week 0
     MockDate.set(regular_season_start.toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // tuesday of week 1
     MockDate.set(regular_season_start.add('7', 'day').day(2).toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 1 - noon
     MockDate.set(
       regular_season_start.add('7', 'day').day(3).hour(11).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 1 - 3pm
     MockDate.set(
       regular_season_start.add('7', 'day').day(3).hour(15).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(false)
+    expect(current_season.is_waiver_period).to.equal(false)
 
     // tuesday of week 2
     MockDate.set(regular_season_start.add('14', 'day').day(2).toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 2 - noon
     MockDate.set(
       regular_season_start.add('14', 'day').day(3).hour(11).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 16 - 3pm
     MockDate.set(
       regular_season_start.add('112', 'day').day(3).hour(15).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(false)
+    expect(current_season.is_waiver_period).to.equal(false)
 
     // tuesday of week 16
     MockDate.set(regular_season_start.add('112', 'day').day(2).toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 16 - noon
     MockDate.set(
       regular_season_start.add('112', 'day').day(3).hour(11).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 16 - 3pm
     MockDate.set(
       regular_season_start.add('112', 'day').day(3).hour(15).toISOString()
     )
-    expect(current_season.isWaiverPeriod).to.equal(false)
+    expect(current_season.is_waiver_period).to.equal(false)
 
     // tuesday of week 17
     MockDate.set(regular_season_start.add('112', 'day').day(2).toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
 
     // wednesday of week 17
     MockDate.set(regular_season_start.add('112', 'day').day(3).toISOString())
-    expect(current_season.isWaiverPeriod).to.equal(true)
+    expect(current_season.is_waiver_period).to.equal(true)
   })
 
   it('week', function () {
@@ -171,27 +171,27 @@ describe('LIBS-SHARED Season', function () {
   // anchor itself -- they stayed green through a 2026 value set a full week
   // early, which shifted every regular-season game to week N+1 and silently
   // unlinked all 4,632 2026 rows in prop_markets_index. These assertions
-  // deliberately anchor on openingDay instead, because the opener's date is
+  // deliberately anchor on opening_day instead, because the opener's date is
   // independently verifiable against the NFL schedule while the anchor is not.
   it('regular_season_start places the opener in REG week 1', function () {
-    const { openingDay, regular_season_start } = current_season
+    const { opening_day, regular_season_start } = current_season
 
     // Tuesday, nine days before the always-Thursday opener.
     expect(regular_season_start.day()).to.equal(2)
-    expect(openingDay.day()).to.equal(4)
-    expect(openingDay.diff(regular_season_start, 'day')).to.equal(9)
+    expect(opening_day.day()).to.equal(4)
+    expect(opening_day.diff(regular_season_start, 'day')).to.equal(9)
 
     // The opener and the Sunday that follows it are both REG week 1, and the
     // Thursday a week earlier is still preseason.
-    expect(current_season.calculate_week(openingDay)).to.deep.equal({
+    expect(current_season.calculate_week(opening_day)).to.deep.equal({
       seas_type: 'REG',
       week: 1
     })
     expect(
-      current_season.calculate_week(openingDay.add('3', 'day'))
+      current_season.calculate_week(opening_day.add('3', 'day'))
     ).to.deep.equal({ seas_type: 'REG', week: 1 })
     expect(
-      current_season.calculate_week(openingDay.subtract('7', 'day')).seas_type
+      current_season.calculate_week(opening_day.subtract('7', 'day')).seas_type
     ).to.equal('PRE')
   })
 
@@ -206,7 +206,7 @@ describe('LIBS-SHARED Season', function () {
       offseason: current_season.offseason,
       regular_season_start: current_season.regular_season_start,
       end: current_season.end,
-      openingDay: current_season.openingDay
+      opening_day: current_season.opening_day
     }
 
     for (const [name, anchor] of Object.entries(anchors)) {
@@ -246,7 +246,7 @@ describe('LIBS-SHARED Season', function () {
   })
 
   it('practice_squad_protection_start', function () {
-    const { openingDay, practice_squad_protection_start } = current_season
+    const { opening_day, practice_squad_protection_start } = current_season
 
     // The constitution's definitions section: "Regular Season" begins 12:00 AM
     // EST on the first Tuesday of Week 1 of the NFL Regular Season -- the
@@ -254,21 +254,21 @@ describe('LIBS-SHARED Season', function () {
     // `regular_season_start`, which anchors preseason waiver/roster mechanics
     // ONE week earlier (nine days before the opener, per the assertion above).
     expect(practice_squad_protection_start.day()).to.equal(2)
-    expect(practice_squad_protection_start.isBefore(openingDay)).to.equal(true)
-    expect(openingDay.diff(practice_squad_protection_start, 'day')).to.equal(2)
+    expect(practice_squad_protection_start.isBefore(opening_day)).to.equal(true)
+    expect(opening_day.diff(practice_squad_protection_start, 'day')).to.equal(2)
   })
 
-  // This is the assertion that lets every caller ask `isRegularSeason` and get
+  // This is the assertion that lets every caller ask `is_regular_season` and get
   // the CONSTITUTIONAL answer, and it is why `api/routes/teams/protect.mjs`
-  // needs no second Article XIV check. Both sides are pinned to `openingDay`,
+  // needs no second Article XIV check. Both sides are pinned to `opening_day`,
   // whose date is checkable against the NFL schedule; expressing either one
   // relative to `regular_season_start` would make the test vacuous with
   // respect to the anchor, which is exactly how the 2026 miscount survived.
-  it('isRegularSeason turns true at the constitutional Regular Season start', function () {
-    const { openingDay } = current_season
-    const constitutional_start = openingDay.subtract('2', 'day')
+  it('is_regular_season turns true at the constitutional Regular Season start', function () {
+    const { opening_day } = current_season
+    const constitutional_start = opening_day.subtract('2', 'day')
 
-    // the getter agrees with the openingDay-derived boundary
+    // the getter agrees with the opening_day-derived boundary
     expect(current_season.practice_squad_protection_start.valueOf()).to.equal(
       constitutional_start.valueOf()
     )
@@ -276,7 +276,7 @@ describe('LIBS-SHARED Season', function () {
     // one minute before: still the offseason, for the fantasy season and for
     // Article XIV alike
     MockDate.set(constitutional_start.subtract('1', 'minute').toISOString())
-    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.is_regular_season).to.equal(false)
     expect(
       current_season.now.isBefore(
         current_season.practice_squad_protection_start
@@ -286,7 +286,7 @@ describe('LIBS-SHARED Season', function () {
     // at the boundary: both flip together, so no window exists in which the
     // regular season has started but protection has not opened
     MockDate.set(constitutional_start.toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
     expect(
       current_season.now.isBefore(
         current_season.practice_squad_protection_start
@@ -300,7 +300,7 @@ describe('LIBS-SHARED Season', function () {
   // each held the getter's value at IMPORT time and never moved again, so in
   // the long-running API `is_offseason` stayed frozen at whatever it was when
   // the process booted. Measured at the deletion: with the clock moved to
-  // 2026-11-17, the getters reported `isRegularSeason=true, week=11` while the
+  // 2026-11-17, the getters reported `is_regular_season=true, week=11` while the
   // frozen exports still read `is_regular_season=false, current_week=0`.
   //
   // Both halves are asserted, because either alone is satisfiable the wrong
@@ -330,11 +330,11 @@ describe('LIBS-SHARED Season', function () {
     }
 
     MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
-    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.is_regular_season).to.equal(false)
     expect(current_season.week).to.equal(0)
 
     MockDate.set(regular_season_start.add('11', 'week').toISOString())
-    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.is_regular_season).to.equal(true)
     expect(current_season.week).to.equal(11)
   })
 
@@ -348,11 +348,11 @@ describe('LIBS-SHARED Season', function () {
   // `calculate_week` does, which makes the assertion answerable against the
   // NFL schedule rather than against the constant under test.
   it('end is the midnight after Super Bowl Sunday', function () {
-    const { regular_season_start, end, nflFinalWeek, superBowlByeWeeks } =
+    const { regular_season_start, end, nfl_final_week, super_bowl_bye_weeks } =
       current_season
 
     const super_bowl_week = regular_season_start.add(
-      nflFinalWeek + superBowlByeWeeks + 4,
+      nfl_final_week + super_bowl_bye_weeks + 4,
       'week'
     )
     expect(current_season.calculate_week(super_bowl_week)).to.deep.equal({

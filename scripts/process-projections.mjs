@@ -82,7 +82,7 @@ const run_season_forecast = async (lid) => {
     const championship_start_week =
       championship_round.length > 0 ? championship_round[0] : null
 
-    if (current_season.week <= current_season.regularSeasonFinalWeek) {
+    if (current_season.week <= current_season.regular_season_final_week) {
       log(`Running season forecast for league ${lid}`)
       forecast_result = await simulation.simulate_season_forecast({
         league_id: lid,
@@ -99,7 +99,7 @@ const run_season_forecast = async (lid) => {
     } else if (
       championship_start_week &&
       current_season.week >= championship_start_week &&
-      current_season.week <= current_season.finalWeek
+      current_season.week <= current_season.final_week
     ) {
       log(
         `Running championship forecast for league ${lid} (starting week ${championship_start_week})`
@@ -202,7 +202,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
     // Regular season processing
     let week = first_projection_week_to_recompute({ year })
-    for (; week <= current_season.nflFinalWeek; week++) {
+    for (; week <= current_season.nfl_final_week; week++) {
       player_row.projection[week] = {}
 
       // average projection
@@ -320,7 +320,7 @@ const process_league_format = async ({
   // only process_league writes league_baselines, and it computes its own.
   const first_week = first_projection_week_to_recompute({ year })
   let week = first_week
-  for (; week <= current_season.nflFinalWeek; week++) {
+  for (; week <= current_season.nfl_final_week; week++) {
     calculate_projection_values({
       players: player_rows,
       league: league_format,
@@ -420,7 +420,7 @@ const process_league = async ({ year, lid }) => {
   const rostered_pids = []
 
   // check to see if it is past the fantasy season
-  if (week <= current_season.finalWeek) {
+  if (week <= current_season.final_week) {
     for (const team of teams) {
       const rosterRow = await getRoster({ tid: team.team_id, week })
       rosterRows.push(rosterRow)
@@ -464,7 +464,7 @@ const process_league = async ({ year, lid }) => {
   week = first_projection_week_to_recompute({ year })
 
   const baselines = {}
-  for (; week <= current_season.nflFinalWeek; week++) {
+  for (; week <= current_season.nfl_final_week; week++) {
     const { baselines: week_baselines } = calculate_projection_values({
       players: player_rows,
       league,
@@ -694,7 +694,7 @@ const process_league = async ({ year, lid }) => {
     )
   }
 
-  if (current_season.week <= current_season.finalWeek) {
+  if (current_season.week <= current_season.final_week) {
     await project_lineups(lid)
     await calculateMatchupProjection({ lid })
     await calculatePlayoffMatchupProjection({ lid })

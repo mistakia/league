@@ -53,7 +53,7 @@ const get_expected_season_years = async () => {
     .orderBy('nfl_games.season_year', 'asc')
     .pluck('nfl_games.season_year')
 
-  return current_season.isRegularSeason
+  return current_season.is_regular_season
     ? rows.filter((season_year) => season_year !== current_season.year)
     : rows
 }

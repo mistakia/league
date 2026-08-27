@@ -60,7 +60,7 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
   }
 
   // Check game timing constraints if during regular season
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     await validate_game_timing(waiver_id, waiver.lid)
   }
 
@@ -88,18 +88,18 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
 
 const process_bulk_practice_waivers = async (daily, timestamp) => {
   // Original bulk processing logic
-  if (current_season.week > current_season.finalWeek) {
+  if (current_season.week > current_season.final_week) {
     log('after final week, practice waivers not run')
     return
   }
 
   // only run daily waivers during offseason
-  if (!current_season.isRegularSeason && !daily) {
+  if (!current_season.is_regular_season && !daily) {
     log('outside of daily waivers during offseason, practice waivers not run')
     return
   }
 
-  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
+  if (current_season.is_regular_season && current_season.is_waiver_period) {
     return
   }
 
@@ -259,7 +259,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
 
 const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
   let value = 0
-  if (!current_season.isRegularSeason) {
+  if (!current_season.is_regular_season) {
     const transactions = await db('transactions').where({
       lid,
       type: transaction_types.DRAFT,

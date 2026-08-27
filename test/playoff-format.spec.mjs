@@ -686,7 +686,7 @@ describe('playoff format and division schedule', function () {
   })
 
   describe('generate_fantasy_league_schedule', function () {
-    const num_weeks = current_season.regularSeasonFinalWeek
+    const num_weeks = current_season.regular_season_final_week
 
     it('builds a full schedule for a 10-team league with no divisions', function () {
       const teams = make_teams(10, 0)

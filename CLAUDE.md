@@ -143,7 +143,10 @@ From `libs-shared/constants/season-constants.mjs`:
 
 - `current_season.year`, `current_season.week` (the continuous counter from `regular_season_start`, not per-type)
 - `current_season.nfl_seas_type` (`PRE`/`REG`/`POST`), `nfl_seas_week` (resets to 1 in POST), `last_completed_season_year` (stable across the Super Bowl gap and offseason)
-- `is_offseason`, `is_regular_season`, `fantasy_weeks`, `nfl_weeks`
+- `current_season.is_offseason`, `current_season.is_regular_season`, `current_season.is_waiver_period`
+- `fantasy_weeks`, `nfl_weeks` — module exports, not members of `current_season`
+
+Every member of `current_season` is snake_case, and every clock-dependent one is a GETTER. Read them off the object at the point of use; never copy one into a module-level const, which freezes it at import and never moves again.
 
 Never reconstruct an `nfl_week_id` locally — use the canonical helpers in `libs-shared/nfl-week-identifier.mjs`. See `docs/data-views-system.md` for the choke-point rules, and [docs/guides/scripts.md](docs/guides/scripts.md) for what these getters read in the offseason and preseason.
 

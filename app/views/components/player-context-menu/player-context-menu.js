@@ -282,7 +282,7 @@ export default function PlayerContextMenu({
       label: 'Designate Protected'
     })
 
-    if (current_season.isOffseason && status.eligible.franchiseTag) {
+    if (current_season.is_offseason && status.eligible.franchiseTag) {
       add({
         key: 'franchise',
         onClick: status.tagged.franchise ? handleRemoveTag : handleFranchiseTag,
@@ -290,7 +290,10 @@ export default function PlayerContextMenu({
       })
     }
 
-    if (current_season.isOffseason && status.eligible.restrictedFreeAgencyTag) {
+    if (
+      current_season.is_offseason &&
+      status.eligible.restrictedFreeAgencyTag
+    ) {
       add({
         key: 'restricted-free-agency',
         onClick: handleRestrictedFreeAgencyTag,
@@ -329,7 +332,7 @@ export default function PlayerContextMenu({
       })
     }
 
-    if (current_season.isOffseason && status.eligible.rookieTag) {
+    if (current_season.is_offseason && status.eligible.rookieTag) {
       add({
         key: 'rookie',
         onClick: status.tagged.rookie ? handleRemoveTag : handleRookieTag,
@@ -338,7 +341,7 @@ export default function PlayerContextMenu({
     }
 
     if (
-      current_season.isOffseason &&
+      current_season.is_offseason &&
       status.active &&
       !status.tagged.restrictedFreeAgency
     ) {

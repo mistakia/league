@@ -73,7 +73,7 @@ export default function LeagueTeam({
     for (const player_map of players) {
       if (!player_map.get('pid')) continue
       if (
-        !current_season.isRegularSeason &&
+        !current_season.is_regular_season &&
         cutlist_pids.includes(player_map.get('pid'))
       )
         continue

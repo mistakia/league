@@ -201,7 +201,7 @@ export default async function ({
   }
 
   // verify player was not poached this offseason
-  if (!current_season.isRegularSeason) {
+  if (!current_season.is_regular_season) {
     const poaches = await db('poaches')
       .where({ pid: release_pid, lid, tid, is_successful: 1 })
       .orderBy('processed', 'desc')

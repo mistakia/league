@@ -71,7 +71,7 @@ const run = async ({ daily = false } = {}) => {
 
     const free_agency_period = get_free_agent_period(league)
     if (
-      !current_season.isRegularSeason &&
+      !current_season.is_regular_season &&
       current_season.now.isAfter(free_agency_period.start) &&
       !daily
     ) {

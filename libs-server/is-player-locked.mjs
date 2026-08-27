@@ -7,7 +7,7 @@ import apply_nfl_games_current_week_join from './data-views/join-nfl-games-curre
 dayjs.extend(timezone)
 
 export default async function (pid) {
-  if (current_season.isOffseason) {
+  if (current_season.is_offseason) {
     return false
   }
 

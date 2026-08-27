@@ -44,11 +44,11 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
 export function calculatePlayerValues(payload) {
   const { league, players, rosterRows } = payload
 
-  const finalWeek = current_season.finalWeek
+  const final_week = current_season.final_week
   for (const player of players) {
     player.points = player.points || {}
     player.projection = player.projection || {}
-    for (let week = 0; week <= finalWeek; week++) {
+    for (let week = 0; week <= final_week; week++) {
       const projection = player.projection[week]
       if (projection) {
         const points = calculatePoints({
@@ -96,7 +96,7 @@ export function calculatePlayerValues(payload) {
   }
 
   const baselinesByWeek = {}
-  for (let week = 0; week <= finalWeek; week++) {
+  for (let week = 0; week <= final_week; week++) {
     const { baselines } = calculate_projection_values({
       players,
       league,

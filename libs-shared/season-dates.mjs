@@ -10,7 +10,7 @@ const season_dates = {
   // This is an ANCHOR, not a date anyone observes: `calculate_week` and the
   // `week` getter are both `diff(this.regular_season_start, 'weeks')`, so the
   // week a game resolves to is a pure function of its distance from here. The
-  // invariant is `openingDay - regular_season_start === 777600` (nine days --
+  // invariant is `opening_day - regular_season_start === 777600` (nine days --
   // the Tuesday nine days before an always-Thursday opener), which makes the
   // opener land in week 1 and week N begin on the Tuesday preceding week N's
   // games. 2023, 2024 and 2025 all carry exactly that gap.
@@ -33,21 +33,21 @@ const season_dates = {
   //
   // Derive the date from the anchor, not from the header comment: the Super
   // Bowl is POST week 4, which `calculate_week` places at
-  // `regular_season_start + (nflFinalWeek + superBowlByeWeeks + 4)` weeks.
+  // `regular_season_start + (nfl_final_week + super_bowl_bye_weeks + 4)` weeks.
   // For 2026 that is Tue Feb 9, whose Sunday is Feb 14 2027.
   end: 1802667600,
 
   // first game (Sep 10 2026)
-  openingDay: 1789012800,
+  opening_day: 1789012800,
 
-  finalWeek: 17,
-  nflFinalWeek: 18,
-  regularSeasonFinalWeek: 14,
-  wildcardWeek: 15,
+  final_week: 17,
+  nfl_final_week: 18,
+  regular_season_final_week: 14,
+  wildcard_week: 15,
 
   // Number of bye weeks between conference championship and super bowl
   // (Pro Bowl week - no playoff games)
-  superBowlByeWeeks: 1
+  super_bowl_bye_weeks: 1
 }
 
 export default season_dates

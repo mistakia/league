@@ -782,7 +782,7 @@ router.post(
         slot_assignments: accepting_team_slots,
         roster: acceptingTeamRoster,
         week: current_season.week,
-        is_regular_season: current_season.isRegularSeason,
+        is_regular_season: current_season.is_regular_season,
         player_extensions: proposingPlayerExtensions
       })
 
@@ -830,7 +830,7 @@ router.post(
         slot_assignments: proposing_team_slots,
         roster: proposingTeamRoster,
         week: current_season.week,
-        is_regular_season: current_season.isRegularSeason,
+        is_regular_season: current_season.is_regular_season,
         player_extensions: acceptingPlayerExtensions
       })
 

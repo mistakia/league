@@ -282,7 +282,7 @@ router.post('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (current_season.week > current_season.finalWeek) {
+    if (current_season.week > current_season.final_week) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -378,8 +378,8 @@ router.post('/?', async (req, res) => {
       .orderBy('transaction_id', 'desc')
 
     if (
-      current_season.isRegularSeason &&
-      !current_season.isWaiverPeriod &&
+      current_season.is_regular_season &&
+      !current_season.is_waiver_period &&
       !transactions.length
     ) {
       return res.status(400).send({ error: 'player is not on waivers' })
@@ -403,9 +403,9 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      if (current_season.isRegularSeason) {
+      if (current_season.is_regular_season) {
         // if regular season and not during waiver period, check if player is on release waivers
-        if (!current_season.isWaiverPeriod) {
+        if (!current_season.is_waiver_period) {
           const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
           if (!isOnWaivers) {
             return res.status(400).send({ error: 'player is not on waivers' })

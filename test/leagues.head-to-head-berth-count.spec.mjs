@@ -32,9 +32,9 @@ chai.use(chai_http)
 // the API validation that rejects an unusable count, and the database CHECK
 // that refuses one regardless of which writer produced it.
 
-// calculateStandings processes weeks 1..finalWeek, where finalWeek is
+// calculateStandings processes weeks 1..final_week, where final_week is
 // max(current_season.week - 1, 0) and current_season.week counts full weeks
-// elapsed since regular_season_start. 22 days in is week 3, so finalWeek is 2 --
+// elapsed since regular_season_start. 22 days in is week 3, so final_week is 2 --
 // the minimum that lets head-to-head record and points for disagree. At one
 // week every team is 1-0 or 0-1 and the record ladder collapses onto the points
 // ladder through its own tiebreakers, which would make the record step

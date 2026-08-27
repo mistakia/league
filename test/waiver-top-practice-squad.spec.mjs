@@ -88,7 +88,7 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
     before(async function () {
       this.timeout(60 * 1000)
       // regular_season_start is Tuesday (day()===2) — advance one week to
-      // stay in REG while keeping day-of-week Tuesday, when isWaiverPeriod is true.
+      // stay in REG while keeping day-of-week Tuesday, when is_waiver_period is true.
       const tuesday_reg = regular_season_start.add(1, 'week')
       MockDate.set(tuesday_reg.toISOString())
       await league_seed(knex, {
@@ -101,8 +101,8 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
     })
 
     it('returns undefined during REG waiver period (line-41 early-return)', async function () {
-      expect(current_season.isRegularSeason).to.equal(true)
-      expect(current_season.isWaiverPeriod).to.equal(true)
+      expect(current_season.is_regular_season).to.equal(true)
+      expect(current_season.is_waiver_period).to.equal(true)
 
       const lid = 1
       const player = await selectPlayer({ random: false, rookie: false })

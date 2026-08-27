@@ -54,7 +54,7 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
   }
 
   // Check game timing constraints if during regular season
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     await validate_game_timing(waiver_id)
   }
 
@@ -81,13 +81,13 @@ const process_bulk_active_waivers = async (daily, timestamp) => {
   // undefined, so every caller can read result.shortfall without a guard. The
   // oracle deliberately does NOT run on these paths: a waiver pending outside
   // its run window is not due, so counting it would be a false shortfall.
-  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
+  if (current_season.is_regular_season && current_season.is_waiver_period) {
     log('during regular season waiver period, active waivers not run')
     return { shortfall: null }
   }
 
   // only run daily waivers during offseason
-  if (!current_season.isRegularSeason && !daily) {
+  if (!current_season.is_regular_season && !daily) {
     log('outside of daily waivers during offseason, active waivers not run')
     return { shortfall: null }
   }
@@ -104,7 +104,7 @@ const process_bulk_active_waivers = async (daily, timestamp) => {
       continue
     }
 
-    if (!current_season.isRegularSeason) {
+    if (!current_season.is_regular_season) {
       const should_skip = await should_skip_league_in_offseason(lid)
       if (should_skip) continue
     }
@@ -200,7 +200,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
   await handle_tied_waivers(waiver)
 
   // update team budget
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     await update_team_budget(waiver.tid, waiver.bid_amount)
   }
 

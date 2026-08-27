@@ -31,7 +31,7 @@ export default class PlayerSlot extends React.Component {
     const pid = player_map.get('pid')
 
     let action
-    if (current_season.week > current_season.finalWeek) {
+    if (current_season.week > current_season.final_week) {
       return null
     } else if (!selected_player_slot && pid) {
       action = (

@@ -106,7 +106,7 @@ const stub_payload = (items) => {
 /*
   The in-season monitors (players_with_injury_status >= 5, plus a 48h
   source='sleeper' injury_status changelog write) sit behind
-  `current_season.isOffseason`, so the branch taken depends on the day the
+  `current_season.is_offseason`, so the branch taken depends on the day the
   suite runs. Satisfying both monitors unconditionally is what keeps this spec
   from turning red on its own in week 1 without any code change.
 

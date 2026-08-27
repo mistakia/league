@@ -7,7 +7,7 @@ const player_prefix_columns = ROW_GRAIN_DEFAULTS.player.prefix_columns
 // for server-side and CLI consumers that need the stable ID list without loading this module.
 
 const is_regular_season_finished =
-  current_season.week > current_season.finalWeek
+  current_season.week > current_season.final_week
 
 export const default_data_view_view_id = is_regular_season_finished
   ? 'SEASON_FANTASY_POINTS'
@@ -88,18 +88,18 @@ export const default_data_views = {
   SEASON_PROJECTIONS: {
     view_id: 'SEASON_PROJECTIONS',
     view_username: 'system',
-    view_name: current_season.isOffseason
+    view_name: current_season.is_offseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
     // TOOO
-    view_description: current_season.isOffseason
+    view_description: current_season.is_offseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
     view_search_column_id: 'player_name',
     table_state: {
       sort: [
         {
-          column_id: current_season.isOffseason
+          column_id: current_season.is_offseason
             ? 'player_season_projected_points_added'
             : 'player_rest_of_season_projected_points_added',
           desc: true
@@ -107,46 +107,46 @@ export const default_data_views = {
       ],
       prefix_columns: player_prefix_columns,
       columns: [
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_points_added'
           : 'player_rest_of_season_projected_points_added',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_points'
           : 'player_rest_of_season_projected_points',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_pass_atts'
           : 'player_rest_of_season_projected_pass_atts',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_pass_yds'
           : 'player_rest_of_season_projected_pass_yds',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_pass_tds'
           : 'player_rest_of_season_projected_pass_tds',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_pass_ints'
           : 'player_rest_of_season_projected_pass_ints',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_rush_atts'
           : 'player_rest_of_season_projected_rush_atts',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_rush_yds'
           : 'player_rest_of_season_projected_rush_yds',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_rush_tds'
           : 'player_rest_of_season_projected_rush_tds',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_fumbles_lost'
           : 'player_rest_of_season_projected_fumbles_lost',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_targets'
           : 'player_rest_of_season_projected_targets',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_recs'
           : 'player_rest_of_season_projected_recs',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_rec_yds'
           : 'player_rest_of_season_projected_rec_yds',
-        current_season.isOffseason
+        current_season.is_offseason
           ? 'player_season_projected_rec_tds'
           : 'player_rest_of_season_projected_rec_tds'
       ]

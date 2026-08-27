@@ -1,13 +1,13 @@
 import { current_season } from '#constants'
 
 const is_regular_season_finished =
-  current_season.week > current_season.finalWeek
+  current_season.week > current_season.final_week
 
 const season_projections_view = {
-  name: current_season.isOffseason
+  name: current_season.is_offseason
     ? 'Season Projections'
     : 'Rest of Season Projections',
-  order_by: current_season.isOffseason
+  order_by: current_season.is_offseason
     ? 'pts_added.season'
     : 'pts_added.rest_of_season',
   fields: [
@@ -15,46 +15,46 @@ const season_projections_view = {
     // TODO player points+
     // TODO player market salary
     // TODO player market adjusted salary
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'pts_added.season'
       : 'pts_added.rest_of_season',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'points.season.total'
       : 'points.rest_of_season.total',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.passing_attempts'
       : 'projection.rest_of_season.passing_attempts',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.passing_yards'
       : 'projection.rest_of_season.passing_yards',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.passing_touchdowns'
       : 'projection.rest_of_season.passing_touchdowns',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.passing_interceptions'
       : 'projection.rest_of_season.passing_interceptions',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.rushing_attempts'
       : 'projection.rest_of_season.rushing_attempts',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.rushing_yards'
       : 'projection.rest_of_season.rushing_yards',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.rushing_touchdowns'
       : 'projection.rest_of_season.rushing_touchdowns',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.fumbles_lost'
       : 'projection.rest_of_season.fumbles_lost',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.targets'
       : 'projection.rest_of_season.targets',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.receptions'
       : 'projection.rest_of_season.receptions',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.receiving_yards'
       : 'projection.rest_of_season.receiving_yards',
-    current_season.isOffseason
+    current_season.is_offseason
       ? 'projection.0.receiving_touchdowns'
       : 'projection.rest_of_season.receiving_touchdowns'
   ]

@@ -136,7 +136,7 @@ router.post('/?', async (req, res) => {
 
     if (!require_auth(req, res)) return
 
-    if (current_season.week > current_season.finalWeek) {
+    if (current_season.week > current_season.final_week) {
       return res.status(400).send({ error: 'player locked' })
     }
 

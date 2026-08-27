@@ -232,7 +232,7 @@ export default class SleeperAdapter extends BaseAdapter {
           roster.owner_id?.toString() || roster.roster_id?.toString(),
         week:
           week ??
-          (current_season.week > current_season.nflFinalWeek
+          (current_season.week > current_season.nfl_final_week
             ? 0
             : current_season.week),
         year: current_season.year,
@@ -446,7 +446,7 @@ export default class SleeperAdapter extends BaseAdapter {
     // - /league/{league_id}/transactions/{week} requires week (current week usually)
     const week =
       options.week ??
-      (current_season.week > current_season.nflFinalWeek
+      (current_season.week > current_season.nfl_final_week
         ? 0
         : current_season.week)
     const transactions = await this.api_client.get(

@@ -41,7 +41,7 @@ class PlayerRoster extends Player {
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
-    const { isRegularSeason, isOffseason } = current_season
+    const { is_regular_season, is_offseason } = current_season
     const tag = player_map.get('tag')
     const isRestrictedFreeAgent =
       tag === player_tag_types.RESTRICTED_FREE_AGENCY
@@ -73,7 +73,7 @@ class PlayerRoster extends Player {
           player_salary,
           bid
         })
-    const projectionType = isRegularSeason ? 'rest_of_season' : 'season'
+    const projectionType = is_regular_season ? 'rest_of_season' : 'season'
     const hasProjections = player_map.hasIn(['market_salary', projectionType])
     const market_salary = player_map.getIn(['market_salary', projectionType], 0)
     const get_savings = () => {
@@ -228,7 +228,7 @@ class PlayerRoster extends Player {
                   prefix='$'
                 />
               )}
-              {!isPoach && isOffseason && is_before_extension_deadline && (
+              {!isPoach && is_offseason && is_before_extension_deadline && (
                 <PercentileMetric
                   scaled
                   value={extendedSalary}
@@ -236,7 +236,7 @@ class PlayerRoster extends Player {
                   prefix='$'
                 />
               )}
-              {!isPoach && isOffseason && (
+              {!isPoach && is_offseason && (
                 <PercentileMetric
                   scaled
                   value={market_salary}
@@ -244,7 +244,7 @@ class PlayerRoster extends Player {
                   prefix='$'
                 />
               )}
-              {isOffseason && (
+              {is_offseason && (
                 <PercentileMetric
                   scaled
                   value={savings}
@@ -275,7 +275,7 @@ class PlayerRoster extends Player {
             </div>
           </>
         )}
-        {!isOffseason && (
+        {!is_offseason && (
           <>
             <div className='row__group'>
               <div className='row__group-body'>
@@ -329,7 +329,7 @@ class PlayerRoster extends Player {
               percentile={percentiles.pts_added_net}
               show_positivity
             />
-            {isOffseason && (
+            {is_offseason && (
               <PercentileMetric
                 scaled
                 value={points_added_including_cap_savings}
@@ -345,12 +345,12 @@ class PlayerRoster extends Player {
             />
           </div>
         </div>
-        {isRegularSeason && (
+        {is_regular_season && (
           <div className='metric table__cell'>
             {weekPoints ? weekPoints.toFixed(1) : '-'}
           </div>
         )}
-        {isRegularSeason && (
+        {is_regular_season && (
           <div className='metric table__cell'>
             <NFLTeamBye nfl_team={player_map.get('team')} />
           </div>

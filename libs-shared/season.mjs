@@ -38,12 +38,12 @@ export default class Season {
     offseason,
     regular_season_start,
     end,
-    openingDay,
-    finalWeek,
-    nflFinalWeek,
-    regularSeasonFinalWeek,
-    wildcardWeek,
-    superBowlByeWeeks = 1,
+    opening_day,
+    final_week,
+    nfl_final_week,
+    regular_season_final_week,
+    wildcard_week,
+    super_bowl_bye_weeks = 1,
     // Optional, and defaulted so it READS optional. `now` pins the clock for a
     // test or a replay; absent it, the `now` getter below falls back to the
     // live Eastern-time clock, which is what every production caller wants and
@@ -63,13 +63,13 @@ export default class Season {
     this.end = eastern(end)
 
     // first game
-    this.openingDay = eastern(openingDay)
+    this.opening_day = eastern(opening_day)
 
-    this.finalWeek = finalWeek
-    this.nflFinalWeek = nflFinalWeek
-    this.regularSeasonFinalWeek = regularSeasonFinalWeek
-    this.wildcardWeek = wildcardWeek
-    this.superBowlByeWeeks = superBowlByeWeeks
+    this.final_week = final_week
+    this.nfl_final_week = nfl_final_week
+    this.regular_season_final_week = regular_season_final_week
+    this.wildcard_week = wildcard_week
+    this.super_bowl_bye_weeks = super_bowl_bye_weeks
 
     if (now) {
       this._now = eastern(now)
@@ -81,13 +81,13 @@ export default class Season {
     return eastern(dayjs().unix())
   }
 
-  get isOffseason() {
+  get is_offseason() {
     return this.week === 0
   }
 
-  get isRegularSeason() {
+  get is_regular_season() {
     const week = this.week
-    return week > 0 && week <= this.finalWeek
+    return week > 0 && week <= this.final_week
   }
 
   // The retrospective half of the current / last-completed pair.
@@ -117,8 +117,8 @@ export default class Season {
     return Math.max(completed_week, 1)
   }
 
-  get isWaiverPeriod() {
-    if (!this.isRegularSeason) {
+  get is_waiver_period() {
+    if (!this.is_regular_season) {
       return true
     }
 
@@ -162,17 +162,17 @@ export default class Season {
   //
   // Nine days is seven plus two, so `regular_season_start + 1 week` and this
   // getter are the SAME instant in every season, and so is the moment
-  // `isRegularSeason` turns true. That identity is not a coincidence to work
-  // around -- it is the invariant that lets every caller ask `isRegularSeason`
+  // `is_regular_season` turns true. That identity is not a coincidence to work
+  // around -- it is the invariant that lets every caller ask `is_regular_season`
   // and get the constitutional answer. `test/season.spec.mjs` pins it against
-  // `openingDay`, whose date is checkable against the NFL schedule, so a
+  // `opening_day`, whose date is checkable against the NFL schedule, so a
   // mis-set anchor fails there instead of silently moving a boundary.
   //
   // This getter therefore has ONE remaining consumer: `is-santuary-period.mjs`,
   // which needs the boundary as a DATE to measure Article XIV Section 15(1)'s
   // "first twenty-four (24) hours of the Regular Season" from. A caller that
   // only wants to know whether the Regular Season has begun wants
-  // `isRegularSeason`; `api/routes/teams/protect.mjs` carried a redundant
+  // `is_regular_season`; `api/routes/teams/protect.mjs` carried a redundant
   // `isBefore(practice_squad_protection_start)` guard behind that check until
   // it was removed, and it was unreachable for its whole life.
   //
@@ -181,8 +181,8 @@ export default class Season {
   // early -- exactly the 2026 defect that unlinked every betting market from
   // its game.
   get practice_squad_protection_start() {
-    const days_since_tuesday = (this.openingDay.day() - 2 + 7) % 7
-    return this.openingDay.subtract(days_since_tuesday, 'day').startOf('day')
+    const days_since_tuesday = (this.opening_day.day() - 2 + 7) % 7
+    return this.opening_day.subtract(days_since_tuesday, 'day').startOf('day')
   }
 
   // POST week numbering, matching what `nfl_games` stores: 1 wild card,
@@ -191,7 +191,7 @@ export default class Season {
   // Wild card, divisional and conference run on the three weekends
   // immediately after the final regular-season week, so they number straight
   // through. Only the Super Bowl sits past the Pro Bowl bye, so
-  // `superBowlByeWeeks` is subtracted THERE and nowhere else -- 6d2bf23e5
+  // `super_bowl_bye_weeks` is subtracted THERE and nowhere else -- 6d2bf23e5
   // subtracted it uniformly to move the Super Bowl from 5 to 4, which moved
   // wild card to 0 and made every postseason odds import miss
   // `find_nfl_game`.
@@ -201,11 +201,11 @@ export default class Season {
   // without it the counter keeps climbing and yields identifiers like
   // `2026_POST_WEEK_7` that `validate_nfl_week_identifier` rejects.
   postseason_week(weeks_since_regular_season_start) {
-    const round = weeks_since_regular_season_start - this.nflFinalWeek
+    const round = weeks_since_regular_season_start - this.nfl_final_week
     if (round <= 3) {
       return round
     }
-    return Math.min(round - this.superBowlByeWeeks, 4)
+    return Math.min(round - this.super_bowl_bye_weeks, 4)
   }
 
   // will detect seas_type and return week number for that seas_type
@@ -222,7 +222,7 @@ export default class Season {
       if (week_number > 4) {
         throw new Error('Date is before preseason start')
       }
-    } else if (diff > this.nflFinalWeek) {
+    } else if (diff > this.nfl_final_week) {
       seas_type = 'POST'
       week_number = this.postseason_week(diff)
     } else {
@@ -250,7 +250,7 @@ export default class Season {
 
     if (week === 0) {
       return 'PRE'
-    } else if (week > this.nflFinalWeek) {
+    } else if (week > this.nfl_final_week) {
       return 'POST'
     } else {
       return 'REG'
@@ -270,7 +270,7 @@ export default class Season {
       } else {
         return 3
       }
-    } else if (week > this.nflFinalWeek) {
+    } else if (week > this.nfl_final_week) {
       return this.postseason_week(week)
     } else {
       return week

@@ -262,7 +262,7 @@ export default function TradePage() {
   // it has been decided -- and gating on it hid the commissioner's veto button.
   const is_settled = is_proposed && !is_open
   const show_action =
-    is_settled || (is_valid && current_season.week < current_season.finalWeek)
+    is_settled || (is_valid && current_season.week < current_season.final_week)
 
   const action_section = (
     <Grid item xs={12}>

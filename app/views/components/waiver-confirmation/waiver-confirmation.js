@@ -71,7 +71,7 @@ export default function WaiverConfirmation({
         )
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
-    current_season.isRegularSeason
+    current_season.is_regular_season
       ? team.free_agent_acquisition_budget_balance
       : ros.availableCap
   )
@@ -102,7 +102,7 @@ export default function WaiverConfirmation({
     const release = value.map((p) => p.id)
     set_waiver_release(release)
     set_missing_release(!isEligible && !release.length)
-    if (!current_season.isRegularSeason) {
+    if (!current_season.is_regular_season) {
       const r = new Roster({ roster: roster.toJS(), league })
       release.forEach((pid) => r.removePlayer(pid))
       set_waiver_max_bid(r.availableCap)
@@ -114,7 +114,7 @@ export default function WaiverConfirmation({
     set_waiver_type(value)
     set_waiver_release([])
     set_missing_type(false)
-    if (!current_season.isRegularSeason) set_waiver_max_bid(ros.availableCap)
+    if (!current_season.is_regular_season) set_waiver_max_bid(ros.availableCap)
     setType(value)
   }
 

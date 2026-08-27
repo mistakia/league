@@ -23,13 +23,13 @@ const calculateStandings = ({
   matchups,
   year = current_season.year
 }) => {
-  const finalWeek =
+  const final_week =
     year === current_season.year
       ? Math.min(
           Math.max(current_season.week - 1, 0),
-          current_season.regularSeasonFinalWeek
+          current_season.regular_season_final_week
         )
-      : current_season.regularSeasonFinalWeek
+      : current_season.regular_season_final_week
   const teamStats = {}
   for (const { team_id: tid, division } of teams) {
     teamStats[tid] = {
@@ -60,7 +60,7 @@ const calculateStandings = ({
     league.starter_slots_defense_special_teams +
     league.starter_slots_kicker
 
-  for (let week = 1; week <= finalWeek; week++) {
+  for (let week = 1; week <= final_week; week++) {
     let highest_score = -Infinity
     let highest_scoring_teams = []
 
@@ -134,7 +134,7 @@ const calculateStandings = ({
     }
   }
 
-  for (let week = 1; week <= finalWeek; week++) {
+  for (let week = 1; week <= final_week; week++) {
     const weekMatchups = matchups.filter((m) => m.week === week)
     for (const m of weekMatchups) {
       const homeScore = teamStats[m.home_team_id].points.weeks[week]

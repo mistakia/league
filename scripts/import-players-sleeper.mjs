@@ -602,7 +602,7 @@ const run = async ({
 
   // In-season-only monitors. Both run after a successful API liveness check
   // and emit shortfalls into the unified signal queue via throw_if_shortfall.
-  if (!current_season.isOffseason) {
+  if (!current_season.is_offseason) {
     // E3: value-level health canary. The 2022 Sleeper blackout kept the API
     // shape intact (player objects returned with the same keys) but stripped
     // injury_status content -- a key-hash canary would not have caught it.

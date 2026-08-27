@@ -240,7 +240,7 @@ export default class EspnAdapter extends BaseAdapter {
   async get_rosters({ league_id, week = null, year = null }) {
     const scoring_period =
       week ??
-      (current_season.week > current_season.nflFinalWeek
+      (current_season.week > current_season.nfl_final_week
         ? 0
         : current_season.week)
     const target_year = year || current_season.year
@@ -279,7 +279,7 @@ export default class EspnAdapter extends BaseAdapter {
         team_external_id: team.id.toString(),
         week:
           week ??
-          (current_season.week > current_season.nflFinalWeek
+          (current_season.week > current_season.nfl_final_week
             ? 0
             : current_season.week),
         year: current_season.year,

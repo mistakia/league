@@ -75,7 +75,7 @@ const process_league_format_year = async ({
   // without nfl_games rows therefore got a season row and no weekly board at
   // all, silently, because a season row is a plausible-looking result.
   const final_week =
-    final_week_result?.final_week ?? current_season.nflFinalWeek
+    final_week_result?.final_week ?? current_season.nfl_final_week
 
   // Baselines are not persisted for a league FORMAT -- only process_league
   // writes league_baselines, and it computes its own.

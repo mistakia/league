@@ -618,7 +618,7 @@ const import_nfl_coaches = async ({
   if (
     !backfill &&
     (since == null || since === 'current') &&
-    current_season.isOffseason
+    current_season.is_offseason
   ) {
     log(
       'Skipping -- NFL offseason; no current-season playcaller data to ingest'

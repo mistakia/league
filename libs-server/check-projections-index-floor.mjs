@@ -21,7 +21,7 @@ export default async function check_projections_index_floor({
   season_type,
   floor
 }) {
-  if (current_season.isOffseason) {
+  if (current_season.is_offseason) {
     return
   }
 

@@ -119,7 +119,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
 
       if (
         league_team_seasonlog.season_year === current_season.year &&
-        current_season.week < current_season.finalWeek
+        current_season.week < current_season.final_week
       ) {
         continue
       }

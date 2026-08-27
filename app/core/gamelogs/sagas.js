@@ -34,7 +34,7 @@ export function* load({ payload }) {
   }
 
   // TODO this should check against a final_week param for the given season (different seasons have different final weeks)
-  if (week === current_season.finalWeek) {
+  if (week === current_season.final_week) {
     yield call(load, {
       payload: {
         leagueId,

@@ -262,7 +262,7 @@ export default function SelectedPlayer({
             </div>
 
             {/* Season Stats - above collapse, only during regular season */}
-            {!current_season.isOffseason && latest_seasonlog && (
+            {!current_season.is_offseason && latest_seasonlog && (
               <div className='selected__player-season-stats'>
                 <div className='selected__player-season-stats-group'>
                   <div className='selected__player-season-stats-label'>
@@ -348,7 +348,7 @@ export default function SelectedPlayer({
                     {playerValue ? `$${playerValue}` : '-'}
                   </div>
                 )}
-                {current_season.isOffseason && (
+                {current_season.is_offseason && (
                   <div className='selected__player-header-item'>
                     <label>Market</label>$
                     {player_map.getIn(['market_salary', 'season'], 0)}

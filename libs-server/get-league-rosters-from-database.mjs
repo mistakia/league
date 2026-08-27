@@ -16,7 +16,7 @@ export default async function ({
   const is_current_year = year === current_season.year
   const current_week = Math.min(
     Math.max(current_season.fantasy_season_week, 0),
-    current_season.finalWeek
+    current_season.final_week
   )
 
   if (min_week === null || min_week === undefined) {

@@ -88,7 +88,7 @@ export default function DashboardPlayersTable({
   is_team_manager
 }) {
   const ref = React.createRef()
-  const { isOffseason, isRegularSeason } = current_season
+  const { is_offseason, is_regular_season } = current_season
   const isWaiver = Boolean(waiverType)
   const isPoach = Boolean(poaches)
   const isClaim = isWaiver || isPoach
@@ -242,10 +242,10 @@ export default function DashboardPlayersTable({
                 {!isRestrictedFreeAgency && (
                   <div className='table__cell'>{baseYear}</div>
                 )}
-                {!isPoach && isOffseason && is_before_extension_deadline && (
+                {!isPoach && is_offseason && is_before_extension_deadline && (
                   <div className='table__cell'>{baseYear + 1}</div>
                 )}
-                {/* {!isPoach && isOffseason && (
+                {/* {!isPoach && is_offseason && (
                 <div className='table__cell'>
                   <PlayerRosterHeader
                     tooltip='Market Salary adjusted for player availability and salary space'
@@ -253,7 +253,7 @@ export default function DashboardPlayersTable({
                   />
                 </div>
               )} */}
-                {!isPoach && isOffseason && (
+                {!isPoach && is_offseason && (
                   <div className='table__cell'>
                     <PlayerRosterHeader
                       tooltip='Salary based on projected relative to baseline player'
@@ -261,7 +261,7 @@ export default function DashboardPlayersTable({
                     />
                   </div>
                 )}
-                {isOffseason && (
+                {is_offseason && (
                   <div className='table__cell'>
                     <PlayerRosterHeader
                       tooltip='Difference between a players salary and the market salary'
@@ -272,7 +272,7 @@ export default function DashboardPlayersTable({
               </div>
             </div>
           )}
-          {!isOffseason && (
+          {!is_offseason && (
             <>
               <div className='row__group'>
                 <div className='row__group-head'>Points</div>
@@ -352,7 +352,7 @@ export default function DashboardPlayersTable({
                   title='Pts+ Net'
                 />
               </div>
-              {isOffseason && (
+              {is_offseason && (
                 <div className='table__cell'>
                   <PlayerRosterHeader
                     tooltip='Salary adjusted value relative to baseline player'
@@ -368,10 +368,10 @@ export default function DashboardPlayersTable({
               </div>
             </div>
           </div>
-          {isRegularSeason && (
+          {is_regular_season && (
             <div className='table__cell metric'>Week {week}</div>
           )}
-          {isRegularSeason && <div className='table__cell metric'>Bye</div>}
+          {is_regular_season && <div className='table__cell metric'>Bye</div>}
           <div className='table__cell metric'>
             <PlayerRosterHeader
               tooltip='Projected starter points you would lose without player'

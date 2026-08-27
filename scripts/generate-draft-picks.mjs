@@ -17,7 +17,7 @@ const log = debug('generate-draft-picks')
 const run = async ({ future_year = current_season.year + 1 }) => {
   const leagues = await db('leagues').where('is_hosted', 1)
 
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     log('not generating future draft picks during the regular season')
     return
   }

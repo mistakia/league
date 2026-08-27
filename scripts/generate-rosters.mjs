@@ -51,7 +51,7 @@ const run = async () => {
   const is_new_season = current_season.now > current_season.end
 
   // do not run once season is over unless generating roster for next season
-  if (current_season.week >= current_season.finalWeek && !is_new_season) {
+  if (current_season.week >= current_season.final_week && !is_new_season) {
     log('season over')
     return
   }
@@ -80,7 +80,7 @@ const run = async () => {
 
   const nextWeek = is_new_season ? 0 : current_season.week + 1
   const previousWeek = is_new_season
-    ? current_season.finalWeek
+    ? current_season.final_week
     : current_season.week
   const previousYear = is_new_season
     ? current_season.year - 1

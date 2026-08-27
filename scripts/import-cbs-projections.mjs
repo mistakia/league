@@ -34,7 +34,10 @@ const run = async ({ season = false, dry = false } = {}) => {
   const week = season ? 0 : Math.max(current_season.week, 1)
   const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
-  if (type !== 'season' && current_season.week > current_season.nflFinalWeek) {
+  if (
+    type !== 'season' &&
+    current_season.week > current_season.nfl_final_week
+  ) {
     return { skipped: true }
   }
 
@@ -120,7 +123,7 @@ const run = async ({ season = false, dry = false } = {}) => {
 
     // A parse that yields nothing is always a failure — the page either moved
     // or changed shape. check_projections_index_floor cannot catch it here,
-    // because it short-circuits on current_season.isOffseason and the only live CBS cron is
+    // because it short-circuits on current_season.is_offseason and the only live CBS cron is
     // the offseason season-projection run.
     throw_if_shortfall(
       items.length === row_count_before

@@ -20,7 +20,7 @@ router.post('/?', async (req, res) => {
     const { pid, release, leagueId } = req.body
     const teamId = Number(req.body.teamId)
 
-    if (current_season.week > current_season.finalWeek) {
+    if (current_season.week > current_season.final_week) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -82,7 +82,7 @@ router.post('/?', async (req, res) => {
 
     const league = await getLeague({ lid: leagueId })
     if (
-      !current_season.isRegularSeason &&
+      !current_season.is_regular_season &&
       league.free_agency_live_auction_start
     ) {
       const faPeriod = get_free_agent_period(league)
@@ -246,7 +246,7 @@ router.put('/:poachId', async (req, res) => {
     const tran = transactions[0]
     const playerPoachValue = tran.player_salary + 2
     if (
-      !current_season.isRegularSeason &&
+      !current_season.is_regular_season &&
       roster.availableCap - playerPoachValue < 0
     ) {
       return res.status(400).send({ error: 'not enough available cap' })

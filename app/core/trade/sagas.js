@@ -75,7 +75,7 @@ function ensure_complete_slot_assignments({
       current_slot: player_map.get('slot'),
       roster,
       week: current_season.week,
-      is_regular_season: current_season.isRegularSeason
+      is_regular_season: current_season.is_regular_season
     })
 
     complete_slots[pid] = default_slot

@@ -7,7 +7,7 @@ import Position from '@components/position'
 import './dashboard-bye-weeks.styl'
 import { current_season } from '#constants'
 
-const weeksRemaining = current_season.finalWeek - current_season.week
+const weeksRemaining = current_season.final_week - current_season.week
 
 function ByeWeekPopover({ players, bye }) {
   const [anchorEl, setAnchorEl] = React.useState(null)

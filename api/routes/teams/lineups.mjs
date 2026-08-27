@@ -201,7 +201,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'lineup locked' })
     }
 
-    if (week > current_season.finalWeek) {
+    if (week > current_season.final_week) {
       return res.status(400).send({ error: 'lineup locked' })
     }
 

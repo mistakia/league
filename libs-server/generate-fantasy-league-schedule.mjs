@@ -133,7 +133,7 @@ const group_by_division = (teams) => {
  *   Qualifying Season week
  */
 const generate_fantasy_league_schedule = (teams) => {
-  const num_weeks = current_season.regularSeasonFinalWeek
+  const num_weeks = current_season.regular_season_final_week
 
   if (teams.length % 2 !== 0) {
     throw new Error(

@@ -21,18 +21,18 @@ const run = async ({ lid = 1, year = current_season.year }) => {
   const matchups = await db('matchups').where({ lid, season_year: year })
   const teams = await db('teams').where({ lid, season_year: year })
 
-  const finalWeek =
+  const final_week =
     year === current_season.year
       ? Math.min(
           Math.max(current_season.week - 1, 0),
-          current_season.regularSeasonFinalWeek
+          current_season.regular_season_final_week
         )
-      : current_season.regularSeasonFinalWeek
+      : current_season.regular_season_final_week
 
   const starters = {}
   const active = {}
   const player_pids = {}
-  for (let week = 1; week <= finalWeek; week++) {
+  for (let week = 1; week <= final_week; week++) {
     starters[week] = {}
     active[week] = {}
     for (const team of teams) {

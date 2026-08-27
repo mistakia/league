@@ -11,7 +11,7 @@ const expect = chai.expect
 
 // Pin clock to a date past week 2 so calculateStandings processes exactly
 // one week. Season.week is `now.diff(regular_season_start, 'weeks')` (full
-// weeks elapsed); 15 days past start = week 2, finalWeek = max(2-1, 0) = 1.
+// weeks elapsed); 15 days past start = week 2, final_week = max(2-1, 0) = 1.
 const into_week_2_unix = season_dates.regular_season_start + 15 * 24 * 60 * 60
 
 const make_league = () => ({

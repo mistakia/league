@@ -87,7 +87,7 @@ export default async function ({
   }
 
   // verify no veterans are signed in the offseason outside of the free agency period and the rookie draft is complete
-  if (!current_season.isRegularSeason) {
+  if (!current_season.is_regular_season) {
     // verify rookie draft is complete
     // Get the season data to check for explicit completion timestamp
     const season = await db('seasons')
@@ -177,7 +177,7 @@ export default async function ({
     throw new Error('exceeds roster limits')
   }
 
-  if (current_season.isOffseason && roster.availableCap - bid < 0) {
+  if (current_season.is_offseason && roster.availableCap - bid < 0) {
     throw new Error('exceeds salary space')
   }
 

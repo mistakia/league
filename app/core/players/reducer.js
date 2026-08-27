@@ -306,7 +306,7 @@ export function players_reducer(state = initialState, { payload, type }) {
     case roster_actions.GET_ROSTERS_FULFILLED: {
       const week = Math.min(
         current_season.fantasy_season_week,
-        current_season.finalWeek
+        current_season.final_week
       )
       const rosters = payload.data.filter((r) => r.week === week)
       return state.withMutations((state) => {

@@ -40,7 +40,7 @@ export function* loadPlays({ week, year } = {}) {
 // -------------------------------------
 
 export function* watch_fetch_players_fulfilled() {
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     yield takeLatest(
       [
         player_actions.FETCH_ALL_PLAYERS_FULFILLED,

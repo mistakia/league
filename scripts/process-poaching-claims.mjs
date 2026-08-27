@@ -48,7 +48,7 @@ const run = async () => {
     throw new Errors.EmptyPoachingClaims()
   }
 
-  if (current_season.isRegularSeason) {
+  if (current_season.is_regular_season) {
     // check if currently between Saturday 6pm and Tuesday 3pm (EST)
     if (should_block_poach_processing(now)) {
       // do not process any claims during this window
