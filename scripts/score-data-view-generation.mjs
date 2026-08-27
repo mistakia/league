@@ -223,6 +223,7 @@ export const run_evaluation = async ({
     let generated = null
     let outcome = 'error'
     let error = null
+    let error_message = null
 
     try {
       const result = await generate_data_view({
@@ -234,6 +235,17 @@ export const run_evaluation = async ({
       generated = result.table_state
     } catch (caught) {
       error = caught.code || caught.name
+      error_message = caught.message
+
+      // A misconfigured client is not a model result, and scoring it as one
+      // reports a broken harness as a fleet of fall-throughs. A whole run once
+      // came back "3 of 3 answered nothing usable" when the real cause was an
+      // unset BASE_MACHINE_SLUG and not one request ever left the process.
+      if (caught.code === 'inference_misconfigured') {
+        throw new Error(
+          `TOOLING ERROR: the inference client is misconfigured, so no score means anything -- ${caught.message}`
+        )
+      }
     }
 
     // An unresolved or inexpressible answer scores zero rather than being
@@ -248,6 +260,14 @@ export const run_evaluation = async ({
       view_name: view.view_name,
       outcome,
       error,
+      error_message,
+      // Both states are kept because a component score of zero is otherwise
+      // undiagnosable: it reads identically whether the model emitted nothing,
+      // emitted a different shape, or emitted the right answer spelled another
+      // way. The `where` and `params` components sat at exactly zero across
+      // every view of a whole run and no report said which.
+      generated,
+      expected,
       expected_column_count: (expected?.columns || []).length,
       column_count_bucket: column_count_bucket(
         (expected?.columns || []).length
