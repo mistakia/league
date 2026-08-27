@@ -435,11 +435,21 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(p.column_name).to.equal('nfl_week_id')
     })
 
-    it('only exposes current_nfl_week as a dynamic value', () => {
+    // Widened from current_nfl_week alone once resolve_nfl_week_params expanded
+    // single_nfl_week_id through the same complete expander. Kept as an
+    // equality rather than an include, so an addition has to be deliberate --
+    // every type declared here must resolve non-empty through every resolver
+    // that can receive it, which test/data-views.nfl-week-dynamic-contract.spec.mjs
+    // enforces from this declaration.
+    it('exposes the widened dynamic value set', () => {
       const types = common_column_params.single_nfl_week_id.dynamic_values.map(
         (d) => d.dynamic_type
       )
-      expect(types).to.deep.equal(['current_nfl_week'])
+      expect(types).to.deep.equal([
+        'current_nfl_week',
+        'last_completed_nfl_week',
+        'current_year_reg_weeks'
+      ])
     })
 
     it('defaults to current_nfl_week', () => {

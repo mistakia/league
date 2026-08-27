@@ -369,6 +369,10 @@ export const nfl_week_id = {
       label: 'Current NFL Week'
     },
     {
+      dynamic_type: 'last_completed_nfl_week',
+      label: 'Last Completed NFL Week'
+    },
+    {
       dynamic_type: 'last_n_nfl_weeks',
       label: 'Last N NFL Weeks',
       default_value: 5,
@@ -390,10 +394,25 @@ export const single_nfl_week_id = {
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_nfl_week' },
   format_value: format_nfl_week_id_value,
+  // A "single" param still declares many-valued types. A week-split column fans
+  // one fact across every week in the list (resolve_nfl_week_ids), and the
+  // scalar callers take the first element. This was safe to widen only once
+  // resolve_nfl_week_params expanded single_nfl_week_id through the same
+  // complete expander nfl_week_id goes through -- before that, a declared type
+  // the partial resolver did not know resolved to nothing while still reading
+  // as an explicit time scope, and the row axis fanned out.
   dynamic_values: [
     {
       dynamic_type: 'current_nfl_week',
       label: 'Current NFL Week'
+    },
+    {
+      dynamic_type: 'last_completed_nfl_week',
+      label: 'Last Completed NFL Week'
+    },
+    {
+      dynamic_type: 'current_year_reg_weeks',
+      label: 'Current Year REG Weeks'
     }
   ]
 }

@@ -12,21 +12,56 @@ import { set_date_for_week } from './fixtures/postseason.mjs'
 
 const expect = chai.expect
 
+// Every assertion here was a SUFFIX regex (`/_REG_WEEK_3$/`) until 2026-08-27.
+// The year was never pinned, and the year was the half that was wrong: the
+// current week took it from the last completed season, so the whole offseason
+// resolved to the prior year's week 1 and every one of these passed over it.
+// Full-identifier equality only, and a preseason case alongside the REG and
+// POST ones -- the offseason is the only period where the two anchors differ.
 describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
   afterEach(() => {
     MockDate.reset()
   })
 
+  it('empty params returns the CURRENT season week in the offseason', function () {
+    set_date_for_week({ seas_type: 'PRE', week: 0 })
+    const id = resolve_single_nfl_week_id({ params: {} })
+    expect(id).to.equal(`${current_season.year}_REG_WEEK_1`)
+    // The defect, stated as its own assertion: this used to be the last
+    // completed season's week 1.
+    expect(
+      id.startsWith(`${current_season.last_completed_season_year}_`)
+    ).to.equal(false)
+  })
+
+  it('dynamic_type last_completed_nfl_week in the offseason returns the prior Super Bowl week', function () {
+    set_date_for_week({ seas_type: 'PRE', week: 0 })
+    const id = resolve_single_nfl_week_id({
+      params: {
+        single_nfl_week_id: { dynamic_type: 'last_completed_nfl_week' }
+      }
+    })
+    expect(id).to.equal(`${current_season.year - 1}_POST_WEEK_4`)
+  })
+
+  it('dynamic_type current_nfl_week in the offseason returns the upcoming week 1', function () {
+    set_date_for_week({ seas_type: 'PRE', week: 0 })
+    const id = resolve_single_nfl_week_id({
+      params: { single_nfl_week_id: { dynamic_type: 'current_nfl_week' } }
+    })
+    expect(id).to.equal(`${current_season.year}_REG_WEEK_1`)
+  })
+
   it('empty params returns current identifier under REG', function () {
     set_date_for_week({ seas_type: 'REG', week: 3 })
     const id = resolve_single_nfl_week_id({ params: {} })
-    expect(id).to.match(/_REG_WEEK_3$/)
+    expect(id).to.equal(`${current_season.year}_REG_WEEK_3`)
   })
 
   it('empty params returns current identifier under POST', function () {
     set_date_for_week({ seas_type: 'POST', week: 2 })
     const id = resolve_single_nfl_week_id({ params: {} })
-    expect(id).to.match(/_POST_WEEK_2$/)
+    expect(id).to.equal(`${current_season.year}_POST_WEEK_2`)
   })
 
   it('dynamic_type current_nfl_week under POST returns POST identifier', function () {
@@ -34,7 +69,7 @@ describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
     const id = resolve_single_nfl_week_id({
       params: { single_nfl_week_id: { dynamic_type: 'current_nfl_week' } }
     })
-    expect(id).to.match(/_POST_WEEK_1$/)
+    expect(id).to.equal(`${current_season.year}_POST_WEEK_1`)
   })
 
   it('historical year+week without seas_type defaults to REG', function () {
@@ -53,7 +88,7 @@ describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
         week: current_season.nfl_seas_week
       }
     })
-    expect(id).to.match(/_POST_WEEK_2$/)
+    expect(id).to.equal(`${current_season.year}_POST_WEEK_2`)
   })
 
   it('year-only params for a past year returns REG era-max week', function () {
@@ -75,7 +110,7 @@ describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
     const id = resolve_single_nfl_week_id({
       params: { year: current_season.year + 1 }
     })
-    expect(id).to.match(/_REG_WEEK_5$/)
+    expect(id).to.equal(`${current_season.year}_REG_WEEK_5`)
   })
 
   it('explicit seas_type is honored', function () {
@@ -145,6 +180,6 @@ describe('LIBS-SERVER resolve_single_nfl_week_id_if_explicit', function () {
     const id = resolve_single_nfl_week_id_if_explicit({
       params: { single_nfl_week_id: { dynamic_type: 'current_nfl_week' } }
     })
-    expect(id).to.match(/_POST_WEEK_1$/)
+    expect(id).to.equal(`${current_season.year}_POST_WEEK_1`)
   })
 })
