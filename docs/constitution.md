@@ -87,7 +87,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Powers and Duties.
 
 2.  The functions of the Commissioner shall include:
-
     1.  To serve as the Chief Administrative, Dispute Resolution and Financial officer of the LEAGUE.
 
     2.  To investigate, either upon complaint or upon the Commissioner’s own initiative, any act, transaction or practice charged, alleged or suspected not to be in the best interests of the game of fantasy football, with authority to compel the Teams and Managers therein to respond to such requests as may be necessary to resolve the same, and upon consideration or upon a refusal or failure to comply with such requests, to impose such penalties as are hereinafter provided.
@@ -105,7 +104,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Prescribed Penalties.
 
 3.  In the case of conduct deemed by the Commissioner not to be in the best interests of the LEAGUE or fantasy football, punitive or disciplinary actions against Teams or Managers may include any one or more of the following:
-
     1.  A formal warning;
 
     2.  A reprimand;
@@ -129,7 +127,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Authority of the Commissioner.
 
 5.  The Commissioner is the final authority in respect of every matter arising under this Constitution, upon the following terms:
-
     1.  Every vote, poll, referendum, petition and recommendation of the Teams, and every jury finding and arbitral award, is Advisory.
 
     2.  Upon the close of any Advisory expression, the Commissioner shall make a Determination, which may adopt it, vary it or depart from it, and that Determination is the act of the LEAGUE.
@@ -139,9 +136,7 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Procedure to Petition the Commissioner for Reconsideration.
 
 6.  A Determination of the Commissioner may be reconsidered under the following process:
-
     1.  Teams interested in the outcome of the Determination (i.e., the Team that would receive the direct benefit of a vacated Determination and any other Team(s) directly involved in the challenged transaction and/or act) are deemed Interested Parties. Any Team, including an Interested Party, may join a petition for reconsideration.
-
         1.  For further clarity, each Team’s interest in the general competitiveness of each other Team shall not constitute an “interest” in the outcome of a Determination for the purposes of subsection (a).
 
     2.  One-third of Teams must agree to a petition for reconsideration, made within one week of the Notice of the Determination or, where the Determination concerns a transaction posted on the Boards, within one week of that posting. Without such a petition there shall be no reconsideration.
@@ -167,7 +162,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Vacancy.
 
 11. The Office of the Commissioner becomes vacant, and shall be filled, upon the following terms:
-
     1.  The Office becomes vacant only where the Commissioner resigns the Office by Notice, is removed from Office on Impeachment pursuant to Sections 13 and 14, or is absent within the meaning of subsection (b).
 
     2.  The Commissioner is absent where, for sixty (60) consecutive days, he has given no Notice and has made no Determination, and, after that period, does neither within a further fourteen (14) days of a written demand posted by Notice by any Manager. The Office becomes vacant upon the expiry of that further period.
@@ -191,7 +185,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Impeachment.
 
 13. The Commissioner may be Impeached only upon the following terms:
-
     1.  A written charge shall first be posted by Notice, specifying which of the grounds in Section 14 is alleged and the conduct relied upon.
 
     2.  No vote to Impeach may be called within seven (7) days of the posting of the charge, during which period the Commissioner may answer it by Notice.
@@ -201,7 +194,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
     4.  The result of a vote upon a charge is determined by the votes cast and requires no ruling. Article IV, Section 2 does not apply to it.
 
 14. The Commissioner shall be removed from Office on Impeachment for Bribery, Maladministration or other High Crimes and Misdemeanors.
-
     1.  improperly exceeding or abusing the powers of the office;
 
     2.  behavior incompatible with the function and purpose of the office; and
@@ -211,7 +203,6 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 ### Determination Upon Inaction or Indecision.
 
 15. Where a Process fails to produce a result, the Commissioner may make a Determination of the matter directly, and that Determination shall have the same force as a result produced by that Process. A Process fails to produce a result where:
-
     1.  its window closes without any Team having cast a vote;
 
     2.  it produces a tie;
@@ -231,7 +222,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Override.
 
 18. A Determination may be vacated by the Teams only by Override, upon the following terms and upon no others:
-
     1.  An Override vote may be called by Notice by any Eligible Team within one (1) week of the Notice of the Determination or, where the Determination concerns a transaction posted on the Boards, within one (1) week of that posting.
 
     2.  The vote shall be by means of a poll on the Boards and shall remain open for three (3) days after the creation of the poll.
@@ -261,7 +251,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Voting in the Offseason.
 
 2.  Each Offseason, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
-
     1.  The election of a Commissioner;
 
     2.  The amount of a Team’s annual Buy-In;
@@ -269,7 +258,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
     3.  The schedule of Payout conditions;
 
     4.  The amendment of this Constitution in respect of matters that shall include, but not be limited to:
-
         1.  The creation of expansion Teams;
 
         2.  Revisions to the League Settings, as defined in [Article V](#article-v); and
@@ -281,7 +269,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Voting in the Regular Season.
 
 3.  During the Regular Season, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
-
     1.  Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
 
     2.  Advisory votes upon a petition for reconsideration, as set out in [Article III, Section 6](#article-iii).
@@ -305,7 +292,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Admission of Managers.
 
 9.  Except as provided in Subsection (e), no individual shall be admitted to the LEAGUE except as a Candidate nominated by a Manager, his "Sponsor", during a nomination period.
-
     1.  A "Vacancy" exists where a Team has no Manager. A Manager who is removed, or suspended permanently, pursuant to Article III, Section 3, Subsection (g) ceases to be the Manager of his Team; a suspension that is not permanent does not create a Vacancy. A Manager who has announced his retirement pursuant to Article XVIII, Section 1 remains the Manager of his Team until the conclusion of the Regular Season in which he announced it, or ceases to be its Manager immediately where he announced it during an Offseason. A Team Orphaned by abandonment alone, pursuant to Article XVIII, Section 3, Subsection (b), is not a Vacancy unless its Manager is removed.
 
     2.  A Team subject to a Vacancy is an Orphaned Team for the purposes of Article XVIII and Article XXI.
@@ -317,7 +303,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
     5.  Where no Candidate is nominated within the nomination period, the Commissioner may, notwithstanding Article III, Section 5, admit to the Vacancy an individual of his choosing who is not a Manager, and shall give Notice of that admission and of his reason for it. Where he does not, no admission occurs, and he may open a further nomination period pursuant to Section 9. An individual so admitted is treated as an admitted Candidate for the purposes of Section 11, Subsections (d) through (h), so far as they are applicable, and the admission is reviewable pursuant to Article III, Section 6.
 
 10. At the close of a nomination period in which one (1) or more Candidates were nominated, the Commissioner shall give Notice of every Candidate and his Sponsors, and shall hold the Admission Vote, which shall remain open three (3) days.
-
     1.  Each Team may rank the Candidates in order of preference, and may rank as few or as many of them as it wishes.
 
     2.  The Candidate a Team ranks first receives points equal to the number of Candidates, the Candidate it ranks second one (1) fewer, and so on. A Candidate whom a Team does not rank receives no points from that Team.
@@ -329,7 +314,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
     5.  Notwithstanding this Section, where only one (1) Candidate is nominated within the nomination period, the Commissioner may admit him without holding an Admission Vote, or may hold one. Where he admits him without an Admission Vote, he shall give Notice of the admission, and that Candidate is treated as an admitted Candidate for the purposes of Section 11, Subsections (d) through (h), so far as they are applicable. Where an Admission Vote is held and no Team has cast a ballot in it, the Commissioner may close it before the expiry of the three (3) days upon Notice, and Section 11 applies to an Admission Vote so closed as it applies to one closed upon the expiry of that period.
 
 11. At the close of the Admission Vote the Commissioner shall rank the Candidates by most points; among Candidates tied on points, as the Commissioner shall determine.
-
     1.  Notwithstanding Article III, Section 5, the Commissioner may admit the highest ranked Candidate, or may pass. He shall admit or pass within seven (7) days of the close of the Admission Vote, and where he does neither he is deemed to have passed.
 
     2.  Where the Commissioner passes, no Candidate is admitted in that Admission Vote. He shall give Notice of the pass and of his reason for it, and shall open a further nomination period pursuant to Section 9.
@@ -355,7 +339,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Reigning Champion Exemption.
 
 13. The Manager of the Team that became the CHAMPION in the immediately preceding season (the “Reigning Champion”) may elect to retain his existing Team name rather than rename his Team.
-
     1.  This exemption may be invoked for a maximum of three (3) consecutive LEAGUE CHAMPIONSHIPS. Where a Manager becomes the CHAMPION in three (3) consecutive seasons and invokes this exemption in each of those seasons, the exemption expires, and that Manager shall rename his Team prior to the following season regardless of whether he becomes the CHAMPION in a fourth consecutive season.
 
     2.  The count of consecutive LEAGUE CHAMPIONSHIPS resets to zero (0) for any Manager who does not become the CHAMPION in a given season. Where that Manager becomes the CHAMPION in a later, non-consecutive season, the exemption becomes available to him again for up to three (3) consecutive invocations.
@@ -369,7 +352,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Standards for Team Names.
 
 15. A Team name shall not:
-
     1.  duplicate the name of another Manager’s Team from any prior season; or
 
     2.  be a trivial variation of that Team’s immediately preceding name, such as the addition or removal of a single word or a single mark of punctuation, as determined in the sole discretion of the Commissioner or by simple majority vote of the Teams.
@@ -391,9 +373,7 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 1.  The LEAGUE shall be a weekly head-to-head league.
 
 2.  The scoring categories and associated points for the LEAGUE shall be as follows:
-
     1.  Passing categories:
-
         1.  Passing Yards (0.05)
 
         2.  TD Pass (4)
@@ -403,7 +383,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
         4.  2pt Passing Conversions (2)
 
     2.  Rushing categories:
-
         1.  Rushing Yards excluding Quarterback Kneels (0.1)
 
         2.  TD Rush (6)
@@ -411,7 +390,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
         3.  2pt Rushing Conversion (2)
 
     3.  Receiving Categories:
-
         1.  Receiving Yards (0.1)
 
         2.  Reception (0.5)
@@ -421,7 +399,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
         4.  2pt Receiving Conversion (2)
 
     4.  Miscellaneous:
-
         1.  Kickoff Return TD (6)
 
         2.  Punt Return TD (6)
@@ -435,13 +412,11 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
         6.  2 Point Return TD (2)
 
     5.  Kicking categories:
-
         1.  Each PAT Made (1)
 
         2.  FG Made (3 + 0.1 per yard over 30)
 
     6.  Defense and Special Teams categories:
-
         1.  Sack (1)
 
         2.  INT Return TD (6)
@@ -471,7 +446,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
         14. 10-13 points allowed (2)
 
 3.  The positional composition of the LEAGUE roster shall be as follows:
-
     1.  1 starting Quarterback (QB); No maximum
 
     2.  2 starting Running Backs (RB); No maximum
@@ -520,7 +494,6 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 ### Divisions.
 
 13. Divisions shall be constituted and shall operate as follows:
-
     1.  Where the LEAGUE consists of ten (10) Teams, there shall be no Divisions. All ten (10) Teams shall compete in a single LEAGUE-wide standing.
 
     2.  Where the LEAGUE consists of twelve (12) Teams, there shall be four (4) Divisions of three (3) Teams each.
@@ -562,7 +535,6 @@ Interpretive Note: _Note that a two-week period of Inactivity, under the Offence
 ### Extensions.
 
 1.  At the beginning of each year, Teams can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
-
     1.  1st extension: +$5
 
     2.  2nd extension: +$10
@@ -598,7 +570,6 @@ Interpretive Note: _Note that a two-week period of Inactivity, under the Offence
 3.  Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agency Auction.
 
 4.  If no non-original teams offer a contract that exceeds the original team’s offer by greater than 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
-
     1.  In the event that two (2) or more non-original teams offer equal winning contracts, those teams will submit an additional blind contract offer.
         1.  This process would be repeated until one (1) team offers a contract with a higher value.
 
@@ -613,7 +584,6 @@ Interpretive Note: _Note that a two-week period of Inactivity, under the Offence
 1.  Each team will be allowed the use of one (1) Franchise Tag each season to extend a player.
 
 2.  The contract value of the Franchise Tag will be the average of the top contracts at the player’s position (rounded up to the nearest whole number) based on the previous season values and points.
-
     1.  QB, WR & RB: top ten (10) player contract values
 
     2.  TE: top five (5) player contract values
@@ -639,7 +609,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 3.  In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, if they are in possession of their own first round pick for the following year, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
 
 4.  The six (6) Teams admitted to the post-season shall receive the last six (6) picks of each round, ordered as follows:
-
     1.  Where the LEAGUE consists of ten (10) Teams, the losers of the WILDCARD ROUND shall receive the 5th and 6th picks, with the lower scoring Team receiving the 5th pick; and the winner of the LEAGUE CHAMPIONSHIP shall receive the 10th pick, while the 2nd, 3rd and 4th place Teams shall receive the 9th, 8th and 7th picks respectively.
 
     2.  Where the LEAGUE consists of twelve (12) Teams, the losers of the WILDCARD ROUND shall receive the 7th and 8th picks, with the lower scoring Team receiving the 7th pick; and the winner of the LEAGUE CHAMPIONSHIP shall receive the 12th pick, while the 2nd, 3rd and 4th place Teams shall receive the 11th, 10th and 9th picks respectively.
@@ -666,7 +635,7 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 1.  The date and time will be posted on the LEAGUE home page and will also be communicated to each Manager via email.
 
-2.  The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than ten (10) days and no later than two (2) days prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
+2.  The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than ten (10) days and no later than two (2) hours prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
 
 ### Budget.
 
@@ -783,7 +752,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Sanctuary Periods.
 
 15. Poaching claims can not be submitted during the following Sanctuary Periods:
-
     1.  First twenty-four (24) hours of the Regular Season;
 
     2.  First twenty-four (24) hours a practice squad player is signed;
@@ -793,7 +761,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Super Priority For Poached Players.
 
 16. When a poached player is first released, the original team will have Super-Priority to claim them when they are on waivers. This Super-Priority applies only to Practice Squad claims and does not reset the team’s waiver order. Super-Priority does not precede active roster claims. If the Super-Priority claim is successful, the player will be placed back on the Practice Squad (drafted or signed) at their original Practice Squad Salary. The Super-Priority remains in effect until one of the following occurs:
-
     1.  The player is rostered for at least four (4) weeks or started in at least one (1) week by the poaching team;
 
     2.  The player is traded to another team;
@@ -813,7 +780,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Authorization to Trade.
 
 1.  The Commissioner is authorized to evaluate all transactions, as authorized by Article III, Section 2(e), upon the following terms:
-
     1.  The Commissioner may veto or nullify any such transactions that contravene this Constitution or that, in his discretion, would be contrary to the best interests of fantasy football;
 
     2.  All such vetoes must be announced within twenty-four (24) hours of the announced transaction;
@@ -847,7 +813,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Participation.
 
 3.  Four (4) Teams will be admitted to the WILDCARD ROUND, after the two (2) Teams admitted directly to the CHAMPIONSHIP under [Article XVII, Section 3](#article-xvii). They shall be, in order:
-
     1.  every Division winner not admitted directly to the CHAMPIONSHIP;
 
     2.  where the LEAGUE has no Divisions, the two (2) Teams with the highest Head-to-Head record over the Qualifying Season among those remaining; and then
@@ -855,7 +820,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
     3.  the Teams with the highest Total Points For (PF) over the Qualifying Season among those remaining, until four (4) Teams have been admitted.
 
 4.  Ties in the measures by which Teams are admitted shall be broken as follows:
-
     1.  In the event that any Teams should be tied in respect of Head-to-Head record, the tie breaker shall be the higher All Play win percentage over the Qualifying Season, and if still tied, the higher Total Points For (PF) over the Qualifying Season.
 
     2.  In the event that any Teams should be tied in respect of Total Points For (PF), the tie breaker shall be the higher All Play win percentage over the Qualifying Season.
@@ -879,7 +843,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Participation.
 
 3.  Two (2) Teams will be admitted directly to the CHAMPIONSHIP, along with the two (2) WILDCARD ROUND winners. The two (2) Teams admitted directly shall be those with the highest All Play win percentage over the Qualifying Season, drawn from the following Teams:
-
     1.  Where the LEAGUE has no Divisions, from all Teams in the LEAGUE.
 
     2.  Where the LEAGUE is organized into Divisions, from the Division winners only, as defined in [Article V, Section 13, Subsection (e)](#article-v).
@@ -895,7 +858,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 6.  Payouts are to be made by the Commissioner no more than one week after the conclusion of the LEAGUE Championship.
 
 7.  Payouts shall be made as follows:
-
     1.  LEAGUE CHAMPIONSHIP Champion: 62% of total yearly Buy-In
 
     2.  LEAGUE CHAMPIONSHIP Runner-Up: 10% of total yearly Buy-In
@@ -913,7 +875,6 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Orphaned Teams.
 
 3.  A team shall be considered Orphaned, upon the following terms:
-
     1.  Quitting Team: If a Manager publicly declares they are quitting the league, the team is immediately classified as an orphan team and the Commissioner will assume control of the team until a replacement manager is found. Public, written declarations are permanent and irrevocable; quitting managers are permanently barred from seeking reinstatement to the league;
 
     2.  Abandoning Team: A team is considered abandoned during the season if a Manager fails to set a lineup for two consecutive games;
@@ -943,17 +904,14 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 ### Offences.
 
 4.  Everyone commits an offence who:
-
     1.  Bribery: Provides another party with value other than in-game value in exchange for in-game value.
 
     2.  Collusion: Agrees with another party to limit open competition in the game by deceiving, misleading or defrauding others in order for a party, who may or may not be a party to the collusion, to obtain an unfair market advantage.
-
         1.  Collusion shall be assumed in any case where one Manager acts for more than one Team at the same time.
 
         2.  Sharing of limited resources, including but not limited to active roster space, salary space, or players.
 
     3.  Non-Competitive Behaviour: Demonstrates an intention not to compete that goes beyond mere negligence.
-
         1.  Under extreme circumstances, a recurring refusal to engage in reasonable transactions may be considered non-competitive behaviour.
 
     4.  General Anti-Avoidance Provision (GAAP): Engages in conduct not otherwise prohibited by this Constitution but is generally acknowledged to be shitty.
@@ -1086,5 +1044,6 @@ The current Buy-In rate, Buy-In due date, and Commissioner contact information a
 | XLIII     | Admission of Managers                                     | 2026-08-16 | 2026-08-16 |
 | XLV       | Commissioner Entrenchment                                 | 2026-08-16 | 2026-08-16 |
 | XLVI      | Single-Candidate Admission                                | 2026-08-17 | 2026-08-17 |
+| XLVII     | Free Agency Auction Timing Window                         | 2026-08-26 | 2026-08-26 |
 
 Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
