@@ -201,7 +201,9 @@ const SYSTEM_PROMPT = [
   '',
   'Rules:',
   '- Use ONLY column ids that appear verbatim in the catalog. Never invent one, and never guess at a plausible-looking id.',
-  '- If the instruction cannot be answered with these columns, set expressible to false and say why. That is a correct answer, not a failure.',
+  '- Always build the view. Search the catalog for the closest columns and use them.',
+  '- Set expressible to false ONLY when nothing in the catalog is even close — no measure, no proxy, no related column. This is a last resort, not an alternative to reading the catalog.',
+  '- Include identity columns (player_name, player_position, player_nfl_teams, or team_code and team_name for a team view) so the rows can be read.',
   '- Prefer fewer, well-chosen columns over many.',
   '- row_axes splits rows by a dimension (for example year or week). Leave it out for a single-row-per-player view.',
   '- sort on the column the instruction is really asking about, descending unless the instruction implies otherwise.'
