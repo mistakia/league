@@ -11,7 +11,7 @@ import { get_scoring_format_id } from '#libs-server/data-views/index.mjs'
 // TODO career_year
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || current_season.stats_season_year
+  let year = params.year || current_season.last_completed_season_year
   if (Array.isArray(year)) {
     year = year[0]
   }
@@ -33,13 +33,13 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
     scoring_format_id = scoring_format_id[0]
   }
 
-  let year = params.year || [current_season.stats_season_year]
+  let year = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
 
   if (!year.length) {
-    year = [current_season.stats_season_year]
+    year = [current_season.last_completed_season_year]
   }
 
   let year_offset_single = params.year_offset || 0

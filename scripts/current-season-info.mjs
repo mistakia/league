@@ -11,7 +11,7 @@ console.log(`  Fantasy Season Week: ${current_season.fantasy_season_week}`)
 console.log(`  NFL Season Week: ${current_season.nfl_seas_week}`)
 console.log(`  NFL Season Type: ${current_season.nfl_seas_type}`)
 console.log(`  Last Week with Stats: ${current_season.last_week_with_stats}`)
-console.log(`  Stats Season Year: ${current_season.stats_season_year}`)
+console.log(`  Stats Season Year: ${current_season.last_completed_season_year}`)
 
 console.log('\nSeason Status:')
 console.log(`  Is Offseason: ${current_season.isOffseason}`)

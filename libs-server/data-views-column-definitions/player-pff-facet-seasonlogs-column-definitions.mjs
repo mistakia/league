@@ -25,13 +25,13 @@ import { career_year, year } from '#libs-shared/common-column-params.mjs'
 // pass_blocking facet is the canonical home of those four names.
 
 const get_pff_params = ({ params = {} }) => {
-  let year_param = params.year || [current_season.stats_season_year]
+  let year_param = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year_param)) {
     year_param = [year_param]
   }
 
   if (!year_param.length) {
-    year_param = [current_season.stats_season_year]
+    year_param = [current_season.last_completed_season_year]
   }
 
   let career_year_param = params.career_year || []

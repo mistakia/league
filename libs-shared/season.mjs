@@ -90,8 +90,22 @@ export default class Season {
     return week > 0 && week <= this.finalWeek
   }
 
-  // TODO rename to last_year_with_stats
-  get stats_season_year() {
+  // The retrospective half of the current / last-completed pair.
+  //
+  //   current (in play or next up)  |  last completed (has results)
+  //   ------------------------------|------------------------------
+  //   season: `year`                |  `last_completed_season_year`
+  //   week:   current_nfl_week_*()  |  last_completed_nfl_week_*()
+  //
+  // Invariant: a week member's year equals the season member in its own
+  // column. Reach for `year` for anything forward-looking -- salaries,
+  // projections, betting markets, practice reports, schedules -- and for this
+  // only when the caller genuinely needs a season that has results.
+  //
+  // The two are EQUAL during the season and differ for the six offseason
+  // months, which is why a wrong choice is invisible from August to February
+  // and then silently serves the prior season.
+  get last_completed_season_year() {
     return this.week === 0 ? this.year - 1 : this.year
   }
 

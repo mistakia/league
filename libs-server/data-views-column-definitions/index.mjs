@@ -130,7 +130,7 @@ const player_league_roster_join = async ({
   data_view_options = {}
 }) => {
   // Roster year defaults to current_season.year (current fantasy year),
-  // NOT the week-identifier year which tracks stats_season_year during offseason.
+  // NOT the week-identifier year which tracks last_completed_season_year during offseason.
   const { lid, year, week: scoped_week } = resolve_roster_scope({ params })
 
   let week

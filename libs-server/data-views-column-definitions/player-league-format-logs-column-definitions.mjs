@@ -11,7 +11,7 @@ import { get_league_format_id } from '#libs-server/data-views/index.mjs'
 // TODO career_year
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || current_season.stats_season_year
+  let year = params.year || current_season.last_completed_season_year
   if (Array.isArray(year)) {
     year = year[0]
   }
@@ -29,7 +29,7 @@ const get_cache_info_for_league_format_careerlogs = create_static_cache_info({
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const { league_format_id = DEFAULT_LEAGUE_FORMAT_ID } = params
-  let year = params.year || [current_season.stats_season_year]
+  let year = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
@@ -45,7 +45,7 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
 }
 
 const league_format_seasonlogs_year_default = (params) => {
-  let year = params.year || [current_season.stats_season_year]
+  let year = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }

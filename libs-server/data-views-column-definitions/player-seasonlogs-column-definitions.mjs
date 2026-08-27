@@ -5,11 +5,11 @@ import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info
 import { single_year, seas_type } from '#libs-shared/common-column-params.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year_param = params.year || [current_season.stats_season_year]
+  let year_param = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year_param)) {
     year_param = [year_param]
   }
-  const year = year_param[0] || current_season.stats_season_year
+  const year = year_param[0] || current_season.last_completed_season_year
   const seas_type_param = params.seas_type || 'REG'
   return { single_year: Number(year), seas_type: seas_type_param }
 }

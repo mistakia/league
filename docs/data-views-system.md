@@ -881,7 +881,7 @@ Reuse and correctness pull against each other here. A param omitted from `consum
 
 1. `query_context.year_range` (year or week split present).
 2. `params.year` (explicit per-column override).
-3. `source.year_default(params)` (the attaching source's anchor year, e.g. ESPN team-stats defaults to `current_season.stats_season_year`).
+3. `source.year_default(params)` (the attaching source's anchor year, e.g. ESPN team-stats defaults to `current_season.last_completed_season_year`).
 4. `[current_season.year]` (defensive last resort).
 
 Without step 3, attaching a `team_year` source on a player cell with no year split would have materialized `player_year_teams` for `current_season.year` (e.g. 2026 mid-offseason) and the source-attach join would find no rows, returning NULL for every active player.
@@ -1522,7 +1522,7 @@ Writers that touch week-scoped rows in tables lacking a source-driven `seas_type
 
 Canonical helpers live in `libs-shared/nfl-week-identifier.mjs`:
 
-- `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `stats_season_year`.
+- `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `last_completed_season_year`.
 - `current_nfl_week_identifier()` → formatted `nfl_week_id` string.
 - `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary. Returns `null` when stepping before REG week 1 of the current year. Throws on positive offsets.
 - `reference_week_fallback_params()` → `{ prior_params, fallback_params }` (or `null`). Used by reserve / gamelog reference-week joins that need a one-week bye fallback; `fallback_params` is two-weeks-prior when it exists, else `prior_params`.

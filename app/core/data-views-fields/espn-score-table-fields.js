@@ -17,8 +17,8 @@ function create_espn_score_field({ score_type, label }) {
       year: {
         ...single_year,
         values: Array.from(
-          { length: current_season.stats_season_year - 2016 },
-          (_, i) => current_season.stats_season_year - i
+          { length: current_season.last_completed_season_year - 2016 },
+          (_, i) => current_season.last_completed_season_year - i
         )
       },
       career_year

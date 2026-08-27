@@ -25,7 +25,7 @@ const resolve_season_type = (params = {}) => {
 //   1. query_context.year_range (year/week split present)
 //   2. params.year (explicit per-column override)
 //   3. source.year_default(params) -- the attaching source's anchor year
-//      (e.g. ESPN team-stats default to current_season.stats_season_year)
+//      (e.g. ESPN team-stats default to current_season.last_completed_season_year)
 //   4. current_season.year (no source context; defensive)
 // Without step 3 the historical-team CTE was built for current_season.year
 // (e.g. 2026 in-offseason) and the source attach found no rows -- causing

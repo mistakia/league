@@ -47,7 +47,9 @@ export const build_step_query_conditions = ({ query, step_name }) => {
   }
 
   if (step_name.includes('projections')) {
-    return query.where('year', current_season.stats_season_year).limit(1)
+    return query
+      .where('year', current_season.last_completed_season_year)
+      .limit(1)
   }
 
   return query.limit(1)

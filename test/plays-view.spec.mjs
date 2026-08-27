@@ -34,7 +34,7 @@ describe('Plays View', () => {
         params: {}
       })
 
-      const expected_query = `select "nfl_plays"."play_type" from "nfl_plays" where "nfl_plays"."season_year" in (${current_season.stats_season_year}) and "nfl_plays"."season_type" in ('REG') limit 500`
+      const expected_query = `select "nfl_plays"."play_type" from "nfl_plays" where "nfl_plays"."season_year" in (${current_season.last_completed_season_year}) and "nfl_plays"."season_type" in ('REG') limit 500`
 
       compare_queries(query.toString(), expected_query)
     })

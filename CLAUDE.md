@@ -142,7 +142,7 @@ Most operations occur within league context (`/leagues/:lid/`). Verify permissio
 From `libs-shared/constants/season-constants.mjs`:
 
 - `current_season.year`, `current_season.week` (the continuous counter from `regular_season_start`, not per-type)
-- `current_season.nfl_seas_type` (`PRE`/`REG`/`POST`), `nfl_seas_week` (resets to 1 in POST), `stats_season_year` (stable across the Super Bowl gap and offseason)
+- `current_season.nfl_seas_type` (`PRE`/`REG`/`POST`), `nfl_seas_week` (resets to 1 in POST), `last_completed_season_year` (stable across the Super Bowl gap and offseason)
 - `is_offseason`, `is_regular_season`, `fantasy_weeks`, `nfl_weeks`
 
 Never reconstruct an `nfl_week_id` locally — use the canonical helpers in `libs-shared/nfl-week-identifier.mjs`. See `docs/data-views-system.md` for the choke-point rules, and [docs/guides/scripts.md](docs/guides/scripts.md) for what these getters read in the offseason and preseason.

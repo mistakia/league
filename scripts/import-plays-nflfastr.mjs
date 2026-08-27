@@ -1250,7 +1250,7 @@ const main = async () => {
       // Import all years from 1999 to current season
       for (
         let import_season_year = 1999;
-        import_season_year <= current_season.stats_season_year;
+        import_season_year <= current_season.last_completed_season_year;
         import_season_year++
       ) {
         // Reset cache between years to ensure each season year's plays are loaded

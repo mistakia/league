@@ -5,7 +5,7 @@ import { team_year_offset_range_select } from '#libs-server/data-views/param-uti
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || [current_season.stats_season_year]
+  let year = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }

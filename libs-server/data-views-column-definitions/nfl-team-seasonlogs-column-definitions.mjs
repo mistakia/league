@@ -6,7 +6,7 @@ import { create_season_cache_info } from '#libs-server/data-views/cache-info-uti
 const default_league_id = 1
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || [current_season.stats_season_year]
+  let year = params.year || [current_season.last_completed_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
@@ -64,7 +64,7 @@ const league_nfl_team_seasonlogs_table_alias = ({ params = {} }) => {
 }
 
 const year_default = (params) => {
-  const raw = params.year ?? current_season.stats_season_year
+  const raw = params.year ?? current_season.last_completed_season_year
   const arr = Array.isArray(raw) ? raw : [raw]
   return arr.map(Number)
 }
@@ -98,7 +98,7 @@ const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
     const year = Array.isArray(params.year)
       ? params.year[0]
-      : params.year || current_season.stats_season_year
+      : params.year || current_season.last_completed_season_year
     return { year: [year] }
   }
 })

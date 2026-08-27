@@ -38,7 +38,7 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  const year = params.year || current_season.stats_season_year
+  const year = params.year || current_season.last_completed_season_year
   let win_rate_type = params.win_rate_type || 'PASS_RUSH'
   if (Array.isArray(win_rate_type)) {
     win_rate_type = win_rate_type[0] || 'PASS_RUSH'
@@ -93,7 +93,7 @@ const espn_team_source = {
   grain: 'team_year',
   key_columns: { team: 'nfl_team', year: 'season_year' },
   year_default: (params) => {
-    const raw = params.year ?? current_season.stats_season_year
+    const raw = params.year ?? current_season.last_completed_season_year
     const arr = Array.isArray(raw) ? raw : [raw]
     return arr.map(Number)
   }

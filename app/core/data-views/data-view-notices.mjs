@@ -36,7 +36,7 @@ const resolve_dynamic_nfl_week_id = (dv) => {
   switch (dv.dynamic_type) {
     case 'current_year_reg_weeks':
       return get_nfl_week_identifiers_for_year({
-        year: current_season.stats_season_year,
+        year: current_season.last_completed_season_year,
         seas_type: 'REG'
       })
     case 'current_nfl_week':
@@ -55,7 +55,7 @@ const resolve_dynamic_nfl_week_id = (dv) => {
       const n = parseInt(dv.value || 3, 10)
       const result = []
       for (let i = 0; i < n; i++) {
-        const y = current_season.stats_season_year - i
+        const y = current_season.last_completed_season_year - i
         if (y < 2000) break
         result.push(...get_nfl_week_identifiers_for_year({ year: y }))
       }

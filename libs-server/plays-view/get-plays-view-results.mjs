@@ -104,7 +104,7 @@ export async function get_plays_view_results_query({
   const query_params = { ...params }
   const has_year_in_where = where.some((c) => c.column_id === 'play_year')
   if (!query_params.year && !has_year_in_where) {
-    query_params.year = [current_season.stats_season_year]
+    query_params.year = [current_season.last_completed_season_year]
   }
 
   // Build base query

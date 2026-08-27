@@ -47,14 +47,14 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
       await knex('practice').where({ pid: TEST_PID }).del()
       await knex('practice').insert({
         pid: TEST_PID,
-        season_year: current_season.stats_season_year,
+        season_year: current_season.last_completed_season_year,
         season_type: 'REG',
         week: Math.max(current_season.week, 1),
         game_designation: 'REG-MATCH'
       })
       await knex('practice').insert({
         pid: TEST_PID,
-        season_year: current_season.stats_season_year,
+        season_year: current_season.last_completed_season_year,
         season_type: 'POST',
         week: 1,
         game_designation: 'POST-UNUSED'
@@ -83,14 +83,14 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
       await knex('practice').where({ pid: TEST_PID }).del()
       await knex('practice').insert({
         pid: TEST_PID,
-        season_year: current_season.stats_season_year,
+        season_year: current_season.last_completed_season_year,
         season_type: 'POST',
         week: 1,
         game_designation: 'POST-MATCH'
       })
       await knex('practice').insert({
         pid: TEST_PID,
-        season_year: current_season.stats_season_year,
+        season_year: current_season.last_completed_season_year,
         season_type: 'REG',
         week: 18,
         game_designation: 'REG-UNUSED'

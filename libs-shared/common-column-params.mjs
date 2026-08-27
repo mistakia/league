@@ -25,7 +25,7 @@ const format_year_value = ({ value, def }) => {
         (dynamic_def?.label || v.dynamic_type) +
         (v.value != null ? ` (${v.value})` : '')
       const n = parseInt(v.value ?? dynamic_def?.default_value ?? 3, 10)
-      const current = current_season.stats_season_year
+      const current = current_season.last_completed_season_year
       switch (v.dynamic_type) {
         case 'last_n_years': {
           const end = current
@@ -189,7 +189,7 @@ export const career_game = {
 export const year = {
   values: available_years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: current_season.stats_season_year,
+  default_value: current_season.last_completed_season_year,
   format_value: format_year_value,
   dynamic_values: [
     {
@@ -211,7 +211,7 @@ export const single_year = {
   values: available_years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  default_value: current_season.stats_season_year,
+  default_value: current_season.last_completed_season_year,
   enable_multi_on_split: ['year']
 }
 
@@ -317,7 +317,7 @@ const resolve_nfl_week_dynamic = ({ dv, def }) => {
 
   switch (dv.dynamic_type) {
     case 'current_year_reg_weeks':
-      return `${current_season.stats_season_year} REG`
+      return `${current_season.last_completed_season_year} REG`
     case 'current_nfl_week': {
       const params = current_nfl_week_params()
       if (!params) return fallback

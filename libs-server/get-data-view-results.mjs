@@ -284,7 +284,7 @@ const process_dynamic_params = (params) => {
 
 const process_dynamic_year_param = (year_param) => {
   let years = Array.isArray(year_param) ? year_param : [year_param]
-  const current_year = current_season.stats_season_year
+  const current_year = current_season.last_completed_season_year
   const max_year = current_season.year
   const min_year = 2000
 
@@ -379,7 +379,7 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
       switch (item.dynamic_type) {
         case 'current_year_reg_weeks': {
           return get_nfl_week_identifiers_for_year({
-            year: current_season.stats_season_year,
+            year: current_season.last_completed_season_year,
             seas_type: 'REG'
           })
         }

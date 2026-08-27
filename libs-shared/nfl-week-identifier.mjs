@@ -285,7 +285,7 @@ export const get_postseason_week_label = ({ week }) => {
  * @returns {NflWeekParams}
  */
 export const current_nfl_week_params = () => {
-  const year = current_season.stats_season_year
+  const year = current_season.last_completed_season_year
   const live_type = current_season.nfl_seas_type
   if (live_type === 'POST') {
     return {
