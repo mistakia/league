@@ -1,5 +1,17 @@
+import jwt from 'jsonwebtoken'
 import config from '#config'
 import { fetch_with_retry } from './proxy-manager.mjs'
+
+// The cache write endpoint is admin-gated (userId === 1) and verifies the bearer
+// token with config.jwt.secret (api/routes/cache.mjs, expressjwt in api/index.mjs).
+// Sign a fresh admin token per request rather than carrying a static one in
+// config: a hard-coded token stops verifying on every jwt.secret rotation — the
+// 2026-08-27 rotation invalidated the legacy league_api_auth_token and broke every
+// importer's cache write with a 401 until re-signed — and a token signed with a
+// retired secret is exactly the artifact a rotation retires. A per-call HMAC sign
+// is cheap and always current.
+const admin_bearer = () =>
+  `Bearer ${jwt.sign({ userId: 1 }, config.jwt.secret)}`
 
 // use_proxy: false -- this is our own xo.football API, not a vendor target.
 export const set = async ({ key, value }) => {
@@ -10,7 +22,7 @@ export const set = async ({ key, value }) => {
     method: 'POST',
     body: JSON.stringify(value),
     headers: {
-      authorization: `Bearer ${config.league_api_auth_token}`,
+      authorization: admin_bearer(),
       'Content-Type': 'application/json'
     },
     max_retries: 3,
