@@ -6,6 +6,8 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
+import * as constants_barrel from '#constants'
+import * as season_constants from '#constants/season-constants.mjs'
 import { current_season } from '#constants'
 import season_dates from '#libs-shared/season-dates.mjs'
 
@@ -290,6 +292,50 @@ describe('LIBS-SHARED Season', function () {
         current_season.practice_squad_protection_start
       )
     ).to.equal(false)
+  })
+
+  // `#constants` used to export current_week, current_year,
+  // current_fantasy_season_week, is_offseason and is_regular_season as
+  // module-level consts. They read like aliases of the getters and were not --
+  // each held the getter's value at IMPORT time and never moved again, so in
+  // the long-running API `is_offseason` stayed frozen at whatever it was when
+  // the process booted. Measured at the deletion: with the clock moved to
+  // 2026-11-17, the getters reported `isRegularSeason=true, week=11` while the
+  // frozen exports still read `is_regular_season=false, current_week=0`.
+  //
+  // Both halves are asserted, because either alone is satisfiable the wrong
+  // way: absence without liveness passes on a module that exports nothing
+  // useful, and liveness without absence passes while a frozen copy sits
+  // beside the getter waiting to be imported.
+  //
+  // And BOTH modules are checked. Asserting only the `#constants` barrel is
+  // vacuous against the reintroduction that actually matters: season-constants
+  // is the file a snapshot gets added back to, and its own header tells
+  // callers to import it directly for tree shaking, so a frozen export could
+  // reappear there and be imported by name while the barrel stayed clean.
+  // Verified by re-adding `is_offseason` to season-constants -- the
+  // barrel-only assertion stayed green.
+  it('exposes no clock-dependent value outside a getter', function () {
+    for (const name of [
+      'current_week',
+      'current_year',
+      'current_fantasy_season_week',
+      'is_offseason',
+      'is_regular_season'
+    ]) {
+      expect(constants_barrel[name], `barrel ${name}`).to.equal(undefined)
+      expect(season_constants[name], `season-constants ${name}`).to.equal(
+        undefined
+      )
+    }
+
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
+    expect(current_season.isRegularSeason).to.equal(false)
+    expect(current_season.week).to.equal(0)
+
+    MockDate.set(regular_season_start.add('11', 'week').toISOString())
+    expect(current_season.isRegularSeason).to.equal(true)
+    expect(current_season.week).to.equal(11)
   })
 
   // `end` is the one anchor with no independently observable date on it -- it

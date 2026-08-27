@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { current_season, is_regular_season } from '#constants'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -53,7 +53,7 @@ const get_expected_season_years = async () => {
     .orderBy('nfl_games.season_year', 'asc')
     .pluck('nfl_games.season_year')
 
-  return is_regular_season
+  return current_season.isRegularSeason
     ? rows.filter((season_year) => season_year !== current_season.year)
     : rows
 }

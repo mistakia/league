@@ -10,11 +10,6 @@
 // Season constants
 export {
   current_season,
-  current_week,
-  current_year,
-  current_fantasy_season_week,
-  is_offseason,
-  is_regular_season,
   league_default_rfa_window_hours,
   league_default_rfa_processing_lead_hours,
   nfl_draft_rounds,

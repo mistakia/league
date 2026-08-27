@@ -1,5 +1,5 @@
 import db from '#db'
-import { is_offseason } from '#constants'
+import { current_season } from '#constants'
 
 import throw_if_shortfall from './throw-if-shortfall.mjs'
 
@@ -21,7 +21,7 @@ export default async function check_projections_index_floor({
   season_type,
   floor
 }) {
-  if (is_offseason) {
+  if (current_season.isOffseason) {
     return
   }
 

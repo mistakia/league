@@ -2,12 +2,14 @@
 import season_dates from '#libs-shared/season-dates.mjs'
 import Season from '#libs-shared/season.mjs'
 
+// Read clock-dependent values off this object, never through a module-level
+// copy. `current_week`, `current_year`, `current_fantasy_season_week`,
+// `is_offseason` and `is_regular_season` used to be exported from here and
+// were evaluated ONCE at import, so they were not aliases of the getters --
+// they were the getters' values at boot, and they never moved again. In the
+// long-running API that meant an `is_offseason` frozen at process start,
+// wrong for the whole season after the first September restart.
 export const current_season = new Season(season_dates)
-export const current_week = current_season.week
-export const current_year = current_season.year
-export const current_fantasy_season_week = current_season.fantasy_season_week
-export const is_offseason = current_season.isOffseason
-export const is_regular_season = current_season.isRegularSeason
 export const league_default_rfa_window_hours = 24
 export const league_default_rfa_processing_lead_hours = 3
 

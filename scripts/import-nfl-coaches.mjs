@@ -612,11 +612,9 @@ const import_nfl_coaches = async ({
   // rows and would trip the "Zero nfl_game_coaches rows ingested" guard below
   // (signal #113494). The scheduled-command is intentionally year-round and
   // expected to no-op out of season; make that explicit here. Mirrors the ESPN
-  // seasonal-import guard (commit 79bf137e) and the league 89bea137 is_offseason
+  // seasonal-import guard (commit 79bf137e) and the league 89bea137 offseason
   // short-circuit. An explicit --backfill or --since <year> still runs
-  // year-round so manual backfills are never gated. current_season.isOffseason
-  // is read live (not the static is_offseason snapshot) for consistency with the
-  // rest of this file and to stay correct if ever run from a long-lived process.
+  // year-round so manual backfills are never gated.
   if (
     !backfill &&
     (since == null || since === 'current') &&

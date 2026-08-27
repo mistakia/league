@@ -105,11 +105,14 @@ const stub_payload = (items) => {
 
 /*
   The in-season monitors (players_with_injury_status >= 5, plus a 48h
-  source='sleeper' injury_status changelog write) sit behind `is_offseason`,
-  which is a module-level const captured at IMPORT time -- so MockDate cannot
-  move it and the branch taken depends on the day the suite runs. Satisfying both
-  monitors unconditionally is what keeps this spec from turning red on its own in
-  week 1 without any code change.
+  source='sleeper' injury_status changelog write) sit behind
+  `current_season.isOffseason`, so the branch taken depends on the day the
+  suite runs. Satisfying both monitors unconditionally is what keeps this spec
+  from turning red on its own in week 1 without any code change.
+
+  That guard used to be a module-level const captured at IMPORT time, which
+  MockDate could not move at all. It is a live getter now, so a future revision
+  of this spec CAN pin the clock and assert each branch directly.
 */
 const FILLER_COUNT = 6
 const injury_filler = () =>

@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { transaction_types, current_year } from '#constants'
+import { transaction_types, current_season } from '#constants'
 import { get_super_priority_status, is_main } from '#libs-server'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async ({
-  year = current_year,
+  year = current_season.year,
   lid = null,
   dry_run = false
 } = {}) => {
@@ -180,7 +180,7 @@ const main = async () => {
       .option('year', {
         alias: 'y',
         type: 'number',
-        default: current_year,
+        default: current_season.year,
         describe: 'Year to process'
       })
       .option('lid', {

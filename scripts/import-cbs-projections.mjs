@@ -120,7 +120,7 @@ const run = async ({ season = false, dry = false } = {}) => {
 
     // A parse that yields nothing is always a failure — the page either moved
     // or changed shape. check_projections_index_floor cannot catch it here,
-    // because it short-circuits on is_offseason and the only live CBS cron is
+    // because it short-circuits on current_season.isOffseason and the only live CBS cron is
     // the offseason season-projection run.
     throw_if_shortfall(
       items.length === row_count_before
