@@ -114,6 +114,16 @@ export const get_session_token_v3 = async () => {
 }
 
 export const getPlayers = async ({ year, token, ignore_cache = false }) => {
+  // `year` is interpolated into the GraphQL query text below and into the cache
+  // key, neither of which is a parameterized position. Callers are scripts
+  // passing a season argument rather than request input, so this is a guard
+  // against a malformed argument rather than a live injection path -- but the
+  // splice is unescaped, so pin it to an integer at the boundary.
+  year = Number(year)
+  if (!Number.isInteger(year)) {
+    throw new Error(`getPlayers requires an integer year, received: ${year}`)
+  }
+
   const cache_key = `/nfl/players/${year}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })

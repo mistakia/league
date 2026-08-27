@@ -32,8 +32,12 @@ const expect = chai.expect
 // asserted here rather than in a browser, because a credential leak is exactly
 // the class that must fail a gate rather than an eyeball.
 
+// A SYNTHETIC token, not a signed one: nothing here verifies it, the specs
+// only assert that the capture allowlists never emit it. It was a real
+// (now-rotated) JWT until 2026-08-27; a credential-shaped literal in a public
+// repo reads as live whether or not it is.
 const SEEDED_TOKEN =
-  'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjQyfQ.this-is-a-fake-session-token'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU5NTQ3Njg3N30.not-a-real-signature-test-fixture-only'
 const SEEDED_EMAIL = 'submitter@example.com'
 
 // Mirrors the real `app` record's shape, built from the REAL User record

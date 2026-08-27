@@ -16,8 +16,29 @@ const format_value = (value) => {
   return String(value)
 }
 
+// A spreadsheet treats a cell opening with one of these as a FORMULA, not text,
+// so an exported league or team name like `=HYPERLINK(...)` executes when the
+// file is opened. Leading tab and CR are here because Excel strips them and
+// then reads the next character the same way.
+const formula_lead = /^[=+\-@\t\r]/
+
+// Plain numbers are exempt. Without this every negative stat in an export would
+// be neutralized into text and stop summing, which is most of what these
+// exports carry.
+const plain_number = /^-?\d+(\.\d+)?$/
+
+const neutralize_formula = (formatted) => {
+  if (!formula_lead.test(formatted) || plain_number.test(formatted)) {
+    return formatted
+  }
+
+  // A leading apostrophe is the spreadsheet convention for "treat as text". It
+  // is consumed on display, so the cell still reads as the original value.
+  return `'${formatted}`
+}
+
 const render_cell = (value) => {
-  const formatted = format_value(value)
+  const formatted = neutralize_formula(format_value(value))
 
   // Escape quotes and wrap in quotes if value contains comma, quote, or newline
   if (

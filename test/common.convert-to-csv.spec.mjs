@@ -103,11 +103,40 @@ describe('LIBS-SHARED convert_to_csv', function () {
     })
   })
 
-  // Locks the escaping behavior byte for byte. Two open security findings
-  // against formula injection are owned elsewhere and deliberately NOT
-  // asserted here -- a leading `=` is expected to pass through unchanged
-  // today, and whoever neutralizes it will update these cases.
+  // Locks the escaping behavior byte for byte.
   describe('escaping', function () {
+    it('neutralizes a leading = so a spreadsheet treats it as text', () => {
+      const csv = convert_to_csv({
+        rows: [{ name: '=HYPERLINK("http://x","c")' }]
+      })
+      expect(csv).to.equal('name\r\n"\'=HYPERLINK(""http://x"",""c"")"\r\n')
+    })
+
+    it('neutralizes the other formula leads, including tab and CR', () => {
+      for (const lead of ['+', '@', '\t', '\r']) {
+        const csv = convert_to_csv({ rows: [{ v: `${lead}cmd` }] })
+        expect(csv, `lead ${JSON.stringify(lead)}`).to.contain(`'${lead}cmd`)
+      }
+    })
+
+    it('neutralizes a formula in a HEADER, not just a data cell', () => {
+      const csv = convert_to_csv({
+        rows: [{ v: 1 }],
+        columns: [{ key: 'v', header: '=1+1' }]
+      })
+      expect(csv).to.equal("'=1+1\r\n1\r\n")
+    })
+
+    it('leaves a negative number alone so it still sums', () => {
+      const csv = convert_to_csv({ rows: [{ v: -3.5 }, { v: -7 }] })
+      expect(csv).to.equal('v\r\n-3.5\r\n-7\r\n')
+    })
+
+    it('neutralizes a non-numeric value that merely starts with -', () => {
+      const csv = convert_to_csv({ rows: [{ v: '-lookup()' }] })
+      expect(csv).to.equal("v\r\n'-lookup()\r\n")
+    })
+
     it('quotes a value containing a comma', () => {
       const csv = convert_to_csv({ rows: [{ name: 'Smith, John' }] })
       expect(csv).to.equal('name\r\n"Smith, John"\r\n')

@@ -1,7 +1,7 @@
 {
   "ssl": false,
   "jwt": {
-    "secret": "WajgVhpr4iCFjGq7rW",
+    "secret": "test-only-not-a-secret-jwt-signing-key",
     "algorithms": ["HS256"]
   },
   "postgres": {
@@ -22,7 +22,7 @@
   },
   "url": "http://127.0.0.1:8080",
   "email": {
-    "resend_api_key": "re_not_a_real_key_test_fixture_only",
+    "resend_api_key": "re_test_000000000000000000000000000000",
     "from": "no-reply@test.invalid"
   },
   "signals_api_url": "",

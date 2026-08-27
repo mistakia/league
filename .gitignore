@@ -24,9 +24,17 @@ yarn-error.log
 
 # App specific
 #
-# Legacy JS config files (migrated to config/ directory with secure-config)
+# Legacy JS config files (migrated to config/ directory)
 config.*.js
-# Note: config/*.json files ARE tracked (encrypted values are safe to commit)
+# config/*.json files ARE tracked, and only config-production.json is encrypted
+# (sops/age, recipients in .sops.yaml). config-development.json and
+# config-test.json are committed PLAINTEXT to a PUBLIC repo, so every value in
+# them is published: they must hold placeholders only, never a real credential
+# and never a value shared with production. The former note here said tracking
+# was safe because "encrypted values are safe to commit"; that rationale died
+# with the symmetric scheme on 2026-07-15 and its survival is how a live
+# production jwt secret sat in config-test.json on GitHub from then until
+# 2026-08-27.
 key.pem
 cert.pem
 drive-credentials.json

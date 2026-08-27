@@ -427,9 +427,12 @@ const keeptradecut_join = ({
           db.raw(`(${data_view_options.year_reference})`)
         )
       } else if (params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
+        // Bare value position, straight from request params on the
+        // unauthenticated /data-views/search path, so each entry is coerced to
+        // an integer rather than spliced as given.
+        const year_array = (
+          Array.isArray(params.year) ? params.year : [params.year]
+        ).map((value) => sql_integer_param({ value, param_name: 'year' }))
         if (year_array.length > 0) {
           this.andOn(db.raw(`${table_name}.year IN (${year_array.join(', ')})`))
         }
