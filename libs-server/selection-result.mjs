@@ -1,19 +1,22 @@
 import {
   player_game_prop_types,
   player_first_quarter_prop_types,
-  player_first_half_alt_prop_types,
-  team_game_market_types
+  player_first_half_alt_prop_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
+// Player prop evaluation only. Team game outcome markets (GAME_MONEYLINE,
+// GAME_SPREAD, GAME_TOTAL and their alt-line variants) are settled by the
+// NFL_GAMES handler in #libs-server/prop-market-settlement/worker/market-data-handlers.mjs,
+// which validates the selection against the game's participants and reads
+// home_nfl_team/away_nfl_team. This module once carried a second, unreachable
+// copy of that logic; it fell through to the default branch here instead.
 export const get_selection_result = ({
   line,
   market_type,
   player_gamelog,
   strict,
   selection_type,
-  selection_pid, // Player or team ID for the selection
-  unsupported_market_types = new Set(),
-  game_data = null // For team markets that need game outcome data
+  unsupported_market_types = new Set()
 }) => {
   const compare = (value, line, selection_type) => {
     if (selection_type === 'UNDER' || selection_type === 'NO') {
@@ -272,56 +275,6 @@ export const get_selection_result = ({
         )
       }
     }
-
-    // Team game outcome markets - these require game outcome data
-    case team_game_market_types.GAME_MONEYLINE:
-      // For moneyline, selection_pid is the team_id, and we compare against game winner
-      if (
-        game_data &&
-        game_data.home_score !== undefined &&
-        game_data.away_score !== undefined
-      ) {
-        const winner =
-          game_data.home_score > game_data.away_score
-            ? game_data.h
-            : game_data.away_score > game_data.home_score
-              ? game_data.v
-              : 'TIE'
-        if (winner === 'TIE') {
-          return 'PUSH'
-        }
-        return winner === selection_pid ? 'WON' : 'LOST'
-      }
-      return null // No game result available
-
-    case team_game_market_types.GAME_SPREAD:
-      // For spread, selection_pid is the team_id, line is the spread
-      if (
-        game_data &&
-        game_data.home_score !== undefined &&
-        game_data.away_score !== undefined &&
-        selection_pid
-      ) {
-        const point_differential = game_data.home_score - game_data.away_score
-        const adjusted_differential =
-          selection_pid === game_data.h
-            ? point_differential
-            : -point_differential
-        return compare(adjusted_differential, -line, 'OVER') // Spread is typically negative for favorites
-      }
-      return null
-
-    case team_game_market_types.GAME_TOTAL:
-      // For totals, we compare total points against the line using selection_type (OVER/UNDER)
-      if (
-        game_data &&
-        game_data.home_score !== undefined &&
-        game_data.away_score !== undefined
-      ) {
-        const total_points = game_data.home_score + game_data.away_score
-        return compare(total_points, line, selection_type)
-      }
-      return null
 
     default:
       unsupported_market_types.add(market_type)
