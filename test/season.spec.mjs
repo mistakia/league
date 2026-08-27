@@ -3,12 +3,18 @@
 import * as chai from 'chai'
 import MockDate from 'mockdate'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
 
 import { current_season } from '#constants'
 import season_dates from '#libs-shared/season-dates.mjs'
 
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 const { regular_season_start, end } = current_season
 const expect = chai.expect
+const league_timezone = 'America/New_York'
 
 describe('LIBS-SHARED Season', function () {
   after(() => {
@@ -141,11 +147,14 @@ describe('LIBS-SHARED Season', function () {
     MockDate.set(regular_season_start.add('112', 'days').toISOString())
     expect(current_season.week).to.equal(16)
 
-    // end of week 16 - day light savings
+    // last minute of week 16. The 61-minute offset this used to carry, labelled
+    // "day light savings", was compensating for nothing -- week 17 begins in
+    // December, nowhere near a transition. The real DST boundary is week 9, and
+    // it has its own assertion below.
     MockDate.set(
       regular_season_start
         .add('119', 'days')
-        .subtract('61', 'minute')
+        .subtract('1', 'minute')
         .toISOString()
     )
     expect(current_season.week).to.equal(16)
@@ -182,6 +191,56 @@ describe('LIBS-SHARED Season', function () {
     expect(
       current_season.calculate_week(openingDay.subtract('7', 'day')).seas_type
     ).to.equal('PRE')
+  })
+
+  // The offsets used to be four hardcoded utcOffset(-5)/utcOffset(-4) literals,
+  // each correct only while its date stayed on one side of a DST boundary, with
+  // nothing anywhere enforcing that. They are now derived from the zone; this is
+  // what enforces it. Reads the anchors' OWN rendering, which is what every
+  // .day() / .hour() / .startOf('day') on them sees -- the offset never moves
+  // the instant, so an assertion on the instant cannot catch this.
+  it('season anchors render as Eastern local midnight', function () {
+    const anchors = {
+      offseason: current_season.offseason,
+      regular_season_start: current_season.regular_season_start,
+      end: current_season.end,
+      openingDay: current_season.openingDay
+    }
+
+    for (const [name, anchor] of Object.entries(anchors)) {
+      expect(anchor.format('HH:mm:ss'), name).to.equal('00:00:00')
+      expect(anchor.utcOffset(), name).to.equal(
+        dayjs.unix(anchor.unix()).tz(league_timezone).utcOffset()
+      )
+    }
+  })
+
+  // The fantasy week flips at local Tuesday 00:00 ET on both sides of the
+  // November fall-back.
+  //
+  // This is the assertion a `.tz()` zone object fails: dayjs carries the
+  // construction-time offset through .add(), so every boundary past the
+  // transition slides to Monday 23:00. `week_end` is built with .add() and
+  // feeds the event windows in libs-server/gambet.mjs and
+  // import-caesars-odds-v4.mjs, so the drift would misfile an hour of betting
+  // events every week from November on.
+  it('week boundaries stay at Tuesday 00:00 ET across the fall-back', function () {
+    // week 9 of a September-anchored season falls just after the fall-back;
+    // 1 and 17 bracket it on either side of the transition
+    for (const week of [1, 9, 17, 20]) {
+      const local = dayjs
+        .unix(regular_season_start.add(week, 'week').unix())
+        .tz(league_timezone)
+      expect(local.format('HH:mm'), `week ${week}`).to.equal('00:00')
+      expect(local.day(), `week ${week} weekday`).to.equal(2)
+    }
+
+    // and the counter turns over there, not an hour early
+    const week_9 = regular_season_start.add(9, 'week')
+    MockDate.set(week_9.subtract('1', 'minute').toISOString())
+    expect(current_season.week).to.equal(8)
+    MockDate.set(week_9.toISOString())
+    expect(current_season.week).to.equal(9)
   })
 
   it('practice_squad_protection_start', function () {

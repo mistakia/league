@@ -6,16 +6,31 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(isBetween)
 
-// Convert any date to Eastern Time regardless of user's timezone
-const toEasternTime = (date) => {
-  return dayjs(date).tz('America/New_York')
-}
+const LEAGUE_TIMEZONE = 'America/New_York'
 
-// Get the correct Eastern Time offset for a given date
-const getEstOffset = (datetime = new Date()) => {
-  // Convert the date to Eastern Time to get the correct offset
-  const easternTime = dayjs(datetime).tz('America/New_York')
-  return easternTime.utcOffset()
+// Every instant this class exposes is Eastern, and the fantasy week flips at
+// local Tuesday 00:00 ET.
+//
+// The offset is DERIVED from the zone for that instant, then pinned as a fixed
+// offset. Both halves are load-bearing.
+//
+// Deriving it replaces four hand-maintained `utcOffset(-5)` / `utcOffset(-4)`
+// literals, each correct only while its date stayed on one side of a DST
+// boundary, with nothing anywhere enforcing that. An `end` set past
+// spring-forward rendered as Friday 23:00 under the literal and Saturday 00:00
+// once derived.
+//
+// Pinning it -- rather than returning a `.tz()` zone object -- is what keeps
+// the arithmetic right. dayjs's timezone plugin carries the offset captured at
+// construction through `.add()`, so `regular_season_start.tz(...).add(9,
+// 'week')` lands on Monday 23:00 ET once the November fall-back has passed
+// instead of Tuesday 00:00. `week_end` is built that way and feeds the event
+// windows in `libs-server/gambet.mjs` and `import-caesars-odds-v4.mjs`, so the
+// drift would silently misfile an hour of betting events every week from
+// November on. A fixed offset has no DST and so cannot drift.
+const eastern = (unix_seconds) => {
+  const instant = dayjs.unix(unix_seconds)
+  return instant.utc().utcOffset(instant.tz(LEAGUE_TIMEZONE).utcOffset())
 }
 
 export default class Season {
@@ -39,19 +54,16 @@ export default class Season {
     now = null
   }) {
     // Super Bowl
-    this.offseason = dayjs.unix(offseason).utc().utcOffset(-5)
+    this.offseason = eastern(offseason)
 
     // Two Tuesdays before first game
-    this.regular_season_start = dayjs
-      .unix(regular_season_start)
-      .utc()
-      .utcOffset(-4)
+    this.regular_season_start = eastern(regular_season_start)
 
     // super bowl
-    this.end = dayjs.unix(end).utc().utcOffset(-5)
+    this.end = eastern(end)
 
     // first game
-    this.openingDay = dayjs.unix(openingDay).utc().utcOffset(-4)
+    this.openingDay = eastern(openingDay)
 
     this.finalWeek = finalWeek
     this.nflFinalWeek = nflFinalWeek
@@ -60,16 +72,13 @@ export default class Season {
     this.superBowlByeWeeks = superBowlByeWeeks
 
     if (now) {
-      const d = dayjs.unix(now)
-      const offset = getEstOffset(d.toDate())
-      this._now = d.utc().utcOffset(offset)
+      this._now = eastern(now)
     }
   }
 
   get now() {
     if (this._now) return this._now
-    // Convert current time to Eastern Time
-    return toEasternTime(dayjs())
+    return eastern(dayjs().unix())
   }
 
   get isOffseason() {
