@@ -115,11 +115,6 @@ const export_data_player_gamelogs = async ({ collector = null } = {}) => {
     .orderBy('esbid', 'asc')
     .orderBy('pid', 'asc')
 
-  const header = {}
-  for (const field of Object.keys(data[0])) {
-    header[field] = field
-  }
-
   const gamelogs_by_year = {}
   for (const item of data) {
     const { season_year: year, ...gamelog } = item
@@ -140,9 +135,7 @@ const export_data_player_gamelogs = async ({ collector = null } = {}) => {
     const year_json_file_path = `${data_path}/nfl/player_gamelogs/${year}.json`
     const year_csv_file_path = `${data_path}/nfl/player_gamelogs/${year}.csv`
 
-    const year_csv_data = [header, ...year_data]
-    const year_csv_data_string = JSON.stringify(year_csv_data)
-    const year_csv = convert_to_csv(year_csv_data_string)
+    const year_csv = convert_to_csv({ rows: year_data })
 
     await fs.mkdir(`${data_path}/nfl/player_gamelogs`, { recursive: true })
     await fs.writeFile(year_json_file_path, JSON.stringify(year_data, null, 2))

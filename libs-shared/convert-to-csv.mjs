@@ -3,9 +3,9 @@ const format_value = (value) => {
     return ''
   }
 
-  // Dates and JSON columns arrive as objects on the array input path but as
-  // strings on the JSON input path; render both the same way so the two input
-  // modes produce identical output.
+  // Dates and JSON columns arrive as objects from knex but as plain values once
+  // a row has been through a normalizer; render both the same way so every
+  // caller produces identical output for the same underlying cell.
   if (value instanceof Date) {
     return value.toISOString()
   }
@@ -16,44 +16,54 @@ const format_value = (value) => {
   return String(value)
 }
 
-/**
- * Convert rows to CSV.
- *
- * Row 0 is the header object — a `{field: field}` map that both defines the
- * column set for every subsequent row and renders as the header line. Keys
- * present only in later rows are not emitted.
- *
- * @param {object[]|string} objArray - rows, or the JSON encoding of them
- * @returns {string} CSV text, CRLF terminated
- */
-export default function (objArray) {
-  const array = typeof objArray === 'string' ? JSON.parse(objArray) : objArray
+const render_cell = (value) => {
+  const formatted = format_value(value)
 
-  if (!array?.length) {
+  // Escape quotes and wrap in quotes if value contains comma, quote, or newline
+  if (
+    formatted.includes(',') ||
+    formatted.includes('"') ||
+    formatted.includes('\n') ||
+    formatted.includes('\r')
+  ) {
+    return '"' + formatted.replace(/"/g, '""') + '"'
+  }
+
+  return formatted
+}
+
+const render_row = (values) => values.map(render_cell).join(',') + '\r\n'
+
+const resolve_columns = ({ rows, columns }) => {
+  const specs = columns ?? Object.keys(rows[0])
+
+  return specs.map((spec) =>
+    typeof spec === 'string' ? { key: spec, header: spec } : spec
+  )
+}
+
+/**
+ * Convert rows to CSV, header line included.
+ *
+ * @param {object} params
+ * @param {object[]} params.rows - one object per data row
+ * @param {(string | {key: string, header: string})[]} [params.columns] - the
+ *   ordered column set. A bare string names a column whose header text is its
+ *   own key; the object form carries a display header that differs from the
+ *   key. Defaults to the keys of the first row. A key absent from a row renders
+ *   as an empty cell.
+ * @returns {string} CSV text, CRLF terminated, empty when there are no rows
+ */
+export default function convert_to_csv({ rows, columns }) {
+  if (!rows?.length) {
     return ''
   }
 
-  const fields = Object.keys(array[0])
+  const resolved_columns = resolve_columns({ rows, columns })
 
-  let str = ''
-  for (let i = 0; i < array.length; i++) {
-    const cells = fields.map((field) => {
-      let value = format_value(array[i][field])
-
-      // Escape quotes and wrap in quotes if value contains comma, quote, or newline
-      if (
-        value.includes(',') ||
-        value.includes('"') ||
-        value.includes('\n') ||
-        value.includes('\r')
-      ) {
-        value = '"' + value.replace(/"/g, '""') + '"'
-      }
-
-      return value
-    })
-
-    str += cells.join(',') + '\r\n'
+  let str = render_row(resolved_columns.map(({ header }) => header))
+  for (const row of rows) {
+    str += render_row(resolved_columns.map(({ key }) => row[key]))
   }
 
   return str

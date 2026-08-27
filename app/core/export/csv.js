@@ -3,13 +3,12 @@
 import { convert_to_csv } from '#libs-shared'
 
 export function csv({ headers, data, fileName = 'xo-football-export.csv' }) {
-  if (headers) {
-    data.unshift(headers)
-  }
-
-  // Convert Object to JSON
-  const jsonObject = JSON.stringify(data)
-  const csv = convert_to_csv(jsonObject)
+  // `headers` maps a row key to the display text for its column, so it also
+  // defines the column set and their order when present.
+  const columns = headers
+    ? Object.entries(headers).map(([key, header]) => ({ key, header }))
+    : undefined
+  const csv = convert_to_csv({ rows: data, columns })
   const exportedFilenmae = fileName + '.csv'
   const blob = new Blob([csv], { type: 'text/csvcharset=utf-8' })
   if (navigator.msSaveBlob) {

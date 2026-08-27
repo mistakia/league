@@ -280,14 +280,10 @@ router.get('/', async (req, res) => {
 
     // Format output
     if (format === 'csv') {
-      // Create header object with all fields
-      const header = {}
-      for (const field of fields) {
-        header[field] = field
-      }
-
-      const csv_data = [header, ...normalized_results]
-      const csv_output = convert_to_csv(csv_data)
+      const csv_output = convert_to_csv({
+        rows: normalized_results,
+        columns: fields
+      })
 
       res.setHeader('Content-Type', 'text/csv')
       res.setHeader(

@@ -21,13 +21,7 @@ enable_debug_namespaces('export-data-nfl-games')
 const export_data_nfl_games = async ({ collector = null } = {}) => {
   const data = await db('nfl_games').orderBy('esbid', 'asc')
 
-  const header = {}
-  for (const field of Object.keys(data[0])) {
-    header[field] = field
-  }
-  const csv_data = [header, ...data]
-  const csv_data_string = JSON.stringify(csv_data)
-  const csv = convert_to_csv(csv_data_string)
+  const csv = convert_to_csv({ rows: data })
 
   const json_file_path = `${data_path}/nfl/games.json`
   const csv_file_path = `${data_path}/nfl/games.csv`

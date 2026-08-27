@@ -1363,14 +1363,10 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
 
     switch (export_format) {
       case 'csv': {
-        // Create header object with all fields
-        const header = {}
-        for (const field of fields) {
-          header[field] = field
-        }
-
-        const csv_data = [header, ...normalized_results]
-        formatted_results = convert_to_csv(csv_data)
+        formatted_results = convert_to_csv({
+          rows: normalized_results,
+          columns: fields
+        })
         res.setHeader('Content-Type', 'text/csv')
         res.setHeader(
           'Content-Disposition',

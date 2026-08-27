@@ -799,21 +799,10 @@ router.get('/views/export/:view_id/:export_format', async (req, res) => {
       }
     }
 
-    const header = {}
-    for (const field of fields) {
-      header[field] = field
-    }
-
-    const normalized_results = plays_view_results.map((row) => {
-      const normalized_row = {}
-      for (const field of fields) {
-        normalized_row[field] = row[field] !== undefined ? row[field] : ''
-      }
-      return normalized_row
+    const formatted_results = convert_to_csv({
+      rows: plays_view_results,
+      columns: fields
     })
-
-    const csv_data = [header, ...normalized_results]
-    const formatted_results = convert_to_csv(csv_data)
     res.setHeader('Content-Type', 'text/csv')
     res.setHeader(
       'Content-Disposition',

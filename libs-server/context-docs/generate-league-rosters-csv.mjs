@@ -43,10 +43,6 @@ export default async function generate_league_rosters_csv({
   const team_rosters = await load_league_rosters({ db, lid, year, league })
   const salary_basis = resolve_salary_basis({ league, year })
 
-  const header = Object.fromEntries(
-    csv_columns.map((column) => [column, column])
-  )
-
   const rows = team_rosters.flatMap(({ rows }) =>
     rows.map((/** @type {Record<string, any>} */ row) => ({
       league_id: league.league_id,
@@ -67,5 +63,5 @@ export default async function generate_league_rosters_csv({
     }))
   )
 
-  return convert_to_csv([header, ...rows])
+  return convert_to_csv({ rows, columns: csv_columns })
 }

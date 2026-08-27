@@ -358,12 +358,6 @@ const export_data_nfl_plays = async ({
   }
   log(`loaded ${data.length} plays`)
 
-  const header = {}
-
-  for (const field of nfl_play_fields) {
-    header[field] = field
-  }
-
   // Convert Buffer fields to integers if they represent BIT(1)
   data.forEach((play) => {
     Object.keys(play).forEach((key) => {
@@ -373,9 +367,7 @@ const export_data_nfl_plays = async ({
     })
   })
 
-  const csv_data = [header, ...data]
-  const csv_data_string = JSON.stringify(csv_data)
-  const csv = convert_to_csv(csv_data_string)
+  const csv = convert_to_csv({ rows: data, columns: nfl_play_fields })
 
   await fs.mkdir(`${data_path}/nfl/plays/${season_year}`, { recursive: true })
 
