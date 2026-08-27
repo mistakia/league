@@ -52,6 +52,11 @@ These are the ones you cannot route to, because you hit them without deciding to
 
 **Never put a secret value as a literal in any command.** Tool calls are recorded verbatim in a synced, indexed timeline. Use indirection; if a literal was emitted, treat it as exposed and rotate.
 
+**This repository is PUBLIC, and every file in it is published — including entity files.** Two consequences that catch sessions without warning:
+
+- **`public_read: false` on an entity here means nothing.** That field governs the base API; it has no bearing on GitHub. An entity file tracked in this repo is world-readable whatever its frontmatter says, so `base entity observe` against one is a publishing action. Anything private — infrastructure topology, a security finding before it is fixed and deployed, credentials of any kind — belongs in an entity under `text/` in the user base, never here.
+- **Every value in `config/config-development.json` and `config/config-test.json` is published.** Only `config-production.json` is encrypted. Those two hold placeholders only: never a real credential, and never a value shared with production.
+
 ### The verification rule
 
 Stated once here because it applies to every undertaking, and it is the single most repeated lesson in this repo's history:
