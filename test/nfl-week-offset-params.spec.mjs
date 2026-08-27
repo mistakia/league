@@ -3,27 +3,13 @@
 import * as chai from 'chai'
 import MockDate from 'mockdate'
 
-import { current_season } from '#constants'
 import {
   nfl_week_offset_params,
   current_nfl_week_params
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { set_date_for_week } from './fixtures/postseason.mjs'
 
 const expect = chai.expect
-const {
-  regular_season_start,
-  nflFinalWeek,
-  superBowlByeWeeks = 1
-} = current_season
-
-const set_date_for_week = ({ seas_type, week }) => {
-  let offset
-  if (seas_type === 'REG') offset = week
-  else if (seas_type === 'POST')
-    offset = nflFinalWeek + superBowlByeWeeks + week
-  else throw new Error('unsupported seas_type for fixture')
-  MockDate.set(regular_season_start.add(offset, 'week').toISOString())
-}
 
 describe('LIBS-SHARED nfl_week_offset_params', function () {
   afterEach(() => {

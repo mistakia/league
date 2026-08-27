@@ -162,6 +162,29 @@ export default class Season {
     return this.openingDay.subtract(days_since_tuesday, 'day').startOf('day')
   }
 
+  // POST week numbering, matching what `nfl_games` stores: 1 wild card,
+  // 2 divisional, 3 conference, 4 super bowl.
+  //
+  // Wild card, divisional and conference run on the three weekends
+  // immediately after the final regular-season week, so they number straight
+  // through. Only the Super Bowl sits past the Pro Bowl bye, so
+  // `superBowlByeWeeks` is subtracted THERE and nowhere else -- 6d2bf23e5
+  // subtracted it uniformly to move the Super Bowl from 5 to 4, which moved
+  // wild card to 0 and made every postseason odds import miss
+  // `find_nfl_game`.
+  //
+  // The clamp holds the value inside `WEEK_RANGES.POST` once the Super Bowl
+  // has passed and `season-dates.mjs` has not yet been bumped by hand;
+  // without it the counter keeps climbing and yields identifiers like
+  // `2026_POST_WEEK_7` that `validate_nfl_week_identifier` rejects.
+  postseason_week(weeks_since_regular_season_start) {
+    const round = weeks_since_regular_season_start - this.nflFinalWeek
+    if (round <= 3) {
+      return round
+    }
+    return Math.min(round - this.superBowlByeWeeks, 4)
+  }
+
   // will detect seas_type and return week number for that seas_type
   // POST and REG seas_type starts at 1
   // PRE seas_type starts at 0
@@ -178,10 +201,7 @@ export default class Season {
       }
     } else if (diff > this.nflFinalWeek) {
       seas_type = 'POST'
-      week_number = Math.min(
-        diff - this.nflFinalWeek - this.superBowlByeWeeks,
-        4
-      )
+      week_number = this.postseason_week(diff)
     } else {
       seas_type = 'REG'
       week_number = diff
@@ -228,7 +248,7 @@ export default class Season {
         return 3
       }
     } else if (week > this.nflFinalWeek) {
-      return week - this.nflFinalWeek - this.superBowlByeWeeks
+      return this.postseason_week(week)
     } else {
       return week
     }

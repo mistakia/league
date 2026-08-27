@@ -8,20 +8,9 @@ import resolve_single_nfl_week_id, {
   resolve_single_nfl_week_id_if_explicit
 } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
-const expect = chai.expect
-const {
-  regular_season_start,
-  nflFinalWeek,
-  superBowlByeWeeks = 1
-} = current_season
+import { set_date_for_week } from './fixtures/postseason.mjs'
 
-const set_date_for_week = ({ seas_type, week }) => {
-  let offset
-  if (seas_type === 'REG') offset = week
-  else if (seas_type === 'POST')
-    offset = nflFinalWeek + superBowlByeWeeks + week
-  MockDate.set(regular_season_start.add(offset, 'week').toISOString())
-}
+const expect = chai.expect
 
 describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
   afterEach(() => {
