@@ -316,7 +316,7 @@ const GATES = [
     id: 'conflated-player-rows',
     command: ['db/gates/check-conflated-player-rows.mjs'],
     requires: 'production-tunnel',
-    negative_control: false,
+    negative_control: true,
     oracle: 'player rows whose own identity fields contradict each other'
   },
   {

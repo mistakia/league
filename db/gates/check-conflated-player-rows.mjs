@@ -24,29 +24,58 @@
                    enough to be worth reading: 50 of 25,361 rows with a usable
                    birth date (measured against production 2026-08-05).
 
-    gsis_cohort    `gsis_player_id` serials are issued roughly chronologically,
-                   so a row whose serial sits far outside its own draft year's
-                   cohort holds an identifier from a different era. Bounded by
-                   the cohort's own 5th/95th percentiles plus a slack margin
-                   rather than a fixed width, because cohort size varies by an
-                   order of magnitude across years. 35 of 16,275 rows.
+    nflverse       `nfl_draft_year` against the `rookie_season` nflverse
+                   publishes for the SAME gsis id. The gsis id names a specific
+                   person, so this asks the question directly rather than
+                   inferring it: if we say a man entered the league decades from
+                   when the holder of his id actually did, one of the two facts
+                   on the row belongs to someone else.
 
     observed       `nfl_draft_year` later than the first season the player has a
-                   gamelog in. The strongest of the three, because a gamelog is
-                   an observation rather than bookkeeping -- but also the
-                   narrowest, since it only sees players with gamelogs. 7 rows
-                   beyond the undrafted grace window.
+                   gamelog in. Narrow, since it only sees players with gamelogs,
+                   but it needs no external feed.
 
-  The undrafted grace window matters on the last two: `nfl_draft_year` is a
-  DEBUT year only when `draft_round > 0`. For an undrafted player it records
-  entry by whatever route the source knew about and routinely postdates the real
-  first appearance, so applying the raw comparison makes the defect look several
-  times larger than it is. See libs-server/player-era.mjs.
+  The undrafted grace window matters on `observed`: `nfl_draft_year` is a DEBUT
+  year only when `draft_round > 0`. For an undrafted player it records entry by
+  whatever route the source knew about and routinely postdates the real first
+  appearance, so applying the raw comparison makes the defect look several times
+  larger than it is. See libs-server/player-era.mjs.
+
+  ## Why the nflverse falsifier replaced a cohort-percentile one
+
+  The falsifier here until 2026-08-27 grouped players by draft year and flagged
+  a gsis serial outside its cohort's 5th/95th percentiles. Serials ARE issued
+  chronologically, so the idea was sound, but the implementation could not work
+  and its failures all pointed the same way -- it reported rows that were fine
+  and stayed silent on rows that were not:
+
+    - It needed a crowd. A draft year required 20+ gsis-bearing rows before the
+      check would run, so the historical years where conflation is most obvious
+      were skipped outright. All eleven pre-1970 grafts were invisible to it.
+    - It graded against its own corruption. The band came from the same rows
+      being judged, so a year whose population was largely conflated widened the
+      band to fit them.
+    - It never applied the undrafted grace this header promised it: the query
+      selected `draft_round` and then never read it. The result was that all 31
+      rows it reported were undrafted and 30 sat below their band -- it was
+      measuring the undrafted entry offset, not self-contradiction.
+
+  Asking nflverse needs none of that machinery: no percentiles, no cohort
+  minimum, no slack constant, and no threshold to invent. Measured 2026-08-27,
+  `rookie_season - nfl_draft_year` over the 15,327 rows nflverse resolves ran
+  continuously from -4 to +7, then left THIRTY-FOUR consecutive empty years,
+  then held eleven rows between +42 and +67, with a twelfth at -8. The data drew
+  its own boundary; MAXIMUM_PLAUSIBLE_ENTRY_GAP_SEASONS just names it. All
+  twelve were repaired by db/adhoc/2026-08-27-repair-conflated-player-identity
+  .sql, so this falsifier carries an EMPTY baseline -- a finding here is new.
+
+  Re-derive with:
+    node db/gates/check-conflated-player-rows.mjs --distribution
 
   ## Why a ratchet rather than a threshold
 
-  Roughly 80 rows trip one of these today and they are pre-existing debt, so a
-  bare threshold would be red on day one and read as noise within a week. The
+  The `age` and `observed` falsifiers carry pre-existing debt, so a bare
+  threshold would be red on day one and read as noise within a week. The
   baseline is the set of pids already known to trip a falsifier; the check fails
   only on a pid that is NEW to it. That is the same shape as
   check-schema-conformance-ratchet.mjs, for the same reason.
@@ -76,6 +105,13 @@ import {
   MINIMUM_PLAUSIBLE_ENTRY_AGE,
   MAXIMUM_PLAUSIBLE_ENTRY_AGE
 } from '#libs-server/player-era.mjs'
+import { asyncBufferFromFile } from 'hyparquet'
+
+import {
+  download_players_file,
+  read_parquet_rows
+} from '#scripts/import-players-nflverse.mjs'
+import { format_negative_controls } from './negative-control.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const BASELINE_PATH = path.join(
@@ -87,11 +123,15 @@ const BASELINE_PATH = path.join(
 // mint-time guard in create-player.mjs so the audit cannot report a pair the
 // minting path was willing to write.
 
-// Slack on top of the cohort's own percentile band, in gsis serial units.
-const GSIS_COHORT_SLACK = 3000
+// How far `nfl_draft_year` may sit from nflverse's `rookie_season` for the same
+// gsis id before the two are describing different people. The legitimate spread
+// is -4..+7 (late entry routes -- CFL, NFL Europe, practice squad years -- put a
+// debut well after the recorded entry); the nearest real finding is at -8, and
+// the next is +42. See the header for the measured distribution.
+const MAXIMUM_PLAUSIBLE_ENTRY_GAP_SEASONS = 8
 
-// A draft year cohort smaller than this has percentiles too noisy to use.
-const MINIMUM_COHORT_SIZE = 20
+// nflverse player coverage begins here; every older career is clamped to it.
+const NFLVERSE_ROOKIE_SEASON_FLOOR = 1974
 
 // `nfl_draft_year` is an entry year rather than a debut year for an undrafted
 // player, so its disagreement with an observed season needs a grace window.
@@ -118,30 +158,58 @@ const find_age_outliers = async () =>
       [MINIMUM_PLAUSIBLE_ENTRY_AGE, MAXIMUM_PLAUSIBLE_ENTRY_AGE]
     )
 
-const find_gsis_cohort_outliers = async () => {
-  const { rows } = await db.raw(
-    `
-    WITH p AS (
-      SELECT pid, nfl_draft_year, draft_round,
-        substring(gsis_player_id from 6)::int AS gsis_serial
-      FROM player
-      WHERE gsis_player_id ~ '^00-00[0-9]{5}$' AND nfl_draft_year IS NOT NULL
-    ), cohort AS (
-      SELECT nfl_draft_year,
-        percentile_cont(0.05) WITHIN GROUP (ORDER BY gsis_serial) AS low,
-        percentile_cont(0.95) WITHIN GROUP (ORDER BY gsis_serial) AS high
-      FROM p GROUP BY 1 HAVING count(*) >= ?
-    )
-    SELECT p.pid, p.nfl_draft_year, p.draft_round, p.gsis_serial,
-      round(cohort.low) AS cohort_low, round(cohort.high) AS cohort_high
-    FROM p JOIN cohort ON cohort.nfl_draft_year = p.nfl_draft_year
-    WHERE p.gsis_serial < cohort.low - ? OR p.gsis_serial > cohort.high + ?
-    ORDER BY p.pid
-  `,
-    [MINIMUM_COHORT_SIZE, GSIS_COHORT_SLACK, GSIS_COHORT_SLACK]
+/**
+ * Pair each player row carrying a gsis id with the nflverse row for that same
+ * id. Returns one entry per pairable row, whether or not it disagrees, so both
+ * the falsifier and `--distribution` read from the same set.
+ */
+const load_nflverse_entry_gaps = async () => {
+  const file_path = await download_players_file({ force_download: false })
+  const nflverse_rows = await read_parquet_rows(
+    await asyncBufferFromFile(file_path)
   )
-  return rows
+
+  const rookie_season_by_gsis = new Map()
+  for (const row of nflverse_rows) {
+    if (row.gsis_id && row.rookie_season) {
+      rookie_season_by_gsis.set(row.gsis_id, Number(row.rookie_season))
+    }
+  }
+
+  // Only rows whose id is actually IN gsis format. The column also holds
+  // esb-format values on old rows (`MOR305100` on Earl Morrall), and comparing
+  // one of those as though it were a gsis id is meaningless -- it matches
+  // nflverse's own esb-keyed leftovers and reports famous, correct players.
+  const players = await db
+    .select('pid', 'gsis_player_id', 'nfl_draft_year')
+    .from('player')
+    .whereRaw("gsis_player_id ~ '^00-00[0-9]{5}$'")
+    .whereNotNull('nfl_draft_year')
+    .whereNot('nfl_draft_year', 0)
+
+  const gaps = []
+  for (const player of players) {
+    const rookie_season = rookie_season_by_gsis.get(player.gsis_player_id)
+    if (!rookie_season) continue
+    // nflverse coverage starts in 1974 and clamps everyone older to it -- 1,318
+    // players carry that value against ~300 for each neighbouring year -- so it
+    // is a censoring floor, not a rookie season, and cannot falsify anything.
+    if (rookie_season <= NFLVERSE_ROOKIE_SEASON_FLOOR) continue
+    gaps.push({
+      pid: player.pid,
+      gsis_player_id: player.gsis_player_id,
+      nfl_draft_year: player.nfl_draft_year,
+      nflverse_rookie_season: rookie_season,
+      gap: rookie_season - player.nfl_draft_year
+    })
+  }
+  return gaps
 }
+
+const find_nflverse_conflicts = (gaps) =>
+  gaps
+    .filter(({ gap }) => Math.abs(gap) >= MAXIMUM_PLAUSIBLE_ENTRY_GAP_SEASONS)
+    .sort((a, b) => a.pid.localeCompare(b.pid))
 
 const find_observed_season_outliers = async () => {
   const { rows } = await db.raw(
@@ -167,12 +235,65 @@ const read_baseline = () => {
   return JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8'))
 }
 
+/**
+ * Prove the falsifier can go red, and that it is not simply red on everything.
+ * A synthetic pair each way, run on every invocation: the runner reads a
+ * control that STAYED GREEN as a gate that cannot report.
+ */
+const run_negative_controls = () => {
+  const conflict_row = {
+    pid: 'CTRL-CONF-000000',
+    gsis_player_id: '00-0000001',
+    nfl_draft_year: 1957,
+    nflverse_rookie_season: 2006,
+    gap: 49
+  }
+  const legitimate_row = {
+    pid: 'CTRL-OKAY-000000',
+    gsis_player_id: '00-0000002',
+    nfl_draft_year: 1999,
+    nflverse_rookie_season: 2003,
+    gap: 4
+  }
+  return [
+    {
+      name: 'reports a decades-apart entry gap',
+      went_red: find_nflverse_conflicts([conflict_row]).length === 1
+    },
+    {
+      name: 'declines a 4-season late-entry-route gap',
+      went_red: find_nflverse_conflicts([legitimate_row]).length === 0
+    }
+  ]
+}
+
+const print_distribution = (gaps) => {
+  const counts = new Map()
+  for (const { gap } of gaps) counts.set(gap, (counts.get(gap) || 0) + 1)
+  console.log(`rookie_season - nfl_draft_year over ${gaps.length} paired rows:`)
+  for (const gap of [...counts.keys()].sort((a, b) => a - b)) {
+    console.log(`  ${gap > 0 ? '+' : ''}${gap}: ${counts.get(gap)}`)
+  }
+}
+
 const main = async () => {
   const rebaseline = process.argv.includes('--rebaseline')
 
+  const entry_gaps = await load_nflverse_entry_gaps()
+
+  if (process.argv.includes('--distribution')) {
+    print_distribution(entry_gaps)
+    await db.destroy()
+    process.exit(0)
+  }
+
+  // stderr, not stdout: the block must reach a terminal on every run without
+  // sitting ahead of machine-readable output. The runner reads both streams.
+  console.error(format_negative_controls({ controls: run_negative_controls() }))
+
   const findings = {
     age: await find_age_outliers(),
-    gsis_cohort: await find_gsis_cohort_outliers(),
+    nflverse: find_nflverse_conflicts(entry_gaps),
     observed: await find_observed_season_outliers()
   }
 
