@@ -39,5 +39,15 @@
     "historical_rate_min_threshold": 0.7
   },
   "signals_api_url": "https://base.example.com",
-  "signals_secret": "<value>"
+  "signals_secret": "<value>",
+  "inference_providers": {
+    "default": "vllm-qwen38-27b-nvfp4",
+    "vllm-qwen38-27b-nvfp4": {
+      "base_url": "https://inference.example.com",
+      "model": "qwen3.8-27b-nvfp4",
+      "auth_mode": "machine_token",
+      "structured_output_mode": "guided_json",
+      "reasoning_effort": "low"
+    }
+  }
 }

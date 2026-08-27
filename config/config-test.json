@@ -26,5 +26,15 @@
     "from": "no-reply@test.invalid"
   },
   "signals_api_url": "",
-  "signals_secret": ""
+  "signals_secret": "",
+  "inference_providers": {
+    "default": "vllm-qwen38-27b-nvfp4",
+    "vllm-qwen38-27b-nvfp4": {
+      "base_url": "",
+      "model": "qwen3.8-27b-nvfp4",
+      "auth_mode": "machine_token",
+      "structured_output_mode": "guided_json",
+      "reasoning_effort": "low"
+    }
+  }
 }
