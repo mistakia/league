@@ -258,14 +258,18 @@ const updatePlayer = async ({
     )
 
     const prev = edit.lhs
-    // `prev` alone would drop the trail for a write onto an EMPTY field, which
-    // is most of an override's first customers -- twelve of the fourteen
-    // sleeper_player_id repairs land on a null column. An adjudicated write with
-    // no changelog row is the unattributed correction this mechanism exists to
-    // end, so an override always records one. The condition is widened only for
-    // overridden fields: making every importer log its null-to-value writes
-    // would add tens of millions of rows to a 67.9M-row table for no verdict.
-    if (prev || has_override) {
+    // Presence, not truthiness: a column holding 0 or '' has a prior value that
+    // the write destroys, and the trail has to carry it.
+    //
+    // `prev != null` alone would drop the trail for a write onto an EMPTY
+    // field, which is most of an override's first customers -- twelve of the
+    // fourteen sleeper_player_id repairs land on a null column. An adjudicated
+    // write with no changelog row is the unattributed correction this mechanism
+    // exists to end, so an override always records one. The condition is widened
+    // only for overridden fields: making every importer log its null-to-value
+    // writes would add tens of millions of rows to a 67.9M-row table for no
+    // verdict.
+    if (prev != null || has_override) {
       if (!source) {
         throw new Error(
           `updatePlayer: source is required to record a player_changelog entry (pid ${player_row.pid}, field ${prop})`

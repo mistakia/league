@@ -17,7 +17,7 @@ import DashboardTeamValue from '@components/dashboard-team-value'
 import PoachNotice from '@components/poach-notice'
 import PlayerRoster from '@components/player-roster'
 import { current_season, fantasy_positions } from '#constants'
-import { isReserveEligible, isReserveCovEligible } from '#libs-shared'
+import { get_reserve_eligibility_from_player_map } from '#libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 import Notices from '@components/notices'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
@@ -232,21 +232,10 @@ export default function LeagueTeam({
   ]) {
     if (!player_map.get('pid')) continue
 
-    const practice_week = player_map.get('practice_week')
-    const practice_data = practice_week ? practice_week.toJS() : null
+    const { reserve_short_term_eligible } =
+      get_reserve_eligibility_from_player_map({ player_map })
 
-    if (
-      !isReserveEligible({
-        roster_status: player_map.get('roster_status'),
-        game_designation: player_map.get('game_designation'),
-        prior_week_inactive: player_map.get('prior_week_inactive'),
-        prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-        week: current_season.week,
-        is_regular_season: current_season.isRegularSeason,
-        game_day: player_map.get('game_day'),
-        practice: practice_data
-      })
-    ) {
+    if (!reserve_short_term_eligible) {
       notice_items.push(
         <Alert key={player_map.get('pid')} severity='error'>
           {player_map.get('name', 'N/A')} is not eligible for Reserve/IR
@@ -261,11 +250,11 @@ export default function LeagueTeam({
   for (const player_map of players.cov) {
     if (!player_map.get('pid')) continue
 
-    if (
-      !isReserveCovEligible({
-        roster_status: player_map.get('roster_status')
-      })
-    ) {
+    const { cov: is_cov_eligible } = get_reserve_eligibility_from_player_map({
+      player_map
+    })
+
+    if (!is_cov_eligible) {
       notice_items.push(
         <Alert key={player_map.get('pid')} severity='error'>
           {player_map.get('name', 'N/A')} is not eligible for Reserve/COVID-19

@@ -61,8 +61,8 @@ export default function PlayersViewMenu({
     ? players_page_views.filter((view) => fuzzy_search(input_value, view.name))
     : players_page_views
 
-  const filtered_items = filtered_views.toList().map((view, index) => (
-    <li className='cursor' key={index} onClick={handleSelect(view)}>
+  const filtered_items = filtered_views.toList().map((view) => (
+    <li className='cursor' key={view.key} onClick={handleSelect(view)}>
       <Box>
         {view.name}
         <br />

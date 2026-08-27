@@ -1,28 +1,21 @@
 // The one place that reads a player's projected total for a week, and the one
 // place that orders players by it.
 //
-// A player's `points` map is populated per week only where a projection exists
-// -- libs-server/get-players.mjs starts it EMPTY and fills only the weeks that
-// came back from the projection tables. And the valuation pools deliberately
-// contain players with no projection at all: process-projections.mjs builds a
-// league's pool as `projection_pids.concat(rostered_pids)`, because replacement
-// level is a question about a real roster and a roster holds players nobody
-// projects. For league 1 that is 24 unprojected players in a pool of 1021.
-//
-// So an absent projection is routine, and the distinction that matters is that
-// it is NOT a zero and NOT a low score -- it is a player who cannot be ranked at
-// all. Returning null rather than undefined is what carries that into arithmetic
+// A missing projection is routine, not exceptional: get-players.mjs starts the
+// `points` map EMPTY and fills only the weeks the projection tables returned, and
+// valuation pools deliberately hold unprojected players, since
+// process-projections.mjs builds the pool as `projection_pids.concat(rostered_pids)`
+// and replacement level is a question about a real roster. The distinction that
+// matters is that such a player is NOT a zero and NOT a low score -- they cannot be
+// ranked at all. Returning null rather than undefined carries that into arithmetic
 // instead of losing it.
 //
-// `points_key` is the key into the points map, NOT necessarily a week. The map
+// `points_key` is the key into the points map, NOT necessarily a week: the map
 // carries the numeric fantasy weeks alongside the named periods `season` and
-// `rest_of_season` (get-players.mjs fills all three from three tables), so a
-// caller on the season path passes `season_aggregate_key` and a caller on the
-// weekly path passes the week. The parameter was called `week` while only the
-// second was true, and that is exactly how the season board came to read
-// `points[0]` after the period split moved the season points to `points.season`
-// -- a key that no longer existed, so every player fell through to the -999
-// sentinel with no error anywhere. Name the axis, not one of its values.
+// `rest_of_season`, so a season-path caller passes `season_aggregate_key` and a
+// weekly-path caller passes the week. While the parameter was named `week`, the
+// season board read `points[0]`, a key that did not exist, and every player fell
+// through to the -999 sentinel with no error. Name the axis, not one of its values.
 export const get_player_week_total = ({ player, points_key }) => {
   const week_points = player.points ? player.points[points_key] : null
   if (!week_points) return null
@@ -36,13 +29,9 @@ export const get_player_week_total = ({ player, points_key }) => {
 // -- returns NaN whenever either side has no projection for the week. A
 // comparator that returns NaN is not an ordering at all, and V8's sort responds
 // by placing elements arbitrarily: the damage is NOT confined to the unprojected
-// players, it scatters the ones that sort fine.
-//
-// Measured at league 1's real ratio (24 unprojected among 1021, 200 trials),
-// that left ~16 out-of-order pairs among the projected players per run and
-// displaced individual players by as much as 936 ranks. In production it seated
-// a 0.71-point bench quarterback ahead of every starting quarterback in the
-// league and made him the QB replacement level for weeks 1 through 12.
+// players, it scatters the ones that sort fine. In production that seated a
+// near-zero bench quarterback ahead of every starter and made him the QB
+// replacement level.
 //
 // Callers should filter unprojected players out before sorting, since a player
 // who cannot be ranked usually should not be in the population either. This

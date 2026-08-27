@@ -11,6 +11,9 @@ export function* load_season() {
 
   console.log({ leagueId, year })
 
+  // the current season's record is already delivered by the auth and
+  // get_league payloads (see AUTH_FULFILLED / GET_LEAGUE_FULFILLED in
+  // ./reducer.js), so there is nothing to fetch for the current year
   if (year === current_season.year) {
     return
   }

@@ -6,6 +6,7 @@ import {
   roster_limit_labels
 } from '#libs-shared/constants/league-settings-labels.mjs'
 
+import { SALARY_ATTRIBUTION_RULE } from '../roster-asset-lineage/constants.mjs'
 import { load_configured_league } from './generate-league-context.mjs'
 import {
   build_frontmatter,
@@ -22,13 +23,26 @@ import {
 
 const DEFAULT_BASE_URL = 'https://xo.football'
 
-// Human descriptions of the salary-attribution rule, derived from the
-// SALARY_ATTRIBUTION_RULE enum in libs-server/roster-asset-lineage/constants.mjs.
+// Human descriptions of the salary-attribution rule.
 const salary_attribution_labels = {
-  0: 'No salary cap',
-  1: 'Auction budget only',
-  2: 'Starting team bears the salary through the season',
-  3: 'Salary follows the player to the acquiring team'
+  [SALARY_ATTRIBUTION_RULE.NO_CAP]: 'No salary cap',
+  [SALARY_ATTRIBUTION_RULE.AUCTION_BUDGET]: 'Auction budget only',
+  [SALARY_ATTRIBUTION_RULE.START_TEAM_BEARS]:
+    'Starting team bears the salary through the season',
+  [SALARY_ATTRIBUTION_RULE.CONTRACT_FOLLOWS]:
+    'Salary follows the player to the acquiring team'
+}
+
+// NO_CAP is the column default, so a league that never chose a rule is stored
+// identically to one that deliberately runs without a cap. A league carrying a
+// salary cap cannot be the second, so report the rule as unset there rather
+// than printing "No salary cap" directly beneath the cap amount.
+function format_salary_attribution(league) {
+  const rule = league.salary_attribution_rule
+  if (rule === SALARY_ATTRIBUTION_RULE.NO_CAP && league.salary_cap > 0) {
+    return 'Not configured'
+  }
+  return salary_attribution_labels[rule] || `Rule ${rule}`
 }
 
 function render_scoring_section(league) {
@@ -119,11 +133,7 @@ export default async function generate_league_rules({
           `$${league.starting_free_agent_acquisition_budget}`
         ],
         ['Minimum bid', `$${league.min_bid}`],
-        [
-          'Salary attribution rule',
-          salary_attribution_labels[league.salary_attribution_rule] ||
-            `Rule ${league.salary_attribution_rule}`
-        ]
+        ['Salary attribution rule', format_salary_attribution(league)]
       ]
     )
   ])

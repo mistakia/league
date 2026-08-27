@@ -339,18 +339,19 @@ export default async function get_plays_view_results({
   let count_promise = Promise.resolve(null)
   if (calculate_total_count) {
     const cleaned_count_query = count_query.clearSelect().clearOrder()
-    if (group_by) {
-      count_promise = db
-        .count('* as count')
-        .from(cleaned_count_query.select(db.raw('1')).as('subquery'))
-        .first()
-        .then((result) => (result ? Number(result.count) : 0))
-    } else {
-      count_promise = cleaned_count_query
-        .count('* as count')
-        .first()
-        .then((result) => (result ? Number(result.count) : 0))
+    const count_builder = group_by
+      ? db
+          .count('* as count')
+          .from(cleaned_count_query.select(db.raw('1')).as('subquery'))
+      : cleaned_count_query.count('* as count')
+
+    if (timeout) {
+      count_builder.timeout(timeout)
     }
+
+    count_promise = count_builder
+      .first()
+      .then((result) => (result ? Number(result.count) : 0))
   }
 
   // Execute data query and count query in parallel
