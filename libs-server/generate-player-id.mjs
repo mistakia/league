@@ -1,6 +1,8 @@
 import debug from 'debug'
 
 import is_main from './is-main.mjs'
+import { fixTeam } from '#libs-shared'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('generate-player-id')
@@ -34,6 +36,11 @@ enable_debug_namespaces('generate-player-id')
 // If the player is a DST (defense/special teams), the pid is the team abbreviation (e.g.
 // "NE", "DAL") -- a stable non-person pseudo-identifier carrying no serial.
 //
+// Position and team are folded through the canonical helpers HERE rather than trusted
+// from the caller, because the pid IS the identity: a vendor spelling that reaches this
+// function unfolded ("DEF", "JAC") would otherwise mint a pid that no lookup can find,
+// and the row it is written onto stores the folded value.
+//
 // This format is the canonical player identifier throughout the system.
 
 const SERIAL_MIN_DIGITS = 6
@@ -54,11 +61,13 @@ const generate_player_id = ({
   serial
 } = {}) => {
   // DST pseudo-rows are not persons: the pid is the team abbreviation, no serial.
-  if (primary_position === 'DST') {
+  // The missing-team check runs before fixTeam, which folds an absent team to "INA"
+  // rather than rejecting it.
+  if (normalize_position(primary_position) === 'DST') {
     if (!current_nfl_team) {
       throw new Error('Missing field current_nfl_team')
     }
-    return current_nfl_team
+    return fixTeam(current_nfl_team)
   }
 
   if (!first_name) {
