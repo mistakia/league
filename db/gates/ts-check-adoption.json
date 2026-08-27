@@ -30,6 +30,7 @@
     "libs-shared/constants/stats-constants.mjs",
     "libs-shared/get-free-agent-period.mjs",
     "libs-shared/get-play-from-play-stats.mjs",
+    "libs-shared/nfl-week-dynamic-values.mjs",
     "libs-shared/nfl-week-identifier.mjs",
     "libs-shared/output-column-param.mjs",
     "libs-shared/simulation/run-simulation.mjs",
