@@ -425,6 +425,26 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
 }
 
 const resolve_nfl_week_params = (params) => {
+  // single_nfl_week_id goes through the SAME expander as nfl_week_id. This is
+  // the only place all four dynamic types are fully expanded, and it used to be
+  // gated on nfl_week_id alone -- so a single_nfl_week_id carrying anything but
+  // `current_nfl_week` fell through to a partial resolver that returned null,
+  // contributing zero weeks to the view scope while still tripping
+  // has_explicit_time_scope. That combination skips the take-view-scope-verbatim
+  // early return and leaves the row axis unbounded: a 13M-row fan-out with a
+  // result set that looks right.
+  //
+  // Expansion is IN PLACE. Deliberately NOT decomposed onto params.year /
+  // params.week / params.seas_type the way nfl_week_id is below: that would
+  // change what every source-attach rule sees for the DFS and betting-market
+  // families, and declared_nfl_weeks already gives the readers that need it the
+  // same information without mutating shared params.
+  if (params.single_nfl_week_id) {
+    params.single_nfl_week_id = process_dynamic_nfl_week_param(
+      params.single_nfl_week_id
+    )
+  }
+
   if (!params.nfl_week_id) return
 
   // Resolve dynamic nfl_week_id values
