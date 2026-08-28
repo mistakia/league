@@ -266,6 +266,26 @@ const GATES = [
     oracle:
       "a cross-file call's object keys vs the callee's destructured parameter list, resolved through the IMPORT EDGE — the silent-default class no column-anchored or query-site-anchored gate here can see"
   },
+  // The RETURN-VALUE dual of the gate above, sharing its resolver
+  // (db/gates/import-edge-resolution.mjs) rather than copying it. Same
+  // prerequisite, same cost, and deliberately adjacent so a session weakening
+  // one resolution rule meets both sets of decoy controls.
+  //
+  // WORKSTATION-ONLY, on the same terms as its dual and NOT by omission. A
+  // finding pairs a producer in one root with a reader in another, and nothing
+  // in this repo requires the two to land in one commit — unlike the DDL rule
+  // that makes the schema-anchored gates CI-safe. So a sibling renaming a
+  // returned key ahead of its consumer repair would turn master red on a
+  // finding invisible in anyone else's diff, and a red master defers EVERY
+  // push to mistakia/league.
+  {
+    id: 'returned-property-reads',
+    command: ['db/gates/check-returned-property-reads.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'a read of `x.foo` where x is bound to a call, vs the key set the callee provably returns, resolved through the IMPORT EDGE or the same module — fails when it judges NOTHING, so a zero is a measurement rather than a narrowing'
+  },
   {
     id: 'private-tests',
     command: ['db/gates/check-private-tests.mjs'],
