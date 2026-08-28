@@ -3,7 +3,7 @@ import React from 'react'
 import PlayerRowNameColumn from '@components/player-row-name-column'
 import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 import PlayerRowPositionColumn from '@components/player-row-position-column'
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   build_nfl_team_values,

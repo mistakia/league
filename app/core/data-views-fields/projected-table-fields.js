@@ -1,4 +1,4 @@
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   common_column_params,

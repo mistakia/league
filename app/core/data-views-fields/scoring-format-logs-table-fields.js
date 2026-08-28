@@ -1,7 +1,7 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import COLUMN_GROUPS from './column-groups'
-import from_format_player_logs from './from-format-player-logs'
+import COLUMN_GROUPS from './column-groups.js'
+import from_format_player_logs from './from-format-player-logs.js'
 import {
   common_column_params,
   named_scoring_formats,

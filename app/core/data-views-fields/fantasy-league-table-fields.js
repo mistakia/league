@@ -1,7 +1,7 @@
 import React from 'react'
 
 import PlayerRowStatusColumn from '@components/player-row-status-column'
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 export default function ({ week, is_logged_in, fantasy_teams = [] }) {

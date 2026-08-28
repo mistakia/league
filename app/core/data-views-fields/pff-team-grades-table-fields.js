@@ -2,7 +2,7 @@ import {
   common_column_params,
   nfl_plays_team_column_params
 } from '#libs-shared'
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { current_season } from '#constants'
 

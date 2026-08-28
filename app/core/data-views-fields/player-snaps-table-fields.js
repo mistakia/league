@@ -1,6 +1,6 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 import { nfl_plays_column_params, output_column_param } from '#libs-shared'
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 
 export default {
   player_snaps: {

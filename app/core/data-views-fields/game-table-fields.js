@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import COLUMN_GROUPS from './column-groups'
+import COLUMN_GROUPS from './column-groups.js'
 import { common_column_params } from '#libs-shared'
 import GameOpponent from '@components/game-opponent'
 

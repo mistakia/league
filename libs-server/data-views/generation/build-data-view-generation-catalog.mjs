@@ -7,6 +7,15 @@ import {
   nfl_plays_team_column_params,
   common_column_params
 } from '#libs-shared'
+import { read_client_column_params } from './read-client-column-params.mjs'
+
+// Read at module load rather than inside the builder so every consumer of the
+// catalog stays synchronous. The client registries are ESM singletons evaluated
+// once at import, so there is nothing to re-read later.
+const {
+  column_params_by_id: client_column_params,
+  carve_out_modules: client_carve_out_modules
+} = await read_client_column_params()
 
 // The model-facing vocabulary for data view generation: every queryable column
 // id with its prose description, and every param key with its data type and
@@ -24,15 +33,13 @@ import {
 // gap (`coverage`) and does not repair it -- policing it is the drift gate's
 // job.
 //
-// One limit worth stating, because it bounds what the catalog can promise:
-// per-column param applicability is only partly server-side. A column
-// definition may declare `column_params`, and most do not -- the full
-// per-column vocabulary lives in the CLIENT field registry
-// (app/core/data-views-fields/), which imports React components and so cannot
-// be read from the server. The catalog therefore carries the shared param
-// registry in full plus per-column keys wherever the server declares them, and
-// a caller must not read a missing `param_keys` as "this column takes no
-// params".
+// Per-column param vocabulary comes from BOTH registries. The server column
+// definitions declare `column_params` on a minority of columns; the client
+// field registry (app/core/data-views-fields/) declares them on most, and is
+// the only place the params a user actually reaches for -- `time_type`,
+// `nfl_week_id`, `output`, `market_type` -- are written down. See
+// `read-client-column-params.mjs` for why that registry was unreadable from the
+// server until now, and for the five modules still carved out of it.
 
 const DATA_TYPE_NAMES = Object.fromEntries(
   Object.entries(table_constants.TABLE_DATA_TYPES).map(([name, value]) => [
@@ -114,17 +121,28 @@ const build_shared_params = ({ param_registries }) => {
 // `seas_type` is PFF's three-value vocabulary on PFF columns and the NFL's
 // everywhere else. Emitting the difference per column keeps the shared
 // registry honest instead of letting one family's spelling stand for all.
-const build_column_params = ({ definition, shared_params }) => {
-  if (!definition.column_params) {
+const build_column_params = ({
+  column_id,
+  definition,
+  shared_params,
+  column_params_from_client
+}) => {
+  // The server definition wins a key collision: it is what actually answers the
+  // query, so where the two registries spell a param differently the executable
+  // spelling is the honest one to advertise.
+  const column_params = {
+    ...column_params_from_client[column_id],
+    ...definition.column_params
+  }
+
+  if (!Object.keys(column_params).length) {
     return {}
   }
 
   const param_keys = []
   const param_overrides = {}
 
-  for (const [param_key, param_definition] of Object.entries(
-    definition.column_params
-  )) {
+  for (const [param_key, param_definition] of Object.entries(column_params)) {
     if (!param_definition || typeof param_definition !== 'object') {
       continue
     }
@@ -153,7 +171,8 @@ const build_column_params = ({ definition, shared_params }) => {
 export const build_data_view_generation_catalog = ({
   column_definitions = data_view_column_definitions,
   field_descriptions = data_view_fields_index,
-  param_registries = default_param_registries
+  param_registries = default_param_registries,
+  column_params_from_client = client_column_params
 } = {}) => {
   const shared_params = build_shared_params({ param_registries })
 
@@ -178,7 +197,12 @@ export const build_data_view_generation_catalog = ({
         // column, so it is the one per-column param vocabulary the server
         // holds in full.
         supports_output: definition.supports_output,
-        ...build_column_params({ definition, shared_params })
+        ...build_column_params({
+          column_id,
+          definition,
+          shared_params,
+          column_params_from_client
+        })
       })
     )
   }
@@ -196,7 +220,17 @@ export const build_data_view_generation_catalog = ({
       undescribed_column_ids: columns
         .filter((column) => !column.description)
         .map((column) => column.column_id),
-      orphaned_description_ids
+      orphaned_description_ids,
+      // What share of columns advertise any param vocabulary at all. This is
+      // the number the whole exercise moves, and it is reported rather than
+      // asserted so a regression shows up as a count instead of as a quietly
+      // worse generation result.
+      columns_with_param_keys: columns.filter((column) => column.param_keys)
+        .length,
+      // The client modules still unreadable from the server. Their columns can
+      // only advertise what the server restates, so this list bounds what the
+      // catalog still cannot see.
+      client_carve_out_modules
     }
   }
 }
