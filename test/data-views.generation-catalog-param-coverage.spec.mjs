@@ -19,7 +19,11 @@ const { expect } = chai
 // So these are counts, not shapes. A structural assertion ("columns have
 // param_keys") passes just as happily at 56 as at 413.
 
-const MINIMUM_COLUMNS_WITH_PARAM_KEYS = 400
+// Measured at 440 of 597: 56 from the server column definitions alone, 413 once
+// the client field registry loads, 440 once `consumes_params_extra` is folded
+// in. Set below the measurement so benign registry churn is not a red suite,
+// and raised when the number rises -- never lowered to make a change pass.
+const MINIMUM_COLUMNS_WITH_PARAM_KEYS = 430
 
 // The keys real saved views reach for most, every one of which was invisible to
 // the server before the client field registry became importable. Named
@@ -49,7 +53,7 @@ describe('data view generation catalog / param coverage', () => {
     // change pass, because the whole defect was the number quietly being small.
     expect(catalog.coverage.columns_with_param_keys).to.be.at.least(
       MINIMUM_COLUMNS_WITH_PARAM_KEYS,
-      `columns advertising param keys regressed to ${catalog.coverage.columns_with_param_keys}; it was 56 before the client field registry became server-importable and 413 after`
+      `columns advertising param keys regressed to ${catalog.coverage.columns_with_param_keys}; it was 56 before the client field registry became server-importable and 440 after`
     )
   })
 
@@ -93,6 +97,19 @@ describe('data view generation catalog / param coverage', () => {
         column.param_keys?.includes('time_type')
       )
     ).to.deep.equal([], 'time_type must be unreachable from the server half')
+  })
+
+  it('has every expected client module loading', () => {
+    // The reader contains an import failure rather than throwing, because it
+    // runs at API start behind a top-level await and an uncaught throw there
+    // trades a partial catalog for no API at all. Containment without this
+    // assertion would be a silent degrade, so the failure is surfaced here.
+    expect(catalog.coverage.client_failed_modules).to.deep.equal(
+      [],
+      `client field modules failed to import: ${catalog.coverage.client_failed_modules
+        .map(({ module, message }) => `${module} (${message})`)
+        .join('; ')}`
+    )
   })
 
   it('reports which client modules are still carved out', () => {

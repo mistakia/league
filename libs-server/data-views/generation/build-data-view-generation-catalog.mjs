@@ -14,7 +14,8 @@ import { read_client_column_params } from './read-client-column-params.mjs'
 // once at import, so there is nothing to re-read later.
 const {
   column_params_by_id: client_column_params,
-  carve_out_modules: client_carve_out_modules
+  carve_out_modules: client_carve_out_modules,
+  failed_modules: client_failed_modules
 } = await read_client_column_params()
 
 // The model-facing vocabulary for data view generation: every queryable column
@@ -127,10 +128,26 @@ const build_column_params = ({
   shared_params,
   column_params_from_client
 }) => {
+  // `consumes_params_extra` is the third declared source, and the only one that
+  // is keys rather than definitions: a plays-backed column lists every
+  // `nfl_plays_column_params` key `apply_play_by_play_column_params_to_query`
+  // may read from it, so the output aggregator can hash per-column filter
+  // divergence. The column accepts each of those keys, which is exactly what
+  // this catalog is for, so they resolve against the shared registry.
+  const params_from_consumes = Object.fromEntries(
+    (Array.isArray(definition.consumes_params_extra)
+      ? definition.consumes_params_extra
+      : []
+    )
+      .filter((param_key) => shared_params[param_key])
+      .map((param_key) => [param_key, shared_params[param_key]])
+  )
+
   // The server definition wins a key collision: it is what actually answers the
-  // query, so where the two registries spell a param differently the executable
+  // query, so where the registries spell a param differently the executable
   // spelling is the honest one to advertise.
   const column_params = {
+    ...params_from_consumes,
     ...column_params_from_client[column_id],
     ...definition.column_params
   }
@@ -230,7 +247,11 @@ export const build_data_view_generation_catalog = ({
       // The client modules still unreadable from the server. Their columns can
       // only advertise what the server restates, so this list bounds what the
       // catalog still cannot see.
-      client_carve_out_modules
+      client_carve_out_modules,
+      // Modules that were expected to load and did not. Always empty in a
+      // healthy tree; a non-empty list means the catalog is degraded and the
+      // param-coverage ratchet is the thing that will say so out loud.
+      client_failed_modules
     }
   }
 }

@@ -25,15 +25,20 @@
 // exists, and that absence is measured rather than an oversight.
 //
 // The client field registry IS readable from the server now, and the catalog
-// carries it: columns advertising param keys went from 56 of 597 to 413, and
-// `time_type`, `nfl_week_id`, `output`, `market_type` and `source_id` are all
-// visible. That fixed most of the problem. A key-existence check that once
-// rejected 123 of 186 saved views now rejects 11 of 189.
+// carries it alongside each column's `consumes_params_extra`: columns
+// advertising param keys went from 56 of 597 to 440, and `time_type`,
+// `nfl_week_id`, `output`, `market_type` and `source_id` are all visible. That
+// fixed most of the problem. A key-existence check that once rejected 123 of
+// 186 saved views now rejects 11 of 189.
 //
 // It still does not ship, because of what those 11 turn out to be. Re-measured
 // against the 189 production saved views, post-migration, over catalog-known
-// columns: 55 rejections, of which 43 are real params that the query builder
-// actively honours and NO registry declares.
+// columns, with the allowed set built as server `column_params` UNION client
+// `column_params` UNION `consumes_params_extra` UNION the shared registries:
+// 55 rejections, of which 43 are real params that the query builder actively
+// honours and NO registry declares. Folding in `consumes_params_extra` raised
+// coverage from 413 to 440 and moved the residual not at all, which is what
+// established that these keys are hand-read rather than merely inherited.
 //
 //   - `sourceid` (17 uses) and `scoring_format_id` (20) are read directly out
 //     of `params` by `player-projected-column-definitions.mjs`, which says in

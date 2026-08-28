@@ -20,10 +20,23 @@ import { fileURLToPath, pathToFileURL } from 'url'
 // import line and the React imports further down were never reached. The
 // specifiers now carry explicit extensions, which webpack resolves unchanged.
 //
-// Five of the 33 modules genuinely do import React or `@components` and are
+// Five of the 34 modules genuinely do import React or `@components` and are
 // carved out here. The carve-out is DERIVED from the source text rather than
 // listed by filename, so a module that later drops its React import starts
 // contributing without anyone remembering to update a list.
+//
+// WHY THE SPECIFIERS WERE REWRITTEN RATHER THAN RESOLVED BY A HOOK.
+// `test/webpack-resolve/register.mjs` already carries a Node resolve hook that
+// derives alias, extensions and mainFiles from the real webpack config, and it
+// records that rewriting all ~1,100 app specifiers was measured and rejected.
+// This directory is 34 files, not 1,100, and the rewrite is mechanical: adding
+// `.js` to a specifier that already resolved to that exact file changes nothing
+// webpack does. The hook was not reused because
+// `test/app.webpack-resolve-hook-conformance.spec.mjs` warns that every
+// additional resolution authority is a thing that can disagree with webpack,
+// and the API server would have been the third. Rewriting makes these modules
+// importable by ANY consumer -- server, test, script -- with no authority at
+// all, which is the smaller standing cost.
 
 const client_fields_directory = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -55,6 +68,7 @@ const is_client_only_module = (source) => react_import_pattern.test(source)
  * @returns {Promise<{
  *   column_params_by_id: Record<string, object>,
  *   carve_out_modules: string[],
+ *   failed_modules: Array<{ module: string, message: string }>,
  *   imported_module_count: number
  * }>}
  */
@@ -73,6 +87,7 @@ export const read_client_column_params = async () => {
 
   const column_params_by_id = {}
   const carve_out_modules = []
+  const failed_modules = []
   let imported_module_count = 0
 
   for (const entry of entries) {
@@ -83,11 +98,23 @@ export const read_client_column_params = async () => {
       continue
     }
 
-    // Not wrapped in try/catch on purpose. Every module here has been shown to
-    // resolve, so an error is a real break -- a moved dependency or a syntax
-    // error -- and swallowing it would silently shrink the vocabulary back
-    // toward the gap.
-    const module = await import(pathToFileURL(module_path).href)
+    // The React text match is a heuristic, and this runs at API start behind a
+    // top-level await. A module that grows a `.styl` import or touches `window`
+    // WITHOUT importing React would slip the filter and, uncaught, take the
+    // whole server down at boot -- trading a partial catalog for no API at all,
+    // which is much the worse failure.
+    //
+    // So the failure is contained but never swallowed: it is recorded, surfaced
+    // through the catalog's `coverage`, and policed by the param-coverage
+    // ratchet in test, which fails when the vocabulary shrinks. The floor check
+    // below still throws if the whole directory stops loading.
+    let module
+    try {
+      module = await import(pathToFileURL(module_path).href)
+    } catch (error) {
+      failed_modules.push({ module: entry, message: error.message })
+      continue
+    }
     imported_module_count += 1
 
     const registry = module.default
@@ -110,13 +137,21 @@ export const read_client_column_params = async () => {
     }
   }
 
+  // The floor. One module failing degrades the catalog and is reported; the
+  // whole directory failing is indistinguishable from "these columns take no
+  // params" and must not start.
   if (!imported_module_count) {
     throw new Error(
-      `every client field module in ${client_fields_directory} was carved out -- the React detection is over-matching`
+      `no client field module in ${client_fields_directory} could be read -- ${carve_out_modules.length} carved out, ${failed_modules.length} failed to import: ${failed_modules.map(({ module, message }) => `${module} (${message})`).join('; ')}`
     )
   }
 
-  return { column_params_by_id, carve_out_modules, imported_module_count }
+  return {
+    column_params_by_id,
+    carve_out_modules,
+    failed_modules,
+    imported_module_count
+  }
 }
 
 export default read_client_column_params
