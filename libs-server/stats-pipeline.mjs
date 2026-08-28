@@ -58,12 +58,19 @@ export const get_format_ids = async () => {
   const default_league = create_default_league()
   const league_ids = await get_hosted_league_ids()
 
+  // Read the catalog's `id`, never its keys. A catalog key is a source slug,
+  // and the generator collapses every slug whose config tuple is deep-equal
+  // onto one canonical id, so an alias slug has no row of its own. Keying off
+  // the slug hands `ppr_lower_turnover` to a lookup that only knows its
+  // canonical `draftkings`, and the resulting throw aborts the whole
+  // process_formats step -- every later scoring format and every league format
+  // included -- for every game finalized.
   const scoring_format_ids = new Set([
-    ...Object.keys(named_scoring_formats),
+    ...Object.values(named_scoring_formats).map((format) => format.id),
     default_league.scoring_format_id
   ])
   const league_format_ids = new Set([
-    ...Object.keys(named_league_formats),
+    ...Object.values(named_league_formats).map((format) => format.id),
     default_league.league_format_id
   ])
 
