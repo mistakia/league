@@ -175,6 +175,8 @@ WebSocket endpoints in `api/sockets/`: `auction.mjs`, `scoreboard.mjs`, `data_vi
 
 Dynamic table configurations in `app/core/data-views/` with configurable columns and filters, WebSocket updates, CSV export and saved views. Field definitions in `libs-shared/data-view-fields-index.mjs`. Service objectives live at [[user:text/league/data-views/data-view-service-objectives.md]].
 
+A second tier executes generated SQL under a sandbox — the `league_data_view_reader` role on its own connection pool, guarded by a `libpg-query` parse. Before touching it, read [docs/data-views-system.md](docs/data-views-system.md#sandboxed-sql-tier): the controls are load-bearing individually and two of them stop attacks the others cannot.
+
 ### Script pattern
 
 ```javascript

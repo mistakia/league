@@ -224,6 +224,18 @@ Later stages attach `data_view_options`, `week_range`, `measure_batches`, `joine
 16. Inject participation status for week-grain player views.
 17. Resolve ORDER BY, assemble WHERE / HAVING / GROUP BY, apply LIMIT and OFFSET.
 
+## The sandboxed SQL path
+
+There is a second producer of rows, and it does not go through any of the pipeline above. Generated SQL is validated by `libs-server/data-views/generation/validate-generated-sql.mjs`, executed by `libs-server/data-views/generation/execute-generated-sql.mjs` on a second connection pool held by `league_data_view_reader`, and wrapped as `SELECT * FROM (<statement>) ... WHERE ... ORDER BY ... LIMIT` so the ordinary UI controls still apply.
+
+Three properties matter here rather than in the tier's own documentation, because they constrain this architecture:
+
+- It enters through `execute_data_view_request` as an alternate `run_query`, so admission, timeout and telemetry are shared. It is not a fifth execution path.
+- Both paths return the same envelope, `{ data_view_results, data_view_metadata, data_view_fields, data_view_query_string }`. `data_view_fields` carries the pg field descriptors in projection order and is what the ad-hoc column deriver reads instead of anything declared. No consumer needs to know which path produced a result.
+- SQL never enters `table_state`. It is a production mechanism; a `table_state` and a set of column descriptors are DERIVED from the result, and a saved view references a row in `data_view_queries` rather than embedding a statement.
+
+Full description of the controls and the allowlist: [data-views-system.md](./data-views-system.md#sandboxed-sql-tier).
+
 ## Adding things
 
 **A column.** Declare `source` with the grain its data actually lives at, and `measure` with the kind and expression. Run it through `derive_measure` if it is a numeric measure so the output contract is generated rather than hand-written. Confirm a source-attach rule exists for `(cell identity, your grain)` for every grain you expect the column to be usable at — the coverage assertion checks this.
@@ -253,6 +265,8 @@ This is also the reason `consumes_params` on an output-aggregator plugin is a di
 - `test/data-views-output-parity.spec.mjs` — legacy `rate_type` and native `output` inputs produce identical SQL, across six column families.
 - `test/data-views.output-aggregator.spec.mjs` — count FILTER semantics, period keying, materialization and year pushdown, per-instance CTE identity for `year` and `year_offset`, and the week-axis sanitization rules.
 - `test/data-views.measure-contract.spec.mjs` — `derive_measure` for both measure kinds.
+- `test/data-view-sql-guard.spec.mjs` — the statement guard and the alias contract, including the three AST shapes that fail open, and the four legitimate complex shapes that must still be accepted.
+- `test/data-view-sql-sandbox.spec.mjs` — the sandbox against a real database: the role's grants, the two PUBLIC write classes, the read-only transaction, the timeout, the row cap and the audit trail, each paired with a positive control demonstrating the attack succeeding without the guard.
 - `db/gates/check-data-view-sql-validity.mjs` — sweeps every column across every admitted row grain, row-axis combination, and two param shapes, and runs `EXPLAIN` against a throwaway database. Not in CI; run it manually as a gate before any grain or column-name cutover.
 
 ## See also

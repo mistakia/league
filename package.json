@@ -99,6 +99,7 @@
     "jsonwebtoken": "^9.0.2",
     "jstat": "^1.9.6",
     "knex": "3.1.0",
+    "libpg-query": "17.7.4",
     "marked": "^5.1.2",
     "ml-matrix": "^6.12.1",
     "morgan": "^1.10.0",

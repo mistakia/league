@@ -42,7 +42,8 @@ The `rate_type` **request** param is not retired and never will be — shared sh
 10. [State Management and Data Flow](#state-management-and-data-flow)
 11. [Error Handling and Edge Cases](#error-handling-and-edge-cases)
 12. [Performance Improvement Opportunities](#performance-improvement-opportunities)
-13. [Related Documentation](#related-documentation)
+13. [Sandboxed SQL Tier](#sandboxed-sql-tier)
+14. [Related Documentation](#related-documentation)
 
 ## System Overview
 
@@ -1712,6 +1713,64 @@ Two things make this hard to see, both worth knowing before you trust a search:
 - **The request field is `row_axes`, not `splits`.** A probe passing `splits: ['year','week']` exercises the YEAR path while reading as a week test, and every case returns valid SQL. Assert on the emitted SQL -- is the axis-specific join actually present -- rather than on the absence of an error.
 
 When a column should support an axis its grain does not declare, add `supports_row_axes` to its `source` and update the column-family spec under `docs/data-view-specs/` to match; the spec and the code disagreeing is itself invisible to every gate.
+
+## Sandboxed SQL Tier
+
+The registry composes 597 columns; the long tail of analytical questions it cannot express is served by executing generated SQL directly, under a sandbox. The ceiling on that tier is not the query language but the table allowlist, so it is as expressive as the allowlist is wide.
+
+It is a TOOL rather than a terminal tier. The generation agent chooses between the registry and SQL by attempting the registry and observing that it falls short, so SQL is not something reached only after the registry dead-ends.
+
+### How a request reaches it
+
+The SQL path enters `execute_data_view_request` as an alternate `run_query` — the same admission gate, timeout policy and telemetry every other data-view path uses, not a fifth execution path:
+
+```js
+execute_data_view_request({
+  params: { sql_text, where, sort, offset, limit },
+  run_query: execute_generated_sql,
+  path: 'sql',
+  skip_cache: true,
+  user_id
+})
+```
+
+**Result caching is off on this path.** `get_data_view_hash` knows nothing about SQL, so two different statements at the same offset and limit share a cache key and would serve each other's rows. The query-backed data-views work adds `query_id` to that hash and turns caching on.
+
+### The controls, and which are load-bearing
+
+| Control                       | File                                                                                         | What it stops                                                                                                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Statement guard               | `libs-server/data-views/generation/validate-generated-sql.mjs`                               | multi-statement injection, writes and DDL at any depth, `lockingClause`, `SELECT ... INTO`, non-allowlisted relations, set-returning functions in `FROM`, unaliased or duplicate output columns |
+| Scoped role                   | `league_data_view_reader`, granted by `db/adhoc/2026-08-28-create-data-view-reader-role.sql` | reads of every relation outside the allowlist, every write, every table added after the grant                                                                                                   |
+| Second pool                   | `db/data-view-sandbox.mjs`                                                                   | the role's privileges cannot be shed. `SET ROLE` on the main pool would not be a control, because `RESET ROLE` is available from inside any session                                             |
+| Read-only transaction         | `execute-generated-sql.mjs`                                                                  | writes the role would otherwise be granted. `SET TRANSACTION READ ONLY`, never `SET LOCAL default_transaction_read_only`, which is a measured no-op inside an open transaction                  |
+| `SET LOCAL statement_timeout` | same                                                                                         | a runaway statement, under the server's 30s baseline                                                                                                                                            |
+| Plain `EXPLAIN` preflight     | same                                                                                         | nothing executes; `EXPLAIN ANALYZE` does execute and is never used                                                                                                                              |
+| Row cap and outer `LIMIT`     | same                                                                                         | an unbounded result set                                                                                                                                                                         |
+
+The parser and the role are independent, and neither is trusted alone. Two cases show why both are needed: `pg_stat_statements` is granted to PUBLIC, so no GRANT can deny it and only the parser stops it; and a view executes with its owner's privileges, so a table-level exclusion does not bind one — granted views are enumerated individually and none may read an excluded relation.
+
+### The allowlist
+
+The grant is an explicitly enumerated list generated by `db/tools/generate-data-view-reader-grants.mjs`, reviewed relation by relation, with a stated reason on every exclusion. It is deliberately NOT a broad sweep minus an exclusion list: that method produced gaps that a review found — `public.config` (third-party API credentials and a Discord webhook), the admission-vote table that actually holds ballot content, and a second saved-views table among them.
+
+The role receives neither arm of the standing `ALTER DEFAULT PRIVILEGES` grants, TABLES or SEQUENCES, so every future relation is denied until someone adds it to that tool. Widening later is cheap; narrowing is never needed.
+
+### The alias contract
+
+Every statement must project uniquely and explicitly named output columns. That is what makes the subquery wrapping safe, gives the row-key convention something stable to key on, and makes the annotation reconciliation total. Three AST shapes fail OPEN if handled naively, and each is named at its branch in the guard with a spec of its own: a set operation carries no top-level `targetList`; a `VALUES` list carries neither a `targetList` nor arms; and `larg` / `rarg` hold bare `SelectStmt` bodies rather than `{SelectStmt: ...}` wrappers.
+
+### Result envelope
+
+Both execution paths return one envelope: `{ data_view_results, data_view_metadata, data_view_fields, data_view_query_string }`. `data_view_fields` is the pg field descriptors in projection order, resolved to `{ name, data_type_oid, pg_type_name, data_type }` by `libs-server/data-views/resolve-pg-field-types.mjs` against `pg_catalog` — `format_type` plus `typcategory`, never `information_schema`, which cannot describe an expression and reports enums as `USER-DEFINED`. An unbucketable type throws rather than returning null.
+
+**`data_view_fields` must never reach a client.** Raw pg descriptors carry `tableID` and `columnID` schema OIDs and the client merges `metadata` wholesale, so descriptors are deliberately not parked on `data_view_metadata`; the deriver emits `metadata.columns` from them server-side.
+
+### Kill switch and audit
+
+`libs-server/data-views/generation/data-view-sql-kill-switch.mjs` gates execution, because a saved view of this tier reaches the executor without passing through generation at all. The Redis key `data_view_sql:enabled` is the operational control and its absence means enabled; `LEAGUE_DATA_VIEW_SQL_DISABLED=1` is the control that still works when Redis does not.
+
+`data_view_sql_audit` records one row per statement attempted — executed, rejected or errored — with the statement text, row count and duration.
 
 ## Related Documentation
 

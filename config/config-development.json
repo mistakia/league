@@ -30,6 +30,20 @@
       "max": 10
     }
   },
+  "postgres_data_view_sandbox": {
+    "client": "pg",
+    "connection": {
+      "host": "127.0.0.1",
+      "port": 5432,
+      "user": "league_data_view_reader",
+      "password": "",
+      "database": "league_development"
+    },
+    "pool": {
+      "min": 0,
+      "max": 4
+    }
+  },
   "filter_prop_pairings_options": {
     "market_odds_max_threshold": 1,
     "historical_rate_min_threshold": 1,

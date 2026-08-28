@@ -517,6 +517,7 @@ const english_words = [
   'middle',
   'migration',
   'min',
+  'milliseconds',
   'minimum',
   'minus',
   'minutes',
@@ -840,6 +841,7 @@ const english_words = [
   'starting',
   'starts',
   'state',
+  'statement',
   'status',
   'step',
   'sticks',
@@ -1122,6 +1124,11 @@ const ratified_system_names = [
   'rts',
   'sis',
   'sportradar',
+  // The query language's own name, ratified 2026-08-28 with the sandboxed-SQL
+  // data-view tier. Not an abbreviation of an English phrase this schema is
+  // declining to spell out -- expanding it would name the column something no
+  // documentation anywhere uses.
+  'sql',
   'sumer',
   'swish',
   'v1',
