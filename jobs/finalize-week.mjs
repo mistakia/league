@@ -7,6 +7,7 @@ import { is_main, report_job, get_season_playoff_weeks } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   run_step,
+  format_step_failures,
   get_hosted_league_ids
 } from '#libs-server/stats-pipeline.mjs'
 
@@ -293,8 +294,22 @@ const main = async () => {
     finalize_result = await finalize_week()
 
     if (!finalize_result?.success) {
+      // finalize_week returns { success, results } and has NEVER returned a
+      // `reason` key, so this read was always undefined and every step failure
+      // reported the literal string "Week finalization failed: unknown error".
+      // The failed steps and their messages were sitting in
+      // results.steps_failed the whole time -- the same discard that made a
+      // finalize-game failure require an SSH, one degree worse because a count
+      // at least told you how many.
+      const steps_failed = finalize_result?.results?.steps_failed ?? []
+      const detail = format_step_failures({
+        steps_failed,
+        total_steps:
+          (finalize_result?.results?.steps_completed?.length ?? 0) +
+          steps_failed.length
+      })
       throw new Error(
-        `Week finalization failed: ${finalize_result?.reason || 'unknown error'}`
+        `Week finalization failed: ${detail || 'no step reported a failure'}`
       )
     }
 

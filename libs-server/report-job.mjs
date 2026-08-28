@@ -1,4 +1,5 @@
 import { execFile } from 'child_process'
+import fs from 'fs'
 import { promisify } from 'util'
 
 import db from '#db'
@@ -125,6 +126,42 @@ const job_type_to_id = build_job_type_to_id()
 export const should_emit_log_error = ({ job_success, job_id, base_cli }) =>
   !job_success && !(job_id && base_cli)
 
+// Retrievable evidence for a failure, per the signal-emission contract's
+// `file:///var/log/<service>.log` form. The signal already carries the host in
+// its own column, so the link is a path and nothing else.
+//
+// DERIVED FROM THIS PROCESS'S OWN STDOUT, not from a variable someone has to
+// remember to set. Every league crontab line already ends in
+// `>> /var/log/league/<name>.log 2>&1`, so the log path is a fact about the fd
+// the kernel handed us, and /proc/self/fd/1 is where that fact is readable. An
+// env var restating it would be a second copy of a value already on the line,
+// free to drift from the redirect it duplicates -- and a forensic link that
+// points at the wrong file is worse than none, because it is believed.
+//
+// This also gets the case the incident actually had: finalize_game runs INSIDE
+// import-plays-nfl-v1, so its output lands in the CALLER's log
+// (/var/log/league/import-plays-preseason.log) and nothing finalize-game knows
+// about itself could name that file. The inherited fd does.
+//
+// Not every run is redirected. Under a tty or a pipe the link resolves to
+// `pipe:[345995878]` or `/dev/pts/0` rather than a path, which is not evidence
+// anyone can retrieve later, so anything not absolute is dropped. Both shapes
+// verified on digitalocean-0.
+export const resolve_log_forensic_link = ({
+  read_link = (path) => fs.readlinkSync(path)
+} = {}) => {
+  try {
+    const target = read_link('/proc/self/fd/1')
+    // `pipe:[...]`, `socket:[...]`, `/dev/pts/0` and `/dev/null` are all
+    // reachable here and none of them is retrievable evidence.
+    if (!target.startsWith('/') || target.startsWith('/dev/')) return null
+    return `file://${target}`
+  } catch {
+    // No procfs (macOS, a container without /proc) -- not an error, just no link.
+    return null
+  }
+}
+
 export default async function report_job({
   job_type,
   job_success = true,
@@ -192,6 +229,12 @@ export default async function report_job({
   ]
   if (job_reason) args.push('--reason', job_reason)
 
+  const forensic_args = []
+  const forensic_link = job_success ? null : resolve_log_forensic_link()
+  if (forensic_link) {
+    forensic_args.push('--forensic-link', forensic_link)
+  }
+
   // Forward this job's cadence so the staleness sweep can compute a next
   // expected fire for it instead of falling back to the flat 3-day window. A
   // weekly or seasonal source under the flat window is effectively unmonitored:
@@ -230,17 +273,26 @@ export default async function report_job({
     )
   }
 
+  // Every ENRICHMENT flag degrades together. `--forensic-link` joins the cadence
+  // flags here rather than going onto `args`, because the fallback below re-runs
+  // `args` verbatim: a flag placed there would be re-sent by the very retry that
+  // exists to drop it, and the row would be lost on any CLI that does not know
+  // it -- turning a diagnosability nicety into the outage it was meant to fix.
+  const optional_args = [...forensic_args, ...schedule_args]
+
   try {
-    await exec_file(base_cli, [...args, ...schedule_args], { timeout: 5000 })
+    await exec_file(base_cli, [...args, ...optional_args], { timeout: 5000 })
   } catch (err) {
-    // Cadence flags must never be able to break reporting. yargs .strict()
+    // Enrichment flags must never be able to break reporting. yargs .strict()
     // rejects an unknown flag with rc=1, which is how the --schedule rollout
     // killed all 31 cron:database: ledger rows for 39 hours (bulletin #48). If
-    // this CLI is ever rolled back below the flag, degrade to the report that
-    // always worked rather than losing the row: losing cadence costs a source
-    // its precise window, losing the report costs the row entirely.
-    if (schedule_args.length && /unknown argument/i.test(err.message || '')) {
-      console.error('run report rejected cadence flags; retrying without them')
+    // this CLI is ever rolled back below a flag, degrade to the report that
+    // always worked rather than losing the row: losing cadence or a log pointer
+    // costs context, losing the report costs the row entirely.
+    if (optional_args.length && /unknown argument/i.test(err.message || '')) {
+      console.error(
+        'run report rejected enrichment flags; retrying without them'
+      )
       try {
         await exec_file(base_cli, args, { timeout: 5000 })
         return

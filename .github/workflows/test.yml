@@ -141,6 +141,28 @@ jobs:
       - name: Dropped table consumer gate
         run: node db/gates/check-dropped-table-consumers.mjs
 
+      # NOT WIRED, deliberately, and written down here because the omission
+      # otherwise reads as an oversight: db/gates/check-returned-property-reads.mjs
+      # and its dual db/gates/check-call-site-param-contracts.mjs are both
+      # workstation-only, run by yarn check:cluster.
+      #
+      # They pass the cheap half of the CI test — static reads of the checkout,
+      # no database, no base ref, no user-base ancestor, about two seconds each
+      # — and fail the half that decides it. Every gate wired above compares a
+      # spec or the schema file against ITSELF, and where the two inputs are a
+      # schema and its consumers, this repo's one-commit rule for DDL plus
+      # export plus dependent code makes them arrive together. These two compare
+      # a PRODUCER in one root against a CONSUMER in another, and no rule
+      # requires those to land in the same commit. A sibling renaming a returned
+      # key ahead of its consumer repair would turn master red on a finding
+      # invisible in every other session's diff, and a red master makes the
+      # sync-all pre-push guard defer EVERY push to mistakia/league.
+      #
+      # The return-side gate landed at zero findings over 608 judged reads, so
+      # this is a wiring judgement rather than a debt problem, and it is the one
+      # that should be revisited if the producer/consumer one-commit discipline
+      # ever becomes a rule rather than a habit.
+
       # The incremental //@ts-check tier. Two steps because they answer two
       # different questions, and the second is the one a green first step cannot
       # cover.

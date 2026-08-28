@@ -98,6 +98,39 @@ const TEST_CONTAINER_ENV = {
   LEAGUE_DB_PORT: String(TEST_CONTAINER.port)
 }
 
+// The pin above named HOST and PORT, but `db/index.mjs` honours five overrides --
+// host, port, user, password and database -- so the other three walked straight
+// through it and the pin was only ever two-fifths of what it claimed. Setting
+// LEAGUE_DB_DATABASE to clear check-private-tests (the one gate that REQUIRES it,
+// and which is `requires: 'none'` so it still receives it) redirected every
+// pinned gate to that database too: on 2026-08-28 saved-view-param-coverage and
+// data-view-url-param-coverage both reported `TOOLING ERROR: database
+// "league_test_privsuite" does not exist` and conflated-player-rows went BLIND,
+// three verdicts manufactured by the environment on gates the change never
+// touched. That is the LOUD direction. The quiet one is worse and is the reason
+// this scrubs rather than adds two more keys: an ambient LEAGUE_DB_DATABASE
+// naming a database that DOES exist on the pinned host -- a leftover
+// `league_test_<slug>` from an isolated suite run, which this guide's own test
+// recipe tells people to export -- silently runs a pinned gate against a stale
+// schema and reports a green over it.
+const DB_CONNECTION_OVERRIDES = [
+  'LEAGUE_DB_HOST',
+  'LEAGUE_DB_PORT',
+  'LEAGUE_DB_USER',
+  'LEAGUE_DB_PASSWORD',
+  'LEAGUE_DB_DATABASE'
+]
+
+// Pinning means the ambient value cannot reach the child AT ALL, so drop the
+// whole family first and then apply the pin. A gate whose `requires` is not a
+// pinned class keeps `process.env` untouched, which is what check-private-tests
+// consumes.
+const pinned_env = (pin) => {
+  const env = { ...process.env }
+  for (const key of DB_CONNECTION_OVERRIDES) delete env[key]
+  return { ...env, ...pin }
+}
+
 // The user-base trees the league-schema-consumer gate reads. They are arguments
 // rather than a hardcoded path inside that gate because the gate is about the
 // league SCHEMA and the corpus is a parameter of the run — but this repo's
@@ -232,6 +265,26 @@ const GATES = [
     negative_control: true,
     oracle:
       "a cross-file call's object keys vs the callee's destructured parameter list, resolved through the IMPORT EDGE — the silent-default class no column-anchored or query-site-anchored gate here can see"
+  },
+  // The RETURN-VALUE dual of the gate above, sharing its resolver
+  // (db/gates/import-edge-resolution.mjs) rather than copying it. Same
+  // prerequisite, same cost, and deliberately adjacent so a session weakening
+  // one resolution rule meets both sets of decoy controls.
+  //
+  // WORKSTATION-ONLY, on the same terms as its dual and NOT by omission. A
+  // finding pairs a producer in one root with a reader in another, and nothing
+  // in this repo requires the two to land in one commit — unlike the DDL rule
+  // that makes the schema-anchored gates CI-safe. So a sibling renaming a
+  // returned key ahead of its consumer repair would turn master red on a
+  // finding invisible in anyone else's diff, and a red master defers EVERY
+  // push to mistakia/league.
+  {
+    id: 'returned-property-reads',
+    command: ['db/gates/check-returned-property-reads.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'a read of `x.foo` where x is bound to a call, vs the key set the callee provably returns, resolved through the IMPORT EDGE or the same module — fails when it judges NOTHING, so a zero is a measurement rather than a narrowing'
   },
   {
     id: 'private-tests',
@@ -470,9 +523,9 @@ const run_gate = ({ gate, base_ref }) => {
     maxBuffer: 64 * 1024 * 1024,
     env:
       gate.requires === 'production-tunnel'
-        ? { ...process.env, ...PRODUCTION_ENV }
+        ? pinned_env(PRODUCTION_ENV)
         : gate.requires === 'test-container'
-          ? { ...process.env, ...TEST_CONTAINER_ENV }
+          ? pinned_env(TEST_CONTAINER_ENV)
           : process.env
   })
 

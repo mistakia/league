@@ -124,16 +124,6 @@
   {
     "check_id": "duplicate-person-rows",
     "grain": {
-      "pid": "BRIA-SMIT-010600"
-    },
-    "disposition": "adjudicated",
-    "reason": "Brian Smith, DE, born 1983-09-16, Missouri, entered 2007, and Brian Smith, LB, born 1989-01-08, entered 2011. Two people.",
-    "evidence": "Birth dates five years apart. The twin carries no college, which is why the college veto could not fire.",
-    "validated_at": "2026-08-16"
-  },
-  {
-    "check_id": "duplicate-person-rows",
-    "grain": {
       "pid": "CHAR-JOHN-008165"
     },
     "disposition": "adjudicated",
@@ -149,16 +139,6 @@
     "disposition": "adjudicated",
     "reason": "Christopher Jones, WR, born 1971-08-07, Miami (Fla.), entered 1995, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
     "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire \u2014 and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
-    "validated_at": "2026-08-16"
-  },
-  {
-    "check_id": "duplicate-person-rows",
-    "grain": {
-      "pid": "CHRI-JONE-019749"
-    },
-    "disposition": "adjudicated",
-    "reason": "Christopher Jones, LB, born 1976-09-30, Clemson, entered 1999, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
-    "evidence": "Different positions and six years between the birth dates. This shell and CHRI-JONE-019714 both join the SAME twin, which alone proves the join is not identity.",
     "validated_at": "2026-08-16"
   },
   {

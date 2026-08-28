@@ -57,58 +57,9 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
     },
     {
-      "caller": "jobs/import-live-odds-worker.mjs",
-      "callee": "report_job",
-      "key": "reason",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "jobs/import-live-odds-worker.mjs",
-      "callee": "report_job",
-      "key": "succ",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "libs-server/format-data-generation/format-processor.mjs",
-      "callee": "check_format_data_exists",
-      "key": "format_hash",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "libs-server/format-data-generation/format-processor.mjs",
-      "callee": "check_format_exists",
-      "key": "format_hash",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
-      "caller": "libs-server/format-data-generation/format-processor.mjs",
-      "callee": "check_removal_safety",
-      "key": "format_hash",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape."
-    },
-    {
       "caller": "private/scripts/finalize-season.mjs",
       "callee": "process_matchups",
       "key": "week",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
-    },
-    {
-      "caller": "private/scripts/import-combination-odds.mjs",
-      "callee": "report_job",
-      "key": "stats",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
-    },
-    {
-      "caller": "private/scripts/import-fanduel-odds.mjs",
-      "callee": "report_job",
-      "key": "market_count",
       "verdict": "pre-existing-defect",
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
     },

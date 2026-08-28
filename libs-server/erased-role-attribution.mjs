@@ -36,6 +36,23 @@ import db from '#db'
  * @property {number} restored - of those, rows holding a _pid again
  */
 
+// The one spelling of "the changelog shows this row was once attributed".
+// Both the detector and the healer below build on this, so neither can drift
+// from the other -- the failure the module docstring warns about.
+//
+// Role-specific spelling: passer uses the PRE-conform names only, and the
+// table carries 215 distinct column names across three conventions. Verify the
+// spelling per column before trusting a zero.
+const CLEARED_COLUMN_NAMES = ['psr_gsis', 'psr_pid']
+
+const with_cleared = (/** @type {any} */ query) =>
+  query
+    .distinct('esbid', 'play_id')
+    .from('play_changelog')
+    .whereIn('column_name', CLEARED_COLUMN_NAMES)
+    .whereNull('new_value')
+    .whereNotNull('previous_value')
+
 /**
  * @param {object} [args]
  * @param {string[]} [args.play_types] - play types to grade
@@ -45,17 +62,7 @@ export const erased_role_attribution_by_play_type = async ({
   play_types = ['NOPL', 'CONV']
 } = {}) => {
   const rows = await db
-    .with('cleared', (query) => {
-      query
-        .distinct('esbid', 'play_id')
-        .from('play_changelog')
-        // Role-specific spelling: passer uses the PRE-conform names only, and
-        // the table carries 215 distinct column names across three
-        // conventions. Verify the spelling per column before trusting a zero.
-        .whereIn('column_name', ['psr_gsis', 'psr_pid'])
-        .whereNull('new_value')
-        .whereNotNull('previous_value')
-    })
+    .with('cleared', with_cleared)
     .select('nfl_plays.play_type')
     .count({ scanned: '*' })
     .from('cleared')
@@ -86,5 +93,81 @@ export const erased_role_attribution_by_play_type = async ({
     erased: Number(row.erased),
     resolvable: Number(row.resolvable),
     restored: Number(row.restored)
+  }))
+}
+
+/**
+ * The ERASED bucket at row grain, with what the changelog still holds for it.
+ *
+ * This is the healer's half of the module. It shares `with_cleared` with the
+ * detector above rather than re-spelling the predicate, which is the coupling
+ * the module docstring requires: a healer built on its own copy of the
+ * predicate would drift the moment either side is edited, and the drift would
+ * be invisible because both would still return plausible numbers.
+ *
+ * Only rows holding NEITHER a `_pid` NOR a `_gsis` are returned. A row that
+ * still holds a `_gsis` is resolvable by ordinary enrichment and is not this
+ * function's business -- restoring it here would write a changelog value over
+ * one the feed may have since corrected.
+ *
+ * @typedef {object} erased_role_attribution_restore_row
+ * @property {number} esbid
+ * @property {number} play_id
+ * @property {string} play_type
+ * @property {string|null} previous_pid - passer_pid as it was before the clear
+ * @property {string|null} previous_gsis - passer_gsis as it was before the clear
+ *
+ * @param {object} [args]
+ * @param {string[]} [args.play_types] - play types to restore
+ * @returns {Promise<erased_role_attribution_restore_row[]>}
+ */
+export const erased_role_attribution_restore_rows = async ({
+  play_types = ['NOPL', 'CONV']
+} = {}) => {
+  const rows = await db
+    .with('cleared', with_cleared)
+    .select(
+      'nfl_plays.esbid',
+      'nfl_plays.play_id',
+      'nfl_plays.play_type',
+      'previous_pid.previous_value as previous_pid',
+      'previous_gsis.previous_value as previous_gsis'
+    )
+    .from('cleared')
+    .join('nfl_plays', function () {
+      this.on('nfl_plays.esbid', '=', 'cleared.esbid').andOn(
+        'nfl_plays.play_id',
+        '=',
+        'cleared.play_id'
+      )
+    })
+    .joinRaw(
+      `left join lateral (
+         select previous_value from play_changelog
+         where esbid = nfl_plays.esbid and play_id = nfl_plays.play_id
+           and column_name = 'psr_pid'
+           and new_value is null and previous_value is not null
+         limit 1
+       ) previous_pid on true`
+    )
+    .joinRaw(
+      `left join lateral (
+         select previous_value from play_changelog
+         where esbid = nfl_plays.esbid and play_id = nfl_plays.play_id
+           and column_name = 'psr_gsis'
+           and new_value is null and previous_value is not null
+         limit 1
+       ) previous_gsis on true`
+    )
+    .whereIn('nfl_plays.play_type', play_types)
+    .whereNull('nfl_plays.passer_pid')
+    .whereNull('nfl_plays.passer_gsis_player_id')
+
+  return rows.map((row) => ({
+    esbid: Number(row.esbid),
+    play_id: Number(row.play_id),
+    play_type: row.play_type,
+    previous_pid: row.previous_pid || null,
+    previous_gsis: row.previous_gsis || null
   }))
 }

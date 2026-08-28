@@ -295,7 +295,7 @@ export const format_market = async ({
     ),
 
     esbid: nfl_game ? nfl_game.esbid : null,
-    season_year: nfl_game ? nfl_game.year : current_season.year,
+    season_year: nfl_game ? nfl_game.season_year : current_season.year,
     source_event_id: draftkings_market.eventId,
     source_event_name: clean_string(draftkings_event?.name) || null,
 
