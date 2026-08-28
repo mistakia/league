@@ -240,6 +240,17 @@ export interface ContributionTrustOverridesRow {
   created_at: Date
 }
 
+export interface DataViewSqlAuditRow {
+  audit_id: number
+  created_at: Date
+  user_id: number | null
+  outcome: string
+  outcome_detail: string | null
+  statement_text: string
+  result_row_count: number | null
+  duration_milliseconds: number | null
+}
+
 export interface DfsContestsRow {
   source_contest_id: string
   source_id: DfsSourceId

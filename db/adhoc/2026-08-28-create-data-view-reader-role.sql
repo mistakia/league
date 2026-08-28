@@ -2,7 +2,18 @@
 -- tier connects as, and close the two PUBLIC write classes that no SELECT
 -- grant touches.
 --
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-28 against league_production
+--
+-- Banner set by hand rather than by `yarn db:exec`, which owns it for every
+-- other file here but could not run this one -- see WHO RUNS THIS below.
+--
+-- ONE THING THIS FILE COULD NOT DO. A role also needs a pg_hba.conf entry
+-- before it can authenticate, and the cluster grants remote access per-role
+-- rather than by a catch-all, so the first connection attempt failed with "no
+-- pg_hba.conf entry" until one was added and the config reloaded. That file is
+-- server configuration and is not in this repository; the entry made, and why
+-- it is narrower than the one beside it, is recorded in the knowledge base with
+-- the rest of the decrypt and access topology.
 --
 -- WHO RUNS THIS. Not `yarn db:exec`, which connects as league_writer. CREATE
 -- ROLE and REVOKE ... ON DATABASE need a superuser (or the database owner for

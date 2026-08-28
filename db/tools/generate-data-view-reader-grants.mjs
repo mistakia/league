@@ -140,6 +140,10 @@ export const EXCLUDED_RELATIONS = new Map([
   // Operator identity on internal adjudication
   ['player_field_override', "carries the adjudicating operator's identity"],
 
+  // The sandbox's own audit trail. A sandbox that can read back every
+  // statement other users have run is not one.
+  ['data_view_sql_audit', "the sandbox's own audit trail"],
+
   // Migration bookkeeping: no analytical content, and a moving target
   ['league_migrations', 'migration bookkeeping'],
   ['league_migrations_lock', 'migration bookkeeping']

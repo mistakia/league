@@ -1,7 +1,7 @@
 -- The audit trail for the sandboxed-SQL data-view tier: one row per statement
 -- this server attempted to run, whether it executed or was refused.
 --
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-28 against league_production
 --
 -- STANDALONE, deliberately. An earlier draft specified this as an extension of
 -- the audit table that the LLM-assisted generation task builds. Generation runs

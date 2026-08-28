@@ -19,5 +19,12 @@ BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'league_reader') THEN
     CREATE ROLE league_reader;
   END IF;
+  -- The sandboxed-SQL data-view role. It entered the schema dump on 2026-08-28
+  -- as 273 GRANT statements, so the schema no longer LOADS without it -- this is
+  -- not optional decoration. test/data-view-sql-sandbox.spec.mjs gives it LOGIN,
+  -- a password and its grants; here it only has to exist.
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'league_data_view_reader') THEN
+    CREATE ROLE league_data_view_reader;
+  END IF;
 END
 $$;
