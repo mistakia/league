@@ -5,6 +5,7 @@
     "api/routes/leagues/middleware.mjs",
     "api/routes/leagues/trade-review.mjs",
     "db/checks/registry.mjs",
+    "db/data-view-sandbox.mjs",
     "db/index.mjs",
     "libs-server/clean-string.mjs",
     "libs-server/context-docs/generate-league-context.mjs",
