@@ -64,20 +64,6 @@
       "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
     },
     {
-      "caller": "private/scripts/import-combination-odds.mjs",
-      "callee": "report_job",
-      "key": "stats",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
-    },
-    {
-      "caller": "private/scripts/import-fanduel-odds.mjs",
-      "callee": "report_job",
-      "key": "market_count",
-      "verdict": "pre-existing-defect",
-      "reason": "Predates this gate and is tracked on user:task/league/redesign-league-database-schema.md. Not an approved shape. Only visible where the private submodule is checked out, which is why it was not in the first pass -- the gate reported CORPUS INCOMPLETE for private on every run that missed it."
-    },
-    {
       "caller": "scripts/generate-league-player-seasonlogs.mjs",
       "callee": "getAcquisitionTransaction",
       "key": "season_year",
