@@ -65,7 +65,7 @@ node -e '
 const fs = require("fs");
 const f = "config/config-development.json";
 const c = JSON.parse(fs.readFileSync(f, "utf8"));
-c.jwt = Object.assign({ algorithms: ["HS256"] }, c.jwt, { secret: "dev-smoke-readonly-local" });
+c.jwt = Object.assign({ algorithms: ["HS256"] }, c.jwt, { secret: "example-dev-smoke-jwt-secret" });
 fs.writeFileSync(f, JSON.stringify(c, null, 2));
 '
 
