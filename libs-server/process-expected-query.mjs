@@ -1,5 +1,8 @@
 import * as constants from '#constants'
-import { current_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  current_nfl_week_identifier,
+  current_nfl_week_params
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 /**
  * Process expected query with template literal syntax
@@ -58,6 +61,18 @@ export function process_expected_query(expected_query_string) {
     // cover it; they do not.
     const current_nfl_week = current_nfl_week_identifier()
 
+    // The {year, seas_type, week} triple the betting-market column family
+    // defaults to. Distinct from `next_week` and from `current_nfl_week` above
+    // because those columns need the parts SEPARATELY -- they emit
+    // `nfl_games.week = ?` and `nfl_games.season_type = ?` as two predicates
+    // rather than one nfl_week_id.
+    //
+    // A golden here must NOT template these off current_season.nfl_seas_week /
+    // .nfl_seas_type, which is what the team-game fixture used to do. Those are
+    // the raw NFL-calendar values: they read PRE for six months and 0 in the
+    // deep offseason, and the columns deliberately no longer consult them.
+    const current_nfl_week_params_value = current_nfl_week_params()
+
     // eslint-disable-next-line no-new-func
     const template_function = new Function(
       'current_season',
@@ -66,6 +81,7 @@ export function process_expected_query(expected_query_string) {
       'last_3_years',
       'next_week',
       'current_nfl_week',
+      'current_nfl_week_params',
       `return \`${expected_query_string}\``
     )
     return template_function(
@@ -74,7 +90,8 @@ export function process_expected_query(expected_query_string) {
       all_years,
       last_3_years,
       next_week,
-      current_nfl_week
+      current_nfl_week,
+      current_nfl_week_params_value
     )
   }
 

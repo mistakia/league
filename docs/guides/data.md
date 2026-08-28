@@ -8,6 +8,25 @@ Extracted from `CLAUDE.md`, which keeps the one-line rule and routes here.
 
 ---
 
+## Grain is carried by the column, never by a value in a shared param
+
+A column knows whether it is game-scoped or season-scoped. That is a property of the column, so **declare it and gate on the declaration**. Never encode it as a magic value in a param every other column also reads.
+
+The worked example is `is_game_prop`, and it is worth the space because every part of it looked reasonable.
+
+**The flag's name did not describe when it was set.** `is_game_prop: true` was passed at seven call sites, every one of them a TEAM path. No player game-prop path passed it. Nothing about the name suggests "team game props only", and no call site is wrong on its own — the omission is only visible if you enumerate all eight.
+
+**So the grain was inferred from a falsy integer instead.** A player game prop fell through to `params.week || 0`, and the join gate read `if (week || career_year.length)`. Week 0 meant "no week", the gate went false, and the column silently went season-wide. Measured across four clocks, all six `player_game_prop_*` columns emitted no `nfl_games` join at any of them — in-season REG and POST included. They were season-wide under a week-scoped label for their whole lives, and the suite was green throughout.
+
+**One expression, three behaviours.** The same `if (week || ...)` correctly skipped the join for a genuine season-grain column, incorrectly skipped it for a game-grain column, and — once someone clamped the producer to 1, which is obviously right in isolation — inner-joined away every player without a preseason week-1 game. That last reading shipped and was reverted the same day.
+
+**What replaced it.** A derived `market_grain` (`game` / `season`), computed inside `get_default_params` from flags that ARE reliably passed, so no call site can omit it. Season grain yields `week = null`, not `0`. The gate tests `market_grain === 'game'`. `local/no-week-zero-sentinel` keeps the sentinel from coming back — see [gates.md](gates.md).
+
+**Two lessons that generalize past this column:**
+
+- **A boolean cannot name a three-member distinction.** "Game", "season", and "nobody said" are three states; a boolean has two, so the third silently borrows one. A closed set of full words has somewhere to put the third.
+- **A green suite cannot see a join that is missing.** The regression's signature was row LOSS on an inner join, and the absence of a join is not a failure — it is more rows. Assert the SQL shape, under every clock the derivation can take, and make the offseason clock one of them.
+
 ## Param coverage: saved views and short URLs
 
 **Run `check-saved-view-param-coverage.mjs` as part of that gate list, not as an afterthought — a renamed PARAM key is the one failure this whole recipe otherwise misses.** The suite, the SQL-validity gate and the goldens all pass over it, because the defect lives in `user_data_views.table_state` rather than in any file. The 2026-08-05 cluster renamed 18 keys in `nfl-plays-column-params.mjs` and shipped without a matching rule in `data-views-saved-view-migration.mjs`, silently dropping filters on **45 saved views** (`qtr` 25, `dot` 7, `route` 7, `dwn` 5, `wp` 5) — found only after the deploy. The rule for that file is stated at length further down; what was missing was running the check at all, so treat it as a required gate whenever a cluster touches a param registry.

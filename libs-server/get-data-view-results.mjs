@@ -12,6 +12,10 @@ import {
   get_max_weeks_for_season_type
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_nfl_week_dynamic_value } from '#libs-shared/nfl-week-dynamic-values.mjs'
+import {
+  resolve_week_dynamic_value,
+  MIN_WEEK
+} from '#libs-shared/week-dynamic-values.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
@@ -317,7 +321,6 @@ const process_dynamic_year_param = (year_param) => {
 
 const process_dynamic_week_param = (week_param, year_param) => {
   let weeks = Array.isArray(week_param) ? week_param : [week_param]
-  const current_week = current_season.week
   const years = Array.isArray(year_param)
     ? year_param
     : year_param != null
@@ -334,44 +337,23 @@ const process_dynamic_week_param = (week_param, year_param) => {
       ),
     0
   )
-  const min_week = 0
 
   weeks = weeks.flatMap((week) => {
     if (typeof week === 'object') {
-      switch (week.dynamic_type) {
-        case 'last_n_weeks': {
-          const n = parseInt(week.value || 3, 10)
-          return Array.from({ length: n }, (_, i) =>
-            Math.max(min_week, current_week - i)
-          )
-        }
-        case 'next_n_weeks': {
-          const n = parseInt(week.value || 3, 10)
-          return Array.from({ length: n }, (_, i) =>
-            Math.min(max_week, current_week + i + 1)
-          )
-        }
-        case 'current_week':
-          // NOT clamped, unlike the single_week twin below. On the MULTI week
-          // param, 0 is the season-long slot and is a meaningful selection --
-          // player-betting-market-column-definitions gates its nfl_games join
-          // on `if (week || ...)`, so 0 means "cover the whole season year"
-          // and 1 means "inner join to week 1 of the CURRENT seas_type".
-          //
-          // Clamping here for one day rescoped every player-game-prop column
-          // to PRESEASON week 1 in the offseason, dropping every player with
-          // no PRE-1 game -- the week clamped onto the REG track while
-          // seas_type stayed on the PRE track, which is this task's own
-          // two-halves-of-different-seasons defect on a different axis.
-          return [current_week]
-        default:
-          return []
-      }
+      return resolve_week_dynamic_value({
+        dynamic_type: week.dynamic_type,
+        value: week.value,
+        max_week
+      })
     }
     const numeric_week = parseInt(week, 10)
+    // Floored at MIN_WEEK, not 0. This was one of only two paths that could put
+    // a 0 into params.week, and 0 there meant "the whole season" -- a falsy
+    // sentinel sharing a column with real week numbers, which broke every
+    // `if (week)` guard it reached.
     return isNaN(numeric_week)
       ? []
-      : Math.max(min_week, Math.min(max_week, numeric_week))
+      : Math.max(MIN_WEEK, Math.min(max_week, numeric_week))
   })
 
   return [...new Set(weeks)]
@@ -464,14 +446,15 @@ const process_dynamic_single_week_param = (single_week_param) => {
     : [single_week_param]
   single_week = single_week.map((week) => {
     if (typeof week === 'object') {
-      if (week.dynamic_type === 'current_week') {
-        // Clamped the same way the param's own default_value is. The raw
-        // counter is 0 through the offseason, and week 0 is the SEASON-LONG
-        // slot rather than a neighbouring week -- so the dynamic and the
-        // default it is supposed to reproduce selected different rows for six
-        // months of the year.
-        return current_season.active_fantasy_week
-      }
+      // The SAME measure the multi param uses, taking the first element because
+      // this param is single-valued. The two used to be near-copies of one
+      // switch and answered differently for `current_week`; sharing the measure
+      // is what makes that divergence unrepresentable rather than merely fixed.
+      const [resolved] = resolve_week_dynamic_value({
+        dynamic_type: week.dynamic_type,
+        value: week.value
+      })
+      return resolved
     }
     return week
   })

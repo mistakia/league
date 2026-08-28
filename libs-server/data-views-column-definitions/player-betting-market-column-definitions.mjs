@@ -1,19 +1,42 @@
 import { bookmaker_constants } from '#libs-shared'
-import { current_season } from '#constants'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_betting_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  parse_nfl_week_identifier,
+  current_nfl_week_params
+} from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
+
+// The column's GRAIN, derived rather than passed.
+//
+// This replaces an `is_game_prop` boolean whose name did not describe when it
+// was set. It was passed at seven call sites, every one of them a TEAM path;
+// no player game-prop path passed it at all. So every player game prop fell
+// through to the season branch and resolved week 0 -- measured across four
+// clocks, all six player_game_prop_* columns emitted no nfl_games join at any
+// of them, in-season REG and POST included. They were season-wide under a
+// week-scoped label for their whole lives.
+//
+// Derived from the two flags that ARE reliably passed, so no call site can omit
+// it and there is nothing to keep in sync. A closed set of two full words
+// rather than a boolean, because "not a game prop" is a positive thing -- a
+// season market -- and not the absence of one.
+const resolve_market_grain = ({ is_player_game_prop, is_team_game_prop }) =>
+  is_player_game_prop || is_team_game_prop ? 'game' : 'season'
 
 const get_default_params = ({
   params,
   is_player_game_prop = false,
-  is_game_prop = false,
   is_team_game_prop = false
 }) => {
+  const market_grain = resolve_market_grain({
+    is_player_game_prop,
+    is_team_game_prop
+  })
+
   const default_bookmaker = is_team_game_prop
     ? bookmaker_constants.bookmakers.DRAFTKINGS
     : bookmaker_constants.bookmakers.FANDUEL
@@ -27,16 +50,29 @@ const get_default_params = ({
     ? parse_nfl_week_identifier({ identifier: resolved_single_nfl_week_id })
     : null
 
+  // ONE resolver for the current week, so year, seas_type and week cannot end
+  // up on different tracks. They did: `seas_type` defaulted straight off
+  // `current_season.nfl_seas_type` (PRE for six months) while the week came
+  // from elsewhere, and clamping that week to 1 pointed every player game-prop
+  // column at PRESEASON week 1 -- the d7d3eb421 regression, reverted the same
+  // day. Reading both from current_nfl_week_params() is what makes that
+  // combination unrepresentable; it always answers on the forward-looking REG
+  // track with a week of at least 1.
+  //
+  // user:guideline/nfl/league/nfl-week-encoding.md forbids a column definition
+  // branching on nfl_seas_type directly, and this was the last site doing it.
+  const current_week_params = current_nfl_week_params()
+
   const year = parsed_single
     ? parsed_single.year
     : Array.isArray(params.year)
       ? params.year[0]
-      : params.year || current_season.year
+      : params.year || current_week_params.year
   const seas_type = parsed_single
     ? parsed_single.seas_type
     : Array.isArray(params.seas_type)
       ? params.seas_type[0]
-      : params.seas_type || current_season.nfl_seas_type
+      : params.seas_type || current_week_params.seas_type
 
   // hit_type and historical_range are concatenated into the column NAME by the
   // historical_* builders below, so they land in identifier position where no
@@ -59,14 +95,27 @@ const get_default_params = ({
 
   let week, market_type
 
+  // A week param holds a real week or NOTHING. Never 0.
+  //
+  // 0 was doing double duty as "the whole season", which is falsy, so it broke
+  // every `if (week)` guard it reached -- including the nfl_games join gate
+  // below, which is how a season-grain column and a game-grain column with no
+  // resolvable week became indistinguishable. `null` is not a week a predicate
+  // can silently match, and the grain the column DECLARES is what the gate now
+  // tests.
+  //
+  // The game branch no longer falls back to current_season.nfl_seas_week, which
+  // is 0 at 2026-07-01 and would skip the join outright.
+  const explicit_week = Array.isArray(params.week)
+    ? params.week[0]
+    : params.week
+
   if (parsed_single) {
     week = parsed_single.week
-  } else if (is_game_prop) {
-    week = Array.isArray(params.week)
-      ? params.week[0]
-      : params.week || current_season.nfl_seas_week
+  } else if (market_grain === 'season') {
+    week = null
   } else {
-    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+    week = explicit_week || current_week_params.week
   }
 
   if (is_player_game_prop) {
@@ -117,6 +166,7 @@ const get_default_params = ({
   return {
     year,
     week,
+    market_grain,
     seas_type,
     market_type,
     time_type,
@@ -129,9 +179,17 @@ const get_default_params = ({
   }
 }
 
+// The CTE name, and with it the cache key. It must resolve its params under the
+// SAME grain as the `with` that builds the CTE, which it did not: this function
+// destructured only `is_player_game_prop` and silently dropped
+// `is_team_game_prop`, so the four team game-prop columns hashed at the season
+// grain while team_betting_market_with built a game-grain CTE. Measured before
+// the fix: identical alias at week 6 and week 7, with an explicit week moving
+// the hash as the control -- two different weeks sharing one cache key.
 const betting_markets_table_alias = ({
   params = {},
   is_player_game_prop = false,
+  is_team_game_prop = false,
   base_table_alias = 'betting_markets'
 }) => {
   const {
@@ -146,7 +204,8 @@ const betting_markets_table_alias = ({
     selection_type
   } = get_default_params({
     params,
-    is_player_game_prop
+    is_player_game_prop,
+    is_team_game_prop
   })
 
   return get_table_hash(
@@ -167,6 +226,7 @@ const player_betting_market_with = ({
   const {
     year,
     week,
+    market_grain,
     seas_type,
     market_type,
     time_type,
@@ -195,7 +255,12 @@ const player_betting_market_with = ({
       qb.select('prop_markets_index.esbid')
     }
 
-    if (week || career_year.length) {
+    // Tests the grain the column DECLARES, not the truthiness of an integer.
+    // `if (week)` was the gate, so a falsy 0 silently turned a game-scoped
+    // column into a season-wide one -- and clamping that 0 to 1 turned it into
+    // a PRESEASON-week-1 inner join that dropped every player without a PRE-1
+    // game. Both readings came from the same expression.
+    if (market_grain === 'game' || career_year.length) {
       qb.join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
         this.andOn(
@@ -305,8 +370,7 @@ const team_betting_market_join = ({
 
   const { market_type } = get_default_params({
     params,
-    is_team_game_prop: true,
-    is_game_prop: true
+    is_team_game_prop: true
   })
 
   query[join_func](table_name, function () {
@@ -344,8 +408,7 @@ const team_betting_market_with = ({
     selection_type
   } = get_default_params({
     params,
-    is_team_game_prop: true,
-    is_game_prop: true
+    is_team_game_prop: true
   })
 
   const markets_cte = `${with_table_name}_markets`
@@ -421,8 +484,7 @@ const team_game_implied_team_total_with = ({
 }) => {
   const { time_type, source_id, year, week, seas_type } = get_default_params({
     params,
-    is_team_game_prop: true,
-    is_game_prop: true
+    is_team_game_prop: true
   })
 
   const spread_cte = `${with_table_name}_spread`
@@ -562,8 +624,7 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   table_alias: (args) =>
     betting_markets_table_alias({
       ...args,
-      is_team_game_prop: true,
-      is_game_prop: true
+      is_team_game_prop: true
     }),
   join: team_betting_market_join,
   with: team_betting_market_with,
@@ -572,8 +633,7 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
     get_params: ({ params = {} } = {}) => {
       const { year, week } = get_default_params({
         params,
-        is_team_game_prop: true,
-        is_game_prop: true
+        is_team_game_prop: true
       })
       return { year: [year], week: week ? [week] : [] }
     }
@@ -689,7 +749,6 @@ export default {
       betting_markets_table_alias({
         ...args,
         is_team_game_prop: true,
-        is_game_prop: true,
         base_table_alias: 'team_game_implied_team_total'
       }),
     join: team_game_implied_team_total_join,
@@ -699,8 +758,7 @@ export default {
       get_params: ({ params = {} } = {}) => {
         const { year, week } = get_default_params({
           params,
-          is_team_game_prop: true,
-          is_game_prop: true
+          is_team_game_prop: true
         })
         return { year: [year], week: week ? [week] : [] }
       }

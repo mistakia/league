@@ -14,6 +14,7 @@ import {
   resolve_nfl_week_dynamic_value,
   format_nfl_week_identifiers_label
 } from './nfl-week-dynamic-values.mjs'
+import { format_week_dynamic_label } from './week-dynamic-values.mjs'
 
 const format_year_value = ({ value, def }) => {
   const param_values = Array.isArray(value) ? value : [value]
@@ -57,27 +58,25 @@ const format_week_value = ({ value, def }) => {
       const fallback =
         (dynamic_def?.label || v.dynamic_type) +
         (v.value != null ? ` (${v.value})` : '')
-      const n = parseInt(v.value ?? dynamic_def?.default_value ?? 3, 10)
-      const current = current_season.week
-      switch (v.dynamic_type) {
-        case 'current_week':
-          // Clamped for the SINGLE param only, matching both its
-          // default_value and its resolver. On the multi param 0 is the
-          // season-long slot and stays 0, so this label always names the week
-          // the filter actually selects.
-          return `${def?.single ? Math.max(current, 1) : current}`
-        case 'last_n_weeks': {
-          const end = current
-          const start = Math.max(1, end - n + 1)
-          return start === end ? `${end}` : `${start}-${end}`
-        }
-        case 'next_n_weeks': {
-          const start = current + 1
-          const end = current + n
-          return start === end ? `${end}` : `${start}-${end}`
-        }
-        default:
-          return fallback
+
+      // DERIVED from the resolver, never recomputed beside it. This label used
+      // to carry its own copy of the switch and the two had drifted: it floored
+      // `last_n_weeks` at 1 while the server floored at 0, so early in a season
+      // the chip named a span the query did not select, and `current_week` was
+      // clamped here for the single param only because the two resolvers
+      // disagreed. Sharing the measure makes a label that contradicts its own
+      // resolution unrepresentable rather than merely fixed.
+      try {
+        return format_week_dynamic_label({
+          dynamic_type: v.dynamic_type,
+          value: v.value ?? dynamic_def?.default_value
+        })
+      } catch {
+        // An undeclared type has no resolution to name. Falling back to the
+        // declared label is right HERE and only here -- this is presentation,
+        // with no row axis for an unresolvable scope to leave unbounded. The
+        // server-side resolver still throws.
+        return fallback
       }
     }
     return String(v)

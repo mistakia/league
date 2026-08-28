@@ -9,6 +9,7 @@ import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
 import noBareDebugEnable from './eslint-rules/no-bare-debug-enable.mjs'
 import noPrivateImportInCore from './eslint-rules/no-private-import-in-core.mjs'
 import noWeekReconstruction from './eslint-rules/no-week-reconstruction.mjs'
+import noWeekZeroSentinel from './eslint-rules/no-week-zero-sentinel.mjs'
 
 // One `local` plugin holding every rule in eslint-rules/. Registering a second
 // plugin object under the same name in a second config block would silently
@@ -19,7 +20,8 @@ const local_rules = {
     ...noBareContainerJsdoc.rules,
     ...noBareDebugEnable.rules,
     ...noPrivateImportInCore.rules,
-    ...noWeekReconstruction.rules
+    ...noWeekReconstruction.rules,
+    ...noWeekZeroSentinel.rules
   }
 }
 
@@ -73,6 +75,7 @@ export default [
       'local/no-bare-container-jsdoc': 'error',
       'local/no-bare-debug-enable': 'error',
       'local/no-week-reconstruction': 'error',
+      'local/no-week-zero-sentinel': 'error',
       camelcase: ['off'],
       curly: ['off'],
       indent: ['off'],

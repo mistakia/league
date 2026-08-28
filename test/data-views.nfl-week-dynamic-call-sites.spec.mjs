@@ -77,22 +77,25 @@ describe('data-views nfl_week dynamic call sites', function () {
     expect(params.single_week).to.deep.equal([1])
   })
 
-  // The other half of that pair, and the one that has to stay UNCLAMPED.
+  // The other half of that pair, and it now CONVERGES rather than diverging.
   //
-  // On the multi week param 0 is the season-long slot, and
-  // player-betting-market-column-definitions gates its nfl_games join on
-  // `if (week || ...)`. Clamping it to 1 makes that join appear with
-  // seas_type = current_season.nfl_seas_type, so through the offseason every
-  // player-game-prop column rescoped to PRESEASON week 1 and inner-joined away
-  // every player without a PRE-1 game. Shipped 2026-08-27 and reverted the
-  // same day.
-  it('the current_week dynamic does NOT clamp on the multi week param', function () {
+  // This assertion used to require the multi param to stay unclamped, because
+  // 0 there was the season-long slot: player-betting-market-column-definitions
+  // gated its nfl_games join on `if (week || ...)`, so clamping to 1 made that
+  // join appear at PRESEASON week 1 and inner-joined away every player without
+  // a PRE-1 game. Shipped 2026-08-27 and reverted the same day.
+  //
+  // The clamp is safe now because the CONSUMER changed first, in the same
+  // commit: that gate tests the column's declared `market_grain` instead of the
+  // truthiness of an integer, so nothing infers "season-long" from a falsy
+  // week. Week 0 is no longer a value any producer can emit.
+  it('the current_week dynamic clamps on the multi week param too', function () {
     set_offseason_date()
     const params = process_params_with_backwards_compatibility({
       week: [{ dynamic_type: 'current_week' }]
     })
     expect(current_season.week).to.equal(0)
-    expect(params.week).to.deep.equal([0])
+    expect(params.week).to.deep.equal([1])
   })
 
   it('the two week params agree once the season is under way', function () {
