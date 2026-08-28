@@ -62,6 +62,7 @@ import { recompute_route_share } from '#libs-server'
 import { pfr_gamelog_agreement_rows } from '#libs-server/pfr-gamelog-agreement.mjs'
 import { erased_role_attribution_by_play_type } from '#libs-server/erased-role-attribution.mjs'
 import { game_prop_column_resolution_rows } from '#libs-server/game-prop-column-resolution.mjs'
+import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -1265,6 +1266,33 @@ const registry = [
     // it would report a real week as un-gradeable forever.
     repair_command:
       'Confirm the direction before touching anything. A numerator of 0 against a non-zero denominator is the COLUMN, not the data: execute the emitted SQL for the failing week (get_data_view_results_query with an explicit {year, seas_type, week}) and check that the prop_markets_index CTE still carries its inner join to nfl_games on esbid, season_year, season_type and week. That join is the change 6e724c02c shipped and the one this check watches. A denominator that has fallen to 0 for a week that used to grade is the opposite condition and belongs to the odds importer — check the runs ledger for the FanDuel market import rather than reading it as a column defect.'
+  },
+
+  {
+    check_id: 'scoring-format-gamelog-completeness',
+    invariant:
+      'Every scoring format holds exactly the (pid, esbid) set that player_gamelogs restricted to fantasy primary positions produces for a season — no missing rows and no extra ones. Row presence is format-INDEPENDENT by construction: the generator takes its row set from player_gamelogs and nothing on the insert path consults the format, which decides the points VALUE and never which rows exist. No other oracle sees this. The generation scripts report success per run, and --only-missing asks whether a format has ANY row rather than the right ones, so a format can sit years out of date while every job it belongs to reports green.',
+    grain: ['season_year', 'scoring_format_id'],
+    rows: async () => scoring_format_gamelog_completeness_rows(),
+    // A season is gradeable only where we hold gamelogs to grade against. The
+    // reference IS player_gamelogs, so a season it does not cover has no
+    // expectation to compare a format to and must not read as a pass.
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      Number(row.expected_n) > 0,
+    min_rate: 1.0,
+    calibration:
+      'EXACT, not a tolerance: the two sets are either identical or they are not, so 1.0 is a live invariant rather than a percentile. WHY INTERSECTION OVER UNION — the two real defects point in opposite directions and stored/expected can only see one. Missing rows: 2025 genesis held 8,775 against an expectation of 11,413, because it was the one format not regenerated after a player_gamelogs backfill added inactive-player rows. Extra rows: every other format held 11,804 for 2025, 391 of them for players whose primary_position has since left fantasy_positions, and stored/expected scores that at 1.03 and passes it. Intersection over union makes both fall below the floor. MEASURED 2026-08-28 against production, mid-repair and therefore almost entirely red: 1,675 units (67 catalog formats x 25 seasons), 1,655 below 1.0, minimum denominator 5,881 (2001), runtime 89s. The shortfalls were not subtle — 2016 stored 7,107 against 11,128 expected and 2023 stored 7,327 against 11,168 — because the gamelogs arm of --only-missing treated a per-GAME table as year-agnostic, so one row from any season read as "this step has run" and the format was skipped forever. The healthy reading after the regeneration is every unit at exactly 1.0000. FOUR UNITS PER SEASON ARE EXPECTED TO STAY RED until the catalog is cleaned: a6bbae3f-08fb-431b-893e-a993e52f471c and c057f2a9-cc6a-47b3-9bb8-e95455e3addc are unreferenced UUID duplicates of sfb15_mfl and sfb15_sleeper left behind by the format-id migration, holding zero rows and zero league_formats and zero seasons. They are deliberately NOT parked — a catalog row nothing references and nothing generates is a real defect, and parking it would convert a two-row cleanup into a permanent adjudication.',
+    // 1,675 units today and the season axis only grows; 1,200 sits below the
+    // 1,625 the count falls to if the two orphaned catalog rows are dropped,
+    // and far above a scan that has stopped reaching player_gamelogs.
+    min_gradeable_units: 1200,
+    // REQUIRED here: the row count is very nearly fixed by construction
+    // (catalog formats x seasons), so min_gradeable_units cannot fall even if
+    // the scan returns nothing, and only the denominator moves. The smallest
+    // observed is 5,881 for 2001, the shortest season in the corpus.
+    min_denominator: 3000,
+    repair_command:
+      'Regenerate the failing format for the failing season, then re-grade: NODE_ENV=production node scripts/generate-scoring-format-player-gamelogs.mjs --scoring_format_id <id> --year <year>. Drop --year for every season. A rate of exactly 0 against a full denominator means the format was never generated at all rather than gone stale — check it exists in league_scoring_formats and is referenced by a league_format before generating 25 seasons of data for it. The derived seasonlogs and careerlogs read FROM this table, so any repair here must be followed by generate-scoring-format-player-seasonlogs.mjs and generate-scoring-format-player-careerlogs.mjs for the same format.'
   }
 ]
 

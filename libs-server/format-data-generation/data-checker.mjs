@@ -34,24 +34,51 @@ export const check_format_exists = async ({ format_id, format_type }) => {
 
 /**
  * Build query conditions based on step type
+ *
+ * This decides what `--only-missing` treats as "already generated", and it is
+ * PRESENCE, never completeness -- a format that holds one qualifying row is
+ * skipped whatever else is missing. Staleness is owned by the
+ * `scoring-format-gamelog-completeness` data check, not by this function.
+ *
  * @param {object} params - Parameters object
  * @param {object} params.query - Database query object
  * @param {string} params.step_name - Name of the generation step
+ * @param {string} params.table_name - Table the step writes, for join qualification
  * @returns {object} Modified query object
  */
-export const build_step_query_conditions = ({ query, step_name }) => {
-  // Seasonlogs and projections span years, so a row from an old year is not
-  // evidence the step has run; every other step's tables are year-agnostic.
+export const build_step_query_conditions = ({
+  query,
+  step_name,
+  table_name
+}) => {
+  // Seasonlogs and projections carry their own season column.
   if (step_name.includes('seasonlogs')) {
-    return query.where('year', '>=', SCRIPT_CONFIG.min_year_check).limit(1)
+    return query
+      .where('season_year', '>=', SCRIPT_CONFIG.min_year_check)
+      .limit(1)
   }
 
   if (step_name.includes('projections')) {
     return query
-      .where('year', current_season.last_completed_season_year)
+      .where('season_year', current_season.last_completed_season_year)
       .limit(1)
   }
 
+  // Gamelogs span years too -- they are per GAME. They were previously treated
+  // as year-agnostic, so one row from any season, however old, read as "this
+  // step has run" and `--only-missing` skipped the format forever. That is what
+  // froze every format's gamelogs at whatever `player_gamelogs` held when the
+  // format was first generated. The season lives on `nfl_games`, since these
+  // tables key on esbid and carry no season column of their own.
+  if (step_name.includes('gamelogs')) {
+    return query
+      .join('nfl_games', 'nfl_games.esbid', `${table_name}.esbid`)
+      .where('nfl_games.season_year', '>=', SCRIPT_CONFIG.min_year_check)
+      .where('nfl_games.season_type', 'REG')
+      .limit(1)
+  }
+
+  // Careerlogs are genuinely year-agnostic -- one row per player per format.
   return query.limit(1)
 }
 
@@ -82,15 +109,21 @@ export const check_format_data_exists = async ({
     const hash_column =
       format_type === 'scoring' ? 'scoring_format_id' : 'league_format_id'
 
-    // Build base query and apply step-specific conditions
-    let query = db(table_name).where(hash_column, format_id)
-    query = build_step_query_conditions({ query, step_name })
+    // Build base query and apply step-specific conditions. The format-id
+    // column is qualified because the gamelogs arm joins nfl_games.
+    let query = db(table_name).where(`${table_name}.${hash_column}`, format_id)
+    query = build_step_query_conditions({ query, step_name, table_name })
 
     const result = await query.first()
     return !!result
   } catch (error) {
-    // Table might not exist or other DB error
-    console.debug(
+    // Returning false means "regenerate", which is the safe direction -- but it
+    // also means a query this function can no longer express reads as missing
+    // data forever, in silence. The `year` -> `season_year` conform landed in
+    // exactly that state: the seasonlog and projection arms threw on every
+    // call, and `--only-missing` regenerated both steps unconditionally while
+    // reporting nothing. Log at warn so the next one is visible.
+    console.warn(
       `Could not check data existence for ${step_name}: ${error.message}`
     )
     return false
