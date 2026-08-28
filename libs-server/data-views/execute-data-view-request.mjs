@@ -81,7 +81,21 @@ const mint_execution_id = () => crypto.randomBytes(8).toString('hex')
 // tunable condition across every pagination offset and every filter. Signature
 // is the ordered column ids plus their params plus the row axes, so a view
 // paging through offsets or filtering differently still collapses to one signal.
+//
+// A sandboxed-SQL request carries NEITHER columns nor row_axes, so without the
+// branch below every SQL view in existence collapses to one signature and one
+// dedup key -- and all but the first slow SQL query is suppressed as a duplicate
+// of an unrelated one. The statement IS the shape for that path.
 const data_view_query_signature = (params) => {
+  const { sql_text, query_id } = params || {}
+  if (sql_text || query_id) {
+    return crypto
+      .createHash('sha256')
+      .update(JSON.stringify({ query_id: query_id || null, sql_text }))
+      .digest('hex')
+      .slice(0, 16)
+  }
+
   const { columns = [], row_axes = [] } = params || {}
   const canonical = JSON.stringify({
     row_axes,
@@ -295,13 +309,13 @@ const release_slot = () => {
  *   it and the executor mints one.
  * @param {object} opts.params - the table state
  * @param {number|null} opts.user_id
- * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export'
+ * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' | 'sql'
  * @param {string} opts.cache_key - the redis key the caller already computed
  * @param {AbortSignal} [opts.signal] - abort while waiting (disconnect / supersede)
  * @param {(state: 'waiting'|'executing') => boolean} [opts.on_heartbeat] - called
  *   every interval while queued or in flight; return false (socket closed) to stop.
  * @param {(info: object) => void} [opts.on_status] - called once when execution starts.
- * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object }>} [opts.run_query] - execution seam (defaults to get_data_view_results)
+ * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object, data_view_fields?: Array<object> }>} [opts.run_query] - execution seam (defaults to get_data_view_results). The sandboxed-SQL tier enters here as an alternate run_query rather than as a fifth execution path.
  * @param {(opts: object) => void} [opts.signal_emitter] - seam for the slow-query emitter
  * @param {(key: string) => Promise<object|null>} [opts.cache_get] - seam for the admission cache re-check
  * @param {boolean} [opts.skip_cache] - bypass the admission re-check and cache
@@ -380,9 +394,6 @@ export async function execute_data_view_request({
     if (cached) {
       admission.counters.cache_hits++
       admission.counters.completed++
-      const normalized = Array.isArray(cached)
-        ? { data_view_results: cached, data_view_metadata: {} }
-        : cached
       const admission_wait_duration_ms = Date.now() - request_started_at
       log_data_view_telemetry({
         event: 'execution',
@@ -392,16 +403,21 @@ export async function execute_data_view_request({
         outcome: 'cache_hit',
         admission_wait_duration_ms,
         query_execution_duration_ms: 0,
-        result_row_count: (normalized.data_view_results || []).length,
+        result_row_count: (cached.data_view_results || []).length,
         user_id: user_id ? 'signed-in' : 'anonymous'
       })
       return {
-        data_view_results: normalized.data_view_results,
-        data_view_metadata: normalized.data_view_metadata,
+        data_view_results: cached.data_view_results,
+        data_view_metadata: cached.data_view_metadata,
+        // Carried through the cache the same as the miss path returns it. The
+        // envelope persisted only these first two keys until 2026-08-28, which
+        // is what dropped anything else run_query returned -- not the JSON
+        // serialization, which round-trips a pg Field losslessly.
+        data_view_fields: cached.data_view_fields,
         execution_id: exec_id,
         admission_wait_duration_ms,
         query_execution_duration_ms: 0,
-        result_row_count: (normalized.data_view_results || []).length,
+        result_row_count: (cached.data_view_results || []).length,
         cache_hit: true
       }
     }
@@ -419,15 +435,20 @@ export async function execute_data_view_request({
     // wrap in db.transaction: the SET LOCALs and the SELECT must ship as a
     // single simple-query message with no client round-trip between them, or
     // idle_in_transaction_session_timeout could kill a running query mid-batch.
-    const { data_view_results, data_view_metadata } = await run_query({
-      ...params,
-      calculate_total_count,
-      // Timeout after the spread: the client's table state must not be able to
-      // name its own deadline. `timeout` reaches Postgres as SET LOCAL
-      // statement_timeout verbatim.
-      timeout,
-      user_id: user_id || null
-    })
+    //
+    // The sandboxed-SQL run_query is the deliberate exception: it needs a real
+    // transaction block because SET TRANSACTION READ ONLY has nowhere else to
+    // live, and it pays a round trip per statement to get it.
+    const { data_view_results, data_view_metadata, data_view_fields } =
+      await run_query({
+        ...params,
+        calculate_total_count,
+        // Timeout after the spread: the client's table state must not be able to
+        // name its own deadline. `timeout` reaches Postgres as SET LOCAL
+        // statement_timeout verbatim.
+        timeout,
+        user_id: user_id || null
+      })
 
     const query_execution_duration_ms = Date.now() - query_started_at
     const admission_wait_duration_ms = query_started_at - request_started_at
@@ -438,7 +459,7 @@ export async function execute_data_view_request({
       const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
       await redis_cache.set(
         cache_key,
-        { data_view_results, data_view_metadata },
+        { data_view_results, data_view_metadata, data_view_fields },
         Math.round(cache_ttl / 1000)
       )
       if (data_view_metadata.cache_expire_at) {
@@ -497,6 +518,11 @@ export async function execute_data_view_request({
     return {
       data_view_results,
       data_view_metadata,
+      // The pg field descriptors, in projection order. They must NOT be folded
+      // into data_view_metadata: raw pg descriptors carry tableID and columnID
+      // schema OIDs and the client merges metadata wholesale, so the deriver
+      // reads these server-side and emits metadata.columns from them.
+      data_view_fields,
       execution_id: exec_id,
       admission_wait_duration_ms,
       query_execution_duration_ms,

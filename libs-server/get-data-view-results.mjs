@@ -18,6 +18,11 @@ import {
 } from '#libs-shared/week-dynamic-values.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
+import resolve_pg_field_types from '#libs-server/data-views/resolve-pg-field-types.mjs'
+import {
+  TOTAL_COUNT_KEY,
+  extract_total_count
+} from '#libs-server/data-views/extract-total-count.mjs'
 import * as validators from '#libs-server/validators.mjs'
 
 import {
@@ -2320,36 +2325,11 @@ export const get_data_view_results_query = async ({
   }
 }
 
-// Reserved output column carrying the `count(*) over ()` total. Column ids and
-// their generated aliases are `[a-z0-9_]`, so leading/trailing double
-// underscores cannot collide with a real one; the collision is asserted against
-// the generated SQL before the column is added.
-const TOTAL_COUNT_KEY = '__data_view_total_count__'
-
 // Named once so the per-query budget is visible in one place. The VALUE is
 // deliberately unchanged here -- choosing a new work_mem belongs with the
 // query-shape work, where it can be decided against shapes that work has
 // actually changed. temp_file_limit, not work_mem, is what bounds blast radius.
 const DATA_VIEW_WORK_MEM = '1GB'
-
-// Split the reserved total-count column off the rows and strip it, so no
-// consumer -- the HTTP route, the websocket socket, the CSV export -- ever sees
-// it. An empty result set yields no rows to read the count from, in which case
-// the total is 0, matching what the wrapped COUNT(*) returned.
-function extract_total_count({ rows, calculate_total_count }) {
-  if (!calculate_total_count) {
-    return { data_view_results: rows, total_count: null }
-  }
-
-  const total_count = rows.length ? parseInt(rows[0][TOTAL_COUNT_KEY], 10) : 0
-
-  const data_view_results = rows.map(
-    ({ [TOTAL_COUNT_KEY]: reserved_total_count, ...data_view_row }) =>
-      data_view_row
-  )
-
-  return { data_view_results, total_count }
-}
 
 export default async function ({
   row_axes = [],
@@ -2415,10 +2395,19 @@ export default async function ({
   const response = await db.raw(
     `${session_settings} ${execution_query_string};`
   )
-  const rows = response[rows_index].rows
+  // knex's postgres dialect returns the raw pg response for a `raw` call, so
+  // this element is a pg Result carrying `.fields` alongside `.rows`. The
+  // descriptors were previously discarded here; the derived-column path reads
+  // projection order and data_type off them rather than off anything declared.
+  const { rows, fields } = response[rows_index]
 
-  const { data_view_results, total_count } = extract_total_count({
+  const {
+    data_view_results,
+    data_view_fields: total_counted_fields,
+    total_count
+  } = extract_total_count({
     rows,
+    fields,
     calculate_total_count
   })
 
@@ -2428,6 +2417,15 @@ export default async function ({
       ...data_view_metadata,
       ...(total_count !== null ? { total_count } : {})
     },
+    // One envelope for both execution paths -- the structured one here and the
+    // sandboxed-SQL one -- so no consumer has to know which produced a result.
+    // These descriptors must never reach a client: pg's raw fields carry
+    // tableID and columnID, which are schema OIDs, and the client merges
+    // `metadata` wholesale. They are deliberately NOT parked on
+    // data_view_metadata for that reason.
+    data_view_fields: await resolve_pg_field_types({
+      fields: total_counted_fields
+    }),
     data_view_query_string
   }
 }

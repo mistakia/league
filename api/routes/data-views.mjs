@@ -1005,13 +1005,10 @@ router.post('/search/?', async (req, res) => {
     const cached_result = await redis_cache.get(cache_key)
 
     if (cached_result) {
-      // The cache holds the canonical { data_view_results, data_view_metadata }
-      // shape shared with the websocket socket and export route. Tolerate a
-      // legacy bare-array entry written by older builds of this route.
-      const cached_rows = Array.isArray(cached_result)
-        ? cached_result
-        : cached_result.data_view_results
-      return res.send(cached_rows)
+      // The cache holds the canonical { data_view_results, data_view_metadata,
+      // data_view_fields } shape shared with the websocket socket and the export
+      // route.
+      return res.send(cached_result.data_view_results)
     }
 
     // Shared executor: one admission and timeout policy across every path. The

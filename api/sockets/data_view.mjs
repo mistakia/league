@@ -89,18 +89,11 @@ export const handle_data_view_request = async ({
   try {
     const cached_value = await cache_get(cache_key)
     if (cached_value && !ignore_cache) {
-      // The cache value is the canonical { data_view_results, data_view_metadata }
-      // object; tolerate a legacy bare-array entry (older builds cached raw rows
-      // under this same key) so a shape mismatch can never surface as
-      // result: undefined and crash the render.
-      const normalized = Array.isArray(cached_value)
-        ? { data_view_results: cached_value, data_view_metadata: {} }
-        : cached_value
       send_websocket_message(ws, 'DATA_VIEW_RESULT', {
         request_id,
         execution_id,
-        result: normalized.data_view_results,
-        metadata: normalized.data_view_metadata,
+        result: cached_value.data_view_results,
+        metadata: cached_value.data_view_metadata,
         append_results: params.append_results
       })
       exec.state = 'done'
