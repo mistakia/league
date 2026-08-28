@@ -83,7 +83,15 @@ describe('DATA VIEW SQL sandbox', function () {
         END
         $$;
       `)
-      await db.raw(`ALTER ROLE ${role} PASSWORD '${SANDBOX_PASSWORD}'`)
+      // LOGIN is set here, not on the CREATE above, because the CREATE only
+      // fires when the role is absent. db/test/init-roles.sql now creates
+      // league_data_view_reader NOLOGIN so the schema's GRANTs can load, so on
+      // any cluster initialized from that script the branch above is skipped and
+      // a LOGIN clause there never runs -- every assertion below then fails
+      // 28000 (cannot log in) instead of the 42501 it is testing for.
+      await db.raw(
+        `ALTER ROLE ${role} WITH LOGIN PASSWORD '${SANDBOX_PASSWORD}'`
+      )
       // Reset every role-level setting, so a previous run's ALTER ROLE cannot
       // make an assertion below pass for the wrong reason.
       await db.raw(`ALTER ROLE ${role} RESET ALL`)
