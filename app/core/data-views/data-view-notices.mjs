@@ -30,11 +30,29 @@ const format_resolved_values = (key, values) => {
 // the same switch. The copies had already drifted: this one anchored
 // last_n_nfl_years on the last completed season while the server anchored it on
 // the current one, so the preview named a different span than the query used.
-const resolve_dynamic_nfl_week_id = (dv) =>
-  resolve_nfl_week_dynamic_value({
-    dynamic_type: dv.dynamic_type,
-    value: dv.value
-  })
+//
+// The resolver THROWS on an unknown dynamic_type, and that is right on the
+// SERVER: an unresolvable dynamic that still reads as an explicit time scope
+// leaves the row axis unbounded, which is a silent multi-million-row fan-out.
+// That rationale does not reach here. This runs inside a createSelector on the
+// data-views render path and a notice preview has no row axis, so the only
+// thing the throw can accomplish on the client is turning the next retired
+// dynamic type into a page crash. Caught here, and ONLY here -- the server-side
+// throw is deliberately untouched.
+//
+// Returning null puts an unresolvable value on the same path as one that
+// resolves to nothing, which the caller already handles by declining to build
+// a preview.
+const resolve_dynamic_nfl_week_id = (dv) => {
+  try {
+    return resolve_nfl_week_dynamic_value({
+      dynamic_type: dv.dynamic_type,
+      value: dv.value
+    })
+  } catch {
+    return null
+  }
+}
 
 const resolve_param_values = (key, value) => {
   const list = Array.isArray(value) ? value : [value]

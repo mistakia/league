@@ -90,10 +90,36 @@ describe('LIBS-SHARED nfl-week dynamic values', function () {
 
     it('resolves every type in the declared vocabulary', function () {
       set_offseason_date()
+      // Denominator asserted: a vocabulary that silently shrank to zero would
+      // make this loop pass over nothing.
+      expect(NFL_WEEK_DYNAMIC_TYPES.length).to.be.at.least(5)
       for (const dynamic_type of NFL_WEEK_DYNAMIC_TYPES) {
         const resolved = resolve_nfl_week_dynamic_value({ dynamic_type })
         expect(resolved, dynamic_type).to.be.an('array')
         expect(resolved.length, dynamic_type).to.be.at.least(1)
+      }
+    })
+
+    // The vocabulary is DERIVED from the resolver map rather than restated
+    // beside it. When the two were separate, they could only disagree in one
+    // direction -- adding a case and forgetting the array left the new type
+    // unexercised by the loop above, silently, while the reverse threw. This
+    // asserts the property that makes that impossible.
+    it('declares exactly the vocabulary it can resolve', function () {
+      set_offseason_date()
+      for (const dynamic_type of NFL_WEEK_DYNAMIC_TYPES) {
+        expect(
+          () => resolve_nfl_week_dynamic_value({ dynamic_type }),
+          dynamic_type
+        ).to.not.throw()
+      }
+      // Inherited Object members must not read as declared vocabulary.
+      for (const inherited of ['toString', 'constructor', 'hasOwnProperty']) {
+        expect(NFL_WEEK_DYNAMIC_TYPES, inherited).to.not.include(inherited)
+        expect(
+          () => resolve_nfl_week_dynamic_value({ dynamic_type: inherited }),
+          inherited
+        ).to.throw(/unknown dynamic_type/)
       }
     })
   })

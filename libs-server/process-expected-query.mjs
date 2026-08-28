@@ -42,6 +42,20 @@ export function process_expected_query(expected_query_string) {
     // clock it was blessed under and self-breaks at the next rollover that
     // moves the week -- and it moved for every one of them when the current
     // week stopped taking its year from the last completed season.
+    //
+    // STATE THE TRADE, because this binding makes the goldens weaker in one
+    // specific way. Both sides of the four `${current_nfl_week}` goldens now
+    // derive from this same call, so those goldens can no longer fail on a
+    // change to the current-week derivation itself -- the "a golden cannot
+    // catch a miss its emitter SHARES" class in docs/guides/data.md. That is
+    // accepted deliberately: the alternative is a literal that self-breaks on
+    // every clock rollover and teaches sessions to re-bless goldens without
+    // reading them, which is the more expensive failure. The coverage this
+    // gives up lives in
+    // test/libs-shared.nfl-week-current-and-last-completed.spec.mjs,
+    // which pins full identifiers across 31 weekly clocks and does NOT share
+    // this emitter. Do not remove that spec on the grounds that the goldens
+    // cover it; they do not.
     const current_nfl_week = current_nfl_week_identifier()
 
     // eslint-disable-next-line no-new-func

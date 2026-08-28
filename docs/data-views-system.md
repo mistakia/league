@@ -395,7 +395,9 @@ Half of these are forward-looking and half retrospective, and the two halves dif
 - `{ dynamic_type: "last_n_nfl_weeks", value: 5 }` → the last 5 week identifiers, walking backwards across the season boundary
 - `{ dynamic_type: "last_n_nfl_years", value: 3 }` → all week identifiers for the last 3 COMPLETED NFL years
 
-`next_n_nfl_years` was documented here and has never existed in any resolver. It now throws rather than resolving to nothing.
+`next_n_nfl_years` is retired and now THROWS rather than resolving to nothing.
+
+It was not merely documentation: it was a labelled, value-bearing UI option on `nfl_week_id` with a full server resolver (`git show 0982c4a8f:libs-server/get-data-view-results.mjs:351`), live from `f68bb7ba3` until `df8d12ea9` removed it on 2026-04-22 with no migration rule. So a saved view COULD have persisted it. What makes the throw safe is the separately verified fact that none did — every `dynamic_type` across `user_data_views` is declared and resolves, confirmed independently twice, including against the 903-row `urls` table that saved views do not cover and that cannot be rewritten. This paragraph previously justified the throw by claiming the type had never had a resolver, which is false; the conclusion held but the stated reason did not, and a false justification is worse than none.
 
 **Centralized Preprocessing** (`resolve_nfl_week_params` in `get-data-view-results.mjs`):
 

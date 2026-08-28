@@ -36,14 +36,55 @@ import {
 
 const MIN_YEAR = 2000
 
-/** The declared vocabulary. A type absent from here cannot be resolved. */
-export const NFL_WEEK_DYNAMIC_TYPES = [
-  'current_nfl_week',
-  'last_completed_nfl_week',
-  'current_year_reg_weeks',
-  'last_n_nfl_weeks',
-  'last_n_nfl_years'
-]
+// A keyed map rather than a `switch`, so the vocabulary below can be DERIVED
+// from it. It used to be a switch beside a hand-kept NFL_WEEK_DYNAMIC_TYPES
+// array, and the two could only disagree in one direction: adding a case and
+// forgetting the array left the new type unexercised by the spec that reads it,
+// silently, while the reverse failed loudly. An asymmetric consistency check is
+// the half that does not hold.
+/** @type {Record<string, (value?: any) => NflWeekIdentifier[]>} */
+const NFL_WEEK_DYNAMIC_RESOLVERS = {
+  current_nfl_week: () => [current_nfl_week_identifier()],
+
+  last_completed_nfl_week: () => {
+    const identifier = last_completed_nfl_week_identifier()
+    return identifier ? [identifier] : []
+  },
+
+  current_year_reg_weeks: () =>
+    get_nfl_week_identifiers_for_year({
+      year: current_season.year,
+      seas_type: 'REG'
+    }),
+
+  last_n_nfl_weeks: (value) => {
+    const n = parseInt(value || 5, 10)
+    const result = []
+    for (let i = 0; i < n; i++) {
+      const params = nfl_week_offset_params({ offset: -i })
+      if (!params) break
+      result.push(format_nfl_week_identifier(params))
+    }
+    return result
+  },
+
+  last_n_nfl_years: (value) => {
+    const n = parseInt(value || 3, 10)
+    const result = []
+    for (let i = 0; i < n; i++) {
+      const year = current_season.last_completed_season_year - i
+      if (year < MIN_YEAR) break
+      result.push(...get_nfl_week_identifiers_for_year({ year }))
+    }
+    return result
+  }
+}
+
+/**
+ * The declared vocabulary, derived from the resolvers rather than restated
+ * beside them. A type absent from here cannot be resolved, by construction.
+ */
+export const NFL_WEEK_DYNAMIC_TYPES = Object.keys(NFL_WEEK_DYNAMIC_RESOLVERS)
 
 /**
  * Resolves one dynamic value to the concrete nfl_week_id list it names.
@@ -56,52 +97,28 @@ export const NFL_WEEK_DYNAMIC_TYPES = [
  * set, so no review and no golden can catch it. A known type reaching a
  * resolver that cannot expand it is the same defect as an unknown one.
  *
+ * The client notice preview is the one caller that catches this rather than
+ * propagating it -- see app/core/data-views/data-view-notices.mjs for why the
+ * rationale above does not reach a surface with no row axis.
+ *
  * @param {{ dynamic_type: string, value?: any }} params
  * @returns {NflWeekIdentifier[]}
  */
 export const resolve_nfl_week_dynamic_value = ({ dynamic_type, value }) => {
-  switch (dynamic_type) {
-    case 'current_nfl_week':
-      return [current_nfl_week_identifier()]
+  const resolver = Object.prototype.hasOwnProperty.call(
+    NFL_WEEK_DYNAMIC_RESOLVERS,
+    dynamic_type
+  )
+    ? NFL_WEEK_DYNAMIC_RESOLVERS[dynamic_type]
+    : null
 
-    case 'last_completed_nfl_week': {
-      const identifier = last_completed_nfl_week_identifier()
-      return identifier ? [identifier] : []
-    }
-
-    case 'current_year_reg_weeks':
-      return get_nfl_week_identifiers_for_year({
-        year: current_season.year,
-        seas_type: 'REG'
-      })
-
-    case 'last_n_nfl_weeks': {
-      const n = parseInt(value || 5, 10)
-      const result = []
-      for (let i = 0; i < n; i++) {
-        const params = nfl_week_offset_params({ offset: -i })
-        if (!params) break
-        result.push(format_nfl_week_identifier(params))
-      }
-      return result
-    }
-
-    case 'last_n_nfl_years': {
-      const n = parseInt(value || 3, 10)
-      const result = []
-      for (let i = 0; i < n; i++) {
-        const year = current_season.last_completed_season_year - i
-        if (year < MIN_YEAR) break
-        result.push(...get_nfl_week_identifiers_for_year({ year }))
-      }
-      return result
-    }
-
-    default:
-      throw new Error(
-        `resolve_nfl_week_dynamic_value: unknown dynamic_type "${dynamic_type}"`
-      )
+  if (!resolver) {
+    throw new Error(
+      `resolve_nfl_week_dynamic_value: unknown dynamic_type "${dynamic_type}"`
+    )
   }
+
+  return resolver(value)
 }
 
 /**

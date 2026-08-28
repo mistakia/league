@@ -134,16 +134,74 @@ describe('data-views dynamic param contract', function () {
             const list = resolve_nfl_week_ids({ params })
             expect(list.length, `list / ${dynamic_type}`).to.be.at.least(1)
 
+            // MEMBERSHIP plus a week floor, not bare parseability.
+            //
+            // This assertion used to be `parse_nfl_week_identifier(scalar) !==
+            // null` and nothing else, which is satisfied by any well-formed
+            // identifier whatsoever. Two separate defects passed it green: a
+            // resolver handing back `2026_REG_WEEK_0` (week 0 PARSES, though
+            // validate_nfl_week_identifier rejects it), and a scalar that had
+            // silently collapsed to a week the list did not single out.
+            //
+            // Deliberately NOT a swap to validate_nfl_week_identifier: that
+            // rejects `2025_POST_WEEK_5` on the era-aware POST bound, and such
+            // rows do exist -- in projections_index and projections_history,
+            // NOT in nfl_games, which carries no POST row past week 4.
             const scalar = resolve_single_nfl_week_id({ params })
+            const parsed = parse_nfl_week_identifier({ identifier: scalar })
+            expect(parsed, `scalar / ${dynamic_type}`).to.not.equal(null)
+            expect(list, `scalar in list / ${dynamic_type}`).to.include(scalar)
             expect(
-              parse_nfl_week_identifier({ identifier: scalar }),
-              `scalar / ${dynamic_type}`
-            ).to.not.equal(null)
+              parsed.week,
+              `scalar week floor / ${dynamic_type}`
+            ).to.be.at.least(1)
           })
         }
       }
     })
   }
+
+  // A SINGLE-valued param may only declare single-valued types.
+  //
+  // Generalized from the `current_year_reg_weeks` trap rather than pinned to it:
+  // that type was declared on single_nfl_week_id, expanded to 18 identifiers,
+  // and every scalar consumer took element [0], so in November a column labelled
+  // "Current Year REG Weeks" rendered week 1 data. Ruled 2026-08-27 and dropped.
+  // Asserting the property means the next many-valued type declared on a single
+  // param fails here instead of shipping the same collapse under a new label.
+  //
+  // Checked at the season's END, where a many-valued type and a single-valued
+  // one are furthest apart. Under the offseason clock most types resolve to
+  // near the same place, which would make this pass without discriminating.
+  it('a single-valued param declares only single-valued dynamic types', function () {
+    set_date_for_week({ seas_type: 'REG', week: 17 })
+
+    const single_param_keys = Object.entries(common_column_params)
+      .filter(
+        ([, def]) => def && typeof def === 'object' && def.single === true
+      )
+      .map(([key]) => key)
+      .concat('single_nfl_week_id')
+
+    const checked = []
+    for (const declaration of declarations) {
+      if (!single_param_keys.includes(declaration.param_key)) continue
+      const params = process_params_with_backwards_compatibility(
+        build_params(declaration)
+      )
+      const resolved = params[declaration.param_key]
+      checked.push(`${declaration.param_key} / ${declaration.dynamic_type}`)
+      expect(
+        resolved.length,
+        `${declaration.param_key} / ${declaration.dynamic_value.dynamic_type} expands to ${resolved.length} values on a SINGLE param, and every scalar consumer takes [0]`
+      ).to.equal(1)
+    }
+
+    // Denominator. A filter that stops matching reports a confident zero.
+    expect(checked.length, 'single-param declarations examined').to.be.at.least(
+      2
+    )
+  })
 
   // The negative control. Without it every assertion above is satisfiable by a
   // resolver that answers a non-empty list for anything at all.

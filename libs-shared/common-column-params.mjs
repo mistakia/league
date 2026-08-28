@@ -395,13 +395,27 @@ export const single_nfl_week_id = {
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_nfl_week' },
   format_value: format_nfl_week_id_value,
-  // A "single" param still declares many-valued types. A week-split column fans
-  // one fact across every week in the list (resolve_nfl_week_ids), and the
-  // scalar callers take the first element. This was safe to widen only once
-  // resolve_nfl_week_params expanded single_nfl_week_id through the same
-  // complete expander nfl_week_id goes through -- before that, a declared type
-  // the partial resolver did not know resolved to nothing while still reading
-  // as an explicit time scope, and the row axis fanned out.
+  // ONLY single-valued dynamic types belong here, and that is the whole rule.
+  //
+  // This used to also declare `current_year_reg_weeks`, which is many-valued.
+  // Every scalar consumer takes element [0], so at a mocked 2026-11-05 the
+  // expansion yielded 18 identifiers, resolve_nfl_week_ids returned all 18, and
+  // resolve_single_nfl_week_id returned `2026_REG_WEEK_1`. In November a
+  // player_dfs_salary / player_practice_status / betting-market column set to
+  // "Current Year REG Weeks" rendered WEEK 1 data under that label, while the
+  // same selection on a week-split column correctly fanned all 18.
+  //
+  // The contract guard could not see it: it asserted only that the scalar
+  // resolver returned something parse_nfl_week_identifier accepts, and week 1
+  // parses fine -- a test passing for a different reason than the one it claims.
+  //
+  // Ruled 2026-08-27: drop the declaration rather than pick a "most meaningful"
+  // member (which requires inventing a meaning) or label which week it collapsed
+  // to (which keeps the trap and documents it). The week-split path already gets
+  // the full fan-out through `nfl_week_id`, which is where all 11 production uses
+  // of this type live -- zero were on single_nfl_week_id, checked across all 189
+  // saved views, with 672 single_nfl_week_id values and 342 dynamic values found
+  // by the same extractor as the positive control.
   dynamic_values: [
     {
       dynamic_type: 'current_nfl_week',
@@ -410,10 +424,6 @@ export const single_nfl_week_id = {
     {
       dynamic_type: 'last_completed_nfl_week',
       label: 'Last Completed NFL Week'
-    },
-    {
-      dynamic_type: 'current_year_reg_weeks',
-      label: 'Current Year REG Weeks'
     }
   ]
 }
