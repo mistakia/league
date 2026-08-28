@@ -26,15 +26,5 @@
     "from": "no-reply@test.invalid"
   },
   "signals_api_url": "",
-  "signals_secret": "",
-  "inference_providers": {
-    "default": "vllm-deepseek-v4-flash",
-    "vllm-deepseek-v4-flash": {
-      "base_url": "",
-      "model": "deepseek-v4-flash",
-      "auth_mode": "machine_token",
-      "structured_output_mode": "json_schema",
-      "thinking": false
-    }
-  }
+  "signals_secret": ""
 }

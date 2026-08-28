@@ -39,15 +39,5 @@
     "historical_rate_min_threshold": 0.7
   },
   "signals_api_url": "https://base.example.com",
-  "signals_secret": "<value>",
-  "inference_providers": {
-    "default": "vllm-deepseek-v4-flash",
-    "vllm-deepseek-v4-flash": {
-      "base_url": "https://inference.example.com",
-      "model": "deepseek-v4-flash",
-      "auth_mode": "machine_token",
-      "structured_output_mode": "json_schema",
-      "thinking": false
-    }
-  }
+  "signals_secret": "<value>"
 }

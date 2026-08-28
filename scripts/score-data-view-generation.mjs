@@ -1,9 +1,9 @@
 // The evaluation harness for LLM-assisted data view generation.
 //
-// Regenerate a `table_state` from `(view_name, view_description)` alone and
-// score it against the view a human actually built. Run this BEFORE tuning any
-// prompt: without it, "the output looks good" is the whole oracle, and that
-// oracle has never once caught a regression.
+// Score a `table_state` generated from `(view_name, view_description)` alone
+// against the view a human actually built. Run this BEFORE tuning anything:
+// without it, "the output looks good" is the whole oracle, and that oracle has
+// never once caught a regression.
 //
 // WHY THE CORPUS COLUMN IS `view_description` AND NOT `description`. Every one
 // of the production views carries a `view_description`; there is no
@@ -30,6 +30,13 @@
 // by any prompt, costs no second inference run, and tests the SCORE rather than
 // the prompt -- which is what a negative control on a metric is for.
 //
+// THIS HARNESS SCORES; IT DOES NOT GENERATE. League used to be the model client
+// and this driver called `generate_data_view` directly. Generation is now an
+// agentic container session, so the generator lives outside this repo and the
+// driver's input is a file of `table_state`s it produced. Splitting the driver
+// this way rather than stubbing the call is what keeps the scorer honest: there
+// is no half-wired generation path left to look like it works.
+//
 // Reports land in scratch/league/data-view-generation-evaluation/, which is the
 // working tier this task owns.
 
@@ -38,11 +45,6 @@ import path from 'path'
 import os from 'os'
 
 import { is_main } from '#libs-server'
-import {
-  generate_data_view,
-  build_catalog_prompt,
-  GENERATION_OUTCOMES
-} from '#libs-server/data-views/generation/generate-data-view.mjs'
 
 const REPORT_DIR =
   process.env.DATA_VIEW_EVAL_DIR ||
@@ -199,60 +201,50 @@ export const load_corpus = async ({ limit, corpus_file }) => {
 const parse_table_state = (value) =>
   typeof value === 'string' ? JSON.parse(value) : value
 
+/**
+ * The generation half of a run, keyed by `view_id`.
+ *
+ * Each record is `{ view_id, table_state, outcome, inexpressible_reason }`.
+ * `table_state` is null when the generator answered nothing usable, and
+ * `outcome` is whatever label the generator recorded -- this harness reports
+ * the distribution and never interprets it, so the generator can change its
+ * vocabulary without changing the score.
+ */
+export const load_generations = async ({ generated_file }) => {
+  const parsed = JSON.parse(await fs.readFile(generated_file, 'utf8'))
+  const records = Array.isArray(parsed) ? parsed : parsed.generations
+
+  if (!Array.isArray(records)) {
+    throw new Error(
+      `TOOLING ERROR: ${generated_file} carries neither an array nor a \`generations\` array`
+    )
+  }
+
+  return new Map(records.map((record) => [record.view_id, record]))
+}
+
 // ---------------------------------------------------------------------------
 // Run
 // ---------------------------------------------------------------------------
 
-export const run_evaluation = async ({
-  corpus,
-  catalog_prompt = build_catalog_prompt(),
-  inference_options = {}
-}) => {
+/**
+ * Score one set of generations against the corpus they answered.
+ *
+ * A corpus view with no generation is NOT dropped -- it scores zero and says
+ * `missing`. Dropping it is how a harness reports a rising mean while the
+ * system answers fewer and fewer questions, and a generator that silently
+ * skipped half the corpus would otherwise look like an improvement.
+ */
+export const run_evaluation = ({ corpus, generations }) => {
   const results = []
 
   for (const view of corpus) {
     const expected = parse_table_state(view.table_state)
-    const instruction = [view.view_name, view.view_description]
-      .filter(Boolean)
-      .join(' — ')
+    const generation = generations.get(view.view_id)
+    const generated = generation?.table_state
+      ? parse_table_state(generation.table_state)
+      : null
 
-    let generated = null
-    let outcome = 'error'
-    let error = null
-    let error_message = null
-    let inexpressible_reason = null
-
-    try {
-      const result = await generate_data_view({
-        instruction,
-        catalog_prompt,
-        inference_options
-      })
-      outcome = result.outcome
-      generated = result.table_state
-      // Every view in this corpus is provably buildable -- a human built it and
-      // the original is right there -- so an `inexpressible` here is always
-      // wrong, and the model's own reason is the only account of why. Over a
-      // full-corpus run it came back on 35 of 165, which is not a footnote.
-      inexpressible_reason = result.inexpressible_reason
-    } catch (caught) {
-      error = caught.code || caught.name
-      error_message = caught.message
-
-      // A misconfigured client is not a model result, and scoring it as one
-      // reports a broken harness as a fleet of fall-throughs. A whole run once
-      // came back "3 of 3 answered nothing usable" when the real cause was an
-      // unset BASE_MACHINE_SLUG and not one request ever left the process.
-      if (caught.code === 'inference_misconfigured') {
-        throw new Error(
-          `TOOLING ERROR: the inference client is misconfigured, so no score means anything -- ${caught.message}`
-        )
-      }
-    }
-
-    // An unresolved or inexpressible answer scores zero rather than being
-    // dropped from the denominator. Dropping it is how a harness reports a
-    // rising mean while the system answers fewer and fewer questions.
     const score = generated
       ? score_table_state({ generated, expected })
       : { columns: 0, where: 0, params: 0, overall: 0 }
@@ -260,10 +252,13 @@ export const run_evaluation = async ({
     results.push({
       view_id: view.view_id,
       view_name: view.view_name,
-      outcome,
-      error,
-      error_message,
-      inexpressible_reason,
+      outcome: generation ? generation.outcome || 'unlabelled' : 'missing',
+      // Every view in this corpus is provably buildable -- a human built it and
+      // the original is right there -- so a refusal here is always wrong, and
+      // the generator's own reason is the only account of why. Over a full-corpus
+      // run of the retired single-shot system it came back on 35 of 165, which
+      // is not a footnote.
+      inexpressible_reason: generation?.inexpressible_reason || null,
       // Both states are kept because a component score of zero is otherwise
       // undiagnosable: it reads identically whether the model emitted nothing,
       // emitted a different shape, or emitted the right answer spelled another
@@ -362,9 +357,12 @@ const read_flag = (name) => {
 const main = async () => {
   const limit = Number(read_flag('limit')) || null
   const corpus_file = read_flag('corpus-file')
+  const generated_file = read_flag('generated-file')
 
-  if (!corpus_file) {
-    console.error('TOOLING ERROR: --corpus-file <manifest> is required')
+  if (!corpus_file || !generated_file) {
+    console.error(
+      'TOOLING ERROR: --corpus-file <manifest> and --generated-file <generations> are both required'
+    )
     process.exit(2)
   }
 
@@ -377,12 +375,25 @@ const main = async () => {
     process.exit(2)
   }
 
-  console.log(`scoring ${corpus.length} view(s) from ${corpus_file}`)
+  const generations = await load_generations({ generated_file })
 
-  const results = await run_evaluation({
-    corpus,
-    inference_options: { max_tokens: 4000, timeout_ms: 300000 }
-  })
+  // A generations file that matches NO corpus view scores a flat zero, which is
+  // indistinguishable from a generator that answered nothing. The likeliest
+  // cause is the two files being built from different corpus snapshots, so this
+  // is a tooling error rather than a result.
+  const matched = corpus.filter((view) => generations.has(view.view_id)).length
+  if (!matched) {
+    console.error(
+      `TOOLING ERROR: none of the ${corpus.length} corpus view ids appear in ${generated_file}`
+    )
+    process.exit(2)
+  }
+
+  console.log(
+    `scoring ${corpus.length} view(s) from ${corpus_file}, ${matched} generated`
+  )
+
+  const results = run_evaluation({ corpus, generations })
   const report = build_report({ results })
 
   await fs.mkdir(REPORT_DIR, { recursive: true })
@@ -407,11 +418,12 @@ const main = async () => {
   }
   console.log(`\nreport: ${report_path}`)
 
-  const unresolved =
-    (report.by_outcome[GENERATION_OUTCOMES.unresolved] || 0) +
-    (report.by_outcome.error || 0)
+  // Counted off the absence of a `table_state` rather than off any outcome
+  // label, so a generator that invents a new label cannot hide a fall-through
+  // from this line.
+  const unusable = results.filter((result) => !result.generated).length
   console.log(
-    `\nfall-through: ${unresolved} of ${report.n} answered nothing usable`
+    `\nfall-through: ${unusable} of ${report.n} answered nothing usable`
   )
 
   // Printed last and read first. Above this line every number is conditional on
