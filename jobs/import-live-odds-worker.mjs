@@ -172,12 +172,15 @@ const import_bookmaker = async (bookmaker_key) => {
     const duration = Date.now() - start_time
     log(`${config.name} import failed after ${duration}ms: ${error.message}`)
 
-    // Report job error
+    // Report job error. `error` is what drives the outcome: report_job derives
+    // job_success=false and job_reason=error.message from it. This call used to
+    // also pass `succ`/`reason`, keys report_job does not declare -- inert here
+    // only because `error` was present alongside them, and a live false-green
+    // the moment it was not. That is the shape that made finalize-game report
+    // 8478 consecutive successes over a broken pipeline.
     await report_job({
       job_type: config.job_type,
-      error,
-      succ: false,
-      reason: `${config.name} import failed: ${error.message}`
+      error
     })
 
     // Still update last import time to prevent hammering on repeated failures
