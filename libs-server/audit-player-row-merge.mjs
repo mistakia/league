@@ -1,7 +1,10 @@
 // @ts-check
 import db from '#db'
 
-import { count_references } from '#libs-server/player-pid-references.mjs'
+import {
+  count_references,
+  reference_count_for
+} from '#libs-server/player-pid-references.mjs'
 import {
   is_real_birth_date,
   is_absent_player_value
@@ -50,12 +53,15 @@ export const audit_player_row_merges = async ({ plans, tables }) => {
   const failures = []
 
   for (const plan of plans) {
-    const [survivor] = await db('player').where('pid', plan.survivor_pid)
-    if (!survivor) {
+    const [survivor_row] = await db('player').where('pid', plan.survivor_pid)
+    if (!survivor_row) {
       failures.push(`${plan.survivor_pid} is gone after its own merge`)
       continue
     }
 
+    // knex types the row by its table, so a column read from a runtime-built
+    // list has to be widened before it can index it.
+    const survivor = /** @type {Record<string, any>} */ (survivor_row)
     const deliberate = new Set(plan.deliberate_columns || [])
 
     for (const column of Object.keys(plan.survivor_row)) {
@@ -112,23 +118,25 @@ export const audit_player_row_merges = async ({ plans, tables }) => {
   })
 
   for (const plan of plans) {
-    const orphaned = after_references.get(plan.folded_pid)
+    const orphaned = reference_count_for(after_references, plan.folded_pid)
     if (orphaned.total > 0) {
       failures.push(
         `${plan.folded_pid} is still referenced by ${orphaned.by_table.map((row) => `${row.table}(${row.rows})`).join(', ')}`
       )
     }
 
+    /** @type {Map<string, number>} */
     const expected = new Map()
     for (const pid of [plan.survivor_pid, plan.folded_pid]) {
-      for (const entry of plan.before_references.get(pid).by_table) {
+      for (const entry of reference_count_for(plan.before_references, pid)
+        .by_table) {
         expected.set(entry.table, (expected.get(entry.table) || 0) + entry.rows)
       }
     }
     const after = new Map(
-      after_references
-        .get(plan.survivor_pid)
-        .by_table.map((entry) => [entry.table, entry.rows])
+      reference_count_for(after_references, plan.survivor_pid).by_table.map(
+        (entry) => [entry.table, entry.rows]
+      )
     )
 
     for (const [table, rows] of expected) {

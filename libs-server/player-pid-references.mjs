@@ -31,12 +31,37 @@ export const get_pid_referencing_tables = async () => {
 }
 
 /**
+ * @typedef {object} PidReferenceCount
+ * @property {number} total
+ * @property {Array<{ table: string, rows: number }>} by_table
+ */
+
+/**
+ * The counted references for one pid.
+ *
+ * Throws rather than returning a zero: every caller looks up a pid it asked to
+ * have counted, so a miss means the count and the lookup disagree about the
+ * population -- and a silent zero there would read as "nothing points at this
+ * row", which is the one answer that makes an unsafe merge look safe.
+ *
+ * @param {Map<string, PidReferenceCount>} references
+ * @param {string} pid
+ * @returns {PidReferenceCount}
+ */
+export const reference_count_for = (references, pid) => {
+  const entry = references.get(pid)
+  if (!entry) throw new Error(`no reference count was captured for ${pid}`)
+  return entry
+}
+
+/**
  * Per-table reference counts for each pid.
  *
  * @param {{ pids: string[], tables: string[] }} params
- * @returns {Promise<Map<string, { total: number, by_table: Array<{ table: string, rows: number }> }>>}
+ * @returns {Promise<Map<string, PidReferenceCount>>}
  */
 export const count_references = async ({ pids, tables }) => {
+  /** @type {Map<string, PidReferenceCount>} */
   const counts = new Map(pids.map((pid) => [pid, { total: 0, by_table: [] }]))
   for (const table of tables) {
     const { rows } = await db.raw(
@@ -44,7 +69,7 @@ export const count_references = async ({ pids, tables }) => {
       [pids]
     )
     for (const row of rows) {
-      const entry = counts.get(row.pid)
+      const entry = reference_count_for(counts, row.pid)
       entry.total += Number(row.rows)
       entry.by_table.push({ table, rows: Number(row.rows) })
     }
@@ -61,13 +86,13 @@ export const count_references = async ({ pids, tables }) => {
  * more-referenced half simply repoints fewer rows. Ties break on pid so a dry
  * run and its apply agree.
  *
- * @param {{ rows: Array<Record<string, any>>, references: Map<string, { total: number }> }} params
+ * @param {{ rows: Array<Record<string, any>>, references: Map<string, PidReferenceCount> }} params
  * @returns {Array<Record<string, any>>}
  */
 export const choose_survivor_by_reference_count = ({ rows, references }) => {
   const [left, right] = rows
-  const left_total = references.get(left.pid).total
-  const right_total = references.get(right.pid).total
+  const left_total = reference_count_for(references, left.pid).total
+  const right_total = reference_count_for(references, right.pid).total
   if (left_total !== right_total) {
     return left_total > right_total ? [left, right] : [right, left]
   }
