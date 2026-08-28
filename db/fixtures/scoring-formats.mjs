@@ -38,11 +38,14 @@ export default async function (knex) {
     .ignore()
 
   // A TE-premium (non-uniform reception) format so tests can exercise the
-  // position CASE in the projected-points in-query scorer (terec != rec). Config
-  // mirrors the sfb15_mfl entry in libs-shared/league-format-definitions.mjs.
+  // position CASE in the projected-points in-query scorer (terec != rec).
+  // SYNTHETIC and deliberately not named after a catalog format: it previously
+  // mirrored sfb15_mfl, and when that format was retired the fixture was left
+  // pinned to an id the catalog no longer defines. What the suite needs here is
+  // the SHAPE (tight_end_reception != receptions), not any particular league.
   await knex('league_scoring_formats')
     .insert({
-      id: 'sfb15_mfl',
+      id: 'te_premium',
       passing_attempts: 0,
       passing_completions: 0,
       passing_yards: 0.04,

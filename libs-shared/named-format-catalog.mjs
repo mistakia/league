@@ -46,18 +46,6 @@ export const named_scoring_formats = {
     description:
       'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
   },
-  sfb15_mfl: {
-    id: 'sfb15_mfl',
-    label: 'Scott Fish Bowl 15 (MFL)',
-    description:
-      'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
-  },
-  sfb15_sleeper: {
-    id: 'sfb15_sleeper',
-    label: 'Scott Fish Bowl 15 (Sleeper)',
-    description:
-      'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
-  },
   sfb16_mfl: {
     id: 'sfb16_mfl',
     label: 'Scott Fish Bowl 16 (MFL)',
@@ -216,22 +204,6 @@ export const named_league_formats = {
     description:
       '12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'draftkings',
-    pricing_model: 'auction'
-  },
-  sfb15_mfl: {
-    id: 'sfb15_mfl',
-    label: 'Scott Fish Bowl 15 (MFL)',
-    description:
-      'Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions',
-    scoring_format: 'sfb15_mfl',
-    pricing_model: 'auction'
-  },
-  sfb15_sleeper: {
-    id: 'sfb15_sleeper',
-    label: 'Scott Fish Bowl 15 (Sleeper)',
-    description:
-      'Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions',
-    scoring_format: 'sfb15_sleeper',
     pricing_model: 'auction'
   },
   sfb16_mfl: {

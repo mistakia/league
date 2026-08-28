@@ -484,9 +484,9 @@ const should_use_main_where = ({ params }) => {
 //
 // Position-aware receiving is gated on the same `needs_position_data` predicate
 // as the legacy `with` builder, so the two paths agree on whether the positional
-// CASE applies. Five production formats need it -- sfb15_mfl and sfb15_sleeper
-// among them -- and this path scored all five as if every reception were worth
-// the base value until the join was wired.
+// CASE applies. Several production formats need it -- the TE-premium Scott Fish
+// Bowl formats among them -- and this path scored all of them as if every
+// reception were worth the base value until the join was wired.
 const fantasy_points_role_attributions = async ({ params }) => {
   const scoring_format = await get_scoring_format(params.scoring_format_id)
   const requires_position_data = needs_position_data(scoring_format)

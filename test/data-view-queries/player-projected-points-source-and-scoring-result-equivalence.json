@@ -1,6 +1,6 @@
 {
   "name": "player_season_projected_points computed in-query honors sourceid + scoring format (QB / TE position CASE / kicker buckets)",
-  "description": "Seed a QB, a TE and a kicker with projections_index rows, then request player_season_projected_points three ways in one view: draftkings + AVERAGE source (col _0), draftkings + ESPN source (col _1), and sfb15_mfl + AVERAGE source (col _2). Asserts the in-query scorer (a) honors the sourceid param (QB _0=20.5 from AVERAGE py/tdp differs from _1=28 from the ESPN row; TE/K have no ESPN row so _1=0), (b) applies the position reception CASE (TE _2 uses sfb15_mfl terec=2: 5*2 + recy 6 + tdrec 6 + trg 7 = 29, vs draftkings _0=17 with uniform rec=1), and (c) scores kicker field goals via the distance buckets plus xpm (K _0=_2=21 = 3+3+3+4+5 + xpm 3); a fgy/10 scorer would yield 3 and fail. A where filter on the AVERAGE column isolates the three seeded players (INNER join) from the unseeded player table.",
+  "description": "Seed a QB, a TE and a kicker with projections_index rows, then request player_season_projected_points three ways in one view: draftkings + AVERAGE source (col _0), draftkings + ESPN source (col _1), and te_premium + AVERAGE source (col _2). Asserts the in-query scorer (a) honors the sourceid param (QB _0=20.5 from AVERAGE py/tdp differs from _1=28 from the ESPN row; TE/K have no ESPN row so _1=0), (b) applies the position reception CASE (TE _2 uses te_premium terec=2: 5*2 + recy 6 + tdrec 6 + trg 7 = 29, vs draftkings _0=17 with uniform rec=1), and (c) scores kicker field goals via the distance buckets plus xpm (K _0=_2=21 = 3+3+3+4+5 + xpm 3); a fgy/10 scorer would yield 3 and fail. A where filter on the AVERAGE column isolates the three seeded players (INNER join) from the unseeded player table.",
   "request": {
     "prefix_columns": ["player_name"],
     "columns": [
@@ -21,7 +21,7 @@
         "column_id": "player_season_projected_points",
         "params": {
           "year": [2024],
-          "scoring_format_id": ["sfb15_mfl"]
+          "scoring_format_id": ["te_premium"]
         }
       }
     ],

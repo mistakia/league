@@ -21,7 +21,7 @@ const expect = chai.expect
 // capability was there and unused.
 //
 // The cost of the gap was not theoretical. Measured against production for
-// sfb15_mfl over 2024 REG, 113 of 117 tight ends disagreed between the two
+// a TE-premium format over 2024 REG, 113 of 117 tight ends disagreed between the two
 // builders -- Austin Hooper at 194.6 on the role-union path against 239.6 on the
 // `with` path, a 45-point season gap on a format whose whole identity is the TE
 // premium. Five production formats carry a positional value.
@@ -56,10 +56,10 @@ const build_role_union_sql = async (scoring_format_id) => {
 describe('from-plays position-aware receiving', () => {
   it('gates both builders on one predicate derived from the role table', async () => {
     const sfb = await db('league_scoring_formats')
-      .where('id', 'sfb15_mfl')
+      .where('id', 'te_premium')
       .first()
 
-    // sfb15_mfl pays 1.0 per reception and 2.0 to a tight end.
+    // The te_premium fixture pays 1.0 per reception and 2.0 to a tight end.
     expect(Number(sfb.tight_end_reception)).to.not.equal(Number(sfb.receptions))
     expect(needs_position_data(sfb)).to.equal(true)
 
@@ -76,7 +76,7 @@ describe('from-plays position-aware receiving', () => {
   })
 
   it('joins player and emits the positional CASE for a positional format', async () => {
-    const sql = await build_role_union_sql('sfb15_mfl')
+    const sql = await build_role_union_sql('te_premium')
 
     expect(sql).to.include('left join "player" as "p_trg"')
     expect(sql).to.include('CASE p_trg.primary_position')

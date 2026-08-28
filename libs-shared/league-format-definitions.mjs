@@ -98,68 +98,6 @@ export const scoring_formats = {
       'Full point per reception scoring with 4-point passing touchdowns'
   },
 
-  sfb15_mfl: {
-    label: 'Scott Fish Bowl 15 (MFL)',
-    config: {
-      passing_attempts: 0, // passing attempts
-      passing_completions: 0, // passing completions
-      passing_yards: 0.04, // passing yards (points per yard)
-      passing_interceptions: 0, // interceptions (0 points in SFB)
-      passing_touchdowns: 6, // passing touchdowns
-      rushing_attempts: 0.5, // rushing attempts (0.5 points per carry)
-      rushing_yards: 0.1, // rushing yards
-      rushing_touchdowns: 6, // rushing touchdowns
-      receptions: 1, // receptions (full PPR)
-      running_back_reception: 1, // RB receptions
-      wide_receiver_reception: 1, // WR receptions
-      tight_end_reception: 2, // TE receptions (rec + 1 for SFB)
-      receiving_yards: 0.1, // receiving yards
-      receiving_touchdowns: 6, // receiving touchdowns
-      two_point_conversions: 2, // two-point conversions
-      fumbles_lost: 0, // fumbles lost (0 points in SFB)
-      punt_return_touchdowns: 6, // punt return touchdowns
-      kickoff_return_touchdowns: 6, // kick return touchdowns
-      fumble_return_touchdowns: 6, // fumble return touchdowns
-      targets: 1, // targets (1 point per target in SFB)
-      rushing_first_downs: 1, // rushing first downs (1 point in SFB)
-      receiving_first_downs: 1, // receiving first downs (1 point in SFB)
-      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
-    },
-    description:
-      'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
-  },
-
-  sfb15_sleeper: {
-    label: 'Scott Fish Bowl 15 (Sleeper)',
-    config: {
-      passing_attempts: 0, // passing attempts
-      passing_completions: 0, // passing completions
-      passing_yards: 0.04, // passing yards (points per yard)
-      passing_interceptions: 0, // interceptions (0 points in SFB)
-      passing_touchdowns: 6, // passing touchdowns
-      rushing_attempts: 0.5, // rushing attempts (0.5 points per carry)
-      rushing_yards: 0.1, // rushing yards
-      rushing_touchdowns: 6, // rushing touchdowns
-      receptions: 2.5, // receptions (2.5 PPR)
-      running_back_reception: 2.5, // RB receptions
-      wide_receiver_reception: 2.5, // WR receptions
-      tight_end_reception: 3.5, // TE receptions (rec + 1 for SFB)
-      receiving_yards: 0.1, // receiving yards
-      receiving_touchdowns: 6, // receiving touchdowns
-      two_point_conversions: 2, // two-point conversions
-      fumbles_lost: 0, // fumbles lost (0 points in SFB)
-      punt_return_touchdowns: 6, // punt return touchdowns
-      kickoff_return_touchdowns: 6, // kick return touchdowns
-      fumble_return_touchdowns: 6, // fumble return touchdowns
-      targets: 0, // targets (no points in SFB Sleeper)
-      rushing_first_downs: 1, // rushing first downs (1 point in SFB)
-      receiving_first_downs: 1, // receiving first downs (1 point in SFB)
-      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
-    },
-    description:
-      'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
-  },
-
   // Scott Fish Bowl 2026. Three primitives no earlier format needed: a
   // tight-end premium on receiving FIRST DOWNS as well as receptions, a bonus
   // rule list, and -- on the Sleeper variant only -- a touchdown that does not
@@ -711,55 +649,6 @@ export const league_formats = {
   },
 
   // Scott Fish Bowl formats
-  sfb15_mfl: {
-    label: 'Scott Fish Bowl 15 (MFL)',
-    config: {
-      number_teams: 12, // number of teams
-      starter_slots_quarterback: 1, // starting QB
-      starter_slots_running_back: 0, // starting RB
-      starter_slots_wide_receiver: 0, // starting WR
-      starter_slots_tight_end: 0, // starting TE
-      starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      starter_slots_running_back_wide_receiver_tight_end_flex: 9, // starting RB/WR/TE flex (9 flex slots)
-      starter_slots_superflex: 2, // starting superflex (2 superflex slots)
-      starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
-      starter_slots_defense_special_teams: 0, // starting D/ST (no D/ST)
-      starter_slots_kicker: 0, // starting K (no K)
-      bench_slot_count: 6, // bench spots
-      practice_squad_slot_count: 0, // practice squad spots
-      reserve_short_term_limit: 3, // Short term reserve spots
-      salary_cap: 200, // salary cap
-      min_bid: 0 // minimum bid
-    },
-    scoring_format: 'sfb15_mfl',
-    description:
-      'Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions'
-  },
-
-  sfb15_sleeper: {
-    label: 'Scott Fish Bowl 15 (Sleeper)',
-    config: {
-      number_teams: 12, // number of teams
-      starter_slots_quarterback: 1, // starting QB
-      starter_slots_running_back: 0, // starting RB
-      starter_slots_wide_receiver: 0, // starting WR
-      starter_slots_tight_end: 0, // starting TE
-      starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      starter_slots_running_back_wide_receiver_tight_end_flex: 9, // starting RB/WR/TE flex (9 flex slots)
-      starter_slots_superflex: 2, // starting superflex (2 superflex slots)
-      starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
-      starter_slots_defense_special_teams: 0, // starting D/ST (no D/ST)
-      starter_slots_kicker: 0, // starting K (no K)
-      bench_slot_count: 6, // bench spots
-      practice_squad_slot_count: 0, // practice squad spots
-      reserve_short_term_limit: 3, // Short term reserve spots
-      salary_cap: 200, // salary cap
-      min_bid: 0 // minimum bid
-    },
-    scoring_format: 'sfb15_sleeper',
-    description:
-      'Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions'
-  },
 
   sfb16_mfl: {
     label: 'Scott Fish Bowl 16 (MFL)',
