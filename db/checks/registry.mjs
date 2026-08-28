@@ -61,6 +61,7 @@ import db from '#db'
 import { recompute_route_share } from '#libs-server'
 import { pfr_gamelog_agreement_rows } from '#libs-server/pfr-gamelog-agreement.mjs'
 import { erased_role_attribution_by_play_type } from '#libs-server/erased-role-attribution.mjs'
+import { game_prop_column_resolution_rows } from '#libs-server/game-prop-column-resolution.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -1234,6 +1235,36 @@ const registry = [
     min_gradeable_units: 180,
     repair_command:
       'Re-run the aggregation for the week: node scripts/generate-player-snaps.mjs --year <year> --week <week> --season_type <type>. It upserts on (esbid, pid, season_year) and merges, so re-running a healthy week is safe. If the rate comes back 0.0000 again, check that nfl_plays holds ENRICHED rows for those games first — the generator left-joins nfl_plays and filters `whereNot play_type NOPL`, which under three-valued logic drops every snap whose play row is missing or unenriched, so an enrichment gap presents here as a snap gap. play-type-enrichment-coverage owns that upstream condition.'
+  },
+
+  {
+    check_id: 'betting-market-game-prop-column-resolution',
+    invariant:
+      'Every player the betting-market tables hold a game prop for in a given week is a player the player game-prop data-view COLUMN returns a value for. league 6e724c02c turned on an inner nfl_games join for six player game-prop columns that had emitted none at any clock, and a newly-enabled inner join that is wrong presents as an EMPTY column — no error, no failing test, no log line. Nothing else can see it: test/data-views.betting-market-grain.spec.mjs asserts the join is emitted, which is a claim about the SQL rather than about what it resolves, and CI runs against a throwaway database holding no betting markets at all. This is the only oracle that executes the shipped column against real markets.',
+    grain: ['season_year', 'season_type', 'week'],
+    // Grades the previous season alongside the current one. The prior season is
+    // what makes the check non-vacuous BEFORE the live season has props: a
+    // detector whose whole population has not arrived yet cannot be shown to
+    // work, and the first run that could tell you anything would be the first
+    // run that matters. See the module header for the numerator/denominator
+    // split — the numerator comes from the shipped column, the denominator from
+    // raw SQL that never touches a column definition.
+    rows: async () => game_prop_column_resolution_rows(),
+    min_rate: 1.0,
+    calibration:
+      'EXACT, not a tolerance: a player the markets hold a game prop for either comes back from the column or does not, so the healthy reading is 1.0 and min_rate 1.0 is a live invariant rather than a percentile. Measured 2026-08-28 against production: the 2025 corpus grades 21 week-units (18 REG, 3 POST) at denominators of 4 to 33 players, every one of them 1.0000 — 2025 REG week 3 resolves 32 of 32, confirmed by executing the emitted SQL of the column itself. The 2026 unit is the one this check exists for and it is UN-GRADEABLE today, which is the state that must never read as a pass: prop_markets_index holds 640 selections for 2026 REG week 1 linked to nfl_games, but every one is a TEAM market (GAME_SPREAD, GAME_MONEYLINE, GAME_ALT_SPREAD) whose selection_pid is one of the 32 team pids and whose selection_type is null, so the player-prop population is genuinely 0 and there is nothing to resolve. It becomes gradeable on its own, with no calendar reminder and no code change, the week real player game props land. THE DEFECT THIS IS CALIBRATED AGAINST is a numerator of 0 against a non-zero denominator — the join annihilating the row set — which is what removing the nfl_games join, or gating it on the truthiness of a week again, produces. A partial reading is a different and rarer condition: the reference admits only selections whose pid we carry in `player`, so a numerator between 1 and the denominator means the column resolved some players of one week and not others, which is a join predicate that is wrong rather than absent.',
+    // 21 units in the 2025 corpus and 19 in 2024, so 15 sits under the smallest
+    // observed season and far above a scan that has stopped reaching the
+    // markets tables. The live week is deliberately NOT counted on: it is
+    // un-gradeable for most of the year by design, and a floor that depended on
+    // it would collapse every offseason.
+    min_gradeable_units: 15,
+    // No min_denominator. The row count is not fixed by construction and the
+    // smallest legitimate population is genuinely small — 2025 POST week 3 has
+    // four passers because four teams were still playing — so any floor above
+    // it would report a real week as un-gradeable forever.
+    repair_command:
+      'Confirm the direction before touching anything. A numerator of 0 against a non-zero denominator is the COLUMN, not the data: execute the emitted SQL for the failing week (get_data_view_results_query with an explicit {year, seas_type, week}) and check that the prop_markets_index CTE still carries its inner join to nfl_games on esbid, season_year, season_type and week. That join is the change 6e724c02c shipped and the one this check watches. A denominator that has fallen to 0 for a week that used to grade is the opposite condition and belongs to the odds importer — check the runs ledger for the FanDuel market import rather than reading it as a column defect.'
   }
 ]
 
