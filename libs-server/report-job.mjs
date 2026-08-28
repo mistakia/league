@@ -192,6 +192,24 @@ export default async function report_job({
   ]
   if (job_reason) args.push('--reason', job_reason)
 
+  // Retrievable evidence for the failure, per the signal-emission contract's
+  // `file:///var/log/<service>.log` form. The signal already carries the host in
+  // its own column, so the link is a path and nothing else. Sent only on a
+  // failure, which is the only outcome that opens a signal to attach it to.
+  //
+  // Taken from the environment for the same reason JOB_SCHEDULE is: the crontab
+  // line owns WHERE a job's stdout goes, so the crontab line is what states it.
+  // Nothing is sent when JOB_LOG_FILE is unset, which makes this safe to deploy
+  // ahead of any crontab carrying it, and wiring one variable lights up every
+  // report_job call site at once rather than one script at a time.
+  //
+  // Without it, a finalize failure named its step but not its stack, and reading
+  // the stack meant an SSH to the worker host to find the log by hand.
+  const forensic_args = []
+  if (!job_success && process.env.JOB_LOG_FILE) {
+    forensic_args.push('--forensic-link', `file://${process.env.JOB_LOG_FILE}`)
+  }
+
   // Forward this job's cadence so the staleness sweep can compute a next
   // expected fire for it instead of falling back to the flat 3-day window. A
   // weekly or seasonal source under the flat window is effectively unmonitored:
@@ -230,17 +248,26 @@ export default async function report_job({
     )
   }
 
+  // Every ENRICHMENT flag degrades together. `--forensic-link` joins the cadence
+  // flags here rather than going onto `args`, because the fallback below re-runs
+  // `args` verbatim: a flag placed there would be re-sent by the very retry that
+  // exists to drop it, and the row would be lost on any CLI that does not know
+  // it -- turning a diagnosability nicety into the outage it was meant to fix.
+  const optional_args = [...forensic_args, ...schedule_args]
+
   try {
-    await exec_file(base_cli, [...args, ...schedule_args], { timeout: 5000 })
+    await exec_file(base_cli, [...args, ...optional_args], { timeout: 5000 })
   } catch (err) {
-    // Cadence flags must never be able to break reporting. yargs .strict()
+    // Enrichment flags must never be able to break reporting. yargs .strict()
     // rejects an unknown flag with rc=1, which is how the --schedule rollout
     // killed all 31 cron:database: ledger rows for 39 hours (bulletin #48). If
-    // this CLI is ever rolled back below the flag, degrade to the report that
-    // always worked rather than losing the row: losing cadence costs a source
-    // its precise window, losing the report costs the row entirely.
-    if (schedule_args.length && /unknown argument/i.test(err.message || '')) {
-      console.error('run report rejected cadence flags; retrying without them')
+    // this CLI is ever rolled back below a flag, degrade to the report that
+    // always worked rather than losing the row: losing cadence or a log pointer
+    // costs context, losing the report costs the row entirely.
+    if (optional_args.length && /unknown argument/i.test(err.message || '')) {
+      console.error(
+        'run report rejected enrichment flags; retrying without them'
+      )
       try {
         await exec_file(base_cli, args, { timeout: 5000 })
         return

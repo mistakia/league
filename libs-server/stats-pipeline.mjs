@@ -130,6 +130,47 @@ export const run_step = async ({
   }
 }
 
+// The step-name roster is what the reader needs FIRST, and it is bounded by the
+// pipeline's own step count (nine at the widest). The per-step messages are
+// unbounded third-party text, so they follow. Front-loading matters because the
+// reason reaches a signal TITLE that is sliced to 200 characters
+// (extension/runs/lib/oracle.mjs title_for_failure) -- put the names after the
+// messages and a single verbose stack pushes every name past the cut, which is
+// how `Finalized game <esbid> with 1 failures` came to require an SSH to
+// digitalocean-0 and a grep of /var/log/league/import-plays-preseason.log to
+// answer "which step".
+const MAX_STEP_ERROR_CHARS = 240
+const MAX_REASON_CHARS = 1200
+
+const truncate = ({ text, limit }) =>
+  text.length > limit ? `${text.slice(0, limit - 3)}...` : text
+
+/**
+ * A job_reason that names the failed steps and carries their error messages.
+ *
+ * `jobs.reason` is an unbounded `text` column, so the cap here is about keeping
+ * a many-step failure readable rather than about fitting a column.
+ *
+ * @param {object} params
+ * @param {Array<{ step: string, error: string }>} params.steps_failed
+ * @param {number} params.total_steps steps the pipeline attempted
+ * @returns {string} the detail clause, empty when nothing failed
+ */
+export const format_step_failures = ({ steps_failed, total_steps }) => {
+  if (!steps_failed?.length) return ''
+
+  const names = steps_failed.map(({ step }) => step).join(', ')
+  const details = steps_failed
+    .map(
+      ({ step, error }) =>
+        `${step}: ${truncate({ text: String(error ?? 'unknown error'), limit: MAX_STEP_ERROR_CHARS })}`
+    )
+    .join(' | ')
+
+  const summary = `${steps_failed.length} of ${total_steps} steps failed [${names}]`
+  return truncate({ text: `${summary} -- ${details}`, limit: MAX_REASON_CHARS })
+}
+
 // ============================================================================
 // Format Processing Pipelines
 // ============================================================================

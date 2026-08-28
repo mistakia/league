@@ -4,6 +4,7 @@ import { report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   run_step,
+  format_step_failures,
   process_all_format_gamelogs,
   process_all_format_aggregates,
   process_global_aggregates
@@ -157,12 +158,19 @@ export const finalize_game = async ({
   const total_duration = Date.now() - start_time
   const success = results.steps_failed.length === 0
 
+  // Everything needed to name the failing step is in `results.steps_failed`
+  // here. Reporting only a COUNT threw it away, and recovering it afterwards
+  // meant an SSH to the worker host and a grep of its log.
   await report_job({
     job_type: job_types.FINALIZE_GAME,
     job_success: success,
     job_reason: success
       ? `Finalized game ${esbid} in ${total_duration}ms`
-      : `Finalized game ${esbid} with ${results.steps_failed.length} failures`
+      : `Finalized game ${esbid}: ${format_step_failures({
+          steps_failed: results.steps_failed,
+          total_steps:
+            results.steps_completed.length + results.steps_failed.length
+        })}`
   })
 
   log(
