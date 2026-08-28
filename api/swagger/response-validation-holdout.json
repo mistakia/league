@@ -57,17 +57,6 @@
     "messages": ["/response/picks/*/pick_string must be string"]
   },
   {
-    "operation": "GET /api/leagues/{leagueId}/players",
-    "status": 200,
-    "class": "pattern_drift",
-    "added": "2026-08-18",
-    "messages": [
-      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
-      "/response/*/roster_status must be equal to one of the allowed values: ACTIVE, INACTIVE, INJURED_RESERVE, PRACTICE_SQUAD, SUSPENDED",
-      "/response/*/roster_status must be string"
-    ]
-  },
-  {
     "operation": "GET /api/leagues/{leagueId}/restricted-free-agency",
     "status": 200,
     "class": "type_drift",
@@ -166,16 +155,6 @@
     "messages": ["/response/*/esbid must be string"]
   },
   {
-    "operation": "GET /api/teams/{teamId}/players",
-    "status": 200,
-    "class": "pattern_drift",
-    "added": "2026-08-18",
-    "messages": [
-      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
-      "/response/*/roster_status must be string"
-    ]
-  },
-  {
     "operation": "GET /api/wagers/{user_id}",
     "status": 200,
     "class": "type_drift",
@@ -259,16 +238,6 @@
     "added": "2026-08-18",
     "messages": [
       "/api/leagues/*/waivers no schema defined for status code '423' in the openapi spec"
-    ]
-  },
-  {
-    "operation": "POST /api/players",
-    "status": 200,
-    "class": "pattern_drift",
-    "added": "2026-08-18",
-    "messages": [
-      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
-      "/response/*/roster_status must be string"
     ]
   },
   {

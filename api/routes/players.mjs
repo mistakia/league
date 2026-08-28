@@ -245,13 +245,11 @@ router.post('/?', async (req, res) => {
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
- *           example: "PATR-MAHO-005785"
+ *           $ref: '#/components/schemas/PlayerId'
  *         description: |
  *           Player ID in the format: FFFF-LLLL-NNNNNN
- *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
- *           - LLLL: First 4 characters of last name (likewise)
+ *           - FFFF: Up to the first 4 letters of the first name (a frozen snapshot, never recomputed)
+ *           - LLLL: Up to the first 4 letters of the last name (likewise)
  *           - NNNNNN: Immutable zero-padded serial -- this is the identity
  *
  *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
@@ -387,13 +385,11 @@ router.get('/:pid', async (req, res) => {
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
- *           example: "PATR-MAHO-005785"
+ *           $ref: '#/components/schemas/PlayerId'
  *         description: |
  *           Player ID in the format: FFFF-LLLL-NNNNNN
- *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
- *           - LLLL: First 4 characters of last name (likewise)
+ *           - FFFF: Up to the first 4 letters of the first name (a frozen snapshot, never recomputed)
+ *           - LLLL: Up to the first 4 letters of the last name (likewise)
  *           - NNNNNN: Immutable zero-padded serial -- this is the identity
  *
  *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
@@ -518,13 +514,11 @@ router.get('/:pid/practices/?', async (req, res) => {
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
- *           example: "PATR-MAHO-005785"
+ *           $ref: '#/components/schemas/PlayerId'
  *         description: |
  *           Player ID in the format: FFFF-LLLL-NNNNNN
- *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
- *           - LLLL: First 4 characters of last name (likewise)
+ *           - FFFF: Up to the first 4 letters of the first name (a frozen snapshot, never recomputed)
+ *           - LLLL: Up to the first 4 letters of the last name (likewise)
  *           - NNNNNN: Immutable zero-padded serial -- this is the identity
  *
  *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
@@ -776,13 +770,11 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *         in: path
  *         required: true
  *         schema:
- *           type: string
- *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
- *           example: "PATR-MAHO-005785"
+ *           $ref: '#/components/schemas/PlayerId'
  *         description: |
  *           Player ID in the format: FFFF-LLLL-NNNNNN
- *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
- *           - LLLL: First 4 characters of last name (likewise)
+ *           - FFFF: Up to the first 4 letters of the first name (a frozen snapshot, never recomputed)
+ *           - LLLL: Up to the first 4 letters of the last name (likewise)
  *           - NNNNNN: Immutable zero-padded serial -- this is the identity
  *
  *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.

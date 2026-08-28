@@ -4,7 +4,9 @@ import {
   nfl_team_abbreviations,
   fantasy_positions,
   external_data_sources,
-  nfl_season_types
+  nfl_season_types,
+  player_nfl_status,
+  position_vocabulary
 } from '#constants'
 import { league_settings_fields } from '#api/routes/leagues/league-settings.mjs'
 
@@ -130,14 +132,23 @@ const options = {
           description: 'Fantasy team ID',
           example: 5
         },
+        // The pattern MIRRORS the `player_pid_format` CHECK constraint on
+        // `public.player`, which is the enforced contract; anything narrower
+        // documents a rule the database does not hold and rejects identities it
+        // accepts. Each name half is one to FOUR letters, not exactly four --
+        // a player whose first or last name is shorter gets a shorter prefix --
+        // and the serial is six OR MORE digits. A team unit is the bare nfl
+        // abbreviation, optionally suffixed with the unit it names.
         PlayerId: {
           type: 'string',
           description:
             'Player ID in format FFFF-LLLL-NNNNNN, where NNNNNN is an immutable ' +
-            'serial and the name prefix is a frozen snapshot. A team defense is ' +
-            'identified by its bare nfl team abbreviation, e.g. NE.',
+            'serial and each name prefix is a frozen snapshot of up to four ' +
+            'letters. A team unit is identified by its bare nfl team ' +
+            'abbreviation, e.g. NE, optionally suffixed -OFF, -DEF or -DST.',
           example: 'PATR-MAHO-005785',
-          pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
+          pattern:
+            '^([A-Z]{1,4}-[A-Z]{1,4}-[0-9]{6,}|[A-Z]{2,3}(-(OFF|DEF|DST))?)$'
         },
         // Common property schemas
         UnixTimestamp: {
@@ -263,47 +274,47 @@ const options = {
               description: 'Formatted name for display',
               example: 'patrick mahomes'
             },
+            // The three position columns share ONE vocabulary and it is
+            // `position_vocabulary`, the same 25 values the
+            // `player_*_position_vocabulary` CHECK constraints enforce. The
+            // hand-written 13-value list this replaced was both too narrow
+            // (no OL, T, G, C, NT, EDGE, OLB, ILB, MLB, DB, P, LS -- all of
+            // which the fixture carries) and wrong (DEF is not a legal stored
+            // value; DST is).
             primary_position: {
               type: 'string',
               maxLength: 4,
-              enum: [
-                'QB',
-                'RB',
-                'WR',
-                'TE',
-                'K',
-                'DEF',
-                'DST',
-                'FB',
-                'CB',
-                'S',
-                'LB',
-                'DE',
-                'DT'
-              ],
+              enum: [...position_vocabulary],
               description: 'Primary position',
               example: 'QB'
             },
             secondary_position: {
               type: 'string',
               maxLength: 4,
-              description: 'Primary position',
+              enum: [...position_vocabulary],
+              description: 'Secondary position',
               example: 'QB'
             },
             tertiary_position: {
               type: 'string',
               maxLength: 4,
               nullable: true,
-              description: 'Secondary position',
+              enum: [...position_vocabulary, null],
+              description: 'Tertiary position',
               example: null
             },
+            // Every property from here down is NULLABLE on `public.player`.
+            // Declaring them required-shaped made each response's validity
+            // depend on which row the suite's random fixture draw returned.
             height_inches: {
               type: 'integer',
+              nullable: true,
               description: 'Height in inches',
               example: 75
             },
             weight_pounds: {
               type: 'integer',
+              nullable: true,
               description: 'Weight in pounds',
               example: 230
             },
@@ -312,34 +323,45 @@ const options = {
             },
             jersey_number: {
               type: 'integer',
+              nullable: true,
               description: 'Jersey number',
               example: 15
             },
             nfl_draft_year: {
               type: 'integer',
+              nullable: true,
               description: 'NFL draft year',
               example: 2017
             },
             draft_round: {
               type: 'integer',
+              nullable: true,
               description: 'Draft round (0 = undrafted)',
               example: 1
             },
             college: {
               type: 'string',
+              nullable: true,
               description: 'College',
               example: 'Texas Tech'
             },
+            // DERIVED from the `player_nfl_status` catalog, never hand-listed.
+            // `player.roster_status` is an unconstrained varchar written by the
+            // roster importers off that catalog, and it is NULLABLE -- 297 of
+            // the 1000 rows in `db/fixtures/test/player.sql` carry null. The
+            // five-value list this replaced named neither the null nor RETIRED,
+            // CUT, NOT_WITH_TEAM, UNSIGNED_FREE_AGENT, UNDRAFTED_FREE_AGENT or
+            // RESTRICTED_FREE_AGENT, every one of which the player routes emit.
+            // Because whether a given response tripped it depended on which row
+            // the suite's `ORDER BY RANDOM()` fixture draw returned, the
+            // hold-out entries covering it went in and out of "stale" at random.
             roster_status: {
               type: 'string',
-              enum: [
-                'ACTIVE',
-                'INACTIVE',
-                'INJURED_RESERVE',
-                'PRACTICE_SQUAD',
-                'SUSPENDED'
-              ],
-              description: 'NFL roster status',
+              nullable: true,
+              enum: [...Object.values(player_nfl_status), null],
+              description:
+                'NFL roster status, from the player_nfl_status catalog. Null ' +
+                'where no status has been reported for the player.',
               example: 'ACTIVE'
             },
             game_designation: {
@@ -352,6 +374,7 @@ const options = {
             date_of_birth: {
               type: 'string',
               format: 'date',
+              nullable: true,
               description: 'Date of birth',
               example: '1995-09-17'
             }
