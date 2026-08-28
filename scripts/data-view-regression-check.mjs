@@ -41,7 +41,7 @@ import { hideBin } from 'yargs/helpers'
 // modules that touch #config at import time.
 import is_main from '#libs-server/is-main.mjs'
 import { load_data_view_test_queries_sync } from '#libs-server/load-test-cases.mjs'
-import { process_expected_query } from '#libs-server/process-expected-query.mjs'
+import { pin_golden_clock } from '#test/utils/golden-clock.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const project_root = path.resolve(__dirname, '..')
@@ -84,13 +84,12 @@ const select_fixtures = () => {
 
 // ---------- SQL sourcing ----------
 
-// Stored expected_query strings may contain `${...}` template literals that
-// the spec runner interpolates via process_expected_query. Apply the same
-// interpolation here so executed SQL matches what the spec tests assert.
+// A stored expected_query is now a literal: the harness compares under a pinned
+// clock, so nothing in a fixture is interpolated at read time.
 const read_head_sql_stored = (filename) => {
   const fp = path.join(project_root, 'test', 'data-view-queries', filename)
   const j = JSON.parse(fs.readFileSync(fp, 'utf8'))
-  return j.expected_query ? process_expected_query(j.expected_query) : null
+  return j.expected_query || null
 }
 
 // Single batched `git cat-file --batch` invocation reads N fixtures with one
@@ -126,9 +125,8 @@ const read_base_sql_stored_batch = (filenames) => {
     cursor += size + 1 // trailing LF after contents
     try {
       const j = JSON.parse(body)
-      const raw = j.expected_query || null
       result[fn] = {
-        sql: raw ? process_expected_query(raw) : null,
+        sql: j.expected_query || null,
         error: null
       }
     } catch {
@@ -326,6 +324,10 @@ const sample_diff_rows = (head_rows, base_rows, n) => {
 }
 
 const main = async () => {
+  // Both sides of this comparison must be generated at the instant the
+  // goldens are blessed at, or a clock-derived fixture reads as a
+  // regression on a date change alone.
+  pin_golden_clock()
   const fixtures = select_fixtures()
   if (!fixtures.length) {
     log('No fixtures matched.')

@@ -14,11 +14,11 @@ import {
   get_data_view_results_query,
   load_data_view_test_queries,
   update_test_file,
-  process_expected_query,
   format_sql,
   normalize_sql_for_comparison
 } from '#libs-server'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import { pin_golden_clock } from '#test/utils/golden-clock.mjs'
 
 const log = debug('evaluate-mismatched-queries')
 
@@ -401,6 +401,9 @@ const compare_results = (actual_result, expected_result, test_name) => {
  */
 const main = async () => {
   try {
+    // Same instant the golden harness compares at.
+    pin_golden_clock()
+
     // Parse command line arguments
     const options = parse_arguments()
 
@@ -462,7 +465,7 @@ const main = async () => {
         const actual_query = query.toString()
 
         // Process the expected query to handle template literals
-        const expected_query = process_expected_query(test_case.expected_query)
+        const expected_query = test_case.expected_query
 
         // Compare with expected query
         const comparison = compare_queries_logic(actual_query, expected_query)

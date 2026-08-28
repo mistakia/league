@@ -1,6 +1,5 @@
-/* global describe it before */
+/* global describe it before after */
 
-import MockDate from 'mockdate'
 import fs from 'node:fs'
 import path from 'node:path'
 import * as chai from 'chai'
@@ -8,10 +7,13 @@ import { fileURLToPath } from 'node:url'
 
 import {
   get_data_view_results_query,
-  load_data_view_test_queries_sync,
-  process_expected_query
+  load_data_view_test_queries_sync
 } from '#libs-server'
-import { compare_queries } from './utils/index.mjs'
+import {
+  compare_queries,
+  pin_golden_clock,
+  restore_suite_clock
+} from './utils/index.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -105,8 +107,12 @@ console.log(`\nLoaded ${data_view_test_queries.length} JSON test cases\n`)
 
 describe('Data View', () => {
   before(() => {
-    MockDate.reset()
+    pin_golden_clock()
     enable_debug_namespaces('data-views')
+  })
+
+  after(() => {
+    restore_suite_clock()
   })
 
   describe('Data View Test Queries', () => {
@@ -124,10 +130,7 @@ describe('Data View', () => {
               await get_data_view_results_query(data_view_test_query.request)
             const actual_query = query.toString()
 
-            // Process the expected query to handle template literals
-            const expected_query = process_expected_query(
-              data_view_test_query.expected_query
-            )
+            const expected_query = data_view_test_query.expected_query
 
             // Source/bridge migration: fixtures whose SQL shape intentionally
             // diverges (orphan-CTE drops, direct team-subject joins, dispatcher

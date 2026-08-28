@@ -194,7 +194,6 @@ export {
   load_data_view_test_queries_sync
 } from './load-test-cases.mjs'
 export { update_test_file } from './update-test-file.mjs'
-export { process_expected_query } from './process-expected-query.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

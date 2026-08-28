@@ -8,7 +8,6 @@ import { hideBin } from 'yargs/helpers'
 
 import { get_data_view_results_query } from '#libs-server/get-data-view-results.mjs'
 import { load_data_view_test_queries_sync } from '#libs-server/load-test-cases.mjs'
-import { process_expected_query } from '#libs-server/process-expected-query.mjs'
 import is_main from '#libs-server/is-main.mjs'
 import {
   format_sql,
@@ -18,6 +17,7 @@ import {
 // which transitively pulls in #api (and its SSL-key reads) under
 // NODE_ENV=production. Direct import keeps the CLI invokable in any env.
 import compare_queries from '#test/utils/compare-queries.mjs'
+import { pin_golden_clock } from '#test/utils/golden-clock.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -179,7 +179,7 @@ async function run_test_case(test_path, options = {}) {
     }
 
     if (test_case.expected_query) {
-      const expected_query = process_expected_query(test_case.expected_query)
+      const expected_query = test_case.expected_query
 
       if (options.showExpected || options.beautify) {
         console.log('\n\x1b[1m=== Expected Query ===\x1b[0m\n')
@@ -265,6 +265,10 @@ async function create_test_case(test_path, request) {
 
 // CLI Main Function
 async function main() {
+  // Compare at the instant the goldens were blessed at. Without this the CLI
+  // and the mocha harness disagree on every clock-derived fixture, and the CLI
+  // is the one that prints a tick.
+  pin_golden_clock()
   const argv = yargs(hideBin(process.argv))
     .usage('Usage: $0 [test-file] [options]')
     .command(

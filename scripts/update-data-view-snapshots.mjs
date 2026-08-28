@@ -2,25 +2,23 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import MockDate from 'mockdate'
 import prettier from 'prettier'
 
 import {
   get_data_view_results_query,
-  load_data_view_test_queries,
-  process_expected_query
+  load_data_view_test_queries
 } from '#libs-server'
-import { compare_queries } from '#test/utils/index.mjs'
+import { compare_queries, pin_golden_clock } from '#test/utils/index.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixtures_dir = path.join(__dirname, '..', 'test', 'data-view-queries')
 
 // This script runs outside test/global.mjs, so it has no clock mock of its own.
-// Honor the same LEAGUE_MOCK_DATE the suite honors, so a regeneration and a
-// verification run can be pinned to the same instant.
-if (process.env.LEAGUE_MOCK_DATE) {
-  MockDate.set(process.env.LEAGUE_MOCK_DATE)
-}
+// Pin it to the SAME instant the golden harness compares at, or a regeneration
+// blesses SQL the suite will never emit and the fixture is red the moment it is
+// written. The pin ignores LEAGUE_MOCK_DATE on both sides, so the two cannot be
+// driven apart by an environment variable set for some other purpose.
+pin_golden_clock()
 
 // Name the fixtures you intend to bless:
 //   node scripts/update-data-view-snapshots.mjs some-fixture.json other.json
@@ -71,7 +69,6 @@ const main = async () => {
   }
 
   let updated = 0
-  let skipped = 0
   let inert_skipped = 0
   for (const test_case of selected) {
     // A `skip_query_match` fixture's expected_query is inert -- the harness
@@ -82,16 +79,11 @@ const main = async () => {
       inert_skipped++
       continue
     }
-    if (test_case.expected_query && test_case.expected_query.includes('${')) {
-      skipped++
-      continue
-    }
     try {
       const { query } = await get_data_view_results_query(test_case.request)
       const actual = query.toString()
-      const expected = process_expected_query(test_case.expected_query)
       try {
-        compare_queries(actual, expected)
+        compare_queries(actual, test_case.expected_query)
         continue
       } catch (e) {}
       const raw = await fs.readFile(
@@ -117,7 +109,7 @@ const main = async () => {
     }
   }
   console.log(
-    `\n${updated} updated, ${skipped} template-skipped` +
+    `\n${updated} updated` +
       (inert_skipped ? `, ${inert_skipped} skip_query_match-skipped` : '')
   )
 }

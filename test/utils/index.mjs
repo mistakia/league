@@ -10,6 +10,11 @@ export { default as releasePlayer } from './release-player.mjs'
 export { default as selectPlayer } from './select-player.mjs'
 export { default as fillRoster } from './fill-roster.mjs'
 export { default as compare_queries } from './compare-queries.mjs'
+export {
+  GOLDEN_CLOCK,
+  pin_golden_clock,
+  restore_suite_clock
+} from './golden-clock.mjs'
 export { default as setupSuperPriority } from './setup-super-priority.mjs'
 export {
   default as create_waiver,
