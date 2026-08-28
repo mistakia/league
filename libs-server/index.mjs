@@ -74,10 +74,14 @@ export {
 } from './create-player.mjs'
 export {
   default as resolve_canonical_player,
-  BIRTH_DATE_PLACEHOLDER,
   UNKNOWN_REASONS,
   describe_resolution
 } from './resolve-canonical-player.mjs'
+export {
+  BIRTH_DATE_PLACEHOLDER,
+  is_real_birth_date,
+  is_absent_player_value
+} from './player-birth-date.mjs'
 export { default as insert_prop_markets } from './insert-prop-markets.mjs'
 export { format_sql, normalize_sql_for_comparison } from './format-sql.mjs'
 export { default as generate_player_id } from './generate-player-id.mjs'

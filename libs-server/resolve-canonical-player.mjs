@@ -1,16 +1,16 @@
 // @ts-check
 import { format_player_name } from '#libs-shared'
 import db from '#db'
+import {
+  BIRTH_DATE_PLACEHOLDER,
+  is_real_birth_date
+} from '#libs-server/player-birth-date.mjs'
 
 // No debug namespace here on purpose. This function is called once per create
 // candidate and its verdict is only meaningful alongside the caller's own
 // disposition counters, so the CALLER logs the outcome -- see
 // import-players-sleeper's skipped_members, which prints every refusal by name
 // and pid through console.log.
-
-// player.date_of_birth is a character varying whose "never learned" value is
-// this string, never NULL. See guideline/nfl/league/league-player-resolution.md.
-export const BIRTH_DATE_PLACEHOLDER = '0000-00-00'
 
 export const UNKNOWN_REASONS = {
   NO_NAME: 'no_name',
@@ -90,8 +90,7 @@ export const UNIQUE_EXTERNAL_ID_COLUMNS = [
  * @param {{ date_of_birth?: string | null }} row
  * @returns {boolean}
  */
-const holds_real_birth_date = (row) =>
-  Boolean(row.date_of_birth) && row.date_of_birth !== BIRTH_DATE_PLACEHOLDER
+const holds_real_birth_date = (row) => is_real_birth_date(row.date_of_birth)
 
 /*
   Answers ONE question: does this person already have a player row, so that a
@@ -300,5 +299,3 @@ export const describe_resolution = ({ name, date_of_birth, resolution }) => {
     resolution.reason ? ` (${resolution.reason})` : ''
   }: "${name}" dob=${date_of_birth || 'absent'}${matched_column} candidates=[${pids}]`
 }
-
-export { holds_real_birth_date }

@@ -63,6 +63,7 @@ import { pfr_gamelog_agreement_rows } from '#libs-server/pfr-gamelog-agreement.m
 import { erased_role_attribution_by_play_type } from '#libs-server/erased-role-attribution.mjs'
 import { game_prop_column_resolution_rows } from '#libs-server/game-prop-column-resolution.mjs'
 import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
+import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -72,45 +73,6 @@ const GAMELOG_CHILD_TABLES = [
   'player_rushing_gamelogs',
   'player_passing_gamelogs',
   'player_defender_gamelogs'
-]
-
-// Every external identifier column on `player`. A shell row is one holding NONE
-// of them. Enumerated rather than derived from information_schema at runtime: a
-// derived list silently changes the predicate's meaning when a column is added,
-// which is the same class of defect as a registry-derived CTE identity key.
-const PLAYER_EXTERNAL_ID_COLUMNS = [
-  'cbs_player_id',
-  'cfbref_player_id',
-  'draftkings_player_id',
-  'esb_player_id',
-  'espn_player_id',
-  'fanduel_player_id',
-  'fantasy_data_player_id',
-  'fantasylabs_player_id',
-  'fantasypoints_player_id',
-  'fantrax_player_id',
-  'ffpc_player_id',
-  'fleaflicker_player_id',
-  'gsis_it_player_id',
-  'gsis_player_id',
-  'keeptradecut_player_id',
-  'mfl_player_id',
-  'nffc_player_id',
-  'nfl_player_id',
-  'otc_player_id',
-  'pff_player_id',
-  'pfr_player_id',
-  'rotowire_player_id',
-  'rotoworld_player_id',
-  'rts_player_id',
-  'sis_player_id',
-  'sleeper_player_id',
-  'smart_player_id',
-  'sportradar_player_id',
-  'sumer_player_id',
-  'swish_player_id',
-  'underdog_player_id',
-  'yahoo_player_id'
 ]
 
 // The ADP sources we run an importer for, with the number of distinct
@@ -353,39 +315,19 @@ const registry = [
       'No person holds both a populated canonical `player` row and a near-empty shell row. Repaired five times across db/adhoc dedupe rounds with NO detector on any surface — no audit script, no gate, no monitoring script grades it — and it is the exact inverse of the conflated-identity class, whose half does have a wired gate.',
     grain: ['pid'],
     rows: async () => {
-      // One statement rather than a builder chain: the predicate is a self-join
-      // with a per-row aggregate over 32 columns on both sides, which knex
-      // cannot express without re-spelling the identifier list twice.
-      const id_expression = (/** @type {string} */ alias) =>
-        `num_nonnulls(${PLAYER_EXTERNAL_ID_COLUMNS.map((column) => `${alias}.${column}`).join(', ')})`
-
-      const { rows: found } = await db.raw(
-        `
-        with id_counts as (
-          select p.pid, p.formatted_name, p.college, ${id_expression('p')} as id_count
-          from player p
-        ),
-        shells as (
-          select c.* from id_counts c
-          where c.id_count = 0
-            and not exists (select 1 from player_gamelogs g where g.pid = c.pid)
-        )
-        select distinct s.pid
-        from shells s
-        join id_counts k
-          on k.formatted_name = s.formatted_name
-         and k.pid <> s.pid
-         and k.id_count >= 2
-         and (k.college = s.college or k.college is null or s.college is null)
-        `
-      )
+      // The pair predicate is shared with the repair that closes this class --
+      // see libs-server/duplicate-person-row-pairs.mjs for why the two must not
+      // hold separate copies. A shell can pair with more than one twin, so the
+      // findings are the DISTINCT shells rather than the pairs.
+      const pairs = await find_duplicate_person_row_pairs()
+      const found = [...new Set(pairs.map((pair) => pair.shell_pid))]
 
       const [scanned] = await db('player').count({ count: '*' })
       const denominator = Number(scanned.count)
 
       return found.length
-        ? found.map((/** @type {Record<string, any>} */ row) => ({
-            pid: row.pid,
+        ? found.map((/** @type {string} */ pid) => ({
+            pid,
             numerator: 1,
             denominator
           }))

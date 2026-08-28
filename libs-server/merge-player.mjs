@@ -3,19 +3,24 @@ import debug from 'debug'
 import db from '#db'
 import update_player_id from './update-player-id.mjs'
 import updatePlayer from './update-player.mjs'
-import { BIRTH_DATE_PLACEHOLDER } from './resolve-canonical-player.mjs'
+import { BIRTH_DATE_PLACEHOLDER } from './player-birth-date.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('merge-player')
 enable_debug_namespaces('merge-player,update-player-id')
 
-// `date_of_birth` is a character varying whose "never learned" value is the
-// `0000-00-00` sentinel rather than NULL, so it is both truthy and exactly as
-// long as a real date. The field merge below breaks string ties by length and
-// otherwise prefers `remove_player_row`, which means the sentinel wins outright
-// against a real birth date whenever the row holding the real one survives --
-// the merge then WRITES the sentinel, the one value this repair class is
+// The field merge below breaks string ties by length and otherwise prefers
+// `remove_player_row`, which means the `0000-00-00` birth-date sentinel wins
+// outright against a real date whenever the row holding the real one survives
+// -- the merge then WRITES the sentinel, the one value this repair class is
 // forbidden to produce. An absence is not a value; treat it as one nowhere.
+//
+// Broader than is_absent_player_value in player-birth-date.mjs, which the merge
+// AUDIT uses: this bare falsy test also treats `0` and `false` as absent, so a
+// numeric column holding zero yields to the other half. The two agree on every
+// case a field merge can produce, and the difference is documented at the other
+// definition rather than reconciled, since narrowing either one changes
+// behavior.
 const is_absent = (value) => !value || value === BIRTH_DATE_PLACEHOLDER
 
 // Exported for its own spec: this rule decides what the surviving row ends up
