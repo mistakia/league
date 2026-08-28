@@ -1,4 +1,5 @@
 import { execFile } from 'child_process'
+import fs from 'fs'
 import { promisify } from 'util'
 
 import db from '#db'
@@ -125,6 +126,42 @@ const job_type_to_id = build_job_type_to_id()
 export const should_emit_log_error = ({ job_success, job_id, base_cli }) =>
   !job_success && !(job_id && base_cli)
 
+// Retrievable evidence for a failure, per the signal-emission contract's
+// `file:///var/log/<service>.log` form. The signal already carries the host in
+// its own column, so the link is a path and nothing else.
+//
+// DERIVED FROM THIS PROCESS'S OWN STDOUT, not from a variable someone has to
+// remember to set. Every league crontab line already ends in
+// `>> /var/log/league/<name>.log 2>&1`, so the log path is a fact about the fd
+// the kernel handed us, and /proc/self/fd/1 is where that fact is readable. An
+// env var restating it would be a second copy of a value already on the line,
+// free to drift from the redirect it duplicates -- and a forensic link that
+// points at the wrong file is worse than none, because it is believed.
+//
+// This also gets the case the incident actually had: finalize_game runs INSIDE
+// import-plays-nfl-v1, so its output lands in the CALLER's log
+// (/var/log/league/import-plays-preseason.log) and nothing finalize-game knows
+// about itself could name that file. The inherited fd does.
+//
+// Not every run is redirected. Under a tty or a pipe the link resolves to
+// `pipe:[345995878]` or `/dev/pts/0` rather than a path, which is not evidence
+// anyone can retrieve later, so anything not absolute is dropped. Both shapes
+// verified on digitalocean-0.
+export const resolve_log_forensic_link = ({
+  read_link = (path) => fs.readlinkSync(path)
+} = {}) => {
+  try {
+    const target = read_link('/proc/self/fd/1')
+    // `pipe:[...]`, `socket:[...]`, `/dev/pts/0` and `/dev/null` are all
+    // reachable here and none of them is retrievable evidence.
+    if (!target.startsWith('/') || target.startsWith('/dev/')) return null
+    return `file://${target}`
+  } catch {
+    // No procfs (macOS, a container without /proc) -- not an error, just no link.
+    return null
+  }
+}
+
 export default async function report_job({
   job_type,
   job_success = true,
@@ -192,22 +229,10 @@ export default async function report_job({
   ]
   if (job_reason) args.push('--reason', job_reason)
 
-  // Retrievable evidence for the failure, per the signal-emission contract's
-  // `file:///var/log/<service>.log` form. The signal already carries the host in
-  // its own column, so the link is a path and nothing else. Sent only on a
-  // failure, which is the only outcome that opens a signal to attach it to.
-  //
-  // Taken from the environment for the same reason JOB_SCHEDULE is: the crontab
-  // line owns WHERE a job's stdout goes, so the crontab line is what states it.
-  // Nothing is sent when JOB_LOG_FILE is unset, which makes this safe to deploy
-  // ahead of any crontab carrying it, and wiring one variable lights up every
-  // report_job call site at once rather than one script at a time.
-  //
-  // Without it, a finalize failure named its step but not its stack, and reading
-  // the stack meant an SSH to the worker host to find the log by hand.
   const forensic_args = []
-  if (!job_success && process.env.JOB_LOG_FILE) {
-    forensic_args.push('--forensic-link', `file://${process.env.JOB_LOG_FILE}`)
+  const forensic_link = job_success ? null : resolve_log_forensic_link()
+  if (forensic_link) {
+    forensic_args.push('--forensic-link', forensic_link)
   }
 
   // Forward this job's cadence so the staleness sweep can compute a next

@@ -5,7 +5,8 @@ import * as chai from 'chai'
 import {
   should_emit_log_error,
   is_connection_error,
-  with_connection_retry
+  with_connection_retry,
+  resolve_log_forensic_link
 } from '#libs-server/report-job.mjs'
 
 const expect = chai.expect
@@ -86,6 +87,56 @@ describe('LIBS-SERVER report_job should_emit_log_error', function () {
         base_cli: null
       })
     ).to.equal(true)
+  })
+})
+
+describe('LIBS-SERVER report_job resolve_log_forensic_link', function () {
+  // The reader is injected because an ESM namespace object is frozen, so a test
+  // that monkeypatches fs.readlinkSync silently does nothing and reports a green
+  // it never earned -- the same reason the gate scanners take their readers as
+  // parameters.
+  const with_link = (target) =>
+    resolve_log_forensic_link({
+      read_link: () => {
+        if (target instanceof Error) throw target
+        return target
+      }
+    })
+
+  it('resolves a cron-redirected stdout to its log file', () => {
+    // The live shape. Verified against digitalocean-0: a crontab line ending in
+    // `>> /var/log/league/<name>.log 2>&1` makes /proc/self/fd/1 readlink to
+    // exactly that path.
+    expect(with_link('/var/log/league/import-plays-preseason.log')).to.equal(
+      'file:///var/log/league/import-plays-preseason.log'
+    )
+  })
+
+  it('drops a pipe, which is not evidence anyone can retrieve later', () => {
+    // Also verified on digitalocean-0: an un-redirected run resolves here.
+    expect(with_link('pipe:[345995878]')).to.equal(null)
+  })
+
+  it('drops a socket', () => {
+    expect(with_link('socket:[123456]')).to.equal(null)
+  })
+
+  it('drops a tty', () => {
+    expect(with_link('/dev/pts/0')).to.equal(null)
+  })
+
+  it('drops /dev/null, which is an absolute path holding nothing', () => {
+    // This is the one an "is it absolute" test alone gets wrong: /dev/null
+    // passes that check and points at no evidence whatsoever.
+    expect(with_link('/dev/null')).to.equal(null)
+  })
+
+  it('returns null rather than throwing where there is no procfs', () => {
+    // macOS and any container without /proc. A report_job that threw here would
+    // lose the outcome entirely over a missing nicety.
+    const err = new Error('ENOENT: no such file or directory')
+    err.code = 'ENOENT'
+    expect(with_link(err)).to.equal(null)
   })
 })
 
