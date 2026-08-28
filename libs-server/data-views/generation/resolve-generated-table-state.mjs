@@ -24,28 +24,39 @@
 // WHAT IT DOES NOT CHECK, AND WHY NOT. There is no check that a param KEY
 // exists, and that absence is measured rather than an oversight.
 //
-// The param vocabulary is not server-side. Only 56 of 597 column definitions
-// declare `column_params`; for the rest it lives in the CLIENT field registry
-// (`app/core/data-views-fields/`), where 31 of 33 modules import React or
-// `@components` for their cell renderers and none of it can be loaded here. A
-// key-existence check built on the server-visible registries alone rejected
-// 123 of the 186 production saved views over 3,219 errors, on real keys --
-// `time_type` (732 uses), `source_id` (700), `market_type` (700) -- which are
-// the very head of real param usage. A check with that false-positive rate does
-// not get fixed, it gets turned off, and it takes the checks that DO work with
+// The client field registry IS readable from the server now, and the catalog
+// carries it: columns advertising param keys went from 56 of 597 to 413, and
+// `time_type`, `nfl_week_id`, `output`, `market_type` and `source_id` are all
+// visible. That fixed most of the problem. A key-existence check that once
+// rejected 123 of 186 saved views now rejects 11 of 189.
+//
+// It still does not ship, because of what those 11 turn out to be. Re-measured
+// against the 189 production saved views, post-migration, over catalog-known
+// columns: 55 rejections, of which 43 are real params that the query builder
+// actively honours and NO registry declares.
+//
+//   - `sourceid` (17 uses) and `scoring_format_id` (20) are read directly out
+//     of `params` by `player-projected-column-definitions.mjs`, which says in
+//     as many words that the persisted key deliberately did not move.
+//   - `output_column_params` / `output_match_column_params` (6) are WRITTEN by
+//     `data-views-saved-view-migration.mjs` itself, so the check would reject a
+//     key the system generates one layer up.
+//
+// That is a 78% false-positive rate, and the cause is a THIRD param source
+// beyond the two this catalog reads: params consumed by hand inside a column
+// definition's query builder, declared nowhere. A registry cannot see them, so
+// no amount of widening the catalog reaches them, and a check at this rate does
+// not get fixed -- it gets turned off, and takes the checks that DO work with
 // it.
 //
-// So what is enforced is what can be enforced correctly: every `column_id`
+// So what is enforced remains what can be enforced correctly: every `column_id`
 // against the full 597-column registry, and every param VALUE for which a
-// definition is actually known. On the same corpus that pair produces 10
-// findings, all of them real -- stale column ids in old saved views, and four
-// `nfl_week_id` values outside the canonical identifier set.
+// definition is actually known.
 //
-// Closing the key gap means making the client field registry importable by
-// splitting each module's data half from its render half. That is a 31-file
-// refactor in a contended area and it is its own task. Until it lands, a
-// fabricated param KEY reaches the query builder and is silently ignored there,
-// exactly as it is today for a saved view.
+// Making the key check shippable means giving those hand-read params a
+// declaration, so that the query builder and the catalog draw on one source.
+// Until then a fabricated param KEY reaches the query builder and is silently
+// ignored there, exactly as it is today for a saved view.
 
 import {
   get_data_view_generation_catalog,
@@ -175,9 +186,9 @@ const check_params = ({ params, catalog_column, catalog, path, errors }) => {
       param_key
     })
 
-    // Unknown here means "not visible from the server", not "not real" -- see
-    // the header. Nothing is reported, because the alternative was measured and
-    // it was a two-thirds false-positive rate.
+    // Unknown here still means "declared in no registry", not "not real" --
+    // some of these are params a column definition reads by hand. See the
+    // header for the measurement.
     if (!definition) continue
 
     const reason = check_param_value({ definition, value })
