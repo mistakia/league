@@ -27,6 +27,7 @@ Two consequences worth stating outright. **This file must be true without verifi
 | Touch anything under `api/`                                      | [docs/guides/api.md](docs/guides/api.md)         |
 | Touch `scripts/`, `jobs/` or a crontab                           | [docs/guides/scripts.md](docs/guides/scripts.md) |
 | Add a gate, check, ratchet or negative control                   | [docs/guides/gates.md](docs/guides/gates.md)     |
+| Put `//@ts-check` on a file, or opt one out                      | [docs/guides/gates.md](docs/guides/gates.md)     |
 
 Each guide carries the full arc of its undertaking, incidents included. They are long on purpose: a session doing one of these needs all of it at once, and none of it otherwise.
 
