@@ -432,6 +432,23 @@ It was not merely documentation: it was a labelled, value-bearing UI option on `
 - `game_clock_range`, `field_position`
 - `roof`, `surface`, `wind` conditions
 
+#### Where the generation catalog's param vocabulary comes from
+
+`libs-server/data-views/generation/build-data-view-generation-catalog.mjs` builds the model-facing vocabulary for data-view generation. It is **derived in process at import and never committed** — a checked-in catalog artifact would rot against the registries the moment either moved, and silently, since the generator would keep offering a column id the server no longer answers.
+
+It draws per-column params from **two** registries, and needs both:
+
+| Source                                                                   | Declares `column_params` on | Holds                                                                                              |
+| ------------------------------------------------------------------------ | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| Server column definitions (`libs-server/data-views-column-definitions/`) | 56 of 597 columns           | The executable spelling; wins a key collision                                                      |
+| Client field registry (`app/core/data-views-fields/`)                    | 357 columns                 | `time_type`, `nfl_week_id`, `output`, `market_type`, `source_id` — most of what a user reaches for |
+
+The client registry was unreadable from the server until 2026-08-28, which held catalog param coverage at 56 of 597 columns and made measured param agreement 0.009. The obstacle was **extensionless relative specifiers** (`from './column-groups'` resolves under webpack and not under bare Node ESM), not React — only 5 of 33 modules import `react` or `@components`, and those five stay carved out, detected from source text rather than by filename. `read-client-column-params.mjs` carries the detail.
+
+**A third param source exists and is not in the catalog.** Some column definitions read a key straight out of `params` in their own query builder without declaring it anywhere — `sourceid` and `scoring_format_id` in `player-projected-column-definitions.mjs` are the live examples, and `data-views-saved-view-migration.mjs` itself writes `output_column_params`. These are real, honoured params that no registry lists, which is why `resolve-generated-table-state.mjs` still does not check that a param KEY exists: over the 189 production saved views such a check rejects 11 views on 55 errors, and 43 of those 55 are these undeclared-but-working keys.
+
+`search-columns.mjs` provides retrieval over the catalog so a caller pulls the columns an instruction is about, with param vocabulary attached, instead of being pushed all 597.
+
 ## Core Functions and Processing
 
 ### Primary Orchestration Functions
