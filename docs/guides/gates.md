@@ -133,7 +133,7 @@ It fails on more than findings. **A gate that declares an always-on negative con
 
 **Four things it cannot decide for you, and they are the whole judgment half of a cluster.**
 
-- **A skipped gate is not a passed gate.** The run says so in its summary; believing it is on you. Same for the count it prints of gates that carry no negative control — 6 of 18 today — whose greens are unproven by construction.
+- **A skipped gate is not a passed gate.** The run says so in its summary; believing it is on you. Same for the gates it names as carrying no negative control, whose greens are unproven by construction. Read that list off the run rather than from here: it moves whenever a gate is added or earns a control, so any number written down on this page is wrong by the time someone reads it — the `6 of 18` this sentence used to carry had drifted to four uncontrolled out of twenty-four.
 - **Whether a finding is a defect or accurate history.** A doc site describing what a rename DID is correct; only live instruction counts. That call needs someone who knows what the cluster did, which is the deciding reason none of this is in CI.
 - **Which findings to read first.** `check-data-view-sql-validity` ranks by reachability tier, not by how broken the SQL looks; ranking by severity once put a dormant seasonal path above a route that had been 500ing for a year.
 - **Whether the green is yours.** Several gates read the WORKING TREE — its schema file, its prose, its column definitions — so a sibling mid-cluster turns them red on findings belonging to nobody in your push. When the shared tree is dirty, run from a clean worktree at your HEAD.
