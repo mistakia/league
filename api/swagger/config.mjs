@@ -6,7 +6,8 @@ import {
   external_data_sources,
   nfl_season_types,
   player_nfl_status,
-  position_vocabulary
+  position_vocabulary,
+  pid_pattern
 } from '#constants'
 import { league_settings_fields } from '#api/routes/leagues/league-settings.mjs'
 
@@ -132,13 +133,15 @@ const options = {
           description: 'Fantasy team ID',
           example: 5
         },
-        // The pattern MIRRORS the `player_pid_format` CHECK constraint on
+        // The pattern is IMPORTED, not spelled here, so the published spec and
+        // the runtime matchers in `optimize-lineup.mjs` cannot drift apart.
+        // `pid_pattern` mirrors the `player_pid_format` CHECK constraint on
         // `public.player`, which is the enforced contract; anything narrower
         // documents a rule the database does not hold and rejects identities it
-        // accepts. Each name half is one to FOUR letters, not exactly four --
-        // a player whose first or last name is shorter gets a shorter prefix --
-        // and the serial is six OR MORE digits. A team unit is the bare nfl
-        // abbreviation, optionally suffixed with the unit it names.
+        // accepts. Note the serial is six OR MORE digits -- it is allowed to
+        // grow past six as the sequence advances, and pinning it at exactly six
+        // is what silently emptied every optimized lineup for two weeks in
+        // 2026-07. See libs-shared/constants/player-id-constants.mjs.
         PlayerId: {
           type: 'string',
           description:
@@ -147,8 +150,7 @@ const options = {
             'letters. A team unit is identified by its bare nfl team ' +
             'abbreviation, e.g. NE, optionally suffixed -OFF, -DEF or -DST.',
           example: 'PATR-MAHO-005785',
-          pattern:
-            '^([A-Z]{1,4}-[A-Z]{1,4}-[0-9]{6,}|[A-Z]{2,3}(-(OFF|DEF|DST))?)$'
+          pattern: pid_pattern
         },
         // Common property schemas
         UnixTimestamp: {

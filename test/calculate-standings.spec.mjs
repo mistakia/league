@@ -53,11 +53,14 @@ const teams = [
   { team_id: 4, division: 2 }
 ]
 
-// optimizeStandingsLineup post-filters its result keys with player_id_regex,
-// which is /^[A-Z]{4}-[A-Z]{4}-[0-9]{6}$/i -- four letters, four letters, then
-// a six-digit DDMMYY. Use real-format pids so .starters.length reflects what
-// the LP solver placed; a pid that does not match is dropped from the result
-// and the week reads as an incomplete lineup.
+// optimizeStandingsLineup post-filters its result keys with player_id_regex
+// (libs-shared/constants/player-id-constants.mjs) -- up to four letters, up to
+// four letters, then a serial of six OR MORE digits. The serial is an opaque
+// ordinal from player_pid_serial_seq, NOT a date; this comment previously said
+// DDMMYY, which describes a scheme retired in the 2026-07 pid re-key. Use
+// real-format pids so .starters.length reflects what the LP solver placed; a
+// pid that does not match is dropped from the result and the week reads as an
+// incomplete lineup.
 const letters = (n) =>
   String.fromCharCode(
     ...Array.from({ length: 4 }, (_, k) => 65 + ((n + k) % 26))
