@@ -352,6 +352,22 @@
     },
     {
       "gate": 1,
+      "path": "league/incident-2026-08-27-public-jwt-secret.md",
+      "table": "config",
+      "column": "jwt",
+      "kind": "not_a_column",
+      "reason": "The league server's own config object, quoted as config.jwt.secret in the incident narrative describing how api/index.mjs verifies and api/routes/auth.mjs signs session tokens. Not the league config table, which is a key/value store (key, config_value, updated_at). Same collision and same token as the rookie-draft-operations config.jwt entry above."
+    },
+    {
+      "gate": 1,
+      "path": "league/incident-2026-08-27-public-jwt-secret.md",
+      "table": "config",
+      "column": "league_api_auth_token",
+      "kind": "not_a_column",
+      "reason": "A sops-encrypted config KEY in config-production.json, named by an incident-cleanup observation recording that it went dormant after 7ff687465 and is still deployed on both hosts. Not a column: the league config table has only key, config_value and updated_at. Same config.* collision as config.jwt."
+    },
+    {
+      "gate": 1,
       "path": "nfl-betting/fantasypoints-data-master-index.md",
       "table": "player",
       "column": "position",
