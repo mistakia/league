@@ -311,6 +311,7 @@ import type {
   ScoringFormatPlayerSeasonProjectionPointsRow,
   ScoringFormatPlayerSeasonlogsRow,
   SeasonProjectionsHistoryRow,
+  SeasonProjectionsIndexRow,
   SeasonsRow,
   SelectionCombinationDefinitionsRow,
   SelectionCombinationOddsHistoryRow,
@@ -630,6 +631,7 @@ declare module 'knex/types/tables' {
     scoring_format_player_season_projection_points: ScoringFormatPlayerSeasonProjectionPointsRow
     scoring_format_player_seasonlogs: ScoringFormatPlayerSeasonlogsRow
     season_projections_history: SeasonProjectionsHistoryRow
+    season_projections_index: SeasonProjectionsIndexRow
     seasons: SeasonsRow
     selection_combination_definitions: SelectionCombinationDefinitionsRow
     selection_combination_odds_history: SelectionCombinationOddsHistoryRow
