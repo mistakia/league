@@ -148,7 +148,7 @@ const run = async ({
   const year = current_season.year
   const week = is_regular_season_projection
     ? 0
-    : Math.max(current_season.week, 1)
+    : current_season.active_fantasy_week
 
   const missing = []
   const items = []

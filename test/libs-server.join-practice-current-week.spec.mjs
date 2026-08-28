@@ -49,7 +49,11 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
         pid: TEST_PID,
         season_year: current_season.last_completed_season_year,
         season_type: 'REG',
-        week: Math.max(current_season.week, 1),
+        // Derived, not literal, and so SHARED with the emitter under test --
+        // this fixture cannot catch a miss in `active_fantasy_week` itself.
+        // That coverage is pinned separately in test/season.spec.mjs; here a
+        // literal would self-break on every clock rollover.
+        week: current_season.active_fantasy_week,
         game_designation: 'REG-MATCH'
       })
       await knex('practice').insert({

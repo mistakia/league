@@ -143,6 +143,7 @@ From `libs-shared/constants/season-constants.mjs`:
 
 - `current_season.year`, `current_season.week` (the continuous counter from `regular_season_start`, not per-type)
 - `current_season.nfl_seas_type` (`PRE`/`REG`/`POST`), `nfl_seas_week` (resets to 1 in POST), `last_completed_season_year` (stable across the Super Bowl gap and offseason)
+- `current_season.active_fantasy_week` — the week fantasy operations target, floored to 1 so it is never the season-long 0 slot. `.week` and `.fantasy_season_week` can both be 0; this one cannot, and that is what its name says. Never re-derive it inline — `local/no-week-reconstruction` forbids it.
 - `current_season.is_offseason`, `current_season.is_regular_season`, `current_season.is_waiver_period`
 - `fantasy_weeks`, `nfl_weeks` — module exports, not members of `current_season`
 

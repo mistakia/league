@@ -99,7 +99,7 @@ class PlayerRoster extends Player {
       ['projected_points_added_positive_including_cap_savings', projectionType],
       0
     )
-    const week = Math.max(current_season.week, 1)
+    const week = current_season.active_fantasy_week
     const weekPoints = player_map.getIn(['points', `${week}`, 'total'], 0)
     const projected_starts = player_map.getIn(['lineups', 'starts'], 0)
     const startPoints = player_map.getIn(['lineups', 'starter_plus_points'], 0)

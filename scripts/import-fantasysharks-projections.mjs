@@ -26,7 +26,7 @@ const run = async ({ season = false, dry = false } = {}) => {
   const URL = season
     ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
     : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
-  const week = season ? 0 : Math.max(current_season.week, 1)
+  const week = season ? 0 : current_season.active_fantasy_week
   const year = current_season.year
   const generated_at = new Date()
   // do not pull in any projections after the season has ended

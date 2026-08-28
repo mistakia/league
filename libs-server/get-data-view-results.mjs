@@ -470,7 +470,7 @@ const process_dynamic_single_week_param = (single_week_param) => {
         // slot rather than a neighbouring week -- so the dynamic and the
         // default it is supposed to reproduce selected different rows for six
         // months of the year.
-        return Math.max(current_season.week, 1)
+        return current_season.active_fantasy_week
       }
     }
     return week

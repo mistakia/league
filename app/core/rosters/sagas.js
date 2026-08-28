@@ -127,7 +127,7 @@ export function* setSelectedPlayerLineupContribution({ payload }) {
 
 export function* setPlayerLineupContribution({ pid }) {
   const currentRoster = yield select(get_current_team_roster_record)
-  const week = Math.max(current_season.week, 1)
+  const week = current_season.active_fantasy_week
   if (!currentRoster.getIn(['lineups', `${week}`])) {
     yield take(roster_actions.SET_LINEUPS)
   }

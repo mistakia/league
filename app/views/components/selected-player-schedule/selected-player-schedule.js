@@ -27,7 +27,7 @@ export default function SelectedPlayerSchedule({
 
   const pos = player_map.get('primary_position')
   const team = player_map.get('team')
-  const current_week = Math.max(current_season.week, 1)
+  const current_week = current_season.active_fantasy_week
   const [selected_week, set_selected_week] = useState(current_week)
   const [selected_years_for_schedule, set_selected_years_for_schedule] =
     useState(

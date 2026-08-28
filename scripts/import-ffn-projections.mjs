@@ -20,7 +20,7 @@ const initialize_cli = () => {
 
 const log = debug('import:projections')
 enable_debug_namespaces('import:projections,get-player')
-const week = Math.max(current_season.week, 1)
+const week = current_season.active_fantasy_week
 
 const generated_at = new Date()
 const getURL = (position) =>

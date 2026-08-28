@@ -25,7 +25,7 @@ export default function optimizeLineup({
 
   const final_week = current_season.final_week
   for (
-    let week = Math.max(current_season.week, 1);
+    let week = current_season.active_fantasy_week;
     week <= final_week;
     week++
   ) {

@@ -159,7 +159,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const week = argv.season ? 0 : Math.max(current_season.week, 1)
+    const week = argv.season ? 0 : current_season.active_fantasy_week
     const result = await run({
       week,
       season_totals: argv.season,

@@ -248,7 +248,7 @@ export const single_week = {
   values: nfl_weeks,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  default_value: Math.max(current_season.week, 1),
+  default_value: current_season.active_fantasy_week,
   enable_multi_on_split: ['week'],
   format_value: format_week_value,
   dynamic_values: [

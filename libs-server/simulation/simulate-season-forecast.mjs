@@ -38,7 +38,7 @@ export async function simulate_season_forecast({
   force_loss_tid = null
 }) {
   const start_time = Date.now()
-  const current_week = week || Math.max(current_season.week, 1)
+  const current_week = week || current_season.active_fantasy_week
   const regular_season_final_week = current_season.regular_season_final_week
 
   log(

@@ -306,7 +306,7 @@ export const current_nfl_week_params = () => {
   return {
     year,
     seas_type: 'REG',
-    week: Math.max(current_season.week, 1)
+    week: current_season.active_fantasy_week
   }
 }
 
@@ -438,7 +438,7 @@ export const last_meaningful_reg_week_params_for_year = ({ year }) => {
     return { year, seas_type: 'REG', week: REG_MAX_WEEKS_BY_ERA({ year }) }
   }
   if (live_type === 'REG') {
-    return { year, seas_type: 'REG', week: Math.max(current_season.week, 1) }
+    return { year, seas_type: 'REG', week: current_season.active_fantasy_week }
   }
   return { year, seas_type: 'REG', week: 1 }
 }

@@ -2183,7 +2183,7 @@ export function getByeByTeam(state, { nfl_team }) {
 
 export function get_game_by_team(
   state,
-  { nfl_team, week = Math.max(current_season.week, 1) }
+  { nfl_team, week = current_season.active_fantasy_week }
 ) {
   const team = state.getIn(['schedule', 'teams', nfl_team])
   if (!team) {

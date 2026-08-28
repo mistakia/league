@@ -148,6 +148,29 @@ export default class Season {
     return this.week
   }
 
+  // The week fantasy operations target. Never 0.
+  //
+  // Three getters here can answer "what week is it" and only this one is safe
+  // to hand to an operation that must act on a real week:
+  //
+  //   `week`                 0 in the offseason -- the raw counter from
+  //                          `regular_season_start`
+  //   `fantasy_season_week`  0 whenever the clock is outside the season window
+  //   `active_fantasy_week`  1 in the offseason -- the next week fantasy
+  //                          operations will act on
+  //
+  // "Active" is the distinguishing property: the other two can be zero, and 0
+  // is the season-long aggregate slot in the projection tables, not a week. A
+  // caller that floors `week` itself is re-deriving this concept without
+  // naming it, which is what `local/no-week-reconstruction` forbids.
+  //
+  // Floor `week`, never `nfl_seas_week`. `get_player_projections` floored the
+  // NFL week instead and amputated every week-0 row, zeroing `market_salary`
+  // on 22 of 23 league formats.
+  get active_fantasy_week() {
+    return Math.max(this.week, 1)
+  }
+
   get week() {
     const diff = Math.max(0, this.now.diff(this.regular_season_start, 'weeks'))
     return diff

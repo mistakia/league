@@ -166,6 +166,35 @@ describe('LIBS-SHARED Season', function () {
     expect(current_season.week).to.equal(17)
   })
 
+  // The clamped half of the pair, pinned AGAINST `week` at each clock rather
+  // than derived from it. The one thing this getter promises is that it never
+  // returns 0, and the offseason leg is the only clock where it can break --
+  // during the season it is indistinguishable from `week`, so a test that only
+  // sampled in-season weeks would pass over a getter that had no clamp at all.
+  it('active_fantasy_week never returns the season-long 0 slot', function () {
+    // Deep offseason: `week` is the raw counter at its floor.
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
+    expect(current_season.week).to.equal(0)
+    expect(current_season.fantasy_season_week).to.equal(0)
+    expect(current_season.active_fantasy_week).to.equal(1)
+
+    // Preseason, still week 0. This is the clock the production tree sits on
+    // for six months of the year.
+    MockDate.set(regular_season_start.toISOString())
+    expect(current_season.week).to.equal(0)
+    expect(current_season.active_fantasy_week).to.equal(1)
+
+    // From week 1 on it tracks `week` exactly, and the clamp is inert.
+    MockDate.set(regular_season_start.add('7', 'days').toISOString())
+    expect(current_season.active_fantasy_week).to.equal(1)
+
+    MockDate.set(regular_season_start.add('112', 'days').toISOString())
+    expect(current_season.active_fantasy_week).to.equal(16)
+
+    MockDate.set(regular_season_start.add('119', 'days').toISOString())
+    expect(current_season.active_fantasy_week).to.equal(17)
+  })
+
   // Every other assertion in this file is expressed RELATIVE to
   // regular_season_start, which makes them all vacuous with respect to the
   // anchor itself -- they stayed green through a 2026 value set a full week

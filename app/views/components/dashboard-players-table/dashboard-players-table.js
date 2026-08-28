@@ -194,7 +194,7 @@ export default function DashboardPlayersTable({
   if (isClaim) classNames.push('waiver')
   if (cutlist) classNames.push('cutlist')
 
-  const week = Math.max(current_season.week, 1)
+  const week = current_season.active_fantasy_week
 
   let summary
   if (typeof space !== 'undefined') {

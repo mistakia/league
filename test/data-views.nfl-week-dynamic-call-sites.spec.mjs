@@ -71,7 +71,7 @@ describe('data-views nfl_week dynamic call sites', function () {
     const params = process_params_with_backwards_compatibility({
       single_week: [{ dynamic_type: 'current_week' }]
     })
-    // single_week's default_value is Math.max(current_season.week, 1) and its
+    // single_week's default_value is current_season.active_fantasy_week and its
     // dynamic returned the raw 0, so the two selected different rows for the
     // whole offseason.
     expect(params.single_week).to.deep.equal([1])

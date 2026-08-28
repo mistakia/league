@@ -31,7 +31,7 @@ const getUrl = (pos, type) =>
 const positions = ['QB', 'RB', 'WR', 'TE']
 
 const run = async ({ season = false, dry = false } = {}) => {
-  const week = season ? 0 : Math.max(current_season.week, 1)
+  const week = season ? 0 : current_season.active_fantasy_week
   const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
   if (

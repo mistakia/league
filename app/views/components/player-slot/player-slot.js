@@ -77,7 +77,7 @@ export default class PlayerSlot extends React.Component {
       classNames.push('selected')
     }
 
-    const week = Math.max(current_season.week, 1)
+    const week = current_season.active_fantasy_week
 
     const statSuffix = {
       passing_attempts: 'pass att',

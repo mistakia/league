@@ -17,7 +17,7 @@ export default class PlayerRosterTotal extends React.Component {
     } = this.props
 
     const { is_offseason, is_regular_season } = current_season
-    const week = Math.max(current_season.week, 1)
+    const week = current_season.active_fantasy_week
     const projectionType = is_regular_season ? 'rest_of_season' : 'season'
 
     let baseSalaryTotal = 0

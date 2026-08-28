@@ -8,6 +8,7 @@ import noUnproxiedFetchWithRetry from './eslint-rules/no-unproxied-fetch-with-re
 import noBareContainerJsdoc from './eslint-rules/no-bare-container-jsdoc.mjs'
 import noBareDebugEnable from './eslint-rules/no-bare-debug-enable.mjs'
 import noPrivateImportInCore from './eslint-rules/no-private-import-in-core.mjs'
+import noWeekReconstruction from './eslint-rules/no-week-reconstruction.mjs'
 
 // One `local` plugin holding every rule in eslint-rules/. Registering a second
 // plugin object under the same name in a second config block would silently
@@ -17,7 +18,8 @@ const local_rules = {
     ...noUnproxiedFetchWithRetry.rules,
     ...noBareContainerJsdoc.rules,
     ...noBareDebugEnable.rules,
-    ...noPrivateImportInCore.rules
+    ...noPrivateImportInCore.rules,
+    ...noWeekReconstruction.rules
   }
 }
 
@@ -70,6 +72,7 @@ export default [
       'local/no-unproxied-fetch-with-retry': 'error',
       'local/no-bare-container-jsdoc': 'error',
       'local/no-bare-debug-enable': 'error',
+      'local/no-week-reconstruction': 'error',
       camelcase: ['off'],
       curly: ['off'],
       indent: ['off'],
@@ -168,7 +171,7 @@ export default [
     },
 
     rules: {
-      // The two BASELINE-FREE rules, and only those. What decides eligibility
+      // The BASELINE-FREE rules, and only those. What decides eligibility
       // here is not importance, it is whether the rule can fail over a file it
       // cannot see: CI never checks this submodule out, so on the runner
       // private/ is an empty directory.
@@ -183,7 +186,8 @@ export default [
       // no-bare-debug-enable is deliberately baseline-free for this reason
       // among others -- see the header of eslint-rules/no-bare-debug-enable.mjs.
       'local/no-unproxied-fetch-with-retry': 'error',
-      'local/no-bare-debug-enable': 'error'
+      'local/no-bare-debug-enable': 'error',
+      'local/no-week-reconstruction': 'error'
     }
   }
 ]
