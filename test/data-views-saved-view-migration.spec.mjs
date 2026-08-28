@@ -1,9 +1,8 @@
 /* global describe it */
 
-import fs from 'fs'
-
 import * as chai from 'chai'
 
+import player_adp_table_fields from '@core/data-views-fields/player-adp-table-fields.js'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 import {
@@ -18,18 +17,18 @@ const { expect } = chai
 
 // The live `nfl_plays` param-key registry (plus nfl_games), used as the liveness
 // oracle below. The ADP table's `number_quarterback` is the one legacy key whose
-// target is not on nfl_plays -- it lives on the ADP table, whose registry is in
-// an `app/` module that imports extensionless paths and so cannot be imported
-// here. Read from source.
-const adp_source = fs.readFileSync(
-  new URL(
-    '../app/core/data-views-fields/player-adp-table-fields.js',
-    import.meta.url
-  ),
-  'utf8'
+// target is not on nfl_plays -- it lives on the ADP table, whose registry is an
+// `app/` module. This spec used to read that module as TEXT and regex for a
+// declaration, because its extensionless relative specifiers do not resolve
+// under bare Node ESM. `test/global.mjs` registers the webpack-resolve hook
+// ahead of every spec, so it imports now and the oracle reads the real object
+// rather than the file's formatting.
+const adp_param_keys = new Set(
+  Object.values(player_adp_table_fields).flatMap((field) =>
+    Object.keys(field.column_params || {})
+  )
 )
-const is_adp_param = (name) =>
-  new RegExp(`^\\s{4}${name}: \\{$`, 'm').test(adp_source)
+const is_adp_param = (name) => adp_param_keys.has(name)
 
 const is_live_param = (name) =>
   Object.prototype.hasOwnProperty.call(nfl_plays_column_params, name) ||
