@@ -680,7 +680,7 @@ describe('API /auth', function () {
       const replay = chai_request
         .execute(server)
         .post('/api/auth/reset-password/confirm')
-        .send({ token, password: 'yet_another_password' })
+        .send({ token, password: 'example-password-1' })
 
       await error(replay, 'invalid or expired reset token')
     })
@@ -699,8 +699,8 @@ describe('API /auth', function () {
   describe('password reset round trip (request -> email -> confirm -> login)', () => {
     const round_trip_username = 'reset_round_trip'
     const round_trip_email = 'round_trip_reset_user@email.com'
-    const original_password = 'round-trip-original-password'
-    const new_password = 'round-trip-new-password'
+    const original_password = 'example-password-2'
+    const new_password = 'example-password-3'
 
     let round_trip_user_id = null
 
@@ -791,7 +791,7 @@ describe('API /auth', function () {
       const first = await chai_request
         .execute(server)
         .post('/api/auth/reset-password/confirm')
-        .send({ token: emailed_token, password: 'round-trip-second-password' })
+        .send({ token: emailed_token, password: 'example-password-4' })
 
       first.should.have.status(200)
 
@@ -800,7 +800,7 @@ describe('API /auth', function () {
       const replay = chai_request
         .execute(server)
         .post('/api/auth/reset-password/confirm')
-        .send({ token: emailed_token, password: 'round-trip-third-password' })
+        .send({ token: emailed_token, password: 'example-password-5' })
 
       await error(replay, 'invalid or expired reset token')
     })

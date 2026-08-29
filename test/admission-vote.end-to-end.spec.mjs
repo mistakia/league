@@ -35,7 +35,7 @@ const [
   team4_token,
   team5_token,
   vacant_team_token,
-  team2_second_userid_token
+  team_two_second_userid_token
 ] = [1, 2, 3, 4, 5, 9, 11].map(token_for)
 
 // A WHOLE ADMISSION VOTE, END TO END, in the shape the real one will run: ten
@@ -215,7 +215,7 @@ describe('ADMISSION VOTE END TO END', function () {
     ;(
       await post({
         path: `/${admission_vote_id}/ballot`,
-        token: team2_second_userid_token,
+        token: team_two_second_userid_token,
         body: { ranked_candidate_ids: [candidate_ids.Bob] }
       })
     ).should.have.status(200)

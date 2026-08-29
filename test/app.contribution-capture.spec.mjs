@@ -36,6 +36,14 @@ const expect = chai.expect
 // only assert that the capture allowlists never emit it. It was a real
 // (now-rotated) JWT until 2026-08-27; a credential-shaped literal in a public
 // repo reads as live whether or not it is.
+//
+// The value has to stay JWT-SHAPED — an allowlist that never sees a token-shaped
+// string is not being tested — so it cannot be given a self-declaring form, and
+// it is a permanent Tier-1 hit on every tracked-content scan. The marker below
+// declares that to the detector; the walk reports the suppressed count, so this
+// stays visible rather than silently exempt.
+//
+// base-secret-scan: declared-fixture
 const SEEDED_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU5NTQ3Njg3N30.not-a-real-signature-test-fixture-only'
 const SEEDED_EMAIL = 'submitter@example.com'
