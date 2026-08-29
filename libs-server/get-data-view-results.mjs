@@ -1392,14 +1392,33 @@ const add_clauses_for_table = async ({
   // and invalid SQL. Keep the join whenever any column in the group needs the
   // alias; correlated-aggregate columns (no main_select) and override-backed
   // columns (pff/dvoa team grades) still skip it.
+  //
+  // An override may also opt OUT of the self-contained contract for some shapes
+  // via `offset_range_reads_join_alias`, which means "this override reads the
+  // JOIN alias, keep the join for me". player_nfl_teams does that for its
+  // year-less shape, where the correlated form was re-deriving a value its CTE
+  // already carries at a cost of one full scan of an unindexed materialized CTE
+  // per outer row. The predicate MUST agree with the branch the override
+  // actually takes: return true while the override still emits a self-contained
+  // subquery and the join is merely redundant; return false while it emits an
+  // alias reference and the whole statement is a 42P01.
   const group_needs_join_alias = select_columns.some(
     ({ column_id, column_params = {} }) => {
       const def = data_views_column_definitions[column_id]
       if (!def || !def.main_select) return false
-      return !(
+      if (
         is_year_offset_range(column_params) &&
         def.main_select_string_year_offset_range
-      )
+      ) {
+        return Boolean(
+          def.offset_range_reads_join_alias?.({
+            params: column_params,
+            row_axes,
+            data_view_options
+          })
+        )
+      }
+      return true
     }
   )
   // Only drop the source join when the offset-range path (correlated aggregate

@@ -266,8 +266,34 @@ const get_select_string = ({
     final_select_expression = select_expression
   }
 
-  const group_by =
-    !is_main_select || has_year_offset_range ? [] : [column_value]
+  // An offset-range override normally needs NO group-by entry: it emits a
+  // correlated scalar subquery whose only outer reference is the already-grouped
+  // pid, which Postgres accepts. An override that instead reads the JOIN alias
+  // (`offset_range_reads_join_alias`) emits a BARE COLUMN of a joined relation,
+  // and that is not functionally dependent on the grouped player columns as far
+  // as Postgres is concerned -- omitting it is a 42803 on the whole statement,
+  // which is how this was first written and how it was caught.
+  const override_reads_join_alias =
+    is_main_select &&
+    has_year_offset_range &&
+    Boolean(
+      column_definition.offset_range_reads_join_alias?.({
+        params: column_params,
+        row_axes,
+        data_view_options
+      })
+    )
+
+  let group_by
+  if (!is_main_select) {
+    group_by = []
+  } else if (override_reads_join_alias) {
+    group_by = [final_select_expression]
+  } else if (has_year_offset_range) {
+    group_by = []
+  } else {
+    group_by = [column_value]
+  }
 
   // TODO unused currently
   // if (is_main_select && column_definition.main_group_by) {

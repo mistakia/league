@@ -101,17 +101,30 @@ export default {
     // shows up in TIME and in loop count, not in buffers -- unlike the other
     // four in this family, which probed real indexes and so did show up there.
     //
-    // NOT fixed here, and the reason is architectural rather than effort. The
-    // only thing that removes a per-row scan of an unindexed CTE is joining it,
-    // and this path deliberately has NO join: `get-data-view-results.mjs`
-    // (group_needs_join_alias / group_offset_range_applies) DROPS the source
-    // join precisely because a `main_select_string_year_offset_range` override
-    // exists, on the contract that such an override is self-contained and
-    // re-scans the source itself. Reading `teams` off a joined alias means
-    // changing that contract for every column that declares an override -- the
-    // same logic whose comments already record two regressions, dangling
-    // aliases and invalid SQL. That is an operator-gated motion, not a
-    // loose end. Surfaced with these numbers rather than started.
+    // FIXED for the year-less shape. Measured after: 538.7ms -> 105.2ms on the
+    // RB-filtered shape (5.1x, planner cost 108,515 -> 6,167), and the full
+    // 28,807-row shape that DID NOT FINISH inside the statement timeout now
+    // completes in 2,815ms -- of which 2,714ms is the CTE build both forms
+    // share, so the join itself costs about 100ms. Buffers barely moved (8,141
+    // -> 8,146), which is the same false negative noted above and the reason
+    // this was nearly closed as not worth fixing.
+    //
+    // An earlier revision of this comment said the fix required changing the
+    // self-contained contract for every column declaring an override, and that
+    // was wrong -- it described only the naive fix. `offset_range_reads_join_alias`
+    // is this column opting OUT of that contract for the year-less shape alone.
+    // Five other columns declare an override and none of them changes, so the
+    // blast radius is this file, one predicate call in `group_needs_join_alias`,
+    // and one group-by branch in data-views/select-string.mjs.
+    //
+    // The group-by branch is not optional and is the trap this fix fell into
+    // first. A correlated subquery needs no group-by entry because its only
+    // outer reference is the already-grouped pid; a bare column of a joined
+    // relation is NOT functionally dependent on those grouped columns, so
+    // omitting it is a 42803 on the whole statement. The query-match golden
+    // could not see it -- the SQL is structurally valid either way -- which is
+    // why the gate is the executed spec in
+    // test/data-views.player-nfl-teams-offset-range-join.spec.mjs.
     main_select_string_year_offset_range: ({
       table_name,
       params,
@@ -120,11 +133,31 @@ export default {
       const min_year_offset = Math.min(...params.year_offset)
       const max_year_offset = Math.max(...params.year_offset)
       const year_clause = data_view_options.year_reference
-      const year_predicate = year_clause
-        ? ` AND ${table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
-        : ''
+
+      // No year reference: the CTE groups by pid alone and carries no `year`
+      // column, so the correlated form was re-deriving `array_agg(DISTINCT t)`
+      // over `unnest(teams)` for the one matching row -- a value the CTE has
+      // already computed as `array_agg(distinct nfl_team)`. Proven equal on
+      // production across all 28,807 players, zero disagreements. The join is
+      // retained on this branch, so read it directly.
+      if (!year_clause) {
+        return `${table_name}.teams`
+      }
+
+      // With a year reference the predicate correlates on the outer row's YEAR
+      // as well as its pid, so the value genuinely moves per outer row and no
+      // pid-keyed join can express it. Correct as written, and it keeps the
+      // original self-contained contract -- which is why the opt-out predicate
+      // returns false here and the join stays dropped.
+      const year_predicate = ` AND ${table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
       return `(SELECT array_agg(DISTINCT t) FROM (SELECT unnest(${table_name}.teams) AS t FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference}${year_predicate}) sub)`
     },
+    // Read by `group_needs_join_alias` in get-data-view-results.mjs. True means
+    // "my override reads the JOIN alias, so do not drop the join for me".
+    // Mirrors the branch above exactly: the two must agree or the select emits a
+    // reference to an alias that is not in the query (42P01).
+    offset_range_reads_join_alias: ({ data_view_options = {} } = {}) =>
+      !data_view_options.year_reference,
     register_ctes: ({ query, params, row_axes, data_view_options }) => {
       if (should_use_cte({ params, row_axes })) {
         register_per_game_cte({ query, params, row_axes, data_view_options })
