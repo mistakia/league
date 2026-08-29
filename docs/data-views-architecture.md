@@ -76,7 +76,16 @@ A column definition declares a `source` descriptor rather than a join. The sourc
 
 A column definition declares what it measures and where the measure lives. The load-bearing fields:
 
-- `source` — `{grain, table, attach, attach_owns_join, supports_row_axes, key_columns, extra_predicates, year_default, week_type}`. `grain` drives source-attach resolution.
+- `source` — `{grain, table, attach, attach_owns_join, supports_row_axes, requires_week, key_columns, extra_predicates, year_default, week_type}`. `grain` drives source-attach resolution.
+
+**`requires_week` says the source's rows are keyed by week, so a request that resolves no week is REFUSED** — `ColumnWeekRequired` from `validate-week-requirement.mjs`, raised at the request boundary beside `ColumnRowGrainMismatch`. Three things satisfy it, and a check that sees only one of them refuses requests that are fine: a `week` param, an `nfl_week_id` / `single_nfl_week_id` param, or a `week` row axis.
+
+Note it is deliberately NOT expressed as `grain: 'player_year_week'`, which is the design that looks right and was tried. Grain drives CELL IDENTITY and cannot see a PARAM, so a grain-based refusal rejects a flat player-row table with an explicit `week: [2]` — a shipped shape, covered by `test/data-view-queries/create-a-query-for-week-projected-stats.json`. Grain answers "what shape is a row"; this answers "was a week supplied", and they are different questions.
+
+Two consumers share the predicate so they cannot drift: the boundary, and `check-data-view-sql-validity`, which must skip a shape that is a 400 rather than EXPLAIN it and report the refusal as a finding.
+
+**A `requires_week` source must also handle the correlated `year_offset` subquery**, which re-scans the base table and re-emits the JOIN's discriminators as literals. When the week comes from the row axis there is no literal: `extra_predicates` omits the week entry, and `select-string` correlates to `data_view_options.week_reference` instead — the same treatment the year already gets. Emitting the literal anyway produces `week = 'null'` (a 22P02 against a smallint); dropping the predicate is worse, since the subquery then sums every week in the offset-expanded year window and returns a plausible wrong number. No golden pairs `year_offset` with a week axis, so only the SQL-validity gate sees this.
+
 - `measure` — the input contract, `{accumulators, combine_accumulators, decimals}`. See the measure contract below.
 - `supports_output` — `{periods: [...], aggregations: [...]}`, DERIVED and never hand-declared. Presence of this field is the signal that the column supports output aggregation.
 - `measure_expr({table_name, params, identity_id})`, `measure_source`, `measure_predicate`, `aggregate`, `combined_measure`, `decimals` — the derived output contract consumed by the aggregator plugins.
