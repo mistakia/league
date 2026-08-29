@@ -1678,7 +1678,6 @@ export const get_data_view_results_query = async ({
   const data_view_options = {
     opening_days_joined: false,
     player_seasonlogs_joined: false,
-    nfl_year_week_timestamp_joined: false,
     from_table_name: from_table_config.from_table_name,
     from_table_type: from_table_config.from_table_type,
     from_table_column_id: from_table_config.column_id,

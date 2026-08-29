@@ -345,11 +345,34 @@ const register_keeptradecut_valued_pids_cte = ({
 // first row inside the window. The outer join is unchanged.
 //
 // It replaced a DISTINCT ON over the window, which scanned 112,115 rows and
-// sorted them down to 3,347. That form's cost was one heap fetch per candidate
-// row, and it could not be indexed away: the metric predicate is not in the
-// index, and a covering index would not help either, because the table has taken
-// 11.1M updates against 2.38M rows so `relallvisible` sits at 32 pages of 21,378
-// and an index-only scan degrades to fetching nearly every row anyway.
+// sorted them down to 3,347, at one heap fetch per candidate row.
+//
+// A covering index DOES remove those heap fetches. The claim that it could not
+// -- made here and in this file's history twice -- was an artifact of an empty
+// visibility map, not a property of the shape, and it was measured while
+// `relallvisible` sat at 32 pages of 21,378. Once the table is vacuumed to
+// all-visible, an `(is_superflex, observed_at, pid) INCLUDE (the three metrics)`
+// index turns the DISTINCT ON into a pure index-only scan: 899 buffers with zero
+// heap fetches, against this lateral's 25,102. Anyone re-deriving "a covering
+// index would not help" from buffer counts alone will get the opposite answer.
+//
+// The lateral is kept regardless, on two grounds the buffer count does not show.
+//
+//   - Warm, the DISTINCT ON is 2.8x SLOWER despite reading 28x fewer buffers
+//     (161ms against 58ms). Its cost is CPU -- sorting 106,036 index entries
+//     down to 3,373 -- and every buffer it touches is already a shared_buffers
+//     hit, so the buffer count is not measuring the thing that dominates.
+//   - Such an index would erode its own advantage. The importer writes
+//     `onConflict(pid, is_superflex, observed_at).merge([...])` over exactly the
+//     three metric columns the index must INCLUDE, so every re-scrape update
+//     would break HOT on a table currently running 95.5% HOT across 11.1M
+//     updates -- bloating the index and pulling down the all-visible fraction
+//     the index-only scan depends on.
+//
+// Both measured on production 2026-08-29, after the vacuum, with the index built
+// and then dropped. Revisit only with a COLD measurement: 25,102 scattered reads
+// against 899 contiguous ones is the regime where the covering index would win,
+// and cold is the case this rewrite exists for.
 //
 // Measured on production 2026-08-29, full three-column query: 429,408 buffers ->
 // 188,422. Output is identical -- verified across all twelve combinations of
@@ -449,6 +472,100 @@ const register_keeptradecut_year_axis_cte = ({
   return cte_name
 }
 
+// The WEEK-axis as-of lookup, resolved ONCE per (pid, year, week) instead of
+// once per outer row -- the same move the year axis above already made, for the
+// same reason and with a larger effect.
+//
+// As a correlated subquery this was O(outer rows), and the outer side of a
+// player-year-week view is every player in the filtered population times every
+// week in scope. A seven-year wide-receiver week split is 458,250 such rows, and
+// it paid TWICE per row: once for the `MAX(observed_at)` SubPlan and again for
+// the outer index scan that re-fetched the row at that instant. It produced
+// 28,076 rows out of those 458,250 probes, because only 894 players carry any
+// KeepTradeCut observation at all.
+//
+// This drives off the valued players crossed with exactly the (year, week) pairs
+// in play, one lateral probe each, stopping at the first row at or before the
+// week's boundary. The outer re-fetch disappears: the lateral returns the metric
+// itself rather than an instant to look the metric up by.
+//
+// Measured on production 2026-08-29, seven-year WR week split: 1,510,276 buffers
+// -> 158,110 and 2,243ms -> 423ms, zero symmetric difference over 28,076 rows.
+// The win holds at every population size rather than trading narrow views for
+// wide ones -- QB 575,264 -> 63,029, TE and K verified identical too -- because
+// the CTE is inlined and the pid join prunes it rather than it being computed
+// whole and then filtered.
+//
+// The (year, week) source is `player_years_weeks`, NOT `base_years`. The year
+// axis could use base_years because a year request names its years, but a week
+// request can also name its WEEKS, and base_years would widen a single-week view
+// back out to every week of that year. player_years_weeks already carries both
+// filters, so scoping to its distinct pairs is exactly the requested grain.
+//
+// No recency floor and no year_offset here, both deliberately: the floor was the
+// year axis's alone, and week-axis year_offset was an unimplemented TODO on the
+// correlated form. This preserves each of those as it found them.
+const keeptradecut_week_axis_as_of_cte = ({
+  metric_column,
+  is_superflex,
+  valued_pids_cte
+}) =>
+  db.raw(
+    `select ktc_p.pid, ktc_w.year, ktc_w.week, ktc_latest.${metric_column} ` +
+      `from ${valued_pids_cte} ktc_p ` +
+      'cross join (select distinct ktc_pyw.year, ktc_pyw.week, ' +
+      'ktc_ts.week_timestamp ' +
+      'from player_years_weeks ktc_pyw ' +
+      'inner join nfl_year_week_timestamp ktc_ts ' +
+      'on ktc_ts.year = ktc_pyw.year and ktc_ts.week = ktc_pyw.week) ktc_w ' +
+      'cross join lateral (' +
+      `select ktc_src.${metric_column} from keeptradecut_valuations ktc_src ` +
+      'where ktc_src.pid = ktc_p.pid ' +
+      `and ktc_src.is_superflex = ${is_superflex ? 'true' : 'false'} ` +
+      `and ktc_src.${metric_column} is not null ` +
+      'and ktc_src.observed_at <= to_timestamp(ktc_w.week_timestamp) ' +
+      'order by ktc_src.observed_at desc limit 1' +
+      ') ktc_latest'
+  )
+
+// One CTE per (metric, superflex) pair, for the same reason the year axis
+// registers one per distinct as-of rule: two columns resolving the same rows
+// would otherwise emit a duplicate WITH alias (42712).
+const register_keeptradecut_week_axis_cte = ({
+  metric_column,
+  query,
+  params,
+  data_view_options
+}) => {
+  const is_superflex = is_superflex_from_params(params)
+  const cte_name = get_table_hash(
+    `ktc_week_as_of/${metric_column}/${is_superflex}`
+  )
+
+  if (!data_view_options.keeptradecut_as_of_ctes) {
+    data_view_options.keeptradecut_as_of_ctes = new Set()
+  }
+  if (!data_view_options.keeptradecut_as_of_ctes.has(cte_name)) {
+    // Registered before the as-of CTE that references it, as above: a WITH item
+    // may only reference items declared ahead of it.
+    const valued_pids_cte = register_keeptradecut_valued_pids_cte({
+      query,
+      data_view_options
+    })
+    query.with(
+      cte_name,
+      keeptradecut_week_axis_as_of_cte({
+        metric_column,
+        is_superflex,
+        valued_pids_cte
+      })
+    )
+    data_view_options.keeptradecut_as_of_ctes.add(cte_name)
+  }
+
+  return cte_name
+}
+
 const keeptradecut_join = ({
   metric_column,
   query,
@@ -504,18 +621,36 @@ const keeptradecut_join = ({
     return
   }
 
-  if (
-    row_axes.includes('week') &&
-    !data_view_options.nfl_year_week_timestamp_joined
-  ) {
-    // player_years_weeks always projects both year and week, so this joins on
-    // the full key unconditionally. The previous `on true` fallback for a
-    // week-without-year request was an unguarded cross join.
-    query.leftJoin('nfl_year_week_timestamp', function () {
-      this.on('nfl_year_week_timestamp.year', '=', 'player_years_weeks.year')
-      this.on('nfl_year_week_timestamp.week', '=', 'player_years_weeks.week')
+  // The week axis takes precedence over the year axis above, and a year+week
+  // request resolves its boundary on this arm, so the pre-aggregated week CTE
+  // covers both. `nfl_year_week_timestamp` is no longer joined into the OUTER
+  // query from here at all -- the boundary it supplied now lives inside the CTE.
+  // That flag is read and written nowhere but this file, so nothing downstream
+  // depended on the join it announced.
+  if (row_axes.includes('week')) {
+    const cte_name = register_keeptradecut_week_axis_cte({
+      metric_column,
+      query,
+      params,
+      data_view_options
     })
-    data_view_options.nfl_year_week_timestamp_joined = true
+
+    query[join_func](`${cte_name} as ${table_name}`, function () {
+      this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
+      // The same (year, week) key the outer nfl_year_week_timestamp join
+      // carried, moved onto the pre-aggregated row's own year and week.
+      this.andOn(
+        db.raw(`${table_name}.year`),
+        '=',
+        db.raw(data_view_options.year_reference || 'player_years_weeks.year')
+      )
+      this.andOn(
+        db.raw(`${table_name}.week`),
+        '=',
+        db.raw(data_view_options.week_reference || 'player_years_weeks.week')
+      )
+    })
+    return
   }
 
   const join_conditions = function () {
@@ -526,24 +661,12 @@ const keeptradecut_join = ({
       db.raw('?', [is_superflex_from_params(params)])
     )
 
-    // No recency floor on either remaining arm. It was the year axis's alone
+    // No recency floor on this arm. It was the year axis's alone
     // (YEAR_AXIS_AS_OF_WINDOW, guarding a delisted player's last rank from being
     // carried forward) and it moved into the pre-aggregated CTE with that arm.
     let boundary_sql = null
 
-    if (row_axes.includes('week')) {
-      // TODO handle year_offset_single and week_offset_single
-      //
-      // week_timestamp is an integer epoch on a materialized view this cluster
-      // does not retype, so it is lifted to the instant domain here. Both sides
-      // hold America/New_York local midnight, so this is a unit conversion and
-      // not a semantic change. The matview retype is a recorded follow-up that
-      // deletes this cast.
-      boundary_sql = 'to_timestamp(nfl_year_week_timestamp.week_timestamp)'
-      // No year-axis arm here: a year-axis-only request returned above through
-      // the pre-aggregated CTE, and a year+week request resolves its boundary on
-      // the week arm. Both the recency floor and the year predicate moved with it.
-    } else if (params.date) {
+    if (params.date) {
       // The old form carried `AT TIME ZONE 'UTC'` here. It was a verified no-op
       // on both DST sides against the epoch column, and translating it onto a
       // timestamptz would introduce a four-hour shift where none exists, so it
