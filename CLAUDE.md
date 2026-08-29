@@ -45,7 +45,7 @@ These are the ones you cannot route to, because you hit them without deciding to
 
 **DDL, the schema export, and the code that depends on them ship in ONE commit.** Between the apply and the commit, any other session's `yarn export:schema` will carry your change without your sweep. This is stricter than the deploy rule: a deploy can lag, a commit cannot.
 
-**Use `yarn test:local`, never `yarn test:db:up && yarn test`.** They point at different ports and the mismatch hangs indefinitely rather than failing, printing nothing. If a run produces no output for more than a minute, treat it as a hang and check before waiting.
+**Use `yarn test:isolated`, never `yarn test:db:up && yarn test`.** The test database is a shared singleton and the suite drops every table in it, so two concurrent runs destroy each other and the wreckage reads as a regression in whatever you were editing rather than as a collision. `test:isolated` gives your run its own database and drops it afterwards; `yarn test:local` still shares. Never hand-assemble the invocation from environment variables — pointing at a database that does not exist hangs indefinitely rather than failing, printing nothing, as does the port mismatch above. If a run produces no output for more than a minute, treat it as a hang and check before waiting.
 
 **Nothing auto-deploys. Deploys are human-gated, and the recurring incident is a partial one.** Prefer `yarn deploy:all` over the individual steps, which are each independently skippable and skip silently.
 
@@ -83,7 +83,8 @@ Stated once here because it applies to every undertaking, and it is the single m
 
 **Testing**
 
-- `yarn test:db:up` / `yarn test:local` / `yarn test:db:down` — throwaway Postgres 16 on `:5433` and the suite against it
+- `yarn test:isolated` — the suite against a private database on the shared `:5433` container, dropped afterwards; takes mocha arguments
+- `yarn test:db:up` / `yarn test:local` / `yarn test:db:down` — throwaway Postgres 16 on `:5433` and the suite against its shared default database
 
 **Build and deploy**
 

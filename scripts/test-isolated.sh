@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#
+# Run the suite against a private database on the shared :5433 container.
+#
+# WHY THIS EXISTS
+#
+# `league-test-pg` is a singleton and `test/global.mjs` drops every table in
+# whatever database it is pointed at, so two sessions running `yarn test:local`
+# at once destroy each other's run. The failure is not clean -- a sibling's
+# DROP/reload lands partway through yours and surfaces as a scatter of
+# `relation "player" does not exist` across unrelated specs, which reads exactly
+# like a regression in whatever you were editing. That has cost multiple
+# sessions a wrong diagnosis.
+#
+# The cure was already documented (give your run its own database), but it was a
+# recipe you had to hand-assemble from environment variables, so sessions kept
+# reaching for `yarn test:local` and rediscovering the collision instead. This
+# turns the recipe into the default path.
+#
+# Usage:
+#   yarn test:isolated                        # whole suite
+#   yarn test:isolated test/some.spec.mjs     # one spec, or any mocha args
+#
+# The database is named for the slug in LEAGUE_TEST_SLUG when set, otherwise for
+# this shell's pid, and it is DROPPED on exit -- including on failure and on
+# interrupt. That matters beyond tidiness: these databases are never reaped
+# otherwise, and 85 of them holding 7.4 GB had accumulated by 2026-08-29.
+#
+# Keep the drop conditional on us having created it, so an interrupted run
+# cannot delete a database that was already there and belongs to somebody else.
+
+set -euo pipefail
+
+CONTAINER=league-test-pg
+DB_USER=league_test
+SLUG="${LEAGUE_TEST_SLUG:-$$}"
+DB_NAME="league_test_${SLUG}"
+created=0
+
+psql_admin() {
+  docker exec -u postgres "$CONTAINER" psql -U "$DB_USER" -d "$DB_USER" -tAc "$1"
+}
+
+cleanup() {
+  local status=$?
+  if [ "$created" -eq 1 ]; then
+    # Terminate stragglers first: a pool connection that outlives mocha makes
+    # DROP DATABASE fail with "is being accessed by other users", which would
+    # leak exactly the database this script exists to reap.
+    psql_admin "SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+                WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid()" >/dev/null 2>&1 || true
+    psql_admin "DROP DATABASE IF EXISTS \"${DB_NAME}\"" >/dev/null 2>&1 \
+      || echo "warning: could not drop ${DB_NAME}; drop it by hand" >&2
+  fi
+  exit "$status"
+}
+trap cleanup EXIT INT TERM
+
+# The container has to be up before the CREATE, not merely before mocha.
+yarn test:db:up
+
+# CREATE and CONFIRM it returned BEFORE mocha starts. Pointing LEAGUE_DB_DATABASE
+# at a database that does not exist yet does not fail -- the pool retries and the
+# run hangs forever with no output, which has burned an hour before now.
+psql_admin "CREATE DATABASE \"${DB_NAME}\" OWNER ${DB_USER}" >/dev/null
+if [ "$(psql_admin "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'")" != "1" ]; then
+  echo "error: ${DB_NAME} was not created; refusing to start mocha" >&2
+  exit 1
+fi
+created=1
+echo "test database: ${DB_NAME}"
+
+# `yarn test` blanks LEAGUE_DB_HOST/PORT, so invoke mocha directly. Loading the
+# rc (no --no-config) keeps local collection identical to CI's.
+LEAGUE_DB_HOST=127.0.0.1 \
+LEAGUE_DB_PORT=5433 \
+LEAGUE_DB_DATABASE="$DB_NAME" \
+TZ=America/New_York \
+NODE_ENV=test \
+TEST=all \
+  node_modules/.bin/mocha --exit --require test/global.mjs "$@"
