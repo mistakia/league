@@ -156,6 +156,10 @@ export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
 export { default as check_season_projections_floor } from './check-season-projections-floor.mjs'
 export {
+  default as check_season_projections_consensus,
+  read_season_consensus_baseline
+} from './check-season-projections-consensus.mjs'
+export {
   default as save_projections,
   projection_periods
 } from './save-projections.mjs'

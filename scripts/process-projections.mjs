@@ -33,7 +33,9 @@ import {
   simulation,
   emit_signal,
   record_league_format_projection_value_history,
-  build_league_format_period_inserts
+  build_league_format_period_inserts,
+  check_season_projections_consensus,
+  read_season_consensus_baseline
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
@@ -818,6 +820,13 @@ const run = async ({ year = current_season.year } = {}) => {
     return
   }
 
+  // Read BEFORE the consensus upsert. Taken after it, the ratchet in
+  // check_season_projections_consensus would compare this run's own output
+  // against itself and could never report a shrink.
+  const season_consensus_baseline = await read_season_consensus_baseline({
+    season_year: year
+  })
+
   const player_rows = await process_average_projections({ year })
   const projection_pids = player_rows.map((p) => p.pid)
 
@@ -921,10 +930,10 @@ const run = async ({ year = current_season.year } = {}) => {
     }
   }
 
-  return { per_format_failures }
+  return { per_format_failures, season_consensus_baseline, year }
 }
 
-const check_oracle = async ({ seas_type }) => {
+const check_oracle = async ({ seas_type, season_consensus_baseline, year }) => {
   // POST-season run() short-circuits after process_average_projections without
   // calling process_league(), so leagues.processed_at intentionally stays
   // stale. Skip the freshness oracle in that case.
@@ -954,7 +963,14 @@ const check_oracle = async ({ seas_type }) => {
     return `process-projections freshness oracle failed: ${details}`
   }
 
-  return check_lineup_starter_identity_oracle()
+  const starter_identity_shortfall =
+    await check_lineup_starter_identity_oracle()
+  if (starter_identity_shortfall) return starter_identity_shortfall
+
+  return check_season_projections_consensus({
+    season_year: year ?? current_season.year,
+    baseline: season_consensus_baseline
+  })
 }
 
 // Output oracle for project_lineups. The freshness oracle above proves
@@ -1043,10 +1059,14 @@ const main = async () => {
   let error
   let per_format_failures = []
   let shortfall = null
+  let season_consensus_baseline = null
+  let year
 
   try {
     const result = await run()
     per_format_failures = result?.per_format_failures || []
+    season_consensus_baseline = result?.season_consensus_baseline || null
+    year = result?.year
   } catch (err) {
     error = err
     console.log(error)
@@ -1055,7 +1075,11 @@ const main = async () => {
   // Always run the oracle, even when run() threw. A throw means some formats
   // crashed; the oracle still tells us which hosted leagues didn't process.
   try {
-    shortfall = await check_oracle({ seas_type })
+    shortfall = await check_oracle({
+      seas_type,
+      season_consensus_baseline,
+      year
+    })
   } catch (err) {
     // An oracle that cannot RUN is a failed oracle, not a passed one. Swallowing
     // the throw left `shortfall` null, so report_job recorded success and the
