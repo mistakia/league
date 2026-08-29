@@ -36,11 +36,20 @@ export const process_scoring_format_year = async ({
     .where({ id: scoring_format_id })
     .first()
 
-  const projections = await db('projections_index').where({
-    season_year: year,
-    season_type: 'REG',
-    source_id: external_data_sources.AVERAGE
-  })
+  // `week >= 1` is load-bearing until Phase C deletes the week-0 rows, and it
+  // stays afterwards as the statement that this read is the WEEKLY one. The
+  // period split moved the season snapshot to its own table but left this read
+  // unfloored, so every lingering `projections_index` week-0 row flowed into
+  // weekly_points_inserts and tripped
+  // `scoring_format_player_projection_points_week_is_fantasy_week` -- taking
+  // out all nine scoring formats on the first run after deploy, hourly.
+  const projections = await db('projections_index')
+    .where({
+      season_year: year,
+      season_type: 'REG',
+      source_id: external_data_sources.AVERAGE
+    })
+    .where('week', '>=', 1)
   // The season snapshot is READ, not derived from a week of the weekly set. It
   // used to come from `projections_index` week 0, which meant a period was being
   // recovered from a reserved week number; it now has its own table and its own
@@ -137,13 +146,22 @@ export const process_scoring_format_year = async ({
   // Each period table is refreshed with the same delete-then-reinsert shape the
   // single table used, scoped to its own (format, year) slice, so a player
   // dropping out of the projection set leaves no stale row behind.
+  //
+  // ONE TRANSACTION per slice, because the unguarded form loses data rather
+  // than failing. The delete committed on its own, so when the insert hit a
+  // CHECK violation on 2026-08-29 the slice was left EMPTY -- seven of ten
+  // active formats lost their whole 2026 weekly set, and the hourly cron
+  // re-emptied it every run. A refresh that cannot complete must leave the
+  // previous contents alone.
   const refresh = async ({ table, items, label }) => {
     if (!items.length) return
-    await db(table).del().where({ scoring_format_id, season_year: year })
-    await batch_insert({
-      items,
-      save: (rows) => db(table).insert(rows),
-      batch_size: 100
+    await db.transaction(async (trx) => {
+      await trx(table).del().where({ scoring_format_id, season_year: year })
+      await batch_insert({
+        items,
+        save: (rows) => trx(table).insert(rows),
+        batch_size: 100
+      })
     })
     log(
       `re-derived ${items.length} ${scoring_format_id} ${label} points for year ${year}`
