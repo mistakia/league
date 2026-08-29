@@ -25,6 +25,29 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // it in config-test.json.
 const SANDBOX_PASSWORD = config.postgres_data_view_sandbox.connection.password
 const SANDBOX_ROLE = 'league_data_view_reader'
+
+// The database this run is ACTUALLY connected to, not the literal `league_test`.
+//
+// TEMP is a DATABASE-level privilege, so the GRANT and REVOKE below name their
+// target explicitly and a hardcoded name is not merely untidy -- it points at a
+// different database than the one the assertion then probes. `db/index.mjs`
+// folds LEAGUE_DB_DATABASE into `config.postgres.connection` at import, and this
+// file is imported after it, so under the isolated-database recipe in
+// docs/guides/test.md (`LEAGUE_DB_DATABASE=league_test_<slug>`) the sandbox pool
+// connects to the per-session database while the literal revoked on the shared
+// one. Two failures came out of that, and the second is the serious one:
+//
+//   - The hardening assertion failed spuriously. The per-session database still
+//     carried the TEMP grant every new database inherits from template1, so
+//     CREATE TEMP TABLE succeeded and the test read a live guard as broken.
+//   - The run REACHED OUT of its isolation and mutated privileges on the shared
+//     `league_test`, which is precisely what the isolation recipe exists to
+//     prevent. A sibling session running the suite there saw its own TEMP grant
+//     revoked out from under it by a run that was supposed to be isolated.
+//
+// Quoted as an identifier because a database name is not a bindable parameter.
+const TEST_DATABASE_IDENTIFIER = `"${config.postgres.connection.database.replace(/"/g, '""')}"`
+
 // The role that is missing the three hardening lines. Every hardening assertion
 // below is paired against it, because a test that never shows the attack working
 // proves nothing about the guard.
@@ -109,7 +132,7 @@ describe('DATA VIEW SQL sandbox', function () {
     // Restore the PUBLIC privileges the hardening REVOKEs remove, so this file
     // starts from the same state as a cluster that has never been hardened and
     // the positive controls below are meaningful.
-    await db.raw('GRANT TEMP ON DATABASE league_test TO PUBLIC')
+    await db.raw(`GRANT TEMP ON DATABASE ${TEST_DATABASE_IDENTIFIER} TO PUBLIC`)
     await db.raw(
       'GRANT EXECUTE ON FUNCTION lo_from_bytea(oid, bytea) TO PUBLIC'
     )
@@ -208,7 +231,9 @@ describe('DATA VIEW SQL sandbox', function () {
       )
       await sandbox_pool.raw('DROP TABLE sandbox_temp_control')
 
-      await db.raw('REVOKE TEMP ON DATABASE league_test FROM PUBLIC')
+      await db.raw(
+        `REVOKE TEMP ON DATABASE ${TEST_DATABASE_IDENTIFIER} FROM PUBLIC`
+      )
 
       const code = await error_code_of(
         sandbox_pool.raw('CREATE TEMP TABLE sandbox_temp_after (id integer)')
