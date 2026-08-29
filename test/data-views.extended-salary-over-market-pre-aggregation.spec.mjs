@@ -309,10 +309,14 @@ describe('Data Views - extended salary over market pre-aggregation', function ()
     // the FRANCHISE row's tag reaches the join too, adding a blank row that no
     // roster state of this player can justify.
     //
-    // Asserted on the VALUES rather than on a row count. The extended-salary
-    // join has a fan-out of its own on the same two roster rows -- it is a
-    // separate join group and predates this column -- so the player yields two
-    // rows either way and a count assertion cannot tell the two worlds apart.
+    // Asserted on the VALUES rather than on a row count, and it must stay that
+    // way. The extended-salary join carried a fan-out of its own on the same two
+    // roster rows until it was de-duplicated in the same style; while that was
+    // live the player yielded two rows in both worlds, so a count assertion
+    // could not tell them apart. Now that the fan-out is closed a count would
+    // appear to work -- but it would be asserting the OTHER join's
+    // de-duplication, in a different join group, and would go green with this
+    // relation's DISTINCT ON removed. Values are what discriminate here.
     it('contributes one tag for a player holding two week-0 rows in one league', async () => {
       const { query } = await get_data_view_results_query(over_market_request)
       const rows = await query.transacting(trx)
@@ -326,6 +330,37 @@ describe('Data Views - extended salary over market pre-aggregation', function ()
         0,
         'a NULL here means the FRANCHISE tag from the higher tid reached a row the relation should never have emitted'
       )
+    })
+
+    // The same gate for the OTHER join group. `player_extended_salary_join`
+    // (player-extended-salary-column-definitions.mjs) joins its subquery to the
+    // player row on pid alone and carried no de-duplication of its own, so the
+    // same two roster rows multiplied every outer row they touched -- silently,
+    // since it duplicates rather than raising the way the correlated roster-tag
+    // form did.
+    //
+    // The two rows must yield DIFFERENT salaries for the duplication to be
+    // observable at all, and here they do only because the extensions for this
+    // scope are UNPROCESSED and the projected branch is live: tid 9001 takes the
+    // REGULAR ladder, salary_paid + (extensions + 1) * 5 = 5 with no holding
+    // row, while tid 9002 is FRANCHISE at position MLB, which no arm of the
+    // franchise CASE names and which therefore falls to ELSE 0. Were the
+    // extensions processed, both rows would collapse to COALESCE(salary_paid, 0)
+    // = 0, the duplicates would carry equal values, and this assertion would be
+    // a false green -- the same trap the roster-tag gate above fell into. The
+    // ladder value 5 asserted below is what pins that branch.
+    it('collapses a player holding two week-0 rows in one league to one salary row', async () => {
+      const { query } = await get_data_view_results_query(over_market_request)
+      const rows = await query.transacting(trx)
+      const fanout_rows = rows.filter((row) => row.pid === fanout_pid)
+
+      expect(fanout_rows).to.have.lengthOf(
+        1,
+        'two week-0 roster rows fanned the player out; the extended-salary subquery needs DISTINCT ON (pid)'
+      )
+      // ORDER BY pid, tid makes the survivor the LOWEST tid deterministically,
+      // so it is 9001's REGULAR ladder and never 9002's FRANCHISE zero.
+      expect(Number(fanout_rows[0].extended_salary_0)).to.equal(5)
     })
 
     // The other half of the two-scope pair. Separate relations make two values

@@ -126,8 +126,30 @@ export const player_extended_salary_join = async ({
           ELSE COALESCE(s.salary_paid, 0) + (COALESCE(rp.extensions, 0) + 1) * 5
         END AS extended_salary`
 
+  // DISTINCT ON is load-bearing rather than defensive. The relation joins the
+  // outer player row on `pid` alone, so it must carry at most one row per pid or
+  // it MULTIPLIES that row. `rosters_players` is UNIQUE on
+  // (pid, week, season_year, tid) and NOT on lid, so one player can hold two
+  // week-0 rows inside one league, and production carries such a pair: pid
+  // ZAMI-WHIT-015750, league 1, 2022, tids 11 and 12.
+  //
+  // Nothing has ever surfaced this. The fan-out is silent -- it duplicates the
+  // outer row rather than raising -- and both of that pair's rows carry the same
+  // tag, so the duplicates compute the same salary and any enclosing GROUP BY
+  // collapses them again. A row-count assertion therefore passes with this
+  // de-duplication removed; only differing values expose it.
+  //
+  // `31dc6b0a0` closed the same grain hole in `roster_tag_sql`, where the
+  // correlated form raised 21000 on that scope instead. Ordering by tid makes
+  // the survivor deterministic rather than plan-dependent, and pid+tid is unique
+  // here because the scope pins lid, season_year and week.
+  //
+  // Neither LEFT JOIN below can fan out: `roster_asset_holding` has no player
+  // holding two open rows on one tid, and `seasons` is one row per (lid, year).
+  // The roster rows are the only multiplying source.
   const subquery = db
     .select('rp.pid', db.raw(salary_expression))
+    .distinctOn('rp.pid')
     .from('rosters_players as rp')
     .leftJoin('roster_asset_holding as s', function () {
       this.on('s.player_id', '=', 'rp.pid')
@@ -139,6 +161,8 @@ export const player_extended_salary_join = async ({
     .where('rp.lid', lid)
     .where('rp.season_year', year)
     .where('rp.week', 0)
+    .orderBy('rp.pid')
+    .orderBy('rp.tid')
 
   // Only the projected branch reads the franchise tag prices off `seasons`.
   if (!extensions_processed) {
