@@ -58,7 +58,8 @@ const player_seasonlogs_source = {
 const get_projection_row_year = ({ params = {}, data_view_options = {} }) => {
   if (
     !data_view_options.pid_reference ||
-    !data_view_options.query_context?.db
+    !data_view_options.query_context?.db ||
+    !data_view_options.query_context?.players_query
   ) {
     return null
   }
@@ -80,54 +81,41 @@ const get_projection_row_year = ({ params = {}, data_view_options = {} }) => {
   return null
 }
 
-// One CTE per projected season, shared by every career-year column in the
-// query. The relation depends on nothing but the season, so two columns
-// projecting the same season read the same rows.
+// The season is pinned into the alias so it moves when the season rolls, rather
+// than a stale relation surviving under a name that no longer describes it.
 const career_year_projection_cte_name = () =>
   get_table_hash(`career_year_projection/${current_season.year}`)
 
-// The register_ctes hook cannot decide whether to emit this relation, because
-// it fires identically for a SELECT column and for a WHERE clause and the two
-// want opposite answers: main_where reads the STORED column deliberately
-// (filtering on career_year has never consulted the projection), so a
-// where-only use must add no CTE and no join. Registering there anyway put an
-// unread relation into five golden queries.
+// Registered from the select expression rather than from the register_ctes
+// hook, because that hook cannot tell a SELECT column from a WHERE clause and
+// the two want opposite answers: main_where reads the STORED column
+// deliberately (filtering on career_year has never consulted the projection),
+// so a where-only use must add no CTE and no join. Registering from the hook
+// put an unread relation into every career-year golden.
 //
-// So the hook only captures the builder, and the relation is registered by the
-// select expression at the moment it actually emits a reference. That is the
-// stronger invariant anyway -- the CTE exists exactly when something reads it,
-// rather than whenever the gate and the emitter happen to agree.
-const capture_query_for_career_year_projection = ({
-  query,
-  data_view_options
-}) => {
-  data_view_options.career_year_projection_query = query
-}
-
+// Registering on first reference gives the stronger invariant anyway -- the
+// relation exists exactly when something reads it.
+//
 // Idempotent: main_select and main_group_by both emit the expression, and two
-// career-year columns projecting the same season share the relation.
-// Re-registering the name would emit a duplicate WITH alias (42712).
+// career-year columns share the one relation. Re-registering the name would
+// emit a duplicate WITH alias (42712).
 const ensure_career_year_projection_cte = (data_view_options) => {
-  const query = data_view_options.career_year_projection_query
-  const { db } = data_view_options.query_context
+  const { db, players_query } = data_view_options.query_context
   const cte_name = career_year_projection_cte_name()
 
-  if (!data_view_options.career_year_projection_ctes) {
-    data_view_options.career_year_projection_ctes = new Set()
-  }
-  if (data_view_options.career_year_projection_ctes.has(cte_name)) {
+  if (data_view_options.career_year_projection_cte_registered) {
     return cte_name
   }
 
-  query.with(cte_name, db.raw(projected_career_year_cte_select()))
+  players_query.with(cte_name, db.raw(projected_career_year_cte_select()))
   // LEFT, not inner. A player with no prior REG seasonlog has no row in the
   // grouped relation, and an inner join would drop them from the view; the
   // COALESCE in the read expression is what restores the `1` the correlated
   // form returned for them.
-  query.leftJoin(cte_name, function () {
+  players_query.leftJoin(cte_name, function () {
     this.on(`${cte_name}.pid`, '=', data_view_options.pid_reference)
   })
-  data_view_options.career_year_projection_ctes.add(cte_name)
+  data_view_options.career_year_projection_cte_registered = true
   return cte_name
 }
 
@@ -137,7 +125,7 @@ const get_career_year_select_expression = ({
   data_view_options = {}
 } = {}) => {
   const row_year = get_projection_row_year({ params, data_view_options })
-  if (row_year === null || !data_view_options.career_year_projection_query) {
+  if (row_year === null) {
     return `${table_name}.career_year`
   }
   const projected = projected_career_year_from_cte({
@@ -151,8 +139,6 @@ export default {
     column_name: 'career_year',
     table_alias: player_seasonlogs_table_alias,
     source: player_seasonlogs_source,
-    register_ctes: ({ query, data_view_options }) =>
-      capture_query_for_career_year_projection({ query, data_view_options }),
     main_select: ({ column_index, table_name, params, data_view_options }) => [
       `${get_career_year_select_expression({
         table_name,
