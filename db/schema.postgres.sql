@@ -241,7 +241,6 @@ DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key_no_user;
-DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_history_pid;
 DROP INDEX IF EXISTS public.idx_projections_history_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_history_natural_key;
@@ -25884,7 +25883,6 @@ CREATE TABLE public.projections_history_y2026 (
 CREATE TABLE public.projections_index (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25939,7 +25937,6 @@ PARTITION BY RANGE (season_year);
 CREATE TABLE public.projections_index_default (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25993,7 +25990,6 @@ CREATE TABLE public.projections_index_default (
 CREATE TABLE public.projections_index_y2020 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26047,7 +26043,6 @@ CREATE TABLE public.projections_index_y2020 (
 CREATE TABLE public.projections_index_y2021 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26101,7 +26096,6 @@ CREATE TABLE public.projections_index_y2021 (
 CREATE TABLE public.projections_index_y2022 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26155,7 +26149,6 @@ CREATE TABLE public.projections_index_y2022 (
 CREATE TABLE public.projections_index_y2023 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26209,7 +26202,6 @@ CREATE TABLE public.projections_index_y2023 (
 CREATE TABLE public.projections_index_y2024 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26263,7 +26255,6 @@ CREATE TABLE public.projections_index_y2024 (
 CREATE TABLE public.projections_index_y2025 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26317,7 +26308,6 @@ CREATE TABLE public.projections_index_y2025 (
 CREATE TABLE public.projections_index_y2026 (
     pid character varying(25) NOT NULL,
     source_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -32722,13 +32712,6 @@ CREATE INDEX idx_projections_history_nfl_week_id ON ONLY public.projections_hist
 --
 
 CREATE INDEX idx_projections_history_pid ON ONLY public.projections_history USING btree (pid);
-
-
---
--- Name: idx_projections_index_natural_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45521,13 +45504,6 @@ CREATE INDEX projections_history_y2026_pid_idx ON public.projections_history_y20
 
 
 --
--- Name: projections_index_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (source_id, pid, user_id, week, season_year, season_type);
-
-
---
 -- Name: projections_index_default_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45546,13 +45522,6 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 --
 
 CREATE UNIQUE INDEX projections_index_default_source_id_pid_week_season_year_se_idx ON public.projections_index_default USING btree (source_id, pid, week, season_year, season_type);
-
-
---
--- Name: projections_index_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45577,13 +45546,6 @@ CREATE UNIQUE INDEX projections_index_y2020_source_id_pid_week_season_year_seas_
 
 
 --
--- Name: projections_index_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (source_id, pid, user_id, week, season_year, season_type);
-
-
---
 -- Name: projections_index_y2021_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45602,13 +45564,6 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2021_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2021 USING btree (source_id, pid, week, season_year, season_type);
-
-
---
--- Name: projections_index_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45633,13 +45588,6 @@ CREATE UNIQUE INDEX projections_index_y2022_source_id_pid_week_season_year_seas_
 
 
 --
--- Name: projections_index_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (source_id, pid, user_id, week, season_year, season_type);
-
-
---
 -- Name: projections_index_y2023_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45658,13 +45606,6 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2023_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2023 USING btree (source_id, pid, week, season_year, season_type);
-
-
---
--- Name: projections_index_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45689,13 +45630,6 @@ CREATE UNIQUE INDEX projections_index_y2024_source_id_pid_week_season_year_seas_
 
 
 --
--- Name: projections_index_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (source_id, pid, user_id, week, season_year, season_type);
-
-
---
 -- Name: projections_index_y2025_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45714,13 +45648,6 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2025_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2025 USING btree (source_id, pid, week, season_year, season_type);
-
-
---
--- Name: projections_index_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -58156,13 +58083,6 @@ ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_default_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_default_natural_key_idx;
-
-
---
 -- Name: projections_index_default_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58181,13 +58101,6 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_default_source_id_pid_week_season_year_se_idx;
-
-
---
--- Name: projections_index_y2020_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2020_natural_key_idx;
 
 
 --
@@ -58212,13 +58125,6 @@ ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION pu
 
 
 --
--- Name: projections_index_y2021_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2021_natural_key_idx;
-
-
---
 -- Name: projections_index_y2021_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58237,13 +58143,6 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2021_source_id_pid_week_season_year_seas_idx;
-
-
---
--- Name: projections_index_y2022_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2022_natural_key_idx;
 
 
 --
@@ -58268,13 +58167,6 @@ ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION pu
 
 
 --
--- Name: projections_index_y2023_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2023_natural_key_idx;
-
-
---
 -- Name: projections_index_y2023_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58293,13 +58185,6 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2023_source_id_pid_week_season_year_seas_idx;
-
-
---
--- Name: projections_index_y2024_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2024_natural_key_idx;
 
 
 --
@@ -58324,13 +58209,6 @@ ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION pu
 
 
 --
--- Name: projections_index_y2025_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2025_natural_key_idx;
-
-
---
 -- Name: projections_index_y2025_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58349,13 +58227,6 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2025_source_id_pid_week_season_year_seas_idx;
-
-
---
--- Name: projections_index_y2026_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2026_natural_key_idx;
 
 
 --

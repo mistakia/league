@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-29 against league_production
 -- Drop projections_index.user_id, the second and last step of retiring it.
 --
 -- RUN THIS ONLY AFTER the user_id-free writers are DEPLOYED. The first step

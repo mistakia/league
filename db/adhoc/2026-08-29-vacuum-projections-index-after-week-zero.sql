@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-29 against league_production
 -- Plain VACUUM ANALYZE on projections_index, after the week-0 delete, the CHECK,
 -- the narrow index build and the user_id drop.
 --

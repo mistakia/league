@@ -20264,7 +20264,6 @@ export interface ProjectionsHistoryY2026Row {
 export interface ProjectionsIndexRow {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20312,7 +20311,6 @@ export interface ProjectionsIndexRow {
 export interface ProjectionsIndexDefaultRow {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20360,7 +20358,6 @@ export interface ProjectionsIndexDefaultRow {
 export interface ProjectionsIndexY2020Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20408,7 +20405,6 @@ export interface ProjectionsIndexY2020Row {
 export interface ProjectionsIndexY2021Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20456,7 +20452,6 @@ export interface ProjectionsIndexY2021Row {
 export interface ProjectionsIndexY2022Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20504,7 +20499,6 @@ export interface ProjectionsIndexY2022Row {
 export interface ProjectionsIndexY2023Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20552,7 +20546,6 @@ export interface ProjectionsIndexY2023Row {
 export interface ProjectionsIndexY2024Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20600,7 +20593,6 @@ export interface ProjectionsIndexY2024Row {
 export interface ProjectionsIndexY2025Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
@@ -20648,7 +20640,6 @@ export interface ProjectionsIndexY2025Row {
 export interface ProjectionsIndexY2026Row {
   pid: string
   source_id: number
-  user_id: number
   week: number
   season_year: number
   passing_attempts: number | null
