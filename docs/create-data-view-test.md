@@ -127,7 +127,15 @@ To pin that a hash did not move, assert the literal alias in a spec (see `test/d
 
 **An assertion anchored on the SHAPE of a table alias matches any join, so it passes whether or not the join you mean is there.** Every join in a data-view query carries a `get_table_hash` alias, so `expect(sql).to.match(/left join "t[0-9a-f]{32}" on/)` is satisfied by the column's own source join and proves nothing about a CTE you added. Measured 2026-08-29: that assertion was written to pin that a new pre-aggregation CTE was LEFT-joined, passed green, and `player-career-year-with-other-columns.json` contains the identical substring with no such CTE anywhere in it. It survived a review pass, because the pattern looks specific.
 
-Anchor on the relation's NAME, not its shape: import `get_table_hash` in the spec, compute the alias the emitter computes (`get_table_hash(\`<key>/${year}\`)`), and assert `"<name>" as (`and`left join "<name>" on`. Note the emitted CTE is rarely the FIRST in the `with`list —`base_years`and`player_years`usually precede it — so anchoring on`with "<name>" as (`fails on a correct query. The same rule kills the neighbouring temptation to assert on a SQL fragment like`group by pid`: it sits one quoted-vs-unquoted character away from an unrelated column's knex-generated `group by "pid"`, so it is a false green and a false red waiting on whichever lands first.
+Anchor on the relation's NAME, not its shape. Import `get_table_hash` in the spec, compute the same alias the emitter computes, and assert against that:
+
+```js
+const cte_name = get_table_hash(`career_year_projection/${year}`)
+expect(sql).to.include(`"${cte_name}" as (`)
+expect(sql).to.include(`left join "${cte_name}" on`)
+```
+
+Two details that cost a red run each. The emitted CTE is rarely FIRST in the `with` list — `base_years` and `player_years` usually precede it — so anchoring on `with "<name>" as (` fails on a correct query. And the same rule kills the neighbouring temptation to assert on a bare SQL fragment such as `group by pid`, which sits one quoted-vs-unquoted character away from an unrelated column's knex-generated `group by "pid"`: a false green and a false red waiting on whichever lands first.
 
 **An alias-separation fixture proves a NECESSARY condition, never a sufficient one — do not read it as covering "these two columns show different numbers".** Two columns getting two joins is what makes different values POSSIBLE; it does not make them different. The two properties come apart whenever the divergence is semantic rather than structural, and then the query-match fixture is green over a live defect by construction, because the SQL is valid and correctly shaped in both worlds.
 
