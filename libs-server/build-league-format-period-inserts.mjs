@@ -3,10 +3,7 @@ import {
   rest_of_season_aggregate_key,
   rest_of_season_net_aggregate_key
 } from '#libs-shared/calculate-player-period-values.mjs'
-import {
-  season_aggregate_key,
-  season_projection_week
-} from '#libs-shared/calculate-distributional-baselines.mjs'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 
 // Partition one league format's computed board into the three tables that now
 // hold it, one per PERIOD.
@@ -30,9 +27,8 @@ import {
  *   calculate_player_period_values have both run
  * @param {string} params.league_format_id
  * @param {number} params.season_year
- * @param {number} params.first_week - the first week the run recomputed, from
- *   first_projection_week_to_recompute. The SEASON period is written exactly
- *   when this is 0.
+ * @param {boolean} params.write_season_period - whether this run recomputed the
+ *   season board, and so has a season value to write. See the seal note below.
  * @returns {object} { weekly_value_inserts, season_value_inserts,
  *   rest_of_season_value_inserts }
  */
@@ -40,7 +36,7 @@ const build_league_format_period_inserts = ({
   player_rows,
   league_format_id,
   season_year,
-  first_week
+  write_season_period
 }) => {
   const weekly_value_inserts = []
   const season_value_inserts = []
@@ -51,19 +47,18 @@ const build_league_format_period_inserts = ({
   // touching it once week 1 opens, so the stored value is the FINAL preseason
   // projection rather than whichever offseason run happened to fire first.
   //
-  // The gate is expressed through the recompute bound rather than as a separate
-  // season-type check, because the two are the same fact:
-  // first_projection_week_to_recompute returns current_season.week for the
-  // current year, so week 0 sits inside the recompute range exactly while the
-  // offseason lasts, and returns 0 for a past year, so a backfill always writes.
-  // One rule, both paths, routed through the helper whose spec fails if the
-  // bound is lowered.
+  // `write_season_period` is now a PARAMETER rather than something inferred here
+  // from the week bound. It was `first_week === 0`, which was only ever correct
+  // by coincidence -- it read a loop bound as if it were a period statement, so
+  // raising that bound to 1 (once week 0 stopped being a projection week) would
+  // have silently stopped writing this table forever, taking market_salary with
+  // it. The caller states the fact directly:
+  // `current_season.is_offseason || year !== current_season.year`.
   //
-  // It is also what makes the season NET trustworthy. That net is a sum over
-  // weeks 1..18, and mid-season only weeks at or after the bound are recomputed
-  // -- so a season row written then would sum a partial board. The seal and the
-  // completeness condition are the same condition.
-  const write_season_period = first_week === season_projection_week
+  // The seal is also what makes the season NET trustworthy. That net is a sum
+  // over weeks 1..18, and mid-season only weeks at or after the recompute bound
+  // are refreshed -- so a season row written then would sum a partial board. The
+  // seal and the completeness condition are the same condition.
 
   for (const player_row of player_rows) {
     const pts_added = player_row.pts_added || {}

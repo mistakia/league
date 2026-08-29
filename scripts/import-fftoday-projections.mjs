@@ -3,14 +3,15 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import db from '#db'
 import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
   find_player_row,
   report_job,
   check_projections_index_floor,
-  record_projection_history
+  check_season_projections_floor,
+  save_projections,
+  projection_periods
 } from '#libs-server'
 import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -146,9 +147,10 @@ const run = async ({
   }
 
   const year = current_season.year
-  const week = is_regular_season_projection
-    ? 0
-    : current_season.active_fantasy_week
+  const period = is_regular_season_projection
+    ? projection_periods.SEASON
+    : projection_periods.WEEK
+  const week = current_season.active_fantasy_week
 
   const missing = []
   const items = []
@@ -211,14 +213,7 @@ const run = async ({
       continue
     }
 
-    inserts.push({
-      pid: player_row.pid,
-      week,
-      season_year: year,
-      season_type: 'REG',
-      source_id: external_data_sources.FFTODAY,
-      ...data
-    })
+    inserts.push({ pid: player_row.pid, ...data })
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -241,32 +236,14 @@ const run = async ({
   }
   if (inserts.length) {
     // remove any existing projections in index not included in this set
-    await db('projections_index')
-      .where({
-        season_year: year,
-        week,
-        source_id: external_data_sources.FFTODAY,
-        season_type: 'REG'
-      })
-      .whereNotIn(
-        'pid',
-        inserts.map((i) => i.pid)
-      )
-      .del()
-
-    log(`Inserting ${inserts.length} projections into database`)
-    await db('projections_index')
-      .insert(inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'user_id',
-        'week',
-        'season_year',
-        'season_type'
-      ])
-      .merge()
-    await record_projection_history({ inserts, generated_at })
+    await save_projections({
+      period,
+      inserts,
+      source_id: external_data_sources.FFTODAY,
+      season_year: year,
+      week,
+      generated_at
+    })
   }
 
   return {
@@ -287,7 +264,9 @@ const main = async () => {
       is_regular_season_projection: argv.season
     })
     if (result && !result.skipped && !argv.dry) {
-      await check_projections_index_floor(result)
+      await (argv.season
+        ? check_season_projections_floor(result)
+        : check_projections_index_floor(result))
     }
   } catch (err) {
     error = err

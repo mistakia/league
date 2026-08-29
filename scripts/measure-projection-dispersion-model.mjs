@@ -173,10 +173,12 @@ const main = async () => {
   // Load projections once; they do not depend on scoring format.
   const projections_by_year = {}
   for (const year of HISTORY_YEARS) {
-    const rows = await db('projections_index').where({
+    // The season-long consensus, from the table that holds it. This read used to
+    // be `projections_index` at `week: 0` and carried a `season_type` predicate;
+    // the season table has neither column, because a season-long projection is
+    // REG by construction.
+    const rows = await db('season_projections_index').where({
       season_year: year,
-      week: 0,
-      season_type: 'REG',
       source_id: external_data_sources.AVERAGE
     })
     if (!rows.length) continue

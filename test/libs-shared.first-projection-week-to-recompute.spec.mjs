@@ -53,30 +53,52 @@ describe('libs-shared/first-projection-week-to-recompute', function () {
   })
 
   describe('past seasons', function () {
-    it('starts at 0, because a completed season has no week to preserve', function () {
+    it('starts at week 1, because a completed season has no week to preserve', function () {
       MockDate.set('2026-10-20T12:00:00Z')
       expect(
         first_projection_week_to_recompute({ year: current_season.year - 1 })
-      ).to.equal(0)
+      ).to.equal(1)
       expect(
         first_projection_week_to_recompute({ year: current_season.year - 3 })
-      ).to.equal(0)
+      ).to.equal(1)
     })
   })
 
-  describe('the offseason carve-out', function () {
-    // Week 0 is the season-long grain and is NOT frozen: in the offseason
-    // current_season.week is 0, so week 0 sits inside the recompute range and
-    // is rewritten on every run. This is why a past season's week-0 row
-    // reflects the END of that season rather than its preseason, and why it
-    // must not be used as a preseason feature.
-    it('recomputes from week 0 in the offseason, leaving week 0 unfrozen', function () {
+  // The bound is never 0, on any clock or any year. `projections_index.week` is
+  // a game week and nothing else -- the season-long row lives in
+  // `season_projections_index`, which has no `week` column, and
+  // `CHECK (week >= 1)` makes 0 unwritable -- so a 0 here would build a row the
+  // table rejects.
+  //
+  // This replaces an "offseason carve-out" leg that asserted the opposite: that
+  // the bound returns 0 in the offseason, leaving week 0 unfrozen and inside the
+  // recompute range. That was true while week 0 was the season-long slot.
+  describe('the floor at week 1', function () {
+    it('returns 1 in the offseason, when the raw clock reads week 0', function () {
       MockDate.set('2026-07-29T12:00:00Z')
 
       expect(current_season.week).to.equal(0)
       expect(
         first_projection_week_to_recompute({ year: current_season.year })
-      ).to.equal(0)
+      ).to.equal(1)
+    })
+
+    it('never returns 0, across the offseason, preseason and season', function () {
+      for (const instant of [
+        '2026-02-15T12:00:00Z',
+        '2026-07-29T12:00:00Z',
+        '2026-08-25T12:00:00Z',
+        '2026-09-15T12:00:00Z',
+        '2026-12-20T12:00:00Z'
+      ]) {
+        MockDate.set(instant)
+        for (const year of [current_season.year, current_season.year - 2]) {
+          expect(
+            first_projection_week_to_recompute({ year }),
+            `${instant} year=${year}`
+          ).to.be.at.least(1)
+        }
+      }
     })
   })
 })

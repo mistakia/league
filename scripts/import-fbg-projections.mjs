@@ -10,7 +10,8 @@ import {
   report_job,
   fetch_with_retry,
   check_projections_index_floor,
-  record_projection_history
+  record_projection_history,
+  projection_periods
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -187,7 +188,11 @@ const run = async ({ dry_run = false } = {}) => {
         'season_type'
       ])
       .merge()
-    await record_projection_history({ inserts, generated_at })
+    await record_projection_history({
+      inserts,
+      period: projection_periods.WEEK,
+      generated_at
+    })
   }
 
   return {

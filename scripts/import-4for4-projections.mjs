@@ -8,10 +8,11 @@ import {
   report_job,
   four_for_four,
   check_projections_index_floor,
-  record_projection_history
+  check_season_projections_floor,
+  save_projections,
+  projection_periods
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
-import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -58,13 +59,16 @@ const run = async ({
   }
 
   const year = current_season.year
-  const week = is_regular_season_projection ? 0 : current_season.nfl_seas_week
+  const period = is_regular_season_projection
+    ? projection_periods.SEASON
+    : projection_periods.WEEK
+  const week = current_season.nfl_seas_week
+  // A season-long projection is REG by construction -- the season table has no
+  // season_type column to hold anything else.
   const seas_type =
-    week === 0
+    is_regular_season_projection || current_season.nfl_seas_type !== 'POST'
       ? 'REG'
-      : current_season.nfl_seas_type === 'POST'
-        ? 'POST'
-        : 'REG'
+      : 'POST'
 
   const data = await four_for_four.get_4for4_projections({
     season_year: year,
@@ -79,7 +83,7 @@ const run = async ({
 
   const first_item = data[0]
 
-  // Weekly projections include a Week column; season-long projections (week 0)
+  // Weekly projections include a Week column; season-long projections
   // legitimately do not, and item.Week is unused for season inserts. Only
   // enforce the guard for weekly imports -- otherwise --season always throws
   // 'No Week column found in data' on valid season CSV (regression from 594f7824
@@ -109,14 +113,7 @@ const run = async ({
     }
 
     const proj = get_projection(item)
-    inserts.push({
-      pid: player_row.pid,
-      season_year: year,
-      week,
-      season_type: seas_type,
-      source_id: external_data_sources['4FOR4'],
-      ...proj
-    })
+    inserts.push({ pid: player_row.pid, ...proj })
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -131,35 +128,16 @@ const run = async ({
   }
 
   if (inserts.length) {
-    // remove any existing projections in index not included in this set
-    await db('projections_index')
-      .where({
-        season_year: year,
-        week,
-        source_id: external_data_sources['4FOR4'],
-        season_type: seas_type
-      })
-      .whereNotIn(
-        'pid',
-        inserts.map((i) => i.pid)
-      )
-      .del()
-
-    log(
-      `Inserting ${inserts.length} projections for week ${week} into database`
-    )
-    await db('projections_index')
-      .insert(inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'user_id',
-        'week',
-        'season_year',
-        'season_type'
-      ])
-      .merge()
-    await record_projection_history({ inserts, generated_at })
+    log(`Inserting ${inserts.length} projections into database`)
+    await save_projections({
+      period,
+      inserts,
+      source_id: external_data_sources['4FOR4'],
+      season_year: year,
+      week,
+      season_type: seas_type,
+      generated_at
+    })
   }
 
   return {
@@ -180,7 +158,9 @@ const main = async () => {
       dry_run: argv.dry
     })
     if (result && !result.skipped && !argv.dry) {
-      await check_projections_index_floor(result)
+      await (argv.season
+        ? check_season_projections_floor(result)
+        : check_projections_index_floor(result))
     }
   } catch (err) {
     error = err

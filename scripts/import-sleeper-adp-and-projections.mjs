@@ -8,10 +8,11 @@ import {
   sleeper,
   find_player_row,
   batch_insert,
-  check_projections_index_floor,
+  check_season_projections_floor,
   find_or_create_adp_format,
   grade_adp_import_run,
-  record_projection_history
+  save_projections,
+  projection_periods
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -124,15 +125,10 @@ const process_matched_player = ({
   })
   adp_inserts.push(...adp_entries)
 
-  // Insert into projections_index and projections
-  projection_inserts.push({
-    pid: player_row.pid,
-    season_year: current_season.year,
-    week: 0,
-    season_type: 'REG',
-    source_id: external_data_sources.SLEEPER,
-    ...proj
-  })
+  // Sleeper publishes a SEASON-LONG projection only -- it carries no weekly
+  // rows at all -- so this goes to season_projections_index under the season
+  // period rather than to a reserved week in the per-week table.
+  projection_inserts.push({ pid: player_row.pid, ...proj })
 }
 
 const import_sleeper_adp_and_projections = async ({
@@ -356,25 +352,11 @@ const import_sleeper_adp_and_projections = async ({
 
   if (projection_inserts.length) {
     log(`Inserting ${projection_inserts.length} projections into database`)
-    await batch_insert({
-      items: projection_inserts,
-      batch_size: BATCH_SIZE,
-      save: async (batch) => {
-        await db('projections_index')
-          .insert(batch)
-          .onConflict([
-            'source_id',
-            'pid',
-            'user_id',
-            'week',
-            'season_year',
-            'season_type'
-          ])
-          .merge()
-      }
-    })
-    await record_projection_history({
+    await save_projections({
+      period: projection_periods.SEASON,
       inserts: projection_inserts,
+      source_id: external_data_sources.SLEEPER,
+      season_year: current_season.year,
       generated_at
     })
   }
@@ -382,9 +364,7 @@ const import_sleeper_adp_and_projections = async ({
   return {
     skipped: false,
     season_year: current_season.year,
-    week: 0,
-    source_id: external_data_sources.SLEEPER,
-    season_type: 'REG'
+    source_id: external_data_sources.SLEEPER
   }
 }
 
@@ -397,7 +377,7 @@ const main = async () => {
       dry_run: argv.dry
     })
     if (result && !result.skipped) {
-      await check_projections_index_floor(result)
+      await check_season_projections_floor(result)
     }
   } catch (err) {
     error = err

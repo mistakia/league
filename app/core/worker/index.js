@@ -2,15 +2,13 @@ import {
   calculateStatsFromPlays,
   calculatePercentiles,
   calculatePoints,
-  calculate_projection_values,
+  calculate_season_projection_values,
+  calculate_weekly_projection_values,
   getOptimizerPositionConstraints,
   optimizeLineup,
   calculate_player_period_values
 } from '#libs-shared'
-import {
-  season_aggregate_key,
-  season_projection_week
-} from '#libs-shared/calculate-distributional-baselines.mjs'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 import solver from 'javascript-lp-solver'
 import {
   current_season,
@@ -48,7 +46,7 @@ export function calculatePlayerValues(payload) {
   for (const player of players) {
     player.points = player.points || {}
     player.projection = player.projection || {}
-    for (let week = 0; week <= final_week; week++) {
+    for (let week = 1; week <= final_week; week++) {
       const projection = player.projection[week]
       if (projection) {
         const points = calculatePoints({
@@ -81,23 +79,29 @@ export function calculatePlayerValues(payload) {
     }
 
     // The SEASON board, under the same named key the API payload uses. The
-    // weekly loop above writes points[0] from projection[0], and that used to be
-    // what the distributional model read -- so this key was never needed here.
-    // It is now: the model reads points.season, and a recompute that does not
-    // publish it prices the whole board at the sentinel on the first roster
-    // mutation, with the server's correct values replaced in place.
-    if (player.projection[season_projection_week]) {
+    // distributional model reads points.season, and a recompute that does not
+    // publish it prices the whole board at nothing on the first roster mutation,
+    // replacing the server's correct values in place.
+    if (player.projection[season_aggregate_key]) {
       player.points[season_aggregate_key] = calculatePoints({
-        stats: player.projection[season_projection_week],
+        stats: player.projection[season_aggregate_key],
         position: player.primary_position,
         league
       })
     }
   }
 
+  // The season board once, then the weekly loop -- the same two-entry-point
+  // split the server uses, so the client-side recompute after a roster mutation
+  // cannot drift from what process-projections wrote.
   const baselinesByWeek = {}
-  for (let week = 0; week <= final_week; week++) {
-    const { baselines } = calculate_projection_values({
+  const { baselines: season_baselines } = calculate_season_projection_values({
+    players,
+    league
+  })
+  baselinesByWeek[season_aggregate_key] = season_baselines
+  for (let week = 1; week <= final_week; week++) {
+    const { baselines } = calculate_weekly_projection_values({
       players,
       league,
       rosterRows,

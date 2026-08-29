@@ -4,7 +4,8 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import {
-  calculate_projection_values,
+  calculate_season_projection_values,
+  calculate_weekly_projection_values,
   calculate_player_period_values,
   groupBy
 } from '#libs-shared'
@@ -55,13 +56,12 @@ const process_league_format_year = async ({
     `processing league format ${league_format_id} for year ${year} (${pricing_model})`
   )
 
-  // Routed through the shared helper rather than a literal 0, so the backfill
-  // and the hourly cron partition by the same rule. For a past year it returns
-  // 0, which is what makes the season period write unconditionally here; for the
-  // current year it returns current_season.week, so an in-season invocation
-  // respects the same week-1 seal the cron does.
-  const first_week = first_projection_week_to_recompute({ year })
-  let week = first_week
+  // The season seal, stated the same way the hourly cron states it: a completed
+  // past year always rebuilds, and the current year writes only while the
+  // offseason lasts. It used to be inferred from the week bound returning 0,
+  // which stopped being expressible once week 0 stopped being a projection week.
+  const write_season_period =
+    current_season.is_offseason || year !== current_season.year
 
   const final_week_result = await db('nfl_games')
     .where({ season_year: year, season_type: 'REG' })
@@ -77,10 +77,22 @@ const process_league_format_year = async ({
   const final_week =
     final_week_result?.final_week ?? current_season.nfl_final_week
 
+  // The season board runs once, outside the weekly loop.
+  if (write_season_period) {
+    calculate_season_projection_values({
+      players: player_rows,
+      league: league_format
+    })
+  }
+
   // Baselines are not persisted for a league FORMAT -- only process_league
   // writes league_baselines, and it computes its own.
-  for (; week <= final_week; week++) {
-    calculate_projection_values({
+  for (
+    let week = first_projection_week_to_recompute({ year });
+    week <= final_week;
+    week++
+  ) {
+    calculate_weekly_projection_values({
       players: player_rows,
       league: league_format,
       week
@@ -102,7 +114,7 @@ const process_league_format_year = async ({
     player_rows,
     league_format_id,
     season_year: year,
-    first_week
+    write_season_period
   })
 
   // Output oracle, asserted BEFORE the destructive rewrite below rather than

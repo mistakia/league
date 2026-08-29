@@ -1,7 +1,8 @@
 import express from 'express'
 
 import { current_season, external_data_sources } from '#constants'
-import { get_player_projections } from '#libs-server'
+import { get_player_projections, get_season_projections } from '#libs-server'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 
 const router = express.Router()
 
@@ -38,9 +39,8 @@ const router = express.Router()
  *                 value:
  *                   - pid: "PATR-MAHO-005785"
  *                     source_id: 18
- *                     week: 0
+ *                     week: "season"
  *                     season_year: 2024
- *                     season_type: "REG"
  *                     pos: "QB"
  *                     passing_attempts: 525
  *                     passing_completions: 345
@@ -56,9 +56,8 @@ const router = express.Router()
  *                 value:
  *                   - pid: "CHRI-MCCA-005372"
  *                     source_id: 18
- *                     week: 0
+ *                     week: "season"
  *                     season_year: 2024
- *                     season_type: "REG"
  *                     pos: "RB"
  *                     rushing_attempts: 285
  *                     rushing_yards: 1350
@@ -83,11 +82,27 @@ router.get('/?', async (req, res) => {
     let projections = cache.get('projections')
     const season_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     if (!projections) {
-      projections = await db('projections_index')
+      const weekly = await db('projections_index')
         .where('source_id', external_data_sources.AVERAGE)
         .where('season_year', current_season.year)
-        .where('week', '>=', current_season.week)
+        .where('week', '>=', current_season.active_fantasy_week)
         .where('season_type', season_type)
+
+      // The season row comes from its own table and carries no week. It is
+      // appended under the named period key rather than a numeric one: the
+      // payload's consumers read `season`, and the week floor above cannot
+      // reach this query to amputate it.
+      const season =
+        season_type === 'REG'
+          ? await db('season_projections_index')
+              .where('source_id', external_data_sources.AVERAGE)
+              .where('season_year', current_season.year)
+          : []
+
+      projections = [
+        ...weekly,
+        ...season.map((row) => ({ ...row, week: season_aggregate_key }))
+      ]
       cache.set('projections', projections, 14400) // 4 hours
     }
 
@@ -115,7 +130,7 @@ router.get('/?', async (req, res) => {
  *
  *       **Time Periods:**
  *       - Weekly projections (weeks 1-18)
- *       - Season totals (week 0)
+ *       - The season-long total, under `week: "season"`
  *       - Regular season and playoff projections
  *
  *       **Data Includes:**
@@ -141,9 +156,8 @@ router.get('/?', async (req, res) => {
  *             example:
  *               - pid: "PATR-MAHO-005785"
  *                 source_id: 18
- *                 week: 0
+ *                 week: "season"
  *                 season_year: 2024
- *                 season_type: "REG"
  *                 pos: "QB"
  *                 passing_attempts: 525
  *                 passing_completions: 345
@@ -176,11 +190,14 @@ router.get('/:pid/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const { pid } = req.params
-    const projections = await get_player_projections({
-      pids: [pid],
-      include_averages: true
-    })
-    res.send(projections)
+    const [weekly, season] = await Promise.all([
+      get_player_projections({ pids: [pid], include_averages: true }),
+      get_season_projections({ pids: [pid], include_averages: true })
+    ])
+    res.send([
+      ...weekly,
+      ...season.map((row) => ({ ...row, week: season_aggregate_key }))
+    ])
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

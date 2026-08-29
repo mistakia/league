@@ -6,7 +6,6 @@ import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
-import { season_projection_week } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
@@ -18,8 +17,8 @@ enable_debug_namespaces('process-projections-for-scoring-format')
 
 // Re-derive the three scoring-format projected-points tables for one
 // (scoring_format, year) slice entirely from the authoritative projections_index
-// / rest_of_season_projections AVERAGE rows. This is the SINGLE source-of-truth
-// path shared
+// / season_projections_index / rest_of_season_projections AVERAGE rows. This is
+// the SINGLE source-of-truth path shared
 // by the 30-min process-projections cron and the ad-hoc / reconciliation
 // backfill, so the precomputed cache can never silently drift from
 // projections_index: delete each period's (format, year) slice and reinsert
@@ -42,15 +41,28 @@ export const process_scoring_format_year = async ({
     season_type: 'REG',
     source_id: external_data_sources.AVERAGE
   })
+  // The season snapshot is READ, not derived from a week of the weekly set. It
+  // used to come from `projections_index` week 0, which meant a period was being
+  // recovered from a reserved week number; it now has its own table and its own
+  // query, and no week predicate can reach it.
+  const season_projections = await db('season_projections_index').where({
+    season_year: year,
+    source_id: external_data_sources.AVERAGE
+  })
   const ros_projections = await db('rest_of_season_projections').where({
     season_year: year,
     source_id: external_data_sources.AVERAGE
   })
 
   const projections_by_pid = groupBy(projections, 'pid')
+  const season_by_pid = groupBy(season_projections, 'pid')
   const ros_by_pid = groupBy(ros_projections, 'pid')
   const pids = Array.from(
-    new Set([...Object.keys(projections_by_pid), ...Object.keys(ros_by_pid)])
+    new Set([
+      ...Object.keys(projections_by_pid),
+      ...Object.keys(season_by_pid),
+      ...Object.keys(ros_by_pid)
+    ])
   )
 
   if (!pids.length) {
@@ -86,23 +98,26 @@ export const process_scoring_format_year = async ({
 
     for (const proj of projections_by_pid[pid] || []) {
       const { week, ...stats } = proj
-      const row = {
+      weekly_points_inserts.push({
         pid,
         season_year: year,
         scoring_format_id,
+        week,
         projected_points_total: score(stats, player.primary_position)
-      }
+      })
+    }
 
-      // projections_index.week is smallint, and its week 0 IS the season-long
-      // projection -- so the season snapshot is derived here rather than being
-      // absent. It seals on its own: process-projections stops recomputing week
-      // 0 once week 1 opens, so re-deriving it after that reproduces the same
-      // frozen input.
-      if (week === season_projection_week) {
-        season_points_inserts.push(row)
-      } else {
-        weekly_points_inserts.push({ ...row, week })
-      }
+    // It seals on its own: process-projections stops recomputing the season
+    // board once week 1 opens, so re-scoring it after that reproduces the same
+    // frozen input.
+    const season_row = (season_by_pid[pid] || [])[0]
+    if (season_row) {
+      season_points_inserts.push({
+        pid,
+        season_year: year,
+        scoring_format_id,
+        projected_points_total: score(season_row, player.primary_position)
+      })
     }
 
     const rest_of_season_row = (ros_by_pid[pid] || [])[0]

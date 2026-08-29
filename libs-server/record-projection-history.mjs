@@ -180,23 +180,29 @@ const record_season_history = async ({ rows, generated_at }) => {
  *
  * @param {object} params
  * @param {Array<object>} params.inserts - the same rows written to
- *   `projections_index`, carrying pid, source_id, season_year, week,
- *   season_type and the stat columns
+ *   `projections_index` or `season_projections_index`
+ * @param {string} params.period - `week` or `season`, from
+ *   `projection_periods`. STATED by the caller rather than inferred from the
+ *   row: it used to be read off `Number(row.week) === 0`, which stopped being
+ *   expressible once the season row lost its week column, and would have
+ *   silently routed every season observation into the weekly table.
  * @param {Date} params.generated_at - observation instant
  * @returns {Promise<object>} { weekly: { inserted }, season: { observed, changed } }
  */
 export default async function record_projection_history({
   inserts,
+  period,
   generated_at
 }) {
   if (!inserts) throw new Error('inserts is required')
   if (!generated_at) throw new Error('generated_at is required')
+  if (period !== 'week' && period !== 'season') {
+    throw new Error(`period must be 'week' or 'season'; got ${period}`)
+  }
 
-  // Number('0') is 0, and the sentinel arrives as a number from every caller --
-  // but compare loosely on the parsed value rather than on the spelling, since
-  // the projections_index writers upstream have carried both.
-  const season_rows = inserts.filter((row) => Number(row.week) === 0)
-  const weekly_rows = inserts.filter((row) => Number(row.week) !== 0)
+  const is_season = period === 'season'
+  const season_rows = is_season ? inserts : []
+  const weekly_rows = is_season ? [] : inserts
 
   // The season table carries no season_type and no user_id, so a row that is
   // not REG or not source-authored would be SILENTLY relabelled by the routing
@@ -209,13 +215,13 @@ export default async function record_projection_history({
   for (const row of season_rows) {
     if (row.season_type && row.season_type !== 'REG') {
       throw new Error(
-        `season-long projection at week 0 carries season_type ${row.season_type}; ` +
+        `season-long projection carries season_type ${row.season_type}; ` +
           'the season table has no season_type column to store it in'
       )
     }
     if (row.user_id) {
       throw new Error(
-        `season-long projection at week 0 carries user_id ${row.user_id}; ` +
+        `season-long projection carries user_id ${row.user_id}; ` +
           'the season table has no user_id column to store it in'
       )
     }

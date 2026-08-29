@@ -7,7 +7,9 @@ import {
   groupBy,
   Roster,
   weightProjections,
-  calculate_projection_values,
+  weight_season_projections,
+  calculate_season_projection_values,
+  calculate_weekly_projection_values,
   calculate_player_period_values,
   named_scoring_formats,
   named_league_formats
@@ -20,6 +22,7 @@ import {
 import {
   get_league_format,
   get_player_projections,
+  get_season_projections,
   getPlayers,
   getRoster,
   getLeague,
@@ -38,10 +41,7 @@ import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-proje
 import { process_scoring_format_year } from './process-projections-for-scoring-format.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
-import {
-  season_aggregate_key,
-  season_projection_week
-} from '#libs-shared/calculate-distributional-baselines.mjs'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { rest_of_season_aggregate_key } from '#libs-shared/calculate-player-period-values.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -166,12 +166,29 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     season_type: seas_type
   })
   log(`fetched ${projections.length} projections`)
+  // The season-long consensus reads its own table. It carries no week column, so
+  // there is no floor for the preseason clock to step past and no predicate that
+  // could amputate it -- which is the 2026-08-04 failure made structurally
+  // unavailable rather than guarded against.
+  //
+  // POST runs skip it: a season-long projection is a REG quantity, and
+  // `season_projections_index` has no `season_type` column to hold anything else.
+  const write_season_period =
+    seas_type === 'REG' &&
+    (current_season.is_offseason || year !== current_season.year)
+  const season_projections = write_season_period
+    ? await get_season_projections({ season_year: year })
+    : []
+  log(`fetched ${season_projections.length} season projections`)
+  const season_projections_by_pid = groupBy(season_projections, 'pid')
+
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)
 
   const player_rows = await db('player').whereIn('pid', projection_pids)
 
   const projectionInserts = []
+  const seasonProjectionInserts = []
   const rosProjectionInserts = []
 
   for (const player_row of player_rows) {
@@ -198,6 +215,23 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
         ...projection
       })
       continue
+    }
+
+    // The SEASON-LONG consensus, from its own table and under its own key.
+    // Written every run through the offseason and sealed once week 1 opens, on
+    // the same condition as the valuation board -- and, like it, no longer a
+    // by-product of where the weekly loop happens to start.
+    if (write_season_period) {
+      const season_projection = weight_season_projections({
+        projections: season_projections_by_pid[player_row.pid] || []
+      })
+      player_row.projection[season_aggregate_key] = season_projection
+      seasonProjectionInserts.push({
+        pid: player_row.pid,
+        source_id: external_data_sources.AVERAGE,
+        season_year: current_season.year,
+        ...season_projection
+      })
     }
 
     // Regular season processing
@@ -233,7 +267,11 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       const ros_has_opinion = {}
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
-        if (week && week !== '0' && week >= current_season.week) {
+        // `Number(week)` drops the named period keys -- 'season' here, and
+        // 'rest_of_season' once it is assigned below -- in the same test that
+        // used to need an explicit `week !== '0'` for the sentinel. Summing a
+        // season row into the rest-of-season accumulator would double the board.
+        if (Number(week) && week >= current_season.week) {
           proj_wks += 1
           for (const [key, value] of Object.entries(projection)) {
             if (value === null || value === undefined) continue
@@ -280,6 +318,23 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     log(`processed and saved ${projectionInserts.length} projections`)
   }
 
+  if (seasonProjectionInserts.length) {
+    log(`processing ${seasonProjectionInserts.length} season projections`)
+
+    await batch_insert({
+      items: seasonProjectionInserts,
+      save: (items) =>
+        db('season_projections_index')
+          .insert(items)
+          .onConflict(['source_id', 'pid', 'season_year'])
+          .merge(),
+      batch_size: 100
+    })
+    log(
+      `processed and saved ${seasonProjectionInserts.length} season projections`
+    )
+  }
+
   if (rosProjectionInserts.length) {
     log(`processing ${rosProjectionInserts.length} ros projections`)
 
@@ -316,12 +371,27 @@ const process_league_format = async ({
     scoring_format_id: league_format.scoring_format_id
   })
 
+  // The season board runs ONCE, before the weekly loop and outside it -- it is
+  // the expensive distributional pass, and it is a period rather than a week.
+  // Gated on the seal: recompute it through the offseason, stop touching it once
+  // week 1 opens, and always rebuild it for a completed past season.
+  const write_season_period =
+    current_season.is_offseason || year !== current_season.year
+  if (write_season_period) {
+    calculate_season_projection_values({
+      players: player_rows,
+      league: league_format
+    })
+  }
+
   // The baselines this loop computes are not persisted for a league FORMAT --
   // only process_league writes league_baselines, and it computes its own.
-  const first_week = first_projection_week_to_recompute({ year })
-  let week = first_week
-  for (; week <= current_season.nfl_final_week; week++) {
-    calculate_projection_values({
+  for (
+    let week = first_projection_week_to_recompute({ year });
+    week <= current_season.nfl_final_week;
+    week++
+  ) {
+    calculate_weekly_projection_values({
       players: player_rows,
       league: league_format,
       week
@@ -343,7 +413,7 @@ const process_league_format = async ({
     player_rows,
     league_format_id,
     season_year: current_season.year,
-    first_week
+    write_season_period
   })
 
   // Record the dated observations BEFORE the destructive rewrites below. The
@@ -406,7 +476,18 @@ const process_league_format = async ({
 }
 
 const process_league = async ({ year, lid }) => {
-  let week = first_projection_week_to_recompute({ year })
+  // The ROSTER week, deliberately not the projection recompute floor. The two
+  // used to be one variable, which was only ever correct by coincidence: the
+  // floor now starts at 1 because week 0 is not a projection week, while a
+  // roster snapshot in the offseason genuinely IS week 0 and `rosters` keeps
+  // using 0 for it. Reading the floor here would have silently moved every
+  // offseason roster lookup to week 1 and found no rows.
+  //
+  // `current_season.week` rather than `fantasy_season_week`: the guard below
+  // relies on this growing past `final_week` once the season ends, which is how
+  // the roster block stops running. `fantasy_season_week` returns to 0 there and
+  // would restart it.
+  const roster_week = current_season.week
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, season_year: year })
@@ -420,9 +501,12 @@ const process_league = async ({ year, lid }) => {
   const rostered_pids = []
 
   // check to see if it is past the fantasy season
-  if (week <= current_season.final_week) {
+  if (roster_week <= current_season.final_week) {
     for (const team of teams) {
-      const rosterRow = await getRoster({ tid: team.team_id, week })
+      const rosterRow = await getRoster({
+        tid: team.team_id,
+        week: roster_week
+      })
       rosterRows.push(rosterRow)
       rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
       const roster = new Roster({ roster: rosterRow, league })
@@ -461,11 +545,23 @@ const process_league = async ({ year, lid }) => {
     player_row.player_salary = tran.player_salary
   }
 
-  week = first_projection_week_to_recompute({ year })
-
+  // Same split as process_league_format: the season board once, then the weekly
+  // loop. Its baselines land under the named period key rather than a reserved
+  // week number, which is what the persist loop below partitions on.
   const baselines = {}
-  for (; week <= current_season.nfl_final_week; week++) {
-    const { baselines: week_baselines } = calculate_projection_values({
+  if (current_season.is_offseason || year !== current_season.year) {
+    const { baselines: season_baselines } = calculate_season_projection_values({
+      players: player_rows,
+      league
+    })
+    baselines[season_aggregate_key] = season_baselines
+  }
+  for (
+    let week = first_projection_week_to_recompute({ year });
+    week <= current_season.nfl_final_week;
+    week++
+  ) {
+    const { baselines: week_baselines } = calculate_weekly_projection_values({
       players: player_rows,
       league,
       rosterRows,
@@ -610,7 +706,7 @@ const process_league = async ({ year, lid }) => {
           type
         }
 
-        if (Number(week) === season_projection_week) {
+        if (week === season_aggregate_key) {
           season_baseline_inserts.push(row)
         } else {
           baselineInserts.push({ ...row, week })

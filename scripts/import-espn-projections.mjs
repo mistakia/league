@@ -2,7 +2,6 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import db from '#db'
 import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
@@ -11,7 +10,9 @@ import {
   espn,
   fetch_with_retry,
   check_projections_index_floor,
-  record_projection_history
+  check_season_projections_floor,
+  save_projections,
+  projection_periods
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -26,8 +27,8 @@ enable_debug_namespaces('import:projections,get-player,fetch')
 const generated_at = new Date()
 
 const run = async ({
+  period,
   week,
-  season_totals = false,
   year = current_season.year,
   dry_run = false
 }) => {
@@ -36,6 +37,7 @@ const run = async ({
     return { skipped: true }
   }
 
+  const season_totals = period === projection_periods.SEASON
   const URL =
     `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leaguedefaults/3?view=kona_player_info` +
     (season_totals ? '&seasonTotals=true' : '')
@@ -96,14 +98,7 @@ const run = async ({
     if (!projections) continue
     const data = espn.stats(projections.stats)
 
-    inserts.push({
-      pid: player_row.pid,
-      season_year: year,
-      week,
-      season_type: 'REG',
-      source_id: external_data_sources.ESPN,
-      ...data
-    })
+    inserts.push({ pid: player_row.pid, ...data })
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -117,37 +112,20 @@ const run = async ({
   }
 
   if (inserts.length) {
-    // remove any existing projections in index not included in this set
-    await db('projections_index')
-      .where({
-        season_year: year,
-        week,
-        source_id: external_data_sources.ESPN,
-        season_type: 'REG'
-      })
-      .whereNotIn(
-        'pid',
-        inserts.map((i) => i.pid)
-      )
-      .del()
-
     log(`Inserting ${inserts.length} projections into database`)
-    await db('projections_index')
-      .insert(inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'user_id',
-        'week',
-        'season_year',
-        'season_type'
-      ])
-      .merge()
-    await record_projection_history({ inserts, generated_at })
+    await save_projections({
+      period,
+      inserts,
+      source_id: external_data_sources.ESPN,
+      season_year: year,
+      week,
+      generated_at
+    })
   }
 
   return {
     skipped: false,
+    period,
     season_year: year,
     week,
     source_id: external_data_sources.ESPN,
@@ -159,15 +137,19 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const week = argv.season ? 0 : current_season.active_fantasy_week
+    const period = argv.season
+      ? projection_periods.SEASON
+      : projection_periods.WEEK
     const result = await run({
-      week,
-      season_totals: argv.season,
+      period,
+      week: current_season.active_fantasy_week,
       year: argv.year,
       dry_run: argv.dry
     })
     if (result && !result.skipped && !argv.dry) {
-      await check_projections_index_floor(result)
+      await (period === projection_periods.SEASON
+        ? check_season_projections_floor(result)
+        : check_projections_index_floor(result))
     }
   } catch (err) {
     error = err
