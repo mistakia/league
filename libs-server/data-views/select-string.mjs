@@ -227,6 +227,25 @@ const get_select_string = ({
       ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
+    // A week-keyed source whose week comes from the ROW AXIS rather than from a
+    // param has no literal to re-emit here, so it correlates to the week
+    // reference -- the same treatment `year_predicate` above gives the year,
+    // and for the same reason: the subquery re-scans the base table and would
+    // otherwise sum every week in the offset-expanded year window.
+    //
+    // Its extra_predicates omits the week entry in exactly that case. Leaving
+    // the literal in emitted `week = 'null'` once the sentinel default went,
+    // which is a 22P02 against a smallint column -- caught by
+    // check-data-view-sql-validity, not by any golden, because no golden pairs
+    // year_offset with a week axis.
+    const week_column = source?.key_columns?.week || 'week'
+    const week_predicate =
+      source?.requires_week &&
+      !extra_predicates_sql.includes(`.${week_column} =`) &&
+      data_view_options.week_reference
+        ? ` AND ${inner_table}.${week_column} = ${data_view_options.week_reference}`
+        : ''
+
     if (column_definition.main_select_string_year_offset_range) {
       // A per-column OVERRIDE of the whole window expression, and it wins over
       // the generic recombination below. The team family needs it because its
@@ -252,7 +271,7 @@ const get_select_string = ({
       const rate_expr = column_definition.recombine_accumulators({
         table_name: inner_table
       })
-      final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
+      final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql}${week_predicate})`
     } else {
       // Reduce the offset window with the column's declared aggregate (default
       // SUM). Non-additive season statistics (means, mins, maxes, ranks)
@@ -260,7 +279,7 @@ const get_select_string = ({
       // player-adp-column-definitions range_offset_aggregate.
       const range_offset_aggregate =
         column_definition.range_offset_aggregate || 'SUM'
-      final_select_expression = `(SELECT ${range_offset_aggregate}(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
+      final_select_expression = `(SELECT ${range_offset_aggregate}(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql}${week_predicate})`
     }
   } else {
     final_select_expression = select_expression

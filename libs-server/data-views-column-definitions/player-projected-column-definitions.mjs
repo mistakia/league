@@ -361,9 +361,13 @@ const make_league_player_projection_source = () => ({
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
     const { league_id, week } = get_default_params({ params })
+    // The week entry is omitted when no PARAM resolves a week. That happens
+    // when the week comes from the row axis instead, and select-string then
+    // correlates the subquery's week to the week reference -- a literal here
+    // would be `String(null)`, a 22P02 against a smallint column.
     return [
       { column: 'lid', value: league_id },
-      { column: 'week', value: String(week) }
+      ...(week == null ? [] : [{ column: 'week', value: String(week) }])
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
@@ -452,9 +456,10 @@ const make_league_format_player_projection_source = () => ({
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
     const { league_format_id, week } = get_default_params({ params })
+    // Omitted when no param resolves a week -- see the league_player source.
     return [
       { column: 'league_format_id', value: league_format_id },
-      { column: 'week', value: String(week) }
+      ...(week == null ? [] : [{ column: 'week', value: String(week) }])
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
@@ -564,7 +569,9 @@ const make_projections_index_source = ({ period = 'week' } = {}) => {
       // discriminates the source even when the JOIN used nfl_week_id.
       return [
         { column: 'source_id', value: source_id },
-        { column: 'week', value: week },
+        // Omitted when no param resolves a week -- see the league_player
+        // source above.
+        ...(week == null ? [] : [{ column: 'week', value: week }]),
         { column: 'season_type', value: seas_type }
       ]
     },
@@ -802,17 +809,30 @@ const projection_points_year_offset_range_sql = ({
   // the week discriminator from the week prefix. Neither period table carries a
   // week or season_type column.
   if (is_week) {
+    // The week basis mirrors the year basis directly above: correlate to
+    // week_reference when a week SPLIT exposes one, and otherwise splice the
+    // param. Only the param path reaches sql_integer_param, which is the point
+    // -- a null week is not a value to sanitize, it is a request that resolved
+    // its week from the row axis instead. Passing null through here raised
+    // "invalid data view param: week" once the `|| 0` sentinel went, on the
+    // year_offset + week-axis shape that no golden covers.
+    //
     // `week` splices into BARE value position and `seas_type` inside quotes,
     // both straight from request params on the unauthenticated
     // /data-views/search path, so they are sanitized here rather than inlined.
     // `source_id` and `year` are already Number-coerced by get_default_params.
-    const week = sql_integer_param({ value: raw_week, param_name: 'week' })
+    const week_reference = data_view_options.week_reference
+    if (week_reference) {
+      predicates.push(`${inner_table}.week = ${week_reference}`)
+    } else {
+      const week = sql_integer_param({ value: raw_week, param_name: 'week' })
+      predicates.push(`${inner_table}.week = ${week}`)
+    }
     const seas_type = sql_enum_param({
       value: raw_seas_type,
       param_name: 'seas_type',
       allowed: nfl_season_types
     })
-    predicates.push(`${inner_table}.week = ${week}`)
     predicates.push(`${inner_table}.season_type = '${seas_type}'`)
   }
 
