@@ -70,6 +70,14 @@ const holdout_key = ({ operation, status }) => `${operation} ${status}`
 // basePath drift, a mount-order change that puts it after the routes -- then
 // nothing is observed, nothing is held, and the suite goes green with the
 // ratchet dead. An empty set at teardown fails the run.
+//
+// It cannot tell that apart from a spec SUBSET that makes no HTTP requests,
+// which is a routine way to run mocha here and produces the same empty set. The
+// failure text names both causes because the one-sided wording cost a session:
+// reading "the validator is not reaching requests at all" off a data-views
+// subset run, it went looking for a stale hold-out entry, and the two entries it
+// landed on were live -- deleting them turns five tests red with 500s. The check
+// stays unconditional; only the message distinguishes.
 const observed_pairs = new Set()
 
 // Pairs where the validator DID raise and a hold-out entry swallowed it. An
@@ -244,11 +252,23 @@ export const assert_holdout_is_current = () => {
   if (report.holdout_total && !report.observed_pair_count) {
     failures.push(
       'Response validation observed ZERO (operation, status) pairs while the ' +
-        `hold-out list carries ${report.holdout_total} entries. The validator ` +
-        'is not reaching requests at all -- check that its middleware is ' +
-        'mounted BEFORE the route mounts in api/index.mjs and that the spec ' +
-        "servers basePath still matches the routes' mount path. Every entry " +
-        'below would otherwise read as merely NOT EXERCISED, which is silent.'
+        `hold-out list carries ${report.holdout_total} entries. Every entry ` +
+        'would otherwise read as merely NOT EXERCISED, which is silent.\n\n' +
+        'TWO causes, and they want opposite responses.\n\n' +
+        '  1. You ran a SPEC SUBSET that issues no HTTP requests at all. Any ' +
+        'data-views, libs-server or golden-corpus file on its own does this. ' +
+        'Then zero observed pairs is correct, this failure is an artifact of ' +
+        'the subset, and there is NOTHING TO REPAIR. Add a spec that exercises ' +
+        'a route -- test/data-view-organization.spec.mjs is a fast one -- and ' +
+        'it goes away. Do not go editing the hold-out list to silence it: its ' +
+        'entries are unexercised here, not stale, and deleting a live one ' +
+        'turns the full suite red.\n\n' +
+        '  2. The validator genuinely stopped reaching requests, which is the ' +
+        'case this guard exists for. Check that its middleware is mounted ' +
+        'BEFORE the route mounts in api/index.mjs and that the spec servers ' +
+        "basePath still matches the routes' mount path.\n\n" +
+        'A full run tells them apart: it observes pairs under cause 1 and ' +
+        'none under cause 2.'
     )
   }
 
