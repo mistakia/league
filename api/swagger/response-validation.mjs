@@ -81,7 +81,15 @@ const holdout_key = ({ operation, status }) => `${operation} ${status}`
 const observed_pairs = new Set()
 
 // Pairs where the validator DID raise and a hold-out entry swallowed it. An
-// entry with no hit here, whose pair was nonetheless observed, is stale.
+// entry with no hit here, whose pair was nonetheless observed, is reported
+// stale -- and that inference only holds for a FULL run. One (operation,
+// status) can have several response shapes and the entry is held by the FAILING
+// one, so a subset exercising only the conformant shape reports a live entry as
+// stale. Measured: test/trade.spec.mjs alone calls
+// POST /api/leagues/{leagueId}/trades 200 stale; adding trade-veto,
+// league-pause and draft-pick-expiry clears it with the entry untouched. The
+// failure text says so, because deleting on that report turns the full suite
+// red.
 const held_pairs = new Map()
 
 const operation_key = (req) => {
@@ -276,13 +284,24 @@ export const assert_holdout_is_current = () => {
     failures.push(
       `${report.stale.length} stale hold-out entr${
         report.stale.length === 1 ? 'y' : 'ies'
-      }: the suite produced this (operation, status) and the response VALIDATED. ` +
-        'The defect is repaired -- delete the entry from ' +
-        'api/swagger/response-validation-holdout.json in the same commit as the ' +
-        'repair.\n' +
+      }: the suite produced this (operation, status) and the response VALIDATED.\n` +
         report.stale
           .map((entry) => `  ${holdout_key(entry)}  (added ${entry.added})`)
-          .join('\n')
+          .join('\n') +
+        '\n\nIN A FULL RUN that means the defect is repaired: delete the entry ' +
+        'from api/swagger/response-validation-holdout.json in the same commit ' +
+        'as the repair.\n\n' +
+        'IN A SPEC SUBSET it usually means the opposite, so check which you ran ' +
+        'before deleting anything. One (operation, status) pair can have more ' +
+        'than one response shape, and an entry is held by the FAILING one. A ' +
+        'subset that exercises only the conformant shape reports the entry ' +
+        'stale while the full suite holds it, and deleting it then turns the ' +
+        'full suite red. Measured: test/trade.spec.mjs alone reports ' +
+        'POST /api/leagues/{leagueId}/trades 200 stale, and adding the other ' +
+        'specs that post a trade -- trade-veto, league-pause, ' +
+        'draft-pick-expiry -- clears it with the entry untouched.\n\n' +
+        'So confirm against a full run, or against every spec that exercises ' +
+        'the operation, before treating an entry here as spent.'
     )
   }
 
