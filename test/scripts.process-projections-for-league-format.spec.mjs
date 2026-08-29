@@ -71,19 +71,19 @@ describe('SCRIPTS process-projections-for-league-format', function () {
       .del()
 
     const projection_rows = []
+    const season_projection_rows = []
     const point_rows = []
     const season_point_rows = []
     seeded_pids.forEach((pid, index) => {
-      // projections_index keeps its week 0 -- that is the RAW season projection
-      // and is a separate retirement from this one. What moved is the SCORED
-      // season board below.
+      // The RAW season projection is its own table now, not week 0 of
+      // projections_index. `CHECK (week >= 1)` makes the old shape unwritable,
+      // so a fixture that kept it would fail on the INSERT rather than on the
+      // assertion -- which is the loud direction, but still the wrong table.
       const season_total = 300 - index * 5
-      projection_rows.push({
+      season_projection_rows.push({
         pid,
         source_id: external_data_sources.AVERAGE,
-        week: 0,
         season_year: YEAR,
-        season_type: 'REG',
         passing_yards: season_total * 2,
         rushing_yards: season_total,
         receiving_yards: season_total
@@ -120,6 +120,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     })
 
     await knex('projections_index').insert(projection_rows)
+    await knex('season_projections_index').insert(season_projection_rows)
     await knex(POINTS_TABLE).insert(point_rows)
     await knex(SEASON_POINTS_TABLE).insert(season_point_rows)
 

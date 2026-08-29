@@ -40,11 +40,13 @@ const initialize_cli = () => yargs(hideBin(process.argv)).argv
 //     from shrunk prior-season rates scored 0.487 -- no better, and it biased
 //     the level high. Components no market prices are left alone.
 //
-// Weekly only. A week-0 season row is NOT written: projections_index stores
-// season totals at week 0 while calculate-points applies the per-game
-// points-against threshold (max(x - 20, 0)), so a season-total points-against
-// would score as a catastrophic penalty. That mismatch is latent today only
-// because the column is never populated at week 0.
+// Weekly only, and no season row is written anywhere. The mismatch that makes
+// it wrong to write one has outlived the sentinel it was described against:
+// calculate-points applies the points-against threshold per game
+// (max(x - 20, 0)), so a season-total points-against would score as a
+// catastrophic penalty. season_projections_index is where a season row would go
+// now -- projections_index cannot hold one at all, since week is
+// CHECK (week >= 1) -- but the scoring mismatch is the reason, not the storage.
 const SOURCE_ID = external_data_sources.XO_DST_MARKET
 
 const generate_dst_market_projections = async ({

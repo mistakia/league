@@ -36,10 +36,11 @@ export const process_scoring_format_year = async ({
     .where({ id: scoring_format_id })
     .first()
 
-  // `week >= 1` is load-bearing until Phase C deletes the week-0 rows, and it
-  // stays afterwards as the statement that this read is the WEEKLY one. The
-  // period split moved the season snapshot to its own table but left this read
-  // unfloored, so every lingering `projections_index` week-0 row flowed into
+  // `week >= 1` now restates the CHECK the column carries rather than guarding
+  // rows that can still exist, and it stays as the statement that this read is
+  // the WEEKLY one. It is here because the period split moved the season
+  // snapshot to its own table but left this read unfloored, so every lingering
+  // `projections_index` week-0 row flowed into
   // weekly_points_inserts and tripped
   // `scoring_format_player_projection_points_week_is_fantasy_week` -- taking
   // out all nine scoring formats on the first run after deploy, hourly.

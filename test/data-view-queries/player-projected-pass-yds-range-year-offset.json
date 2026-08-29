@@ -1,6 +1,6 @@
 {
   "name": "player_season_projected_pass_yds range year_offset re-scans projections_index with numeric week + seas_type discriminators",
-  "description": "projections_index-backed projected stat (additive count, SUM is correct) with range year_offset=[1,2] re-scans projections_index pinned to source_id=18, numeric week=0, seas_type=REG and year IN (2024,2025).",
+  "description": "projections_index-backed projected stat (additive count, SUM is correct) with range year_offset=[1,2] re-scans projections_index pinned to source_id=18, week >= 1, seas_type=REG and year IN (2024,2025).",
   "request": {
     "prefix_columns": ["player_name"],
     "columns": [

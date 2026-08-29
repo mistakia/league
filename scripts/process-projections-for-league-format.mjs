@@ -245,11 +245,22 @@ const process_projections_for_league_format = async ({
   }
 
   for (const process_year of years) {
-    const projections = await db('projections_index').where({
-      season_year: process_year,
-      source_id: external_data_sources.AVERAGE,
-      season_type: 'REG'
-    })
+    // `week >= 1` says this read is the WEEKLY one, and it was the last
+    // unfloored `projections_index` read left. It was latent rather than
+    // harmless: the week-0 rows landed as an inert `projection['0']` key,
+    // because the periods this loop writes are driven by `points`, which comes
+    // from a table that has never held week 0. The sibling read in
+    // process-projections-for-scoring-format.mjs had the same shape and was NOT
+    // inert -- it took out all nine scoring formats on the first cron after the
+    // period split. Floored here so the class is extinct rather than one site
+    // away from recurring.
+    const projections = await db('projections_index')
+      .where({
+        season_year: process_year,
+        source_id: external_data_sources.AVERAGE,
+        season_type: 'REG'
+      })
+      .where('week', '>=', 1)
 
     const projections_by_pid = groupBy(projections, 'pid')
     const projection_pids = Object.keys(projections_by_pid)
