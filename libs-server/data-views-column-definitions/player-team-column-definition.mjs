@@ -64,6 +64,54 @@ export default {
       return ['player.current_nfl_team']
     },
     // Set of all teams the player was on in any year of the window.
+    //
+    // This is the last correlated per-row subquery in the data-view column
+    // family, and it is EXPENSIVE -- measured 2026-08-29 on production, not
+    // estimated. It emits two different shapes and only one of them has to be
+    // this way.
+    //
+    // WITH a year_reference (row_axes: ['year']), the predicate correlates on
+    // the outer row's YEAR as well as its pid, so the value genuinely moves per
+    // row and a pid-keyed relation cannot express it. That shape is correct as
+    // written.
+    //
+    // WITHOUT one (no row_axes), the CTE groups by pid alone and carries no
+    // `year` column, so the subquery reduces to re-deriving
+    // `array_agg(DISTINCT t)` over `unnest(teams)` for the single matching row
+    // -- a value the CTE ALREADY computed as `array_agg(distinct nfl_team)`.
+    // Proven equivalent on production over all 28,807 players: zero rows where
+    // the correlated form and a direct read of `teams` disagree.
+    //
+    // The cost of that redundancy is quadratic, because a MATERIALIZED CTE has
+    // no index and the filter is a full scan of it per outer row. On a 500-row
+    // view sorted on the column -- sorted deliberately, since a bare paged view
+    // lets the LIMIT short-circuit it -- the planner puts the SubPlan at
+    // 7,178,000 against the CTE's own 137,660, and EXPLAIN ANALYZE on the real
+    // 28,807-row shape does not finish inside the statement timeout. Bounded to
+    // a 1,000-player outer set it completes at 2,720ms, with the CTE Scan
+    // reporting loops=1000 and `Rows Removed by Filter: 14502` on every one:
+    // 14,503 CTE rows scanned to find the 1 that matches. Per-row cost is
+    // ~0.92ms, which extrapolates to roughly 26 SECONDS of subquery work on the
+    // full view.
+    //
+    // Note BUFFERS is the wrong meter here and reads as a false negative. The
+    // CTE is a tuplestore, so re-scanning it costs no shared buffers beyond the
+    // one-time materialization; the 572,453 buffers the CTE Scan node reports
+    // are the CTE's own build, attributed to its first scan. The per-row cost
+    // shows up in TIME and in loop count, not in buffers -- unlike the other
+    // four in this family, which probed real indexes and so did show up there.
+    //
+    // NOT fixed here, and the reason is architectural rather than effort. The
+    // only thing that removes a per-row scan of an unindexed CTE is joining it,
+    // and this path deliberately has NO join: `get-data-view-results.mjs`
+    // (group_needs_join_alias / group_offset_range_applies) DROPS the source
+    // join precisely because a `main_select_string_year_offset_range` override
+    // exists, on the contract that such an override is self-contained and
+    // re-scans the source itself. Reading `teams` off a joined alias means
+    // changing that contract for every column that declares an override -- the
+    // same logic whose comments already record two regressions, dangling
+    // aliases and invalid SQL. That is an operator-gated motion, not a
+    // loose end. Surfaced with these numbers rather than started.
     main_select_string_year_offset_range: ({
       table_name,
       params,
