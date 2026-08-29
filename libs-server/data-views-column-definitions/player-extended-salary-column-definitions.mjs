@@ -133,13 +133,34 @@ export const player_extended_salary_join = async ({
   // week-0 rows inside one league, and production carries such a pair: pid
   // ZAMI-WHIT-015750, league 1, 2022, tids 11 and 12.
   //
-  // Nothing has ever surfaced this. The fan-out is silent -- it duplicates the
+  // BOTH OF THOSE ROWS ARE VALID and the missing `lid` is not a schema defect.
+  // week 0 is the OFFSEASON, a period rather than an instant --
+  // `docs/canonical-data-schemas.md` says so on the rosters schema itself
+  // ("0 for offseason/preseason rosters") and `docs/constitution.md` Article I
+  // defines the Offseason as running from the championship to the first Tuesday
+  // of week 1. A player can therefore belong to two teams inside one league at
+  // week 0 in sequence, which is exactly this pair: team 12 DRAFTED the player
+  // on 2022-07-25 and team 11 POACHED him on 2022-09-10. Do NOT "repair" the
+  // data and do NOT add a unique constraint on (pid, week, season_year, lid) --
+  // it would forbid legitimate roster history, and it also breaks every trade,
+  // since both trade paths delete-then-insert per roster and the traded player
+  // transiently exists on both teams inside the transaction (measured: four
+  // trade specs fail on it).
+  //
+  // So this de-duplication is a rendering choice, not a corruption repair. The
+  // column has to yield ONE salary per player and the offseason legitimately
+  // offers two, so `ORDER BY pid, tid` picks the lower tid: arbitrary between
+  // two valid answers, but stable, which is what the join needs. If a product
+  // rule ever says which team's contract the offseason should show, this is the
+  // line that encodes it.
+  //
+  // Nothing has ever surfaced the fan-out. It is silent -- it duplicates the
   // outer row rather than raising -- and both of that pair's rows carry the same
   // tag, so the duplicates compute the same salary and any enclosing GROUP BY
   // collapses them again. A row-count assertion therefore passes with this
   // de-duplication removed; only differing values expose it.
   //
-  // `31dc6b0a0` closed the same grain hole in `roster_tag_sql`, where the
+  // `31dc6b0a0` de-duplicated `roster_tag_sql` the same way, where the
   // correlated form raised 21000 on that scope instead. Ordering by tid makes
   // the survivor deterministic rather than plan-dependent, and pid+tid is unique
   // here because the scope pins lid, season_year and week.
