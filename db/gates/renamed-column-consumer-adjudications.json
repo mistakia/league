@@ -1531,6 +1531,19 @@
       "sites": ["libs-server/get-players.mjs"],
       "verdict": "already-swept",
       "reason": "The COLUMN read is repointed: libs-server/get-players.mjs:394 destructures projected_points_added off the row. The flagged old-name reads are the in-memory player.pts_added aggregate map, a DIFFERENT object -- keyed by aggregate_key ('ros', 'ros_net', numeric weeks) and emitted as the API property the SPA consumes, not a column. get-players.mjs:340 initializes it and :396 writes the repointed column value into it. Renaming that property is an API contract change across 30 SPA sites and belongs to task/league/restructure-points-added-pipeline, not to this schema conform; leaving it named pts_added is what lets the SPA survive this deploy without a lockstep frontend change."
+    },
+    {
+      "table": "projections_index",
+      "column": "user_id",
+      "verdict": "not-a-db-read",
+      "sites": [
+        "api/routes/projections.mjs",
+        "libs-server/check-projections-index-floor.mjs",
+        "libs-server/get-players.mjs",
+        "scripts/process-projections-for-league-format.mjs",
+        "scripts/process-projections-for-scoring-format.mjs"
+      ],
+      "reason": "projections_index.user_id was DROPPED on 2026-08-29, not renamed, and it is dead rather than relocated: the user-authored projection feature went in 31d596b99, the arm of weight-projections that consumed it went with it, and the only 27 rows that ever held a non-zero value were the week-0 rows the same migration deleted. There is no replacement column and none is wanted. Every one of these five files carries ZERO occurrences of the token user_id -- measured, not assumed -- so none of them reads the dropped column in any form. They are candidates only because each queries projections_index while the generic user_id token appears elsewhere in the corpus, in auth, data-views and admission-votes, against entirely unrelated tables. The five writers that DID name it in an ON CONFLICT target list (process-projections, save-projections, import-fbg, import-ffn, generate-dst-market-projections) were repointed to the narrow key and deployed before the column was dropped, so they are not in this candidate set at all."
     }
   ]
 }
