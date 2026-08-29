@@ -190,7 +190,27 @@ export default [
       // among others -- see the header of eslint-rules/no-bare-debug-enable.mjs.
       'local/no-unproxied-fetch-with-retry': 'error',
       'local/no-bare-debug-enable': 'error',
-      'local/no-week-reconstruction': 'error'
+      'local/no-week-reconstruction': 'error',
+      // Stateless correctness rules, eligible by the same bar as the local
+      // rules above: zero private files on the runner means zero reports, so
+      // the check is merely narrower in CI than locally. no-unused-vars was
+      // previously silenced solely because it ships with the standard/style
+      // ruleset that was dropped here to avoid style debt -- it is not a
+      // style rule and has no committed baseline. no-unreachable is clean
+      // across the tree. no-undef is deliberately NOT added: this block sets
+      // no globals, so it would flag Node/browser names (process, window,
+      // fetch) as undefined; landing it would need a globals setup first.
+      'no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          caughtErrors: 'none',
+          argsIgnorePattern: '^_'
+        }
+      ],
+      'no-unreachable': 'error'
     }
   }
 ]
