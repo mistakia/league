@@ -294,31 +294,81 @@ const as_of_observed_at = ({
     }
   }
 
+// The 894 players carrying ANY KeepTradeCut observation, against 28,129 in
+// `player`. Registered once per query and shared by every KTC column, because it
+// is the same relation regardless of metric, superflex flag or boundary -- three
+// columns each computing it separately cost 64,134 buffers, of which two thirds
+// were pure duplication.
+//
+// A loose index scan rather than `select distinct pid`: Postgres 16 has no index
+// skip scan, so the plain DISTINCT falls back to a full parallel seq scan of all
+// 2.38M rows (21,378 buffers). Walking the primary key one pid at a time reads
+// 3,636. The recursion is the standard emulation -- take the lowest pid, then
+// repeatedly take the lowest pid strictly greater than the last -- and it
+// terminates when the lookahead subquery returns NULL, which is why the outer
+// select filters those out.
+const keeptradecut_valued_pids_cte = () =>
+  db.raw(
+    'with recursive ktc_pid_scan as (' +
+      '(select pid from keeptradecut_valuations order by pid limit 1) ' +
+      'union all ' +
+      'select (select ktc_next.pid from keeptradecut_valuations ktc_next ' +
+      'where ktc_next.pid > ktc_pid_scan.pid order by ktc_next.pid limit 1) ' +
+      'from ktc_pid_scan where ktc_pid_scan.pid is not null' +
+      ') select pid from ktc_pid_scan where pid is not null'
+  )
+
+const register_keeptradecut_valued_pids_cte = ({
+  query,
+  data_view_options
+}) => {
+  const cte_name = get_table_hash('ktc_valued_pids')
+  if (!data_view_options.keeptradecut_valued_pids_cte) {
+    query.with(cte_name, keeptradecut_valued_pids_cte())
+    data_view_options.keeptradecut_valued_pids_cte = cte_name
+  }
+  return data_view_options.keeptradecut_valued_pids_cte
+}
+
 // The YEAR-axis as-of lookup, resolved ONCE per (pid, year) instead of once per
 // outer row.
 //
-// As a correlated subquery this is O(outer rows), and the outer side of a
+// As a correlated subquery this was O(outer rows), and the outer side of a
 // player-year view is `player CROSS JOIN base_years` -- 28,129 players x 7 years
 // = 196,903 rows, probed once per KTC column. A three-column view therefore ran
-// 590,709 probes to answer a 500-row page, and only 893 players carry ANY KTC
-// observation, so ~97% of those probes matched nothing. Measured on production
-// (signals 126516/126517): the three arms were 71% of a 4,992ms execution.
+// 590,709 probes to answer a 500-row page, and only 894 players carry ANY KTC
+// observation, so ~97% of those probes matched nothing.
 //
-// Pre-aggregated the same answer costs one pass: DISTINCT ON keyed by the same
-// (pid, year), ordered by observed_at DESC, which is exactly the MAX(observed_at)
-// the subquery selected. The outer join becomes a hash join on (pid, year).
-// 4,992ms -> ~2,000ms, byte-identical output INCLUDING __data_view_total_count__,
-// verified on both emitted signatures.
+// This drives off the 894 valued players instead: one lateral probe per
+// (valued pid, year) -- 6,258 for a seven-year view -- each an Index Scan
+// Backward on the primary key (pid, is_superflex, observed_at) that stops at the
+// first row inside the window. The outer join is unchanged.
 //
-// Deliberately NOT filtered to the view's year range: opening_days is 57 rows,
-// each contributing one bounded window, and constraining it measured no faster
-// (2,088-2,113ms unfiltered against 1,852-2,194ms filtered) while requiring the
-// resolved year list at build time. The window predicate is what prunes.
+// It replaced a DISTINCT ON over the window, which scanned 112,115 rows and
+// sorted them down to 3,347. That form's cost was one heap fetch per candidate
+// row, and it could not be indexed away: the metric predicate is not in the
+// index, and a covering index would not help either, because the table has taken
+// 11.1M updates against 2.38M rows so `relallvisible` sits at 32 pages of 21,378
+// and an index-only scan degrades to fetching nearly every row anyway.
+//
+// Measured on production 2026-08-29, full three-column query: 429,408 buffers ->
+// 188,422. Output is identical -- verified across all twelve combinations of
+// three metrics, both superflex values and both boundary types, zero symmetric
+// difference in each.
+//
+// The year source is `opening_days` INNER JOINed to `base_years` rather than
+// `opening_days` alone. Under DISTINCT ON the unfiltered 57 rows were free (the
+// window predicate pruned them and constraining it measured no faster), but a
+// lateral does work per year, so the unfiltered form would run 50,958 probes
+// instead of 6,258. The inner join also preserves the old semantics exactly: a
+// requested year absent from opening_days contributed nothing before and
+// contributes nothing now.
 const keeptradecut_year_axis_as_of_cte = ({
   metric_column,
   is_superflex,
   year_offset_single,
-  as_of_month_day
+  as_of_month_day,
+  valued_pids_cte
 }) => {
   const boundary_sql = as_of_month_day
     ? year_axis_month_day_boundary({
@@ -332,14 +382,20 @@ const keeptradecut_year_axis_as_of_cte = ({
       })
 
   return db.raw(
-    `select distinct on (ktc_src.pid, ktc_od.year) ktc_src.pid, ktc_od.year, ktc_src.${metric_column} ` +
-      'from opening_days ktc_od ' +
-      'inner join keeptradecut_valuations ktc_src on ' +
-      `ktc_src.is_superflex = ${is_superflex ? 'true' : 'false'} ` +
+    `select ktc_p.pid, ktc_od.year, ktc_latest.${metric_column} ` +
+      `from ${valued_pids_cte} ktc_p ` +
+      'cross join (select ktc_od_src.year, ktc_od_src.opening_day ' +
+      'from opening_days ktc_od_src ' +
+      'inner join base_years on base_years.year = ktc_od_src.year) ktc_od ' +
+      'cross join lateral (' +
+      `select ktc_src.${metric_column} from keeptradecut_valuations ktc_src ` +
+      'where ktc_src.pid = ktc_p.pid ' +
+      `and ktc_src.is_superflex = ${is_superflex ? 'true' : 'false'} ` +
       `and ktc_src.${metric_column} is not null ` +
       `and ktc_src.observed_at <= ${boundary_sql} ` +
       `and ktc_src.observed_at > (${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}') ` +
-      `order by ktc_src.pid, ktc_od.year, ktc_src.observed_at desc`
+      'order by ktc_src.observed_at desc limit 1' +
+      ') ktc_latest'
   )
 }
 
@@ -371,13 +427,20 @@ const register_keeptradecut_year_axis_cte = ({
     data_view_options.keeptradecut_as_of_ctes = new Set()
   }
   if (!data_view_options.keeptradecut_as_of_ctes.has(cte_name)) {
+    // Registered before the as-of CTE that references it: a WITH item may only
+    // reference items declared ahead of it, and knex emits them in call order.
+    const valued_pids_cte = register_keeptradecut_valued_pids_cte({
+      query,
+      data_view_options
+    })
     query.with(
       cte_name,
       keeptradecut_year_axis_as_of_cte({
         metric_column,
         is_superflex,
         year_offset_single,
-        as_of_month_day
+        as_of_month_day,
+        valued_pids_cte
       })
     )
     data_view_options.keeptradecut_as_of_ctes.add(cte_name)
