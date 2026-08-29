@@ -37,15 +37,24 @@ const SCOPED_PATH_FRAGMENTS = [
 // exemption for player-projected-column-definitions.mjs through two owners; it
 // was deleted on 2026-08-29 when the last two `params.week || 0` sites went.
 //
-// The fix that closed it is worth naming, because the obvious one was tried and
-// rejected: not a throw from inside the join callback (one was built, proved on
-// six cases, then cut -- check-data-view-sql-validity EXPLAINs every column with
+// The fix that closed it is worth naming, because TWO obvious ones were tried
+// and rejected.
+//
+// Not a throw from inside the join callback: one was built, proved on six
+// cases, then cut -- check-data-view-sql-validity EXPLAINs every column with
 // empty params, and a bare API request reaches the same shape, so it fired on
-// user-reachable input), and not another default. The week-scoped projection
-// sources now declare `grain: 'player_year_week'`, source-attach has no rule
-// admitting that grain under a weekless cell, and the refusal is raised at the
-// request boundary beside ColumnRowGrainMismatch. Grain is a declaration; a
-// default is a guess.
+// user-reachable input.
+//
+// And not `grain: 'player_year_week'` refused via source-attach, which is the
+// design this comment claimed had shipped until 2026-08-29. The golden corpus
+// disproved it: grain drives cell identity and cannot see a week PARAM, so it
+// refuses create-a-query-for-week-projected-stats.json -- a flat player-row
+// table carrying an explicit week, whose SQL emits `week = '2'` correctly.
+//
+// What shipped is `source.requires_week`, satisfied by a week param, an
+// `nfl_week_id`, or a week row axis, and refused at the request boundary in
+// libs-server/data-views/validate-week-requirement.mjs. A requirement is a
+// declaration; a default is a guess.
 const WEEK_IDENTIFIERS = new Set([
   'week',
   'min_week',
@@ -81,7 +90,7 @@ const rule = {
     schema: [],
     messages: {
       fallback:
-        'A week param holds a real week or nothing. `week || 0` reintroduces the season-long sentinel, which is falsy and silently disables every week-scoped join gate downstream. Use null and let the column declare its grain.',
+        'A week param holds a real week or nothing. `week || 0` reintroduces the season-long sentinel, which is falsy and silently disables every week-scoped join gate downstream. Use null and let the source declare `requires_week`.',
       assignment:
         'Assigning 0 to a week reintroduces the season-long sentinel. A week-grain column with no resolvable week is an error, not a default of 0.',
       comparison:
