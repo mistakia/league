@@ -1,0 +1,22 @@
+{
+  "name": "player career year current season projection",
+  "description": "Pins the pre-aggregated shape of the current-season career-year projection: one grouped CTE registered once and LEFT JOINed on pid, read through COALESCE(career_year, 1). The five older career-year fixtures all carry the current season in a WHERE clause or at past years only, so none of them emits the projection at all and the whole path had no fixture coverage. The LEFT join and the COALESCE are load-bearing together: a player with no prior REG seasonlog has no row in the CTE, and an inner join would drop them while a missing COALESCE would blank them. Executed coverage for that lives in test/libs-server.player-career-year-projection.spec.mjs; this fixture pins the SQL shape.",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_career_year",
+        "params": {
+          "year": [2026, 2025, 2024]
+        }
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "where": [],
+    "sort": [],
+    "row_axes": ["year"],
+    "limit": 10
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t461ffd2c2c635d6fcc839e31b1186e11\" as (select pid, (count(DISTINCT season_year) + 1)::smallint as career_year from player_seasonlogs where season_type = 'REG' and season_year < 2026 group by pid) select \"player\".\"pid\", player.first_name, player.last_name, COALESCE(tae590fbcb6b66a2dfceee29f440b7913.career_year, CASE WHEN player_years.year = 2026 THEN COALESCE(t461ffd2c2c635d6fcc839e31b1186e11.career_year, 1::smallint) END) as career_year_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t461ffd2c2c635d6fcc839e31b1186e11\" on \"t461ffd2c2c635d6fcc839e31b1186e11\".\"pid\" = \"player\".\"pid\" left join \"player_seasonlogs\" as \"tae590fbcb6b66a2dfceee29f440b7913\" on \"tae590fbcb6b66a2dfceee29f440b7913\".\"pid\" = \"player\".\"pid\" and \"tae590fbcb6b66a2dfceee29f440b7913\".\"season_year\" = \"player_years\".\"year\" and \"tae590fbcb6b66a2dfceee29f440b7913\".\"season_type\" = 'REG' group by player.first_name, player.last_name, COALESCE(tae590fbcb6b66a2dfceee29f440b7913.career_year, CASE WHEN player_years.year = 2026 THEN COALESCE(t461ffd2c2c635d6fcc839e31b1186e11.career_year, 1::smallint) END), \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 10",
+  "tags": ["player", "seasonlogs", "row_axes", "year", "cte", "joins"],
+  "timeout_ms": 35000
+}
