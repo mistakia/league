@@ -264,6 +264,8 @@ const main = async () => {
       await import('#libs-server/data-views/derive-column-row-grains.mjs')
     ).default
     const { get_data_view_results_query } = await import('#libs-server')
+    const { week_is_resolvable } =
+      await import('#libs-server/data-views/validate-week-requirement.mjs')
 
     const all_column_ids = Object.keys(column_definitions)
     const column_ids = argv.column ? [argv.column] : all_column_ids
@@ -313,13 +315,27 @@ const main = async () => {
             continue
           }
 
+          // And a shape the REQUEST BOUNDARY refuses is not a shape to
+          // EXPLAIN. A week-keyed column with no resolvable week is a 400, not
+          // SQL, so generating it would report the refusal as a gate finding.
+          //
+          // Resolved through the same predicate the boundary uses. A second
+          // copy of this here is how the sweep built to catch refused shapes
+          // would come to disagree about which they are.
           for (const shape_name of shape_names) {
+            const params = SHAPES[shape_name]()
+            if (
+              definition?.source?.requires_week &&
+              !week_is_resolvable({ params, row_axes })
+            ) {
+              continue
+            }
             checked++
             const result = await generate_and_explain({
               db,
               get_data_view_results_query,
               column_id,
-              params: SHAPES[shape_name](),
+              params,
               row_grain: [row_grain_id],
               row_axes
             })

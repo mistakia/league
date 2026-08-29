@@ -30,9 +30,23 @@ const expect = chai.expect
 
 const YEAR = 2025
 
+// The week param is not part of what these tests assert -- the carrier column
+// is incidental, and the subject is the SORT emitter. It is here because
+// player_week_projected_points reads week-keyed rows and the boundary refuses a
+// request that resolves no week (source.requires_week, added 2026-08-29 with
+// the retirement of the `params.week || 0` sentinel). Without it these three
+// cases die on that refusal before reaching the emitter they are about.
+//
+// It does not weaken them: nothing about the assertions changed, no `week`
+// appears after the ORDER BY, and the sibling case below still proves an
+// `order by ... week` IS emitted when the week axis is active -- which is what
+// gives the negative assertions here their discriminating power.
 const player_request = ({ sort_column_id, row_axes }) => ({
   columns: [
-    { column_id: 'player_week_projected_points', params: { year: [YEAR] } }
+    {
+      column_id: 'player_week_projected_points',
+      params: { year: [YEAR], week: [1] }
+    }
   ],
   prefix_columns: ['player_name'],
   sort: [{ column_id: sort_column_id, desc: true }],

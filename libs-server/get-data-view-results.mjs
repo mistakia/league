@@ -49,6 +49,7 @@ import {
   year_offset_range_applies
 } from '#libs-server/data-views/year-offset-range.mjs'
 import validate_row_grain_compatibility from '#libs-server/data-views/validate-row-grain-compatibility.mjs'
+import validate_week_requirement from '#libs-server/data-views/validate-week-requirement.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
@@ -1639,7 +1640,17 @@ export const get_data_view_results_query = async ({
     where,
     defs: data_views_column_definitions
   })
-  const all_errors = [...schema_errors, ...row_grain_errors]
+  // The WEEK half of the same question. row_grain decides player-versus-team;
+  // this decides whether a column reading week-keyed rows has a week to read
+  // them at. Refused here rather than joined to an arbitrary week.
+  const week_errors = validate_week_requirement({
+    row_axes,
+    prefix_columns,
+    columns,
+    where,
+    defs: data_views_column_definitions
+  })
+  const all_errors = [...schema_errors, ...row_grain_errors, ...week_errors]
   if (all_errors.length) {
     throw new Error(all_errors.join('\n'))
   }

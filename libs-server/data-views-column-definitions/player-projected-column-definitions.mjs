@@ -42,13 +42,21 @@ const get_default_params = ({ params = {} }) => {
       ? parse_nfl_week_identifier({ identifier: nfl_week[0] })
       : null
     year = parsed ? parsed.year : current_season.year
-    week = parsed ? parsed.week : 0
+    // An nfl_week_id that did not parse yields no week, not week 0. The
+    // identifier list was empty or malformed; inventing a period for it is what
+    // the sentinel did.
+    week = parsed ? parsed.week : null
     seas_type = parsed ? parsed.seas_type : 'REG'
   } else {
     year = Array.isArray(params.year)
       ? params.year[0]
       : params.year || current_season.year
-    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+    // Null, not 0, when the request carries no week. Only the week-scoped
+    // sources read this, and they declare a player_year_week grain that the
+    // request boundary refuses under a weekless cell -- so a null here is a
+    // state the period tables never see. `|| 0` instead named a period that no
+    // table has expressed since the period split.
+    week = Array.isArray(params.week) ? params.week[0] : (params.week ?? null)
     seas_type = Array.isArray(params.seas_type)
       ? params.seas_type[0]
       : params.seas_type || 'REG'
@@ -218,16 +226,19 @@ const apply_projected_join = ({
     query_context
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
   const year = params.year || current_season.year
-  // `|| 0` is a SENTINEL DEFAULT and the last one in this file: a week-scoped
-  // column with no resolvable week pins the join to a week the narrowed tables
-  // can no longer hold, so it matches nothing and the column reads blank. It
-  // survives this cutover deliberately. The fix is not another default and not
-  // a throw from inside this join callback -- it is for the week-scoped sources
-  // to declare `grain: 'player_year_week'` and be admitted by source-attach
-  // resolution, with the refusal raised at the request boundary next to
-  // ColumnRowGrainMismatch. That is a data-views change, not a projection-period
-  // one; it lands in the step that follows this file's cutover.
-  const week = params.week || 0
+  // No week default. Every source that passes `join_week: true` declares
+  // `grain: 'player_year_week'`, so source-attach admits it only under a cell
+  // carrying a week axis, and `week_reference` is therefore always present
+  // below. A request with no week axis is refused at the boundary by
+  // validate_source_attach_compatibility before reaching here.
+  //
+  // What stood here was `params.week || 0`, the last sentinel default in this
+  // file. Week 0 was the season key while every period shared one table, so the
+  // fallback returned a season value under a week header; once the periods
+  // split it pinned the join to a week the narrowed tables cannot hold, so the
+  // column read blank instead. Wrong-period and silently-empty are the same
+  // defect, and neither is expressible now that the grain is declared.
+  const week = params.week
 
   players_query[join_method](join_table_clause, function () {
     this.on(`${table_alias}.pid`, '=', pid_reference)
@@ -303,6 +314,12 @@ const apply_projected_join = ({
           }
         }
       } else {
+        // No week ROW AXIS, so the week comes from the param -- a flat player
+        // row pinned to one week, which is a shipped shape. `week` is
+        // guaranteed non-null here: every source passing join_week declares
+        // `requires_week`, and the boundary refuses a request that resolves no
+        // week, so the sentinel default this used to carry is unreachable
+        // rather than merely unwise.
         this.andOn(
           `${table_alias}.week`,
           '=',
@@ -329,6 +346,12 @@ const apply_projected_join = ({
 // express) -- otherwise the alias is joined twice.
 const make_league_player_projection_source = () => ({
   grain: 'player',
+  // These rows are keyed by week, so a request that resolves no week has no
+  // row to join. Refused at the boundary by validate_week_requirement rather
+  // than defaulted -- see that module for why grain is the wrong instrument
+  // here (it cannot see a week PARAM, and a flat player-row table with an
+  // explicit week is a shipped shape).
+  requires_week: true,
   table: 'league_player_projection_values',
   // Conformed to season_year. param-utils/select-string default year_column to
   // 'year' when a source omits key_columns, which would emit a correlated
@@ -420,6 +443,8 @@ const make_league_player_rest_of_season_projection_source =
 // pointed at a sentinel.
 const make_league_format_player_projection_source = () => ({
   grain: 'player',
+  // Week-keyed rows -- see the league_player source above.
+  requires_week: true,
   table: 'league_format_player_projection_values',
   // Conformed to season_year -- see the note on the league_player source above.
   key_columns: { year: 'season_year' },
@@ -513,6 +538,11 @@ const make_projections_index_source = ({ period = 'week' } = {}) => {
 
   return {
     grain: 'player',
+    // Only the WEEK arm is week-keyed. season_projections_index and
+    // rest_of_season_projections are grained (source_id, pid, season_year) with
+    // no week column at all, so they require nothing and stay resolvable under
+    // every request shape.
+    requires_week: is_week,
     table,
     attach_owns_join: true,
     // season_year, not year -- see select-string.mjs's source.key_columns.year
