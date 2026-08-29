@@ -9,6 +9,7 @@ import {
   player_nfl_status
 } from '#constants'
 import { nfl_week_identifier } from '#libs-shared'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 import get_player_transactions from './get-player-transactions.mjs'
 import getLeague from './get-league.mjs'
 import apply_practice_current_week_join from './data-views/join-practice-current-week.mjs'
@@ -542,15 +543,23 @@ export default async function ({
     }
   }
 
-  // include player weekly and rest-of-season raw projections
+  // include player weekly, season and rest-of-season raw projections
   const projections = await db('projections_index')
     .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
-    .where('week', '>=', current_season.week)
+    .where('week', '>=', current_season.active_fantasy_week)
     .whereIn('pid', returnedPlayerIds)
     // projections data source publishes REG-only; POST projections intentionally omitted
     // (see user:task/league/close-reg-post-week-encoding-gaps.md Out of Scope)
     .where('season_type', 'REG')
+  // No week predicate, and none is expressible: `season_projections_index` has
+  // no `week` column. That is what makes the season row unreachable by the clock
+  // -- the week floor above stepped past 0 in the preseason on 2026-08-04 and
+  // amputated every season row, and this query has no equivalent to step.
+  const season_projections = await db('season_projections_index')
+    .where('source_id', external_data_sources.AVERAGE)
+    .where('season_year', current_season.year)
+    .whereIn('pid', returnedPlayerIds)
   const rest_of_season_projections = await db('rest_of_season_projections')
     .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
@@ -558,6 +567,14 @@ export default async function ({
 
   for (const projection of projections) {
     players_by_pid[projection.pid].projection[projection.week] = projection
+  }
+
+  // Under the named period key, which is the same token the SPA's client-side
+  // recompute publishes (app/core/worker/index.js) and the same one the data
+  // views and the API payload use.
+  for (const season_projection of season_projections) {
+    players_by_pid[season_projection.pid].projection[season_aggregate_key] =
+      season_projection
   }
 
   for (const rest_of_season_projection of rest_of_season_projections) {

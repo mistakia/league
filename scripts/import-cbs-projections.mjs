@@ -3,14 +3,15 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import db from '#db'
 import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
   find_player_row,
   report_job,
   check_projections_index_floor,
-  record_projection_history
+  check_season_projections_floor,
+  save_projections,
+  projection_periods
 } from '#libs-server'
 import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -31,7 +32,8 @@ const getUrl = (pos, type) =>
 const positions = ['QB', 'RB', 'WR', 'TE']
 
 const run = async ({ season = false, dry = false } = {}) => {
-  const week = season ? 0 : current_season.active_fantasy_week
+  const period = season ? projection_periods.SEASON : projection_periods.WEEK
+  const week = current_season.active_fantasy_week
   const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
   if (
@@ -149,14 +151,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       continue
     }
 
-    inserts.push({
-      pid: player_row.pid,
-      week,
-      season_year: year,
-      season_type: 'REG',
-      source_id: external_data_sources.CBS,
-      ...data
-    })
+    inserts.push({ pid: player_row.pid, ...data })
   }
 
   log(`Could not locate ${missing.length} players`)
@@ -172,32 +167,14 @@ const run = async ({ season = false, dry = false } = {}) => {
 
   if (inserts.length) {
     // remove any existing projections in index not included in this set
-    await db('projections_index')
-      .where({
-        season_year: year,
-        week,
-        source_id: external_data_sources.CBS,
-        season_type: 'REG'
-      })
-      .whereNotIn(
-        'pid',
-        inserts.map((i) => i.pid)
-      )
-      .del()
-
-    log(`Inserting ${inserts.length} projections into database`)
-    await db('projections_index')
-      .insert(inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'user_id',
-        'week',
-        'season_year',
-        'season_type'
-      ])
-      .merge()
-    await record_projection_history({ inserts, generated_at })
+    await save_projections({
+      period,
+      inserts,
+      source_id: external_data_sources.CBS,
+      season_year: year,
+      week,
+      generated_at
+    })
   }
 
   return {
@@ -218,7 +195,9 @@ const main = async () => {
       dry: argv.dry
     })
     if (result && !result.skipped && !argv.dry) {
-      await check_projections_index_floor(result)
+      await (argv.season
+        ? check_season_projections_floor(result)
+        : check_projections_index_floor(result))
     }
   } catch (err) {
     error = err

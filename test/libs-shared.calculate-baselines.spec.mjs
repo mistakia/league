@@ -2,11 +2,11 @@
 import * as chai from 'chai'
 
 import calculateBaselines from '#libs-shared/calculate-baselines.mjs'
-import calculate_projection_values from '#libs-shared/calculate-projection-values.mjs'
 import {
-  season_projection_week,
-  season_aggregate_key
-} from '#libs-shared/calculate-distributional-baselines.mjs'
+  calculate_season_projection_values,
+  calculate_weekly_projection_values
+} from '#libs-shared/calculate-projection-values.mjs'
+import { season_aggregate_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 
 const expect = chai.expect
 
@@ -267,7 +267,7 @@ describe('LIBS-SHARED calculate-baselines unprojected players', function () {
 
 describe('LIBS-SHARED calculate-projection-values', function () {
   it('carries both baselines on a weekly board', () => {
-    const { baselines } = calculate_projection_values({
+    const { baselines } = calculate_weekly_projection_values({
       players: cross_position_board(),
       league: two_team_league,
       week: 1
@@ -285,23 +285,21 @@ describe('LIBS-SHARED calculate-projection-values', function () {
         pid: player.pid,
         position: player.primary_position,
         total: player.points[1].total,
-        // The season board is published under the season KEY, while
-        // `season_projection_week` remains the week that DISPATCHES to it below.
-        // Writing the board under the week is what production did after the
-        // period split, and it priced every player at the sentinel.
+        // The season board is published under the season KEY. Writing it under a
+        // reserved week number is what production did after the period split,
+        // and it priced every player at the sentinel.
         week: season_aggregate_key
       })
     )
 
-    const { baselines } = calculate_projection_values({
+    const { baselines } = calculate_season_projection_values({
       players,
-      league: two_team_league,
-      week: season_projection_week
+      league: two_team_league
     })
 
     // The season baseline is an expectation over drawn seasons, so it holds no
     // pid; `available` is a roster-aware question the season board does not ask
-    // and nothing reads at week 0.
+    // and nothing reads on the season period.
     expect(baselines.QB.starter.pid).to.equal(null)
     expect(baselines.QB.starter.points).to.be.a('number')
     for (const position of ['QB', 'RB', 'WR', 'TE']) {

@@ -22,40 +22,40 @@ const season_projections_view = {
       ? 'points.season.total'
       : 'points.rest_of_season.total',
     current_season.is_offseason
-      ? 'projection.0.passing_attempts'
+      ? 'projection.season.passing_attempts'
       : 'projection.rest_of_season.passing_attempts',
     current_season.is_offseason
-      ? 'projection.0.passing_yards'
+      ? 'projection.season.passing_yards'
       : 'projection.rest_of_season.passing_yards',
     current_season.is_offseason
-      ? 'projection.0.passing_touchdowns'
+      ? 'projection.season.passing_touchdowns'
       : 'projection.rest_of_season.passing_touchdowns',
     current_season.is_offseason
-      ? 'projection.0.passing_interceptions'
+      ? 'projection.season.passing_interceptions'
       : 'projection.rest_of_season.passing_interceptions',
     current_season.is_offseason
-      ? 'projection.0.rushing_attempts'
+      ? 'projection.season.rushing_attempts'
       : 'projection.rest_of_season.rushing_attempts',
     current_season.is_offseason
-      ? 'projection.0.rushing_yards'
+      ? 'projection.season.rushing_yards'
       : 'projection.rest_of_season.rushing_yards',
     current_season.is_offseason
-      ? 'projection.0.rushing_touchdowns'
+      ? 'projection.season.rushing_touchdowns'
       : 'projection.rest_of_season.rushing_touchdowns',
     current_season.is_offseason
-      ? 'projection.0.fumbles_lost'
+      ? 'projection.season.fumbles_lost'
       : 'projection.rest_of_season.fumbles_lost',
     current_season.is_offseason
-      ? 'projection.0.targets'
+      ? 'projection.season.targets'
       : 'projection.rest_of_season.targets',
     current_season.is_offseason
-      ? 'projection.0.receptions'
+      ? 'projection.season.receptions'
       : 'projection.rest_of_season.receptions',
     current_season.is_offseason
-      ? 'projection.0.receiving_yards'
+      ? 'projection.season.receiving_yards'
       : 'projection.rest_of_season.receiving_yards',
     current_season.is_offseason
-      ? 'projection.0.receiving_touchdowns'
+      ? 'projection.season.receiving_touchdowns'
       : 'projection.rest_of_season.receiving_touchdowns'
   ]
 }

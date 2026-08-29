@@ -8,10 +8,14 @@ export * as data_views_constants from './data-views-constants.mjs'
 export * as bookmaker_constants from './bookmaker-constants.mjs'
 export * as adp_format from './adp-format.mjs'
 export { default as weightProjections } from './weight-projections.mjs'
+export { weight_season_projections } from './weight-projections.mjs'
 export { default as calculateBaselines } from './calculate-baselines.mjs'
 export { default as calculatePoints } from './calculate-points.mjs'
 export { default as calculateValues } from './calculate-values.mjs'
-export { default as calculate_projection_values } from './calculate-projection-values.mjs'
+export {
+  calculate_season_projection_values,
+  calculate_weekly_projection_values
+} from './calculate-projection-values.mjs'
 export { default as get_eligible_slots } from './get-eligible-slots.mjs'
 export { default as Roster } from './roster.mjs'
 export { default as calculateDstStatsFromPlays } from './calculate-dst-stats-from-plays.mjs'

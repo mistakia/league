@@ -35,7 +35,7 @@ import { get_player_week_total } from './get-player-week-points.mjs'
 //
 //   dispersion = top_projection_share * position_scale + projection_slope * projection
 //
-// MEASURED, not tuned. Per position over 2020-2025, `projections_index` week 0
+// MEASURED, not tuned. Per position over 2020-2025, `season_projections_index`
 // (the frozen preseason board) against realized `scoring_format_player_seasonlogs`:
 // bin the position by projection, take the standard deviation of
 // (realized - projection) inside each bin, and regress those on the bins' mean

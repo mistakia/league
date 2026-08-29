@@ -5,10 +5,18 @@ import * as chai from 'chai'
 import db from '#db'
 import { current_season } from '#constants'
 import { get_data_view_results_query } from '#libs-server/get-data-view-results.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import { projected_career_year_from_cte } from '#libs-shared/career-year-definition.mjs'
 
 const { expect } = chai
 
 const year = current_season.year
+
+// Name the relation under test rather than matching a fragment of anyone's SQL.
+// Every other join in these queries also carries a get_table_hash alias, so a
+// pattern like /left join "t[0-9a-f]{32}"/ passes whether or not the projection
+// is joined at all -- it matched the player_seasonlogs source join.
+const projection_cte_name = get_table_hash(`career_year_projection/${year}`)
 
 // career_year is only materialized for seasons a player has actually appeared
 // in, so before the season's first game the current-season rows render blank.
@@ -36,9 +44,44 @@ describe('Data Views - player_career_year current-season projection', function (
     )
     const sql = query.toString()
     expect(sql).to.include('COALESCE(')
-    expect(sql).to.include('count(DISTINCT projected.season_year) + 1')
-    expect(sql).to.include(`projected.season_year < ${year}`)
+    expect(sql).to.include('count(DISTINCT season_year) + 1')
+    expect(sql).to.include(`season_year < ${year}`)
     expect(sql).to.include(`player_years.year = ${year}`)
+    // Pre-aggregated, not correlated: one grouped pass joined onto the player
+    // row, rather than a subquery evaluated once per outer row.
+    expect(sql).to.include(`"${projection_cte_name}" as (`)
+    // The join has to be LEFT and the read has to COALESCE, or every player
+    // with no prior REG seasonlog is dropped or blanked. See the seeded
+    // no-prior-seasons spec below for the executed proof.
+    expect(sql).to.include(`left join "${projection_cte_name}" on`)
+    expect(sql).to.include(
+      projected_career_year_from_cte({ cte_alias: projection_cte_name })
+    )
+  })
+
+  it('registers the pre-aggregated relation once for two career-year columns', async () => {
+    const { query } = await get_data_view_results_query({
+      columns: [
+        { column_id: 'player_career_year', params: { year: [year, year - 1] } },
+        {
+          column_id: 'player_career_year',
+          params: { year: [year, year - 1], seas_type: 'POST' }
+        }
+      ],
+      prefix_columns: ['player_name'],
+      where: [],
+      sort: [],
+      row_axes: ['year'],
+      offset: 0,
+      limit: 20
+    })
+    const sql = query.toString()
+    // Both columns project the same season, so they read the same relation.
+    // Registering it twice would emit a duplicate WITH alias (42712).
+    const registrations = sql.split(`"${projection_cte_name}" as (`)
+    expect(registrations).to.have.lengthOf(2)
+    const joins = sql.split(`left join "${projection_cte_name}" on`)
+    expect(joins).to.have.lengthOf(2)
   })
 
   it('leaves past-year-only queries on plain career_year', async () => {
@@ -48,7 +91,10 @@ describe('Data Views - player_career_year current-season projection', function (
     const sql = query.toString()
     expect(sql).to.include('career_year as career_year_0')
     expect(sql).to.not.include('COALESCE(')
-    expect(sql).to.not.include('count(DISTINCT projected.season_year)')
+    expect(sql).to.not.include('count(DISTINCT season_year)')
+    // The pre-aggregated relation is not registered either, so a past-year-only
+    // query carries no extra CTE and no extra join.
+    expect(sql).to.not.include(projection_cte_name)
   })
 
   it('projects the current-season career year without a year axis', async () => {
@@ -62,8 +108,8 @@ describe('Data Views - player_career_year current-season projection', function (
     })
     const sql = query.toString()
     expect(sql).to.include('COALESCE(')
-    expect(sql).to.include('count(DISTINCT projected.season_year) + 1')
-    expect(sql).to.include(`projected.season_year < ${year}`)
+    expect(sql).to.include('count(DISTINCT season_year) + 1')
+    expect(sql).to.include(`season_year < ${year}`)
   })
 
   it('returns the projected value while past-year stored values are untouched', async () => {
@@ -108,6 +154,52 @@ describe('Data Views - player_career_year current-season projection', function (
       // Stored values are untouched.
       expect(by_year[year - 1]).to.equal(2)
       expect(by_year[year - 2]).to.equal(1)
+    } finally {
+      await trx.rollback()
+    }
+  })
+
+  // The correctness crux of the pre-aggregated form, and the one case a naive
+  // rewrite gets wrong. The correlated subquery aggregated over an empty set
+  // and returned `count(0) + 1 = 1` for a player with no prior REG seasonlog;
+  // a GROUP BY relation simply has no row for that player, so a LEFT JOIN
+  // yields NULL and the cell renders blank. On production this is 16,536 of
+  // 28,807 players. Delete the COALESCE in projected_career_year_from_cte and
+  // this spec goes red -- that is what makes it a gate rather than a
+  // screenshot.
+  it('projects 1 for a player with no prior regular-season seasonlog', async () => {
+    const trx = await db.transaction()
+    try {
+      // Seeded with NO player_seasonlogs rows at all.
+      await trx.raw(
+        `INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-CYR-000002', 'Test', 'Cyrook', 'T.Cyrook', 'Test Cyrook', 'MLB', 'MLB', '2004-01-01', ${year}, 'ZWA')`
+      )
+
+      const { query } = await get_data_view_results_query({
+        columns: [
+          {
+            column_id: 'player_career_year',
+            params: { year: [year, year - 1] }
+          }
+        ],
+        prefix_columns: ['player_name'],
+        where: [
+          { column_id: 'player_position', operator: 'IN', value: ['MLB'] }
+        ],
+        row_axes: ['year'],
+        offset: 0,
+        limit: 100
+      })
+      const rows = await query.transacting(trx)
+      const seeded_rows = rows.filter((row) => row.pid === 'TEST-CYR-000002')
+      expect(seeded_rows).to.have.lengthOf(2)
+      const by_year = Object.fromEntries(
+        seeded_rows.map((row) => [Number(row.year), row.career_year_0])
+      )
+      // Entering their first season: no prior REG seasons, plus one.
+      expect(by_year[year]).to.equal(1)
+      // A past season the player did not play stays blank, as before.
+      expect(by_year[year - 1]).to.equal(null)
     } finally {
       await trx.rollback()
     }

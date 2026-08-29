@@ -33,18 +33,29 @@ const FORMAT_TIMEOUT_MS = 300_000
 export const MAX_ATTEMPTS_PER_FORMAT = 3
 
 // A slice is legitimately empty when there is nothing to derive it FROM. The
-// scoring cache is built from the AVERAGE rows in projections_index, so with
-// no source rows for the year every scoring format is correctly empty and none
-// of them is stale.
+// scoring cache is built from the AVERAGE rows in projections_index and
+// season_projections_index, so with no source rows for the year every scoring
+// format is correctly empty and none of them is stale.
+//
+// BOTH tables, and the season one is not redundant: five of nine 2026 sources
+// publish only a season-long projection and carry no weekly rows at all, so a
+// year covered entirely by those sources has an empty projections_index and a
+// populated season table. Probing only the weekly table would report such a year
+// sourceless and mark every format permanently non-stale.
 export const has_projection_source_for_year = async ({ db, year }) => {
-  const row = await db('projections_index')
+  const weekly_row = await db('projections_index')
     .where({
       season_year: year,
       season_type: 'REG',
       source_id: external_data_sources.AVERAGE
     })
     .first('pid')
-  return Boolean(row)
+  if (weekly_row) return true
+
+  const season_row = await db('season_projections_index')
+    .where({ season_year: year, source_id: external_data_sources.AVERAGE })
+    .first('pid')
+  return Boolean(season_row)
 }
 
 // Scoring formats a season row references whose points slice is empty.

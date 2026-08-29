@@ -6,7 +6,6 @@ import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
-import { season_projection_week } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
@@ -18,8 +17,8 @@ enable_debug_namespaces('process-projections-for-scoring-format')
 
 // Re-derive the three scoring-format projected-points tables for one
 // (scoring_format, year) slice entirely from the authoritative projections_index
-// / rest_of_season_projections AVERAGE rows. This is the SINGLE source-of-truth
-// path shared
+// / season_projections_index / rest_of_season_projections AVERAGE rows. This is
+// the SINGLE source-of-truth path shared
 // by the 30-min process-projections cron and the ad-hoc / reconciliation
 // backfill, so the precomputed cache can never silently drift from
 // projections_index: delete each period's (format, year) slice and reinsert
@@ -37,9 +36,26 @@ export const process_scoring_format_year = async ({
     .where({ id: scoring_format_id })
     .first()
 
-  const projections = await db('projections_index').where({
+  // `week >= 1` is load-bearing until Phase C deletes the week-0 rows, and it
+  // stays afterwards as the statement that this read is the WEEKLY one. The
+  // period split moved the season snapshot to its own table but left this read
+  // unfloored, so every lingering `projections_index` week-0 row flowed into
+  // weekly_points_inserts and tripped
+  // `scoring_format_player_projection_points_week_is_fantasy_week` -- taking
+  // out all nine scoring formats on the first run after deploy, hourly.
+  const projections = await db('projections_index')
+    .where({
+      season_year: year,
+      season_type: 'REG',
+      source_id: external_data_sources.AVERAGE
+    })
+    .where('week', '>=', 1)
+  // The season snapshot is READ, not derived from a week of the weekly set. It
+  // used to come from `projections_index` week 0, which meant a period was being
+  // recovered from a reserved week number; it now has its own table and its own
+  // query, and no week predicate can reach it.
+  const season_projections = await db('season_projections_index').where({
     season_year: year,
-    season_type: 'REG',
     source_id: external_data_sources.AVERAGE
   })
   const ros_projections = await db('rest_of_season_projections').where({
@@ -48,9 +64,14 @@ export const process_scoring_format_year = async ({
   })
 
   const projections_by_pid = groupBy(projections, 'pid')
+  const season_by_pid = groupBy(season_projections, 'pid')
   const ros_by_pid = groupBy(ros_projections, 'pid')
   const pids = Array.from(
-    new Set([...Object.keys(projections_by_pid), ...Object.keys(ros_by_pid)])
+    new Set([
+      ...Object.keys(projections_by_pid),
+      ...Object.keys(season_by_pid),
+      ...Object.keys(ros_by_pid)
+    ])
   )
 
   if (!pids.length) {
@@ -86,23 +107,26 @@ export const process_scoring_format_year = async ({
 
     for (const proj of projections_by_pid[pid] || []) {
       const { week, ...stats } = proj
-      const row = {
+      weekly_points_inserts.push({
         pid,
         season_year: year,
         scoring_format_id,
+        week,
         projected_points_total: score(stats, player.primary_position)
-      }
+      })
+    }
 
-      // projections_index.week is smallint, and its week 0 IS the season-long
-      // projection -- so the season snapshot is derived here rather than being
-      // absent. It seals on its own: process-projections stops recomputing week
-      // 0 once week 1 opens, so re-deriving it after that reproduces the same
-      // frozen input.
-      if (week === season_projection_week) {
-        season_points_inserts.push(row)
-      } else {
-        weekly_points_inserts.push({ ...row, week })
-      }
+    // It seals on its own: process-projections stops recomputing the season
+    // board once week 1 opens, so re-scoring it after that reproduces the same
+    // frozen input.
+    const season_row = (season_by_pid[pid] || [])[0]
+    if (season_row) {
+      season_points_inserts.push({
+        pid,
+        season_year: year,
+        scoring_format_id,
+        projected_points_total: score(season_row, player.primary_position)
+      })
     }
 
     const rest_of_season_row = (ros_by_pid[pid] || [])[0]
@@ -122,13 +146,22 @@ export const process_scoring_format_year = async ({
   // Each period table is refreshed with the same delete-then-reinsert shape the
   // single table used, scoped to its own (format, year) slice, so a player
   // dropping out of the projection set leaves no stale row behind.
+  //
+  // ONE TRANSACTION per slice, because the unguarded form loses data rather
+  // than failing. The delete committed on its own, so when the insert hit a
+  // CHECK violation on 2026-08-29 the slice was left EMPTY -- seven of ten
+  // active formats lost their whole 2026 weekly set, and the hourly cron
+  // re-emptied it every run. A refresh that cannot complete must leave the
+  // previous contents alone.
   const refresh = async ({ table, items, label }) => {
     if (!items.length) return
-    await db(table).del().where({ scoring_format_id, season_year: year })
-    await batch_insert({
-      items,
-      save: (rows) => db(table).insert(rows),
-      batch_size: 100
+    await db.transaction(async (trx) => {
+      await trx(table).del().where({ scoring_format_id, season_year: year })
+      await batch_insert({
+        items,
+        save: (rows) => trx(table).insert(rows),
+        batch_size: 100
+      })
     })
     log(
       `re-derived ${items.length} ${scoring_format_id} ${label} points for year ${year}`

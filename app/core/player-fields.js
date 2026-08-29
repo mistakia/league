@@ -287,30 +287,30 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.0.passing_attempts': {
+    'projection.season.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Projected Passing Attempts (Season)',
-      player_value_path: 'projection.0.passing_attempts'
+      player_value_path: 'projection.season.passing_attempts'
     },
-    'projection.0.passing_yards': {
+    'projection.season.passing_yards': {
       category: 'passing',
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Season)',
-      player_value_path: 'projection.0.passing_yards'
+      player_value_path: 'projection.season.passing_yards'
     },
-    'projection.0.passing_touchdowns': {
+    'projection.season.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Projected Passing Touchdowns (Season)',
-      player_value_path: 'projection.0.passing_touchdowns',
+      player_value_path: 'projection.season.passing_touchdowns',
       fixed: 1
     },
-    'projection.0.passing_interceptions': {
+    'projection.season.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Projected Interceptions (Season)',
-      player_value_path: 'projection.0.passing_interceptions',
+      player_value_path: 'projection.season.passing_interceptions',
       fixed: 1
     },
 
@@ -368,30 +368,30 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.0.rushing_attempts': {
+    'projection.season.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Projected Rushing Attempts (Season)',
-      player_value_path: 'projection.0.rushing_attempts'
+      player_value_path: 'projection.season.rushing_attempts'
     },
-    'projection.0.rushing_yards': {
+    'projection.season.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Projected Rushing Yards (Season)',
-      player_value_path: 'projection.0.rushing_yards'
+      player_value_path: 'projection.season.rushing_yards'
     },
-    'projection.0.rushing_touchdowns': {
+    'projection.season.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Projected Rushing Touchdowns (Season)',
-      player_value_path: 'projection.0.rushing_touchdowns',
+      player_value_path: 'projection.season.rushing_touchdowns',
       fixed: 1
     },
-    'projection.0.fumbles_lost': {
+    'projection.season.fumbles_lost': {
       category: 'rushing',
       column_header: 'FUM',
       csv_header: 'Projected Fumbles (Season)',
-      player_value_path: 'projection.0.fumbles_lost',
+      player_value_path: 'projection.season.fumbles_lost',
       fixed: 1
     },
 
@@ -450,31 +450,31 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.0.targets': {
+    'projection.season.targets': {
       category: 'receiving',
       column_header: 'TAR',
       csv_header: 'Projected Targets (Season)',
-      player_value_path: 'projection.0.targets',
+      player_value_path: 'projection.season.targets',
       fixed: 1
     },
-    'projection.0.receptions': {
+    'projection.season.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Projected Receptions (Season)',
-      player_value_path: 'projection.0.receptions',
+      player_value_path: 'projection.season.receptions',
       fixed: 1
     },
-    'projection.0.receiving_yards': {
+    'projection.season.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Projected Receiving Yards (Season)',
-      player_value_path: 'projection.0.receiving_yards'
+      player_value_path: 'projection.season.receiving_yards'
     },
-    'projection.0.receiving_touchdowns': {
+    'projection.season.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Projected Receiving Touchdowns (Season)',
-      player_value_path: 'projection.0.receiving_touchdowns',
+      player_value_path: 'projection.season.receiving_touchdowns',
       fixed: 1
     },
 

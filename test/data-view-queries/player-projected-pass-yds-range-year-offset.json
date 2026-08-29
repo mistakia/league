@@ -13,6 +13,6 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT SUM(projections_index.passing_yards) FROM projections_index WHERE projections_index.pid = player.pid AND projections_index.season_year IN (2024,2025) AND projections_index.source_id = 18 AND projections_index.week = 0 AND projections_index.season_type = 'REG') AS \"season_projected_pass_yds_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT SUM(season_projections_index.passing_yards) FROM season_projections_index WHERE season_projections_index.pid = player.pid AND season_projections_index.season_year IN (2024,2025) AND season_projections_index.source_id = 18) AS \"season_projected_pass_yds_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "projected", "range", "regression"]
 }

@@ -110,15 +110,37 @@ const get_alias_key = ({ year, week, seas_type, nfl_week }) => {
   return `${year}_week_${week}_${seas_type}`
 }
 
-const projections_index_table_alias = ({ params = {} }) => {
-  const p = get_default_params({ params })
-  // source_id is part of the alias key so two projection columns at the same
-  // year/week/seas_type but different sources do not collapse into one shared
-  // JOIN (which could carry only one source_id predicate).
-  return get_table_hash(
-    `projections_index_${get_alias_key(p)}_source_${p.source_id}`
-  )
+// The three periods of the RAW-STAT fan-out, each its own table. Only the week
+// table has a week / season_type discriminator; the other two are grained
+// (source_id, pid, season_year), so week = 0 is not a period they can express.
+const PROJECTION_PERIOD_TABLES = {
+  week: 'projections_index',
+  season: 'season_projections_index',
+  rest_of_season: 'rest_of_season_projections'
 }
+
+// Each period gets its OWN alias, and that is load-bearing rather than tidy.
+// Two columns whose table_alias hashes equal collapse into ONE join group
+// carrying only the seeding column's table and predicates. All three prefixes
+// shared a single alias until 2026-08-29, so a view holding two of them emitted
+// one join and selected the same expression under both headers -- proved live,
+// with no error and no failing golden, because no golden mixes prefixes. It is
+// the same class the league_format aliases below record. Three tables make it
+// unavoidable rather than latent.
+//
+// source_id is part of every key so two projection columns at the same period
+// but different sources do not collapse into one shared JOIN (which could carry
+// only one source_id predicate). The week key adds week / seas_type; the period
+// keys cannot, because those columns do not exist on their tables.
+const projections_index_period_table_alias =
+  (period) =>
+  ({ params = {} }) => {
+    const p = get_default_params({ params })
+    const key = period === 'week' ? get_alias_key(p) : String(p.year)
+    return get_table_hash(
+      `${PROJECTION_PERIOD_TABLES[period]}_${key}_source_${p.source_id}`
+    )
+  }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
   const p = get_default_params({ params })
@@ -481,69 +503,80 @@ const make_league_format_player_rest_of_season_projection_source =
     table: 'league_format_player_rest_of_season_projection_values'
   })
 
-const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
-  grain: 'player',
-  table: is_rest_of_season ? 'rest_of_season_projections' : 'projections_index',
-  attach_owns_join: true,
-  // season_year, not year -- see select-string.mjs's source.key_columns.year
-  // read (generic year_offset_range correlated-subquery path re-scans
-  // source.table directly and needs the real column name).
-  key_columns: { year: 'season_year' },
-  year_default: (params) => [get_default_params({ params }).year],
-  extra_predicates: (params) => {
-    const { seas_type, week, source_id } = get_default_params({ params })
-    // rest_of_season_projections is keyed (source_id, pid, year) — no
-    // week/seas_type discriminator — so the rest-of-season subquery pins
-    // source_id only.
-    if (is_rest_of_season) {
-      return [{ column: 'source_id', value: source_id }]
-    }
-    // projections_index.week is smallint (numeric); seas_type is an enum. The
-    // offset-expanded year window plus source_id + seas_type + week discriminates
-    // the source even when the JOIN used nfl_week_id.
-    return [
-      { column: 'source_id', value: source_id },
-      { column: 'week', value: week },
-      { column: 'season_type', value: seas_type }
-    ]
-  },
-  attach: ({ query_context, params, table_alias, join_type }) => {
-    const { seas_type, nfl_week, source_id } = get_default_params({ params })
-    const join_table_clause = is_rest_of_season
-      ? `rest_of_season_projections as ${table_alias}`
-      : `projections_index as ${table_alias}`
-    apply_projected_join({
-      query_context,
-      params,
-      table_alias,
-      join_type,
-      join_table_clause,
-      join_year: true,
-      join_week: !is_rest_of_season,
-      join_year_column: 'season_year',
-      additional_conditions() {
-        // source_id discriminates the projection provider on both tables. ros
-        // carries no week/seas_type/nfl_week_id columns, so it stops here.
-        this.andOn(`${table_alias}.source_id`, '=', source_id)
-        if (is_rest_of_season) return
-        if (nfl_week) {
-          this.andOn(
-            db.raw(
-              `${table_alias}.nfl_week_id IN (${nfl_week.map(() => '?').join(',')})`,
-              nfl_week
-            )
-          )
-        } else {
-          this.andOn(
-            `${table_alias}.season_type`,
-            '=',
-            db.raw('?', [seas_type])
-          )
-        }
+// The RAW-STAT source, one arm per period. `period` is three-valued rather than
+// an `is_rest_of_season` boolean because the set has three members and a boolean
+// cannot name three. Follows make_league_player_period_projection_source above:
+// one parameterized factory bound to concrete tables, not a factory per period.
+const make_projections_index_source = ({ period = 'week' } = {}) => {
+  const table = PROJECTION_PERIOD_TABLES[period]
+  const is_week = period === 'week'
+
+  return {
+    grain: 'player',
+    table,
+    attach_owns_join: true,
+    // season_year, not year -- see select-string.mjs's source.key_columns.year
+    // read (generic year_offset_range correlated-subquery path re-scans
+    // source.table directly and needs the real column name). All three tables
+    // conform to season_year.
+    key_columns: { year: 'season_year' },
+    year_default: (params) => [get_default_params({ params }).year],
+    extra_predicates: (params) => {
+      const { seas_type, week, source_id } = get_default_params({ params })
+      // season_projections_index and rest_of_season_projections are both keyed
+      // (source_id, pid, season_year) with no week / season_type discriminator,
+      // so their subqueries pin source_id only.
+      if (!is_week) {
+        return [{ column: 'source_id', value: source_id }]
       }
-    })
+      // projections_index.week is smallint (numeric); seas_type is an enum. The
+      // offset-expanded year window plus source_id + seas_type + week
+      // discriminates the source even when the JOIN used nfl_week_id.
+      return [
+        { column: 'source_id', value: source_id },
+        { column: 'week', value: week },
+        { column: 'season_type', value: seas_type }
+      ]
+    },
+    attach: ({ query_context, params, table_alias, join_type }) => {
+      const { seas_type, nfl_week, source_id } = get_default_params({ params })
+      apply_projected_join({
+        query_context,
+        params,
+        table_alias,
+        join_type,
+        join_table_clause: `${table} as ${table_alias}`,
+        join_year: true,
+        // MANDATORY false on both period arms. apply_projected_join defaults
+        // join_week to true and falls back to `params.week || 0`, so omitting
+        // it emits a week predicate against a column neither period table has.
+        join_week: is_week,
+        join_year_column: 'season_year',
+        additional_conditions() {
+          // source_id discriminates the projection provider on all three
+          // tables. The period tables carry no week / season_type /
+          // nfl_week_id columns, so they stop here.
+          this.andOn(`${table_alias}.source_id`, '=', source_id)
+          if (!is_week) return
+          if (nfl_week) {
+            this.andOn(
+              db.raw(
+                `${table_alias}.nfl_week_id IN (${nfl_week.map(() => '?').join(',')})`,
+                nfl_week
+              )
+            )
+          } else {
+            this.andOn(
+              `${table_alias}.season_type`,
+              '=',
+              db.raw('?', [seas_type])
+            )
+          }
+        }
+      })
+    }
   }
-})
+}
 
 // --- Projected fantasy points in-query scorer ------------------------------
 //
@@ -692,7 +725,7 @@ const projection_fantasy_points_sql = ({
 const projection_points_year_offset_range_sql = ({
   params = {},
   data_view_options = {},
-  is_rest_of_season = false
+  period = 'week'
 }) => {
   const [min_offset, max_offset] = resolve_year_offset_range(params)
   const {
@@ -701,23 +734,12 @@ const projection_points_year_offset_range_sql = ({
     source_id,
     year
   } = get_default_params({ params })
-  // `week` splices into BARE value position and `seas_type` inside quotes, both
-  // straight from request params on the unauthenticated /data-views/search
-  // path, so they are sanitized here rather than at each predicate below.
-  // `source_id` and `year` are already Number-coerced by get_default_params.
-  const week = sql_integer_param({ value: raw_week, param_name: 'week' })
-  const seas_type = sql_enum_param({
-    value: raw_seas_type,
-    param_name: 'seas_type',
-    allowed: nfl_season_types
-  })
   const scoring_format = get_projection_scoring_format({
     params,
     data_view_options
   })
-  const inner_table = is_rest_of_season
-    ? 'rest_of_season_projections'
-    : 'projections_index'
+  const is_week = period === 'week'
+  const inner_table = PROJECTION_PERIOD_TABLES[period]
 
   const expression = projection_fantasy_points_sql({
     scoring_format,
@@ -745,8 +767,21 @@ const projection_points_year_offset_range_sql = ({
     year_predicate,
     `${inner_table}.source_id = ${source_id}`
   ]
-  // rest_of_season_projections carries no week / seas_type discriminator.
-  if (!is_rest_of_season) {
+  // A three-way split, NOT a deletion: this subquery fans player_projected_points
+  // across all three prefixes, and dropping the predicate outright would strip
+  // the week discriminator from the week prefix. Neither period table carries a
+  // week or season_type column.
+  if (is_week) {
+    // `week` splices into BARE value position and `seas_type` inside quotes,
+    // both straight from request params on the unauthenticated
+    // /data-views/search path, so they are sanitized here rather than inlined.
+    // `source_id` and `year` are already Number-coerced by get_default_params.
+    const week = sql_integer_param({ value: raw_week, param_name: 'week' })
+    const seas_type = sql_enum_param({
+      value: raw_seas_type,
+      param_name: 'seas_type',
+      allowed: nfl_season_types
+    })
     predicates.push(`${inner_table}.week = ${week}`)
     predicates.push(`${inner_table}.season_type = '${seas_type}'`)
   }
@@ -906,14 +941,14 @@ const player_projected_points_added_including_cap_savings_periods = {
 // param and stay self-consistent with the raw-stat columns. See task
 // projected-points-in-query-scoring-source-selection.
 const player_projected_points = {
-  table_alias: projections_index_table_alias,
+  table_alias_factory: projections_index_period_table_alias,
   source_factory: make_projections_index_source,
   // Resolve scoring-format weights asynchronously before the (synchronous)
   // select / group-by / where emit; memoized on data_view_options.
   register_ctes: register_projection_scoring_format,
   // Bound per prefix by create_projected_stat: main_select needs the
   // prefix-correct select alias; the year_offset override needs the
-  // prefix-correct table (projections_index vs rest_of_season_projections).
+  // prefix-correct table, one per period.
   method_factories: {
     main_select:
       ({ select_as }) =>
@@ -957,48 +992,52 @@ const player_projected_points = {
           position_reference: PROJECTION_POSITION_REFERENCE
         }),
     main_select_string_year_offset_range:
-      ({ is_rest_of_season }) =>
+      ({ period }) =>
       ({ params = {}, data_view_options = {} }) =>
         projection_points_year_offset_range_sql({
           params,
           data_view_options,
-          is_rest_of_season
+          period
         })
   }
 }
 
 const projections_index_base = (column_name) => ({
   column_name,
-  table_alias: projections_index_table_alias,
+  table_alias_factory: projections_index_period_table_alias,
   source_factory: make_projections_index_source
 })
 
-// The RAW-STAT fan-out. Every column it builds reads projections_index or
-// rest-of-season raw projections, where the three prefixes genuinely are one
-// table shape under a period switch. The league-format valuation columns are
-// NOT fanned out here -- see league_format_period_column_definitions above for
-// why they cannot be.
+// The RAW-STAT fan-out. Every column it builds reads one of the three period
+// tables, which share a column shape under a period switch. The league-format
+// valuation columns are NOT fanned out here -- see
+// league_format_period_column_definitions above for why they cannot be.
+//
+// The table_alias is bound PER PERIOD, not shared across the fan. A shared one
+// collapsed all three prefixes into a single join; see the note on
+// projections_index_period_table_alias.
 const create_projected_stat = (base, stat_name) => {
-  const { source_factory, method_factories, ...rest } = base
-  const prefixes = ['week', 'season', 'rest_of_season']
-  return prefixes.reduce((acc, prefix) => {
-    const is_rest_of_season = prefix === 'rest_of_season'
-    const select_as = () => `${prefix}_projected_${stat_name}`
+  const { source_factory, table_alias_factory, method_factories, ...rest } =
+    base
+  const periods = ['week', 'season', 'rest_of_season']
+  return periods.reduce((acc, period) => {
+    const select_as = () => `${period}_projected_${stat_name}`
     const definition = {
       ...rest,
       select_as,
-      source: source_factory({ is_rest_of_season }),
+      table_alias: table_alias_factory(period),
+      source: source_factory({ period }),
       get_cache_info: get_cache_info_for_player_projected_stats
     }
-    // Columns that emit prefix-aware methods (player_projected_points) bind them
-    // here so each prefix gets the right select alias / projection table. Other
+    // Columns that emit period-aware methods (player_projected_points) bind them
+    // here so each period gets the right select alias / projection table. Other
     // stats declare no method_factories and are unaffected.
     if (method_factories) {
       for (const [method, factory] of Object.entries(method_factories)) {
-        definition[method] = factory({ select_as, is_rest_of_season })
+        definition[method] = factory({ select_as, period })
       }
     }
-    acc[`player_${prefix}_projected_${stat_name}`] = definition
+    acc[`player_${period}_projected_${stat_name}`] = definition
     return acc
   }, {})
 }

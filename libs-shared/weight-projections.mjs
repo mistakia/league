@@ -1,13 +1,5 @@
 import { all_projected_fantasy_stats, external_data_sources } from '#constants'
 
-const removeFalsy = (obj) => {
-  const newObj = {}
-  Object.keys(obj).forEach((prop) => {
-    if (obj[prop]) newObj[prop] = obj[prop]
-  })
-  return newObj
-}
-
 const has_any_projected_value = (projection) => {
   for (const stat of all_projected_fantasy_stats) {
     const value = projection[stat]
@@ -18,28 +10,17 @@ const has_any_projected_value = (projection) => {
   return false
 }
 
-const weightProjections = ({ projections, weights = [], userId, week }) => {
+// The weighting core, over a projection set the caller has ALREADY narrowed to
+// one period. It is period-blind on purpose: the season set comes from
+// `season_projections_index`, which carries no `week` column at all, so a week
+// comparison here would be `undefined === undefined` on every row and would
+// silently pass for the wrong reason. Each period arm below states its own
+// narrowing rather than sharing a defaulted one.
+const weight_narrowed_projections = ({ sourceProjections, weights }) => {
   const data = {}
   for (const r of all_projected_fantasy_stats) {
     data[r] = []
   }
-
-  // Guard on userId first. Without it, an absent `user_id` on a source row
-  // matches an absent `userId` argument (undefined === undefined) and that row
-  // is treated as a user override, clobbering the consensus with one source's
-  // raw numbers. Production rows come from projections_index and carry an
-  // explicit null, which is why this never fired -- it is one column default
-  // away from doing so.
-  const userProjection =
-    (userId &&
-      projections.find((p) => p.user_id === userId && p.week === week)) ||
-    {}
-  const sourceProjections = projections.filter(
-    (p) =>
-      p.source_id &&
-      p.week === week &&
-      p.source_id !== external_data_sources.AVERAGE
-  )
 
   for (const projection of sourceProjections) {
     // An ALL-ZERO row is a placeholder, not a forecast that the player will do
@@ -98,7 +79,38 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
     result[r] = appliedWeight / totalWeight || 0
   }
 
-  return Object.assign({}, result, removeFalsy(userProjection))
+  return result
 }
+
+const is_real_source = (p) =>
+  p.source_id && p.source_id !== external_data_sources.AVERAGE
+
+// The per-week consensus. Its rows come from `projections_index`, which holds
+// every week side by side, so narrowing to one week is this function's job.
+//
+// There is no user-override arm. One existed until the user-projection feature
+// was removed: it took a `userId`, found that user's row, and let it displace
+// the consensus stat by stat. Nothing has passed `userId` since, and
+// `projections_index.user_id` has been constant zero, so the arm could not fire.
+const weightProjections = ({ projections, weights = [], week }) =>
+  weight_narrowed_projections({
+    weights,
+    sourceProjections: projections.filter(
+      (p) => is_real_source(p) && p.week === week
+    )
+  })
+
+// The season-long consensus. Its input rows come from
+// `season_projections_index`, one row per (source_id, pid, season_year), so the
+// period narrowing is the QUERY's job and there is nothing left to filter on
+// here beyond excluding AVERAGE. Excluding AVERAGE is load-bearing rather than
+// tidy: this function's own output is written back to the same table under the
+// AVERAGE source_id, so without it each hourly run would feed the consensus its
+// own prior output and the board would drift toward a fixed point of itself.
+export const weight_season_projections = ({ projections, weights = [] }) =>
+  weight_narrowed_projections({
+    weights,
+    sourceProjections: projections.filter(is_real_source)
+  })
 
 export default weightProjections

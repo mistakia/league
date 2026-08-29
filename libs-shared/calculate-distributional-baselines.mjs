@@ -23,21 +23,20 @@ import { get_player_week_total } from './get-player-week-points.mjs'
 //
 // And it is not affordable. One 1000-draw pass over the real 2026 board (624
 // players, 90 slots) costs about 9 seconds. process-projections covers 23 league
-// formats plus each hosted league, and loops weeks 0 through the final week --
-// 19 weeks in the offseason. Applied to every week that is roughly 70 minutes
-// per run against an hourly cron. Season only is under 4 minutes.
+// formats plus each hosted league. Applied to every week of a season that is
+// roughly 70 minutes per run against an hourly cron. Season only is under 4
+// minutes -- which is why calculate-projection-values.mjs gives the season board
+// its own entry point, called once per board rather than once per week.
 //
-// Every measurement behind this rebuild was made on week 0. Applying it to the
-// weekly boards would ship an unmeasured change, so the weekly path keeps its
-// known bias rather than trading it for an unknown one.
-export const season_projection_week = 0
+// Every measurement behind this rebuild was made on the season board. Applying
+// it to the weekly boards would ship an unmeasured change, so the weekly path
+// keeps its known bias rather than trading it for an unknown one.
 
 // What the season board PUBLISHES under, on `player.pts_added` and
-// `player.market_salary`. Deliberately NOT the numeric 0 it dispatches on: a
-// period is not a week, and encoding one as a reserved week number in memory is
-// the same defect the dedicated period tables removed from the `week` column.
-// Keeping the two apart means `season_projection_week` selects the CODE PATH
-// while this selects the OUTPUT KEY, and only the first is a week.
+// `player.market_salary`, and what SELECTS it -- one token for both, now that
+// the numeric 0 it used to dispatch on is gone. A period is not a week, and
+// encoding one as a reserved week number was the same defect the dedicated
+// period tables removed from the `week` column.
 //
 // It is also what lets one vocabulary run end to end -- DB column, in-memory
 // aggregate key, API payload key and data-view field id all say `season` for
@@ -220,9 +219,9 @@ export const fill_starting_slots = ({ values, positions, slots }) => {
 // is pricing.
 //
 // This reads the SEASON board and takes no week. It used to take one and pass it
-// straight through as the points-map key, which was the same number
-// (`season_projection_week`) that selects this code path at the call site -- so
-// the week that DISPATCHED here was silently reused as the key to READ with.
+// straight through as the points-map key, which was the same number (a reserved
+// week 0) that selected this code path at the call site -- so the week that
+// DISPATCHED here was silently reused as the key to READ with.
 // Once the period split moved the season points to `points.season`, that key
 // matched nothing, every player fell through to the -999 sentinel, and
 // calculate-prices then early-returned on its positive-total guard without ever

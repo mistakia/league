@@ -1,0 +1,26 @@
+{
+  "name": "player league extended salary over market pre aggregated",
+  "description": "Pins the pre-aggregated shape of the two operands behind player_league_extended_salary_over_market: a roster-tag relation and a market-salary relation, each registered once as a CTE and LEFT JOINed on pid, read as plain qualified columns rather than as correlated scalar subqueries evaluated once per outer row. This column had NO fixture coverage before 2026-08-29 -- the only other extended-salary golden carries player_league_extended_salary, which shares the join group but neither operand. Three things here are load-bearing and none is guessable from the SQL alone. The joins must be LEFT: on production ~96% of players match no roster row and no market row, and an inner join would drop every one of them rather than rendering the cell blank. The roster relation must carry DISTINCT ON (pid) ordered by tid, because rosters_players is UNIQUE on (pid, week, season_year, tid) and not on lid, so one player can hold two week-0 rows in one league; the correlated form raised 21000 on that scope while an undeduplicated relation would silently duplicate the outer row. Neither read takes a COALESCE, unlike the career-year projection this follows: both correlated forms were plain scalar lookups returning NULL on no match, which is exactly what the LEFT JOIN yields. Executed coverage for the LEFT join and the de-duplication lives in test/data-views.extended-salary-over-market-pre-aggregation.spec.mjs; this fixture pins the SQL shape.",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_league_extended_salary_over_market"
+      },
+      {
+        "column_id": "player_league_extended_salary"
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "where": [],
+    "sort": [
+      {
+        "column_id": "player_league_extended_salary_over_market",
+        "desc": true
+      }
+    ],
+    "limit": 10
+  },
+  "expected_query": "with \"tb2c8cc1af7497269e002e2f50792efc9\" as (select distinct on (pid) pid, tag from rosters_players where lid = 1 and season_year = 2026 and week = 0 order by pid, tid), \"tcd9af7a78c24d007fa47bed1394bf6b8\" as (select pid, market_salary_positive from league_format_player_season_projection_values where league_format_id = 'genesis_10_team' and season_year = 2026) select \"player\".\"pid\", player.first_name, player.last_name, CASE WHEN tb2c8cc1af7497269e002e2f50792efc9.tag IN (1, 4) THEN \"tc24f628545c14fd008158b643b9284aa\".\"extended_salary\" - tcd9af7a78c24d007fa47bed1394bf6b8.market_salary_positive END AS player_league_extended_salary_over_market_0, \"tc24f628545c14fd008158b643b9284aa\".\"extended_salary\" AS \"extended_salary_0\", \"player\".\"primary_position\" from \"player\" left join \"tb2c8cc1af7497269e002e2f50792efc9\" on \"tb2c8cc1af7497269e002e2f50792efc9\".\"pid\" = \"player\".\"pid\" left join \"tcd9af7a78c24d007fa47bed1394bf6b8\" on \"tcd9af7a78c24d007fa47bed1394bf6b8\".\"pid\" = \"player\".\"pid\" left join (select \"rp\".\"pid\", CASE\n          WHEN rp.slot IN (12,15,16,17) THEN COALESCE(s.salary_paid, 0)\n          WHEN rp.tag = 2 THEN\n            CASE rp.player_position\n              WHEN 'QB' THEN COALESCE(ssn.franchise_tag_salary_quarterback, 0)\n              WHEN 'RB' THEN COALESCE(ssn.franchise_tag_salary_running_back, 0)\n              WHEN 'WR' THEN COALESCE(ssn.franchise_tag_salary_wide_receiver, 0)\n              WHEN 'TE' THEN COALESCE(ssn.franchise_tag_salary_tight_end, 0)\n              ELSE 0\n            END\n          WHEN rp.tag = 3 THEN COALESCE(s.salary_paid, 0)\n          ELSE COALESCE(s.salary_paid, 0) + (COALESCE(rp.extensions, 0) + 1) * 5\n        END AS extended_salary from \"rosters_players\" as \"rp\" left join \"roster_asset_holding\" as \"s\" on \"s\".\"player_id\" = \"rp\".\"pid\" and \"s\".\"lid\" = \"rp\".\"lid\" and \"s\".\"tid\" = \"rp\".\"tid\" and \"s\".\"asset_type\" = 1 and \"s\".\"period_end\" is null left join \"seasons\" as \"ssn\" on \"ssn\".\"lid\" = \"rp\".\"lid\" and \"ssn\".\"season_year\" = \"rp\".\"season_year\" where \"rp\".\"lid\" = 1 and \"rp\".\"season_year\" = 2026 and \"rp\".\"week\" = 0) as \"tc24f628545c14fd008158b643b9284aa\" on \"tc24f628545c14fd008158b643b9284aa\".\"pid\" = \"player\".\"pid\" group by player.first_name, player.last_name, CASE WHEN tb2c8cc1af7497269e002e2f50792efc9.tag IN (1, 4) THEN \"tc24f628545c14fd008158b643b9284aa\".\"extended_salary\" - tcd9af7a78c24d007fa47bed1394bf6b8.market_salary_positive END, \"tc24f628545c14fd008158b643b9284aa\".\"extended_salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 10",
+  "tags": ["player", "cte", "joins", "sorting", "parameters"],
+  "timeout_ms": 35000
+}

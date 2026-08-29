@@ -32,6 +32,7 @@ export { default as classify_restricted_free_agency_bid_outcome } from './classi
 export { default as get_restricted_free_agency_nominations } from './get-restricted-free-agency-nominations.mjs'
 export { default as getRoster } from './get-roster.mjs'
 export { default as get_player_projections } from './get-projections.mjs'
+export { default as get_season_projections } from './get-season-projections.mjs'
 export { default as getLeague } from './get-league.mjs'
 export { default as createLeague } from './create-league.mjs'
 export {
@@ -153,6 +154,11 @@ export { default as report_job } from './report-job.mjs'
 export { default as emit_signal, resolve_signal } from './emit-signal.mjs'
 export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
+export { default as check_season_projections_floor } from './check-season-projections-floor.mjs'
+export {
+  default as save_projections,
+  projection_periods
+} from './save-projections.mjs'
 export { default as record_projection_history } from './record-projection-history.mjs'
 export { default as grade_adp_import_run } from './grade-adp-import-run.mjs'
 export { summarize_adp_feed } from './grade-adp-import-run.mjs'

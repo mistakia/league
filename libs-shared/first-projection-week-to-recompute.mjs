@@ -20,25 +20,36 @@ import { current_season } from '#constants'
  * standing between that edit and leaked future information in a backtest is
  * this function and its spec.
  *
- * Past seasons return 0 because they are complete: there is no "current week"
+ * Past seasons return 1 because they are complete: there is no "current week"
  * to preserve, and a rebuild is expected to cover the whole season.
  *
- * NOT frozen by this bound, and NOT safe to treat as point-in-time:
- *   - week `0`. In the offseason `current_season.week` IS 0, so week 0 sits
- *     inside the recompute range and is rewritten every run. This return value
- *     is therefore also the SEASON PERIOD's write gate: the season projection
- *     row is written exactly while this is 0, which seals it at the start of
- *     week 1 and is what makes the season net -- a sum over weeks 1..18 --
- *     summable from a complete board.
- *   - the rest-of-season period, which is recomputed from the remaining weeks
- *     by construction.
+ * THIS BOUND IS NEVER 0, AND THAT IS A CONTRACT RATHER THAN A CLAMP.
+ * `projections_index.week` is a game week and nothing else: the season-long row
+ * lives in `season_projections_index`, which has no `week` column, and
+ * `CHECK (week >= 1)` makes 0 unwritable. A 0 here would build a row the table
+ * rejects.
+ *
+ * THIS IS NOT THE SEASON PERIOD'S WRITE GATE. It used to be, by accident -- the
+ * season board ran as iteration zero of the loop this bound seeds, so "the bound
+ * is 0" and "write the season row" were the same fact and neither was named. The
+ * season board now has its own entry point
+ * (calculate_season_projection_values) and its own seal condition, stated by the
+ * caller. Do not reintroduce a period meaning here.
+ *
+ * Still NOT frozen by this bound, and NOT safe to treat as point-in-time: the
+ * rest-of-season period, which is recomputed from the remaining weeks by
+ * construction.
+ *
+ * The current-season arm reads `active_fantasy_week` rather than flooring `week`
+ * inline; `local/no-week-reconstruction` forbids re-deriving that concept
+ * without naming it.
  *
  * See user:text/league/projection-history-system.md for the full semantic.
  *
  * @param {object} params
  * @param {number} params.year
- * @returns {number} first week to recompute, inclusive
+ * @returns {number} first week to recompute, inclusive; always >= 1
  */
 export default function first_projection_week_to_recompute({ year }) {
-  return year === current_season.year ? current_season.week : 0
+  return year === current_season.year ? current_season.active_fantasy_week : 1
 }

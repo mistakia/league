@@ -8,7 +8,8 @@ import {
   is_main,
   find_player_row,
   report_job,
-  record_projection_history
+  record_projection_history,
+  projection_periods
 } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -127,7 +128,11 @@ const run = async ({ dry = false } = {}) => {
       'season_type'
     ])
     .merge()
-  await record_projection_history({ inserts, generated_at })
+  await record_projection_history({
+    inserts,
+    period: projection_periods.WEEK,
+    generated_at
+  })
 }
 
 const main = async () => {
