@@ -133,10 +133,38 @@ const WRITER_ROOTS = ['api', 'libs-server', 'scripts', 'jobs', 'private']
 // Schema
 // ---------------------------------------------------------------------------
 
+// The column list ends at a `)` in column ZERO, and what follows it is a TAIL
+// clause -- `WITH (...)` storage parameters, or `PARTITION BY RANGE (...)` --
+// before the statement's semicolon. Terminating on `\n);` instead treats a
+// tailed table as unterminated: the non-greedy body runs on to the NEXT table's
+// `\n);`, so the tailed table is recorded under its own name with its
+// SUCCESSOR's columns, and the successor is not recorded at all.
+//
+// That is not hypothetical and it is not a partitioning-only concern. Six
+// partitioned parents carried a tail for as long as they have been partitioned,
+// each silently swallowing its first partition, and the gate stayed green
+// because none of the seven pairs mattered. It went red the day a `WITH (...)`
+// landed on keeptradecut_valuations, whose successor is league_baselines: the
+// gate then reported keeptradecut_valuations as league-scoped via an `lid` it
+// does not have, and league_baselines as absent from a schema that defines it.
+// Two findings, both false, from one unanchored terminator.
+/**
+ * The tables `source` DECLARES, counted independently of `parse_schema`. The
+ * two disagreeing means the parser dropped one, which is the only way this gate
+ * can narrow its own subject without saying so.
+ */
+export const declared_table_names = (source) =>
+  [...source.matchAll(/^CREATE TABLE (?:IF NOT EXISTS )?public\.(\w+)/gm)].map(
+    (match) => match[1]
+  )
+
+export const unparsed_tables = ({ source, tables }) =>
+  declared_table_names(source).filter((table) => !(table in tables))
+
 export const parse_schema = (source) => {
   const tables = {}
   const table_re =
-    /CREATE TABLE (?:IF NOT EXISTS )?public\.(\w+)\s*\(([\s\S]*?)\n\);/g
+    /CREATE TABLE (?:IF NOT EXISTS )?public\.(\w+)\s*\(([\s\S]*?)\n\)[^;]*;/g
   let match
   while ((match = table_re.exec(source)) !== null) {
     const [, table, body] = match
@@ -458,6 +486,23 @@ const run = async () => {
     console.error('TOOLING ERROR: parsed no tables out of the schema file')
     process.exit(2)
   }
+
+  // The parse must account for EVERY `CREATE TABLE` in the file. A non-empty
+  // parse is not evidence it is complete: the terminator defect above dropped
+  // seven tables while leaving 309, which reads as a healthy parse and is the
+  // failure mode this gate is least able to notice from its own output. Anchor
+  // on a count derived independently of the parser, so a table shape nobody
+  // anticipated is a TOOLING ERROR rather than a silently narrowed subject.
+  const unparsed = unparsed_tables({ source: schema_source, tables })
+  if (unparsed.length) {
+    console.error(
+      `TOOLING ERROR: schema declares ` +
+        `${declared_table_names(schema_source).length} tables but the parse ` +
+        `recorded ${Object.keys(tables).length}; not parsed: ` +
+        unparsed.join(', ')
+    )
+    process.exit(2)
+  }
   if (!reset_list.length) {
     console.error('TOOLING ERROR: parsed no .del() calls out of the fixture')
     process.exit(2)
@@ -670,6 +715,63 @@ const run = async () => {
   controls.push([
     `tier 2 finds the parent-scoped children (${tier2.length}) and claims nothing without a seed (${seedless.size})`,
     tier2.length > 0 && seedless.size === 0
+  ])
+
+  // 7. The schema parser against both TAIL forms, on a planted fixture rather
+  //    than on the real schema. A tailed table must be recorded with its OWN
+  //    columns and must not consume its successor. Asserting the successor's
+  //    presence is the half that matters -- the swallow leaves the tailed table
+  //    present and merely WRONG, so a check that only counts names, or only
+  //    looks up the tailed table, passes while the defect is live.
+  const planted_schema = [
+    'CREATE TABLE public.control_tailed_with (',
+    '    pid character varying(25) NOT NULL',
+    ")\nWITH (autovacuum_vacuum_scale_factor='0.005');",
+    '',
+    'CREATE TABLE public.control_tailed_partition (',
+    '    pid character varying(25) NOT NULL',
+    ')\nPARTITION BY RANGE (season_year);',
+    '',
+    'CREATE TABLE public.control_successor (',
+    '    lid integer NOT NULL',
+    ');'
+  ].join('\n')
+  const planted = parse_schema(planted_schema)
+  controls.push([
+    'a WITH(...) table and a PARTITION BY table each keep their own columns ' +
+      'and do not swallow the table after them',
+    planted.control_tailed_with?.join() === 'pid' &&
+      planted.control_tailed_partition?.join() === 'pid' &&
+      planted.control_successor?.join() === 'lid'
+  ])
+
+  // 8. And the completeness invariant itself, driven red through the SAME
+  //    helper `run` uses, so the control cannot pass against a second copy of
+  //    the logic while `run`'s copy is broken.
+  //
+  //    A SINGLE-LINE table is the stand-in. The parser anchors the end of the
+  //    column list on a `)` in column zero, and a one-line statement has none.
+  //    pg_dump does not emit that shape today, which is exactly the point: this
+  //    invariant exists for the shape nobody anticipated, so it has to be
+  //    driven by one the parser genuinely cannot read. The first attempt here
+  //    used a stray semicolon inside a WITH(...) tail and STAYED GREEN -- the
+  //    terminator just stopped early and the table parsed fine.
+  const unterminatable =
+    'CREATE TABLE public.control_unterminatable (a integer);'
+  controls.push([
+    'a table the parser cannot terminate is named by the completeness ' +
+      'invariant rather than dropped from the subject',
+    unparsed_tables({
+      source: unterminatable,
+      tables: parse_schema(unterminatable)
+    }).includes('control_unterminatable')
+  ])
+
+  // And the same invariant must stay SILENT on a schema that parses cleanly,
+  // or it would report every day and mean nothing.
+  controls.push([
+    'the completeness invariant is silent on a schema that parses cleanly',
+    unparsed_tables({ source: planted_schema, tables: planted }).length === 0
   ])
 
   console.log('\nNEGATIVE CONTROL')
