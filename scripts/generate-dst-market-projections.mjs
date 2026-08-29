@@ -125,7 +125,6 @@ const generate_dst_market_projections = async ({
           .onConflict([
             'source_id',
             'pid',
-            'user_id',
             'week',
             'season_year',
             'season_type'

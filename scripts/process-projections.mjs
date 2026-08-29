@@ -309,7 +309,6 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
           .onConflict([
             'source_id',
             'pid',
-            'user_id',
             'week',
             'season_year',
             'season_type'

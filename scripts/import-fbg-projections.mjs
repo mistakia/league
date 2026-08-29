@@ -179,14 +179,7 @@ const run = async ({ dry_run = false } = {}) => {
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'user_id',
-        'week',
-        'season_year',
-        'season_type'
-      ])
+      .onConflict(['source_id', 'pid', 'week', 'season_year', 'season_type'])
       .merge()
     await record_projection_history({
       inserts,

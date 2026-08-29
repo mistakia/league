@@ -240,6 +240,7 @@ DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
+DROP INDEX IF EXISTS public.idx_projections_index_natural_key_no_user;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_history_pid;
 DROP INDEX IF EXISTS public.idx_projections_history_nfl_week_id;
@@ -4254,7 +4255,8 @@ CREATE TABLE public.keeptradecut_valuations (
     keeptradecut_value integer NOT NULL,
     position_rank smallint,
     overall_rank smallint
-);
+)
+WITH (autovacuum_vacuum_scale_factor='0.005', autovacuum_vacuum_threshold='2000', autovacuum_analyze_scale_factor='0.01');
 
 
 --
@@ -25924,7 +25926,8 @@ CREATE TABLE public.projections_index (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 )
 PARTITION BY RANGE (season_year);
 
@@ -25978,7 +25981,8 @@ CREATE TABLE public.projections_index_default (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26031,7 +26035,8 @@ CREATE TABLE public.projections_index_y2020 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26084,7 +26089,8 @@ CREATE TABLE public.projections_index_y2021 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26137,7 +26143,8 @@ CREATE TABLE public.projections_index_y2022 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26190,7 +26197,8 @@ CREATE TABLE public.projections_index_y2023 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26243,7 +26251,8 @@ CREATE TABLE public.projections_index_y2024 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26296,7 +26305,8 @@ CREATE TABLE public.projections_index_y2025 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -26349,7 +26359,8 @@ CREATE TABLE public.projections_index_y2026 (
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_index_week_is_fantasy_week CHECK ((week >= 1))
 );
 
 
@@ -32718,6 +32729,13 @@ CREATE INDEX idx_projections_history_pid ON ONLY public.projections_history USIN
 --
 
 CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (source_id, pid, user_id, week, season_year, season_type);
+
+
+--
+-- Name: idx_projections_index_natural_key_no_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_projections_index_natural_key_no_user ON ONLY public.projections_index USING btree (source_id, pid, week, season_year, season_type);
 
 
 --
@@ -45524,6 +45542,13 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 
 
 --
+-- Name: projections_index_default_source_id_pid_week_season_year_se_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_default_source_id_pid_week_season_year_se_idx ON public.projections_index_default USING btree (source_id, pid, week, season_year, season_type);
+
+
+--
 -- Name: projections_index_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45542,6 +45567,13 @@ CREATE INDEX projections_index_y2020_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2020_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2020_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2020 USING btree (source_id, pid, week, season_year, season_type);
 
 
 --
@@ -45566,6 +45598,13 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 
 
 --
+-- Name: projections_index_y2021_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2021_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2021 USING btree (source_id, pid, week, season_year, season_type);
+
+
+--
 -- Name: projections_index_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45584,6 +45623,13 @@ CREATE INDEX projections_index_y2022_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2022_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2022_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2022 USING btree (source_id, pid, week, season_year, season_type);
 
 
 --
@@ -45608,6 +45654,13 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 
 
 --
+-- Name: projections_index_y2023_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2023_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2023 USING btree (source_id, pid, week, season_year, season_type);
+
+
+--
 -- Name: projections_index_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45626,6 +45679,13 @@ CREATE INDEX projections_index_y2024_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2024_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2024_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2024 USING btree (source_id, pid, week, season_year, season_type);
 
 
 --
@@ -45650,6 +45710,13 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 
 
 --
+-- Name: projections_index_y2025_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2025_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2025 USING btree (source_id, pid, week, season_year, season_type);
+
+
+--
 -- Name: projections_index_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -45668,6 +45735,13 @@ CREATE INDEX projections_index_y2026_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2026_pid_idx ON public.projections_index_y2026 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2026_source_id_pid_week_season_year_seas_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2026_source_id_pid_week_season_year_seas_idx ON public.projections_index_y2026 USING btree (source_id, pid, week, season_year, season_type);
 
 
 --
@@ -58103,6 +58177,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
+-- Name: projections_index_default_source_id_pid_week_season_year_se_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_default_source_id_pid_week_season_year_se_idx;
+
+
+--
 -- Name: projections_index_y2020_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58121,6 +58202,13 @@ ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.pro
 --
 
 ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections_index_y2020_pid_idx;
+
+
+--
+-- Name: projections_index_y2020_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2020_source_id_pid_week_season_year_seas_idx;
 
 
 --
@@ -58145,6 +58233,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
+-- Name: projections_index_y2021_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2021_source_id_pid_week_season_year_seas_idx;
+
+
+--
 -- Name: projections_index_y2022_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58163,6 +58258,13 @@ ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.pro
 --
 
 ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections_index_y2022_pid_idx;
+
+
+--
+-- Name: projections_index_y2022_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2022_source_id_pid_week_season_year_seas_idx;
 
 
 --
@@ -58187,6 +58289,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
+-- Name: projections_index_y2023_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2023_source_id_pid_week_season_year_seas_idx;
+
+
+--
 -- Name: projections_index_y2024_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58205,6 +58314,13 @@ ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.pro
 --
 
 ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections_index_y2024_pid_idx;
+
+
+--
+-- Name: projections_index_y2024_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2024_source_id_pid_week_season_year_seas_idx;
 
 
 --
@@ -58229,6 +58345,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
+-- Name: projections_index_y2025_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2025_source_id_pid_week_season_year_seas_idx;
+
+
+--
 -- Name: projections_index_y2026_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -58247,6 +58370,13 @@ ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.pro
 --
 
 ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections_index_y2026_pid_idx;
+
+
+--
+-- Name: projections_index_y2026_source_id_pid_week_season_year_seas_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key_no_user ATTACH PARTITION public.projections_index_y2026_source_id_pid_week_season_year_seas_idx;
 
 
 --

@@ -1,0 +1,29 @@
+-- STATUS: PENDING
+-- Plain VACUUM ANALYZE on projections_index, after the week-0 delete, the CHECK,
+-- the narrow index build and the user_id drop.
+--
+-- Run with: yarn db:exec db/adhoc/2026-08-29-vacuum-projections-index-after-week-zero.sql --no-transaction
+-- VACUUM cannot run inside a transaction block, which is what that flag is for.
+--
+-- Two reasons, and the second is the one that would otherwise be silent.
+--
+-- The obvious one: the delete removes ~50,200 dead tuples across eight
+-- partitions and nothing reclaims them until a vacuum runs.
+--
+-- The one worth writing down: DELETE, ADD CONSTRAINT and DROP COLUMN all empty
+-- the VISIBILITY MAP for the pages they touch, and an empty visibility map costs
+-- index-only scans with no error and no plan change anyone would notice --
+-- queries just get slower. A sibling session found projections_index and every
+-- projections_history partition sitting at zero percent all-visible after the
+-- 2026-08-04 and 2026-08-08 rewrites, from exactly this cause. Reported by the
+-- session that vacuumed them on 2026-08-29.
+--
+-- ANALYZE as well as VACUUM, unlike that sweep: the delete removes 8 percent of
+-- the table and the planner's row estimates for `week` are now wrong at the low
+-- end -- there is no week 0 any more, and the histogram still says there is.
+--
+-- Plain VACUUM, never VACUUM FULL. FULL takes ACCESS EXCLUSIVE for the duration
+-- and rewrites the whole relation, which on a live table this size is an outage
+-- to reclaim disk nobody is short of.
+
+VACUUM (ANALYZE) public.projections_index;

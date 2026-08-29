@@ -91,7 +91,8 @@ const is_real_source = (p) =>
 // There is no user-override arm. One existed until the user-projection feature
 // was removed: it took a `userId`, found that user's row, and let it displace
 // the consensus stat by stat. Nothing has passed `userId` since, and
-// `projections_index.user_id` has been constant zero, so the arm could not fire.
+// `projections_index` no longer has a `user_id` column at all, so the arm has
+// nothing left to read even in principle.
 const weightProjections = ({ projections, weights = [], week }) =>
   weight_narrowed_projections({
     weights,

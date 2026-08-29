@@ -82,7 +82,7 @@ export default async function save_projections({
     .onConflict(
       is_season
         ? ['source_id', 'pid', 'season_year']
-        : ['source_id', 'pid', 'user_id', 'week', 'season_year', 'season_type']
+        : ['source_id', 'pid', 'week', 'season_year', 'season_type']
     )
     .merge()
 

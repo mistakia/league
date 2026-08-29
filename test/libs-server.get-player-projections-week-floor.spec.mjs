@@ -42,20 +42,12 @@ const seed_projection = async ({ week, season_type }) =>
     .insert({
       pid: TEST_PID,
       source_id: TEST_SOURCEID,
-      user_id: 0,
       week,
       season_year: current_season.year,
       season_type,
       passing_yards: 100
     })
-    .onConflict([
-      'source_id',
-      'pid',
-      'user_id',
-      'week',
-      'season_year',
-      'season_type'
-    ])
+    .onConflict(['source_id', 'pid', 'week', 'season_year', 'season_type'])
     .merge()
 
 const seed_season_projection = async () =>

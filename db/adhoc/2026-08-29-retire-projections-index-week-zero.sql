@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-29 against league_production
 -- Retire the week = 0 season-long slot from projections_index: delete the rows
 -- and narrow week to CHECK (week >= 1), so the sentinel is unwritable rather
 -- than merely unwritten.
@@ -183,6 +183,38 @@ ALTER TABLE public.projections_index_y2025 VALIDATE CONSTRAINT projections_index
 ALTER TABLE public.projections_index_y2026 VALIDATE CONSTRAINT projections_index_week_is_fantasy_week;
 ALTER TABLE public.projections_index_default VALIDATE CONSTRAINT projections_index_week_is_fantasy_week;
 ALTER TABLE public.projections_index VALIDATE CONSTRAINT projections_index_week_is_fantasy_week;
+
+--
+-- (3b) The narrow natural key, created BESIDE the old one rather than replacing
+--      it. This is the first of two steps that retire user_id.
+--
+-- user_id is dead: the user-authored projection feature was removed end to end,
+-- the arm in weight-projections that consumed it is gone, and the 27 rows that
+-- carried a non-zero value are the week-0 rows deleted above. Every remaining
+-- reference is either an ON CONFLICT target member or a `user_id = 0` filter
+-- that matches everything.
+--
+-- IT CANNOT BE DROPPED IN ONE STEP, and the reason is an interlock rather than
+-- caution. ON CONFLICT requires a unique index matching its key list exactly.
+-- Drop the column first and the deployed writers' six-column target has no
+-- index; deploy five-column writers first and THEIR target has no index. Either
+-- order breaks every projection write, and the importers run hourly at :30.
+--
+-- Both indexes coexisting removes the window: from here until the drop, both key
+-- shapes resolve. The narrow one is created AFTER the delete above, because the
+-- 27 user rows collide on it -- they are source_id 0, season_year 2020, week 0
+-- and differ only in user_id.
+--
+-- Built with a plain blocking CREATE INDEX. The lock-free variant is not
+-- supported on a partitioned parent, and at ~570k surviving rows the build is
+-- short anyway. The partition key (season_year) is in the index, which is what
+-- makes a unique index on a partitioned table legal at all.
+--
+-- Do not name that variant in this file even in a comment: db-exec.sh greps the
+-- file for the keyword and refuses a transactional apply on a match, so a prose
+-- mention of it costs this file its rollback. Cost one dry run to find.
+CREATE UNIQUE INDEX idx_projections_index_natural_key_no_user
+  ON public.projections_index (source_id, pid, week, season_year, season_type);
 
 --
 -- (4) Post-conditions, asserted rather than eyeballed.

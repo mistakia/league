@@ -123,8 +123,17 @@ const parse_tables = ({ sql, enum_names }) => {
   // that anchor runs past the end and swallows every COMMENT ON and CREATE
   // TABLE statement up to the next unpartitioned table's terminator. The tell
   // was 92 "unmapped pg types" whose text was comment prose.
-  const re =
-    /CREATE TABLE public\.([a-z0-9_]+) \(([\s\S]*?)\n\)(?:\s+PARTITION BY [^;]*)?;/g
+  //
+  // The tail is now ANY non-semicolon text rather than an enumerated list of
+  // clauses, because enumerating them means the next clause anyone adds
+  // reproduces the same swallow. It did: a table given per-table autovacuum
+  // storage parameters closes as `)\nWITH (autovacuum_... );`, the
+  // PARTITION-BY-only alternative did not match, and the lazy body ran on to
+  // the following table's terminator. league_baselines vanished from both
+  // generated files and keeptradecut_valuations grew phantom `WITH` and
+  // `CREATE` columns typed `unknown`. Nothing between `\n)` and the `;` is ever
+  // a column, so consuming it wholesale is both simpler and safe.
+  const re = /CREATE TABLE public\.([a-z0-9_]+) \(([\s\S]*?)\n\)[^;]*;/g
   let match
   const unknown_types = new Map()
 
@@ -313,10 +322,15 @@ const main = () => {
   // the run asserts a floor on what it found rather than trusting its own
   // silence. The counts are the schema's, not a hand-maintained number: they
   // only have to prove the walk reached real material.
+  // EXACT, not a 90 percent floor. The floor was the reason the swallow above
+  // shipped: losing one table out of ~150 scores 0.99 and passes, and the
+  // failure mode of this parser is losing tables one at a time as new clause
+  // shapes appear. Every declared table must be parsed, and there is no
+  // legitimate reason for one to be missing.
   const declared_tables = (sql.match(/^CREATE TABLE public\./gm) || []).length
-  if (tables.size < declared_tables * 0.9) {
+  if (tables.size !== declared_tables) {
     console.error(
-      `FAIL: parsed ${tables.size} tables from ${declared_tables} CREATE TABLE statements -- the column walk is not reaching the schema`
+      `FAIL: parsed ${tables.size} tables from ${declared_tables} CREATE TABLE statements -- the column walk is not reaching the whole schema`
     )
     process.exit(2)
   }

@@ -209,7 +209,6 @@ describe('API /leagues - format id update', function () {
     await knex('projections_index').insert({
       pid: projection_pid,
       source_id: external_data_sources.AVERAGE,
-      user_id: 0,
       week: 1,
       season_year: current_season.year,
       season_type: 'REG',

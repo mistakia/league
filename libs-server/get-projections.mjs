@@ -48,7 +48,6 @@ export default async function get_player_projections({
     .whereIn('pid', pids)
     .where({
       season_year,
-      user_id: 0,
       season_type
     })
     .where('week', '>=', week)

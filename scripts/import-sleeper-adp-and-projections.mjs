@@ -292,7 +292,7 @@ const import_sleeper_adp_and_projections = async ({
     // Check for duplicate projection_inserts
     const unique_keys = new Set()
     const duplicates = projection_inserts.filter((item) => {
-      const key = `${item.source_id}-${item.pid}-${item.user_id}-${item.week}-${item.season_year}`
+      const key = `${item.source_id}-${item.pid}-${item.week}-${item.season_year}`
       if (unique_keys.has(key)) {
         return true
       }
@@ -310,7 +310,6 @@ const import_sleeper_adp_and_projections = async ({
           (item) =>
             item.source_id === duplicates[0].source_id &&
             item.pid === duplicates[0].pid &&
-            item.user_id === duplicates[0].user_id &&
             item.week === duplicates[0].week &&
             item.season_year === duplicates[0].season_year
         )
