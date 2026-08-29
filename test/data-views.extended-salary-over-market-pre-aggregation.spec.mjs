@@ -23,6 +23,14 @@ const league_format_id = 'genesis_10_team'
 const market_cte = market_salary_cte_name({ league_format_id, year })
 const roster_cte = roster_tag_cte_name({ lid, year })
 
+// A second real catalog format, for the two-scope cases. The scope lives in the
+// relation name, so this must resolve to a different relation than market_cte.
+const other_league_format_id = 'ppr'
+const other_market_cte = market_salary_cte_name({
+  league_format_id: other_league_format_id,
+  year
+})
+
 const over_market_request = {
   columns: [
     { column_id: 'player_league_extended_salary_over_market' },
@@ -118,6 +126,46 @@ describe('Data Views - extended salary over market pre-aggregation', function ()
     expect(sql).to.include(`left join "${market_cte}" on`)
   })
 
+  // The idempotency guard is a Set keyed by relation NAME rather than a boolean
+  // flag, and this is the case that forces it. Two of these columns at
+  // different format scopes share one roster relation and need TWO market
+  // relations; a flag would register the first and let the second silently READ
+  // it, so the second column would price against the wrong format's market
+  // salary. Valid SQL, plausible numbers, wrong answer.
+  //
+  // Necessary but not sufficient on its own -- two relations is what makes two
+  // values POSSIBLE, not what makes them different. The executed spec below is
+  // the other half.
+  it('separates the market relations for two columns at different formats', async () => {
+    const { query } = await get_data_view_results_query({
+      columns: [
+        { column_id: 'player_league_extended_salary_over_market' },
+        {
+          column_id: 'player_league_extended_salary_over_market',
+          params: { league_format_id: other_league_format_id }
+        }
+      ],
+      prefix_columns: ['player_name'],
+      where: [],
+      sort: [],
+      offset: 0,
+      limit: 10
+    })
+    const sql = query.toString()
+
+    expect(market_cte).to.not.equal(other_market_cte)
+    for (const cte_name of [roster_cte, market_cte, other_market_cte]) {
+      expect(sql.split(`"${cte_name}" as (`)).to.have.lengthOf(2)
+      expect(sql.split(`left join "${cte_name}" on`)).to.have.lengthOf(2)
+    }
+
+    // The roster relation depends on lid and year only, so the two columns
+    // share it rather than duplicating it.
+    expect([...sql.matchAll(/left join "t[0-9a-f]{32}" on/g)]).to.have.lengthOf(
+      3
+    )
+  })
+
   describe('executed', function () {
     const rostered_pid = 'TEST-OVMK-000001'
     const unrostered_pid = 'TEST-OVMK-000002'
@@ -182,6 +230,15 @@ describe('Data Views - extended salary over market pre-aggregation', function ()
           league_format_id,
           season_year: year,
           market_salary_positive: 10.0
+        },
+        // Same player, second format, DIFFERENT market salary. Two columns
+        // scoped to the two formats must resolve these two numbers and not one
+        // of them twice.
+        {
+          pid: rostered_pid,
+          league_format_id: other_league_format_id,
+          season_year: year,
+          market_salary_positive: 3.0
         }
       ])
 
@@ -269,6 +326,68 @@ describe('Data Views - extended salary over market pre-aggregation', function ()
         0,
         'a NULL here means the FRANCHISE tag from the higher tid reached a row the relation should never have emitted'
       )
+    })
+
+    // The other half of the two-scope pair. Separate relations make two values
+    // POSSIBLE; only executing proves they are different. Collapse the two
+    // market relations onto one and both columns render the same number --
+    // valid SQL, correctly shaped, and wrong, which is the failure mode the
+    // structural assertion above cannot see.
+    it('resolves different market salaries for two columns at different formats', async () => {
+      const { query } = await get_data_view_results_query({
+        columns: [
+          { column_id: 'player_league_extended_salary_over_market' },
+          {
+            column_id: 'player_league_extended_salary_over_market',
+            params: { league_format_id: other_league_format_id }
+          }
+        ],
+        prefix_columns: ['player_name'],
+        where: [
+          { column_id: 'player_position', operator: 'IN', value: ['MLB'] }
+        ],
+        sort: [],
+        offset: 0,
+        limit: 100
+      })
+      const rows = await query.transacting(trx)
+      const row = rows.find((candidate) => candidate.pid === rostered_pid)
+
+      expect(row).to.exist
+      // Ladder salary 5, less each format's own seeded market salary.
+      expect(Number(row.player_league_extended_salary_over_market_0)).to.equal(
+        -7.5
+      )
+      expect(Number(row.player_league_extended_salary_over_market_1)).to.equal(
+        2
+      )
+    })
+
+    // The where-only path EXECUTED, not just emitted. A relation registered
+    // after the filter string is built still has to land in the query for
+    // Postgres to resolve the alias, and a text assertion cannot tell a
+    // resolvable reference from a 42P01.
+    it('filters on the pre-aggregated value with no column selected', async () => {
+      const { query } = await get_data_view_results_query({
+        columns: [],
+        prefix_columns: ['player_name'],
+        where: [
+          { column_id: 'player_position', operator: 'IN', value: ['MLB'] },
+          {
+            column_id: 'player_league_extended_salary_over_market',
+            operator: '>',
+            value: -10
+          }
+        ],
+        sort: [],
+        offset: 0,
+        limit: 100
+      })
+      const pids = (await query.transacting(trx)).map((row) => row.pid)
+
+      expect(pids).to.include(rostered_pid)
+      // NULL fails the predicate, which is what the correlated form did too.
+      expect(pids).to.not.include(unrostered_pid)
     })
   })
 })
