@@ -4,6 +4,7 @@ import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
 import get_playoff_seeding from './get-playoff-seeding.mjs'
 import compare_playoff_seed from './compare-playoff-seed.mjs'
+import { calculate_week_all_play_records } from './calculate-week-all-play-records.mjs'
 import { enable_debug_namespaces } from './enable-debug-namespaces.mjs'
 
 const log = debug('calculate-standings')
@@ -170,20 +171,20 @@ const calculateStandings = ({
 
     // calculate all play record
 
+    const week_all_play_records = calculate_week_all_play_records({
+      scores_by_team_id: new Map(
+        teams.map(({ team_id: tid }) => [
+          tid,
+          teamStats[tid].points.weeks[week]
+        ])
+      )
+    })
+
     for (const { team_id: tid } of teams) {
-      const scores = Object.values(teamStats)
-        .filter((p) => p.tid !== tid)
-        .map((p) => p.points.weeks[week])
-      const score = teamStats[tid].points.weeks[week]
-      teamStats[tid].stats.all_play_wins += scores.filter(
-        (p) => p < score
-      ).length
-      teamStats[tid].stats.all_play_losses += scores.filter(
-        (p) => p > score
-      ).length
-      teamStats[tid].stats.all_play_ties += scores.filter(
-        (p) => p === score
-      ).length
+      const record = week_all_play_records.get(tid)
+      teamStats[tid].stats.all_play_wins += record.all_play_wins
+      teamStats[tid].stats.all_play_losses += record.all_play_losses
+      teamStats[tid].stats.all_play_ties += record.all_play_ties
     }
   }
 

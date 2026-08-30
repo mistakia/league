@@ -37,6 +37,8 @@ export { default as is_before_extension_deadline } from './is-before-extension-d
 export { default as epoch_to_timestamptz } from './epoch-to-timestamptz.mjs'
 export { default as timestamptz_to_epoch } from './timestamptz-to-epoch.mjs'
 export { default as calculateStandings } from './calculate-standings.mjs'
+export { calculate_week_all_play_records } from './calculate-week-all-play-records.mjs'
+export { seeded_random } from './seeded-random.mjs'
 export { default as compare_playoff_seed } from './compare-playoff-seed.mjs'
 export { default as compare_all_play_seed } from './compare-all-play-seed.mjs'
 export { default as compare_at_large_berth } from './compare-at-large-berth.mjs'

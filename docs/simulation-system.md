@@ -100,7 +100,18 @@ Multi-week simulation that aggregates scores across weeks to determine champions
 
 ### Season Forecast
 
-Monte Carlo simulation of remaining regular season weeks to calculate playoff odds, division odds, and championship odds.
+Monte Carlo simulation of the remaining regular season weeks, producing playoff, bye, division and championship odds.
+
+**Every measure the league format reads moves with the simulation.** Each remaining week is simulated once into per-team, per-simulation score vectors (`raw_team_scores`), and each Monte Carlo iteration draws ONE index per week and reads every team's score at that index. Head-to-head outcome, `points_for` and the All Play record are therefore all consequences of the same draw, and the cross-team structure the correlated engine produced survives into the standings.
+
+That is not a refinement. The playoff format is configuration: league 1's 2026 season admits two teams directly on All Play win percentage and fills two at-large places on points for, so a forecast that copies those two measures from actuals and never updates them is not forecasting four of its six berths at all. It degenerates completely in the season's zero state, where every team's All Play record and points for are zero.
+
+Two consequences worth knowing:
+
+- **There is no separate inner simulation count.** Drawing an index per week samples with replacement from however many draws the vectors hold, so a smaller inner count would cap the effective sample size no matter how large the outer loop is. The week vectors are built at the forecast's own `n_simulations`.
+- **`division_odds` is null for a league with no divisions**, rather than a copy of the bye flag. A league with SOME teams divided is refused outright, following `generate-fantasy-league-schedule`: `get_playoff_seeding` treats a null division as one pseudo-division, whose "winner" is merely the best undivided team.
+
+`force_win_tid` / `force_loss_tid` condition on the draws where that outcome occurred rather than overwriting a result the scores contradict. A subset below 100 draws is refused, because resampling that few reports its own noise as a forecast; a matchup already decided by completed games returns the unconditional forecast instead of throwing.
 
 ### Playoff Forecast
 
@@ -308,6 +319,13 @@ node scripts/simulate-league-matchups.mjs --lid 1 --week 15 --year 2024
 node scripts/simulate-league-matchups.mjs --lid 1 --week 15 --year 2024 --save  # Save to DB
 node scripts/simulate-league-matchups.mjs --lid 1 --week 15 --year 2024 --json  # JSON output
 
+# Season forecast (playoff / bye / division / championship odds)
+node scripts/simulate-season-forecast.mjs --lid 1
+node scripts/simulate-season-forecast.mjs --lid 1 --seed 7 --json     # Reproducible
+node scripts/simulate-season-forecast.mjs --lid 1 --week 8 --year 2025  # Historical
+node scripts/simulate-season-forecast.mjs --lid 1 --force_loss_tid 3  # Conditional
+node scripts/simulate-season-forecast.mjs --lid 1 --save              # Write the forecast
+
 # Single matchup simulation
 node scripts/simulate-matchup.mjs --lid 1 --team_ids 1,2 --week 15 --year 2024
 
@@ -352,7 +370,8 @@ const championship = await simulation.simulate_championship({
 const forecast = await simulation.simulate_season_forecast({
   league_id: 1,
   year: 2024,
-  n_simulations: 10000
+  n_simulations: 10000,
+  seed: 7 // optional; makes the whole forecast reproducible
 })
 
 // Playoff forecasts
@@ -390,6 +409,9 @@ yarn test --reporter min test/simulation.data-loaders.spec.mjs
 
 # League-wide simulation tests
 yarn test --reporter min test/simulation.league-wide.spec.mjs
+
+# Season forecast (module level, runs with no database)
+yarn test --reporter min test/simulation.season-forecast.spec.mjs
 
 # All simulation tests
 yarn test --reporter min test/simulation*.spec.mjs

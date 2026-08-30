@@ -10,6 +10,15 @@ import { current_season } from '#constants'
 import { get_season_playoff_weeks } from '#libs-server'
 
 import { load_actual_playoff_points } from './load-actual-points.mjs'
+import {
+  find_highest_scoring_team,
+  select_wildcard_winners,
+  count_wildcard_survivors
+} from './resolve-playoff-bracket.mjs'
+import {
+  resolve_decided_division_winners,
+  decided_division_odds
+} from './resolve-division-odds.mjs'
 import { simulate_playoff_weeks_correlated } from './simulate-playoff-weeks.mjs'
 import { load_simulation_context } from './simulation-helpers.mjs'
 
@@ -35,50 +44,6 @@ const sum_actual_points = ({ actual_points, weeks, tid }) => {
   }
   return total
 }
-
-/**
- * The highest-scoring team, or null when there are no teams to compare.
- * The running maximum starts at -Infinity so a field of negative totals still
- * produces a winner, and the null is distinguished from a tid, which may be any
- * integer.
- *
- * @param {object} params
- * @param {number[]} params.team_ids - Teams to compare
- * @param {(tid: number) => number} params.get_score - Score for a team
- * @returns {number | null} Winning team ID
- */
-const find_highest_scoring_team = ({ team_ids, get_score }) => {
-  let max_score = -Infinity
-  let winner_tid = null
-  for (const tid of team_ids) {
-    const score = get_score(tid)
-    if (score > max_score) {
-      max_score = score
-      winner_tid = tid
-    }
-  }
-  return winner_tid
-}
-
-/**
- * The wildcard teams that advance: the highest scorers, one per pairing.
- *
- * @param {object} params
- * @param {number[]} params.wildcard_tids - Teams playing the wildcard round
- * @param {number} params.survivor_count - Teams that advance
- * @param {(tid: number) => number} params.get_score - Wildcard score for a team
- * @returns {number[]} Advancing team IDs
- */
-const select_wildcard_winners = ({
-  wildcard_tids,
-  survivor_count,
-  get_score
-}) =>
-  wildcard_tids
-    .map((tid) => ({ tid, score: get_score(tid) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, survivor_count)
-    .map((r) => r.tid)
 
 /**
  * Resolve the forecast to a decided champion: the winner takes all the odds.
@@ -131,11 +96,10 @@ export async function simulate_wildcard_forecast({
 
   const { playoff_format } = await load_simulation_context({ league_id, year })
   const { playoff_team_count, bye_count } = playoff_format
-  // One winner per wildcard pairing. The championship round is the byes plus
-  // these, which is what championship_team_count asserts further down.
-  const wildcard_survivor_count = Math.floor(
-    (playoff_team_count - bye_count) / 2
-  )
+  const wildcard_survivor_count = count_wildcard_survivors({
+    playoff_team_count,
+    bye_count
+  })
 
   // The playoff weeks are per-league configuration on the season row, the same
   // source the caller dispatches on. Hardcoding 15/16/17 forecasts weeks the
@@ -186,13 +150,35 @@ export async function simulate_wildcard_forecast({
     season_year: year
   })
 
+  // Division winners are decided by the completed regular season, so they need
+  // every team's final standings rather than the playoff field's. Reading them
+  // is what retires the old division_odds, which was the bye flag under a
+  // second name and had reported byes as division titles since 2ce9f7225.
+  const all_team_stats = await db('league_team_seasonlogs').where({
+    lid: league_id,
+    season_year: year
+  })
+  const all_team_stats_by_tid = {}
+  for (const stats of all_team_stats) {
+    all_team_stats_by_tid[stats.tid] = stats
+  }
+
+  const division_winner_tids = resolve_decided_division_winners({
+    teams: all_teams,
+    team_stats_by_tid: all_team_stats_by_tid,
+    playoff_format
+  })
+
   // Initialize results
   const result = {}
   for (const team of all_teams) {
     result[team.team_id] = {
       tid: team.team_id,
       playoff_odds: team_stats.some((t) => t.tid === team.team_id) ? 1.0 : 0.0,
-      division_odds: bye_tids.includes(team.team_id) ? 1.0 : 0.0,
+      division_odds: decided_division_odds({
+        division_winner_tids,
+        team_id: team.team_id
+      }),
       bye_odds: bye_tids.includes(team.team_id) ? 1.0 : 0.0,
       championship_wins: 0
     }
@@ -379,9 +365,10 @@ export async function simulate_championship_forecast({
 
   const { playoff_format } = await load_simulation_context({ league_id, year })
   const { bye_count } = playoff_format
-  const wildcard_survivor_count = Math.floor(
-    (playoff_format.playoff_team_count - bye_count) / 2
-  )
+  const wildcard_survivor_count = count_wildcard_survivors({
+    playoff_team_count: playoff_format.playoff_team_count,
+    bye_count
+  })
   // Byes plus the wildcard survivors, which is one winner per wildcard pairing.
   const championship_team_count = bye_count + wildcard_survivor_count
 
@@ -397,7 +384,8 @@ export async function simulate_championship_forecast({
     season_year: year
   })
 
-  // Load team stats to identify which seeds received a bye
+  // Load team stats to identify which seeds received a bye, and to resolve the
+  // division winners the completed regular season decided.
   const team_stats_list = await db('league_team_seasonlogs').where({
     lid: league_id,
     season_year: year
@@ -407,6 +395,12 @@ export async function simulate_championship_forecast({
   for (const stats of team_stats_list) {
     team_stats_by_tid[stats.tid] = stats
   }
+
+  const division_winner_tids = resolve_decided_division_winners({
+    teams: all_teams,
+    team_stats_by_tid,
+    playoff_format
+  })
 
   // Initialize results
   const result = {}
@@ -423,7 +417,10 @@ export async function simulate_championship_forecast({
     result[team.team_id] = {
       tid: team.team_id,
       playoff_odds: all_playoff_tids.includes(team.team_id) ? 1.0 : 0.0,
-      division_odds: has_bye ? 1.0 : 0.0,
+      division_odds: decided_division_odds({
+        division_winner_tids,
+        team_id: team.team_id
+      }),
       bye_odds: has_bye ? 1.0 : 0.0,
       championship_wins: 0
     }

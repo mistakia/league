@@ -67,7 +67,7 @@ const at_large_comparators = {
  * @param {number} [params.head_to_head_berth_count] - how many places below the
  *   byes go to the best remaining teams on the standings ladder before the
  *   at-large ladder fills the rest
- * @returns {{ seeded_tids: Array, playoff_tids: Array, bye_tids: Array, wildcard_tids: Array }}
+ * @returns {{ seeded_tids: Array, playoff_tids: Array, bye_tids: Array, wildcard_tids: Array, division_winner_tids: Array }}
  */
 const get_playoff_seeding = ({
   teams,
@@ -219,7 +219,12 @@ const get_playoff_seeding = ({
     seeded_tids,
     playoff_tids,
     bye_tids: playoff_tids.slice(0, bye_count),
-    wildcard_tids: playoff_tids.slice(bye_count)
+    wildcard_tids: playoff_tids.slice(bye_count),
+    // Already derived above and previously discarded. A league with no
+    // divisions collapses into ONE pseudo-division keyed on null, so this
+    // returns a single "winner" that is merely the best team -- callers that
+    // mean division titles must establish the league HAS divisions first.
+    division_winner_tids: division_winners.map((team) => team.tid)
   }
 }
 

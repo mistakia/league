@@ -47,7 +47,8 @@ const log = debug('simulation:playoff-weeks')
  * @param {number} params.year - NFL year
  * @param {number} params.n_simulations - Number of simulations
  * @param {Map<number, Map<number, number>>} [params.locked_week_scores] - Map of week -> Map<tid, points> for completed weeks
- * @returns {Promise<object>} { raw_team_scores: Map<tid, number[]>, week_results: Object[] }
+ * @param {number} [params.seed] - Optional seed for reproducibility
+ * @returns {Promise<object>} { raw_team_scores: Map<tid, number[]>, raw_team_scores_by_week: Map<week, Map<tid, number[]>>, week_results: Object[] }
  */
 export async function simulate_playoff_weeks_correlated({
   league_id,
@@ -55,7 +56,8 @@ export async function simulate_playoff_weeks_correlated({
   weeks,
   year,
   n_simulations,
-  locked_week_scores = new Map()
+  locked_week_scores = new Map(),
+  seed
 }) {
   log(
     `Running correlated playoff simulation for ${team_ids.length} teams, weeks ${weeks.join(',')}`
@@ -154,7 +156,14 @@ export async function simulate_playoff_weeks_correlated({
 
   const week_results = []
 
+  // Per-week vectors alongside the running total. A caller resolving a BRACKET
+  // needs the rounds separately -- who survives the wildcard week is decided by
+  // that week alone -- and recovering the split here costs nothing, where a
+  // second call would repeat the whole shared load above.
+  const raw_team_scores_by_week = new Map()
+
   // Simulate each week
+  let week_seed = seed
   for (const week of weeks) {
     const rosters = all_rosters_by_week.get(week)
     const schedule = schedules.get(week)
@@ -249,12 +258,17 @@ export async function simulate_playoff_weeks_correlated({
       schedule,
       teams,
       n_simulations,
+      seed: week_seed,
       return_raw_scores: true,
       locked_scores: actual_points,
       game_environment,
       game_outcome_correlations,
       position_defaults: position_game_defaults
     })
+
+    raw_team_scores_by_week.set(week, week_result.raw_team_scores)
+
+    if (week_seed !== undefined) week_seed += 1000
 
     // Aggregate per-simulation scores across weeks
     for (const team_id of team_ids) {
@@ -280,5 +294,5 @@ export async function simulate_playoff_weeks_correlated({
 
   log(`Correlated playoff simulation complete`)
 
-  return { raw_team_scores, week_results }
+  return { raw_team_scores, raw_team_scores_by_week, week_results }
 }

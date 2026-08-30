@@ -10,7 +10,12 @@ const map_state_to_props = createSelector(
   get_teams_for_current_league,
   (app, teams) => {
     const list = teams.toList()
-    const sorted = list.sort((a, b) => b.division_odds - a.division_odds)
+    // Null-tolerant: an undivided league carries null on every team, and
+    // `null - null` is 0 rather than NaN, but an explicit floor keeps the
+    // comparator honest if one team is ever missing a value the others have.
+    const sorted = list.sort(
+      (a, b) => (b.division_odds ?? -1) - (a.division_odds ?? -1)
+    )
     return { teams: sorted }
   }
 )

@@ -272,28 +272,45 @@ export async function simulate_league_week({
   }
 
   // Aggregate player scores to fantasy team totals
-  const team_raw_scores = new Map()
+  const raw_team_scores = new Map()
   for (const [team_id, roster] of rosters) {
     const totals = new Array(n_simulations).fill(0)
+    const unscored_pids = []
 
     for (const pid of roster.player_ids) {
       const player_scores = player_raw_scores.get(pid)
-      if (player_scores) {
-        for (let sim = 0; sim < n_simulations; sim++) {
-          totals[sim] += player_scores[sim]
-        }
+
+      // A starter with no projection is dropped by simulate-nfl-game and used
+      // to be skipped here in silence, contributing zero. That merely perturbed
+      // a win probability while these vectors fed nothing else; they now feed
+      // points_for and All Play, which are the primary sort keys for four of
+      // this league's six berths, so a silent zero moves the seeding instead.
+      // Same no-fallback stance the projection load above already takes.
+      if (!player_scores) {
+        unscored_pids.push(pid)
+        continue
+      }
+
+      for (let sim = 0; sim < n_simulations; sim++) {
+        totals[sim] += player_scores[sim]
       }
     }
 
-    team_raw_scores.set(team_id, totals)
+    if (unscored_pids.length) {
+      throw new Error(
+        `team ${team_id} has ${unscored_pids.length} starter(s) with no simulated score in week ${week} of ${year}: ${unscored_pids.join(', ')}`
+      )
+    }
+
+    raw_team_scores.set(team_id, totals)
   }
 
   // Calculate matchup results
   const matchup_results = []
 
   for (const matchup of matchups) {
-    const home_scores = team_raw_scores.get(matchup.home_team_id)
-    const away_scores = team_raw_scores.get(matchup.away_team_id)
+    const home_scores = raw_team_scores.get(matchup.home_team_id)
+    const away_scores = raw_team_scores.get(matchup.away_team_id)
 
     if (!home_scores || !away_scores) {
       log(
@@ -335,6 +352,12 @@ export async function simulate_league_week({
     n_simulations,
     elapsed_ms,
     matchups: matchup_results,
+    // The per-team, per-simulation score vectors the win probabilities above
+    // were derived from. Index i is one coherent joint realization of the whole
+    // league's week, so a consumer that reads every team at the same index
+    // keeps the cross-team structure the correlated draw produced -- which the
+    // probabilities alone have already collapsed away.
+    raw_team_scores,
     team_count: rosters.size,
     player_count: player_ids_array.length,
     nfl_games_simulated: games_map.size,

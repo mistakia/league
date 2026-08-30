@@ -12,6 +12,15 @@ import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryDivisionOdds({ teams, tid }) {
+  // A league with no Divisions has no division odds, and the forecast now says
+  // so with a null rather than writing the bye flag into the column. Rendering
+  // it anyway put an identical percentage on screen twice, since this panel
+  // sits directly above Bye Odds.
+  const has_division_odds = teams.some(
+    (t) => t.division_odds !== null && t.division_odds !== undefined
+  )
+  if (!has_division_odds) return null
+
   const team = teams.find((t) => t.team_id === tid) || new Team()
   const rank = teams.findIndex((t) => t.team_id === tid) + 1
   const items = []
