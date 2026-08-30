@@ -480,6 +480,98 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   })
 })
 
+describe('import-plays-nfl-v1 conditional upsert change predicate', function () {
+  // nfl_plays.updated advanced on every import pass whether or not any value
+  // changed, so it carried no signal about the play data and could not key the
+  // finalization watermark guard. The predicate below is what makes the column
+  // mean "last changed"; these cases pin the two exclusions that make it work,
+  // because either one silently reverts the mechanism to unconditional
+  // rewriting while still looking correct.
+
+  // Loaded lazily for the same submodule reason as the block above.
+  const load_module = () => import('../libs-server/build-plays-merge.mjs')
+
+  it('omits updated from the comparison', async () => {
+    const { build_plays_change_predicate } = await load_module()
+    const predicate = build_plays_change_predicate('nfl_plays', [
+      { esbid: 1, play_id: 2, updated: 1700000000, quarter: 1 }
+    ])
+
+    // updated carries a fresh timestamp on every pass, so including it would
+    // report a change every time and suppress nothing.
+    expect(predicate.toString()).to.not.include('updated')
+  })
+
+  it('compares drive_sequence against its coalesce merge target', async () => {
+    const { build_plays_change_predicate } = await load_module()
+    const predicate = build_plays_change_predicate('nfl_plays', [
+      { esbid: 1, play_id: 2, drive_sequence: null }
+    ])
+
+    // Comparing against bare EXCLUDED."drive_sequence" would read an untagged
+    // feed value as a change on every poll.
+    expect(predicate.toString()).to.include(
+      'coalesce(EXCLUDED."drive_sequence", "nfl_plays"."drive_sequence")'
+    )
+    expect(predicate.toString()).to.not.include(', EXCLUDED."drive_sequence"')
+  })
+
+  it('compares each column against the value the merge would write', async () => {
+    const { build_plays_merge, build_plays_change_predicate } =
+      await load_module()
+    const rows = [
+      { esbid: 1, play_id: 2, drive_sequence: null, quarter: 1, updated: 1700 }
+    ]
+
+    const merge = build_plays_merge('nfl_plays', rows)
+    const predicate = build_plays_change_predicate('nfl_plays', rows).toString()
+
+    // Every merged column except updated appears on the predicate's incoming
+    // side spelled exactly as the merge writes it, so the two cannot drift.
+    for (const [column, value] of Object.entries(merge)) {
+      if (column === 'updated') continue
+      expect(predicate).to.include(value.toString())
+    }
+  })
+
+  it('is null-safe rather than using an equality comparison', async () => {
+    const { build_plays_change_predicate } = await load_module()
+    const predicate = build_plays_change_predicate('nfl_plays', [
+      { esbid: 1, play_id: 2, quarter: null }
+    ])
+
+    // A plain <> yields null for a null-to-null or null-to-value column, which
+    // would suppress a real write.
+    expect(predicate.toString()).to.include('is distinct from')
+  })
+
+  it('returns null when the batch carries no comparable column', async () => {
+    const { build_plays_change_predicate } = await load_module()
+
+    expect(
+      build_plays_change_predicate('nfl_plays', [{ updated: 1700 }])
+    ).to.equal(null)
+  })
+
+  it('renders into the ON CONFLICT DO UPDATE clause, not the outer statement', async () => {
+    const { build_plays_merge, build_plays_change_predicate } =
+      await load_module()
+    const db = (await import('#db')).default
+    const rows = [{ esbid: 1, play_id: 2, season_year: 2025, quarter: 1 }]
+
+    const sql = db('nfl_plays')
+      .insert(rows)
+      .onConflict(['esbid', 'play_id', 'season_year'])
+      .merge(build_plays_merge('nfl_plays', rows))
+      .where(build_plays_change_predicate('nfl_plays', rows))
+      .toString()
+
+    // A predicate that landed anywhere else would parse and run while gating
+    // nothing.
+    expect(sql).to.match(/do update set .* where .* is distinct from /)
+  })
+})
+
 describe('audit-drive-seq-coherence classification', function () {
   // Real production rows -- the distinct (esbid, quarter, drive_sequence) triples for
   // three games, one of each class, read 2026-07-24. A synthetic fixture cannot
