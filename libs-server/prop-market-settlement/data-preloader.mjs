@@ -131,6 +131,11 @@ const load_nfl_plays = async (esbids) => {
       'pass_yards',
       'rush_yards',
       'receiving_yards',
+      // Sack yardage for the net-yards team markets. A sack carries its loss in
+      // yards_gained and nothing in the three columns above, so a team total
+      // built from those alone is gross rather than the NFL's net figure.
+      'is_sack',
+      'yards_gained',
       // Play outcome flags used by count and first-scorer market logic
       'is_completion',
       'is_touchdown',

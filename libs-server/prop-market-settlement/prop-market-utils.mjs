@@ -228,18 +228,6 @@ export const create_selection_result = ({
 })
 
 /**
- * Format duration in human-readable format
- *
- * @param {number} ms - Duration in milliseconds
- * @returns {string} Formatted duration
- */
-export const format_duration = (ms) => {
-  if (ms < 1000) return `${ms}ms`
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
-  return `${(ms / 60000).toFixed(1)}min`
-}
-
-/**
  * Validate games have complete score data
  *
  * @param {Array<string>} esbids - Game IDs to validate

@@ -11,7 +11,6 @@ export {
 export { preload_game_data } from './data-preloader.mjs'
 export { write_selection_results_to_db } from './selection-result-writer.mjs'
 export {
-  format_duration,
   validate_games_with_data,
   fetch_markets_for_games
 } from './prop-market-utils.mjs'

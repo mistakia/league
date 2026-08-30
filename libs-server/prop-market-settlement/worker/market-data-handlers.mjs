@@ -421,8 +421,41 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       for (const play of plays) {
         total += calculate_metric_value(play, mapping) || 0
       }
+      if (mapping.net_of_sack_yards) {
+        total += this._sum_sack_yards(plays)
+      }
       return total
     }
+  }
+
+  /**
+   * Sum the sack yardage on a set of plays
+   *
+   * A sack carries its loss as a negative yards_gained and nothing in
+   * rush_yards, receiving_yards or pass_yards, so it reaches the metric through
+   * neither. The return is negative or zero and is ADDED to the gross total,
+   * which is what turns it into the NFL's net figure.
+   *
+   * @param {Array<object>} plays - Plays already filtered to the market's team and period
+   * @returns {number} Sack yardage, negative or zero
+   */
+  _sum_sack_yards(plays) {
+    let sack_yards = 0
+    for (const play of plays) {
+      if (play.is_sack !== true) {
+        continue
+      }
+      // A sack with no yardage loaded is a hole in the metric, not a zero-yard
+      // sack: settling past it understates the loss and grades the market high,
+      // which is the defect this whole path exists to remove.
+      if (play.yards_gained === null || play.yards_gained === undefined) {
+        throw new Error(
+          `Sack play in game ${play.esbid} has no yards_gained, so team net yards cannot be settled`
+        )
+      }
+      sack_yards += Number(play.yards_gained) || 0
+    }
+    return sack_yards
   }
 }
 

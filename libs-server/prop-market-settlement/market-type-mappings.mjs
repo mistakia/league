@@ -297,15 +297,23 @@ export const market_type_mappings = {
   },
 
   // Team yardage markets - full game (use NFL plays data)
+  //
+  // The combined rush+receiving totals carry net_of_sack_yards because the NFL
+  // books team total yards net: rushing yards plus PASSING yards after sack
+  // losses. The single-column rushing and receiving markets below must not
+  // carry it -- a sack is neither a rush nor a reception, and subtracting it
+  // from either one alone invents a loss the market never counted.
   [team_game_market_types.GAME_TEAM_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     metric_columns: ['rush_yards', 'receiving_yards'],
-    team_aggregate: true
+    team_aggregate: true,
+    net_of_sack_yards: true
   },
   [team_game_market_types.GAME_TEAM_ALT_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     metric_columns: ['rush_yards', 'receiving_yards'],
-    team_aggregate: true
+    team_aggregate: true,
+    net_of_sack_yards: true
   },
   [team_game_market_types.GAME_TEAM_ALT_RUSHING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
@@ -323,13 +331,15 @@ export const market_type_mappings = {
     handler: HANDLER_TYPES.NFL_PLAYS,
     metric_columns: ['rush_yards', 'receiving_yards'],
     team_aggregate: true,
-    half_filter: 1
+    half_filter: 1,
+    net_of_sack_yards: true
   },
   [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     metric_columns: ['rush_yards', 'receiving_yards'],
     team_aggregate: true,
-    half_filter: 1
+    half_filter: 1,
+    net_of_sack_yards: true
   },
   [team_game_market_types.GAME_TEAM_FIRST_HALF_RUSHING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
@@ -355,7 +365,8 @@ export const market_type_mappings = {
     handler: HANDLER_TYPES.NFL_PLAYS,
     metric_columns: ['rush_yards', 'receiving_yards'],
     team_aggregate: true,
-    quarter_filter: 1
+    quarter_filter: 1,
+    net_of_sack_yards: true
   },
   [team_game_market_types.GAME_TEAM_FIRST_QUARTER_RUSHING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,

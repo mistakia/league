@@ -18,10 +18,10 @@ import { preload_game_data } from '#libs-server/prop-market-settlement/data-prel
 import { write_selection_results_to_db } from '#libs-server/prop-market-settlement/selection-result-writer.mjs'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import {
-  format_duration,
   validate_games_with_data,
   fetch_markets_for_games
 } from '#libs-server/prop-market-settlement/prop-market-utils.mjs'
+import { format_duration } from '#libs-server/format-duration.mjs'
 import { update_market_settlement_status } from './update-market-settlement-status.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 

@@ -10,6 +10,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import debug from 'debug'
 
+import { format_duration } from '#libs-server/format-duration.mjs'
+
 const log = debug('import-reporting')
 
 /**
@@ -473,26 +475,6 @@ export const save_report_to_file = async (collector, output_dir = null) => {
   log(`Report saved to: ${filepath}`)
 
   return filepath
-}
-
-/**
- * Format duration in human-readable format
- */
-const format_duration = (ms) => {
-  if (ms < 1000) {
-    return `${ms}ms`
-  }
-  if (ms < 60000) {
-    return `${(ms / 1000).toFixed(1)}s`
-  }
-  if (ms < 3600000) {
-    const minutes = Math.floor(ms / 60000)
-    const seconds = Math.floor((ms % 60000) / 1000)
-    return `${minutes}m ${seconds}s`
-  }
-  const hours = Math.floor(ms / 3600000)
-  const minutes = Math.floor((ms % 3600000) / 60000)
-  return `${hours}h ${minutes}m`
 }
 
 /**
