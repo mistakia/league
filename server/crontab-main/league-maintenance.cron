@@ -3,6 +3,12 @@
 # Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-maintenance.cron)
 #
 # League
+#
+# Offset minute marks (3-48/15, 6-56/10, 1-56/5, ...) are DELIBERATE, not typos
+# for the round form. Every recurring cadence used to land on :00 and :30, which
+# put 22 jobs in one minute at midnight and 11 at 04:30. Spreading them across
+# residues drops the year's peak to 6. Before restoring any of these to */N,
+# re-run the peak check -- one "tidy" undoes the whole spread.
 
 ## Every Sunday at 4:00AM — verify named-catalog rows match DB config (replaces retired drift-detector slot)
 0 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-named-format-catalog.mjs >> /var/log/league/verify-named-format-catalog.log 2>&1
@@ -46,10 +52,10 @@
 ## load-bearing rather than cosmetic. 4:45 keeps it in its own slot in the
 ## keeptradecut morning chain (4:30 import, 4:45 here, 5:00 roster-asset-lineage,
 ## 5:15 calibrate-composite-market-value-sources, 5:45 generate-composite).
-45 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
+45 4 * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
 
 ## Every day at 4:30AM
-30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all >> /var/log/league/league-generate-league-team-player-seasonlogs.log 2>&1
+50 4 * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all >> /var/log/league/league-generate-league-team-player-seasonlogs.log 2>&1
 
 ## Every day at 9:00AM -- coverage oracle for keeptradecut_liquidity. That table
 ## is collected once per calendar day and read by nothing, so a sustained
@@ -59,10 +65,10 @@
 ## slots (12:30 and 20:30, league-imports.cron) have already had their chance at
 ## every day it counts. Fires only on 2+ CONSECUTIVE missing days -- a single
 ## missing day is what the recovery slots exist to absorb.
-0 9 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-keeptradecut-liquidity-coverage.mjs >> /var/log/league/audit-keeptradecut-liquidity-coverage.log 2>&1
+0 9 * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-keeptradecut-liquidity-coverage.mjs >> /var/log/league/audit-keeptradecut-liquidity-coverage.log 2>&1
 
 ## Every Monday at 5:00AM (with optimal-lineup pass)
-0 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
+30 5 * * 1 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
 
 ## Every day at 5:00AM. Backstop only since 2026-08-03 -- refresh-roster-asset-lineage.mjs
 ## below now rebuilds a league within a minute of any change to the walker's inputs.
@@ -71,7 +77,7 @@
 ## the fingerprint gaining it too would go stale silently, and this run reasserts
 ## canonical state regardless. Every run is a full per-league delete-and-rebuild
 ## inside one transaction; lid=1 takes 9-25s, dominated by the snapshot recompute.
-0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
+0 5 * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
 
 ## Every 5 minutes: rebuild any league whose lineage inputs changed. The lineage graph
 ## is read by the player_extended_salary data-view column, which renders a $0 salary
@@ -87,7 +93,7 @@
 ## itself cached for 5 minutes. Matches the cadence class of every other frequent
 ## league job. Raise it only for a consumer that reads the graph directly and needs
 ## sub-5-minute freshness.
-*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
+*/5 * * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
 
 ## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
 15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1
@@ -103,7 +109,7 @@
 ## claims each window exactly once via the league_notifications unique constraint, so
 ## running it every 5 minutes is idempotent. This also removes the dependence on the host
 ## clock matching the league timezone.
-*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
+1-56/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
 
 ## Announce the rookie draft's published slate to the announcements channel (every 10 minutes,
 ## year-round; self-gating). Posts the coming day's windows once per publication.
@@ -119,28 +125,28 @@
 ## row per invocation. This cadence was chosen to match notifications-draft.mjs, the other
 ## draft-clock poller, which is disabled as of 2026-08-30 (see league-imports.cron) -- so this is
 ## now the only one running, and the */10 stands on its own reasoning above.
-*/10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-draft-slate.mjs >> /var/log/league/announce-draft-slate.log 2>&1
+6-56/10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-draft-slate.mjs >> /var/log/league/announce-draft-slate.log 2>&1
 
 ## Process restricted free agency bids (check every 5 minutes, year-round; self-gating).
 ## Same reasoning as above: each bid's processing time is derived from its own window and
 ## falls restricted_free_agency_processing_lead_hours before the next announcement, so
 ## processing always strictly precedes the next nomination. Bids not yet due are skipped.
-*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
+2-57/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
 
 ## Reset stale RFA tags (defense-in-depth) — daily at 5am, year-round. Idempotent: preserves any tag=4 backed by an un-cancelled current-year bid in restricted_free_agency_bids.
 ## NOT month-pinned. The window it guards moves with the offseason schedule: a Feb-May pin could not see the 2026 RFA window at all once it shifted to August, so the guard was dark for the one period it exists to cover. The script self-gates cheaply.
-0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-player-restricted-free-agency-tags.mjs >> /var/log/league/reset-player-restricted-free-agency-tags.log 2>&1
+10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-player-restricted-free-agency-tags.mjs >> /var/log/league/reset-player-restricted-free-agency-tags.log 2>&1
 
 ## Announce free agency period start (check every 30 minutes in August and September)
-*/30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
+12-42/30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
 
 ## Process extensions at extension_deadline_at (check every 5 minutes, year-round; self-gating fires once per league per extension_deadline_at via league_notifications marker).
 ## NOT month-pinned. The deadline moves — a single-month pin (`5`) silently skipped the 2026 Jul-6 deadline and a 5-8 range would have skipped any shift past August. The gate is extension_deadline_at plus its 14-day auto-process retry tail (AUTO_PROCESS_WINDOW_DAYS in process-extensions.mjs), which the script evaluates itself in two cheap queries.
-*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
+3-58/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
 
 ## Expire protected practice squad designations at extension_deadline_at (check every 5 minutes, year-round). Same deadline as process-extensions above, so it runs at the same cadence; the two do not interact (extensions read active/reserve, this reads practice).
 ## NOT month-pinned, for the same reason the deadline moves. Needs no marker and no retry tail: the reset converges (PSP->PS, PSDP->PSD leaves nothing in scope), so a missed firing self-heals on the next one instead of expiring out of a window. Was scheduled NOWHERE until 2026-07-31 — it had run 4 times ever, all by hand, and league 1's 48 designations survived the 2026 deadline as a result.
-*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-protected-designation.mjs >> /var/log/league/reset-protected-designation.log 2>&1
+4-59/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-protected-designation.mjs >> /var/log/league/reset-protected-designation.log 2>&1
 
 # League Each Season Week
 
@@ -156,10 +162,10 @@
 0 7 1 2-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-seasons.mjs >> /var/log/league/generate-seasons.log 2>&1
 
 ## Create database partitions for upcoming season (At 00:00 on the 1st in May and July)
-0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/create-season-partitions.mjs >> /var/log/league/create-season-partitions.log 2>&1
+10 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/create-season-partitions.mjs >> /var/log/league/create-season-partitions.log 2>&1
 
 ## Every day at 0:00
-0 0 * * * job-wrapper.sh league-cleanup-puppeteer find /tmp -maxdepth 1 -name 'puppeteer*' -mtime +2 -exec rm -rf {} \; >> /var/log/league/league-cleanup-puppeteer.log 2>&1
+20 0 * * * job-wrapper.sh league-cleanup-puppeteer find /tmp -maxdepth 1 -name 'puppeteer*' -mtime +2 -exec rm -rf {} \; >> /var/log/league/league-cleanup-puppeteer.log 2>&1
 
 ## Check disk space every hour
 0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
@@ -172,7 +178,7 @@
 ## stop being tradeable, so the lag between window close and sweep is a window
 ## in which an expired pick can still be traded. Self-gates to one grouped
 ## query when no league has an outstanding pick past its deadline.
-30 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/close-expired-rookie-drafts.mjs >> /var/log/league/close-expired-rookie-drafts.log 2>&1
+50 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/close-expired-rookie-drafts.mjs >> /var/log/league/close-expired-rookie-drafts.log 2>&1
 
 
 

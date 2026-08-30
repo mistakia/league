@@ -3,9 +3,15 @@
 # Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-waivers.cron)
 #
 # Waivers - Poaching
+#
+# Offset minute marks (3-48/15, 6-56/10, 1-56/5, ...) are DELIBERATE, not typos
+# for the round form. Every recurring cadence used to land on :00 and :30, which
+# put 22 jobs in one minute at midnight and 11 at 04:30. Spreading them across
+# residues drops the year's peak to 6. Before restoring any of these to */N,
+# re-run the peak check -- one "tidy" undoes the whole spread.
 
 ## Process Poaching Waivers Every 15 Minutes (except at 15:00)
-*/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs >> /var/log/league/league-process-poaching-waivers.log 2>&1
+8-53/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs >> /var/log/league/league-process-poaching-waivers.log 2>&1
 
 ## Process Poaching Waivers Daily at 15:15
 15 15 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily >> /var/log/league/league-process-poaching-waivers-daily.log 2>&1

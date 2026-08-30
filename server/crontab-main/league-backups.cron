@@ -38,6 +38,12 @@
 #     stand-down and skips the source before any staleness math. So its 5-day
 #     window is inert. The backup itself is still covered by the content-freshness
 #     checks on base-storage; it is the runs-layer redundancy that is missing.
+#
+# Offset minute marks (3-48/15, 6-56/10, 1-56/5, ...) are DELIBERATE, not typos
+# for the round form. Every recurring cadence used to land on :00 and :30, which
+# put 22 jobs in one minute at midnight and 11 at 04:30. Spreading them across
+# residues drops the year's peak to 6. Before restoring any of these to */N,
+# re-run the peak check -- one "tidy" undoes the whole spread.
 
 # Full whole-DB dump (directory format, parallel) — Tuesday + Friday 08:00 UTC (off-peak)
 0 8 * * 2,5 JOB_SCHEDULE_ENTITY_URI=user:scheduled-command/league/league-backup-full.md job-wrapper.sh league-backup-full /bin/bash /root/league/scripts/postgres-backup.sh -f >> /var/log/league/league-postgres-backup.log 2>&1
@@ -46,7 +52,7 @@
 0 0 * * * job-wrapper.sh league-backup-user-timeseries /bin/bash /root/league/scripts/postgres-backup.sh >> /var/log/league/league-postgres-backup.log 2>&1
 
 # User dump — 15-minute checkpoint (latest overwritten in place) year-round
-*/15 * * * * job-wrapper.sh league-backup-user-checkpoint /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint >> /var/log/league/league-postgres-backup.log 2>&1
+3-48/15 * * * * job-wrapper.sh league-backup-user-checkpoint /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint >> /var/log/league/league-postgres-backup.log 2>&1
 
 # Scrubbed dev fixture — daily 00:23 UTC, latest overwritten in place.
 #
