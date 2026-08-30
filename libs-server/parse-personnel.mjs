@@ -4,16 +4,23 @@
 // _pp columns and are not produced by this parser.
 
 const OFF_LONG_RE = /(\d+)\s*(QB|RB|TE|WR|OL)\b/gi
-const DEF_LONG_RE = /(\d+)\s*(DL|LB|DB)\b/gi
-const SHORT_CODE_RE = /^[0-9]{2}\*?$/
+// The lookbehind is load-bearing, not defensive polish. Without it this pattern
+// matches the trailing `3DB` of the vendor's `0-3DB` and reports { dl: 0, lb: 0,
+// db: 3 } -- so deleting the package softmap alone would NOT have stopped that
+// vocabulary being parsed, it would only have moved which line did it. A count
+// preceded by a digit, a hyphen or a plus is part of some other token, never a
+// position count of its own.
+const DEF_LONG_RE = /(?<![-+\d])(\d+)\s*(DL|LB|DB)\b/gi
 
-const DEF_SOFTMAP = {
-  nickel: { db: 5 },
-  dime: { db: 6 },
-  base: { db: 4 },
-  '0-3db': { db: 3 },
-  '7+db': { db: 7 }
-}
+// This parser once also accepted two shapes no NFL feed has ever emitted: the
+// two-digit offensive short code (11, 01*) and a defensive package softmap
+// (Nickel, Dime, Base, 0-3DB, 7+DB). Both arrived on 2026-04-26, three weeks
+// after the charting import first ran, and both existed only to make sense of
+// that vendor's vocabulary landing in these columns -- which was itself the
+// defect. With the mapping deleted and the contaminated rows repaired, no row
+// in nfl_plays or nfl_plays_current_week carries either shape, in any of the 27
+// seasons. They are deliberately not restored: accepting a vocabulary is what
+// would quietly re-admit it if a mapping were ever added back.
 
 export const PERSONNEL_OFFENSE_COLUMNS = {
   qb: 'offense_personnel_quarterback_count',
@@ -32,14 +39,6 @@ export const PERSONNEL_DEFENSE_COLUMNS = {
 const parse_offensive = (value) => {
   const trimmed = value.trim()
 
-  if (SHORT_CODE_RE.test(trimmed)) {
-    const rb = Number(trimmed[0])
-    const te = Number(trimmed[1])
-    const wr = 5 - rb - te
-    if (wr < 0) return null
-    return { qb: 1, rb, te, wr, ol: 5 }
-  }
-
   const counts = { qb: 1, rb: 0, te: 0, wr: 0, ol: 5 }
   let matched = false
   for (const match of trimmed.matchAll(OFF_LONG_RE)) {
@@ -51,8 +50,6 @@ const parse_offensive = (value) => {
 
 const parse_defensive = (value) => {
   const trimmed = value.trim()
-  const softmap = DEF_SOFTMAP[trimmed.toLowerCase()]
-  if (softmap) return { ...softmap }
 
   const counts = { dl: 0, lb: 0, db: 0 }
   let matched = false

@@ -26,25 +26,19 @@ describe('parse_personnel_string', function () {
       expect(result).to.deep.equal({ qb: 2, rb: 1, te: 0, wr: 2, ol: 6 })
     })
 
-    it('parses short-code format', function () {
-      expect(
-        parse_personnel_string({ value: '11', side: 'offense' })
-      ).to.deep.equal({ qb: 1, rb: 1, te: 1, wr: 3, ol: 5 })
-      expect(
-        parse_personnel_string({ value: '12', side: 'offense' })
-      ).to.deep.equal({ qb: 1, rb: 1, te: 2, wr: 2, ol: 5 })
-    })
-
-    it('parses short-code with asterisk variant', function () {
-      expect(
-        parse_personnel_string({ value: '01*', side: 'offense' })
-      ).to.deep.equal({ qb: 1, rb: 0, te: 1, wr: 4, ol: 5 })
-    })
-
-    it('rejects short-code that overflows wr', function () {
-      expect(parse_personnel_string({ value: '99', side: 'offense' })).to.equal(
+    // The two-digit short code is the charting vendor's vocabulary, not the NFL
+    // feed's, and accepting it here is what let that vendor's values become
+    // personnel counts on 3,507 rows. Zero rows in any of the 27 seasons carry
+    // the shape, so this asserts the parser refuses it rather than that it is
+    // merely unused -- an unused branch would re-admit the vocabulary the moment
+    // someone restored the mapping.
+    it('refuses the vendor two-digit short code', function () {
+      expect(parse_personnel_string({ value: '11', side: 'offense' })).to.equal(
         null
       )
+      expect(
+        parse_personnel_string({ value: '01*', side: 'offense' })
+      ).to.equal(null)
     })
 
     it('applies QB and OL defaults when absent', function () {
@@ -61,34 +55,19 @@ describe('parse_personnel_string', function () {
       ).to.deep.equal({ dl: 4, lb: 3, db: 4 })
     })
 
-    it('soft-maps Nickel', function () {
-      expect(
-        parse_personnel_string({ value: 'Nickel', side: 'defense' })
-      ).to.deep.equal({ db: 5 })
-    })
-
-    it('soft-maps Dime', function () {
-      expect(
-        parse_personnel_string({ value: 'Dime', side: 'defense' })
-      ).to.deep.equal({ db: 6 })
-    })
-
-    it('soft-maps Base', function () {
-      expect(
-        parse_personnel_string({ value: 'Base', side: 'defense' })
-      ).to.deep.equal({ db: 4 })
-    })
-
-    it('soft-maps 0-3DB', function () {
-      expect(
-        parse_personnel_string({ value: '0-3DB', side: 'defense' })
-      ).to.deep.equal({ db: 3 })
-    })
-
-    it('soft-maps 7+DB', function () {
-      expect(
-        parse_personnel_string({ value: '7+DB', side: 'defense' })
-      ).to.deep.equal({ db: 7 })
+    // Same story as the offensive short code: package names are the charting
+    // vendor's vocabulary, reaching 662 rows across the five values. 0-3DB and
+    // 7+DB are here for a second reason -- the long-form pattern matched the
+    // trailing `3DB` of `0-3DB` and returned { db: 3 } with the package softmap
+    // uninvolved, so this case fails on the regex alone if the anchor is ever
+    // relaxed, not just on the softmap being restored.
+    it('refuses vendor defensive package names', function () {
+      for (const value of ['Nickel', 'Dime', 'Base', '0-3DB', '7+DB']) {
+        expect(parse_personnel_string({ value, side: 'defense' })).to.equal(
+          null,
+          value
+        )
+      }
     })
   })
 
@@ -169,14 +148,14 @@ describe('add_personnel_counts_to_play_data', function () {
     expect(play).to.not.have.property('offense_personnel_running_back_count')
   })
 
-  it('does not overwrite dl/lb when defensive softmap label parses to db only', function () {
+  it('writes no counts for a vendor package name and leaves existing ones alone', function () {
     const play = {
       defense_personnel: 'Nickel',
       defense_personnel_defensive_line_count: 4,
       defense_personnel_linebacker_count: 2
     }
     add_personnel_counts_to_play_data(play)
-    expect(play.defense_personnel_defensive_back_count).to.equal(5)
+    expect(play).to.not.have.property('defense_personnel_defensive_back_count')
     expect(play.defense_personnel_defensive_line_count).to.equal(4)
     expect(play.defense_personnel_linebacker_count).to.equal(2)
   })
