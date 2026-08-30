@@ -2387,7 +2387,6 @@ export interface NflPlaysRow {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -2725,6 +2724,8 @@ export interface NflPlaysRow {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysCurrentWeekRow {
@@ -2807,7 +2808,6 @@ export interface NflPlaysCurrentWeekRow {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -3289,7 +3289,6 @@ export interface NflPlaysYear2000Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -3627,6 +3626,8 @@ export interface NflPlaysYear2000Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2001Row {
@@ -3709,7 +3710,6 @@ export interface NflPlaysYear2001Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -4047,6 +4047,8 @@ export interface NflPlaysYear2001Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2002Row {
@@ -4129,7 +4131,6 @@ export interface NflPlaysYear2002Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -4467,6 +4468,8 @@ export interface NflPlaysYear2002Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2003Row {
@@ -4549,7 +4552,6 @@ export interface NflPlaysYear2003Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -4887,6 +4889,8 @@ export interface NflPlaysYear2003Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2004Row {
@@ -4969,7 +4973,6 @@ export interface NflPlaysYear2004Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -5307,6 +5310,8 @@ export interface NflPlaysYear2004Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2005Row {
@@ -5389,7 +5394,6 @@ export interface NflPlaysYear2005Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -5727,6 +5731,8 @@ export interface NflPlaysYear2005Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2006Row {
@@ -5809,7 +5815,6 @@ export interface NflPlaysYear2006Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -6147,6 +6152,8 @@ export interface NflPlaysYear2006Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2007Row {
@@ -6229,7 +6236,6 @@ export interface NflPlaysYear2007Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -6567,6 +6573,8 @@ export interface NflPlaysYear2007Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2008Row {
@@ -6649,7 +6657,6 @@ export interface NflPlaysYear2008Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -6987,6 +6994,8 @@ export interface NflPlaysYear2008Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2009Row {
@@ -7069,7 +7078,6 @@ export interface NflPlaysYear2009Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -7407,6 +7415,8 @@ export interface NflPlaysYear2009Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2010Row {
@@ -7489,7 +7499,6 @@ export interface NflPlaysYear2010Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -7827,6 +7836,8 @@ export interface NflPlaysYear2010Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2011Row {
@@ -7909,7 +7920,6 @@ export interface NflPlaysYear2011Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -8247,6 +8257,8 @@ export interface NflPlaysYear2011Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2012Row {
@@ -8329,7 +8341,6 @@ export interface NflPlaysYear2012Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -8667,6 +8678,8 @@ export interface NflPlaysYear2012Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2013Row {
@@ -8749,7 +8762,6 @@ export interface NflPlaysYear2013Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -9087,6 +9099,8 @@ export interface NflPlaysYear2013Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2014Row {
@@ -9169,7 +9183,6 @@ export interface NflPlaysYear2014Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -9507,6 +9520,8 @@ export interface NflPlaysYear2014Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2015Row {
@@ -9589,7 +9604,6 @@ export interface NflPlaysYear2015Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -9927,6 +9941,8 @@ export interface NflPlaysYear2015Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2016Row {
@@ -10009,7 +10025,6 @@ export interface NflPlaysYear2016Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -10347,6 +10362,8 @@ export interface NflPlaysYear2016Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2017Row {
@@ -10429,7 +10446,6 @@ export interface NflPlaysYear2017Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -10767,6 +10783,8 @@ export interface NflPlaysYear2017Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2018Row {
@@ -10849,7 +10867,6 @@ export interface NflPlaysYear2018Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -11187,6 +11204,8 @@ export interface NflPlaysYear2018Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2019Row {
@@ -11269,7 +11288,6 @@ export interface NflPlaysYear2019Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -11607,6 +11625,8 @@ export interface NflPlaysYear2019Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2020Row {
@@ -11689,7 +11709,6 @@ export interface NflPlaysYear2020Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -12027,6 +12046,8 @@ export interface NflPlaysYear2020Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2021Row {
@@ -12109,7 +12130,6 @@ export interface NflPlaysYear2021Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -12447,6 +12467,8 @@ export interface NflPlaysYear2021Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2022Row {
@@ -12529,7 +12551,6 @@ export interface NflPlaysYear2022Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -12867,6 +12888,8 @@ export interface NflPlaysYear2022Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2023Row {
@@ -12949,7 +12972,6 @@ export interface NflPlaysYear2023Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -13287,6 +13309,8 @@ export interface NflPlaysYear2023Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2024Row {
@@ -13369,7 +13393,6 @@ export interface NflPlaysYear2024Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -13707,6 +13730,8 @@ export interface NflPlaysYear2024Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2025Row {
@@ -13789,7 +13814,6 @@ export interface NflPlaysYear2025Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -14127,6 +14151,8 @@ export interface NflPlaysYear2025Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflPlaysYear2026Row {
@@ -14209,7 +14235,6 @@ export interface NflPlaysYear2026Row {
   is_return_touchdown: boolean | null
   touchdown_nfl_team: string | null
   return_nfl_team: string | null
-  has_charting_data: boolean | null
   yards_from_own_goal: number | null
   true_air_yards: number | null
   is_created_reception: boolean | null
@@ -14547,6 +14572,8 @@ export interface NflPlaysYear2026Row {
   offense_personnel_running_back_count_per_play: number | null
   offense_personnel_tight_end_count_per_play: number | null
   offense_personnel_wide_receiver_count_per_play: number | null
+  receiver_alignment_charting: string | null
+  coverage_defenders: number | null
 }
 
 export interface NflSnapsRow {

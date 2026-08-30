@@ -250,6 +250,21 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result).to.not.have.property('defense_personnel')
     })
 
+    // The vendor's formation is directional; the NFL feed's receiver_alignment
+    // is normalized strong-side-first and cannot express 1x3. A right-heavy
+    // value is therefore the control that proves this landed in the vendor's
+    // own column and was not normalized in transit.
+    it('maps formation to receiver_alignment_charting, not receiver_alignment', () => {
+      const result = map_charting_play_to_db_fields({ formation: '1x3' })
+      expect(result.receiver_alignment_charting).to.equal('1x3')
+      expect(result).to.not.have.property('receiver_alignment')
+    })
+
+    it('maps coverageDefenders to coverage_defenders', () => {
+      const result = map_charting_play_to_db_fields({ coverageDefenders: 7 })
+      expect(result.coverage_defenders).to.equal(7)
+    })
+
     it('does not write is_motion, which the vendor never returns', () => {
       const result = map_charting_play_to_db_fields({ isMotion: true })
       expect(result).to.not.have.property('is_motion')

@@ -144,7 +144,11 @@ const FIELD_MAPPINGS = {
   leadRun: 'is_lead_run',
   isOwnFumbleRecovery: 'is_own_fumble_recovery',
   playType: 'charting_play_type',
-  penaltyOutcome: 'charting_penalty_outcome'
+  penaltyOutcome: 'charting_penalty_outcome',
+  coverageDefenders: 'coverage_defenders',
+  // Deliberately NOT offense_formation, and deliberately NOT the NFL feed's
+  // receiver_alignment -- see the note in the transformation block below.
+  formation: 'receiver_alignment_charting'
 }
 
 export function map_charting_play_to_db_fields(source_play) {
@@ -196,11 +200,11 @@ export function map_charting_play_to_db_fields(source_play) {
     )
   }
 
-  // formation, offensivePersonnelBasic and defensivePersonnelPackage are
-  // deliberately NOT mapped. Each named an existing column owned by the NFL
-  // feed, and update_play is called here with no protected_fields, so this
-  // importer filled wherever that feed left NULL -- putting a second,
-  // incompatible vocabulary into one column:
+  // offensivePersonnelBasic and defensivePersonnelPackage are deliberately NOT
+  // mapped, and `formation` is deliberately mapped somewhere else. Each named
+  // an existing column owned by the NFL feed, and update_play is called here
+  // with no protected_fields, so this importer filled wherever that feed left
+  // NULL -- putting a second, incompatible vocabulary into one column:
   //
   //   offense_formation   directional NxN receiver splits against SHOTGUN /
   //                       SINGLEBACK / I_FORM. Measured 462 rows, 2025 only.
@@ -209,10 +213,12 @@ export function map_charting_play_to_db_fields(source_play) {
   //   defense_personnel   package names (Other, Base, Nickel, Dime) against
   //                       "2 DL, 4 LB, 5 DB". 2,004 rows, likewise 2025 only.
   //
-  // The vendor's formation is a real fact we want; it gets its own column
-  // rather than this one, because the encodings differ -- the NFL feed's
-  // receiver_alignment is normalized strong-side-first and never emits a
-  // right-heavy value, while this vendor emits 1x3 alongside 3x1.
+  // The two personnel vocabularies have no destination here and are dropped.
+  // The vendor's formation is a real fact we want, so it gets its own column,
+  // receiver_alignment_charting -- and NOT the NFL feed's receiver_alignment,
+  // which looks like the same vocabulary and is not: that column is normalized
+  // strong-side-first and never emits a right-heavy value, while this vendor is
+  // directional and emits 1x3 alongside 3x1.
   //
   // runSide -> run_location
   if ('runSide' in source_play && source_play.runSide !== undefined) {
