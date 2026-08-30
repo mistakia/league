@@ -257,6 +257,36 @@ const print_discovery_proposal = () => {
   console.log(JSON.stringify(proposal, null, 2))
 }
 
+// Whether this run can judge the hold-out list at all, in one place, because
+// both checks below share the precondition and answering it twice is how a
+// reader ends up with two mental models of one question.
+//
+// Neither check is meaningful outside a full run. Blindness compares observed
+// pairs against zero, and staleness infers a repair from an entry that stopped
+// failing -- but one (operation, status) can have several response shapes, and
+// an entry is held by the FAILING one, so a subset reaching only the conformant
+// shape reports a live entry as stale. The documented remedy for stale is to
+// delete the entry, and deleting a live one turns the full suite red.
+//
+// Two ways a run declares itself unable, and they are not redundant:
+//
+//   - LEAGUE_SUITE_SUBSET, set by the invoking script, covers a subset that DOES
+//     serve requests -- the false-stale case, which no amount of counting can
+//     detect from inside. Measured: test/trade.spec.mjs alone reports
+//     POST /api/leagues/{leagueId}/trades 200 stale.
+//   - Zero requests served needs no declaration, so it also covers a bare
+//     `mocha <file>` that never went through a script. This was the single
+//     largest source of false red here: every ad-hoc single-spec run reported
+//     "1 failing" on a spec that passed, which teaches every reader, human and
+//     agent, that a red suite is noise.
+const unjudgeable_reason = (report) => {
+  if (process.env.LEAGUE_SUITE_SUBSET) {
+    return 'LEAGUE_SUITE_SUBSET is set, so this run is a declared spec subset'
+  }
+  if (!report.request_count) return 'this run served zero HTTP requests'
+  return null
+}
+
 export const assert_holdout_is_current = () => {
   const report = get_response_validation_report()
   const failures = []
@@ -274,18 +304,12 @@ export const assert_holdout_is_current = () => {
     )
   }
 
-  // No request reached the app at all. Such a run cannot observe a pair and
-  // cannot judge validator reachability either way, so there is nothing here to
-  // be current or stale ABOUT. Failing it was the single largest source of
-  // false red in this suite: every ad-hoc single-spec run reported "1 failing"
-  // on a spec that passed, which teaches every reader, human and agent, that a
-  // red suite is noise. Announce, do not fail.
-  if (!report.request_count) {
+  const unjudgeable = unjudgeable_reason(report)
+  if (unjudgeable) {
     console.log(
-      '\nresponse validation hold-out NOT CHECKED -- this run served zero HTTP ' +
-        'requests, so it observed no (operation, status) pairs and cannot ' +
-        'judge the hold-out list or validator reachability. Run the full suite ' +
-        'for that verdict.'
+      `\nresponse validation hold-out NOT CHECKED -- ${unjudgeable}. Neither ` +
+        'a blindness report nor a stale-entry report is trustworthy from such ' +
+        'a run. Run the full suite for that verdict.'
     )
     return report
   }
