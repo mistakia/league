@@ -3,14 +3,18 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { is_main } from '#libs-server'
+import { load_wagers_from_files } from '#libs-server/wager-analysis/wager-data-loading.mjs'
 import {
-  load_wagers_from_files,
   build_selection_index,
   enrich_selections_from_db,
-  build_unique_selections,
+  build_unique_selections
+} from '#libs-server/wager-analysis/wager-data-processing.mjs'
+import {
   calculate_wager_summary,
-  calculate_props_summary,
-  analyze_prop_near_miss_combinations,
+  calculate_props_summary
+} from '#libs-server/wager-analysis/wager-calculations.mjs'
+import { analyze_prop_near_miss_combinations } from '#libs-server/wager-analysis/prop-near-miss-analysis.mjs'
+import {
   print_player_exposure_if_requested,
   print_summary_tables,
   print_round_robin_analysis_if_requested,
@@ -19,9 +23,9 @@ import {
   print_exposures_by_game,
   print_prop_combination_tables,
   print_individual_wagers_if_not_hidden,
-  print_fanatics_sets_if_requested,
-  handle_markdown_outputs
-} from '#libs-server/wager-analysis/index.mjs'
+  print_fanatics_sets_if_requested
+} from '#libs-server/wager-analysis/wager-console-output-handlers.mjs'
+import { handle_markdown_outputs } from '#libs-server/wager-analysis/wager-markdown-output-handlers.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('analyze-wagers')
