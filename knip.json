@@ -41,6 +41,18 @@
     // object rather than by a static import of each file.
     "eslint-rules/**/*.mjs",
 
+    // Core modules whose ONLY importer lives in private/. They are live, but
+    // private/ is a submodule no workflow checks out, so on the runner the
+    // importer does not exist and the module reads as unused -- a false
+    // positive that fails the gate CLOSED. Listing it here makes the local run
+    // and the CI run agree.
+    //   transform-play-route.mjs <- private/libs-server/ngs.mjs
+    // Verify a candidate before adding it: the importer must be in private/ AND
+    // there must be no public one. Check against a real private-less checkout
+    // (`git worktree add`, which does not populate submodules), NOT by adding
+    // private/** to `ignore` -- ignore still resolves the edge, absence does not.
+    "libs-server/transform-play-route.mjs",
+
     // The private submodule mirrors the public layout: private/scripts/ holds
     // runnable importers, so it is an entry surface exactly like scripts/.
     // Without this its libs-server/ modules read as unused too, because

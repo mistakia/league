@@ -23,7 +23,11 @@ Add another registry of any of those shapes and it gets an entry glob with a com
 
 ## `private/` is absent on the runner
 
-`private/` is a submodule no workflow checks out, so in CI it is an empty directory. That is benign for knip — the files are missing rather than unreferenced, and core may never statically import `#private`, so the rest of the graph is unchanged. It does mean CI covers everything except `private/`, which has to be checked from a local clone.
+`private/` is a submodule no workflow checks out, so in CI it is an empty directory. Mostly that is benign — the files are missing rather than unreferenced, and core may never statically import `#private`. It does mean CI covers everything except `private/`, which has to be checked from a local clone.
+
+**The exception is a core module whose ONLY importer lives in `private/`.** On the runner that importer does not exist, so the module reads as unused and the gate fails CLOSED on a live file. `libs-server/transform-play-route.mjs` is the known case — its sole importer is `private/libs-server/ngs.mjs` — and it carries an entry glob naming that importer. Before adding another, confirm the importer really is private-only.
+
+**Verify a private-absence claim against a real private-less checkout, not against an `ignore` pattern.** `git worktree add` does not populate submodules, which reproduces CI exactly. Adding `private/**` to `ignore` does NOT: knip still resolves the edge through the files on disk, so the run comes back green and the runner does not. That difference is what turned master red after the gate landed.
 
 ## The gate
 
