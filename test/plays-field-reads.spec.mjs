@@ -11,6 +11,10 @@ import * as chai from 'chai'
 import getPlayFromPlayStats from '#libs-shared/get-play-from-play-stats.mjs'
 import { enrich_fixed_drives } from '#libs-server/play-enrichment/fixed-drive-enrichment.mjs'
 import calculateStatsFromPlays from '#libs-shared/calculate-stats-from-plays.mjs'
+import {
+  build_plays_merge,
+  build_plays_change_predicate
+} from '#libs-server/upsert-plays.mjs'
 
 const expect = chai.expect
 
@@ -368,19 +372,13 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   // all-or-nothing enrichment rule into active data loss rather than a gap.
 
   // Imported from libs-server rather than from the importer script: that
-  // script's transitive graph reaches the private submodule's NGS module (via
-  // finalize-game.mjs -> import-nfl-games-ngs.mjs), and CI checks out without
-  // submodules, so importing it here passes locally and dies with
-  // ERR_MODULE_NOT_FOUND on the runner.
-  const load_build_plays_merge = async () => {
-    const module = await import('../libs-server/build-plays-merge.mjs')
-    return module.build_plays_merge
-  }
+  // script's transitive graph reaches the private submodule's NGS module, and
+  // CI checks out without submodules, so importing it here passes locally and
+  // dies with ERR_MODULE_NOT_FOUND on the runner.
 
   const merge_sql = (merge, column) => merge[column].toString()
 
   it('resolves drive_sequence as a coalesce against the stored value', async () => {
-    const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
       { esbid: 1, play_id: 2, season_year: 2025, drive_sequence: null }
     ])
@@ -391,7 +389,6 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   })
 
   it('leaves every other column on blanket-merge semantics', async () => {
-    const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
       {
         esbid: 1,
@@ -407,7 +404,6 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   })
 
   it('qualifies the coalesce with the table being written', async () => {
-    const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays_current_week', [
       { esbid: 1, play_id: 2, drive_sequence: null }
     ])
@@ -418,7 +414,6 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   })
 
   it('covers every column present on any row of the batch', async () => {
-    const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
       { esbid: 1, play_id: 2, drive_sequence: 4 },
       { esbid: 1, play_id: 3, drive_sequence: null, is_penalty: true }
@@ -433,8 +428,6 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   })
 
   it('survives a second pass whose batch carries null for a stored value', async () => {
-    const build_plays_merge = await load_build_plays_merge()
-
     // Pass 1: the whole game is untagged, so the enrichment computes drive_sequence
     // for every play and the upsert stores it.
     const first_pass = enrich_fixed_drives(two_half_game())
@@ -488,11 +481,7 @@ describe('import-plays-nfl-v1 conditional upsert change predicate', function () 
   // because either one silently reverts the mechanism to unconditional
   // rewriting while still looking correct.
 
-  // Loaded lazily for the same submodule reason as the block above.
-  const load_module = () => import('../libs-server/build-plays-merge.mjs')
-
   it('omits updated from the comparison', async () => {
-    const { build_plays_change_predicate } = await load_module()
     const predicate = build_plays_change_predicate('nfl_plays', [
       { esbid: 1, play_id: 2, updated: 1700000000, quarter: 1 }
     ])
@@ -503,7 +492,6 @@ describe('import-plays-nfl-v1 conditional upsert change predicate', function () 
   })
 
   it('compares drive_sequence against its coalesce merge target', async () => {
-    const { build_plays_change_predicate } = await load_module()
     const predicate = build_plays_change_predicate('nfl_plays', [
       { esbid: 1, play_id: 2, drive_sequence: null }
     ])
@@ -517,8 +505,6 @@ describe('import-plays-nfl-v1 conditional upsert change predicate', function () 
   })
 
   it('compares each column against the value the merge would write', async () => {
-    const { build_plays_merge, build_plays_change_predicate } =
-      await load_module()
     const rows = [
       { esbid: 1, play_id: 2, drive_sequence: null, quarter: 1, updated: 1700 }
     ]
@@ -535,7 +521,6 @@ describe('import-plays-nfl-v1 conditional upsert change predicate', function () 
   })
 
   it('is null-safe rather than using an equality comparison', async () => {
-    const { build_plays_change_predicate } = await load_module()
     const predicate = build_plays_change_predicate('nfl_plays', [
       { esbid: 1, play_id: 2, quarter: null }
     ])
@@ -546,16 +531,12 @@ describe('import-plays-nfl-v1 conditional upsert change predicate', function () 
   })
 
   it('returns null when the batch carries no comparable column', async () => {
-    const { build_plays_change_predicate } = await load_module()
-
     expect(
       build_plays_change_predicate('nfl_plays', [{ updated: 1700 }])
     ).to.equal(null)
   })
 
   it('renders into the ON CONFLICT DO UPDATE clause, not the outer statement', async () => {
-    const { build_plays_merge, build_plays_change_predicate } =
-      await load_module()
     const db = (await import('#db')).default
     const rows = [{ esbid: 1, play_id: 2, season_year: 2025, quarter: 1 }]
 

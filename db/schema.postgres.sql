@@ -5372,8 +5372,16 @@ CREATE TABLE public.nfl_games (
     sportradar_game_id character varying,
     sportradar_season_id character varying,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
-    pff_game_id bigint
+    pff_game_id bigint,
+    finalized_plays_updated_at timestamp with time zone
 );
+
+
+--
+-- Name: COLUMN nfl_games.finalized_plays_updated_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_games.finalized_plays_updated_at IS 'Watermark over nfl_plays.updated covered by the last successful finalization of this game. Read before finalization begins, written only on full success. Null means never finalized.';
 
 
 --

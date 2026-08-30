@@ -4,6 +4,11 @@ import db from '#db'
  * Build the ON CONFLICT update set for a plays upsert, protecting drive_sequence
  * from being erased by a null.
  *
+ * The merge, the change predicate and the upsert that pairs them live in one
+ * module on purpose: each is derived from the same column set, and a call site
+ * that took one without the other would write plays that look right and carry a
+ * meaningless `updated`. Keeping them apart is what would let them drift.
+ *
  * The live worker re-polls the full playlist for an in-progress game every 60
  * seconds and re-upserts every play, and getPlayData always sets the drive_sequence
  * key -- null for any play the NFL feed has not yet tagged with a

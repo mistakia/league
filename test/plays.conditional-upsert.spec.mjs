@@ -1,4 +1,4 @@
-/* global describe it before beforeEach */
+/* global describe it before beforeEach after */
 
 // The finalization watermark guard keys on nfl_plays.updated, so the whole
 // mechanism rests on one claim about real Postgres behavior: a second import
@@ -15,7 +15,7 @@
 import * as chai from 'chai'
 
 import db from '#db'
-import { upsert_plays } from '#libs-server/build-plays-merge.mjs'
+import { upsert_plays } from '#libs-server/upsert-plays.mjs'
 
 const expect = chai.expect
 
@@ -46,6 +46,12 @@ const max_updated = async () => {
 
 describe('nfl_plays conditional upsert against a real database', function () {
   before(async () => {
+    await db('nfl_plays').where({ esbid }).del()
+  })
+
+  // The suite shares one database across every spec file, so seeded plays left
+  // behind are read by anything that aggregates nfl_plays.
+  after(async () => {
     await db('nfl_plays').where({ esbid }).del()
   })
 

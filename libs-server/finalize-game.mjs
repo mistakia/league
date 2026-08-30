@@ -1,5 +1,6 @@
 import debug from 'debug'
 
+import db from '#db'
 import { report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
@@ -11,7 +12,6 @@ import {
 } from '#libs-server/stats-pipeline.mjs'
 
 import import_nfl_games_nfl from '#scripts/import-nfl-games-nfl.mjs'
-import import_nfl_games_ngs from '#scripts/import-nfl-games-ngs.mjs'
 import process_plays from '#scripts/process-plays.mjs'
 import generate_player_gamelogs from '#scripts/generate-player-gamelogs.mjs'
 import generate_player_snaps_for_week from '#scripts/generate-player-snaps.mjs'
@@ -34,12 +34,40 @@ enable_debug_namespaces('finalize-game')
  * - Market results processing
  * - Optional: Seasonlog and careerlog aggregate updates
  *
+ * IDEMPOTENCY. Finalizing a game whose play data has not changed since the last
+ * successful finalization is pure waste, and it was the dominant consumer of
+ * CPU on the production host -- every completed game re-finalized roughly 96
+ * times a day. The guard below skips that case.
+ *
+ * It lives HERE rather than at the call site because "do not redo completed
+ * work" is a property of finalization, not of whoever invokes it, and because
+ * the one production caller is not the only way in.
+ *
+ * The skip is of finalize_game, NOT of process_all_format_gamelogs. That step
+ * is week-scoped and shared across every game in the week, so guarding inside
+ * it would need separate per-week state and would break the case where a
+ * genuinely changed game must refresh its week.
+ *
+ * Three routes keep a legitimate re-finalization working:
+ *
+ * - Corrected play data, the common case, works with no intervention: an
+ *   importer writing a real change bumps nfl_plays.updated past the stored
+ *   watermark and the next pass finalizes. This depends on the conditional
+ *   upsert in upsert-plays.mjs -- without it `updated` advances on every
+ *   pass, carries no signal, and this guard would skip nothing.
+ * - A new scoring or league format changes nothing in nfl_plays and would be
+ *   wrongly skipped, so it takes force_finalize. Format onboarding is a
+ *   deliberate operator action rather than a poll, which is the shape an
+ *   explicit flag fits.
+ * - A change to the finalization pipeline itself uses the same flag.
+ *
  * @param {object} params
  * @param {string} params.esbid - Game identifier
  * @param {number} params.season_year - Season year
  * @param {number} params.week - Week number
  * @param {string} params.season_type - Season type (PRE, REG, POST)
  * @param {boolean} params.update_aggregates - If true, also update seasonlogs and careerlogs (default: false)
+ * @param {boolean} params.force_finalize - If true, finalize even when the play-data watermark says nothing changed (default: false)
  * @returns {Promise<object>} - Processing results
  */
 export const finalize_game = async ({
@@ -47,9 +75,45 @@ export const finalize_game = async ({
   season_year,
   week,
   season_type,
-  update_aggregates = false
+  update_aggregates = false,
+  force_finalize = false
 }) => {
   const start_time = Date.now()
+
+  // Read the watermark BEFORE the first step, not after the last one. A run
+  // averages 71 seconds; stamping the completion time would silently claim
+  // coverage of any play corrected during the run, and that correction would
+  // never re-finalize.
+  const { max: plays_updated_at } = await db('nfl_plays')
+    .where({ esbid })
+    .max('updated as max')
+    .first()
+
+  const game = await db('nfl_games')
+    .select('finalized_plays_updated_at')
+    .where({ esbid })
+    .first()
+  const finalized_through = game?.finalized_plays_updated_at || null
+
+  const watermark_is_current =
+    finalized_through !== null &&
+    (plays_updated_at === null || plays_updated_at <= finalized_through)
+
+  if (watermark_is_current && !force_finalize) {
+    log(
+      `Skipping game finalization for esbid: ${esbid}, play data unchanged since ${finalized_through.toISOString()}`
+    )
+    return {
+      esbid,
+      season_year,
+      week,
+      season_type,
+      skipped: true,
+      steps_completed: [],
+      steps_failed: []
+    }
+  }
+
   log(
     `Starting game finalization for esbid: ${esbid}, ${season_year} week ${week}`
   )
@@ -59,6 +123,7 @@ export const finalize_game = async ({
     season_year,
     week,
     season_type,
+    skipped: false,
     steps_completed: [],
     steps_failed: []
   }
@@ -68,8 +133,19 @@ export const finalize_game = async ({
     name: 'import_games',
     results,
     logger: log,
-    fn: () =>
-      Promise.all([
+    fn: async () => {
+      // Lazy, and load-bearing for the test suite: import-nfl-games-ngs.mjs
+      // statically imports #private/libs-server/ngs.mjs, and CI checks out
+      // without the submodule. A static import here makes every spec that
+      // touches finalize_game abort the ENTIRE mocha run at load with
+      // ERR_MODULE_NOT_FOUND rather than failing one test, which is why this
+      // module had no coverage at all. Deferring it costs nothing: this step
+      // needs the network and vendor credentials, so it only ever runs where
+      // the submodule is present anyway.
+      const { default: import_nfl_games_ngs } =
+        await import('#scripts/import-nfl-games-ngs.mjs')
+
+      return Promise.all([
         import_nfl_games_nfl({
           season_year,
           week,
@@ -78,6 +154,7 @@ export const finalize_game = async ({
         }),
         import_nfl_games_ngs({ season_year })
       ])
+    }
   })
 
   // Step 2: Process plays (enrich with player IDs, play types, etc.)
@@ -157,6 +234,15 @@ export const finalize_game = async ({
   // Report job completion
   const total_duration = Date.now() - start_time
   const success = results.steps_failed.length === 0
+
+  // Only a fully successful run may claim the watermark. A partial failure that
+  // marked the game done would strand whatever the failing step was meant to
+  // produce, with nothing to trigger a retry -- the next pass would skip.
+  if (success) {
+    await db('nfl_games')
+      .where({ esbid })
+      .update({ finalized_plays_updated_at: plays_updated_at })
+  }
 
   // Everything needed to name the failing step is in `results.steps_failed`
   // here. Reporting only a COUNT threw it away, and recovering it afterwards

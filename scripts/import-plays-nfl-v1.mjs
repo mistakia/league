@@ -19,7 +19,7 @@ import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
-import { upsert_plays } from '#libs-server/build-plays-merge.mjs'
+import { upsert_plays } from '#libs-server/upsert-plays.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   standardize_score_type,
@@ -36,6 +36,12 @@ const initialize_cli = () => {
       type: 'boolean',
       default: false,
       describe: 'Skip per-game finalization after END_GAME detection'
+    })
+    .option('force_finalize', {
+      type: 'boolean',
+      default: false,
+      describe:
+        'Re-finalize even when the play-data watermark says nothing changed. For a new scoring or league format, or a change to the finalization pipeline itself -- neither shows up as a change in nfl_plays'
     })
     .option('full_season', {
       type: 'boolean',
@@ -287,6 +293,7 @@ const importPlaysForWeek = async ({
   ignore_cache = false,
   force_update = false,
   skip_finalization = false,
+  force_finalize = false,
   token,
   dry_run = false,
   collector = null
@@ -610,13 +617,18 @@ const importPlaysForWeek = async ({
             `END_GAME detected for esbid: ${game.esbid}, triggering game finalization`
           )
           try {
-            await finalize_game({
+            const finalize_result = await finalize_game({
               esbid: game.esbid,
               season_year,
               week,
-              season_type
+              season_type,
+              force_finalize
             })
-            log(`Game finalization completed for esbid: ${game.esbid}`)
+            log(
+              finalize_result.skipped
+                ? `Game finalization skipped for esbid: ${game.esbid}, play data unchanged since the last finalization`
+                : `Game finalization completed for esbid: ${game.esbid}`
+            )
           } catch (finalize_err) {
             log(`Error finalizing game after END_GAME: ${finalize_err.message}`)
           }
@@ -694,6 +706,7 @@ const importPlaysForYear = async ({
   force_update = false,
   ignore_cache = false,
   skip_finalization = true,
+  force_finalize = false,
   token,
   dry_run = false
 } = {}) => {
@@ -731,6 +744,7 @@ const importPlaysForYear = async ({
       force_update,
       ignore_cache,
       skip_finalization,
+      force_finalize,
       token,
       dry_run
     })
@@ -755,6 +769,7 @@ const importAllPlays = async ({
   force_update,
   ignore_cache = false,
   skip_finalization = true,
+  force_finalize = false,
   dry_run = false
 } = {}) => {
   const nfl_games_result = await db('nfl_games')
@@ -784,6 +799,7 @@ const importAllPlays = async ({
         force_update,
         ignore_cache,
         skip_finalization,
+        force_finalize,
         token,
         dry_run
       })
@@ -797,6 +813,7 @@ const importAllPlays = async ({
         force_update,
         ignore_cache,
         skip_finalization,
+        force_finalize,
         token,
         dry_run
       })
@@ -810,6 +827,7 @@ const importAllPlays = async ({
         force_update,
         ignore_cache,
         skip_finalization,
+        force_finalize,
         token,
         dry_run
       })
@@ -841,6 +859,7 @@ const main = async () => {
         ignore_cache: argv.ignore_cache,
         force_update: argv.final,
         skip_finalization: argv.skip_finalization,
+        force_finalize: argv.force_finalize,
         dry_run
       })
     } else if (argv.all) {
@@ -864,6 +883,7 @@ const main = async () => {
           ignore_cache: argv.ignore_cache,
           force_update: argv.final,
           skip_finalization: argv.skip_finalization,
+          force_finalize: argv.force_finalize,
           dry_run
         })
       } else {
@@ -890,6 +910,7 @@ const main = async () => {
           ignore_cache: true,
           force_update: argv.final,
           skip_finalization: argv.skip_finalization,
+          force_finalize: argv.force_finalize,
           dry_run
         })
         all_games_skipped = result?.all_games_skipped
@@ -903,6 +924,7 @@ const main = async () => {
         ignore_cache: true,
         force_update: argv.final,
         skip_finalization: argv.skip_finalization,
+        force_finalize: argv.force_finalize,
         dry_run
       })
       log('end')
