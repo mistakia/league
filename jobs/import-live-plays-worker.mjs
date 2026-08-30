@@ -90,8 +90,11 @@ const run_import_iteration = async () => {
     //
     // What made the flag dangerous was the completed-game skip also reading
     // it. That conflation is gone: the skip now keys on force_update alone,
-    // and the finalization watermark guard is what keeps a repeat poll from
-    // redoing work.
+    // and since this worker passes no force_update, the skip is what stops a
+    // repeat poll from redoing a finished game -- it returns before
+    // finalize_game is ever called. The watermark guard inside finalize_game
+    // does NOT run on this path; it defends the --final/force_update path,
+    // which is the one that deliberately bypasses the skip.
     const result = await with_timeout(
       import_plays_nfl_v1({ ignore_cache: true }),
       ITERATION_TIMEOUT_MS
