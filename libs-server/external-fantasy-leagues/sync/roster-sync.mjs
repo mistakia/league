@@ -228,15 +228,19 @@ export class RosterSync {
 
     // An external player the mapper could not resolve is indistinguishable from
     // a player who left the roster, and the removal below is a hard delete of
-    // internal rows. Skip the whole team rather than let an upstream mapping gap
-    // erase a roster.
-    if (unmapped_external_player_ids.length > 0) {
-      return this._skip_roster({
+    // internal rows -- so an incomplete mapping must suppress the REMOVAL, not
+    // the whole roster. Writing the players that did resolve is safe either way,
+    // and abandoning the team instead makes one unresolvable player (an IDP, a
+    // DST, an unsigned rookie -- and `map_to_internal` also returns null for a
+    // caught exception) mean that team never syncs at all.
+    const player_mapping_is_complete = unmapped_external_player_ids.length === 0
+    if (!player_mapping_is_complete) {
+      this._record_roster_error({
         sync_stats_errors,
         sync_context,
         external_team_id,
         error_type: 'roster_player_mapping_missing',
-        error_message: `Unmapped external players on team ${internal_team_id}: ${unmapped_external_player_ids.join(', ')}`
+        error_message: `Unmapped external players on team ${internal_team_id}, skipping removals: ${unmapped_external_player_ids.join(', ')}`
       })
     }
 
@@ -246,15 +250,27 @@ export class RosterSync {
     await db.transaction(async (trx) => {
       const current_roster_rows = await trx('rosters_players')
         .where({ roster_id: roster_row.roster_id })
-        .select('pid')
-      const current_pids = new Set(
-        current_roster_rows.map((roster_player_row) => roster_player_row.pid)
+        .select('pid', 'slot')
+      const slot_by_current_pid = new Map(
+        current_roster_rows.map((roster_player_row) => [
+          roster_player_row.pid,
+          roster_player_row.slot
+        ])
       )
 
       const pids_to_add = [...slots_by_pid.keys()].filter(
-        (pid) => !current_pids.has(pid)
+        (pid) => !slot_by_current_pid.has(pid)
       )
-      const pids_to_remove = [...current_pids].filter(
+      // A player already on the roster whose external slot changed -- promoted
+      // off the taxi squad, moved to IR -- needs the new slot written. Adding
+      // only new pids would leave the mapped slot correct on the first sync and
+      // permanently stale on every one after it.
+      const pids_to_reslot = [...slots_by_pid.keys()].filter(
+        (pid) =>
+          slot_by_current_pid.has(pid) &&
+          slot_by_current_pid.get(pid) !== slots_by_pid.get(pid)
+      )
+      const pids_to_remove = [...slot_by_current_pid.keys()].filter(
         (pid) => !slots_by_pid.has(pid)
       )
 
@@ -289,7 +305,16 @@ export class RosterSync {
           .ignore()
       }
 
-      if (pids_to_remove.length > 0) {
+      for (const pid of pids_to_reslot) {
+        await trx('rosters_players')
+          .where({ roster_id: roster_row.roster_id, pid })
+          .update({ slot: slots_by_pid.get(pid) })
+      }
+
+      // Only when every external player resolved: a pid absent from an
+      // incomplete mapping may be present on the external roster under an id we
+      // failed to resolve, and this delete cannot be undone.
+      if (player_mapping_is_complete && pids_to_remove.length > 0) {
         await trx('rosters_players')
           .where({ roster_id: roster_row.roster_id })
           .whereIn('pid', pids_to_remove)
@@ -318,6 +343,33 @@ export class RosterSync {
     error_type,
     error_message
   }) {
+    this._record_roster_error({
+      sync_stats_errors,
+      sync_context,
+      external_team_id,
+      error_type,
+      error_message
+    })
+    return false
+  }
+
+  /**
+   * Record a sync error without abandoning the roster
+   *
+   * Separate from `_skip_roster` because not every problem is fatal to the
+   * roster: an unresolvable external player suppresses the removal step and
+   * still lets the resolvable players be written.
+   *
+   * @param {object} options - same shape as `_skip_roster`
+   * @private
+   */
+  _record_roster_error({
+    sync_stats_errors,
+    sync_context,
+    external_team_id,
+    error_type,
+    error_message
+  }) {
     log(error_message)
     sync_stats_errors.push(
       this.sync_utils.create_sync_error({
@@ -332,7 +384,6 @@ export class RosterSync {
         }
       })
     )
-    return false
   }
 
   /**
@@ -462,12 +513,30 @@ export class RosterSync {
   _extract_roster_players({ external_roster, platform }) {
     const player_id_key = this._get_platform_player_id_key({ platform })
 
-    return (external_roster.players || []).map((roster_player) => ({
-      external_player_id: roster_player.player_ids?.[player_id_key],
-      slot:
-        ROSTER_SLOT_BY_CATEGORY[roster_player.roster_slot_category] ??
-        roster_slot_types.BENCH
-    }))
+    return (external_roster.players || []).map((roster_player) => {
+      const { roster_slot_category } = roster_player
+      // A category outside the canonical vocabulary still benches the player,
+      // because refusing the whole roster over a slot label would be worse. It
+      // is logged rather than absorbed silently: ESPN emitted `STARTER` against
+      // a schema declaring `STARTING` for as long as this fallback hid it, and
+      // the same drift on `INJURED_RESERVE` would misfile an IR player onto the
+      // active roster with nothing to show for it.
+      if (
+        roster_slot_category != null &&
+        !(roster_slot_category in ROSTER_SLOT_BY_CATEGORY)
+      ) {
+        log(
+          `unknown roster_slot_category '${roster_slot_category}' from ${platform}, benching -- see canonical-roster-format.json`
+        )
+      }
+
+      return {
+        external_player_id: roster_player.player_ids?.[player_id_key],
+        slot:
+          ROSTER_SLOT_BY_CATEGORY[roster_slot_category] ??
+          roster_slot_types.BENCH
+      }
+    })
   }
 }
 

@@ -959,15 +959,15 @@ export default class EspnAdapter extends BaseAdapter {
     const lineup_slot_id = espn_entry.lineupSlotId
 
     const slot_map = {
-      0: { slot: 'QB', category: 'STARTER' },
-      2: { slot: 'RB', category: 'STARTER' },
-      4: { slot: 'WR', category: 'STARTER' },
-      6: { slot: 'TE', category: 'STARTER' },
-      16: { slot: 'DST', category: 'STARTER' },
-      17: { slot: 'K', category: 'STARTER' },
+      0: { slot: 'QB', category: 'STARTING' },
+      2: { slot: 'RB', category: 'STARTING' },
+      4: { slot: 'WR', category: 'STARTING' },
+      6: { slot: 'TE', category: 'STARTING' },
+      16: { slot: 'DST', category: 'STARTING' },
+      17: { slot: 'K', category: 'STARTING' },
       20: { slot: 'BENCH', category: 'BENCH' },
       21: { slot: 'IR', category: 'INJURED_RESERVE' },
-      23: { slot: 'FLEX', category: 'STARTER' }
+      23: { slot: 'FLEX', category: 'STARTING' }
     }
 
     return slot_map[lineup_slot_id] || { slot: 'BENCH', category: 'BENCH' }
