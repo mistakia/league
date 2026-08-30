@@ -47,16 +47,30 @@
 ## Offset from the games pass above (:00/:15/:30/:45) on purpose: the plays
 ## importer SKIPS any game with a null detail_v1_game_id, and that id is written
 ## by import-nfl-games-nfl.mjs. Games must land first or every game is skipped.
+##
+## All three preseason passes below share one flock. A run that overruns its
+## cadence used to stack on its successor -- more than seventy minutes of
+## overrun was observed on this ten-minute schedule on 2026-08-30 -- and the
+## three passes contend with each other as well as with themselves, since they
+## import the same season into the same tables. -n makes a late run exit
+## immediately rather than queue behind itself.
+##
+## --ignore_cache here bypasses the HTTP response cache and nothing else. It is
+## load-bearing: preseason has no live worker (see the comment below), so this
+## line IS the live-play import path, and the cached game-detail entry never
+## expires -- get_plays_v1 passes no max_age_ms and the cache route applies no
+## default -- so without it every poll after the first would replay one frozen
+## snapshot and the game would never acquire its END_GAME play.
 ## Every 10 minutes from 1pm-midnight ET on game days (Thu, Fri, Sat, Sun)
-7-57/10 13-23 * 7,8 4,5,6,0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
+7-57/10 13-23 * 7,8 4,5,6,0 NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-preseason.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
 
 ## Post-game finalization at 00:45 the morning after each preseason game day --
 ## catches games that ran past the last in-window pass (15 min after the 00:30
 ## games catch-up, same ordering constraint)
-45 0 * 7,8,9 5,6,0,1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
+45 0 * 7,8,9 5,6,0,1 NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-preseason.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
 
 ## Daily 05:00 force pass for late stat corrections (July, August)
-0 5 * 7,8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache --final >> /var/log/league/import-plays-preseason.log 2>&1
+0 5 * 7,8 * NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-preseason.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache --final >> /var/log/league/import-plays-preseason.log 2>&1
 
 ################################### PLAYOFF PLAY IMPORTING ########################################
 ## Import plays and finalize completed playoff games
@@ -65,15 +79,15 @@
 
 ## Saturday playoff games (Wild Card, Divisional rounds) - January and early February
 ## Every 10 minutes from 4pm-midnight ET (games start ~4:30pm on Saturdays)
-*/10 16-23 * 1 6 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache >> /var/log/league/import-plays-playoffs.log 2>&1
+*/10 16-23 * 1 6 NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-playoffs.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache >> /var/log/league/import-plays-playoffs.log 2>&1
 
 ## Sunday playoff games (all rounds including Super Bowl) - January and February
 ## Every 10 minutes from 1pm-midnight ET
-*/10 13-23 * 1,2 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache >> /var/log/league/import-plays-playoffs.log 2>&1
+*/10 13-23 * 1,2 0 NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-playoffs.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache >> /var/log/league/import-plays-playoffs.log 2>&1
 
 ## Post-game finalization runs - catch any games that finished late
 ## Run at 12:30am on days after playoff games (Sunday for Saturday games, Monday for Sunday games)
-30 0 * 1,2 0,1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache --final >> /var/log/league/import-plays-playoffs.log 2>&1
+30 0 * 1,2 0,1 NODE_ENV=production /usr/bin/flock -n /var/lock/league-import-plays-playoffs.lock /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache --final >> /var/log/league/import-plays-playoffs.log 2>&1
 
 ################################### WEEK FINALIZATION ########################################
 
