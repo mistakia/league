@@ -77,6 +77,97 @@ describe('LIBS-SERVER simulation data loaders', function () {
     })
   })
 
+  describe('merge_player_projections', function () {
+    // calculate-points falls back to the scoring registry defaults for any
+    // column a config omits, so a bare object scores every stat at its default
+    // rather than at zero. That is enough to exercise the merge.
+    const league_settings = {}
+
+    const merge = ({ player_ids, ...rest }) =>
+      simulation.merge_player_projections({
+        player_ids,
+        traditional_projections: new Map(),
+        traditional_stats: new Map(),
+        market_projections: new Map(),
+        player_info: new Map(),
+        league_settings,
+        ...rest
+      })
+
+    it('should report a market override as merged', () => {
+      const { projections, sources } = merge({
+        player_ids: ['WIDE-RECR-000001'],
+        traditional_stats: new Map([
+          ['WIDE-RECR-000001', { receiving_yards: 50, receptions: 4 }]
+        ]),
+        market_projections: new Map([
+          ['WIDE-RECR-000001', { stats: { receiving_yards: 80 } }]
+        ]),
+        player_info: new Map([['WIDE-RECR-000001', { position: 'WR' }]])
+      })
+
+      expect(sources.get('WIDE-RECR-000001')).to.equal('merged')
+      expect(projections.get('WIDE-RECR-000001')).to.be.a('number')
+    })
+
+    it('should report traditional-only stats as traditional', () => {
+      const { sources } = merge({
+        player_ids: ['WIDE-RECR-000002'],
+        traditional_stats: new Map([
+          ['WIDE-RECR-000002', { receiving_yards: 50, receptions: 4 }]
+        ]),
+        player_info: new Map([['WIDE-RECR-000002', { position: 'WR' }]])
+      })
+
+      expect(sources.get('WIDE-RECR-000002')).to.equal('traditional')
+    })
+
+    // DST and K short-circuit to null in merge_market_stats_with_traditional --
+    // they have no stat-level projections to merge -- and fall back to the
+    // pre-calculated projection. Presence in market_projections says nothing
+    // about how they were scored, which is what the source label used to guess
+    // from.
+    it('should report a DST in market_projections as traditional', () => {
+      const { projections, sources } = merge({
+        player_ids: ['KC'],
+        traditional_projections: new Map([['KC', 9.5]]),
+        market_projections: new Map([['KC', { stats: { anytime_td: 0.1 } }]]),
+        player_info: new Map([['KC', { position: 'DST' }]])
+      })
+
+      expect(projections.get('KC')).to.equal(9.5)
+      expect(sources.get('KC')).to.equal('traditional')
+    })
+
+    it('should report a kicker in market_projections as traditional', () => {
+      const { projections, sources } = merge({
+        player_ids: ['KICK-ERRR-000001'],
+        traditional_projections: new Map([['KICK-ERRR-000001', 7.25]]),
+        market_projections: new Map([
+          ['KICK-ERRR-000001', { stats: { anytime_td: 0.05 } }]
+        ]),
+        player_info: new Map([['KICK-ERRR-000001', { position: 'K' }]])
+      })
+
+      expect(projections.get('KICK-ERRR-000001')).to.equal(7.25)
+      expect(sources.get('KICK-ERRR-000001')).to.equal('traditional')
+    })
+
+    // A pid with neither a merge result nor a pre-calculated projection is
+    // dropped. Keeping sources in step with projections is what makes the
+    // caller's counts unable to disagree with the map they summarize.
+    it('should omit a player with no projection of either kind', () => {
+      const { projections, sources } = merge({
+        player_ids: ['MISS-INGG-000001'],
+        player_info: new Map([['MISS-INGG-000001', { position: 'WR' }]])
+      })
+
+      expect(projections.has('MISS-INGG-000001')).to.equal(false)
+      expect(sources.has('MISS-INGG-000001')).to.equal(false)
+      expect(sources.size).to.equal(projections.size)
+    })
+  })
+
   describe('POSITION_RANKS constant', function () {
     it('should contain expected position ranks', () => {
       expect(simulation_pure.POSITION_RANKS).to.be.an('object')

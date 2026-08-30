@@ -21,7 +21,9 @@ const log = debug('simulation:load-projection-data')
  * @param {object} params.market_data - Market projection data { stats: { ... }, projection }
  * @param {string} params.position - Player position (QB, RB, WR, TE, K, DST)
  * @param {object} params.league_settings - League scoring settings
- * @returns {object|null} { points, source, merged_stats } or null if no data
+ * @returns {{ points: number, source: 'merged'|'traditional', merged_stats: Record<string, number> }|null}
+ *   The scored merge, or null when the position has no stat-level projections to
+ *   merge (DST and K) or there is no projection data at all.
  */
 export function merge_market_stats_with_traditional({
   traditional_stats,

@@ -171,7 +171,7 @@ export async function simulate_league_week({
   ])
 
   // Merge projections: market stats override traditional stats where available
-  const { projections, market_merged_count } = merge_player_projections({
+  const { projections, sources } = merge_player_projections({
     player_ids: player_ids_array,
     traditional_projections,
     traditional_stats,
@@ -179,6 +179,10 @@ export async function simulate_league_week({
     player_info,
     league_settings
   })
+
+  const market_merged_count = [...sources.values()].filter(
+    (source) => source === 'merged'
+  ).length
 
   log(
     `Projections: ${traditional_projections.size} traditional, ${market_projections.size} market, ${market_merged_count} merged`

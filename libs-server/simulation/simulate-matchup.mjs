@@ -209,15 +209,19 @@ export async function simulate_matchup({
   const { projections: traditional_projections } = projections_result
 
   // Merge projections: market stats override traditional stats where available
-  const { projections, market_merged_count, traditional_only_count } =
-    merge_player_projections({
-      player_ids: pending_player_ids,
-      traditional_projections,
-      traditional_stats,
-      market_projections,
-      player_info,
-      league_settings
-    })
+  const { projections, sources } = merge_player_projections({
+    player_ids: pending_player_ids,
+    traditional_projections,
+    traditional_stats,
+    market_projections,
+    player_info,
+    league_settings
+  })
+
+  const market_merged_count = [...sources.values()].filter(
+    (source) => source === 'merged'
+  ).length
+  const traditional_only_count = sources.size - market_merged_count
 
   log(
     `Projections merged: ${market_merged_count} market-merged, ${traditional_only_count} traditional-only`

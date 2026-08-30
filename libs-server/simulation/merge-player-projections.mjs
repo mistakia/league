@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Merge market projections with traditional projections for simulation.
  * Extracts the common projection merging pattern used across simulation orchestrators.
@@ -10,9 +11,12 @@ import { merge_market_stats_with_traditional } from './load-projection-data.mjs'
  * Market stats override traditional stats where available, with traditional
  * stats filling in gaps (e.g., yards, receptions when only TD odds exist).
  *
- * Every tag here used to be a bare container name, with the real shapes written
- * in the prose beside them -- so the information existed and nothing checked it.
- * They are the same shapes, now stated where the checker can read them.
+ * `sources` reports how each pid was actually scored. It is the authority for
+ * that question: presence in `market_projections` does NOT imply a market
+ * override, since DST and K short-circuit to null in
+ * merge_market_stats_with_traditional and fall back to the pre-calculated
+ * projection. A pid appears in `sources` if and only if it appears in
+ * `projections`, so a caller counting one cannot disagree with the other.
  *
  * @param {object} params
  * @param {string[]} params.player_ids - Player IDs to merge projections for
@@ -22,7 +26,7 @@ import { merge_market_stats_with_traditional } from './load-projection-data.mjs'
  * @param {Map<string, { position: string, nfl_team?: string }>} params.player_info - Player info map
  * @param {import('#db/schema-types.js').LeagueScoringFormatsRow} params.league_settings - League
  *   scoring settings for point calculation.
- * @returns {{ projections: Map<string, number>, market_merged_count: number, traditional_only_count: number }}
+ * @returns {{ projections: Map<string, number>, sources: Map<string, 'merged'|'traditional'> }}
  */
 export function merge_player_projections({
   player_ids,
@@ -33,8 +37,7 @@ export function merge_player_projections({
   league_settings
 }) {
   const projections = new Map()
-  let market_merged_count = 0
-  let traditional_only_count = 0
+  const sources = new Map()
 
   for (const pid of player_ids) {
     const trad_stats = traditional_stats.get(pid)
@@ -51,24 +54,19 @@ export function merge_player_projections({
 
     if (merge_result) {
       projections.set(pid, merge_result.points)
-      if (merge_result.source === 'merged') {
-        market_merged_count++
-      } else {
-        traditional_only_count++
-      }
+      sources.set(pid, merge_result.source)
     } else {
       // Fall back to pre-calculated traditional projection if available
       const trad_points = traditional_projections.get(pid)
       if (trad_points !== undefined) {
         projections.set(pid, trad_points)
-        traditional_only_count++
+        sources.set(pid, 'traditional')
       }
     }
   }
 
   return {
     projections,
-    market_merged_count,
-    traditional_only_count
+    sources
   }
 }

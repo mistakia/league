@@ -319,8 +319,8 @@ const format_lineup_analysis = async ({
       let points_str
       if (points_data.is_actual) {
         points_str = `${points_data.points.toFixed(1)} actual`
-      } else if (points_data.source === 'market') {
-        points_str = `${points_data.points.toFixed(1)} market`
+      } else if (points_data.source === 'merged') {
+        points_str = `${points_data.points.toFixed(1)} market-merged`
       } else {
         points_str = `${points_data.points.toFixed(1)} proj`
       }

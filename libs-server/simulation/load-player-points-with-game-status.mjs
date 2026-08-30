@@ -115,23 +115,25 @@ export async function load_player_points_with_game_status({
   })
 
   // Merge projections: market stats override traditional stats where available
-  const { projections: merged_points } = merge_player_projections({
-    player_ids: pending_players,
-    traditional_projections,
-    traditional_stats,
-    market_projections,
-    player_info,
-    league_settings
-  })
+  const { projections: merged_points, sources: merged_sources } =
+    merge_player_projections({
+      player_ids: pending_players,
+      traditional_projections,
+      traditional_stats,
+      market_projections,
+      player_info,
+      league_settings
+    })
 
-  // Convert to format with source tracking
+  // Convert to format with source tracking. The label comes from the merge
+  // rather than from market_projections.has(pid): a DST or K can be present in
+  // the market data and still be scored from its pre-calculated projection.
   const merged_projections = new Map()
   for (const pid of pending_players) {
     if (merged_points.has(pid)) {
-      const market_had_data = market_projections.has(pid)
       merged_projections.set(pid, {
         points: merged_points.get(pid),
-        source: market_had_data ? 'merged' : 'traditional'
+        source: merged_sources.get(pid)
       })
     }
   }
