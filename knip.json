@@ -9,6 +9,21 @@
     // specifier that knip cannot resolve, so nothing links it to its callers.
     "app/core/worker/index.js",
 
+    // A worker_threads entry. scripts/process-market-results.mjs builds its path
+    // as a string and spawns it with `new Worker(worker_path)`, so no import
+    // links it to its caller. market-data-handlers.mjs is reached THROUGH it and
+    // needs no entry of its own. Same shape as the web worker above, and the
+    // same false positive: it reported as dead while being live.
+    "libs-server/prop-market-settlement/worker/market-calculator-worker.mjs",
+
+    // The emit contract for data-view generation, which has NO in-repo importer
+    // BY DESIGN. Generation is an agentic container session rather than a league
+    // module, so the consumer of generated_table_state_schema, SHAPE_PROMPT and
+    // AGENT_INSTRUCTIONS is the harness, outside this repo. Commit 8da73b1e1
+    // retired the orchestration and named these three as the kept contract; the
+    // file is a published surface, not a leftover.
+    "libs-server/data-views/generation/generate-data-view.mjs",
+
     "webpack/*.mjs",
     "eslint.config.mjs",
     "test/**/*.mjs",

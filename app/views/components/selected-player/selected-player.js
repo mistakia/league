@@ -22,9 +22,6 @@ import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
 import SelectedPlayerProjections from '@components/selected-player-projections'
 import StackedMetric from '@components/stacked-metric'
 import { current_season, nfl_player_status_display_names } from '#constants'
-/* import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
- * import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
- * import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits' */
 import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
 import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
@@ -452,11 +449,6 @@ export default function SelectedPlayer({
           <TabPanel value={4}>
             <SelectedPlayerProjections />
           </TabPanel>
-          {/* <TabPanel value={5}>
-              <SelectedPlayerTeamStats />
-              <SelectedPlayerTeamSituationSplits />
-              <SelectedPlayerTeamPositionSplits />
-              </TabPanel> */}
           <TabPanel value={5}>
             <SelectedPlayerPractice />
           </TabPanel>

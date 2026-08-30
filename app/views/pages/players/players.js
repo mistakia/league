@@ -17,7 +17,6 @@ import DraftRoundFilter from '@components/draft-round-filter'
 import ExperienceFilter from '@components/experience-filter'
 import WeekFilter from '@components/week-filter'
 import PlayersTimePeriodFilter from '@components/players-time-period-filter'
-// import AgeFilter from '@components/age-filter' TODO — fix
 import WatchlistFilter from '@components/watchlist-filter'
 import PageLayout from '@layouts/page'
 import PlayerHeader from '@components/player-header'
@@ -259,7 +258,6 @@ export default function PlayersPage({
             )}
             <div className='players__filters-row'>
               <ExperienceFilter />
-              {/* <AgeFilter /> */}
               <DraftRoundFilter />
               <NFLTeamsFilter />
               <CollegeFilter />

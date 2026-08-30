@@ -205,6 +205,25 @@ jobs:
       - name: bare-container JSDoc baseline
         run: yarn check:jsdoc-baseline
 
+      # Dead code. Its own step rather than a line inside the `yarn test` block
+      # below, on the independent-signal rule: a knip failure, a lint failure and
+      # a test failure are three different facts and none should mask another.
+      # In this job, so it costs no extra runner spin-up.
+      #
+      # `--include files` deliberately. Only the unused-FILES report is a gate.
+      # The unused-EXPORTS report is not trustworthy and must never be acted on
+      # -- see docs/guides/dead-code.md. Dependency reports are a separate
+      # cleanup and are not clean yet.
+      #
+      # private/ is a submodule this workflow does not check out, so on the
+      # runner it is an empty directory. That is benign for knip -- the files
+      # are absent rather than unreferenced, and core never statically imports
+      # #private, so the rest of the graph is unchanged. Verified green in that
+      # shape. It does mean this step covers everything EXCEPT private/, which
+      # has to be checked from a local clone.
+      - name: Dead code (knip)
+        run: yarn knip --include files
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
