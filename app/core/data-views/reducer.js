@@ -1,13 +1,44 @@
 import Immutable, { Map, Set as ImmutableSet, List } from 'immutable'
 
-import { data_views_actions } from './index'
+import { data_views_actions } from './actions'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
+import { migrate_table_state } from '#libs-shared/data-views-saved-view-migration.mjs'
 
 // table_state is stored as a plain JS object (consistent with the other
 // reducer cases that build views via `new Map({ ...view, table_state })`) so
 // downstream consumers can use plain `.columns` / `.map` access.
+
+// The saved_view read path. `libs-shared/data-views-saved-view-migration.mjs`
+// declares COLUMN_ID rules for three surfaces; local_storage applies them via
+// the versioned chain and short_url via parse-table-state-from-url, but until
+// this call existed the saved_view surface applied NOTHING at read time. The
+// server rewrites param KEYS on the query boundary (build_param_key_rewrite in
+// libs-server/get-data-view-results.mjs) and never column ids, so a row in
+// user_data_views holding a renamed id reached the reselect mapProps in
+// app/views/pages/data-views/index.js and threw `Field not found for
+// column_id` -- a blank page for that view's owner, indefinitely, until
+// somebody remembered to run scripts/migrate-data-views-saved.mjs by hand.
+// Signals 127159/127160 (2026-08-28) are that failure, eleven days after the
+// rule landed.
+//
+// READ-ONLY on purpose: this rewrites what enters the store and never writes
+// back to the server. A view hydrated from a shared /u/<hash> link can have a
+// foreign owner or none, and handle_save_data_view forks any such view into a
+// NEW row (client_generated_view_id) rather than updating in place -- so an
+// automatic write-back would mint duplicate views for readers of other
+// people's links. The one-shot script stays the durable rewrite; this is the
+// guarantee that a stranded row still renders in the meantime.
+//
+// Applied at EVERY point a persisted table_state enters the store, not just
+// the server fetches: a browser snapshot restored by
+// restore_view_states_from_browser is only migrated by the versioned chain if
+// its stored version is behind, so a snapshot already at
+// STORAGE_SCHEMA_VERSION carrying a newly renamed id would otherwise overwrite
+// the migrated server state with the stranded one.
+const migrate_persisted = (table_state) =>
+  migrate_table_state(table_state).table_state
 
 export function data_views_reducer(
   state = new Map(
@@ -21,12 +52,13 @@ export function data_views_reducer(
     case data_views_actions.GET_DATA_VIEWS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((view) => {
+          const table_state = migrate_persisted(view.table_state)
           state.set(
             view.view_id,
             new Map({
               ...view,
-              table_state: view.table_state,
-              saved_table_state: view.table_state
+              table_state,
+              saved_table_state: table_state
             })
           )
         })
@@ -34,18 +66,20 @@ export function data_views_reducer(
 
     case data_views_actions.GET_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
+        const table_state = migrate_persisted(payload.data.table_state)
         state.set(
           payload.data.view_id,
           new Map({
             ...payload.data,
-            table_state: payload.data.table_state,
-            saved_table_state: payload.data.table_state
+            table_state,
+            saved_table_state: table_state
           })
         )
       })
 
     case data_views_actions.POST_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
+        const table_state = migrate_persisted(payload.data.table_state)
         state.set(
           payload.data.view_id,
           new Map({
@@ -53,8 +87,8 @@ export function data_views_reducer(
             view_name: payload.data.view_name,
             view_description: payload.data.view_description,
             user_id: payload.data.user_id,
-            table_state: payload.data.table_state,
-            saved_table_state: payload.data.table_state
+            table_state,
+            saved_table_state: table_state
           })
         )
         if (
@@ -73,7 +107,10 @@ export function data_views_reducer(
     case data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE: {
       const { view_id, table_state } = payload
       if (!is_valid_table_state(table_state)) return state
-      return state.mergeIn([view_id], { view_id, table_state })
+      return state.mergeIn([view_id], {
+        view_id,
+        table_state: migrate_persisted(table_state)
+      })
     }
 
     case data_views_actions.REVERT_DATA_VIEW: {
