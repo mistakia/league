@@ -217,23 +217,42 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result.is_split_run).to.equal(null)
     })
 
-    it('maps coverage and personnel fields', () => {
+    it('maps the coverage fields it owns', () => {
       const source = {
         coverageScheme: 'COVER 3',
         manZoneCoverage: 'ZONE',
-        quarterbackAlignment: 'SHOTGUN',
-        formation: 'SINGLEBACK',
-        offensivePersonnelBasic: '11',
-        defensivePersonnelPackage: 'Nickel'
+        quarterbackAlignment: 'SHOTGUN'
       }
 
       const result = map_charting_play_to_db_fields(source)
       expect(result.coverage_type).to.equal('COVER_3')
       expect(result.man_zone).to.equal('ZONE')
       expect(result.quarterback_position).to.equal('SHOTGUN')
-      expect(result.offense_formation).to.equal('SINGLEBACK')
-      expect(result.offense_personnel).to.equal('11')
-      expect(result.defense_personnel).to.equal('Nickel')
+    })
+
+    // These three fields name columns the NFL feed owns, and this importer calls
+    // update_play with no protected_fields, so mapping them made it a second
+    // writer that filled wherever that feed left NULL -- a second vocabulary in
+    // one column, measured at 462, 3,507 and 2,004 rows and none of it present
+    // in any season before the vendor arrived. The values use the vendor's own
+    // vocabulary here on purpose: a mapping restored by someone reading only
+    // the field names would put exactly these strings into those columns.
+    it('does not write the formation and personnel columns the NFL feed owns', () => {
+      const source = {
+        formation: '1x3',
+        offensivePersonnelBasic: '11',
+        defensivePersonnelPackage: 'Nickel'
+      }
+
+      const result = map_charting_play_to_db_fields(source)
+      expect(result).to.not.have.property('offense_formation')
+      expect(result).to.not.have.property('offense_personnel')
+      expect(result).to.not.have.property('defense_personnel')
+    })
+
+    it('does not write is_motion, which the vendor never returns', () => {
+      const result = map_charting_play_to_db_fields({ isMotion: true })
+      expect(result).to.not.have.property('is_motion')
     })
 
     it('maps new charting-exclusive columns', () => {

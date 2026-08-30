@@ -100,7 +100,9 @@ const FIELD_MAPPINGS = {
   isCompletePass: 'is_completion',
   screen: 'is_screen_pass',
   playAction: 'is_play_action',
-  isMotion: 'is_motion',
+  // isMotion is not mapped: the vendor never returns it (no motion- or
+  // shift-like key appears among the 97 distinct keys on a 190-play sample),
+  // so the entry only stood ready to make this a third writer of is_motion.
   pressure: 'is_qb_pressure',
   scoringPlay: 'is_scoring_play',
   isHit: 'is_qb_hit',
@@ -194,27 +196,24 @@ export function map_charting_play_to_db_fields(source_play) {
     )
   }
 
-  // formation -> offense_formation
-  if ('formation' in source_play && source_play.formation !== undefined) {
-    result.offense_formation = source_play.formation
-  }
-
-  // offensivePersonnelBasic -> offense_personnel
-  if (
-    'offensivePersonnelBasic' in source_play &&
-    source_play.offensivePersonnelBasic !== undefined
-  ) {
-    result.offense_personnel = source_play.offensivePersonnelBasic
-  }
-
-  // defensivePersonnelPackage -> defense_personnel
-  if (
-    'defensivePersonnelPackage' in source_play &&
-    source_play.defensivePersonnelPackage !== undefined
-  ) {
-    result.defense_personnel = source_play.defensivePersonnelPackage
-  }
-
+  // formation, offensivePersonnelBasic and defensivePersonnelPackage are
+  // deliberately NOT mapped. Each named an existing column owned by the NFL
+  // feed, and update_play is called here with no protected_fields, so this
+  // importer filled wherever that feed left NULL -- putting a second,
+  // incompatible vocabulary into one column:
+  //
+  //   offense_formation   directional NxN receiver splits against SHOTGUN /
+  //                       SINGLEBACK / I_FORM. Measured 462 rows, 2025 only.
+  //   offense_personnel   two-digit codes (11, 01*) against "1 RB, 1 TE, 3 WR".
+  //                       3,507 rows, and zero in any season before 2025.
+  //   defense_personnel   package names (Other, Base, Nickel, Dime) against
+  //                       "2 DL, 4 LB, 5 DB". 2,004 rows, likewise 2025 only.
+  //
+  // The vendor's formation is a real fact we want; it gets its own column
+  // rather than this one, because the encodings differ -- the NFL feed's
+  // receiver_alignment is normalized strong-side-first and never emits a
+  // right-heavy value, while this vendor emits 1x3 alongside 3x1.
+  //
   // runSide -> run_location
   if ('runSide' in source_play && source_play.runSide !== undefined) {
     const run_side = source_play.runSide
