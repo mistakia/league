@@ -2307,6 +2307,56 @@ export interface NflPlayStatsCurrentWeekRow {
   is_valid: boolean | null
 }
 
+export interface NflPlayerPlayChartingRow {
+  esbid: number
+  nfl_team: string
+  source_row_index: number
+  sumer_player_id: string
+  pid: string | null
+  jersey_number: number | null
+  alignment: string | null
+  alignment_side: string | null
+  snap_role: string | null
+  defender_technique: string | null
+  is_box_alignment: boolean | null
+  route_run: string | null
+  route_release: string | null
+  route_break_depth: number | null
+  coverage_responsibility: string | null
+  coverage_responsibility_side: string | null
+  is_primary_coverage: boolean | null
+  gap_assignment: string | null
+  gap_assignment_side: string | null
+  press_type: string | null
+  is_press: boolean | null
+  is_pressure: boolean | null
+  is_pressure_allowed: boolean | null
+  is_hurry: boolean | null
+  is_hurry_allowed: boolean | null
+  is_sack_allowed: boolean | null
+  is_hit: boolean | null
+  is_quarterback_hitter: boolean | null
+  is_quarterback_scramble: boolean | null
+  is_quarterback_designed_run: boolean | null
+  is_first_contact: boolean | null
+  is_stop: boolean | null
+  is_tackle_missed: boolean | null
+  is_pass_breakup: boolean | null
+  is_reception_allowed: boolean | null
+  passing_depth_of_target: number | null
+  passing_epa: number | null
+  receiving_depth_of_target: number | null
+  receiving_receptions: number | null
+  receiving_yards_after_catch: number | null
+  receiving_epa: number | null
+  rushing_epa: number | null
+  yards_after_contact: number | null
+  defense_solo_tackles: number | null
+  defense_assisted_tackles: number | null
+  defense_tackles_for_loss: number | null
+  defense_sacks: number | null
+}
+
 export interface NflPlaysRow {
   esbid: number
   play_id: number

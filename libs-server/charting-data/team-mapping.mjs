@@ -40,4 +40,20 @@ export function resolve_sumer_team(sumer_team_id) {
   return SUMER_TEAM_ID_TO_NFL[sumer_team_id] || null
 }
 
-export { SUMER_TEAM_ID_TO_NFL }
+// The players/by-play route is asked FOR a team rather than answering with one,
+// so it needs the map read backwards. Derived rather than transcribed: a second
+// hand-written literal is a second thing to keep in step, and the mapping is
+// one-to-one across all 32 teams.
+const NFL_TO_SUMER_TEAM_ID = Object.fromEntries(
+  Object.entries(SUMER_TEAM_ID_TO_NFL).map(([sumer_id, nfl_team]) => [
+    nfl_team,
+    sumer_id
+  ])
+)
+
+export function resolve_nfl_team_sumer_id(nfl_team) {
+  if (!nfl_team) return null
+  return NFL_TO_SUMER_TEAM_ID[nfl_team] || null
+}
+
+export { SUMER_TEAM_ID_TO_NFL, NFL_TO_SUMER_TEAM_ID }

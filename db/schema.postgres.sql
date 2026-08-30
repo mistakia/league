@@ -348,6 +348,8 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_box_defenders;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ball_carrier_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_nfl_player_play_charting_sumer_player_id;
+DROP INDEX IF EXISTS public.idx_nfl_player_play_charting_pid;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_stat_id_is_valid_esbid_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
@@ -606,6 +608,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl_plays_passer_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_player_play_charting DROP CONSTRAINT IF EXISTS nfl_player_play_charting_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_matchup_stats DROP CONSTRAINT IF EXISTS nfl_matchup_stats_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_games_changelog DROP CONSTRAINT IF EXISTS nfl_games_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_pkey;
@@ -966,6 +969,7 @@ DROP TABLE IF EXISTS public.nfl_plays_player;
 DROP TABLE IF EXISTS public.nfl_plays_passer;
 DROP TABLE IF EXISTS public.nfl_plays_current_week;
 DROP TABLE IF EXISTS public.nfl_plays;
+DROP TABLE IF EXISTS public.nfl_player_play_charting;
 DROP TABLE IF EXISTS public.nfl_play_stats_current_week;
 DROP TABLE IF EXISTS public.nfl_play_stats;
 DROP TABLE IF EXISTS public.nfl_matchup_stats;
@@ -5492,6 +5496,61 @@ CREATE TABLE public.nfl_play_stats_current_week (
     smart_player_id character varying(47),
     nfl_team_id character varying(36),
     is_valid boolean
+);
+
+
+--
+-- Name: nfl_player_play_charting; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_player_play_charting (
+    esbid integer NOT NULL,
+    nfl_team character varying(4) NOT NULL,
+    source_row_index smallint NOT NULL,
+    sumer_player_id character varying(36) NOT NULL,
+    pid character varying(25),
+    jersey_number smallint,
+    alignment character varying(8),
+    alignment_side character varying(8),
+    snap_role character varying(16),
+    defender_technique character varying(8),
+    is_box_alignment boolean,
+    route_run character varying(16),
+    route_release character varying(16),
+    route_break_depth numeric(5,2),
+    coverage_responsibility character varying(24),
+    coverage_responsibility_side character varying(8),
+    is_primary_coverage boolean,
+    gap_assignment character varying(16),
+    gap_assignment_side character varying(8),
+    press_type character varying(16),
+    is_press boolean,
+    is_pressure boolean,
+    is_pressure_allowed boolean,
+    is_hurry boolean,
+    is_hurry_allowed boolean,
+    is_sack_allowed boolean,
+    is_hit boolean,
+    is_quarterback_hitter boolean,
+    is_quarterback_scramble boolean,
+    is_quarterback_designed_run boolean,
+    is_first_contact boolean,
+    is_stop boolean,
+    is_tackle_missed boolean,
+    is_pass_breakup boolean,
+    is_reception_allowed boolean,
+    passing_depth_of_target smallint,
+    passing_epa numeric(16,12),
+    receiving_depth_of_target smallint,
+    receiving_receptions smallint,
+    receiving_yards_after_catch smallint,
+    receiving_epa numeric(16,12),
+    rushing_epa numeric(16,12),
+    yards_after_contact smallint,
+    defense_solo_tackles smallint,
+    defense_assisted_tackles smallint,
+    defense_tackles_for_loss smallint,
+    defense_sacks numeric(3,1)
 );
 
 
@@ -29861,6 +29920,14 @@ ALTER TABLE ONLY public.nfl_matchup_stats
 
 
 --
+-- Name: nfl_player_play_charting nfl_player_play_charting_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_player_play_charting
+    ADD CONSTRAINT nfl_player_play_charting_pkey PRIMARY KEY (esbid, nfl_team, source_row_index);
+
+
+--
 -- Name: nfl_plays_passer nfl_plays_passer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -32014,6 +32081,20 @@ CREATE INDEX idx_nfl_play_stats_play_id ON public.nfl_play_stats USING btree (pl
 --
 
 CREATE INDEX idx_nfl_play_stats_stat_id_is_valid_esbid_play_id ON public.nfl_play_stats USING btree (stat_id, is_valid, esbid, play_id);
+
+
+--
+-- Name: idx_nfl_player_play_charting_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_player_play_charting_pid ON public.nfl_player_play_charting USING btree (pid);
+
+
+--
+-- Name: idx_nfl_player_play_charting_sumer_player_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_player_play_charting_sumer_player_id ON public.nfl_player_play_charting USING btree (sumer_player_id);
 
 
 --
@@ -59751,6 +59832,14 @@ GRANT SELECT ON TABLE public.nfl_play_stats TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_reader;
 GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_data_view_reader;
+
+
+--
+-- Name: TABLE nfl_player_play_charting; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_reader;
+GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_data_view_reader;
 
 
 --

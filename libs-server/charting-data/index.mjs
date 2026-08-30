@@ -138,6 +138,31 @@ class ChartingDataClient {
     return []
   }
 
+  // The per-player-per-snap grain, one request per team. The response is
+  // grouped by PLAYER in contiguous blocks, not ordered by play, and it carries
+  // no play id -- the nested play object selects only the two team ids. Return
+  // order is the ONLY thing distinguishing two rows, so the caller must
+  // preserve the array's index.
+  async get_player_plays({ game_id, team_id }) {
+    log(`fetching player plays for game ${game_id} team ${team_id}`)
+    const response = await this.request({
+      path: '/api/players/by-play/',
+      // sumerGameId / sumerTeamId on this route alone; every other route this
+      // client calls takes gameId / teamId. The inconsistency is the vendor's.
+      params: { sumerGameId: game_id, sumerTeamId: team_id }
+    })
+
+    if (response && response.sumerPlayerPlaysInGameNflsList) {
+      return response.sumerPlayerPlaysInGameNflsList
+    }
+
+    log(
+      'unexpected player plays response shape: %O',
+      Object.keys(response || {})
+    )
+    return []
+  }
+
   async get_matchup_stats({ game_id }) {
     log(`fetching matchup stats for game ${game_id}`)
     const response = await this.request({

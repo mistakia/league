@@ -200,7 +200,8 @@ export const job_types = {
   // main() caught every throw into a bare process.exit(). A run that wrote
   // nothing for an entire season_type therefore left no row anywhere, which is
   // how 2024 PRE and 2026 PRE both reached zero aggregated snaps unnoticed.
-  GENERATE_PLAYER_SNAPS: 141
+  GENERATE_PLAYER_SNAPS: 141,
+  IMPORT_PLAYER_PLAYS_CHARTING: 142
 }
 
 export const job_title_by_id = {
@@ -343,5 +344,6 @@ export const job_title_by_id = {
   137: 'Audit KeepTradeCut Liquidity Coverage',
   139: 'Run Data Checks',
   140: 'Announce Draft Slate',
-  141: 'Generate Player Snaps'
+  141: 'Generate Player Snaps',
+  142: 'Import Player Plays (Charting)'
 }

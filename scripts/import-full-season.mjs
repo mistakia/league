@@ -74,6 +74,7 @@ import import_plays_sportradar from './import-plays-sportradar.mjs'
 import import_players_charting from './import-players-charting.mjs'
 import import_plays_charting from './import-plays-charting.mjs'
 import import_matchup_stats_charting from './import-matchup-stats-charting.mjs'
+import import_player_plays_charting from './import-player-plays-charting.mjs'
 import process_plays from './process-plays.mjs'
 
 // Gamelog and aggregation scripts
@@ -169,7 +170,7 @@ const REPORT_OUTPUT_DIR = path.resolve(__dirname, '..', 'tmp')
 
 const log = debug('import-full-season')
 enable_debug_namespaces(
-  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,import-plays-charting,import-matchup-stats-charting,import-players-charting,charting-data,process-plays,generate-player-gamelogs,audit-player-gamelogs'
+  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,import-plays-charting,import-matchup-stats-charting,import-players-charting,import-player-plays-charting,charting-data,process-plays,generate-player-gamelogs,audit-player-gamelogs'
 )
 
 const DELAYS = {
@@ -1246,7 +1247,9 @@ const import_full_season = async ({
           skip_sources
         })
       ) {
-        log('=== Charting Data Imports (players, plays, matchup stats) ===')
+        log(
+          '=== Charting Data Imports (players, plays, matchup stats, player plays) ==='
+        )
         try {
           // 1. Establish player ID mappings
           await import_players_charting({ season_year, collector })
@@ -1262,6 +1265,15 @@ const import_full_season = async ({
           await import_matchup_stats_charting({
             season_year,
             collector,
+            force: ignore_cache
+          })
+          await wait(DELAYS.BETWEEN_SCRIPTS)
+
+          // 4. Import the per-player-per-snap grain. Two requests per game, so
+          // it is the most expensive stage here; it skips games already
+          // covered on BOTH teams, and --ignore-cache asks for them again.
+          await import_player_plays_charting({
+            season_year,
             force: ignore_cache
           })
         } catch (error) {

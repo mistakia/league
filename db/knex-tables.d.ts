@@ -131,6 +131,7 @@ import type {
   NflMatchupStatsRow,
   NflPlayStatsRow,
   NflPlayStatsCurrentWeekRow,
+  NflPlayerPlayChartingRow,
   NflPlaysRow,
   NflPlaysCurrentWeekRow,
   NflPlaysPasserRow,
@@ -451,6 +452,7 @@ declare module 'knex/types/tables' {
     nfl_matchup_stats: NflMatchupStatsRow
     nfl_play_stats: NflPlayStatsRow
     nfl_play_stats_current_week: NflPlayStatsCurrentWeekRow
+    nfl_player_play_charting: NflPlayerPlayChartingRow
     nfl_plays: NflPlaysRow
     nfl_plays_current_week: NflPlaysCurrentWeekRow
     nfl_plays_passer: NflPlaysPasserRow
