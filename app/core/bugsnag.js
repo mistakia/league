@@ -163,6 +163,47 @@ const record_client_trace_id = (client_trace_id) => {
   }
 }
 
+// Keys whose VALUE must never reach the signal queue. The queue is synced and
+// full-text indexed, so anything shipped here is durable and searchable.
+//
+// The reason this is a denylist applied centrally, rather than a rule for call
+// sites: api/sagas.js reports EVERY failed request as
+// `report_error(err, { options: opts })`, where `opts` is the request payload
+// verbatim. For a login, register or reset-password submission that payload is
+// the credential itself. `is_expected_client_error` drops the ordinary
+// wrong-password 4xx, but a 5xx or a network failure on those endpoints is a
+// real error that legitimately reports — and would carry the plaintext.
+// Redacting at the one place everything funnels through is the only version of
+// this that cannot be forgotten by the next call site.
+const REDACTED_KEYS = new Set([
+  'password',
+  'password2',
+  'current_password',
+  'new_password',
+  'invite_code',
+  'token',
+  'access_token',
+  'refresh_token',
+  'authorization'
+])
+
+const REDACT_MAX_DEPTH = 6
+
+const redact_sensitive = (value, depth = 0) => {
+  if (depth > REDACT_MAX_DEPTH) return value
+  if (Array.isArray(value)) {
+    return value.map((entry) => redact_sensitive(entry, depth + 1))
+  }
+  if (!value || typeof value !== 'object') return value
+  const out = {}
+  for (const [key, entry] of Object.entries(value)) {
+    out[key] = REDACTED_KEYS.has(key.toLowerCase())
+      ? '[redacted]'
+      : redact_sensitive(entry, depth + 1)
+  }
+  return out
+}
+
 const post_to_league_api = (err, metadata) => {
   try {
     // Suppress expected post-deploy chunk-load churn (see is_chunk_load_error):
@@ -202,7 +243,7 @@ const post_to_league_api = (err, metadata) => {
           // network-layer error is triageable to a specific endpoint.
           request_url: err?.request_url || null
         },
-        metadata: enriched
+        metadata: redact_sensitive(enriched)
       })
     }).catch(() => {})
   } catch (_send_error) {

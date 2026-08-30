@@ -1,4 +1,5 @@
 // @ts-check
+import crypto from 'crypto'
 import debug from 'debug'
 
 const log = debug('external:auth')
@@ -20,10 +21,6 @@ const log = debug('external:auth')
  * @property {number | null} expires_at
  * @property {boolean} public_leagues
  * @property {boolean} private_leagues
- */
-
-/**
- * @typedef {AuthResult & { cached_at: number }} CachedAuthResult
  */
 
 /**
@@ -53,21 +50,19 @@ const log = debug('external:auth')
  * - MFL: API key or username/password
  * - Fleaflicker: No authentication required
  *
- * Provides authentication result caching and token refresh capabilities.
- * Used by platform adapters to authenticate before making API requests.
+ * Stateless by construction, and deliberately so: an instance holds no cache
+ * and no cross-call state, because the only thing it would have to key a cache
+ * on is the platform, and the credentials belong to a user. Each adapter owns
+ * its own instance and each sync job owns its own adapter, so an auth result
+ * never outlives the job that produced it.
  *
  * @example
- * const auth_result = await platform_authenticator.authenticate('espn', {
+ * const auth_result = await new PlatformAuthenticator().authenticate('espn', {
  *   espn_s2: '...',
  *   swid: '...'
  * })
  */
 export class PlatformAuthenticator {
-  constructor() {
-    this.auth_cache = new Map()
-    this.refresh_tokens = new Map()
-  }
-
   /**
    * Create standardized authentication result object
    * @private
@@ -126,11 +121,6 @@ export class PlatformAuthenticator {
         break
       default:
         throw new Error(`Unsupported platform: ${platform}`)
-    }
-
-    // Cache successful authentication results
-    if (result && result.success) {
-      this.cache_auth(platform, result)
     }
 
     return result
@@ -485,7 +475,11 @@ export class PlatformAuthenticator {
       redirect_uri: 'oob', // Out-of-band for desktop apps
       response_type: 'code',
       scope: 'openid profile email',
-      state: Math.random().toString(36).substring(7)
+      // Cryptographic, because a CSRF parameter drawn from Math.random() is not
+      // one. Nothing verifies it on return today -- the flow is out-of-band, so
+      // there is no callback to forge -- but the value must be unguessable
+      // before any redirect handler is added, not after.
+      state: crypto.randomBytes(32).toString('base64url')
     })
 
     return `https://api.login.yahoo.com/oauth2/request_auth?${params.toString()}`
@@ -548,79 +542,4 @@ export class PlatformAuthenticator {
 
     return data.apikey
   }
-
-  /**
-   * Get cached authentication for platform
-   * @param {string} platform - Platform identifier
-   * @returns {CachedAuthResult|null} Cached auth data or null
-   */
-  get_cached_auth(platform) {
-    const cached = this.auth_cache.get(platform)
-    if (!cached) return null
-
-    // Check if cached auth is expired
-    if (cached.expires_at && Date.now() >= cached.expires_at) {
-      this.auth_cache.delete(platform)
-      return null
-    }
-
-    return cached
-  }
-
-  /**
-   * Cache authentication result
-   * @param {string} platform - Platform identifier
-   * @param {AuthResult} auth_result - Authentication result to cache
-   */
-  cache_auth(platform, auth_result) {
-    this.auth_cache.set(platform, {
-      ...auth_result,
-      cached_at: Date.now()
-    })
-  }
-
-  /**
-   * Clear authentication cache
-   * @param {string} [platform] - Specific platform to clear, or all if not specified
-   */
-  // No `= null` default: the annotation says `[platform]`, i.e. absent, and a
-  // null default contradicted it for no gain -- the `if (platform)` below reads
-  // both the same way.
-  clear_cache(platform) {
-    if (platform) {
-      this.auth_cache.delete(platform)
-      this.refresh_tokens.delete(platform)
-    } else {
-      this.auth_cache.clear()
-      this.refresh_tokens.clear()
-    }
-  }
-
-  /**
-   * Get authentication status for all cached platforms
-   * @returns {Record<string, object>} Authentication status by platform
-   */
-  get_auth_status() {
-    /** @type {Record<string, object>} */
-    const status = {}
-
-    for (const [platform, auth_data] of this.auth_cache.entries()) {
-      status[platform] = {
-        authenticated: true,
-        auth_type: auth_data.auth_type,
-        expires_at: auth_data.expires_at,
-        expired: auth_data.expires_at
-          ? Date.now() >= auth_data.expires_at
-          : false,
-        public_leagues: auth_data.public_leagues,
-        private_leagues: auth_data.private_leagues,
-        cached_at: auth_data.cached_at
-      }
-    }
-
-    return status
-  }
 }
-
-// Export singleton instance
-export const platform_authenticator = new PlatformAuthenticator()

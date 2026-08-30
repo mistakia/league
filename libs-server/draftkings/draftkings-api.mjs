@@ -96,8 +96,6 @@ export const get_websocket_connection = ({ authorization } = {}) =>
           }
         )
 
-        log(wss)
-
         wss.on('open', () => {
           log('wss connection opened')
           resolve(wss)

@@ -295,9 +295,9 @@ export default async function ({
         this.on('league_format_player_seasonlogs.pid', 'player.pid')
         this.andOn('league_format_player_seasonlogs.season_year', season_year)
         this.andOn(
-          db.raw(
-            `league_format_player_seasonlogs.league_format_id = '${league_format_id}'`
-          )
+          db.raw('league_format_player_seasonlogs.league_format_id = ?', [
+            league_format_id
+          ])
         )
       })
       .select(db.raw(league_format_player_seasonlogs_selects.join(',')))
@@ -319,9 +319,9 @@ export default async function ({
         this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
         this.andOn('scoring_format_player_seasonlogs.season_year', season_year)
         this.andOn(
-          db.raw(
-            `scoring_format_player_seasonlogs.scoring_format_id = '${scoring_format_id}'`
-          )
+          db.raw('scoring_format_player_seasonlogs.scoring_format_id = ?', [
+            scoring_format_id
+          ])
         )
       })
       .select(db.raw(scoring_format_player_seasonlogs_selects.join(',')))

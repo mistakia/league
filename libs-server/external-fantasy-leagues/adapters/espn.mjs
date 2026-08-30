@@ -1,7 +1,7 @@
 import BaseAdapter from './base-adapter.mjs'
 import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
 import { schema_validator } from '#libs-server/external-fantasy-leagues/utils/schema-validator.mjs'
-import { platform_authenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
+import { PlatformAuthenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
 import { format_nfl_injury_status } from '#libs-shared'
 import { player_nfl_status, current_season } from '#constants'
 
@@ -13,6 +13,11 @@ import { player_nfl_status, current_season } from '#constants'
 export default class EspnAdapter extends BaseAdapter {
   constructor(config = {}) {
     super(config)
+
+    // Owned per adapter, never shared. The adapter itself is constructed once
+    // per sync job, so authentication state cannot outlive the job.
+    this.platform_authenticator = new PlatformAuthenticator()
+    this.auth_result = null
 
     // Use corrected ESPN API base URL
     this.api_client = new AuthenticatedApiClient({
@@ -54,7 +59,7 @@ export default class EspnAdapter extends BaseAdapter {
    */
   async authenticate(credentials = {}) {
     try {
-      const auth_result = await platform_authenticator.authenticate(
+      const auth_result = await this.platform_authenticator.authenticate(
         'espn',
         credentials
       )
@@ -78,8 +83,7 @@ export default class EspnAdapter extends BaseAdapter {
           has_cookies: !!auth_result.credentials
         })
 
-        // Cache authentication result
-        platform_authenticator.cache_auth('espn', auth_result)
+        this.auth_result = auth_result
         return true
       }
 
@@ -102,12 +106,15 @@ export default class EspnAdapter extends BaseAdapter {
       )
     }
 
-    const cached_auth = platform_authenticator.get_cached_auth('espn')
-    if (!cached_auth || !cached_auth.credentials) {
+    // This adapter's OWN auth result, set by its own authenticate() call. It
+    // was previously read out of a process-global cache keyed on the platform
+    // name, which is not the user -- so the swid could belong to whoever
+    // authenticated last.
+    if (!this.auth_result || !this.auth_result.credentials) {
       throw new Error('No valid ESPN authentication found')
     }
 
-    const { swid } = cached_auth.credentials
+    const { swid } = this.auth_result.credentials
     const leagues_url = `https://fan.api.espn.com/apis/v2/fans/${swid}?displayEvents=true&displayNow=true&displayRecs=true&recLimit=5&context=fantasy&source=espncom-fantasy&lang=en&section=espn&region=us`
 
     const response = await fetch(leagues_url)

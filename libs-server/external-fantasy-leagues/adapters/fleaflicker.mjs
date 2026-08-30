@@ -1,6 +1,6 @@
 import BaseAdapter from './base-adapter.mjs'
 import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
-import { platform_authenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
+import { PlatformAuthenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
 
 /**
  * Fleaflicker adapter
@@ -10,6 +10,11 @@ import { platform_authenticator } from '#libs-server/external-fantasy-leagues/ut
 export default class FleaflickerAdapter extends BaseAdapter {
   constructor(config = {}) {
     super(config)
+
+    // Owned per adapter, never shared. The adapter itself is constructed once
+    // per sync job, so authentication state cannot outlive the job.
+    this.platform_authenticator = new PlatformAuthenticator()
+    this.auth_result = null
 
     this.sport = 'NFL'
 
@@ -41,7 +46,7 @@ export default class FleaflickerAdapter extends BaseAdapter {
    */
   async authenticate(credentials = {}) {
     try {
-      const auth_result = await platform_authenticator.authenticate(
+      const auth_result = await this.platform_authenticator.authenticate(
         'fleaflicker',
         credentials
       )
@@ -63,7 +68,7 @@ export default class FleaflickerAdapter extends BaseAdapter {
           }
         )
 
-        platform_authenticator.cache_auth('fleaflicker', auth_result)
+        this.auth_result = auth_result
         return true
       }
 

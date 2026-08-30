@@ -39,7 +39,7 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
       adapter.get_platform().should.equal('sleeper')
     })
 
-    it('should return cached adapter on subsequent calls', function () {
+    it('should return a fresh adapter on every call', function () {
       const adapter1 = orchestrator.initialize_adapter({
         platform_name: 'sleeper'
       })
@@ -47,7 +47,10 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
         platform_name: 'sleeper'
       })
 
-      adapter1.should.equal(adapter2) // Same instance
+      // Deliberately NOT the same instance. An adapter carries authentication
+      // state, and the orchestrator outlives any one user's sync job, so a
+      // per-platform cache handed one user's authenticated adapter to the next.
+      adapter1.should.not.equal(adapter2)
     })
 
     it('should throw error for unsupported platform', function () {
@@ -284,9 +287,8 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
       sync_stats.should.have.property('errors').that.is.an('array')
     })
 
-    it('should have adapter cache initialized', function () {
-      orchestrator.should.have.property('adapters')
-      orchestrator.adapters.should.be.instanceof(Map)
+    it('should hold no adapter cache', function () {
+      orchestrator.should.not.have.property('adapters')
     })
   })
 

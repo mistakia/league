@@ -180,7 +180,7 @@ const load_fanduel_wagers = async ({
     placed_after: placed_after.format(),
     placed_before: placed_before ? placed_before.format() : null,
     fanduel_states,
-    authorization
+    has_authorization: Boolean(authorization)
   })
 
   let wagers = []

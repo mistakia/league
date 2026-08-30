@@ -92,9 +92,20 @@ export default class AuthenticatedApiClient {
    * @param {string} auth_type - Authentication type: 'none' | 'cookie_based' | 'oauth2' | 'api_key'
    */
   set_authentication(credentials, auth_type) {
+    // Clear every auth-derived header FIRST. Each case below sets its header
+    // only on the success branch, so without this a call that resolves to a
+    // weaker auth_type -- or to the same type with incomplete credentials --
+    // left the previous call's header in place and the client kept sending it.
+    // Callers reasonably read set_authentication as "the client is now
+    // authenticated as exactly this"; the reset is what makes that true.
+    delete this.headers.Cookie
+    delete this.headers.Authorization
+
     this.authentication.type = auth_type
     this.authentication.credentials = credentials
     this.authentication.authenticated = false
+    this.authentication.expires_at = null
+    this.authentication.refresh_token = null
 
     switch (auth_type) {
       case 'none':

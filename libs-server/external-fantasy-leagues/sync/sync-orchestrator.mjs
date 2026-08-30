@@ -68,9 +68,6 @@ export default class SyncOrchestrator {
     this.transaction_sync = new TransactionSync()
     this.progress_reporter = new ProgressReporter()
     this.sync_utils = new SyncUtils()
-
-    // Available adapters (instantiated on demand)
-    this.adapters = new Map()
   }
 
   /**
@@ -137,14 +134,20 @@ export default class SyncOrchestrator {
         adapter_config: fetch_options.adapter_config
       })
 
-      if (credentials && Object.keys(credentials).length > 0) {
+      // Always authenticate, even with no credentials: an empty bag puts the
+      // adapter affirmatively into its unauthenticated state rather than
+      // leaving whatever state it happened to be constructed with. Skipping the
+      // call is what let a credential-less job inherit a prior session.
+      const has_credentials =
+        Boolean(credentials) && Object.keys(credentials).length > 0
+      if (has_credentials) {
         await this.progress_reporter.report_adapter_init_progress({
           progress_callback,
           platform_name,
           status: 'authenticating'
         })
-        await adapter.authenticate(credentials)
       }
+      await adapter.authenticate(has_credentials ? credentials : {})
 
       // Fetch in parallel
       await this.progress_reporter.report_fetch_progress({
@@ -297,18 +300,18 @@ export default class SyncOrchestrator {
    */
   initialize_adapter({ platform_name, adapter_config = {} }) {
     try {
-      if (this.adapters.has(platform_name)) {
-        return this.adapters.get(platform_name)
-      }
-
-      // Get adapter class from registry
+      // A FRESH adapter every call, never one cached per platform. An adapter
+      // holds authentication state on its api_client, and the orchestrator is a
+      // process-lifetime singleton shared by every user's sync job, so a cache
+      // keyed on platform name handed one user's authenticated client to the
+      // next user's job for the same platform. The cache only ever saved an
+      // object allocation, which is nothing against a per-job fetch.
       const AdapterClass = ADAPTER_REGISTRY[platform_name.toLowerCase()]
       if (!AdapterClass) {
         throw new Error(`Unsupported platform: ${platform_name}`)
       }
 
       const adapter = new AdapterClass(adapter_config)
-      this.adapters.set(platform_name, adapter)
 
       log(`Initialized ${platform_name} adapter`)
       return adapter
@@ -369,17 +372,18 @@ export default class SyncOrchestrator {
         adapter_config: sync_options.adapter_config
       })
 
-      // Authenticate if credentials provided
-      if (credentials && Object.keys(credentials).length > 0) {
-        if (progress_callback) {
-          await this.progress_reporter.report_adapter_init_progress({
-            progress_callback,
-            platform_name,
-            status: 'authenticating'
-          })
-        }
-        await adapter.authenticate(credentials)
+      // Always authenticate — see the note on the same call in
+      // fetch_league_data. An empty bag is a valid, meaningful argument.
+      const has_credentials =
+        Boolean(credentials) && Object.keys(credentials).length > 0
+      if (has_credentials && progress_callback) {
+        await this.progress_reporter.report_adapter_init_progress({
+          progress_callback,
+          platform_name,
+          status: 'authenticating'
+        })
       }
+      await adapter.authenticate(has_credentials ? credentials : {})
 
       // Step 2: Sync league configuration
       if (progress_callback) {

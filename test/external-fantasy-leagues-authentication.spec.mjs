@@ -1,7 +1,8 @@
-/* global describe, it, after, beforeEach, afterEach */
+/* global describe, it, beforeEach, afterEach */
 import * as chai from 'chai'
-import { platform_authenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
+import { PlatformAuthenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
 import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
+import SyncOrchestrator from '#libs-server/external-fantasy-leagues/sync/sync-orchestrator.mjs'
 import SleeperAdapter from '#libs-server/external-fantasy-leagues/adapters/sleeper.mjs'
 import EspnAdapter from '#libs-server/external-fantasy-leagues/adapters/espn.mjs'
 import YahooAdapter from '#libs-server/external-fantasy-leagues/adapters/yahoo.mjs'
@@ -12,9 +13,13 @@ process.env.NODE_ENV = 'test'
 chai.should()
 
 describe('External Fantasy Leagues - Authentication System', function () {
+  let platform_authenticator
+
   beforeEach(function () {
-    // Clear authentication cache before each test
-    platform_authenticator.clear_cache()
+    // A fresh authenticator per test. There is no shared instance to reset:
+    // the authenticator holds no cache, which is the property these tests are
+    // written against.
+    platform_authenticator = new PlatformAuthenticator()
   })
 
   describe('Platform Authenticator', function () {
@@ -29,16 +34,6 @@ describe('External Fantasy Leagues - Authentication System', function () {
         result.should.have.property('private_leagues', true)
         result.should.have.property('credentials', null)
         result.should.have.property('expires_at', null)
-      })
-
-      it('should cache Sleeper authentication', async function () {
-        await platform_authenticator.authenticate('sleeper', {})
-
-        const cached = platform_authenticator.get_cached_auth('sleeper')
-        cached.should.not.be.null
-        cached.should.have.property('success', true)
-        cached.should.have.property('platform', 'sleeper')
-        cached.should.have.property('cached_at')
       })
     })
 
@@ -165,49 +160,85 @@ describe('External Fantasy Leagues - Authentication System', function () {
         result.should.have.property('credentials', null)
       })
     })
+  })
 
-    describe('Authentication Status and Caching', function () {
-      it('should track authentication status across platforms', async function () {
-        await platform_authenticator.authenticate('sleeper', {})
-        await platform_authenticator.authenticate('espn', {})
-        await platform_authenticator.authenticate('fleaflicker', {})
+  describe('Cross-user isolation', function () {
+    // These are the regression tests for the two critical review findings. Both
+    // described the same defect: process-lifetime state keyed on the platform
+    // name, which is not the user. Each test below fails on the pre-fix code.
 
-        const status = platform_authenticator.get_auth_status()
+    it('gives every initialize_adapter call its own adapter', function () {
+      const orchestrator = new SyncOrchestrator()
 
-        status.should.have.property('sleeper')
-        status.should.have.property('espn')
-        status.should.have.property('fleaflicker')
+      const first = orchestrator.initialize_adapter({ platform_name: 'espn' })
+      const second = orchestrator.initialize_adapter({ platform_name: 'espn' })
 
-        status.sleeper.should.have.property('authenticated', true)
-        status.sleeper.should.have.property('auth_type', 'none')
-        status.sleeper.should.have.property('expired', false)
+      // Pre-fix this returned the SAME cached object, carrying the first
+      // caller's authentication into the second caller's job.
+      first.should.not.equal(second)
+    })
 
-        status.espn.should.have.property('authenticated', true)
-        status.espn.should.have.property('auth_type', 'none')
+    it('does not carry one adapter authentication into the next job', async function () {
+      const orchestrator = new SyncOrchestrator()
 
-        status.fleaflicker.should.have.property('authenticated', true)
-        status.fleaflicker.should.have.property('auth_type', 'none')
+      const first_user_adapter = orchestrator.initialize_adapter({
+        platform_name: 'espn'
+      })
+      await first_user_adapter.authenticate({
+        espn_s2: 'first-user-s2-value',
+        swid: 'first-user-swid-value'
+      })
+      first_user_adapter.api_client.headers.should.have.property('Cookie')
+
+      // A connection with no stored credentials is the ordinary public-league
+      // case: decrypt_credentials returns {} for a null column.
+      const second_user_adapter = orchestrator.initialize_adapter({
+        platform_name: 'espn'
+      })
+      await second_user_adapter.authenticate({})
+
+      second_user_adapter.api_client.headers.should.not.have.property('Cookie')
+      chai.expect(second_user_adapter.auth_result.credentials).to.be.null
+    })
+
+    it('clears a stale auth header when re-authenticating the same client', function () {
+      const client = new AuthenticatedApiClient({
+        base_url: 'https://example.test'
       })
 
-      it('should clear authentication cache', async function () {
-        await platform_authenticator.authenticate('sleeper', {})
-        platform_authenticator.get_cached_auth('sleeper').should.not.be.null
+      client.set_authentication(
+        { espn_s2: 'stale-s2-value', swid: 'stale-swid-value' },
+        'cookie_based'
+      )
+      client.headers.should.have.property('Cookie')
 
-        platform_authenticator.clear_cache('sleeper')
-        const cached = platform_authenticator.get_cached_auth('sleeper')
-        chai.expect(cached).to.be.null
+      // Resolving to a weaker auth_type must not leave the prior header behind.
+      client.set_authentication(null, 'none')
+      client.headers.should.not.have.property('Cookie')
+
+      // Nor must an incomplete bag of the SAME type.
+      client.set_authentication(
+        { espn_s2: 'stale-s2-value', swid: 'stale-swid-value' },
+        'cookie_based'
+      )
+      client.set_authentication({ espn_s2: 'only-half' }, 'cookie_based')
+      client.headers.should.not.have.property('Cookie')
+    })
+
+    it('keeps two authenticators from sharing credentials', async function () {
+      const first = new PlatformAuthenticator()
+      const second = new PlatformAuthenticator()
+
+      await first.authenticate('espn', {
+        espn_s2: 'first-user-s2-value',
+        swid: 'first-user-swid-value'
       })
+      const second_result = await second.authenticate('espn', {})
 
-      it('should clear all authentication cache', async function () {
-        await platform_authenticator.authenticate('sleeper', {})
-        await platform_authenticator.authenticate('espn', {})
-
-        platform_authenticator.clear_cache()
-
-        chai.expect(platform_authenticator.get_cached_auth('sleeper')).to.be
-          .null
-        chai.expect(platform_authenticator.get_cached_auth('espn')).to.be.null
-      })
+      // Pre-fix the shared cache meant the second caller could read the first
+      // caller's credentials back out.
+      chai.expect(second_result.credentials).to.be.null
+      second_result.should.have.property('private_leagues', false)
     })
   })
 
@@ -387,11 +418,6 @@ describe('External Fantasy Leagues - Authentication System', function () {
 
         result.should.be.true
         adapter.authenticated.should.be.true
-
-        // Check that authentication was cached
-        const cached = platform_authenticator.get_cached_auth('sleeper')
-        cached.should.not.be.null
-        cached.should.have.property('platform', 'sleeper')
       })
     })
 
@@ -503,20 +529,16 @@ describe('External Fantasy Leagues - Authentication System', function () {
     it('should handle authentication failures gracefully', async function () {
       const adapter = new EspnAdapter()
 
-      // Mock platform_authenticator to simulate failure
-      const original_authenticate = platform_authenticator.authenticate
-      platform_authenticator.authenticate = async () => {
+      // Patch the adapter's OWN authenticator. It used to be a process-global
+      // singleton, so the patch and its restore were visible to every other
+      // test and to production code in the same process.
+      adapter.platform_authenticator.authenticate = async () => {
         throw new Error('Simulated authentication failure')
       }
 
-      try {
-        const result = await adapter.authenticate({})
-        result.should.be.false
-        adapter.authenticated.should.be.false
-      } finally {
-        // Restore original method
-        platform_authenticator.authenticate = original_authenticate
-      }
+      const result = await adapter.authenticate({})
+      result.should.be.false
+      adapter.authenticated.should.be.false
     })
 
     it('should handle circuit breaker when open', async function () {
@@ -536,10 +558,5 @@ describe('External Fantasy Leagues - Authentication System', function () {
         error.message.should.include('Circuit breaker is open')
       }
     })
-  })
-
-  after(function () {
-    // Clean up authentication cache after all tests
-    platform_authenticator.clear_cache()
   })
 })

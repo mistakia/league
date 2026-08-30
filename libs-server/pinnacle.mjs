@@ -237,6 +237,11 @@ export const get_nfl_matchups = async ({
     max_retries: 3,
     use_proxy: true,
     proxy_pool: 'pinnacle',
+    // Fail CLOSED. proxy-manager is fail-open twice -- an unresolved pool
+    // silently uses `default`, an empty pool silently goes direct -- and both
+    // are log-only, so without this a Pinnacle-authenticated request can leave
+    // from the server's own address and nothing reports it.
+    requires_proxy: true,
     initial_delay: 1000,
     max_delay: 10000,
     response_type: 'json',
@@ -279,6 +284,11 @@ export const get_market_odds = async ({
     max_retries: 3,
     use_proxy: true,
     proxy_pool: 'pinnacle',
+    // Fail CLOSED. proxy-manager is fail-open twice -- an unresolved pool
+    // silently uses `default`, an empty pool silently goes direct -- and both
+    // are log-only, so without this a Pinnacle-authenticated request can leave
+    // from the server's own address and nothing reports it.
+    requires_proxy: true,
     initial_delay: 1000,
     max_delay: 10000,
     response_type: 'json',
