@@ -83,7 +83,9 @@ export async function simulate_playoff_weeks_correlated({
     team_ids,
     weeks,
     year,
-    current_week: current_season.week
+    // active_fantasy_week, not week: `week` is 0 for the whole offseason and
+    // preseason, and load_teams_starters_by_week refuses anything below 1.
+    current_week: current_season.active_fantasy_week
   })
 
   // Collect all player IDs across all weeks

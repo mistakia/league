@@ -83,7 +83,10 @@ export async function simulate_league_week({
       league_id,
       week,
       year,
-      current_week: current_season.week
+      // active_fantasy_week, not week: `week` is 0 for the whole offseason and
+      // preseason, and load_team_starters refuses anything below 1, so the
+      // roster load threw on every call between the Super Bowl and Week 1.
+      current_week: current_season.active_fantasy_week
     }),
     load_nfl_schedule({ season_year: year, week })
   ])

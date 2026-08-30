@@ -30,6 +30,7 @@ const SIMULATIONS = 10000
  *   being forecast have already been played. Passing the current week is
  *   therefore NOT equivalent to omitting it.
  * @param {number} [params.n_simulations=10000] - Number of Monte Carlo iterations
+ * @param {number} [params.seed] - Seed for every draw the forecast makes
  * @param {string} [params.force_win_tid] - Force this team to win its matchup in
  *   the first remaining week
  * @param {string} [params.force_loss_tid] - Force this team to lose its matchup
@@ -41,6 +42,7 @@ export async function simulate_season_forecast({
   year = current_season.year,
   week = null,
   n_simulations = SIMULATIONS,
+  seed,
   force_win_tid = null,
   force_loss_tid = null
 }) {
@@ -181,6 +183,7 @@ export async function simulate_season_forecast({
       week: sim_week,
       year,
       n_simulations: 1000, // Fewer sims for probability estimation
+      seed,
       use_actual_results
     })
 
