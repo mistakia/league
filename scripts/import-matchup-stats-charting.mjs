@@ -401,6 +401,13 @@ const main = async () => {
       })
       .option('seas_type', {
         type: 'string',
+        // The alias is the fix, not decoration. Three of these four scripts
+        // declared this option as `seas_type` and then read `argv.season_type`,
+        // which yargs never set -- so --seas_type PRE parsed cleanly, was
+        // dropped, and every run silently used the default scope. The alias
+        // makes yargs populate BOTH keys, so neither spelling can be the wrong
+        // one. Same defect class as the qtr/dwn keys find_play used to accept.
+        alias: 'season_type',
         description: 'Season type (REG, POST, PRE)'
       })
       .option('no_proxy', {
