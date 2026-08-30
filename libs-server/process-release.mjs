@@ -91,6 +91,31 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   // Automatically create waiver for all eligible super priority cases
   // Team can update the waiver to include a release if roster space is needed
   // Super priority waivers are always FREE_AGENCY_PRACTICE type
+  //
+  // Guarded on a PENDING waiver rather than on any waiver, and the distinction
+  // is the whole point. This insert used to be unconditional, sitting outside
+  // both branches above, so a repeat release against an already-eligible record
+  // wrote a second waiver while the first was still waiting to process. But a
+  // repeat release whose earlier waiver has already RESOLVED is a genuinely new
+  // entitlement -- the original team's chance was never consumed, and they are
+  // owed another. Keying on `processed`/`cancelled` being null allows the
+  // second case and refuses the first.
+  const pending_waiver = await db('waivers')
+    .where({
+      pid,
+      tid: super_priority_status.original_tid,
+      lid,
+      type: waiver_types.FREE_AGENCY_PRACTICE,
+      super_priority: 1
+    })
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .first()
+
+  if (pending_waiver) {
+    return
+  }
+
   await db('waivers').insert({
     user_id: 0,
     pid,

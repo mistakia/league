@@ -170,4 +170,159 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
       expect(roster_player.slot).to.equal(roster_slot_types.BENCH)
     })
   })
+
+  // The super-priority waiver insert in handle_super_priority_on_release used
+  // to sit OUTSIDE both record branches, so a release that found an already
+  // eligible record ran neither the insert nor the update branch and still
+  // wrote a waiver. The existing coverage above could not see it: it asserts
+  // the waiver with `.first()`, which reads identically whether one row or two
+  // were written.
+  //
+  // The three cases below are a set. The guard keys on a waiver being PENDING
+  // rather than on one merely existing, and only the third case can tell those
+  // two rules apart -- a blunt "any waiver" check passes the first two and
+  // silently swallows an entitlement the original team is genuinely owed.
+  describe('super priority waiver is not duplicated', function () {
+    const leagueId = 1
+    const originalTeamId = 1
+    const poachingTeamId = 2
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
+      await league(knex)
+    })
+
+    // Drives a real poach-into-immediate-release, which is the only path that
+    // reaches the insert, rather than calling the unexported helper directly.
+    const poach_and_immediately_release = async () => {
+      const player1 = await selectPlayer({ pos: 'WR' })
+
+      await addPlayer({
+        teamId: originalTeamId,
+        leagueId,
+        userId: 1,
+        player: player1,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
+        value: 0
+      })
+
+      await fillRoster({ teamId: poachingTeamId, leagueId })
+
+      await processPoach({
+        pid: player1.pid,
+        release: [],
+        lid: leagueId,
+        tid: poachingTeamId,
+        user_id: 2
+      })
+
+      return player1
+    }
+
+    const super_priority_waivers_for = (pid) =>
+      knex('waivers').where({
+        pid,
+        tid: originalTeamId,
+        lid: leagueId,
+        type: waiver_types.FREE_AGENCY_PRACTICE,
+        super_priority: 1
+      })
+
+    it('writes exactly one waiver on a first release', async () => {
+      // The positive control. Without it the two cases below would also pass on
+      // an implementation that had stopped writing waivers altogether.
+      const player1 = await poach_and_immediately_release()
+
+      const waivers = await super_priority_waivers_for(player1.pid)
+      expect(waivers).to.have.lengthOf(1)
+    })
+
+    it('writes no second waiver while the first is still pending', async () => {
+      const player1 = await selectPlayer({ pos: 'WR' })
+
+      await addPlayer({
+        teamId: originalTeamId,
+        leagueId,
+        userId: 1,
+        player: player1,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
+        value: 0
+      })
+      await fillRoster({ teamId: poachingTeamId, leagueId })
+
+      // An unresolved waiver from an earlier release in the same cycle.
+      await knex('waivers').insert({
+        user_id: 0,
+        pid: player1.pid,
+        tid: originalTeamId,
+        lid: leagueId,
+        submitted: new Date(),
+        bid_amount: 0,
+        priority_order: 0,
+        type: waiver_types.FREE_AGENCY_PRACTICE,
+        super_priority: 1
+      })
+
+      await processPoach({
+        pid: player1.pid,
+        release: [],
+        lid: leagueId,
+        tid: poachingTeamId,
+        user_id: 2
+      })
+
+      const waivers = await super_priority_waivers_for(player1.pid)
+      expect(waivers).to.have.lengthOf(1)
+      expect(waivers[0].processed).to.equal(null)
+    })
+
+    it('writes a new waiver when the earlier one has already resolved', async () => {
+      // The case that makes the `processed`/`cancelled` guard load-bearing. A
+      // repeat release whose earlier waiver resolved is a NEW entitlement --
+      // the original team's chance was never consumed and they are owed
+      // another. A guard keyed on any waiver at all would swallow it.
+      const player1 = await selectPlayer({ pos: 'WR' })
+
+      await addPlayer({
+        teamId: originalTeamId,
+        leagueId,
+        userId: 1,
+        player: player1,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
+        value: 0
+      })
+      await fillRoster({ teamId: poachingTeamId, leagueId })
+
+      await knex('waivers').insert({
+        user_id: 0,
+        pid: player1.pid,
+        tid: originalTeamId,
+        lid: leagueId,
+        submitted: new Date(),
+        bid_amount: 0,
+        priority_order: 0,
+        type: waiver_types.FREE_AGENCY_PRACTICE,
+        super_priority: 1,
+        processed: new Date(),
+        is_successful: 0,
+        reason: 'no practice squad space'
+      })
+
+      await processPoach({
+        pid: player1.pid,
+        release: [],
+        lid: leagueId,
+        tid: poachingTeamId,
+        user_id: 2
+      })
+
+      const waivers = await super_priority_waivers_for(player1.pid)
+      expect(waivers).to.have.lengthOf(2)
+      expect(waivers.filter((w) => w.processed === null)).to.have.lengthOf(1)
+    })
+  })
 })
