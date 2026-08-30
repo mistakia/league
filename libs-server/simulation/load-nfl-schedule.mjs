@@ -54,7 +54,7 @@ export const NFL_TEAMS = [
  * @param {number} params.season_year - NFL year
  * @param {number} params.week - NFL week
  * @param {string} [params.season_type='REG'] - Season type (REG or POST)
- * @returns {Promise<Object<string, { opponent: string, esbid: number, is_home: boolean, is_final: boolean, has_started: boolean, kickoff_at: number }>>} Schedule keyed by team abbreviation
+ * @returns {Promise<Object<string, { opponent: string, esbid: number, is_home: boolean, is_final: boolean, has_started: boolean, kickoff_at: Date }>>} Schedule keyed by team abbreviation
  */
 export async function load_nfl_schedule({
   season_year,
@@ -76,7 +76,7 @@ export async function load_nfl_schedule({
  * @param {number} params.season_year - NFL year
  * @param {number[]} params.weeks - Array of NFL weeks
  * @param {string} [params.season_type='REG'] - Season type (REG or POST)
- * @returns {Promise<Map<number, Object<string, { opponent: string, esbid: number, is_home: boolean, is_final: boolean, has_started: boolean, kickoff_at: number }>>>} Map of week to schedule keyed by team abbreviation
+ * @returns {Promise<Map<number, Object<string, { opponent: string, esbid: number, is_home: boolean, is_final: boolean, has_started: boolean, kickoff_at: Date }>>>} Map of week to schedule keyed by team abbreviation
  */
 export async function load_nfl_schedules_for_weeks({
   season_year,
