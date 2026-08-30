@@ -2,7 +2,13 @@
 
 import * as chai from 'chai'
 
-import { calculate_wager_summary } from '#libs-server/wager-analysis/wager-calculations.mjs'
+import {
+  calculate_props_summary,
+  calculate_wager_summary,
+  format_american_odds_as_fractional,
+  format_metric_result,
+  format_threshold_distance
+} from '#libs-server/wager-analysis/wager-calculations.mjs'
 import { create_wager_summary_table } from '#libs-server/wager-analysis/wager-table-formatters.mjs'
 
 const expect = chai.expect
@@ -75,6 +81,207 @@ describe('LIBS-SERVER wager-calculations', function () {
       // claimed the same aggregation for different operations. This holds the
       // other half: max_wager_odds must NOT become a sum (1700).
       expect(summary.max_wager_odds).to.equal(1200)
+    })
+  })
+
+  // b89f5ab53 rewrote 245 lines of this module and introduced both mechanisms
+  // below. Neither had a case until now, and both decide money.
+  describe('wagers_by_odds_range', function () {
+    const priced = (parsed_odds) => ({
+      selections: [{ event_id: 1, selection_id: 1 }],
+      is_settled: false,
+      stake: 1,
+      potential_win: 1,
+      parsed_odds
+    })
+
+    it('files a price AT a bucket bound in the bucket above it', () => {
+      // ODDS_BUCKETS is scanned for the first `wager_odds < upper_bound`, so
+      // the bound is exclusive and +100 belongs to range_100_400. Flipping the
+      // comparison to <= moves all three of these one bucket down, which is
+      // exactly the off-by-one a fixture of interior values cannot see.
+      const summary = calculate_wager_summary({
+        wagers: [priced(99), priced(100), priced(400)]
+      })
+
+      expect(summary.wagers_by_odds_range.under_100).to.equal(1)
+      expect(summary.wagers_by_odds_range.range_100_400).to.equal(1)
+      expect(summary.wagers_by_odds_range.range_400_1000).to.equal(1)
+    })
+
+    it('files a negative price under_100 rather than dropping it', () => {
+      // A favourite is the most common price there is. `find` returning
+      // undefined for it would silently drop the wager from the histogram
+      // while still counting it in `wagers`, so the two disagree.
+      const summary = calculate_wager_summary({ wagers: [priced(-110)] })
+
+      expect(summary.wagers_by_odds_range.under_100).to.equal(1)
+      expect(summary.wagers).to.equal(1)
+    })
+
+    it('catches the top bucket, so no price falls out of the histogram', () => {
+      // over_1000000 carries Infinity as its bound. A finite bound there sends
+      // `find` to undefined and increment_odds_bucket returns the counts
+      // unchanged -- a silent drop, not an error.
+      const summary = calculate_wager_summary({
+        wagers: [priced(1000000), priced(Number.MAX_SAFE_INTEGER)]
+      })
+      const histogram_total = Object.values(
+        summary.wagers_by_odds_range
+      ).reduce((total, count) => total + count, 0)
+
+      expect(summary.wagers_by_odds_range.over_1000000).to.equal(2)
+      expect(histogram_total).to.equal(summary.wagers)
+    })
+
+    it('leaves a wager carrying no price out of the histogram entirely', () => {
+      // Odds of 0 mean "no price", per the module's own comment. It must not
+      // land in under_100, which would drag the average price down.
+      const summary = calculate_wager_summary({ wagers: [priced(0)] })
+      const histogram_total = Object.values(
+        summary.wagers_by_odds_range
+      ).reduce((total, count) => total + count, 0)
+
+      expect(summary.wagers).to.equal(1)
+      expect(summary.wagers_with_odds).to.equal(0)
+      expect(histogram_total).to.equal(0)
+    })
+  })
+
+  describe('gross return', function () {
+    const lost_leg_wager = {
+      selections: [{ event_id: 1, selection_id: 1, is_lost: true }],
+      is_settled: true,
+      stake: 10,
+      potential_win: 60
+    }
+
+    it('pays a hypothetical win its potential, not the nothing it really returned', () => {
+      // The wager genuinely lost and the book paid 0. Asking "what if this prop
+      // had hit" is the whole point of `props`, so only potential_win can
+      // express the answer -- `actual_return ?? potential_win` would read the
+      // real 0 here and report the counterfactual as a break-even.
+      const summary = calculate_wager_summary({
+        wagers: [{ ...lost_leg_wager, actual_return: 0 }],
+        props: [{ event_id: 1, selection_id: 1 }]
+      })
+
+      expect(summary.wagers_won).to.equal(1)
+      expect(summary.total_return).to.equal(60)
+      expect(summary.total_won).to.equal(50)
+    })
+
+    it('prefers what the book actually paid on a real win', () => {
+      // A real win must NOT read potential_win, or a partially-voided or
+      // reduced-odds settlement reports profit the book never paid.
+      const summary = calculate_wager_summary({
+        wagers: [
+          {
+            selections: [{ event_id: 1, selection_id: 1, is_won: true }],
+            is_settled: true,
+            is_won: true,
+            stake: 10,
+            potential_win: 60,
+            actual_return: 55
+          }
+        ]
+      })
+
+      expect(summary.total_return).to.equal(55)
+      expect(summary.total_won).to.equal(45)
+    })
+
+    it('returns nothing for a lost wager even when the book recorded a payout', () => {
+      // is_lost short-circuits ahead of the `actual_return || 0` tail. Without
+      // it a stray actual_return on a losing wager becomes phantom profit.
+      const summary = calculate_wager_summary({
+        wagers: [{ ...lost_leg_wager, actual_return: 999 }]
+      })
+
+      expect(summary.wagers_loss).to.equal(1)
+      expect(summary.total_return).to.equal(0)
+      expect(summary.total_won).to.equal(0)
+    })
+
+    it('contributes nothing from an open wager', () => {
+      const summary = calculate_wager_summary({
+        wagers: [
+          {
+            selections: [{ event_id: 1, selection_id: 1 }],
+            is_settled: false,
+            stake: 10,
+            potential_win: 60
+          }
+        ]
+      })
+
+      expect(summary.wagers_open).to.equal(1)
+      expect(summary.total_return).to.equal(0)
+    })
+  })
+
+  describe('calculate_props_summary', function () {
+    it('counts every selection, hits only the winners, and sums implied probability', () => {
+      // +100 implies 0.5 and -200 implies 0.6667; a selection with no price
+      // contributes 0 to the implied total but still counts as a selection, so
+      // the three fields cannot be collapsed into one another.
+      const summary = calculate_props_summary([
+        { event_id: 1, selection_id: 1, parsed_odds: 100, is_won: true },
+        { event_id: 1, selection_id: 2, parsed_odds: -200, is_won: false },
+        { event_id: 1, selection_id: 3, is_won: true }
+      ])
+
+      expect(summary.total_selections).to.equal(3)
+      expect(summary.actual_hits).to.equal(2)
+      expect(summary.market_implied_hits).to.be.closeTo(1.1667, 0.0001)
+    })
+
+    it('returns a zeroed summary for no props rather than NaN', () => {
+      // Vacuity guard: the cases above compare against a populated fixture, so
+      // an implementation that returned the seed unconditionally would still
+      // need this to hold.
+      const summary = calculate_props_summary([])
+
+      expect(summary.total_selections).to.equal(0)
+      expect(summary.actual_hits).to.equal(0)
+      expect(summary.market_implied_hits).to.equal(0)
+    })
+  })
+
+  describe('display formatters', function () {
+    it('formats a metric result to one decimal, and a missing one as a dash', () => {
+      expect(format_metric_result(12.34)).to.equal('12.3')
+      // Zero is a real measurement and must not take the null branch.
+      expect(format_metric_result(0)).to.equal('0.0')
+      expect(format_metric_result(null)).to.equal('-')
+      expect(format_metric_result(undefined)).to.equal('-')
+    })
+
+    it('signs a threshold distance only when it is above the line', () => {
+      expect(format_threshold_distance(2.5)).to.equal('+2.5')
+      expect(format_threshold_distance(-2.5)).to.equal('-2.5')
+      // Exactly on the line is neither above nor below: `distance > 0` is
+      // false, so no plus sign. A `>=` here would read as beating the line.
+      expect(format_threshold_distance(0)).to.equal('0.0')
+      expect(format_threshold_distance(null)).to.equal('-')
+    })
+
+    it('converts American odds to a profit ratio over 1', () => {
+      // decimal - 1: +500 pays 5 to 1, -110 pays 0.91 to 1. Dropping the -1
+      // reports the stake as profit on every row.
+      expect(format_american_odds_as_fractional(500)).to.equal('5.00/1')
+      expect(format_american_odds_as_fractional(-110)).to.equal('0.91/1')
+      expect(format_american_odds_as_fractional(null)).to.equal('-')
+      expect(format_american_odds_as_fractional(undefined)).to.equal('-')
+    })
+
+    it('renders an unpriceable input as NaN/1, which the null guard does not cover', () => {
+      // b89f5ab53 removed a try/catch here. It was already dead code -- oddslib
+      // returns NaN rather than throwing -- so removing it changed nothing, but
+      // neither the old nor the new version reaches the '-' the null branch
+      // returns. This pins the gap rather than endorsing it: a fix belongs in
+      // the guard, and this case is what would then go red to announce it.
+      expect(format_american_odds_as_fractional(NaN)).to.equal('NaN/1')
     })
   })
 
