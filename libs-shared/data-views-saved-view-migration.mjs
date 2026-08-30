@@ -951,6 +951,16 @@ export const PARAM_KEY_RENAMES = Object.assign(
 // 2026-08-05.
 export const MIGRATED_PARAM_KEYS = new Set(Object.keys(PARAM_KEY_RENAMES))
 
+// Materialized ONCE. migrate_params iterates this per column entry, and since
+// the saved-view read path landed in the two view reducers it runs on the main
+// thread for every entry of every view a list fetch returns. Rebuilding a
+// 190-entry array of pairs there cost 44 of the 47ms a production-shaped fetch
+// (189 views, 3262 entries) spent in migrate_table_state -- about three dropped
+// frames on a dev machine and several times that on a phone. Array order is
+// Object.entries order, which is the declared merge order the chain resolution
+// above depends on, so hoisting preserves it exactly.
+const PARAM_KEY_RENAME_ENTRIES = Object.entries(PARAM_KEY_RENAMES)
+
 // ===========================================================================
 // Derived views for consumers outside the migration path
 // ===========================================================================
@@ -1058,7 +1068,7 @@ const migrate_params = (params) => {
     }
   }
 
-  for (const [legacy_key, current_key] of Object.entries(PARAM_KEY_RENAMES)) {
+  for (const [legacy_key, current_key] of PARAM_KEY_RENAME_ENTRIES) {
     if (!Object.prototype.hasOwnProperty.call(next, legacy_key)) continue
     const { [legacy_key]: value, ...rest } = next
     // A view that somehow carries both keys keeps the current one; the legacy

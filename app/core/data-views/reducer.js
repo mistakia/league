@@ -17,19 +17,21 @@ import { migrate_table_state } from '#libs-shared/data-views-saved-view-migratio
 // server rewrites param KEYS on the query boundary (build_param_key_rewrite in
 // libs-server/get-data-view-results.mjs) and never column ids, so a row in
 // user_data_views holding a renamed id reached the reselect mapProps in
-// app/views/pages/data-views/index.js and threw `Field not found for
-// column_id` -- a blank page for that view's owner, indefinitely, until
-// somebody remembered to run scripts/migrate-data-views-saved.mjs by hand.
-// Signals 127159/127160 (2026-08-28) are that failure, eleven days after the
-// rule landed.
+// app/views/pages/data-views/index.js, which does NOT throw -- it calls
+// report_error and `continue`s, dropping the column from the render. So the
+// user loses a column silently and the only trace is a log_error signal;
+// signals 127159/127160 (2026-08-28) are exactly that, raised eleven days
+// after the rule landed and cleared only by someone remembering to run
+// scripts/migrate-data-views-saved.mjs by hand.
 //
 // READ-ONLY on purpose: this rewrites what enters the store and never writes
 // back to the server. A view hydrated from a shared /u/<hash> link can have a
-// foreign owner or none, and handle_save_data_view forks any such view into a
-// NEW row (client_generated_view_id) rather than updating in place -- so an
-// automatic write-back would mint duplicate views for readers of other
-// people's links. The one-shot script stays the durable rewrite; this is the
-// guarantee that a stranded row still renders in the meantime.
+// foreign owner or none, and the save_data_view saga (app/core/data-views/
+// sagas.js) forks any such view into a NEW row via client_generated_view_id
+// rather than updating in place -- so an automatic write-back would mint
+// duplicate views for readers of other people's links. The one-shot script
+// stays the durable rewrite; this is the guarantee that a stranded row still
+// renders in the meantime.
 //
 // Applied at EVERY point a persisted table_state enters the store, not just
 // the server fetches: a browser snapshot restored by
