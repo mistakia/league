@@ -85,10 +85,14 @@ export async function load_nfl_schedules_for_weeks({
 }) {
   log(`Loading NFL schedules for year ${season_year}, weeks ${weeks.join(',')}`)
 
+  // Exactly the requested season type, never a widened set. nfl_games numbers
+  // POST weeks from 1, so for weeks 1-4 a REG and a POST game share a week
+  // number, and the schedule below keys one entry per team -- admitting both
+  // made the surviving row a function of the query plan rather than of what the
+  // caller asked for. No caller passes anything but the REG default today.
   const games = await db('nfl_games')
-    .where({ season_year })
+    .where({ season_year, season_type })
     .whereIn('week', weeks)
-    .whereIn('season_type', season_type === 'POST' ? ['POST'] : ['REG', 'POST'])
     .select(
       'away_nfl_team',
       'home_nfl_team',

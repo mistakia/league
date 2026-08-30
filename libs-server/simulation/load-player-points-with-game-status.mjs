@@ -46,16 +46,10 @@ export async function load_player_points_with_game_status({
   // schedule lookup below.
   const player_info = await load_player_info({ player_ids })
 
-  // The schedule is keyed by NFL team abbreviation, so one entry per team per
-  // week. Its season_type filter excludes PRE and nothing else: on the default
-  // it admits REG and POST together (load-nfl-schedule.mjs), and nfl_games
-  // numbers POST weeks from 1, so for weeks 1-4 of a season whose postseason
-  // has been played two rows collide on the same team key. The query has no
-  // ORDER BY, so which one survives is planner-dependent. A player whose entry
-  // resolves to the POST game is then classified complete, finds no gamelog for
-  // that esbid, and drops out of the returned map entirely. KNOWN DEFECT, not
-  // handled here — every current caller asks for weeks 15-18, which cannot
-  // collide. Its JSDoc declares only `object`, so narrow it to the two fields
+  // The schedule is keyed by NFL team abbreviation, one entry per team, and
+  // load_nfl_schedule filters to exactly the season type asked for — so the REG
+  // week this reads cannot be displaced by the POST game sharing its week
+  // number. Its JSDoc declares only `object`, so narrow it to the two fields
   // read below.
   const schedule =
     /** @type {Record<string, { esbid: number, is_final: boolean }>} */ (
