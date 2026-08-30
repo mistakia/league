@@ -368,7 +368,17 @@ const importPlaysForWeek = async ({
       .where({ esbid: game.esbid, play_type_nfl: 'END_GAME' })
       .first()
 
-    if (!force_update && !ignore_cache && haveEndPlay) {
+    // The two flags mean different things and this guard consults only one of
+    // them. `ignore_cache` bypasses the HTTP response cache, which is why it is
+    // passed to get_plays_v1 below and to nothing else; `force_update` (the
+    // --final flag) is what overrides this completed-game skip.
+    //
+    // Reading `ignore_cache` here as well is what produced the re-finalization
+    // loop: six cron lines pass --ignore_cache as a house habit to force a
+    // fresh fetch, every one of them therefore also defeated this skip, and
+    // every completed game was re-imported and re-finalized on every pass. A
+    // caller that genuinely needs a completed game re-imported passes --final.
+    if (!force_update && haveEndPlay) {
       log(`skipping esbid: ${game.esbid}, already have final play`)
       skip_count += 1
       continue

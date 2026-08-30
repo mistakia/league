@@ -82,6 +82,16 @@ const setup_signal_handlers = () => {
  */
 const run_import_iteration = async () => {
   try {
+    // ignore_cache stays. This is the flag that produced the re-finalization
+    // loop on the cron lines, so a later reader will recognise it here and
+    // remove it -- but for a worker polling an IN-PROGRESS game, forcing an
+    // HTTP re-fetch is the flag doing its real job, and stripping it would
+    // serve a cached playlist and stall live scoring.
+    //
+    // What made the flag dangerous was the completed-game skip also reading
+    // it. That conflation is gone: the skip now keys on force_update alone,
+    // and the finalization watermark guard is what keeps a repeat poll from
+    // redoing work.
     const result = await with_timeout(
       import_plays_nfl_v1({ ignore_cache: true }),
       ITERATION_TIMEOUT_MS
