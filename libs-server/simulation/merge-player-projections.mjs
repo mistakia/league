@@ -3,7 +3,7 @@
  * Extracts the common projection merging pattern used across simulation orchestrators.
  */
 
-import { merge_market_stats_with_traditional } from './load-simulation-data.mjs'
+import { merge_market_stats_with_traditional } from './load-projection-data.mjs'
 
 /**
  * Merge market projections with traditional projections for a set of players.

@@ -14,6 +14,7 @@ import {
   load_player_projections,
   load_player_projection_stats
 } from './load-projection-data.mjs'
+import { merge_player_projections } from './merge-player-projections.mjs'
 
 const log = debug('simulation:load-simulation-data')
 
@@ -178,10 +179,6 @@ export async function load_player_points_with_game_status({
 
   // Load scoring format for market projection calculation
   const league_settings = await load_scoring_format({ scoring_format_id })
-
-  // Import merge helper dynamically to avoid circular dependency
-  const { merge_player_projections } =
-    await import('./merge-player-projections.mjs')
 
   // Load raw projection stats for stat-level merging
   const traditional_stats = await load_player_projection_stats({
