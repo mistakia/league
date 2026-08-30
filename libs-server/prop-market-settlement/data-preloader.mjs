@@ -61,7 +61,7 @@ export const preload_game_data = async (esbids) => {
 // under its UNQUALIFIED name, which is what the handler reads and what the gate
 // therefore compares against -- hence the derived list below rather than a
 // second hand-written one that could disagree with this.
-export const player_gamelog_select_columns = [
+const player_gamelog_select_columns = [
   'player_gamelogs.esbid',
   'player_gamelogs.pid',
   'player_gamelogs.season_year',

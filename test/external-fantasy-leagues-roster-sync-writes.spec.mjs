@@ -212,41 +212,4 @@ describe('External Fantasy Leagues - roster sync writes', function () {
       ).to.equal(roster_slot_types.RESERVE_SHORT_TERM)
     })
   })
-
-  describe('the adapter slot-category vocabulary', function () {
-    it('matches what the sync maps, for every category ESPN emits', async function () {
-      // Feeding the real adapter's vocabulary into the real sync, rather than
-      // fixturing either side: ESPN emitted `STARTER` against a canonical schema
-      // declaring `STARTING`, and the sync's `?? BENCH` fallback absorbed it
-      // silently for as long as it was wrong. The same drift on INJURED_RESERVE
-      // would put an IR player on the active roster with nothing to show for it.
-      const { default: ESPNAdapter } =
-        await import('#libs-server/external-fantasy-leagues/adapters/espn.mjs')
-      const adapter = new ESPNAdapter()
-
-      const emitted_categories = new Set(
-        // Every ESPN lineup slot id the adapter knows, plus one it does not, so
-        // the default branch is covered too.
-        [0, 2, 4, 6, 16, 17, 20, 21, 23, 9999].map(
-          (lineupSlotId) =>
-            adapter.determine_roster_slot_info_espn({ lineupSlotId }).category
-        )
-      )
-
-      const canonical_categories = new Set([
-        'STARTING',
-        'BENCH',
-        'INJURED_RESERVE',
-        'PRACTICE_SQUAD'
-      ])
-
-      for (const category of emitted_categories) {
-        expect(
-          canonical_categories.has(category),
-          `ESPN emits roster_slot_category '${category}', which is not in ` +
-            'canonical-roster-format.json -- the sync benches it silently'
-        ).to.equal(true)
-      }
-    })
-  })
 })

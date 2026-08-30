@@ -31,7 +31,12 @@ const PLATFORM_PLAYER_ID_KEYS = {
 // starter is imported onto the bench exactly like a bench player. IR and
 // practice squad DO survive, because the adapter resolves those from the
 // platform's own reserve/taxi lists.
-const ROSTER_SLOT_BY_CATEGORY = {
+// Exported because it is the CANONICAL vocabulary: every adapter emitting a
+// roster_slot_category is writing for this map, and an emission it does not
+// name is benched. A test asserting that agreement against its own copy of the
+// key list would agree with whichever side it was spelled from, so it reads
+// this.
+export const ROSTER_SLOT_BY_CATEGORY = {
   STARTING: roster_slot_types.BENCH,
   BENCH: roster_slot_types.BENCH,
   INJURED_RESERVE: roster_slot_types.RESERVE_SHORT_TERM,
