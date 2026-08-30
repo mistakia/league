@@ -58,6 +58,63 @@ const MARKET_HISTORY_UPDATE_FIELDS = [
 // Fields that trigger an index update when changed
 const MARKET_INDEX_UPDATE_FIELDS = ['esbid', 'season_year']
 
+const MARKET_INDEX_CONFLICT_TARGET = [
+  'source_id',
+  'source_market_id',
+  'time_type'
+]
+
+// Columns a re-observation may freely rewrite.
+const MARKET_INDEX_MERGE_COLUMNS = [
+  'market_type',
+  'source_market_name',
+  'source_event_id',
+  'source_event_name',
+  'is_open',
+  'is_live',
+  'selection_count',
+  'observed_at'
+]
+
+// And the two it may not, once the market is settled.
+//
+// esbid names the GAME a market was offered on, and settlement grades the
+// market's selections against that game. The PrizePicks importer used to
+// re-derive it on every observation from the CURRENT week and the player's
+// CURRENT team, so a market re-observed in a later week, or belonging to a
+// traded player, was silently re-stamped onto a different game -- 9,160 markets
+// ended up naming one game on their OPEN row and another on their CLOSE row,
+// across 18,418 settled selection rows.
+//
+// The importer no longer derives the stamp that way, but that fix lives in one
+// writer and this is the choke point every writer passes through. Expressing
+// the rule HERE, in the upsert rather than in a prefetch-and-branch above it,
+// is what makes it a guarantee: the decision reads the row being written, in
+// the same statement that writes it, so a concurrent settlement cannot land in
+// the gap between reading is_market_settled and acting on it. A NULL settles as
+// not-settled, which is the intended reading of the column's default.
+//
+// season_year travels with esbid and has the same failure mode, so the same
+// rule governs it.
+const MARKET_INDEX_STAMP_COLUMNS = ['esbid', 'season_year']
+
+const build_market_index_merge = () => {
+  const merge = {}
+
+  for (const column of MARKET_INDEX_MERGE_COLUMNS) {
+    merge[column] = db.raw('excluded.??', [column])
+  }
+
+  for (const column of MARKET_INDEX_STAMP_COLUMNS) {
+    merge[column] = db.raw(
+      'case when prop_markets_index.is_market_settled then prop_markets_index.?? else excluded.?? end',
+      [column, column]
+    )
+  }
+
+  return merge
+}
+
 // Deduplicate inserts by generating a unique key for each record
 const deduplicate_inserts = (inserts, get_key) => {
   const unique = new Map()
@@ -485,8 +542,8 @@ export default async function (markets, { dry_run = false } = {}) {
           index_promises.push(
             db('prop_markets_index')
               .insert(unique_market_index)
-              .onConflict(['source_id', 'source_market_id', 'time_type'])
-              .merge()
+              .onConflict(MARKET_INDEX_CONFLICT_TARGET)
+              .merge(build_market_index_merge())
           )
         }
 

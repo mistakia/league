@@ -176,6 +176,7 @@ DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_dl_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_db_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
+DROP INDEX IF EXISTS public.nfl_games_prizepicks_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_games_nflverse_game_id;
 DROP INDEX IF EXISTS public.nfl_game_coaches_team;
 DROP INDEX IF EXISTS public.manager_waitlist_submissions_submitted_at_index;
@@ -4880,7 +4881,7 @@ CREATE TABLE public.league_team_forecast (
     season_year smallint,
     day integer NOT NULL,
     playoff_odds numeric(5,4) NOT NULL,
-    division_odds numeric(5,4) NOT NULL,
+    division_odds numeric(5,4),
     bye_odds numeric(5,4) NOT NULL,
     championship_odds numeric(5,4) NOT NULL,
     generated_at timestamp with time zone NOT NULL,
@@ -5373,7 +5374,8 @@ CREATE TABLE public.nfl_games (
     sportradar_season_id character varying,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     pff_game_id bigint,
-    finalized_plays_updated_at timestamp with time zone
+    finalized_plays_updated_at timestamp with time zone,
+    prizepicks_game_id character varying
 );
 
 
@@ -5382,6 +5384,13 @@ CREATE TABLE public.nfl_games (
 --
 
 COMMENT ON COLUMN public.nfl_games.finalized_plays_updated_at IS 'Watermark over nfl_plays.updated covered by the last successful finalization of this game. Read before finalization begins, written only on full success. Null means never finalized.';
+
+
+--
+-- Name: COLUMN nfl_games.prizepicks_game_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_games.prizepicks_game_id IS 'PrizePicks'' own identifier for this game, as carried on a projection''s attributes.game_id (for example NFL_game_O0Bbd8YaAfhi417H0Zeb0wTF). Resolves a prop market to its game without re-deriving from the current week and the player''s current team. Null means no crosswalk entry and the importer falls back to the team-based match.';
 
 
 --
@@ -33175,6 +33184,13 @@ CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (nfl_t
 --
 
 CREATE INDEX nfl_games_nflverse_game_id ON public.nfl_games USING btree (nflverse_game_id);
+
+
+--
+-- Name: nfl_games_prizepicks_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX nfl_games_prizepicks_game_id_idx ON public.nfl_games USING btree (prizepicks_game_id);
 
 
 --

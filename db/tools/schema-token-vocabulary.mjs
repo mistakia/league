@@ -1118,6 +1118,11 @@ const ratified_system_names = [
   'otc',
   'pff',
   'pfr',
+  // The book's own name, ratified 2026-08-30 with nfl_games.prizepicks_game_id.
+  // Same category as `draftkings` and `fanduel`, which are already here: a
+  // betting source that publishes its own brand, not an abbreviation this
+  // schema is declining to spell out.
+  'prizepicks',
   'rotowire',
   'rotoworld',
   'rtm',

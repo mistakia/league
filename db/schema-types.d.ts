@@ -1922,7 +1922,7 @@ export interface LeagueTeamForecastRow {
   season_year: number | null
   day: number
   playoff_odds: number
-  division_odds: number
+  division_odds: number | null
   bye_odds: number
   championship_odds: number
   generated_at: Date
@@ -2236,6 +2236,7 @@ export interface NflGamesRow {
   nfl_week_id: string | null
   pff_game_id: number | null
   finalized_plays_updated_at: Date | null
+  prizepicks_game_id: string | null
 }
 
 export interface NflGamesChangelogRow {
