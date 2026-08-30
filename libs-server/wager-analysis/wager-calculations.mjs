@@ -265,8 +265,8 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
         wagers_cashed_out: is_cashed_out
           ? accumulator.wagers_cashed_out + 1
           : accumulator.wagers_cashed_out,
-        max_potential_win:
-          accumulator.max_potential_win + (wager.potential_win || 0),
+        total_potential_win:
+          accumulator.total_potential_win + (wager.potential_win || 0),
         open_potential_win: is_settled
           ? accumulator.open_potential_win
           : accumulator.open_potential_win + (wager.potential_win || 0),
@@ -309,7 +309,7 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       wagers_open: 0,
       total_won: 0,
       total_return: 0,
-      max_potential_win: 0,
+      total_potential_win: 0,
       open_potential_win: 0,
       wagers_with_odds: 0,
       wagers_odds_sum: 0,

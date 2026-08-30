@@ -24,7 +24,7 @@ export const build_selection_index = ({ wagers }) => {
           exposure_count: 0,
           open_wagers: 0,
           open_potential_payout: 0,
-          max_potential_payout: 0,
+          total_potential_payout: 0,
           week: dayjs(selection.start_time)
             .subtract(2, 'day')
             .diff(current_season.regular_season_start, 'weeks')
@@ -32,7 +32,7 @@ export const build_selection_index = ({ wagers }) => {
       }
 
       selections_index[key].exposure_count += 1
-      selections_index[key].max_potential_payout += wager.potential_win
+      selections_index[key].total_potential_payout += wager.potential_win
 
       if (!wager.is_settled) {
         selections_index[key].open_wagers += 1
@@ -205,7 +205,7 @@ export const build_unique_selections = ({
         name: selection.name,
         exposure_rate: `${((selection.exposure_count / filtered_wagers.length) * 100).toFixed(2)}%`,
         open_potential_roi: `${((selection.open_potential_payout / total_risk) * 100).toFixed(0)}%`,
-        max_potential_roi: `${((selection.max_potential_payout / total_risk) * 100).toFixed(0)}%`
+        total_potential_roi: `${((selection.total_potential_payout / total_risk) * 100).toFixed(0)}%`
       }
     })
     .sort((a, b) => b.exposure_count - a.exposure_count)

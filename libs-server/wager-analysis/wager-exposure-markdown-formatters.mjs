@@ -48,8 +48,8 @@ const format_performance_summary = (wager_summary, props_summary) => {
   lines.push(format_table_row(['ROI', wager_summary.current_roi]))
   lines.push(
     format_table_row([
-      'Max Potential ROI',
-      `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+      'Total Potential ROI',
+      `${((wager_summary.total_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
     ])
   )
   lines.push(
@@ -475,7 +475,7 @@ export const format_exposures_markdown = (
         prop.parsed_odds,
         prop.result,
         prop.exposure_rate,
-        prop.max_potential_roi,
+        prop.total_potential_roi,
         threshold,
         actual,
         diff

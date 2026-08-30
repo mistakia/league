@@ -169,8 +169,8 @@ const analyze_wagers = async ({
   wager_summary.open_potential_win = Number(
     wager_summary.open_potential_win.toFixed(2)
   )
-  wager_summary.max_potential_win = Number(
-    wager_summary.max_potential_win.toFixed(2)
+  wager_summary.total_potential_win = Number(
+    wager_summary.total_potential_win.toFixed(2)
   )
 
   const { selections_index } = build_selection_index({

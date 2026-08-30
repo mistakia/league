@@ -19,7 +19,7 @@ export const create_player_exposure_table = (
       exposure_rate: `${((stats.exposure_count / filtered_wagers_count) * 100).toFixed(2)}%`,
       open_wagers: stats.open_wagers,
       open_potential_roi: `${((stats.open_potential_payout / total_risk) * 100).toFixed(0)}%`,
-      max_potential_roi: `${((stats.max_potential_payout / total_risk) * 100).toFixed(0)}%`
+      total_potential_roi: `${((stats.total_potential_payout / total_risk) * 100).toFixed(0)}%`
     }))
     .sort((a, b) => b.exposure_count - a.exposure_count)
     .forEach((player) => player_summary_table.addRow(player))
@@ -64,8 +64,8 @@ export const create_wager_summary_table = (
       : 'N/A'
   )
   add_row(
-    'Max Potential ROI',
-    `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+    'Total Potential ROI',
+    `${((wager_summary.total_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
   )
 
   // Add rows for props_summary
@@ -95,7 +95,7 @@ export const create_wager_summary_table = (
 
   if (show_potential_gain) {
     add_row('Open Potential Win', wager_summary.open_potential_win)
-    add_row('Max Potential Win', wager_summary.max_potential_win)
+    add_row('Total Potential Win', wager_summary.total_potential_win)
   }
 
   return wager_summary_table
@@ -157,10 +157,10 @@ export const create_unique_props_table = (
       result.open_potential_payout = prop.open_potential_payout.toFixed(2)
       result.open_potential_roi = prop.open_potential_roi
     }
-    result.max_potential_roi = prop.max_potential_roi
+    result.total_potential_roi = prop.total_potential_roi
 
     if (show_potential_gain) {
-      result.max_potential_payout = prop.max_potential_payout.toFixed(2)
+      result.total_potential_payout = prop.total_potential_payout.toFixed(2)
     }
 
     // Move threshold, actual, and diff columns to the end
@@ -197,7 +197,7 @@ export const create_event_exposure_table = (
         odds: prop.parsed_odds,
         result: prop.result,
         exposure_rate: prop.exposure_rate,
-        max_potential_roi: prop.max_potential_roi,
+        total_potential_roi: prop.total_potential_roi,
         open_potential_roi: prop.open_potential_roi
       }
 
@@ -207,7 +207,7 @@ export const create_event_exposure_table = (
 
       if (show_potential_gain) {
         row.open_potential_payout = prop.open_potential_payout.toFixed(2)
-        row.max_potential_payout = prop.max_potential_payout.toFixed(2)
+        row.total_potential_payout = prop.total_potential_payout.toFixed(2)
       }
 
       // Move threshold, actual, and diff columns to the end

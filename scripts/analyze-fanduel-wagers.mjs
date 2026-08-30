@@ -118,7 +118,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
             : is_won
               ? accumulator.total_return + potential_win
               : accumulator.total_return,
-        max_potential_win: accumulator.max_potential_win + potential_win,
+        total_potential_win: accumulator.total_potential_win + potential_win,
         open_potential_win:
           accumulator.open_potential_win + Number(wager.potentialWin),
 
@@ -138,7 +138,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       total_risk: 0,
       total_won: 0,
       total_return: 0,
-      max_potential_win: 0,
+      total_potential_win: 0,
       open_potential_win: 0,
       lost_by_legs: {}
     }
@@ -222,7 +222,7 @@ const analyze_fanduel_wagers = async ({
         .subtract('2', 'day')
         .diff(current_season.regular_season_start, 'weeks')
 
-      let max_potential_payout = 0
+      let total_potential_payout = 0
       let open_potential_payout = 0
       let open_wagers = 0
       let exposure_count = 0
@@ -234,7 +234,7 @@ const analyze_fanduel_wagers = async ({
               open_wagers += 1
             }
             open_potential_payout += Number(wager.potentialWin)
-            max_potential_payout +=
+            total_potential_payout +=
               Number(wager.currentSize) *
               (Number(wager.betPrices.betPrice.decimalPrice) || 0)
             exposure_count += 1
@@ -279,7 +279,7 @@ const analyze_fanduel_wagers = async ({
         exposure_count,
         open_wagers,
         open_potential_payout,
-        max_potential_payout,
+        total_potential_payout,
         name,
         week,
         exposure_rate: `${((exposure_count / filtered.length) * 100).toFixed(
@@ -289,9 +289,10 @@ const analyze_fanduel_wagers = async ({
           ((open_potential_payout / wager_summary.total_risk) * 100).toFixed(
             0
           ) + '%',
-        max_potential_roi:
-          ((max_potential_payout / wager_summary.total_risk) * 100).toFixed(0) +
-          '%'
+        total_potential_roi:
+          ((total_potential_payout / wager_summary.total_risk) * 100).toFixed(
+            0
+          ) + '%'
       }
     })
     .sort((a, b) => b.exposure_count - a.exposure_count)
@@ -310,8 +311,8 @@ const analyze_fanduel_wagers = async ({
   wager_summary.open_potential_win = Number(
     wager_summary.open_potential_win.toFixed(2)
   )
-  wager_summary.max_potential_win = Number(
-    wager_summary.max_potential_win.toFixed(2)
+  wager_summary.total_potential_win = Number(
+    wager_summary.total_potential_win.toFixed(2)
   )
 
   const wager_summary_table = new Table({ title: 'Execution Summary' })
@@ -328,9 +329,9 @@ const analyze_fanduel_wagers = async ({
         (wager_summary.open_potential_win / wager_summary.total_risk - 1) *
         100
       ).toFixed(0) + '%',
-    max_potential_roi:
+    total_potential_roi:
       (
-        (wager_summary.max_potential_win / wager_summary.total_risk - 1) *
+        (wager_summary.total_potential_win / wager_summary.total_risk - 1) *
         100
       ).toFixed(0) + '%',
     ...props_summary
@@ -347,7 +348,7 @@ const analyze_fanduel_wagers = async ({
 
   if (show_potential_gain) {
     wager_table_row.open_potential_win = wager_summary.open_potential_win
-    wager_table_row.max_potential_win = wager_summary.max_potential_win
+    wager_table_row.total_potential_win = wager_summary.total_potential_win
   }
 
   wager_summary_table.addRow(wager_table_row)
@@ -386,13 +387,13 @@ const analyze_fanduel_wagers = async ({
       odds: prop.americanPrice,
       exposure_rate: prop.exposure_rate,
       result: prop.result,
-      max_potential_roi: prop.max_potential_roi,
+      total_potential_roi: prop.total_potential_roi,
       open_potential_roi: prop.open_potential_roi
     }
 
     if (show_potential_gain) {
       result.open_potential_payout = prop.open_potential_payout.toFixed(2)
-      result.max_potential_payout = prop.max_potential_payout.toFixed(2)
+      result.total_potential_payout = prop.total_potential_payout.toFixed(2)
     }
 
     if (show_counts) {
@@ -424,7 +425,7 @@ const analyze_fanduel_wagers = async ({
           odds: prop.americanPrice,
           exposure_rate: prop.exposure_rate,
           result: prop.result,
-          max_potential_roi: prop.max_potential_roi,
+          total_potential_roi: prop.total_potential_roi,
           open_potential_roi: prop.open_potential_roi
         }
 
@@ -434,7 +435,7 @@ const analyze_fanduel_wagers = async ({
 
         if (show_potential_gain) {
           row.open_potential_payout = prop.open_potential_payout.toFixed(2)
-          row.max_potential_payout = prop.max_potential_payout.toFixed(2)
+          row.total_potential_payout = prop.total_potential_payout.toFixed(2)
         }
 
         event_table.addRow(row)

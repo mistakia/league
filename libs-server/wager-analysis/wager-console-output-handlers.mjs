@@ -49,7 +49,7 @@ export const print_player_exposure_if_requested = ({
         exposure_count: 0,
         open_wagers: 0,
         open_potential_payout: 0,
-        max_potential_payout: 0,
+        total_potential_payout: 0,
         props_count: 0
       }
     }
@@ -58,8 +58,8 @@ export const print_player_exposure_if_requested = ({
     acc[selection.player_name].open_wagers += selection.open_wagers
     acc[selection.player_name].open_potential_payout +=
       selection.open_potential_payout
-    acc[selection.player_name].max_potential_payout +=
-      selection.max_potential_payout
+    acc[selection.player_name].total_potential_payout +=
+      selection.total_potential_payout
     acc[selection.player_name].props_count += 1
 
     return acc
