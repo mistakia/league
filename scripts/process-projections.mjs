@@ -62,7 +62,7 @@ const timestamp = new Date()
  * Run season forecast simulation and save results.
  * Uses the new player-level correlation simulation system.
  */
-const run_season_forecast = async (lid) => {
+export const run_season_forecast = async (lid) => {
   if (isNaN(lid)) {
     log('Skipping season forecast - invalid lid')
     return
@@ -71,77 +71,79 @@ const run_season_forecast = async (lid) => {
   const year = current_season.year
   let forecast_result
 
-  try {
-    // Get league to access wildcard_round and championship_round from seasons table
-    const league = await getLeague({ lid, year })
-    if (!league) {
-      log(`League ${lid} not found, skipping forecast`)
-      return
-    }
+  // No catch here. simulate_season_forecast stopped fabricating a 50/50 result
+  // for a week it could not simulate and now throws, on the reasoning that no
+  // substitute outcome is acceptable -- and a catch that logs and returns puts
+  // that fix straight back to sleep, because this script's only real surface is
+  // the pipeline_failure signal main() emits. The cron line runs bare node with
+  // no job-wrapper and main() ends in a bare process.exit(), so the exit code
+  // reaches nobody; rethrowing to it would surface nothing. run() already wraps
+  // each league in its own try/catch and collects the failure with
+  // stage 'process_league', which feeds that one signal. Let it propagate.
+  const league = await getLeague({ lid, year })
+  if (!league) {
+    // run() only calls this for hosted leagues, so a missing league row is a
+    // broken invariant rather than a league with nothing to forecast.
+    throw new Error(`League ${lid} not found, cannot run forecast`)
+  }
 
-    const wildcard_round = league.wildcard_round
-    const championship_round = league.championship_round || []
-    const championship_start_week =
-      championship_round.length > 0 ? championship_round[0] : null
+  const wildcard_round = league.wildcard_round
+  const championship_round = league.championship_round || []
+  const championship_start_week =
+    championship_round.length > 0 ? championship_round[0] : null
 
-    if (current_season.week <= current_season.regular_season_final_week) {
-      log(`Running season forecast for league ${lid}`)
-      forecast_result = await simulation.simulate_season_forecast({
-        league_id: lid,
-        year
-      })
-    } else if (wildcard_round && current_season.week === wildcard_round) {
-      log(
-        `Running wildcard forecast for league ${lid} (week ${wildcard_round})`
-      )
-      forecast_result = await simulation.simulate_wildcard_forecast({
-        league_id: lid,
-        year
-      })
-    } else if (
-      championship_start_week &&
-      current_season.week >= championship_start_week &&
-      current_season.week <= current_season.final_week
-    ) {
-      log(
-        `Running championship forecast for league ${lid} (starting week ${championship_start_week})`
-      )
-      forecast_result = await simulation.simulate_championship_forecast({
-        league_id: lid,
-        year
-      })
-    } else {
-      log('No forecast to run - season complete')
-      return
-    }
+  if (current_season.week <= current_season.regular_season_final_week) {
+    log(`Running season forecast for league ${lid}`)
+    forecast_result = await simulation.simulate_season_forecast({
+      league_id: lid,
+      year
+    })
+  } else if (wildcard_round && current_season.week === wildcard_round) {
+    log(`Running wildcard forecast for league ${lid} (week ${wildcard_round})`)
+    forecast_result = await simulation.simulate_wildcard_forecast({
+      league_id: lid,
+      year
+    })
+  } else if (
+    championship_start_week &&
+    current_season.week >= championship_start_week &&
+    current_season.week <= current_season.final_week
+  ) {
+    log(
+      `Running championship forecast for league ${lid} (starting week ${championship_start_week})`
+    )
+    forecast_result = await simulation.simulate_championship_forecast({
+      league_id: lid,
+      year
+    })
+  } else {
+    log('No forecast to run - season complete')
+    return
+  }
 
-    // Save forecast results to database
-    const forecastInserts = []
-    for (const [tid, forecast] of Object.entries(forecast_result)) {
-      forecastInserts.push({
-        tid: Number(tid),
-        lid,
-        week: current_season.week,
-        season_year: year,
-        day: dayjs().dayOfYear(),
-        playoff_odds: forecast.playoff_odds,
-        division_odds: forecast.division_odds,
-        bye_odds: forecast.bye_odds,
-        championship_odds: forecast.championship_odds,
-        generated_at: timestamp
-      })
-    }
+  // Save forecast results to database
+  const forecastInserts = []
+  for (const [tid, forecast] of Object.entries(forecast_result)) {
+    forecastInserts.push({
+      tid: Number(tid),
+      lid,
+      week: current_season.week,
+      season_year: year,
+      day: dayjs().dayOfYear(),
+      playoff_odds: forecast.playoff_odds,
+      division_odds: forecast.division_odds,
+      bye_odds: forecast.bye_odds,
+      championship_odds: forecast.championship_odds,
+      generated_at: timestamp
+    })
+  }
 
-    if (forecastInserts.length) {
-      await db('league_team_forecast')
-        .insert(forecastInserts)
-        .onConflict(['tid', 'season_year', 'week', 'day'])
-        .merge()
-      log(`Saved ${forecastInserts.length} team forecasts`)
-    }
-  } catch (err) {
-    log(`Error running season forecast: ${err.message}`)
-    console.error(err)
+  if (forecastInserts.length) {
+    await db('league_team_forecast')
+      .insert(forecastInserts)
+      .onConflict(['tid', 'season_year', 'week', 'day'])
+      .merge()
+    log(`Saved ${forecastInserts.length} team forecasts`)
   }
 }
 

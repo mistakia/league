@@ -5,7 +5,13 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { Roster, calculatePoints } from '#libs-shared'
 import { current_season } from '#constants'
-import { is_main, getLeague, getRoster, report_job } from '#libs-server'
+import {
+  is_main,
+  getLeague,
+  getRoster,
+  report_job,
+  get_season_playoff_weeks
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -17,10 +23,33 @@ const log = debug('process-playoffs')
 enable_debug_namespaces('process-playoffs')
 
 const process_playoffs = async ({ lid, year }) => {
-  // skip if processing current season and it is before the wildcard round
-  if (year === current_season.year && current_season.week < 15) {
-    return
+  // The playoff weeks are per-league configuration on the season row, the same
+  // source simulate-playoff-forecast reads. Hardcoding 15/16/17 here wrote the
+  // rows at weeks the league does not play, so the forecast -- which resolves
+  // the configured weeks and looks for rows there -- found none. The ORDINALS
+  // (playoff_week_number 1, 2, 3) are stable and stay literal; only the week
+  // numbers drift.
+  const { wildcard_week, championship_weeks, final_week } =
+    await get_season_playoff_weeks({ lid, season_year: year })
+
+  if (year === current_season.year) {
+    // Only the current season reaches the branches that WRITE a week. A past
+    // season with no `seasons` row still processes: every branch below it takes
+    // derives its weeks from the playoffs rows that already exist, so throwing
+    // unconditionally here would break historical reprocessing.
+    if (!wildcard_week || !championship_weeks.length) {
+      throw new Error(
+        `No playoff weeks configured for league ${lid} in ${year}`
+      )
+    }
+
+    // skip if processing current season and it is before the wildcard round
+    if (current_season.week < wildcard_week) {
+      return
+    }
   }
+
+  const championship_start_week = championship_weeks[0]
 
   const league = await getLeague({ lid })
   const playoffs = await db('playoffs').where({ lid, season_year: year })
@@ -30,7 +59,7 @@ const process_playoffs = async ({ lid, year }) => {
   })
 
   const is_wildcard_round =
-    current_season.year === year && current_season.week === 15
+    current_season.year === year && current_season.week === wildcard_week
   if (!playoffs.length && is_wildcard_round) {
     log(`creating wildcard round matchups for lid ${lid} year ${year}`)
 
@@ -48,7 +77,7 @@ const process_playoffs = async ({ lid, year }) => {
         tid,
         lid,
         season_year: year,
-        week: 15 // wildcard round week
+        week: wildcard_week
       })
     }
 
@@ -112,7 +141,7 @@ const process_playoffs = async ({ lid, year }) => {
     .merge()
   log(`updated ${playoffs.length} playoff results`)
 
-  if (current_season.year !== year || current_season.week > 17) {
+  if (current_season.year !== year || current_season.week > final_week) {
     // calculate post season finish
     const playoff_teams = playoffs
       .filter((p) => p.playoff_week_number === 1)
@@ -139,7 +168,7 @@ const process_playoffs = async ({ lid, year }) => {
       overall_finish: 5
     })
 
-    // combine championship round week 16 and 17 points
+    // combine every championship round week's points
     const championship_round_matchups = playoffs.filter(
       (p) => p.playoff_week_number > 1
     )
@@ -203,9 +232,10 @@ const process_playoffs = async ({ lid, year }) => {
   }
 
   const is_championship_round =
-    current_season.year === year && current_season.week >= 16
+    current_season.year === year &&
+    current_season.week >= championship_start_week
   const missing_championship_matchups = !playoffs.some(
-    (p) => p.playoff_week_number === 2 && p.week === 16
+    (p) => p.playoff_week_number === 2 && p.week === championship_start_week
   )
   if (missing_championship_matchups && is_championship_round) {
     log(`creating championship round matchups for lid ${lid} year ${year}`)
@@ -221,28 +251,26 @@ const process_playoffs = async ({ lid, year }) => {
       .map((t) => t.tid)
 
     const wildcard_teams = playoffs
-      .filter((p) => p.playoff_week_number === 1 && p.week === 15)
+      .filter((p) => p.playoff_week_number === 1 && p.week === wildcard_week)
       .sort((a, b) => b.points - a.points)
       .slice(0, 2)
       .map((p) => p.tid)
 
     const championship_teams = [...regular_season_teams, ...wildcard_teams]
     const championship_inserts = []
+    // One row per championship week, ordinal 2 upward. The previous hand-written
+    // pair made a two-week round structural; simulate-playoff-forecast already
+    // reads playoff_week_number as an ordinal where anything above 1 is the
+    // championship round, "however many weeks that round spans".
     for (const tid of championship_teams) {
-      championship_inserts.push({
-        playoff_week_number: 2, // championship round
-        tid,
-        lid,
-        season_year: year,
-        week: 16 // championship round week
-      })
-
-      championship_inserts.push({
-        playoff_week_number: 3, // championship round
-        tid,
-        lid,
-        season_year: year,
-        week: 17 // championship round week
+      championship_weeks.forEach((championship_week, index) => {
+        championship_inserts.push({
+          playoff_week_number: index + 2,
+          tid,
+          lid,
+          season_year: year,
+          week: championship_week
+        })
       })
     }
 
