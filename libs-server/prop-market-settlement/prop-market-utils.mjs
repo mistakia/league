@@ -5,6 +5,7 @@
 
 import debug from 'debug'
 import db from '#db'
+import { get_market_types_settled_without_selection_type } from '#libs-server/prop-market-settlement/market-type-mappings.mjs'
 
 const log = debug('prop-market-utils')
 
@@ -321,6 +322,28 @@ export const fetch_markets_for_games = async ({
         // is_market_settled flag would skip selections still unsettled under a
         // market already marked settled.
         qb.whereNull('prop_market_selections_index.selection_result')
+
+        // Drop the rows no run can ever grade, or missing_only never
+        // converges: a permanent failure writes no selection_result, so the
+        // row stays null, is refetched next run and errors again, and the
+        // cron's error report grows without bound.
+        //
+        // The test is per market type, not per column. Moneyline and the
+        // spreads settle from the selected team alone, so filtering every row
+        // with a null selection_type would strand settlements that are
+        // perfectly gradeable.
+        const pid_only_market_types =
+          get_market_types_settled_without_selection_type()
+        qb.where(function () {
+          this.whereNotNull(
+            'prop_market_selections_index.selection_type'
+          ).orWhere(function () {
+            this.whereIn(
+              'prop_markets_index.market_type',
+              pid_only_market_types
+            ).whereNotNull('prop_market_selections_index.selection_pid')
+          })
+        })
       }
     })
 

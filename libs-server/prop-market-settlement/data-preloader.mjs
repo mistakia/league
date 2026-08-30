@@ -123,6 +123,10 @@ const load_nfl_plays = async (esbids) => {
       'sequence',
       // Team attribution for team_aggregate markets
       'offense_nfl_team',
+      // Which side scored, so first-touchdown markets can tell an offensive
+      // touchdown from one returned by the defense. The play-shape flags cannot:
+      // a rush fumbled and returned is still is_rushing_play.
+      'touchdown_nfl_team',
       // Player identification columns
       'passer_pid',
       'ball_carrier_pid',

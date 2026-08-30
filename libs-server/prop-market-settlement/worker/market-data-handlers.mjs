@@ -231,6 +231,12 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
    * being thrown to, not the scorer. Crediting them would settle the market
    * against the wrong player, so the market is failed instead.
    *
+   * The play-shape inference is guarded by touchdown_nfl_team rather than
+   * standing on its own, because the shape flags survive a turnover: a rush
+   * fumbled and returned is still is_rushing_play. Only the scoring team tells
+   * an offensive touchdown from a defensive one, so a row that does not name it
+   * fails too rather than being credited blind.
+   *
    * @param {object} params - Named parameters
    * @param {Array<object>} params.game_plays - All plays for the game
    * @param {object} params.market - Market object containing selection criteria
@@ -246,6 +252,30 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
     if (!first_touchdown_play) {
       return 0
+    }
+
+    // The play shape alone does not say WHICH SIDE scored. A rush or a
+    // completed pass that is fumbled and returned is still is_rushing_play or
+    // is_passing_play, and ball_carrier_pid/target_pid then hold the player who
+    // lost the ball rather than the defender who scored. touchdown_nfl_team is
+    // the only column that settles the question, so the inference below runs
+    // only once the scoring side is known to be the offense.
+    if (
+      first_touchdown_play.touchdown_nfl_team === null ||
+      first_touchdown_play.touchdown_nfl_team === undefined
+    ) {
+      throw new Error(
+        `First touchdown in game ${market.esbid} does not name the scoring team, so its scorer cannot be attributed`
+      )
+    }
+
+    if (
+      first_touchdown_play.touchdown_nfl_team !==
+      first_touchdown_play.offense_nfl_team
+    ) {
+      throw new Error(
+        `First touchdown in game ${market.esbid} was scored by the defense and nfl_plays does not name its scorer`
+      )
     }
 
     let scorer_pid = null

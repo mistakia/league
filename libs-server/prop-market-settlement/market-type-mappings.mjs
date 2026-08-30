@@ -435,7 +435,12 @@ export const market_type_mappings = {
 
 // Add alt line markets after base markets are defined. An alt line market
 // settles exactly like its base market -- only the offered line differs -- so
-// it reuses the base mapping unchanged.
+// it copies the base mapping's rules.
+//
+// A COPY, not the base object itself. Mappings carry per-market-type flags
+// (half_filter, net_of_sack_yards, special_logic), and an alias would make the
+// alt type and its base literally the same object, so any later per-type
+// adjustment to one would silently move the other.
 const alt_line_mappings = {}
 
 // Map alt line markets to their base counterparts
@@ -443,7 +448,7 @@ Object.entries(player_game_alt_prop_types).forEach(([key, value]) => {
   const base_type = key.replace('_ALT_', '_')
   const base_mapping = market_type_mappings[player_game_prop_types[base_type]]
   if (base_mapping && base_mapping.handler !== HANDLER_TYPES.UNSUPPORTED) {
-    alt_line_mappings[value] = base_mapping
+    alt_line_mappings[value] = { ...base_mapping }
   }
 })
 
@@ -475,7 +480,7 @@ Object.entries(player_quarter_alt_prop_types).forEach(([key, value]) => {
 
   const base_mapping = market_type_mappings[quarter_prop_types[base_type]]
   if (base_mapping && base_mapping.handler !== HANDLER_TYPES.UNSUPPORTED) {
-    alt_line_mappings[value] = base_mapping
+    alt_line_mappings[value] = { ...base_mapping }
   }
 })
 
@@ -500,6 +505,33 @@ export const get_supported_market_types = () => {
 export const get_unsupported_market_types = () => {
   return Object.keys(market_type_mappings).filter(
     (type) => market_type_mappings[type].handler === HANDLER_TYPES.UNSUPPORTED
+  )
+}
+
+/**
+ * Market types that grade without reading selection_type
+ *
+ * Moneyline and the spreads settle from the selected TEAM and the two scores:
+ * winner_determination compares the scores directly, and the spread branch of
+ * determine_selection_result returns before it ever looks at the type. Every
+ * other market reaches an over/under or yes/no test and cannot be graded
+ * without one.
+ *
+ * The distinction exists because a selection row with no selection_type is
+ * permanently ungradeable for most markets but perfectly gradeable for these,
+ * so a fetch that filtered on the column alone would strand real settlements.
+ *
+ * @returns {string[]} Market types settleable from selection_pid alone
+ */
+export const get_market_types_settled_without_selection_type = () => {
+  const pid_only_calculation_types = [
+    'winner_determination',
+    'point_differential_vs_spread'
+  ]
+  return Object.keys(market_type_mappings).filter((type) =>
+    pid_only_calculation_types.includes(
+      market_type_mappings[type].calculation_type
+    )
   )
 }
 
