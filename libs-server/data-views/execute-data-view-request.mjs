@@ -132,8 +132,16 @@ const data_view_query_signature = (params) => {
 // inherit one made about a different query.
 //
 // Every entry states the trade-off that was declined, so a reader sees which
-// fix was available and why it was not taken. `review_after` exists so an
-// accepted cost gets revisited instead of inherited forever.
+// fix was available and why it was not taken.
+//
+// `review_after` is a NOTE TO A READER, not a trigger. Nothing in this repo
+// reads it -- there is no job, lint or signal that fires when the date passes,
+// and a session that assumes otherwise is trusting a safety net that does not
+// exist. It records that an acceptance was meant to last months rather than
+// forever. The two mechanisms that DO operate are the two above: a run past the
+// ceiling still emits, and editing the view changes the signature so the
+// acceptance stops matching. Between them, the exposure from never revisiting
+// an entry is that a query known to cost its measured_ms keeps costing it.
 const ACCEPTED_SLOW_QUERIES = {
   da81f8407752c611: {
     threshold_ms: 8000,
@@ -148,9 +156,18 @@ const ACCEPTED_SLOW_QUERIES = {
       '-- there is no index or query rewrite left to make. The only remaining ' +
       'fix is narrowing the view (fewer columns or a shorter year range), a ' +
       'product decision we declined. 8000 deliberately does NOT cover the ' +
-      'loaded case: this class of query measured 4,992ms idle against ' +
-      '10,840ms under load, so a contended run still emits, which is the ' +
-      'run worth looking at.'
+      'loaded case, so a contended run still emits, which is the run worth ' +
+      'looking at. The idle-vs-loaded factor here was originally recorded as ' +
+      '4,992ms against 10,840ms (2.17x) under conditions nobody characterised. ' +
+      'Re-measured 2026-08-30 on interleaved arms it is 4,836ms quiet (load ' +
+      '2.1-2.8) against 6,123ms loaded (load 7.5-8.1) -- 1.27x, not 2.17x. Do ' +
+      'not project a quiet-host number off the old figure: the query is on-CPU ' +
+      '91-94% of its elapsed time, so contention costs lost PARALLELISM (7-11 ' +
+      'of 17 planned workers launch under load, 11-14 quiet) rather than wait, ' +
+      'and roughly 6.1 CPU-seconds is computation no host quieting removes. ' +
+      'Note 6593 is itself a loaded reading, and 4,836ms quiet leaves only ' +
+      '~160ms under the 5s objective while the view span grows a season a ' +
+      'year, so this acceptance is more marginal than the ceiling suggests.'
   }
 }
 
