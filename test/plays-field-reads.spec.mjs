@@ -648,6 +648,7 @@ describe('prop-market-settlement nfl_plays select coverage', function () {
         required_columns.add('is_passing_play')
         required_columns.add('ball_carrier_pid')
         required_columns.add('target_pid')
+        required_columns.add('is_completion')
       }
     }
 

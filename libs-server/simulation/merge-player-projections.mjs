@@ -20,11 +20,8 @@ import { merge_market_stats_with_traditional } from './load-simulation-data.mjs'
  * @param {Map<string, any>} params.traditional_stats - Traditional projection stats (pid -> stats object)
  * @param {Map<string, any>} params.market_projections - Market-derived projections (pid -> market data)
  * @param {Map<string, { position: string, nfl_team?: string }>} params.player_info - Player info map
- * @param {import('#db/schema-types.js').LeagueScoringFormatsRow} [params.league_settings] - League
- *   scoring settings for point calculation. OPTIONAL because it comes from a
- *   `.first()` on league_scoring_formats and its only caller guards that lookup
- *   for the market-projection load ONLY -- this call sits outside that guard, so
- *   a league with no scoring-format row reaches here with nothing.
+ * @param {import('#db/schema-types.js').LeagueScoringFormatsRow} params.league_settings - League
+ *   scoring settings for point calculation.
  * @returns {{ projections: Map<string, number>, market_merged_count: number, traditional_only_count: number }}
  */
 export function merge_player_projections({

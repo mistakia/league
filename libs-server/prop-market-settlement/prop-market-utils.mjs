@@ -26,10 +26,28 @@ const parse_score = (value) => {
 }
 
 /**
+ * Parse the line a selection is graded against
+ * @param {*} value - Line value carried by the selection row
+ * @returns {number} Parsed line
+ * @throws {Error} If the line is missing or not a number
+ */
+const parse_selection_metric_line = (value) => {
+  if (value === null || value === undefined || value === '') {
+    throw new Error('Missing selection metric line')
+  }
+  const line = Number(value)
+  if (Number.isNaN(line)) {
+    throw new Error(`Invalid selection metric line: ${value}`)
+  }
+  return line
+}
+
+/**
  * Calculate metric value by summing specified columns or using calculation_type
  * @param {object} data_item - Data object containing metric columns or game data
  * @param {object} mapping - Market mapping with metric_columns or calculation_type
- * @returns {number} Total metric value
+ * @returns {number|null} Total metric value, or null when the game has no scores yet
+ * @throws {Error} If the mapping names no metric, or a metric column holds a non-numeric value
  */
 export const calculate_metric_value = (data_item, mapping) => {
   // Handle calculation_type for NFL_GAMES handler
@@ -42,30 +60,37 @@ export const calculate_metric_value = (data_item, mapping) => {
       return null
     }
 
+    // Moneyline (winner_determination) has no case here: the NFL_GAMES handler
+    // grades it inline from the two scores and calls this only for the two
+    // calculation types below.
     switch (mapping.calculation_type) {
       case 'total_points':
         return home_score + away_score
       case 'point_differential_vs_spread':
         // Returns from home team perspective (caller adjusts for team)
         return home_score - away_score
-      case 'winner_determination':
-        // No metric value needed for moneyline
-        return null
       default:
-        return null
+        throw new Error(`Unknown calculation_type: ${mapping.calculation_type}`)
     }
   }
 
   if (!mapping.metric_columns || mapping.metric_columns.length === 0) {
-    return null
+    throw new Error(
+      `Mapping for handler ${mapping.handler} names neither a calculation_type nor metric_columns, so there is no metric to settle against`
+    )
   }
 
   let total = 0
   for (const column of mapping.metric_columns) {
     const value = data_item[column]
-    if (value !== null && value !== undefined) {
-      total += Number(value) || 0
+    if (value === null || value === undefined) {
+      continue
     }
+    const numeric_value = Number(value)
+    if (Number.isNaN(numeric_value)) {
+      throw new Error(`Non-numeric value in metric column ${column}: ${value}`)
+    }
+    total += numeric_value
   }
 
   return total
@@ -79,6 +104,7 @@ export const calculate_metric_value = (data_item, mapping) => {
  * @param {number} params.selection_metric_line - Line to compare against
  * @param {object} params.mapping - Market mapping configuration
  * @returns {string} 'WON', 'LOST', or 'PUSH'
+ * @throws {Error} If there is no metric value, no usable line, or an unknown selection type
  */
 export const determine_selection_result = ({
   metric_value,
@@ -87,23 +113,20 @@ export const determine_selection_result = ({
   mapping
 }) => {
   if (metric_value === null || metric_value === undefined) {
-    return null
+    throw new Error(
+      `No metric value to settle selection type ${selection_type} against`
+    )
   }
 
-  const line = Number(selection_metric_line) || 0
   const type = selection_type ? selection_type.toLowerCase() : null
 
-  // Handle special logic cases
-  if (mapping.special_logic === 'anytime_touchdown') {
-    if (type === 'yes') {
-      return metric_value > 0 ? 'WON' : 'LOST'
-    } else if (type === 'no') {
-      return metric_value === 0 ? 'WON' : 'LOST'
-    }
-  }
-
-  // First touchdown scorer logic
-  if (mapping.special_logic === 'first_touchdown_scorer') {
+  // Both reduce to the same scored/did-not-score test: the gamelog handler sums
+  // the player's touchdown columns, and the plays handler reduces the game's
+  // first touchdown to 1 or 0 for the selected player.
+  if (
+    mapping.special_logic === 'anytime_touchdown' ||
+    mapping.special_logic === 'first_touchdown_scorer'
+  ) {
     if (type === 'yes') {
       return metric_value > 0 ? 'WON' : 'LOST'
     } else if (type === 'no') {
@@ -125,7 +148,8 @@ export const determine_selection_result = ({
   // line is the spread (negative means favorite, positive means underdog)
   // Team covers if: point_differential + spread > 0
   if (mapping.calculation_type === 'point_differential_vs_spread') {
-    const adjusted_margin = metric_value + line
+    const adjusted_margin =
+      metric_value + parse_selection_metric_line(selection_metric_line)
     if (adjusted_margin === 0) {
       return 'PUSH'
     }
@@ -136,6 +160,7 @@ export const determine_selection_result = ({
   // Note: NFL scores are integers and lines are stored as decimals (e.g., 44.0, 44.5)
   // Integer comparison with decimal works correctly in JavaScript (44 === 44.0 is true)
   if (type === 'over' || type === 'under') {
+    const line = parse_selection_metric_line(selection_metric_line)
     if (metric_value === line) {
       return 'PUSH'
     }
@@ -166,42 +191,41 @@ export const group_by_game = (data) => {
 }
 
 /**
- * Create both OPEN and CLOSE result objects for a single market calculation
+ * Create the settlement result for one selection row
+ *
+ * A selection's OPEN and CLOSE rows can carry different lines, so each is
+ * fetched and graded on its own and the result is stamped with the time_type of
+ * the row it came from.
+ *
  * @param {object} params - Named parameters
- * @param {object} params.market - Market object (should not have time_type set)
+ * @param {object} params.market - Market object for one selection row, carrying its time_type
  * @param {number} params.metric_value - Calculated metric value
- * @param {string} params.selection_result - WON/LOST result
+ * @param {string} params.selection_result - WON/LOST/PUSH result
  * @param {string} params.handler_type - Handler type identifier
  * @param {string} params.error - Error message if any
- * @returns {Array<object>} Array with OPEN and CLOSE result objects
+ * @returns {object} Result object for the row's time_type
  */
-export const create_dual_result_objects = ({
+export const create_selection_result = ({
   market,
   metric_value,
   selection_result,
   handler_type,
   error = null
-}) => {
-  const base_result = {
-    esbid: market.esbid,
-    market_type: market.market_type,
-    selection_pid: market.selection_pid,
-    selection_type: market.selection_type,
-    selection_metric_line: market.selection_metric_line,
-    source_id: market.source_id,
-    source_market_id: market.source_market_id,
-    source_selection_id: market.source_selection_id,
-    metric_value,
-    selection_result,
-    handler_type,
-    error
-  }
-
-  return [
-    { ...base_result, time_type: 'OPEN' },
-    { ...base_result, time_type: 'CLOSE' }
-  ]
-}
+}) => ({
+  esbid: market.esbid,
+  market_type: market.market_type,
+  selection_pid: market.selection_pid,
+  selection_type: market.selection_type,
+  selection_metric_line: market.selection_metric_line,
+  source_id: market.source_id,
+  source_market_id: market.source_market_id,
+  source_selection_id: market.source_selection_id,
+  time_type: market.time_type,
+  metric_value,
+  selection_result,
+  handler_type,
+  error
+})
 
 /**
  * Format duration in human-readable format
@@ -241,15 +265,18 @@ export const validate_games_with_data = async (esbids) => {
 }
 
 /**
- * Fetch OPEN markets for specified games
- * Each fetched OPEN market will generate both OPEN and CLOSE results in the handlers
+ * Fetch settleable selection rows for specified games
+ *
+ * One row per selection per time_type, each carrying the line that row is
+ * graded against — the OPEN and CLOSE lines of a selection routinely differ, so
+ * a CLOSE row settled against its OPEN line grades the wrong bet.
  *
  * @param {object} params - Named parameters
  * @param {Array<string>} params.esbids - Game IDs to fetch markets for
  * @param {number} params.year - Season year
- * @param {boolean} params.missing_only - Only fetch unsettled markets
+ * @param {boolean} params.missing_only - Only fetch selections with no result yet
  * @param {Array<string>} params.supported_market_types - Supported market types
- * @returns {object[]} OPEN market data (will generate 2x results: OPEN and CLOSE)
+ * @returns {object[]} Selection rows, one per time_type
  */
 export const fetch_markets_for_games = async ({
   esbids,
@@ -259,7 +286,7 @@ export const fetch_markets_for_games = async ({
 }) => {
   if (!esbids || esbids.length === 0) return []
 
-  log(`Fetching markets for ${esbids.length} games`)
+  log(`Fetching selections for ${esbids.length} games`)
 
   const markets = await db('prop_market_selections_index')
     .select(
@@ -270,32 +297,46 @@ export const fetch_markets_for_games = async ({
       'prop_market_selections_index.selection_type',
       'prop_market_selections_index.source_id',
       'prop_market_selections_index.source_market_id',
-      'prop_market_selections_index.source_selection_id'
+      'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.time_type'
     )
+    // prop_markets_index is keyed by time_type too, so a join without it pairs
+    // every selection row with both market rows. That is not only a duplicate:
+    // the two rows of a market can carry different esbid, market_type and
+    // season_year, so the extra pairing grades the selection against another
+    // game. Each selection row belongs to its own snapshot's market row.
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
         '=',
         'prop_market_selections_index.source_id'
-      ).andOn(
-        'prop_markets_index.source_market_id',
-        '=',
-        'prop_market_selections_index.source_market_id'
       )
+        .andOn(
+          'prop_markets_index.source_market_id',
+          '=',
+          'prop_market_selections_index.source_market_id'
+        )
+        .andOn(
+          'prop_markets_index.time_type',
+          '=',
+          'prop_market_selections_index.time_type'
+        )
     })
     .whereIn('prop_markets_index.esbid', esbids)
     .andWhere('prop_markets_index.season_year', year)
-    .andWhere('prop_market_selections_index.time_type', 'OPEN') // Only fetch OPEN markets since we generate both OPEN and CLOSE
     .modify((qb) => {
       if (supported_market_types && supported_market_types.length > 0) {
         qb.whereIn('prop_markets_index.market_type', supported_market_types)
       }
       if (missing_only) {
-        qb.where('prop_markets_index.is_market_settled', false)
+        // Results are written at selection grain, so the market-grain
+        // is_market_settled flag would skip selections still unsettled under a
+        // market already marked settled.
+        qb.whereNull('prop_market_selections_index.selection_result')
       }
     })
 
-  log(`Found ${markets.length} markets`)
+  log(`Found ${markets.length} selections`)
 
   return markets
 }

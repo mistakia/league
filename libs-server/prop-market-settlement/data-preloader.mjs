@@ -74,9 +74,12 @@ const load_player_gamelogs = async (esbids) => {
       'player_gamelogs.receptions',
       'player_gamelogs.receiving_yards',
       'player_gamelogs.receiving_touchdowns',
+      // Return and fumble-return touchdowns (anytime / two-plus TD markets)
+      'player_gamelogs.punt_return_touchdowns',
+      'player_gamelogs.kickoff_return_touchdowns',
+      'player_gamelogs.fumble_return_touchdowns',
       // Defense stats
       'player_gamelogs.defensive_sacks',
-      'player_gamelogs.defensive_three_and_outs',
       // Kicking stats
       'player_gamelogs.field_goals_made',
       // Longest stats from specialized tables
@@ -115,6 +118,9 @@ const load_nfl_plays = async (esbids) => {
     .select(
       'esbid',
       'quarter',
+      // Intra-game ordering, so first-scorer markets read the game's first
+      // touchdown rather than whichever row the database happened to return
+      'sequence',
       // Team attribution for team_aggregate markets
       'offense_nfl_team',
       // Player identification columns
@@ -137,6 +143,8 @@ const load_nfl_plays = async (esbids) => {
     // nullified play and a two-point conversion are both out. play_type is
     // filtered without being selected -- the handler never reads it.
     .whereIn('play_type', stat_countable_play_types)
+    .orderBy('esbid')
+    .orderBy('sequence')
 }
 
 /**

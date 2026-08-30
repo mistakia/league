@@ -11,8 +11,20 @@ import {
   calculate_metric_value,
   determine_selection_result,
   group_by_game,
-  create_dual_result_objects
+  create_selection_result
 } from '#libs-server/prop-market-settlement/prop-market-utils.mjs'
+
+/**
+ * The player each nfl_plays yardage column is credited to. A play row names
+ * three different players, and each yardage column belongs to exactly one of
+ * them, so a market combining two columns spans plays that no single
+ * player_column selects.
+ */
+const PLAY_METRIC_PLAYER_COLUMNS = {
+  pass_yards: 'passer_pid',
+  rush_yards: 'ball_carrier_pid',
+  receiving_yards: 'target_pid'
+}
 
 /**
  * Base class for market data handlers
@@ -25,58 +37,7 @@ class MarketDataHandler {
   }
 
   /**
-   * Create error results for both OPEN and CLOSE time types
-   * @param {object} market - Market object
-   * @param {string} error_message - Error description
-   * @returns {Array<object>} Array with OPEN and CLOSE error result objects
-   */
-  _create_error_results(market, error_message) {
-    return create_dual_result_objects({
-      market,
-      metric_value: null,
-      selection_result: null,
-      handler_type: this.handler_type,
-      error: error_message
-    })
-  }
-
-  /**
-   * Create success results for both OPEN and CLOSE time types
-   * @param {object} market - Market object
-   * @param {number} metric_value - Calculated metric value
-   * @param {string} selection_result - WON/LOST result
-   * @returns {Array<object>} Array with OPEN and CLOSE success result objects
-   */
-  _create_success_results(market, metric_value, selection_result) {
-    return create_dual_result_objects({
-      market,
-      metric_value,
-      selection_result,
-      handler_type: this.handler_type
-    })
-  }
-
-  /**
-   * Get market mapping configuration
-   * @param {object} market - Market object
-   * @returns {object} Market mapping configuration
-   */
-  _get_market_mapping(market) {
-    return market.mapping || market_type_mappings[market.market_type]
-  }
-}
-
-/**
- * Player Gamelog Market Handler
- * Processes player performance markets using preloaded gamelog data
- */
-export class PlayerGamelogMarketHandler extends MarketDataHandler {
-  constructor(player_gamelogs) {
-    super(player_gamelogs, HANDLER_TYPES.PLAYER_GAMELOG)
-  }
-
-  /**
-   * Process a batch of markets using player gamelog data
+   * Process a batch of markets, isolating each market's failure to that market
    * @param {Array<object>} markets - Array of market objects to process
    * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
    */
@@ -94,6 +55,66 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
     }
 
     return all_results
+  }
+
+  /**
+   * Create the error result for one selection row
+   * @param {object} market - Market object
+   * @param {string} error_message - Error description
+   * @returns {Array<object>} Array with the error result for this selection row
+   */
+  _create_error_results(market, error_message) {
+    return [
+      create_selection_result({
+        market,
+        metric_value: null,
+        selection_result: null,
+        handler_type: this.handler_type,
+        error: error_message
+      })
+    ]
+  }
+
+  /**
+   * Create the success result for one selection row
+   * @param {object} market - Market object
+   * @param {number} metric_value - Calculated metric value
+   * @param {string} selection_result - WON/LOST result
+   * @returns {Array<object>} Array with the result for this selection row
+   */
+  _create_success_results(market, metric_value, selection_result) {
+    return [
+      create_selection_result({
+        market,
+        metric_value,
+        selection_result,
+        handler_type: this.handler_type
+      })
+    ]
+  }
+
+  /**
+   * Get market mapping configuration
+   * @param {object} market - Market object
+   * @returns {object} Market mapping configuration
+   * @throws {Error} If the market type has no mapping
+   */
+  _get_market_mapping(market) {
+    const mapping = market.mapping || market_type_mappings[market.market_type]
+    if (!mapping) {
+      throw new Error(`No mapping for market type ${market.market_type}`)
+    }
+    return mapping
+  }
+}
+
+/**
+ * Player Gamelog Market Handler
+ * Processes player performance markets using preloaded gamelog data
+ */
+export class PlayerGamelogMarketHandler extends MarketDataHandler {
+  constructor(player_gamelogs) {
+    super(player_gamelogs, HANDLER_TYPES.PLAYER_GAMELOG)
   }
 
   /**
@@ -146,78 +167,47 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
   }
 
   /**
-   * Process a batch of markets using NFL plays data
-   * @param {Array<object>} markets - Array of market objects to process
-   * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
-   */
-  async batch_calculate(markets) {
-    const all_results = []
-
-    for (const market of markets) {
-      try {
-        const results = this._process_single_market(market)
-        all_results.push(...results)
-      } catch (error) {
-        const error_results = this._create_error_results(market, error.message)
-        all_results.push(...error_results)
-      }
-    }
-
-    return all_results
-  }
-
-  /**
    * Process a single market using NFL plays data
    * @param {object} market - Market object to process
    * @returns {Array<object>} Array with OPEN and CLOSE result objects
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
-    const game_plays = this.data_by_game[market.esbid] || []
+    const game_plays = this.data_by_game[market.esbid]
+
+    // No preloaded plays means the game was never loaded, not that nothing
+    // happened in it. Settling on an empty play set would grade every market
+    // in the game against a zero metric as if that were a real outcome.
+    if (!game_plays || game_plays.length === 0) {
+      return this._create_error_results(
+        market,
+        `No plays found for game ${market.esbid}`
+      )
+    }
 
     let metric_value
     if (mapping.special_logic === 'first_touchdown_scorer') {
-      // For first touchdown scorer, find the first TD in the entire game
-      const first_td_play = game_plays.find((play) => {
-        const value = play[mapping.metric_columns[0]]
-        return value === true
-      })
-
-      if (!first_td_play) {
-        metric_value = 0 // No touchdowns in the game
-      } else {
-        // Check if this player scored the first TD
-        // For rushing TDs: ball_carrier_pid is the scorer
-        // For passing TDs: target_pid is the scorer (receiver)
-        // TODO: Use td_pid field once it's available in nfl_plays table
-        let is_scorer = false
-
-        if (first_td_play.is_rushing_play === true) {
-          // Rushing TD - ball_carrier_pid is the scorer
-          is_scorer = first_td_play.ball_carrier_pid === market.selection_pid
-        } else if (first_td_play.is_passing_play === true) {
-          // Passing TD - target_pid is the scorer (receiver)
-          is_scorer = first_td_play.target_pid === market.selection_pid
-        } else {
-          // Other types of TDs - check both fields as fallback
-          is_scorer =
-            first_td_play.ball_carrier_pid === market.selection_pid ||
-            first_td_play.target_pid === market.selection_pid
-        }
-
-        metric_value = is_scorer ? 1 : 0
-      }
-    } else {
-      const relevant_plays = this._filter_plays_for_market(
+      metric_value = this._calculate_first_touchdown_metric({
         game_plays,
         market,
         mapping
-      )
-      metric_value = this._calculate_plays_metric(
-        relevant_plays,
-        mapping,
-        market
-      )
+      })
+    } else if (this._is_combined_player_market(mapping)) {
+      metric_value = this._calculate_combined_player_metric({
+        game_plays,
+        market,
+        mapping
+      })
+    } else {
+      const relevant_plays = this._filter_plays_for_market({
+        game_plays,
+        market,
+        mapping
+      })
+      metric_value = this._calculate_plays_metric({
+        plays: relevant_plays,
+        mapping
+      })
     }
     const selection_result = determine_selection_result({
       metric_value,
@@ -230,47 +220,147 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
   }
 
   /**
-   * Filter plays based on market requirements (player, team, quarter, etc.)
-   * @param {Array<object>} game_plays - All plays for a specific game
-   * @param {object} market - Market object containing selection criteria
-   * @param {object} mapping - Market mapping configuration
-   * @returns {Array<object>} Filtered plays relevant to the market
+   * Score the selected player against the game's first touchdown
+   *
+   * nfl_plays names three players per row and none of them is labelled as the
+   * scorer, so the scorer is inferred from the kind of play: a rushing
+   * touchdown is scored by the ball carrier, a touchdown on a completed pass by
+   * the target. Every other touchdown -- a kickoff, punt or fumble return, a
+   * pass intercepted and returned -- is scored by a player this row does not
+   * name, and ball_carrier_pid/target_pid then hold whoever was carrying or
+   * being thrown to, not the scorer. Crediting them would settle the market
+   * against the wrong player, so the market is failed instead.
+   *
+   * @param {object} params - Named parameters
+   * @param {Array<object>} params.game_plays - All plays for the game
+   * @param {object} params.market - Market object containing selection criteria
+   * @param {object} params.mapping - Market mapping configuration
+   * @returns {number} 1 if the selected player scored the first touchdown, else 0
+   * @throws {Error} If the first touchdown's scorer cannot be identified
    */
-  _filter_plays_for_market(game_plays, market, mapping) {
-    if (!game_plays) {
-      return []
+  _calculate_first_touchdown_metric({ game_plays, market, mapping }) {
+    const touchdown_column = mapping.metric_columns[0]
+    const first_touchdown_play = game_plays.find(
+      (play) => play[touchdown_column] === true
+    )
+
+    if (!first_touchdown_play) {
+      return 0
     }
 
+    let scorer_pid = null
+    if (first_touchdown_play.is_rushing_play === true) {
+      scorer_pid = first_touchdown_play.ball_carrier_pid
+    } else if (
+      first_touchdown_play.is_passing_play === true &&
+      first_touchdown_play.is_completion === true
+    ) {
+      scorer_pid = first_touchdown_play.target_pid
+    }
+
+    if (!scorer_pid) {
+      throw new Error(
+        `First touchdown in game ${market.esbid} was not scored on a rush or a completed pass and nfl_plays does not name its scorer`
+      )
+    }
+
+    return scorer_pid === market.selection_pid ? 1 : 0
+  }
+
+  /**
+   * Whether the mapping sums yardage credited to more than one player column
+   * @param {object} mapping - Market mapping configuration
+   * @returns {boolean} True for combined passing/rushing/receiving player markets
+   */
+  _is_combined_player_market(mapping) {
+    return (
+      mapping.special_logic === 'combined_passing_rushing' ||
+      mapping.special_logic === 'combined_rushing_receiving'
+    )
+  }
+
+  /**
+   * Sum a combined market's metric columns, each against its own player column
+   *
+   * A combined market spans plays where the selected player appears in
+   * different roles -- passer on his pass plays, ball carrier on his scrambles
+   * -- so filtering the game to one player column would drop half the
+   * production before the sum ever sees it.
+   *
+   * @param {object} params - Named parameters
+   * @param {Array<object>} params.game_plays - All plays for the game
+   * @param {object} params.market - Market object containing selection criteria
+   * @param {object} params.mapping - Market mapping configuration
+   * @returns {number} Summed metric value
+   * @throws {Error} If a metric column has no known player attribution
+   */
+  _calculate_combined_player_metric({ game_plays, market, mapping }) {
+    if (!market.selection_pid) {
+      return 0
+    }
+
+    const plays = this._apply_period_filters({ plays: game_plays, mapping })
+
+    let total = 0
+    for (const metric_column of mapping.metric_columns) {
+      const player_column = PLAY_METRIC_PLAYER_COLUMNS[metric_column]
+      if (!player_column) {
+        throw new Error(
+          `No player attribution for metric column ${metric_column}`
+        )
+      }
+
+      for (const play of plays) {
+        if (play[player_column] !== market.selection_pid) {
+          continue
+        }
+        total += Number(play[metric_column]) || 0
+      }
+    }
+
+    return total
+  }
+
+  /**
+   * Restrict plays to the quarter or half the mapping scopes the market to
+   * @param {object} params - Named parameters
+   * @param {Array<object>} params.plays - Plays to restrict
+   * @param {object} params.mapping - Market mapping configuration
+   * @returns {Array<object>} Plays within the mapping's period
+   */
+  _apply_period_filters({ plays, mapping }) {
+    if (mapping.quarter_filter) {
+      return plays.filter((play) => play.quarter === mapping.quarter_filter)
+    }
+    if (mapping.half_filter === 1) {
+      return plays.filter((play) => play.quarter === 1 || play.quarter === 2)
+    }
+    if (mapping.half_filter === 2) {
+      return plays.filter((play) => play.quarter === 3 || play.quarter === 4)
+    }
+    return plays
+  }
+
+  /**
+   * Filter plays based on market requirements (player, team, quarter, etc.)
+   * @param {object} params - Named parameters
+   * @param {Array<object>} params.game_plays - All plays for a specific game
+   * @param {object} params.market - Market object containing selection criteria
+   * @param {object} params.mapping - Market mapping configuration
+   * @returns {Array<object>} Filtered plays relevant to the market
+   */
+  _filter_plays_for_market({ game_plays, market, mapping }) {
     // For team aggregate markets, filter by offensive team
     if (mapping.team_aggregate) {
       if (!market.selection_pid) {
         return []
       }
-      let filtered_plays = game_plays.filter(
-        (play) => play.offense_nfl_team === market.selection_pid
-      )
-
-      // Apply quarter filter if specified
-      if (mapping.quarter_filter) {
-        filtered_plays = filtered_plays.filter(
-          (play) => play.quarter === mapping.quarter_filter
-        )
-      }
-
-      // Apply half filter if specified
-      if (mapping.half_filter) {
-        if (mapping.half_filter === 1) {
-          filtered_plays = filtered_plays.filter(
-            (play) => play.quarter === 1 || play.quarter === 2
-          )
-        } else if (mapping.half_filter === 2) {
-          filtered_plays = filtered_plays.filter(
-            (play) => play.quarter === 3 || play.quarter === 4
-          )
-        }
-      }
-
-      return filtered_plays
+      return this._apply_period_filters({
+        plays: game_plays.filter(
+          (play) => play.offense_nfl_team === market.selection_pid
+        ),
+        mapping
+      })
     }
 
     // For player markets, require player_column
@@ -287,35 +377,20 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       )
     }
 
-    // Filter by quarter if specified
-    if (mapping.quarter_filter) {
-      filtered_plays = filtered_plays.filter(
-        (play) => play.quarter === mapping.quarter_filter
-      )
-    }
+    filtered_plays = this._apply_period_filters({
+      plays: filtered_plays,
+      mapping
+    })
 
-    // Filter by half if specified (first half = quarters 1 and 2)
-    if (mapping.half_filter) {
-      if (mapping.half_filter === 1) {
-        // First half: quarters 1 and 2
-        filtered_plays = filtered_plays.filter(
-          (play) => play.quarter === 1 || play.quarter === 2
-        )
-      } else if (mapping.half_filter === 2) {
-        // Second half: quarters 3 and 4
-        filtered_plays = filtered_plays.filter(
-          (play) => play.quarter === 3 || play.quarter === 4
-        )
-      }
-    }
-
-    // Filter out plays with null/undefined metric values
+    // Drop plays the market's metric does not reach at all. A play carrying a
+    // value in any one of the metric columns still counts toward the sum, so
+    // only a play null in every one of them is irrelevant.
     if (mapping.metric_columns && mapping.metric_columns.length > 0) {
-      const primary_metric_column = mapping.metric_columns[0]
-      filtered_plays = filtered_plays.filter((play) => {
-        const value = play[primary_metric_column]
-        return value !== null && value !== undefined
-      })
+      filtered_plays = filtered_plays.filter((play) =>
+        mapping.metric_columns.some(
+          (column) => play[column] !== null && play[column] !== undefined
+        )
+      )
     }
 
     return filtered_plays
@@ -323,29 +398,20 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
   /**
    * Calculate metric value from filtered plays based on aggregation type
-   * @param {Array<object>} plays - Filtered plays to calculate from
-   * @param {object} mapping - Market mapping configuration
-   * @param {object} market - Market data (needed for first_touchdown_scorer logic)
+   * @param {object} params - Named parameters
+   * @param {Array<object>} params.plays - Filtered plays to calculate from
+   * @param {object} params.mapping - Market mapping configuration
    * @returns {number} Calculated metric value
    */
-  _calculate_plays_metric(plays, mapping, market = null) {
-    if (mapping.special_logic === 'count_receptions') {
-      // Count receptions by counting completed passes (comp = true)
-      return plays.filter((play) => {
-        const value = play[mapping.metric_columns[0]]
-        return value === true
-      }).length
-    } else if (mapping.special_logic === 'count_attempts') {
-      // Count attempts by counting plays where the metric is true
-      return plays.filter((play) => {
-        const value = play[mapping.metric_columns[0]]
-        return value === true
-      }).length
-    } else if (mapping.special_logic === 'first_touchdown_scorer') {
-      // For first touchdown scorer, we need to check ALL plays in the game, not just filtered ones
-      // This logic should be handled at a higher level since we need access to all game plays
-      // For now, return 0 and handle this in the main processing logic
-      return 0
+  _calculate_plays_metric({ plays, mapping }) {
+    if (
+      mapping.special_logic === 'count_receptions' ||
+      mapping.special_logic === 'count_attempts'
+    ) {
+      // Both count plays whose single flag column is set: a reception is a
+      // completed pass, an attempt is a rush or pass play.
+      return plays.filter((play) => play[mapping.metric_columns[0]] === true)
+        .length
     } else if (mapping.aggregation_type === 'MAX') {
       const values = plays.map((play) => calculate_metric_value(play, mapping))
       return values.length > 0 ? Math.max(...values) : 0
@@ -364,31 +430,9 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
  * NFL Games Market Handler
  * Processes game-level markets using preloaded NFL games data
  */
-export class NFLGamesMarketHandler {
+export class NFLGamesMarketHandler extends MarketDataHandler {
   constructor(nfl_games) {
-    this.handler_type = HANDLER_TYPES.NFL_GAMES
-    this.games_by_id = this._index_games_by_id(nfl_games)
-  }
-
-  /**
-   * Process a batch of markets using NFL games data
-   * @param {Array<object>} markets - Array of market objects to process
-   * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
-   */
-  async batch_calculate(markets) {
-    const all_results = []
-
-    for (const market of markets) {
-      try {
-        const results = this._process_single_market(market)
-        all_results.push(...results)
-      } catch (error) {
-        const error_results = this._create_error_results(market, error.message)
-        all_results.push(...error_results)
-      }
-    }
-
-    return all_results
+    super(nfl_games, HANDLER_TYPES.NFL_GAMES)
   }
 
   /**
@@ -398,7 +442,7 @@ export class NFLGamesMarketHandler {
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
-    const game = this.games_by_id[market.esbid]
+    const [game] = this.data_by_game[market.esbid] || []
 
     if (!game) {
       const error_message = `No game data found for esbid ${market.esbid}`
@@ -561,59 +605,5 @@ export class NFLGamesMarketHandler {
           `Unknown calculation_type: ${calculation_type}`
         )
     }
-  }
-
-  /**
-   * Create error results for both OPEN and CLOSE time types
-   * @param {object} market - Market object
-   * @param {string} error_message - Error description
-   * @returns {Array<object>} Array with OPEN and CLOSE error result objects
-   */
-  _create_error_results(market, error_message) {
-    return create_dual_result_objects({
-      market,
-      metric_value: null,
-      selection_result: null,
-      handler_type: this.handler_type,
-      error: error_message
-    })
-  }
-
-  /**
-   * Create success results for both OPEN and CLOSE time types
-   * @param {object} market - Market object
-   * @param {number} metric_value - Calculated metric value
-   * @param {string} selection_result - WON/LOST result
-   * @returns {Array<object>} Array with OPEN and CLOSE success result objects
-   */
-  _create_success_results(market, metric_value, selection_result) {
-    return create_dual_result_objects({
-      market,
-      metric_value,
-      selection_result,
-      handler_type: this.handler_type
-    })
-  }
-
-  /**
-   * Get market mapping configuration
-   * @param {object} market - Market object
-   * @returns {object} Market mapping configuration
-   */
-  _get_market_mapping(market) {
-    return market.mapping || market_type_mappings[market.market_type]
-  }
-
-  /**
-   * Index games by their esbid for fast lookup
-   * @param {Array<object>} games - Array of game objects
-   * @returns {object} Games indexed by esbid
-   */
-  _index_games_by_id(games) {
-    const games_by_id = {}
-    for (const game of games) {
-      games_by_id[game.esbid] = game
-    }
-    return games_by_id
   }
 }

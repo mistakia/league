@@ -31,8 +31,14 @@ export default async function process_super_priority({
     throw new Error('Invalid league ID')
   }
 
-  // Get original team roster
-  const rosterRow = await getRoster({ tid: original_tid })
+  // Get original team roster for the week every write below targets.
+  // getRoster defaults to `fantasy_season_week`, which is 0 outside the regular
+  // season, so the space and protected-player checks would otherwise run
+  // against a different week's roster than the one being mutated.
+  const rosterRow = await getRoster({
+    tid: original_tid,
+    week: current_season.week
+  })
   const roster = new Roster({ roster: rosterRow, league })
 
   // Get player info
@@ -42,21 +48,42 @@ export default async function process_super_priority({
   }
   const player_row = player_rows[0]
 
-  // Determine target slot based on super_priority record requirements
+  // knex throws a bare `Undefined binding(s) detected` on an undefined value in
+  // an object-form where, so this is checked before the query rather than
+  // surfacing as an error that never names this function.
+  if (super_priority_id === undefined) {
+    throw new Error('super_priority_id is required')
+  }
+
   const super_priority_record = await db('super_priority')
     .where({ super_priority_id })
     .first()
 
-  let target_slot
-  if (super_priority_record && super_priority_record.requires_waiver) {
-    target_slot = roster_slot_types.PS
-  } else {
-    // Player can automatically return (was PSD or PS with open slot)
-    target_slot = roster_slot_types.PSD
+  // The waiver caller checks eligibility through get_super_priority_status
+  // before dispatching here, but the exported function and the CLI below are
+  // both entry points in their own right: without these the record's state is
+  // never read, and a stale or already-claimed id would add a second roster row
+  // and a second SUPER_PRIORITY transaction.
+  if (!super_priority_record) {
+    throw new Error(`Invalid super priority ID: ${super_priority_id}`)
   }
 
+  if (!super_priority_record.eligible) {
+    throw new Error('Super priority claim is not eligible')
+  }
+
+  if (super_priority_record.claimed) {
+    throw new Error('Super priority claim has already been processed')
+  }
+
+  // A claim that had to clear waivers returns the player as a signed practice
+  // squad player; an automatic return (was PSD, or PS with an open slot) keeps
+  // the drafted designation it was released with.
+  const target_slot = super_priority_record.requires_waiver
+    ? roster_slot_types.PS
+    : roster_slot_types.PSD
+
   // Handle waiver releases - validate and simulate before checking space
-  const releasePlayers = []
   if (release.length) {
     for (const release_pid of release) {
       const releasePlayer = roster.get(release_pid)
@@ -72,7 +99,6 @@ export default async function process_super_priority({
         throw new Error('Cannot release protected practice squad players')
       }
 
-      releasePlayers.push(release_pid)
       // Simulate removal to check if space will be available
       roster.removePlayer(release_pid)
     }
@@ -80,22 +106,17 @@ export default async function process_super_priority({
 
   // Check practice squad space and position limits after simulated releases
   if (
-    super_priority_record &&
     super_priority_record.requires_waiver &&
-    target_slot === roster_slot_types.PS
+    !roster.has_practice_squad_space_for_position(player_row.primary_position)
   ) {
-    if (
-      !roster.has_practice_squad_space_for_position(player_row.primary_position)
-    ) {
-      throw new Error(
-        'No practice squad space available or position limit exceeded'
-      )
-    }
+    throw new Error(
+      'No practice squad space available or position limit exceeded'
+    )
   }
 
   // Process releases now that we've validated space will be available
-  if (releasePlayers.length) {
-    for (const release_pid of releasePlayers) {
+  if (release.length) {
+    for (const release_pid of release) {
       await processRelease({
         release_pid,
         tid: original_tid,
@@ -105,19 +126,14 @@ export default async function process_super_priority({
     }
   }
 
-  // Add player to original team roster for current and future weeks
-  const current_week_roster = await db('rosters')
-    .where('week', '>=', current_season.week)
-    .where('season_year', current_season.year)
-    .where('tid', original_tid)
-    .first()
-
-  if (!current_week_roster) {
-    throw new Error('No current week roster found')
-  }
-
+  // Add player to the original team's roster for the current week only. Later
+  // weeks are not written here: generate-rosters.mjs builds each next week from
+  // the preceding one, so the player carries forward. This matches every other
+  // add path -- submit-acquisition, process-poach,
+  // process-restricted-free-agency-bid -- while only REMOVALS fan out over
+  // `week >= current_season.week`.
   await db('rosters_players').insert({
-    roster_id: current_week_roster.roster_id,
+    roster_id: rosterRow.roster_id,
     slot: target_slot,
     pid,
     player_position: player_row.primary_position,
@@ -125,8 +141,8 @@ export default async function process_super_priority({
     extensions: 0,
     tid: original_tid,
     lid,
-    week: current_week_roster.week,
-    season_year: current_week_roster.season_year
+    week: current_season.week,
+    season_year: current_season.year
   })
 
   // Create transaction
@@ -164,10 +180,6 @@ export default async function process_super_priority({
   await db('transactions').insert(transaction)
 
   // Mark super priority as claimed
-  if (super_priority_id === undefined) {
-    throw new Error('super_priority_id is undefined')
-  }
-
   await db('super_priority').where({ super_priority_id }).update({
     claimed: 1,
     claimed_at: occurred_at
@@ -184,17 +196,14 @@ export default async function process_super_priority({
     let message = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) has been claimed via Super Priority by ${team.name} (${team.abbreviation}).`
 
     // Add release information if players were released
-    if (releasePlayers.length) {
-      const released_player_rows = await db('player').whereIn(
-        'pid',
-        releasePlayers
-      )
+    if (release.length) {
+      const released_player_rows = await db('player').whereIn('pid', release)
 
       const released_names = released_player_rows
         .map((p) => `${p.first_name} ${p.last_name} (${p.primary_position})`)
         .join(', ')
 
-      const verb = releasePlayers.length === 1 ? 'has' : 'have'
+      const verb = release.length === 1 ? 'has' : 'have'
       message += ` ${released_names} ${verb} been released.`
     }
 
@@ -210,19 +219,22 @@ export default async function process_super_priority({
     tid: original_tid,
     slot: target_slot,
     transaction,
-    requires_waiver: super_priority_record?.requires_waiver || false
+    requires_waiver: Boolean(super_priority_record.requires_waiver)
   }
 }
 
 const main = async () => {
   const pid = process.argv[2]
   const original_tid = Number(process.argv[3])
-  const lid = Number(process.argv[4]) || 1
+  const lid = Number(process.argv[4])
   const super_priority_id = Number(process.argv[5])
 
-  if (!pid || !original_tid || !super_priority_id) {
+  // All four are positional and required. `lid` cannot be made optional here
+  // the way it is in the trailing-argument scripts: omitting it would shift the
+  // super priority id into `lid` and leave `super_priority_id` as NaN.
+  if (!pid || !original_tid || !lid || !super_priority_id) {
     console.log(
-      'Usage: node process-super-priority.mjs <pid> <original_tid> [lid] <super_priority_id>'
+      'Usage: node process-super-priority.mjs <pid> <original_tid> <lid> <super_priority_id>'
     )
     process.exit(1)
   }

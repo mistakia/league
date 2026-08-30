@@ -7,6 +7,37 @@ import SyncUtils from './sync-utils.mjs'
 
 const log = debug('external:roster-sync')
 
+// Key inside the canonical `player_ids` object that carries a platform's OWN
+// player identifier (schemas/canonical-player-format.json, mirrored in
+// canonical-roster-format.json). The key is not derivable from the platform
+// name -- RTSPORTS stores its id under `rts_id` -- and the canonical format
+// defines no player-id key at all for FFPC, NFFC or FANTRAX, so those platforms
+// cannot be mapped by id and are rejected rather than silently keyed undefined.
+const PLATFORM_PLAYER_ID_KEYS = {
+  sleeper: 'sleeper_id',
+  espn: 'espn_id',
+  yahoo: 'yahoo_id',
+  mfl: 'mfl_id',
+  cbs: 'cbs_id',
+  fleaflicker: 'fleaflicker_id',
+  nfl: 'nfl_id',
+  rtsports: 'rts_id'
+}
+
+// Internal roster slot for each canonical `roster_slot_category`. A STARTING
+// entry cannot become a starting slot here: resolving one needs the league's
+// position settings, which no adapter reads -- sleeper's
+// determine_roster_slot_info returns `slot: null` for that category -- so a
+// starter is imported onto the bench exactly like a bench player. IR and
+// practice squad DO survive, because the adapter resolves those from the
+// platform's own reserve/taxi lists.
+const ROSTER_SLOT_BY_CATEGORY = {
+  STARTING: roster_slot_types.BENCH,
+  BENCH: roster_slot_types.BENCH,
+  INJURED_RESERVE: roster_slot_types.RESERVE_SHORT_TERM,
+  PRACTICE_SQUAD: roster_slot_types.PS
+}
+
 /**
  * Roster sync module
  * Handles syncing roster data and player mappings from external platforms
@@ -31,7 +62,7 @@ export class RosterSync {
    * @param {object} options.sync_stats - Sync statistics object
    * @param {(message: string, progress: number, detail: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
    * @param {object[]} [options.sync_stats_errors] - Array to collect sync errors
-   * @returns {Promise<object>} Roster sync results
+   * @returns {Promise<void>}
    */
   async sync_rosters({
     adapter,
@@ -45,13 +76,16 @@ export class RosterSync {
 
       const external_rosters = await adapter.get_rosters({
         league_id: sync_context.external_league_id,
-        week: sync_context.week
+        week: sync_context.week,
+        year: sync_context.year
       })
+
+      const rosters = external_rosters || []
 
       if (progress_callback) {
         await progress_callback('Retrieved roster data', 45, {
           step: 'rosters',
-          roster_count: external_rosters?.length || 0
+          roster_count: rosters.length
         })
       }
 
@@ -59,51 +93,53 @@ export class RosterSync {
       await this._setup_player_mappings({
         adapter,
         sync_context,
-        sync_stats
+        sync_stats,
+        rosters
       })
 
-      const rosters = external_rosters || []
       let processed_rosters = 0
+      let synced_rosters = 0
 
       for (const external_roster of rosters) {
-        if (progress_callback && rosters.length > 0) {
+        if (progress_callback) {
           const roster_progress = 45 + (processed_rosters / rosters.length) * 20 // 45-65%
           await progress_callback(
             `Processing roster ${processed_rosters + 1}/${rosters.length}`,
             Math.round(roster_progress),
             {
               step: 'rosters',
-              team_id:
-                external_roster.team_external_id ||
-                external_roster.roster_id ||
-                external_roster.team_id,
+              team_id: this._extract_team_id({ external_roster }),
               processed: processed_rosters,
               total: rosters.length
             }
           )
         }
 
-        await this.sync_single_roster({ external_roster, sync_context })
+        const roster_synced = await this.sync_single_roster({
+          external_roster,
+          sync_context,
+          sync_stats_errors
+        })
+        if (roster_synced) {
+          synced_rosters++
+        }
         processed_rosters++
       }
 
-      sync_stats.rosters_updated += processed_rosters
+      // Only rosters that actually reached the database count as updated -- a
+      // skipped roster is reported through sync_stats_errors instead.
+      sync_stats.rosters_updated += synced_rosters
 
       if (progress_callback) {
         await progress_callback('Rosters synchronized', 68, {
           step: 'rosters',
           rosters_processed: processed_rosters,
+          rosters_synced: synced_rosters,
           players_mapped: sync_stats.players_mapped
         })
       }
 
-      log(`Synced ${rosters.length} rosters`)
-
-      return {
-        success: true,
-        rosters_processed: rosters.length,
-        players_mapped: sync_context.player_mappings.size
-      }
+      log(`Synced ${synced_rosters} of ${rosters.length} rosters`)
     } catch (error) {
       log(`Error syncing rosters: ${error.message}`)
       const sync_error = this.sync_utils.create_sync_error({
@@ -126,60 +162,177 @@ export class RosterSync {
    * @param {object} options - Single roster sync options
    * @param {object} options.external_roster - External roster data
    * @param {object} options.sync_context - Sync context with league and platform info
-   * @returns {Promise<void>}
+   * @param {object[]} [options.sync_stats_errors] - Array to collect sync errors
+   * @returns {Promise<boolean>} True when the roster was written to the database
    */
-  async sync_single_roster({ external_roster, sync_context }) {
+  async sync_single_roster({
+    external_roster,
+    sync_context,
+    sync_stats_errors = []
+  }) {
     const external_team_id = this._extract_team_id({ external_roster })
     const internal_team_id = sync_context.team_mappings.get(external_team_id)
 
     if (!internal_team_id) {
-      log(`No team mapping found for external team: ${external_team_id}`)
-      return
+      return this._skip_roster({
+        sync_stats_errors,
+        sync_context,
+        external_team_id,
+        error_type: 'roster_team_mapping_missing',
+        error_message: `No team mapping found for external team ${external_team_id}`
+      })
     }
 
-    // Get current internal roster
-    const current_roster = await this._get_current_roster({
-      internal_league_id: sync_context.internal_league_id,
-      internal_team_id,
-      week: sync_context.week,
-      year: sync_context.year
+    // `rosters_players.roster_id` is NOT NULL and half the primary key, so the
+    // week's `rosters` row has to exist before any player can be written. It is
+    // created by league setup, never here.
+    const roster_row = await db('rosters')
+      .where({
+        lid: sync_context.internal_league_id,
+        tid: internal_team_id,
+        week: sync_context.week,
+        season_year: sync_context.year
+      })
+      .first()
+
+    if (!roster_row) {
+      return this._skip_roster({
+        sync_stats_errors,
+        sync_context,
+        external_team_id,
+        error_type: 'roster_row_missing',
+        error_message: `No rosters row for team ${internal_team_id} in week ${sync_context.week} of ${sync_context.year}`
+      })
+    }
+
+    const roster_entries = this._extract_roster_players({
+      external_roster,
+      platform: sync_context.platform
     })
 
-    const current_pids = new Set(
-      current_roster.map((roster_entry) => roster_entry.pid)
-    )
-    const external_pids = new Set()
+    const slots_by_pid = new Map()
+    const unmapped_external_player_ids = []
 
-    // Process external roster players
-    const roster_players = this._extract_roster_players({ external_roster })
-
-    for (const external_player_id of roster_players) {
-      const pid = sync_context.player_mappings.get(external_player_id)
+    for (const roster_entry of roster_entries) {
+      const pid = sync_context.player_mappings.get(
+        roster_entry.external_player_id
+      )
       if (pid) {
-        external_pids.add(pid)
-
-        // Add player to roster if not already there (idempotent)
-        if (!current_pids.has(pid)) {
-          await this._add_player_to_roster({
-            internal_league_id: sync_context.internal_league_id,
-            internal_team_id,
-            pid,
-            week: sync_context.week,
-            year: sync_context.year
-          })
-        }
+        slots_by_pid.set(pid, roster_entry.slot)
+      } else {
+        unmapped_external_player_ids.push(
+          String(roster_entry.external_player_id)
+        )
       }
     }
 
-    // Remove players no longer on external roster
-    await this._remove_obsolete_players({
-      current_pids,
-      external_pids,
-      internal_league_id: sync_context.internal_league_id,
-      internal_team_id,
-      week: sync_context.week,
-      year: sync_context.year
+    // An external player the mapper could not resolve is indistinguishable from
+    // a player who left the roster, and the removal below is a hard delete of
+    // internal rows. Skip the whole team rather than let an upstream mapping gap
+    // erase a roster.
+    if (unmapped_external_player_ids.length > 0) {
+      return this._skip_roster({
+        sync_stats_errors,
+        sync_context,
+        external_team_id,
+        error_type: 'roster_player_mapping_missing',
+        error_message: `Unmapped external players on team ${internal_team_id}: ${unmapped_external_player_ids.join(', ')}`
+      })
+    }
+
+    // The adds and the delete are one unit: a failure part way through the adds
+    // would otherwise leave the team half-migrated, and the delete is not
+    // recoverable.
+    await db.transaction(async (trx) => {
+      const current_roster_rows = await trx('rosters_players')
+        .where({ roster_id: roster_row.roster_id })
+        .select('pid')
+      const current_pids = new Set(
+        current_roster_rows.map((roster_player_row) => roster_player_row.pid)
+      )
+
+      const pids_to_add = [...slots_by_pid.keys()].filter(
+        (pid) => !current_pids.has(pid)
+      )
+      const pids_to_remove = [...current_pids].filter(
+        (pid) => !slots_by_pid.has(pid)
+      )
+
+      // `rosters_players.player_position` holds the player's primary position
+      // and is NOT NULL under a vocabulary CHECK. Every pid here came from a
+      // `player` row the mapper resolved, so the lookup always finds one.
+      const positions_by_pid = new Map(
+        (
+          await trx('player')
+            .whereIn('pid', pids_to_add)
+            .select('pid', 'primary_position')
+        ).map((player_row) => [player_row.pid, player_row.primary_position])
+      )
+
+      for (const pid of pids_to_add) {
+        await trx('rosters_players')
+          .insert({
+            roster_id: roster_row.roster_id,
+            lid: sync_context.internal_league_id,
+            tid: internal_team_id,
+            pid,
+            slot: slots_by_pid.get(pid),
+            player_position: positions_by_pid.get(pid),
+            week: sync_context.week,
+            season_year: sync_context.year,
+            extensions: 0,
+            tag: player_tag_types.REGULAR
+          })
+          // (roster_id, pid) is the primary key -- the only conflict target the
+          // table can arbitrate for this insert.
+          .onConflict(['roster_id', 'pid'])
+          .ignore()
+      }
+
+      if (pids_to_remove.length > 0) {
+        await trx('rosters_players')
+          .where({ roster_id: roster_row.roster_id })
+          .whereIn('pid', pids_to_remove)
+          .del()
+      }
     })
+
+    return true
+  }
+
+  /**
+   * Record a roster that could not be synced and leave its internal rows alone
+   * @param {object} options - Skip options
+   * @param {object[]} options.sync_stats_errors - Array to collect sync errors
+   * @param {object} options.sync_context - Sync context with league and platform info
+   * @param {string} options.external_team_id - External team ID of the skipped roster
+   * @param {string} options.error_type - Sync error type
+   * @param {string} options.error_message - Human readable reason
+   * @returns {boolean} Always false, so callers can `return this._skip_roster(...)`
+   * @private
+   */
+  _skip_roster({
+    sync_stats_errors,
+    sync_context,
+    external_team_id,
+    error_type,
+    error_message
+  }) {
+    log(error_message)
+    sync_stats_errors.push(
+      this.sync_utils.create_sync_error({
+        error_type,
+        error_message,
+        step: 'sync_single_roster',
+        context_data: {
+          platform: sync_context.platform,
+          external_league_id: sync_context.external_league_id,
+          external_team_id,
+          week: sync_context.week
+        }
+      })
+    )
+    return false
   }
 
   /**
@@ -188,24 +341,30 @@ export class RosterSync {
    * @param {object} options.adapter - Platform adapter instance
    * @param {object} options.sync_context - Sync context
    * @param {object} options.sync_stats - Sync statistics object
+   * @param {object[]} options.rosters - External rosters in canonical format
    * @returns {Promise<void>}
    * @private
    */
-  async _setup_player_mappings({ adapter, sync_context, sync_stats }) {
-    const external_players = await adapter.get_players()
+  async _setup_player_mappings({ adapter, sync_context, sync_stats, rosters }) {
+    const player_catalog = await adapter.get_players()
 
-    // Build player mapping context
-    const player_mapping_context = this._build_player_mapping_context({
-      external_players
+    // Platform player endpoints are global (Sleeper's is the whole ~11k entry
+    // NFL catalog) and bulk_map_to_internal issues one sequential database
+    // lookup per entry, so narrow to the players actually on a roster in this
+    // league first -- the same trim the read-only fetch path applies.
+    const external_players = this.sync_utils.filter_players_to_rostered({
+      players: player_catalog,
+      rosters
     })
 
-    // Map all external player IDs to internal PIDs
     const player_mappings = await this.player_mapper.bulk_map_to_internal({
       platform: sync_context.platform,
-      players: player_mapping_context.players
+      players: this._build_player_mapping_inputs({
+        external_players,
+        platform: sync_context.platform
+      })
     })
 
-    // Store player mappings in context
     for (const [external_id, pid] of player_mappings) {
       if (pid) {
         sync_context.player_mappings.set(external_id, pid)
@@ -216,25 +375,69 @@ export class RosterSync {
   }
 
   /**
-   * Build player mapping context from external players
-   * @param {object} options - Context building options
-   * @param {object[]} options.external_players - Array of external player data
-   * @returns {object} Player mapping context
+   * Build bulk_map_to_internal inputs from canonical external players
+   * @param {object} options - Input building options
+   * @param {object[]} options.external_players - External players in canonical format
+   * @param {string} options.platform - Platform identifier
+   * @returns {object[]} Array of `{ external_id, fallback_data }` mapping inputs
    * @private
    */
-  _build_player_mapping_context({ external_players }) {
-    return {
-      players: external_players.map((external_player) => ({
-        external_id: external_player.player_id || external_player.id,
+  _build_player_mapping_inputs({ external_players, platform }) {
+    const player_id_key = this._get_platform_player_id_key({ platform })
+
+    return external_players
+      .map((external_player) => ({
+        external_id: external_player.player_ids?.[player_id_key],
         fallback_data: {
-          name:
-            external_player.full_name ||
-            `${external_player.first_name} ${external_player.last_name}`,
+          name: this._build_player_name({ external_player }),
           position: external_player.position,
-          team: external_player.team || external_player.nfl_team
+          team: external_player.team_abbreviation
         }
       }))
+      .filter((mapping_input) => mapping_input.external_id != null)
+  }
+
+  /**
+   * Build a search name for fallback player matching
+   * @param {object} options - Name building options
+   * @param {object} options.external_player - External player in canonical format
+   * @returns {string|null} Player name, or null when the player carries no name
+   * @private
+   */
+  _build_player_name({ external_player }) {
+    if (external_player.player_name) {
+      return external_player.player_name
     }
+
+    // Never hand the fuzzy matcher a name assembled from absent parts -- an
+    // unguarded join yields the literal "undefined undefined" and matches
+    // whatever is closest to it.
+    const name_parts = [
+      external_player.first_name,
+      external_player.last_name
+    ].filter(Boolean)
+
+    return name_parts.length > 0 ? name_parts.join(' ') : null
+  }
+
+  /**
+   * Get the canonical `player_ids` key holding a platform's own player ID
+   * @param {object} options - Lookup options
+   * @param {string} options.platform - Platform identifier
+   * @returns {string} Canonical player_ids key
+   * @private
+   */
+  _get_platform_player_id_key({ platform }) {
+    const player_id_key =
+      PLATFORM_PLAYER_ID_KEYS[String(platform).toLowerCase()]
+
+    if (!player_id_key) {
+      throw new Error(
+        `No canonical player id field defined for platform: ${platform}`
+      )
+    }
+
+    return player_id_key
   }
 
   /**
@@ -245,118 +448,26 @@ export class RosterSync {
    * @private
    */
   _extract_team_id({ external_roster }) {
-    // Canonical format uses team_external_id
-    return (
-      external_roster.team_external_id ||
-      external_roster.roster_id ||
-      external_roster.team_id
-    )
+    return external_roster.team_external_id
   }
 
   /**
-   * Extract roster players from external roster
+   * Extract roster players from external roster (canonical format)
    * @param {object} options - Roster players extraction options
-   * @param {object} options.external_roster - External roster data
-   * @returns {string[]} Array of external player IDs
+   * @param {object} options.external_roster - External roster data in canonical format
+   * @param {string} options.platform - Platform identifier
+   * @returns {object[]} Array of `{ external_player_id, slot }` entries
    * @private
    */
-  _extract_roster_players({ external_roster }) {
-    return external_roster.players || external_roster.roster || []
-  }
+  _extract_roster_players({ external_roster, platform }) {
+    const player_id_key = this._get_platform_player_id_key({ platform })
 
-  /**
-   * Get current roster from database
-   * @param {object} options - Current roster retrieval options
-   * @param {string} options.internal_league_id - Internal league ID
-   * @param {string} options.internal_team_id - Internal team ID
-   * @param {number} options.week - Week number
-   * @param {number} options.year - Season year
-   * @returns {Promise<object[]>} Current roster entries
-   * @private
-   */
-  async _get_current_roster({
-    internal_league_id,
-    internal_team_id,
-    week,
-    year
-  }) {
-    return await db('rosters_players').where({
-      lid: internal_league_id,
-      tid: internal_team_id,
-      week,
-      season_year: year
-    })
-  }
-
-  /**
-   * Add player to roster
-   * @param {object} options - Player addition options
-   * @param {string} options.internal_league_id - Internal league ID
-   * @param {string} options.internal_team_id - Internal team ID
-   * @param {string} options.pid - Player ID
-   * @param {number} options.week - Week number
-   * @param {number} options.year - Season year
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _add_player_to_roster({
-    internal_league_id,
-    internal_team_id,
-    pid,
-    week,
-    year
-  }) {
-    await db('rosters_players')
-      .insert({
-        lid: internal_league_id,
-        tid: internal_team_id,
-        pid,
-        slot: roster_slot_types.BENCH, // Default to bench
-        player_position: 'BENCH',
-        week,
-        season_year: year,
-        extensions: 0,
-        tag: player_tag_types.REGULAR
-      })
-      .onConflict(['lid', 'tid', 'pid', 'week', 'season_year'])
-      .ignore()
-  }
-
-  /**
-   * Remove players no longer on external roster
-   * @param {object} options - Player removal options
-   * @param {Set<string>} options.current_pids - Set of current player IDs
-   * @param {Set<string>} options.external_pids - Set of external player IDs
-   * @param {string} options.internal_league_id - Internal league ID
-   * @param {string} options.internal_team_id - Internal team ID
-   * @param {number} options.week - Week number
-   * @param {number} options.year - Season year
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _remove_obsolete_players({
-    current_pids,
-    external_pids,
-    internal_league_id,
-    internal_team_id,
-    week,
-    year
-  }) {
-    const players_to_remove = [...current_pids].filter(
-      (pid) => !external_pids.has(pid)
-    )
-
-    if (players_to_remove.length > 0) {
-      await db('rosters_players')
-        .where({
-          lid: internal_league_id,
-          tid: internal_team_id,
-          week,
-          season_year: year
-        })
-        .whereIn('pid', players_to_remove)
-        .del()
-    }
+    return (external_roster.players || []).map((roster_player) => ({
+      external_player_id: roster_player.player_ids?.[player_id_key],
+      slot:
+        ROSTER_SLOT_BY_CATEGORY[roster_player.roster_slot_category] ??
+        roster_slot_types.BENCH
+    }))
   }
 }
 

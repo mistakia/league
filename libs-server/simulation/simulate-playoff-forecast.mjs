@@ -7,6 +7,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
+import { get_season_playoff_weeks } from '#libs-server'
 
 import { load_actual_playoff_points } from './load-simulation-data.mjs'
 import { simulate_playoff_weeks_correlated } from './simulate-playoff-weeks.mjs'
@@ -17,7 +18,99 @@ const log = debug('simulation:playoff-forecast')
 const SIMULATIONS = 10000
 
 /**
- * Simulate wildcard round forecast (week 15).
+ * Total a team's recorded points across the given weeks. A week with no
+ * recorded result contributes nothing, so an incomplete round is a partial
+ * total rather than an error.
+ *
+ * @param {object} params
+ * @param {Map<number, Map<number, number>>} params.actual_points - week -> tid -> points
+ * @param {number[]} params.weeks - Weeks to total
+ * @param {number} params.tid - Team ID
+ * @returns {number} Total points
+ */
+const sum_actual_points = ({ actual_points, weeks, tid }) => {
+  let total = 0
+  for (const week of weeks) {
+    total += actual_points.get(week)?.get(tid) || 0
+  }
+  return total
+}
+
+/**
+ * The highest-scoring team, or null when there are no teams to compare.
+ * The running maximum starts at -Infinity so a field of negative totals still
+ * produces a winner, and the null is distinguished from a tid, which may be any
+ * integer.
+ *
+ * @param {object} params
+ * @param {number[]} params.team_ids - Teams to compare
+ * @param {(tid: number) => number} params.get_score - Score for a team
+ * @returns {number | null} Winning team ID
+ */
+const find_highest_scoring_team = ({ team_ids, get_score }) => {
+  let max_score = -Infinity
+  let winner_tid = null
+  for (const tid of team_ids) {
+    const score = get_score(tid)
+    if (score > max_score) {
+      max_score = score
+      winner_tid = tid
+    }
+  }
+  return winner_tid
+}
+
+/**
+ * The wildcard teams that advance: the highest scorers, one per pairing.
+ *
+ * @param {object} params
+ * @param {number[]} params.wildcard_tids - Teams playing the wildcard round
+ * @param {number} params.survivor_count - Teams that advance
+ * @param {(tid: number) => number} params.get_score - Wildcard score for a team
+ * @returns {number[]} Advancing team IDs
+ */
+const select_wildcard_winners = ({
+  wildcard_tids,
+  survivor_count,
+  get_score
+}) =>
+  wildcard_tids
+    .map((tid) => ({ tid, score: get_score(tid) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, survivor_count)
+    .map((r) => r.tid)
+
+/**
+ * Resolve the forecast to a decided champion: the winner takes all the odds.
+ *
+ * @param {object} params
+ * @param {object} params.result - Forecast keyed by team ID
+ * @param {number | null} params.winner_tid - Winning team ID
+ */
+const set_decided_championship_odds = ({ result, winner_tid }) => {
+  for (const tid in result) {
+    result[tid].championship_odds = Number(tid) === winner_tid ? 1.0 : 0.0
+    delete result[tid].championship_wins
+  }
+}
+
+/**
+ * Convert Monte Carlo win counts into championship odds.
+ *
+ * @param {object} params
+ * @param {object} params.result - Forecast keyed by team ID
+ * @param {number} params.n_simulations - Simulations run
+ */
+const set_simulated_championship_odds = ({ result, n_simulations }) => {
+  for (const tid in result) {
+    result[tid].championship_odds =
+      result[tid].championship_wins / n_simulations
+    delete result[tid].championship_wins
+  }
+}
+
+/**
+ * Simulate the wildcard round forecast.
  * Called when regular season is complete but playoffs haven't started.
  * Uses player-level correlation simulation.
  * Incorporates actual results for completed weeks.
@@ -43,6 +136,20 @@ export async function simulate_wildcard_forecast({
   const wildcard_survivor_count = Math.floor(
     (playoff_team_count - bye_count) / 2
   )
+
+  // The playoff weeks are per-league configuration on the season row, the same
+  // source the caller dispatches on. Hardcoding 15/16/17 forecasts weeks the
+  // league does not play: no actual results are found there and the rosters
+  // simulated are the wrong ones, silently, the same way hardcoding the seed
+  // range did below.
+  const { wildcard_week, championship_weeks, playoff_weeks } =
+    await get_season_playoff_weeks({ lid: league_id, season_year: year })
+
+  if (!wildcard_week || !championship_weeks.length) {
+    throw new Error(
+      `No playoff weeks configured for league ${league_id} in ${year}`
+    )
+  }
 
   // Get playoff teams
   const team_stats = await db('league_team_seasonlogs')
@@ -96,63 +203,42 @@ export async function simulate_wildcard_forecast({
     await load_actual_playoff_points({
       league_id,
       team_ids: all_playoff_tids,
-      weeks: [15, 16, 17],
+      weeks: playoff_weeks,
       year
     })
 
   log(`Weeks with actual results: ${weeks_with_results.join(', ') || 'none'}`)
 
-  // Check if wildcard week (15) is complete
-  const wildcard_complete = weeks_with_results.includes(15)
+  const wildcard_complete = weeks_with_results.includes(wildcard_week)
 
   // Determine which weeks need simulation
-  const weeks_to_simulate = [15, 16, 17].filter(
+  const weeks_to_simulate = playoff_weeks.filter(
     (w) => !weeks_with_results.includes(w)
   )
 
-  // If all weeks complete, just return actual winner
+  // The wildcard result, once it exists, is the same in every simulation, so
+  // resolve the survivors once rather than per iteration below.
+  const actual_wildcard_winners = wildcard_complete
+    ? select_wildcard_winners({
+        wildcard_tids,
+        survivor_count: wildcard_survivor_count,
+        get_score: (tid) => actual_points.get(wildcard_week)?.get(tid) || 0
+      })
+    : null
+
+  // If all weeks complete, just return actual winner. Nothing left to simulate
+  // means the wildcard week has results, so actual_wildcard_winners is set.
   if (weeks_to_simulate.length === 0) {
     log('All playoff weeks complete - using actual results')
 
-    // Determine wildcard winners from week 15 scores
-    const week15_points = actual_points.get(15)
-    const wildcard_results = wildcard_tids
-      .map((tid) => ({ tid, score: week15_points?.get(tid) || 0 }))
-      .sort((a, b) => b.score - a.score)
-    const wildcard_winners = wildcard_results
-      .slice(0, wildcard_survivor_count)
-      .map((r) => r.tid)
+    const championship_teams = [...bye_tids, ...actual_wildcard_winners]
+    const winner_tid = find_highest_scoring_team({
+      team_ids: championship_teams,
+      get_score: (tid) =>
+        sum_actual_points({ actual_points, weeks: championship_weeks, tid })
+    })
 
-    // Championship teams
-    const championship_teams = [...bye_tids, ...wildcard_winners]
-
-    // Calculate total championship scores
-    const total_scores = {}
-    for (const tid of championship_teams) {
-      total_scores[tid] = 0
-      for (const week of [16, 17]) {
-        const week_points = actual_points.get(week)
-        if (week_points?.has(tid)) {
-          total_scores[tid] += week_points.get(tid)
-        }
-      }
-    }
-
-    // Find winner
-    let max_score = -1
-    let winner_tid = null
-    for (const tid of championship_teams) {
-      if (total_scores[tid] > max_score) {
-        max_score = total_scores[tid]
-        winner_tid = tid
-      }
-    }
-
-    // Set championship odds for all teams (100% for winner, 0% for others)
-    for (const tid in result) {
-      result[tid].championship_odds = Number(tid) === winner_tid ? 1.0 : 0.0
-      delete result[tid].championship_wins
-    }
+    set_decided_championship_odds({ result, winner_tid })
 
     const elapsed_ms = Date.now() - start_time
     log(`Wildcard forecast completed in ${elapsed_ms}ms (actual results)`)
@@ -163,9 +249,11 @@ export async function simulate_wildcard_forecast({
   log(`Running correlated wildcard simulations`)
 
   // Determine which weeks need simulation for each round
-  const wildcard_weeks_to_simulate = weeks_to_simulate.filter((w) => w === 15)
-  const championship_weeks_to_simulate = weeks_to_simulate.filter(
-    (w) => w >= 16
+  const wildcard_weeks_to_simulate = weeks_to_simulate.filter(
+    (w) => w === wildcard_week
+  )
+  const championship_weeks_to_simulate = weeks_to_simulate.filter((w) =>
+    championship_weeks.includes(w)
   )
 
   // Run correlated simulation for wildcard week if needed
@@ -181,98 +269,59 @@ export async function simulate_wildcard_forecast({
     wildcard_raw_scores = wildcard_result.raw_team_scores
   }
 
-  // Run correlated simulation for championship weeks for all 6 playoff teams
+  // Run correlated simulation for championship weeks for every playoff team
   // (we need scores for all teams since wildcard winners vary per simulation)
   let championship_raw_scores = null
   if (championship_weeks_to_simulate.length > 0) {
-    // Build locked week scores for championship weeks from actual_points
-    const championship_locked_scores = new Map()
-    for (const week of weeks_with_results) {
-      if (week >= 16) {
-        championship_locked_scores.set(week, actual_points.get(week))
-      }
-    }
-
     const championship_result = await simulate_playoff_weeks_correlated({
       league_id,
       team_ids: all_playoff_tids,
       weeks: championship_weeks_to_simulate,
       year,
-      n_simulations,
-      locked_week_scores: championship_locked_scores
+      n_simulations
     })
     championship_raw_scores = championship_result.raw_team_scores
   }
 
+  // Completed championship weeks are constant across simulations, so total them
+  // once. They are deliberately NOT passed to the simulation as
+  // locked_week_scores: that folds them into every entry of raw_team_scores, so
+  // adding them here as well would weight a completed week twice against a
+  // simulated one.
+  const completed_championship_totals = new Map(
+    all_playoff_tids.map((tid) => [
+      tid,
+      sum_actual_points({ actual_points, weeks: championship_weeks, tid })
+    ])
+  )
+
   // Run Monte Carlo winner counting
   log(`Counting winners from ${n_simulations} simulations`)
   for (let sim = 0; sim < n_simulations; sim++) {
-    let wildcard_winners
-
-    if (wildcard_complete) {
-      // Use actual wildcard results
-      const week15_points = actual_points.get(15)
-      const wildcard_results = wildcard_tids
-        .map((tid) => ({ tid, score: week15_points?.get(tid) || 0 }))
-        .sort((a, b) => b.score - a.score)
-      wildcard_winners = wildcard_results
-        .slice(0, wildcard_survivor_count)
-        .map((r) => r.tid)
-    } else {
-      // Determine wildcard winners from simulated week 15 scores
-      const wildcard_results = wildcard_tids
-        .map((tid) => ({ tid, score: wildcard_raw_scores.get(tid)[sim] }))
-        .sort((a, b) => b.score - a.score)
-      wildcard_winners = wildcard_results
-        .slice(0, wildcard_survivor_count)
-        .map((r) => r.tid)
-    }
+    const wildcard_winners =
+      actual_wildcard_winners ||
+      select_wildcard_winners({
+        wildcard_tids,
+        survivor_count: wildcard_survivor_count,
+        get_score: (tid) => wildcard_raw_scores.get(tid)[sim]
+      })
 
     // Championship round: bye teams + wildcard winners
     const championship_teams = [...bye_tids, ...wildcard_winners]
 
-    // Calculate championship scores for this simulation
-    const scores = {}
-    for (const tid of championship_teams) {
-      scores[tid] = 0
+    const winner_tid = find_highest_scoring_team({
+      team_ids: championship_teams,
+      get_score: (tid) =>
+        completed_championship_totals.get(tid) +
+        (championship_raw_scores ? championship_raw_scores.get(tid)[sim] : 0)
+    })
 
-      // Add actual points from completed championship weeks
-      for (const week of weeks_with_results) {
-        if (week >= 16) {
-          const week_points = actual_points.get(week)
-          if (week_points?.has(tid)) {
-            scores[tid] += week_points.get(tid)
-          }
-        }
-      }
-
-      // Add simulated championship week scores
-      if (championship_raw_scores && championship_raw_scores.has(tid)) {
-        scores[tid] += championship_raw_scores.get(tid)[sim]
-      }
-    }
-
-    // Find winner (highest total)
-    let max_score = -1
-    let winner_tid = null
-    for (const tid of championship_teams) {
-      if (scores[tid] > max_score) {
-        max_score = scores[tid]
-        winner_tid = tid
-      }
-    }
-
-    if (winner_tid) {
+    if (winner_tid !== null) {
       result[winner_tid].championship_wins++
     }
   }
 
-  // Calculate championship odds
-  for (const tid in result) {
-    result[tid].championship_odds =
-      result[tid].championship_wins / n_simulations
-    delete result[tid].championship_wins
-  }
+  set_simulated_championship_odds({ result, n_simulations })
 
   const elapsed_ms = Date.now() - start_time
   log(`Wildcard forecast completed in ${elapsed_ms}ms`)
@@ -281,7 +330,7 @@ export async function simulate_wildcard_forecast({
 }
 
 /**
- * Simulate championship round forecast (weeks 16-17).
+ * Simulate the championship round forecast.
  * Uses player-level correlation simulation.
  * Incorporates actual results for completed weeks.
  *
@@ -299,12 +348,34 @@ export async function simulate_championship_forecast({
   const start_time = Date.now()
   log(`Starting championship forecast for league ${league_id}`)
 
-  // Get championship teams from playoffs table
-  const playoffs = await db('playoffs')
-    .where({ lid: league_id, season_year: year })
-    .whereIn('playoff_week_number', [2, 3]) // Championship round entries
+  // The championship weeks are per-league configuration on the season row, the
+  // same source the caller dispatches on.
+  const { championship_weeks } = await get_season_playoff_weeks({
+    lid: league_id,
+    season_year: year
+  })
 
-  const championship_tids = [...new Set(playoffs.map((p) => p.tid))]
+  if (!championship_weeks.length) {
+    throw new Error(
+      `No championship weeks configured for league ${league_id} in ${year}`
+    )
+  }
+
+  // One read of the playoff field, filtered two ways below.
+  // playoffs.playoff_week_number is an ORDINAL, not a week: 1 is the wildcard
+  // round and every entry above it is the championship round, however many
+  // weeks that round spans.
+  const playoffs = await db('playoffs').where({
+    lid: league_id,
+    season_year: year
+  })
+
+  const championship_tids = [
+    ...new Set(
+      playoffs.filter((p) => p.playoff_week_number > 1).map((p) => p.tid)
+    )
+  ]
+  const all_playoff_tids = [...new Set(playoffs.map((p) => p.tid))]
 
   const { playoff_format } = await load_simulation_context({ league_id, year })
   const { bye_count } = playoff_format
@@ -325,13 +396,6 @@ export async function simulate_championship_forecast({
     lid: league_id,
     season_year: year
   })
-  const all_playoff_tids = [
-    ...new Set(
-      (await db('playoffs').where({ lid: league_id, season_year: year })).map(
-        (p) => p.tid
-      )
-    )
-  ]
 
   // Load team stats to identify which seeds received a bye
   const team_stats_list = await db('league_team_seasonlogs').where({
@@ -348,7 +412,7 @@ export async function simulate_championship_forecast({
   const result = {}
   for (const team of all_teams) {
     const team_stats = team_stats_by_tid[team.team_id]
-    // Top two seeds receive the bye; divisions confer no berth.
+    // The top bye_count seeds receive the bye; divisions confer no berth.
     // Number.isInteger first: the optional chain guards undefined, not null,
     // and a null regular_season_finish coerces to 0 <= bye_count, awarding a
     // bye to every team with no recorded finish.
@@ -370,14 +434,14 @@ export async function simulate_championship_forecast({
     await load_actual_playoff_points({
       league_id,
       team_ids: championship_tids,
-      weeks: [16, 17],
+      weeks: championship_weeks,
       year
     })
 
   log(`Weeks with actual results: ${weeks_with_results.join(', ') || 'none'}`)
 
   // Determine which weeks need simulation
-  const weeks_to_simulate = [16, 17].filter(
+  const weeks_to_simulate = championship_weeks.filter(
     (w) => !weeks_with_results.includes(w)
   )
 
@@ -385,33 +449,13 @@ export async function simulate_championship_forecast({
   if (weeks_to_simulate.length === 0) {
     log('All championship weeks complete - using actual results')
 
-    // Calculate total scores from actual results
-    const total_scores = {}
-    for (const tid of championship_tids) {
-      total_scores[tid] = 0
-      for (const week of [16, 17]) {
-        const week_points = actual_points.get(week)
-        if (week_points?.has(tid)) {
-          total_scores[tid] += week_points.get(tid)
-        }
-      }
-    }
+    const winner_tid = find_highest_scoring_team({
+      team_ids: championship_tids,
+      get_score: (tid) =>
+        sum_actual_points({ actual_points, weeks: championship_weeks, tid })
+    })
 
-    // Find winner
-    let max_score = -1
-    let winner_tid = null
-    for (const tid of championship_tids) {
-      if (total_scores[tid] > max_score) {
-        max_score = total_scores[tid]
-        winner_tid = tid
-      }
-    }
-
-    // Set championship odds for all teams (100% for winner, 0% for others)
-    for (const tid in result) {
-      result[tid].championship_odds = Number(tid) === winner_tid ? 1.0 : 0.0
-      delete result[tid].championship_wins
-    }
+    set_decided_championship_odds({ result, winner_tid })
 
     const elapsed_ms = Date.now() - start_time
     log(`Championship forecast completed in ${elapsed_ms}ms (actual results)`)
@@ -432,28 +476,17 @@ export async function simulate_championship_forecast({
 
   // Count winners from simulation results
   for (let sim = 0; sim < n_simulations; sim++) {
-    // Find winner for this simulation (highest total)
-    let max_score = -1
-    let winner_tid = null
-    for (const tid of championship_tids) {
-      const score = raw_team_scores.get(tid)[sim]
-      if (score > max_score) {
-        max_score = score
-        winner_tid = tid
-      }
-    }
+    const winner_tid = find_highest_scoring_team({
+      team_ids: championship_tids,
+      get_score: (tid) => raw_team_scores.get(tid)[sim]
+    })
 
-    if (winner_tid) {
+    if (winner_tid !== null) {
       result[winner_tid].championship_wins++
     }
   }
 
-  // Calculate championship odds
-  for (const tid in result) {
-    result[tid].championship_odds =
-      result[tid].championship_wins / n_simulations
-    delete result[tid].championship_wins
-  }
+  set_simulated_championship_odds({ result, n_simulations })
 
   const elapsed_ms = Date.now() - start_time
   log(`Championship forecast completed in ${elapsed_ms}ms`)

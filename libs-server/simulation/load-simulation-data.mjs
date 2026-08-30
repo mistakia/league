@@ -8,6 +8,13 @@ import debug from 'debug'
 
 import db from '#db'
 
+import { load_nfl_schedule } from './load-nfl-schedule.mjs'
+import { load_market_projections } from './load-market-projections.mjs'
+import {
+  load_player_projections,
+  load_player_projection_stats
+} from './load-projection-data.mjs'
+
 const log = debug('simulation:load-simulation-data')
 
 // Re-export from split files for backwards compatibility
@@ -54,7 +61,7 @@ export async function load_player_info({ player_ids }) {
  *
  * @param {object} params
  * @param {string} params.scoring_format_id - Scoring format hash
- * @returns {Promise<object>} Scoring format configuration
+ * @returns {Promise<import('#db/schema-types.js').LeagueScoringFormatsRow>} Scoring format configuration
  */
 export async function load_scoring_format({ scoring_format_id }) {
   const scoring_format = await db('league_scoring_formats')
@@ -99,11 +106,9 @@ export async function load_actual_player_points({
 
   const points_map = new Map()
   for (const row of rows) {
-    // No parseFloat: db/index.mjs registers a NUMERIC type parser, so `points`
-    // arrives as a number and the parse was a stringify-and-reparse round trip.
-    // The null skip is the part that matters -- parseFloat(null) is NaN, and a
-    // NaN in this map reads downstream as a real score and poisons every total
-    // it reaches, where an absent pid correctly reads as "no actual points".
+    // A gamelog row can exist with no score yet. Leaving the pid out of the map
+    // makes that read downstream as "no actual points"; putting a null in would
+    // read as a real score of zero and poison every total it reaches.
     if (row.points === null) continue
     points_map.set(row.pid, row.points)
   }
@@ -131,39 +136,22 @@ export async function load_player_points_with_game_status({
   year,
   scoring_format_id
 }) {
-  // Import market projections loader dynamically to avoid circular dependency
-  const { load_market_projections } =
-    await import('./load-market-projections.mjs')
-
-  // Import projection loaders from split file
-  const { load_player_projections, load_player_projection_stats } =
-    await import('./load-projection-data.mjs')
-
   if (!player_ids.length) {
     return new Map()
   }
 
-  // Load player NFL teams
-  const players = await db('player')
-    .select('pid', 'current_nfl_team')
-    .whereIn('pid', player_ids)
+  // Positions feed the TD stat mapping in the market merge; NFL teams key the
+  // schedule lookup below.
+  const player_info = await load_player_info({ player_ids })
 
-  const player_team_map = new Map()
-  for (const p of players) {
-    player_team_map.set(p.pid, p.current_nfl_team)
-  }
-
-  // Load NFL schedule to check game status
-  const games = await db('nfl_games')
-    .where({ season_year: year, week })
-    .select('home_nfl_team', 'away_nfl_team', 'esbid', 'status')
-
-  const team_game_map = new Map()
-  for (const game of games) {
-    const is_final = game.status?.toUpperCase()?.startsWith('FINAL') ?? false
-    team_game_map.set(game.home_nfl_team, { esbid: game.esbid, is_final })
-    team_game_map.set(game.away_nfl_team, { esbid: game.esbid, is_final })
-  }
+  // The schedule is keyed by NFL team abbreviation, and carries the season_type
+  // filter this lookup needs so a PRE game cannot displace the REG game in the
+  // same numbered week. Its JSDoc declares only `object`, so narrow it to the
+  // two fields read below.
+  const schedule =
+    /** @type {Record<string, { esbid: number, is_final: boolean }>} */ (
+      await load_nfl_schedule({ season_year: year, week })
+    )
 
   // Categorize players by game status
   const completed_players = []
@@ -171,8 +159,8 @@ export async function load_player_points_with_game_status({
   const completed_esbids = new Set()
 
   for (const pid of player_ids) {
-    const team = player_team_map.get(pid)
-    const game_info = team_game_map.get(team)
+    const team = player_info.get(pid)?.nfl_team
+    const game_info = team ? schedule[team] : undefined
     if (game_info?.is_final) {
       completed_players.push(pid)
       completed_esbids.add(game_info.esbid)
@@ -182,26 +170,14 @@ export async function load_player_points_with_game_status({
   }
 
   // Load actual points for completed games
-  const actual_points_map = new Map()
-  if (completed_players.length > 0 && completed_esbids.size > 0) {
-    const actual_rows = await db('scoring_format_player_gamelogs')
-      .whereIn('pid', completed_players)
-      .whereIn('esbid', [...completed_esbids])
-      .where('scoring_format_id', scoring_format_id)
-      .select('pid', 'points')
-
-    for (const row of actual_rows) {
-      // Same as load_actual_player_points above: already a number, and a null
-      // must not enter the map as NaN.
-      if (row.points === null) continue
-      actual_points_map.set(row.pid, row.points)
-    }
-  }
+  const actual_points_map = await load_actual_player_points({
+    player_ids: completed_players,
+    esbids: [...completed_esbids],
+    scoring_format_id
+  })
 
   // Load scoring format for market projection calculation
-  const league_settings = await db('league_scoring_formats')
-    .where({ id: scoring_format_id })
-    .first()
+  const league_settings = await load_scoring_format({ scoring_format_id })
 
   // Import merge helper dynamically to avoid circular dependency
   const { merge_player_projections } =
@@ -214,18 +190,9 @@ export async function load_player_points_with_game_status({
     year
   })
 
-  // Load player positions for TD stat mapping (as player_info format)
-  const player_info = new Map()
-  const position_rows = await db('player')
-    .select('pid', 'primary_position')
-    .whereIn('pid', pending_players)
-  for (const row of position_rows) {
-    player_info.set(row.pid, { position: row.primary_position })
-  }
-
   // Load market projections for pending players
   let market_projections = new Map()
-  if (league_settings && pending_players.length > 0) {
+  if (pending_players.length > 0) {
     market_projections = await load_market_projections({
       player_ids: pending_players,
       week,
@@ -316,17 +283,20 @@ export async function load_actual_playoff_points({
   const weeks_with_results = new Set()
 
   for (const entry of playoff_entries) {
-    const points = entry.points
-    // Only count as having results if points > 0 (game actually played).
-    // The null test is exactly what the old `parseFloat(null)` bought: NaN > 0
-    // is false, and so is null > 0 once the comparison is written out.
-    if (points !== null && points > 0) {
-      if (!actual_points.has(entry.week)) {
-        actual_points.set(entry.week, new Map())
-      }
-      actual_points.get(entry.week).set(entry.tid, points)
-      weeks_with_results.add(entry.week)
+    // process-playoffs.mjs inserts a playoff row with a null `points` and fills
+    // it in once the week is scored, so the whereNotNull above is the whole
+    // "this week has a result" test — a team that legitimately scored zero
+    // still counts. `points_manual` is the manual correction that overrides the
+    // computed score, matched to the post-season standings in
+    // scripts/process-playoffs.mjs so the forecast's actual-results winner
+    // cannot disagree with the recorded champion.
+    const points = entry.points_manual || entry.points
+
+    if (!actual_points.has(entry.week)) {
+      actual_points.set(entry.week, new Map())
     }
+    actual_points.get(entry.week).set(entry.tid, points)
+    weeks_with_results.add(entry.week)
   }
 
   return {

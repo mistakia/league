@@ -449,7 +449,7 @@ const execute_processing = async ({
 
   log(`Processing completed in ${format_duration(processing_duration)}`)
   log(
-    `Processed ${results.length} market results (${markets.length} markets x 2 time_types)`
+    `Processed ${results.length} market results from ${markets.length} markets`
   )
 
   // Prepare database updates

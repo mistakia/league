@@ -17,14 +17,82 @@ import oddslib from '#libs-server/odds-conversions.mjs'
  * @typedef {object} Wager
  * @property {WagerSelection[]} selections
  * @property {boolean} is_settled
+ * @property {boolean} [is_won]
  * @property {boolean} [is_cashed_out]
  * @property {number} [bonus_bet_amount]
  * @property {number} [parsed_odds]
  * @property {number} stake
- * @property {number} [pandl]
  * @property {number} [actual_return]
  * @property {number} potential_win
  */
+
+/**
+ * Odds buckets in ascending order: a wager counts in the first bucket whose
+ * upper bound its price is below. The keys are the field names the summary
+ * reports and the exposure formatter reads, so a new bucket is one row here.
+ */
+const ODDS_BUCKETS = [
+  { key: 'under_100', upper_bound: 100 },
+  { key: 'range_100_400', upper_bound: 400 },
+  { key: 'range_400_1000', upper_bound: 1000 },
+  { key: 'range_1000_10000', upper_bound: 10000 },
+  { key: 'range_10000_50000', upper_bound: 50000 },
+  { key: 'range_50000_100000', upper_bound: 100000 },
+  { key: 'range_100000_150000', upper_bound: 150000 },
+  { key: 'range_150000_250000', upper_bound: 250000 },
+  { key: 'range_250000_500000', upper_bound: 500000 },
+  { key: 'range_500000_1000000', upper_bound: 1000000 },
+  { key: 'over_1000000', upper_bound: Infinity }
+]
+
+/**
+ * Count a wager's price in its odds bucket, returning a new counts object to
+ * maintain immutability in the reducer.
+ *
+ * @param {Record<string, number>} counts
+ * @param {number} wager_odds - American odds
+ * @returns {Record<string, number>} Updated counts object
+ */
+const increment_odds_bucket = (counts, wager_odds) => {
+  const bucket = ODDS_BUCKETS.find(
+    ({ upper_bound }) => wager_odds < upper_bound
+  )
+  return bucket ? { ...counts, [bucket.key]: counts[bucket.key] + 1 } : counts
+}
+
+/**
+ * The gross return, stake included, a wager contributes to the summary.
+ *
+ * `actual_return` is what the book really paid, so it wins wherever it is
+ * known — except for a hypothetical win, where the wager really lost and paid
+ * nothing, and only the potential payout can express what the excluded props
+ * would have returned. Cashed out wagers report their settlement; open wagers
+ * have none yet and contribute nothing.
+ *
+ * @param {object} params
+ * @param {Wager} params.wager
+ * @param {boolean} params.is_won
+ * @param {boolean} params.is_lost
+ * @param {boolean} params.is_hypothetical_win
+ * @returns {number}
+ */
+const calculate_gross_return = ({
+  wager,
+  is_won,
+  is_lost,
+  is_hypothetical_win
+}) => {
+  if (is_won) {
+    if (is_hypothetical_win) {
+      return wager.potential_win || 0
+    }
+    return wager.actual_return ?? wager.potential_win ?? 0
+  }
+  if (is_lost) {
+    return 0
+  }
+  return wager.actual_return || 0
+}
 
 /**
  * Helper to check if two props are equal.
@@ -115,19 +183,12 @@ export const format_american_odds_as_fractional = (american_odds) => {
     return '-'
   }
 
-  try {
-    // Convert American odds to decimal odds first
-    const decimal_odds = oddslib.from('moneyline', american_odds).to('decimal')
+  // Decimal odds carry the stake, so the profit ratio is decimal - 1:
+  // decimal odds of 2.5 display as 1.50/1.
+  const decimal_odds = oddslib.from('moneyline', american_odds).to('decimal')
+  const profit_ratio = (decimal_odds - 1).toFixed(2)
 
-    // Convert decimal to X/1 fractional format
-    // Decimal odds of 2.5 = 1.5/1 profit ratio
-    const profit_ratio = (decimal_odds - 1).toFixed(2)
-
-    return `${profit_ratio}/1`
-  } catch (error) {
-    // Fallback to American odds if conversion fails
-    return american_odds > 0 ? `+${american_odds}` : american_odds
-  }
+  return `${profit_ratio}/1`
 }
 
 /**
@@ -140,58 +201,46 @@ export const format_american_odds_as_fractional = (american_odds) => {
 export const calculate_wager_summary = ({ wagers, props = [] }) =>
   wagers.reduce(
     (accumulator, wager) => {
-      const lost_legs = wager.selections.filter((selection) => {
-        for (const prop of props) {
-          if (is_prop_equal(selection, prop)) {
-            return false
-          }
-        }
-        return selection.is_lost
-      }).length
+      const lost_selections = wager.selections.filter(
+        (selection) => selection.is_lost
+      )
+      const rescued_legs = lost_selections.filter((selection) =>
+        props.some((prop) => is_prop_equal(selection, prop))
+      ).length
+      const lost_legs = lost_selections.length - rescued_legs
 
       const is_settled = wager.is_settled
       const is_cashed_out = wager.is_cashed_out || false
 
-      // Cashed out wagers are considered settled but neither won nor lost
-      const is_won = is_settled && !is_cashed_out && lost_legs === 0
+      // A win is either the book's own settlement or the counterfactual `props`
+      // asks for — every leg that really lost was one of the excluded props.
+      // Deriving it from the absence of a losing leg alone would also count a
+      // settled wager whose legs all voided. Cashed out wagers are considered
+      // settled but neither won nor lost.
+      const is_won =
+        is_settled &&
+        !is_cashed_out &&
+        lost_legs === 0 &&
+        (Boolean(wager.is_won) || rescued_legs > 0)
       const is_lost = is_settled && !is_cashed_out && lost_legs > 0
+      const is_hypothetical_win = is_won && rescued_legs > 0
+
+      const gross_return = calculate_gross_return({
+        wager,
+        is_won,
+        is_lost,
+        is_hypothetical_win
+      })
 
       // Track bonus bet amounts
       const bonus_bet_amount = wager.bonus_bet_amount || 0
 
-      // Track wager odds
-      const wager_odds = wager.parsed_odds || 0
-
-      // Categorize wagers by odds ranges
-      const odds_categories = {}
-      if (wager_odds < 100) {
-        odds_categories.under_100 = 1
-      } else if (wager_odds >= 100 && wager_odds < 400) {
-        odds_categories.range_100_400 = 1
-      } else if (wager_odds >= 400 && wager_odds < 1000) {
-        odds_categories.range_400_1000 = 1
-      } else if (wager_odds >= 1000 && wager_odds < 10000) {
-        odds_categories.range_1000_10000 = 1
-      } else if (wager_odds >= 10000 && wager_odds < 50000) {
-        odds_categories.range_10000_50000 = 1
-      } else if (wager_odds >= 50000 && wager_odds < 100000) {
-        odds_categories.range_50000_100000 = 1
-      } else if (wager_odds >= 100000 && wager_odds < 150000) {
-        odds_categories.range_100000_150000 = 1
-      } else if (wager_odds >= 150000 && wager_odds < 250000) {
-        odds_categories.range_150000_250000 = 1
-      } else if (wager_odds >= 250000 && wager_odds < 500000) {
-        odds_categories.range_250000_500000 = 1
-      } else if (wager_odds >= 500000 && wager_odds < 1000000) {
-        odds_categories.range_500000_1000000 = 1
-      } else if (wager_odds >= 1000000) {
-        odds_categories.over_1000000 = 1
-      }
+      // Odds of 0 are not a price a book can offer, so they mean the wager
+      // carries none; such a wager is left out of the odds statistics rather
+      // than counted as a real "< +100" price that drags the average down.
+      const wager_odds = wager.parsed_odds || null
 
       return {
-        won_wagers: is_won
-          ? [...accumulator.won_wagers, wager]
-          : accumulator.won_wagers,
         wagers: accumulator.wagers + 1,
         wagers_won: is_won
           ? accumulator.wagers_won + 1
@@ -205,72 +254,42 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
 
         total_risk: accumulator.total_risk + wager.stake,
         bonus_bet_risk: accumulator.bonus_bet_risk + bonus_bet_amount,
-        // total_won = profit only (pandl), not including stake returned
-        // This is the actual money won, not the gross return
+        // total_won = profit only, the gross return less the stake it risked,
+        // so it is money won rather than money returned
         total_won:
           is_won || is_cashed_out
-            ? accumulator.total_won + (wager.pandl || 0)
+            ? accumulator.total_won + gross_return - wager.stake
             : accumulator.total_won,
         // total_return = stake + profit for settled wagers (used for ROI calculation)
-        total_return:
-          wager.actual_return !== null && wager.actual_return !== undefined
-            ? accumulator.total_return + wager.actual_return
-            : is_won
-              ? accumulator.total_return + (wager.potential_win || 0)
-              : is_lost
-                ? accumulator.total_return + 0
-                : accumulator.total_return,
+        total_return: accumulator.total_return + gross_return,
         wagers_cashed_out: is_cashed_out
           ? accumulator.wagers_cashed_out + 1
           : accumulator.wagers_cashed_out,
-        max_potential_win: accumulator.max_potential_win + wager.potential_win,
+        max_potential_win:
+          accumulator.max_potential_win + (wager.potential_win || 0),
         open_potential_win: is_settled
           ? accumulator.open_potential_win
-          : accumulator.open_potential_win + wager.potential_win,
+          : accumulator.open_potential_win + (wager.potential_win || 0),
 
         // Track max and average wager odds
-        wagers_odds_sum: accumulator.wagers_odds_sum + wager_odds,
+        wagers_with_odds:
+          wager_odds === null
+            ? accumulator.wagers_with_odds
+            : accumulator.wagers_with_odds + 1,
+        wagers_odds_sum: accumulator.wagers_odds_sum + (wager_odds || 0),
         max_wager_odds:
-          wager_odds > accumulator.max_wager_odds
+          wager_odds !== null && wager_odds > accumulator.max_wager_odds
             ? wager_odds
             : accumulator.max_wager_odds,
 
         // Wagers by odds range
-        wagers_by_odds_range: {
-          under_100:
-            accumulator.wagers_by_odds_range.under_100 +
-            (odds_categories.under_100 || 0),
-          range_100_400:
-            accumulator.wagers_by_odds_range.range_100_400 +
-            (odds_categories.range_100_400 || 0),
-          range_400_1000:
-            accumulator.wagers_by_odds_range.range_400_1000 +
-            (odds_categories.range_400_1000 || 0),
-          range_1000_10000:
-            accumulator.wagers_by_odds_range.range_1000_10000 +
-            (odds_categories.range_1000_10000 || 0),
-          range_10000_50000:
-            accumulator.wagers_by_odds_range.range_10000_50000 +
-            (odds_categories.range_10000_50000 || 0),
-          range_50000_100000:
-            accumulator.wagers_by_odds_range.range_50000_100000 +
-            (odds_categories.range_50000_100000 || 0),
-          range_100000_150000:
-            accumulator.wagers_by_odds_range.range_100000_150000 +
-            (odds_categories.range_100000_150000 || 0),
-          range_150000_250000:
-            accumulator.wagers_by_odds_range.range_150000_250000 +
-            (odds_categories.range_150000_250000 || 0),
-          range_250000_500000:
-            accumulator.wagers_by_odds_range.range_250000_500000 +
-            (odds_categories.range_250000_500000 || 0),
-          range_500000_1000000:
-            accumulator.wagers_by_odds_range.range_500000_1000000 +
-            (odds_categories.range_500000_1000000 || 0),
-          over_1000000:
-            accumulator.wagers_by_odds_range.over_1000000 +
-            (odds_categories.over_1000000 || 0)
-        },
+        wagers_by_odds_range:
+          wager_odds === null
+            ? accumulator.wagers_by_odds_range
+            : increment_odds_bucket(
+                accumulator.wagers_by_odds_range,
+                wager_odds
+              ),
 
         // Track lost legs dynamically - count wagers by number of losing selections
         lost_by_legs: update_lost_by_legs_count(
@@ -281,7 +300,6 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       }
     },
     {
-      won_wagers: [],
       wagers: 0,
       wagers_won: 0,
       wagers_loss: 0,
@@ -293,21 +311,12 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       total_return: 0,
       max_potential_win: 0,
       open_potential_win: 0,
+      wagers_with_odds: 0,
       wagers_odds_sum: 0,
       max_wager_odds: 0,
-      wagers_by_odds_range: {
-        under_100: 0,
-        range_100_400: 0,
-        range_400_1000: 0,
-        range_1000_10000: 0,
-        range_10000_50000: 0,
-        range_50000_100000: 0,
-        range_100000_150000: 0,
-        range_150000_250000: 0,
-        range_250000_500000: 0,
-        range_500000_1000000: 0,
-        over_1000000: 0
-      },
+      wagers_by_odds_range: Object.fromEntries(
+        ODDS_BUCKETS.map(({ key }) => [key, 0])
+      ),
       lost_by_legs: {}
     }
   )

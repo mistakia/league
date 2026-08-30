@@ -156,8 +156,10 @@ const analyze_wagers = async ({
 
   // Calculate average wager odds
   wager_summary.avg_wager_odds =
-    wager_summary.wagers > 0
-      ? Math.round(wager_summary.wagers_odds_sum / wager_summary.wagers)
+    wager_summary.wagers_with_odds > 0
+      ? Math.round(
+          wager_summary.wagers_odds_sum / wager_summary.wagers_with_odds
+        )
       : 0
 
   // Format numbers

@@ -13,7 +13,8 @@
  *   - Sportradar may still FILL a protected field while it is empty (a live
  *     import populating a value before FTN/nflfastR data exists).
  *   - Sportradar may NEVER overwrite a protected field that already holds a
- *     truthy value, regardless of the overwrite flags. The authoritative
+ *     value, `false` and `0` included — only an empty column may be filled,
+ *     regardless of the overwrite flags. The authoritative
  *     post-game source (FTN/nflfastR) is the only writer permitted to correct
  *     an existing value, and those importers do not pass this set.
  *
