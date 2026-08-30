@@ -116,7 +116,9 @@
 ##
 ## */10 rather than */5 because the event is once a day: the whole cost of the coarser poll is up
 ## to ten minutes of latency on a schedule for the following morning, and report_job writes a runs
-## row per invocation. Matches notifications-draft.mjs, the other draft-clock poller.
+## row per invocation. This cadence was chosen to match notifications-draft.mjs, the other
+## draft-clock poller, which is disabled as of 2026-08-30 (see league-imports.cron) -- so this is
+## now the only one running, and the */10 stands on its own reasoning above.
 */10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-draft-slate.mjs >> /var/log/league/announce-draft-slate.log 2>&1
 
 ## Process restricted free agency bids (check every 5 minutes, year-round; self-gating).
@@ -177,4 +179,13 @@
 # Crontab Export
 
 ## Export crontab for backup sync (hourly)
+##
+## DO NOT DELETE THIS LINE. It looks like pointless waste -- the schedule
+## cannot change between runs without a deploy -- and a grep of THIS repo for
+## league-crontab.txt finds no reader, which is the trap. The reader is in
+## user-base: cli/monitoring/check-league-backups.sh names this file as
+## CONFIG_FRESH_SENTINEL and asserts it is under 48h old, using the fact that
+## it is rewritten hourly as proof the config pull is still running. Removing
+## the line would make that monitor report a stale config backup, and the cause
+## would not be visible from either repo alone.
 0 * * * * crontab -l > /tmp/league-crontab.txt

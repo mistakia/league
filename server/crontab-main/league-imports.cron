@@ -12,7 +12,19 @@ JOB_PROJECT=league
 ## marker, not the schedule.
 ## The script self-gates cheaply (no active draft -> two quick queries), so it
 ## is left unscoped by month to avoid a date-shift silently skipping the draft.
-*/10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
+##
+## DISABLED 2026-08-30. The Discord send at scripts/notifications-draft.mjs:170
+## is commented out behind a TODO saying to restore it, but the script still
+## calls record_league_notification_sent on every pass. So each poll claims the
+## once-only marker for a notification nobody received, and whoever restores
+## the send would find every marker already claimed and ship a feature that
+## stays silent. Running the poll in this state is worse than not running it.
+##
+## Before re-enabling: move the record_league_notification_sent call inside the
+## same gate as the send, so the marker is claimed only when a message actually
+## goes out. Do NOT delete scripts/notifications-draft.mjs -- the TODO says the
+## send is meant to come back.
+# */10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
 
 
 # PROJECTIONS
