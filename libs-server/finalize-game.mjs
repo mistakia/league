@@ -43,6 +43,23 @@ enable_debug_namespaces('finalize-game')
  * work" is a property of finalization, not of whoever invokes it, and because
  * the one production caller is not the only way in.
  *
+ * TWO GUARDS, DIFFERENT PATHS. This one is not the only thing stopping repeat
+ * work, and knowing which runs where matters -- a comment in the live worker
+ * once credited this guard for a path it never executes on:
+ *
+ * - Every POLLING path (both cron families and the pm2 live worker) is stopped
+ *   earlier, by the completed-game skip at import-plays-nfl-v1.mjs, which
+ *   returns before finalize_game is called at all. Those callers pass no
+ *   force_update.
+ * - This guard defends the --final/force_update path, which deliberately
+ *   bypasses that skip and is therefore the only way a completed game reaches
+ *   finalization. It is what makes the daily --final run cheap instead of a
+ *   full re-finalization of every completed game.
+ *
+ * Neither subsumes the other: the skip cannot defend --final because --final
+ * exists to bypass it, and this guard cannot defend polling because it is
+ * never reached there.
+ *
  * The skip is of finalize_game, NOT of process_all_format_gamelogs. That step
  * is week-scoped and shared across every game in the week, so guarding inside
  * it would need separate per-week state and would break the case where a
@@ -129,32 +146,35 @@ export const finalize_game = async ({
   }
 
   // Step 1: Import game status and scores
+  //
+  // This once also called import_nfl_games_ngs({ season_year }) alongside the
+  // NFL import, under Promise.all. Three things were wrong with that and only
+  // the third was visible:
+  //
+  // - Both importers blanket-merge home_score, away_score and status onto
+  //   nfl_games, so Promise.all ordering decided which source won the scores.
+  //   A race over score columns is not something to leave to scheduling.
+  // - It was season-scoped on a per-game path: finalizing ONE game re-upserted
+  //   the entire season schedule.
+  // - Nothing reads what it uniquely supplied. ngs_game_id, ngs_stadium_id and
+  //   home_ngs_team_id are write-only columns (positive-control verified), and
+  //   a daily 03:00 cron already owns that import.
+  //
+  // Removing it also retires the dynamic import this step used to need:
+  // import-nfl-games-ngs.mjs statically reaches #private, which CI checks out
+  // empty, so a static import here aborted the entire mocha run at load rather
+  // than failing one test. That is why this module had no coverage at all.
   await run_step({
     name: 'import_games',
     results,
     logger: log,
-    fn: async () => {
-      // Lazy, and load-bearing for the test suite: import-nfl-games-ngs.mjs
-      // statically imports #private/libs-server/ngs.mjs, and CI checks out
-      // without the submodule. A static import here makes every spec that
-      // touches finalize_game abort the ENTIRE mocha run at load with
-      // ERR_MODULE_NOT_FOUND rather than failing one test, which is why this
-      // module had no coverage at all. Deferring it costs nothing: this step
-      // needs the network and vendor credentials, so it only ever runs where
-      // the submodule is present anyway.
-      const { default: import_nfl_games_ngs } =
-        await import('#scripts/import-nfl-games-ngs.mjs')
-
-      return Promise.all([
-        import_nfl_games_nfl({
-          season_year,
-          week,
-          season_type,
-          ignore_cache: true
-        }),
-        import_nfl_games_ngs({ season_year })
-      ])
-    }
+    fn: () =>
+      import_nfl_games_nfl({
+        season_year,
+        week,
+        season_type,
+        ignore_cache: true
+      })
   })
 
   // Step 2: Process plays (enrich with player IDs, play types, etc.)

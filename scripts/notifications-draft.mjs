@@ -24,6 +24,20 @@ enable_debug_namespaces('notifications-draft')
 
 const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 
+// The Discord send below is disabled, and the once-only marker must not be
+// claimed while it is. A marker written without a send is indistinguishable
+// from one written by a real send, so every poll silently consumed the pick's
+// only chance to be announced: restoring the send later would find every
+// marker already present and stay permanently silent, with nothing in the data
+// to say why.
+//
+// The send and the marker are gated on this ONE constant so they cannot drift
+// apart again -- the previous shape had the send commented out and the marker
+// call left running, which is exactly the drift. Flip this to true in the same
+// change that uncomments the send and restores the sendNotifications import;
+// nothing else needs to move.
+const NOTIFICATION_SEND_ENABLED = false
+
 const run = async () => {
   // One instant read two ways: draft_start and draft.selection_timestamp are
   // timestamptz as of the 2026-08-07 conformance pass, so the SQL comparison
@@ -164,8 +178,18 @@ const run = async () => {
 
     log(message)
 
-    // TODO - notification send is disabled; restore it inside this gate so it
-    // shares the once-only marker below.
+    // Detection and logging above are useful on their own and stay live. The
+    // claim below is what must not happen without a delivery, so the gate sits
+    // here rather than around the send alone.
+    if (!NOTIFICATION_SEND_ENABLED) {
+      log(
+        `league ${lid}: send disabled -- announcing nothing and leaving the once-only marker for pick #${frontier.pick} unclaimed`
+      )
+      continue
+    }
+
+    // TODO - restore this send and flip NOTIFICATION_SEND_ENABLED in the same
+    // change; the sendNotifications import needs restoring with it.
 
     /* await sendNotifications({
      *   league,
