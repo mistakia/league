@@ -101,6 +101,39 @@ export const build_plays_change_predicate = (table, rows) => {
   )
 }
 
+/**
+ * Upsert a batch of plays, writing only the rows the batch actually changes.
+ *
+ * Both play tables go through here rather than each assembling its own chain,
+ * so neither can end up with the merge but not the change predicate. A table
+ * wired with only the merge keeps advancing `updated` on every pass, which is
+ * invisible in the data and silently defeats the finalization watermark guard
+ * for every game in that table.
+ *
+ * RETURNING under ON CONFLICT ... DO UPDATE ... WHERE yields only the rows the
+ * statement actually inserted or updated, so the row count measures how much of
+ * a pass is real work rather than how many rows were offered.
+ *
+ * @param {object} params
+ * @param {string} params.table - Target table name
+ * @param {NflPlaysRow[]} params.rows - Rows to upsert
+ * @param {string[]} params.conflict_columns - The table's conflict target
+ * @returns {Promise<object[]>} The rows written, one entry per real change
+ */
+export const upsert_plays = async ({ table, rows, conflict_columns }) => {
+  const query = db(table)
+    .insert(rows)
+    .onConflict(conflict_columns)
+    .merge(build_plays_merge(table, rows))
+
+  const change_predicate = build_plays_change_predicate(table, rows)
+  if (change_predicate) {
+    query.where(change_predicate)
+  }
+
+  return query.returning('play_id')
+}
+
 const collect_columns = (rows) => {
   const columns = new Set()
   for (const row of rows) {

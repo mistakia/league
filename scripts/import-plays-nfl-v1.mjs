@@ -19,7 +19,7 @@ import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
-import { build_plays_merge } from '#libs-server/build-plays-merge.mjs'
+import { upsert_plays } from '#libs-server/build-plays-merge.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   standardize_score_type,
@@ -586,11 +586,12 @@ const importPlaysForWeek = async ({
         }
 
         if (play_inserts.length) {
-          await db('nfl_plays')
-            .insert(play_inserts)
-            .onConflict(['esbid', 'play_id', 'season_year'])
-            .merge(build_plays_merge('nfl_plays', play_inserts))
-          result.plays_updated += play_inserts.length
+          const written = await upsert_plays({
+            table: 'nfl_plays',
+            rows: play_inserts,
+            conflict_columns: ['esbid', 'play_id', 'season_year']
+          })
+          result.plays_updated += written.length
         }
 
         // Trigger game finalization when END_GAME detected
@@ -630,10 +631,11 @@ const importPlaysForWeek = async ({
         }
 
         if (play_inserts.length) {
-          await db('nfl_plays_current_week')
-            .insert(play_inserts)
-            .onConflict(['esbid', 'play_id'])
-            .merge(build_plays_merge('nfl_plays_current_week', play_inserts))
+          await upsert_plays({
+            table: 'nfl_plays_current_week',
+            rows: play_inserts,
+            conflict_columns: ['esbid', 'play_id']
+          })
         }
       } catch (err) {
         log('Error on inserting plays and play stats ignored')
