@@ -461,22 +461,27 @@ export default class SyncOrchestrator {
         })
       }
 
-      // Step 6: Complete
-      if (progress_callback) {
-        await this.progress_reporter.report_completion_progress({
-          progress_callback,
-          status: 'success',
-          sync_stats
-        })
-      }
-
       // A sync that skipped every roster is not a successful sync. The errors
       // array already records each skip, but nothing read it for the verdict,
       // so a run that wrote nothing at all still reported success -- which is
       // how ESPN's empty player catalog stayed invisible for as long as it did.
       // Any skip is a failure: the caller asked for these rosters, and a
       // partial answer that claims success is the shape that hides a defect.
+      //
+      // Computed BEFORE the completion report, because the streamed channel has
+      // to carry the same verdict as the return value. It previously did not:
+      // this reported 'Sync completed successfully' at 100% while the job it
+      // belongs to went on to land as failed.
       const sync_succeeded = sync_stats.errors.length === 0
+
+      // Step 6: Complete
+      if (progress_callback) {
+        await this.progress_reporter.report_completion_progress({
+          progress_callback,
+          status: sync_succeeded ? 'success' : 'partial',
+          sync_stats
+        })
+      }
 
       log(
         `Completed sync for ${platform_name} league ${external_league_id}` +

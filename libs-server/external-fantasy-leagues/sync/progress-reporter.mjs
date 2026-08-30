@@ -141,6 +141,19 @@ export class ProgressReporter {
         stats: sync_stats,
         validation_results
       })
+    } else if (status === 'partial') {
+      // A sync that skipped rosters finishes, but it did not succeed. The
+      // orchestrator's returned verdict already says so; this is the streamed
+      // channel saying the same thing, which it previously did not -- it
+      // reported 'Sync completed successfully' at 100% for a run whose job was
+      // about to land as failed. Not 'error': the run reached the end and wrote
+      // what it could, so 0% and 'Sync failed' would be its own misreport.
+      await progress_callback('Sync completed with errors', 100, {
+        step: 'completed_with_errors',
+        stats: sync_stats,
+        validation_results,
+        errors: sync_stats.errors || []
+      })
     } else if (status === 'fetch_complete') {
       await progress_callback('Fetch completed successfully', 100, {
         step: 'completed',

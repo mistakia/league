@@ -117,7 +117,7 @@ describe('external fantasy leagues fetch and sync verdict', function () {
   })
 
   describe('a sync that skipped rosters does not report success', function () {
-    const sync_with = async ({ skips }) => {
+    const sync_with = async ({ skips, progress = [] }) => {
       const orchestrator = new SyncOrchestrator()
 
       orchestrator.initialize_adapter = () => ({
@@ -139,9 +139,17 @@ describe('external fantasy leagues fetch and sync verdict', function () {
         platform_name: 'SLEEPER',
         external_league_id: 'test-league',
         internal_league_id: 1,
-        credentials: {}
+        credentials: {},
+        sync_options: {
+          progress_callback: async (message, percentage, context_data) => {
+            progress.push({ message, percentage, ...context_data })
+          }
+        }
       })
     }
+
+    const terminal_progress = (progress) =>
+      progress.filter((entry) => String(entry.step).startsWith('completed'))
 
     it('reports success when nothing was skipped', async function () {
       // Positive control. Without it, the failing case below would also pass
@@ -158,6 +166,40 @@ describe('external fantasy leagues fetch and sync verdict', function () {
 
       expect(result.success).to.equal(false)
       expect(result.errors).to.have.lengthOf(1)
+    })
+
+    // The returned verdict and the STREAMED one are two different surfaces, and
+    // fixing the first left the second saying the opposite. import-queue drives
+    // the sync with a progress_callback that writes job progress, so a skipped
+    // sync announced 'Sync completed successfully' at 100% and the job it
+    // belongs to then landed as failed. The two cases below are a pair on
+    // purpose: the success one is what makes the failure one mean anything.
+    it('streams a successful completion when nothing was skipped', async function () {
+      const progress = []
+      await sync_with({ skips: [], progress })
+
+      const terminal = terminal_progress(progress)
+      expect(terminal).to.have.lengthOf(1)
+      expect(terminal[0].step).to.equal('completed')
+      expect(terminal[0].message).to.equal('Sync completed successfully')
+    })
+
+    it('does not stream success when a roster was skipped', async function () {
+      const progress = []
+      await sync_with({
+        skips: [{ error_type: 'roster_skip', error_message: 'no mapping' }],
+        progress
+      })
+
+      const terminal = terminal_progress(progress)
+      expect(terminal).to.have.lengthOf(1)
+      expect(terminal[0].message).to.not.match(/successfully/)
+      expect(terminal[0].message).to.equal('Sync completed with errors')
+      expect(terminal[0].step).to.equal('completed_with_errors')
+      // Still terminal at 100: the run reached the end and wrote what it could,
+      // so reporting 0% would be its own misreport in the other direction.
+      expect(terminal[0].percentage).to.equal(100)
+      expect(terminal[0].errors).to.have.lengthOf(1)
     })
   })
 })
