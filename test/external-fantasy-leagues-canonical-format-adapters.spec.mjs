@@ -1,4 +1,4 @@
-/* global describe, it, before */
+/* global describe, it, before, beforeEach */
 import { expect } from 'chai'
 import * as chai_module from 'chai'
 
@@ -6,6 +6,7 @@ import { load_platform_response } from './utils/fixture-loader.mjs'
 import SleeperAdapter from '#libs-server/external-fantasy-leagues/adapters/sleeper.mjs'
 import EspnAdapter from '#libs-server/external-fantasy-leagues/adapters/espn.mjs'
 import { schema_validator } from '#libs-server/external-fantasy-leagues/utils/schema-validator.mjs'
+import { current_season } from '#constants'
 
 process.env.NODE_ENV = 'test'
 chai_module.should()
@@ -108,9 +109,14 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
 
     describe('get_rosters() canonical format transformation', function () {
       it('should transform Sleeper roster data to canonical format', async function () {
-        // Mock the API call to return our fixture data
-        sleeper_adapter.api_client.get = async () =>
-          sleeper_rosters_fixture.data.rosters
+        // Mock the API call to return our fixture data. get_rosters reads the
+        // league object too, for the season the id belongs to.
+        sleeper_adapter.api_client.get = async (url) => {
+          if (url.includes('/rosters'))
+            return sleeper_rosters_fixture.data.rosters
+          if (url.includes('/players/nfl')) return {}
+          return sleeper_league_fixture.data.league
+        }
 
         const result = await sleeper_adapter.get_rosters({
           league_id: 'test_league_id'
@@ -153,9 +159,13 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
 
     describe('get_transactions() canonical format transformation', function () {
       it('should transform Sleeper transaction data to canonical format', async function () {
-        // Mock the API call to return our fixture data
-        sleeper_adapter.api_client.get = async () =>
-          sleeper_transactions_fixture.data.transactions
+        // Mock the API call to return our fixture data. get_transactions reads
+        // the league object too, for the season the id belongs to.
+        sleeper_adapter.api_client.get = async (url) => {
+          if (url.includes('/transactions/'))
+            return sleeper_transactions_fixture.data.transactions
+          return sleeper_league_fixture.data.league
+        }
 
         const result = await sleeper_adapter.get_transactions({
           league_id: 'test_league_id'
@@ -273,6 +283,172 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
         free_agent.transaction_type.should.equal('FREE_AGENT_PICKUP')
         // Free agent transactions don't have waiver_details
         expect(free_agent.waiver_details).to.be.null
+      })
+    })
+
+    describe('season stamping is drawn from the league, not the clock', function () {
+      // The league-config fixture is the 2025 season, and current_season.year
+      // has moved past it, so every case below distinguishes the league's own
+      // season from the live one.
+      const fixture_season = 2025
+
+      // A fresh adapter per case: the season memo is per instance, and the
+      // shared adapter above would carry a warm cache into the fetch count.
+      let sleeper_adapter
+      beforeEach(function () {
+        sleeper_adapter = new SleeperAdapter()
+      })
+
+      const mock_api = ({ adapter, rosters, transactions }) => {
+        adapter.api_client.get = async (url) => {
+          if (url.includes('/rosters')) return rosters || []
+          if (url.includes('/players/nfl')) return {}
+          if (url.includes('/transactions/')) return transactions || []
+          return sleeper_league_fixture.data.league
+        }
+      }
+
+      it('stamps a roster with the season its league id belongs to', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          rosters: sleeper_rosters_fixture.data.rosters
+        })
+
+        const result = await sleeper_adapter.get_rosters({
+          league_id: 'test_league_id'
+        })
+
+        result[0].year.should.equal(fixture_season)
+        result[0].year.should.not.equal(current_season.year)
+      })
+
+      it('stamps a back-year roster with a season-final week, not the live one', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          rosters: sleeper_rosters_fixture.data.rosters
+        })
+
+        // The live week is 0 in the offseason, which is also the sentinel, so
+        // the two branches are indistinguishable until the clock is mid-season.
+        // Drive it to a real week so this case can actually go red.
+        const original = Object.getOwnPropertyDescriptor(current_season, 'week')
+        Object.defineProperty(current_season, 'week', {
+          get: () => 7,
+          configurable: true
+        })
+
+        try {
+          const result = await sleeper_adapter.get_rosters({
+            league_id: 'test_league_id'
+          })
+
+          // A prior league-season returns its FINAL roster state, so the live
+          // week describes nothing about it.
+          result[0].week.should.equal(0)
+          result[0].week.should.not.equal(7)
+        } finally {
+          if (original) {
+            Object.defineProperty(current_season, 'week', original)
+          } else {
+            delete current_season.week
+          }
+        }
+      })
+
+      it('stamps a transaction with the season its league id belongs to', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          transactions: sleeper_transactions_fixture.data.transactions
+        })
+
+        const result = await sleeper_adapter.get_transactions({
+          league_id: 'test_league_id',
+          options: { week: 1 }
+        })
+
+        result[0].year.should.equal(fixture_season)
+        result[0].year.should.not.equal(current_season.year)
+      })
+
+      it('refuses a get_rosters year the league id cannot serve', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          rosters: sleeper_rosters_fixture.data.rosters
+        })
+
+        let thrown = null
+        try {
+          await sleeper_adapter.get_rosters({
+            league_id: 'test_league_id',
+            year: 2023
+          })
+        } catch (error) {
+          thrown = error
+        }
+
+        expect(thrown).to.not.be.null
+        thrown.message.should.include('2023')
+        thrown.message.should.include(String(fixture_season))
+      })
+
+      it('refuses a get_transactions year the league id cannot serve', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          transactions: sleeper_transactions_fixture.data.transactions
+        })
+
+        let thrown = null
+        try {
+          await sleeper_adapter.get_transactions({
+            league_id: 'test_league_id',
+            options: { week: 1 },
+            year: 2023
+          })
+        } catch (error) {
+          thrown = error
+        }
+
+        expect(thrown).to.not.be.null
+        thrown.message.should.include('2023')
+      })
+
+      it('accepts the year the league id does serve', async function () {
+        mock_api({
+          adapter: sleeper_adapter,
+          rosters: sleeper_rosters_fixture.data.rosters
+        })
+
+        const result = await sleeper_adapter.get_rosters({
+          league_id: 'test_league_id',
+          year: fixture_season
+        })
+
+        result[0].year.should.equal(fixture_season)
+      })
+
+      it('reads the league object once across repeated week calls', async function () {
+        let league_fetches = 0
+        sleeper_adapter.api_client.get = async (url) => {
+          if (url.includes('/transactions/'))
+            return sleeper_transactions_fixture.data.transactions
+          league_fetches += 1
+          return sleeper_league_fixture.data.league
+        }
+
+        await sleeper_adapter.get_transactions({
+          league_id: 'test_league_id',
+          options: { week: 1 }
+        })
+        await sleeper_adapter.get_transactions({
+          league_id: 'test_league_id',
+          options: { week: 2 }
+        })
+        await sleeper_adapter.get_transactions({
+          league_id: 'test_league_id',
+          options: { week: 3 }
+        })
+
+        league_fetches.should.equal(1)
       })
     })
 

@@ -19,6 +19,13 @@ export default class SleeperAdapter extends BaseAdapter {
     this.platform_authenticator = new PlatformAuthenticator()
     this.auth_result = null
 
+    // A Sleeper league id addresses exactly one league-season, so the season a
+    // fetch belongs to is a property of the id rather than of the request.
+    // Memoized per adapter for the same reason the auth state above is: the
+    // adapter is constructed once per sync job, and a transaction sync asks
+    // once per week.
+    this._league_season_cache = new Map()
+
     this.api_client = new AuthenticatedApiClient({
       base_url: 'https://api.sleeper.app/v1',
       requests_per_minute: 1000,
@@ -119,6 +126,37 @@ export default class SleeperAdapter extends BaseAdapter {
   }
 
   /**
+   * Resolve the season a Sleeper league id belongs to, from the league itself.
+   *
+   * Sleeper models every season as a separate league object, so a league id
+   * addresses one season and a caller cannot select another one by asking. Any
+   * `year` a caller supplies is therefore an assertion to check, not a
+   * parameter to honor -- honoring it would stamp the requested year onto
+   * whatever season the id actually serves.
+   *
+   * @param {object} params - Parameters object
+   * @param {string} params.league_id - Sleeper league ID
+   * @param {number} [params.year] - Season the caller believes this id serves
+   * @returns {Promise<number>} The league's own season year
+   */
+  async _resolve_league_season({ league_id, year = null }) {
+    if (!this._league_season_cache.has(league_id)) {
+      const league_data = await this.api_client.get(`/league/${league_id}`)
+      this._league_season_cache.set(league_id, Number(league_data.season))
+    }
+
+    const league_season = this._league_season_cache.get(league_id)
+
+    if (year != null && Number(year) !== league_season) {
+      throw new Error(
+        `Sleeper league ${league_id} is the ${league_season} season, not ${year}. A Sleeper league id addresses one season; reach a prior season through its own league id via the previous_league_id chain.`
+      )
+    }
+
+    return league_season
+  }
+
+  /**
    * Get league information in canonical format
    * @param {string} league_id - Sleeper league ID
    * @param {object} [options={}] - Additional options (not currently used by Sleeper)
@@ -216,14 +254,21 @@ export default class SleeperAdapter extends BaseAdapter {
    * @param {object} params - Parameters object
    * @param {string} params.league_id - Sleeper league ID
    * @param {number} [params.week] - Optional week number for historical data
-   * @param {number} [params.year] - Optional year (not currently used by Sleeper API)
+   * @param {number} [params.year] - Season the caller expects; throws on mismatch
    * @returns {Promise<object[]>} Array of roster objects in canonical format
    */
   async get_rosters({ league_id, week = null, year = null }) {
     // ffscrapr pattern: Sleeper does not support historical week rosters via API
     const endpoint = `/league/${league_id}/rosters`
 
-    const rosters = await this.api_client.get(endpoint)
+    const [rosters, league_season] = await Promise.all([
+      this.api_client.get(endpoint),
+      this._resolve_league_season({ league_id, year })
+    ])
+
+    // A league id from a past season returns that season's FINAL roster state,
+    // so the live week counter describes nothing about it.
+    const is_current_season = league_season === current_season.year
 
     // A Sleeper roster entry is a bare player id string with no metadata, so
     // the name/position/team a mapping fallback needs has to come from the
@@ -243,10 +288,11 @@ export default class SleeperAdapter extends BaseAdapter {
           roster.owner_id?.toString() || roster.roster_id?.toString(),
         week:
           week ??
-          (current_season.week > current_season.nfl_final_week
+          (!is_current_season ||
+          current_season.week > current_season.nfl_final_week
             ? 0
             : current_season.week),
-        year: current_season.year,
+        year: league_season,
         roster_snapshot_date: new Date().toISOString(),
 
         // All players with their roster assignments
@@ -466,10 +512,12 @@ export default class SleeperAdapter extends BaseAdapter {
    * @param {object} params - Parameters object
    * @param {string} params.league_id - Sleeper league ID
    * @param {object} [params.options={}] - Optional filters (week, transaction_type, team_id, etc.)
-   * @param {number} [params.year] - Optional year (not currently used by Sleeper API)
+   * @param {number} [params.year] - Season the caller expects; throws on mismatch
    * @returns {Promise<object[]>} Array of transaction objects in canonical format
    */
   async get_transactions({ league_id, options = {}, year = null }) {
+    const league_season = await this._resolve_league_season({ league_id, year })
+
     // ffscrapr references:
     // - /league/{league_id}/transactions/{week} requires week (current week usually)
     const week =
@@ -506,7 +554,7 @@ export default class SleeperAdapter extends BaseAdapter {
             ? new Date(transaction.status_updated).toISOString()
             : null,
         week: transaction.leg || week,
-        year: current_season.year,
+        year: league_season,
 
         // Teams involved (schema property name: involved_teams)
         involved_teams: this.extract_transaction_teams_standard(transaction),
