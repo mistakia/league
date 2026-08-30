@@ -76,28 +76,43 @@ export async function load_actual_playoff_points({
     .whereIn('tid', team_ids)
     .whereNotNull('points')
 
-  const actual_points = new Map()
-  const weeks_with_results = new Set()
+  // Whether a week has been played is a property of the WEEK, not of any one
+  // row in it, because the two writers in scripts/process-playoffs.mjs disagree
+  // about what an unplayed week looks like. Seeding inserts rows with no
+  // `points` key, which land NULL. Scoring sets points to 0 and accumulates per
+  // starter, logging a warning and continuing on every gamelog miss — so a week
+  // scored before its gamelogs load is written as a real 0 and passes the
+  // whereNotNull above. Requiring some team to have scored above zero is what
+  // separates the two; a per-team test instead would drop a team that really
+  // scored zero and report a partial week.
+  //
+  // `points_manual` is the manual correction that overrides the computed score,
+  // matched to the post-season standings in scripts/process-playoffs.mjs so the
+  // forecast's actual-results winner cannot disagree with the recorded champion.
+  const points_by_week = new Map()
 
   for (const entry of playoff_entries) {
-    // process-playoffs.mjs inserts a playoff row with a null `points` and fills
-    // it in once the week is scored, so the whereNotNull above is the whole
-    // "this week has a result" test — a team that legitimately scored zero
-    // still counts. `points_manual` is the manual correction that overrides the
-    // computed score, matched to the post-season standings in
-    // scripts/process-playoffs.mjs so the forecast's actual-results winner
-    // cannot disagree with the recorded champion.
     const points = entry.points_manual || entry.points
 
-    if (!actual_points.has(entry.week)) {
-      actual_points.set(entry.week, new Map())
+    if (!points_by_week.has(entry.week)) {
+      points_by_week.set(entry.week, new Map())
     }
-    actual_points.get(entry.week).set(entry.tid, points)
-    weeks_with_results.add(entry.week)
+    points_by_week.get(entry.week).set(entry.tid, points)
+  }
+
+  const actual_points = new Map()
+
+  for (const [week, week_points] of points_by_week) {
+    const week_was_played = [...week_points.values()].some(
+      (points) => points > 0
+    )
+    if (week_was_played) {
+      actual_points.set(week, week_points)
+    }
   }
 
   return {
     actual_points,
-    weeks_with_results: [...weeks_with_results].sort((a, b) => a - b)
+    weeks_with_results: [...actual_points.keys()].sort((a, b) => a - b)
   }
 }
