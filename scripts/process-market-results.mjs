@@ -29,74 +29,90 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv))
-    .usage(
-      '$0 [options]',
-      'Process prop market results with simplified parallel processing'
-    )
-    .option('year', {
-      type: 'number',
-      describe: 'Season year to process',
-      default: 2025
-    })
-    .option('week', {
-      type: 'number',
-      describe:
-        'Specific week to process (default: most relevant week based on day of week)'
-    })
-    .option('seas_type', {
-      type: 'string',
-      describe: 'Season type (PRE, REG, POST)',
-      choices: ['PRE', 'REG', 'POST']
-    })
-    .option('dry_run', {
-      type: 'boolean',
-      default: false,
-      describe: 'Preview without database writes'
-    })
-    .option('batch_size', {
-      type: 'number',
-      default: 250,
-      describe: 'Markets per worker task'
-    })
-    .option('workers', {
-      type: 'number',
-      describe: 'Worker threads (default: auto-detect)'
-    })
-    .option('verbose', {
-      type: 'boolean',
-      default: false,
-      describe: 'Enable verbose logging'
-    })
-    .option('missing_only', {
-      type: 'boolean',
-      default: false,
-      describe: 'Only process markets with missing results'
-    })
-    .option('error_report', {
-      type: 'string',
-      describe: 'Export detailed error report to file'
-    })
-    .option('error_sample_size', {
-      type: 'number',
-      default: 10,
-      describe: 'Number of error examples to show per error type'
-    })
-    .option('esbids', {
-      type: 'string',
-      describe: 'Comma-separated game IDs to process (overrides week/year)'
-    })
-    .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
-    .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
-    .example('$0 --seas_type POST --week 1', 'Process playoff week 1')
-    .example('$0 --missing_only', 'Only process markets with missing results')
-    .example(
-      '$0 --error_report errors.json --error_sample_size 20',
-      'Export detailed error report'
-    )
-    .example('$0 --esbids 401547417,401547418', 'Process specific games by ID')
-    .help()
-    .parse()
+  return (
+    yargs(hideBin(process.argv))
+      .usage(
+        '$0 [options]',
+        'Process prop market results with simplified parallel processing'
+      )
+      // Named for the config key execute_processing reads, not shortened to
+      // `year`. The two disagreed, so every CLI run resolved season_year to
+      // undefined and knex rejected the game query with an undefined binding
+      // before any market was fetched -- the whole CLI path was dead. Nothing
+      // schedules this script, so the breakage stayed invisible: settlement runs
+      // through process_market_results from finalize-game and finalize-week,
+      // which pass season_year directly.
+      .option('season_year', {
+        type: 'number',
+        describe: 'Season year to process',
+        default: current_season.year
+      })
+      .option('week', {
+        type: 'number',
+        describe:
+          'Specific week to process (default: most relevant week based on day of week)'
+      })
+      // Also named for the config key, and this half of the mismatch was the
+      // dangerous one: an unread season_type fell back to the current one
+      // silently, so --seas_type POST processed the regular season and said
+      // nothing, where the season_year mismatch at least failed loudly.
+      .option('season_type', {
+        type: 'string',
+        describe: 'Season type (PRE, REG, POST)',
+        choices: ['PRE', 'REG', 'POST']
+      })
+      .option('dry_run', {
+        type: 'boolean',
+        default: false,
+        describe: 'Preview without database writes'
+      })
+      .option('batch_size', {
+        type: 'number',
+        default: 250,
+        describe: 'Markets per worker task'
+      })
+      .option('workers', {
+        type: 'number',
+        describe: 'Worker threads (default: auto-detect)'
+      })
+      .option('verbose', {
+        type: 'boolean',
+        default: false,
+        describe: 'Enable verbose logging'
+      })
+      .option('missing_only', {
+        type: 'boolean',
+        default: false,
+        describe: 'Only process markets with missing results'
+      })
+      .option('error_report', {
+        type: 'string',
+        describe: 'Export detailed error report to file'
+      })
+      .option('error_sample_size', {
+        type: 'number',
+        default: 10,
+        describe: 'Number of error examples to show per error type'
+      })
+      .option('esbids', {
+        type: 'string',
+        describe: 'Comma-separated game IDs to process (overrides week/year)'
+      })
+      .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
+      .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
+      .example('$0 --season_type POST --week 1', 'Process playoff week 1')
+      .example('$0 --missing_only', 'Only process markets with missing results')
+      .example(
+        '$0 --error_report errors.json --error_sample_size 20',
+        'Export detailed error report'
+      )
+      .example(
+        '$0 --esbids 401547417,401547418',
+        'Process specific games by ID'
+      )
+      .help()
+      .parse()
+  )
 }
 
 const log = debug('process-market-results')
