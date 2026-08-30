@@ -139,6 +139,14 @@ const player_dfs_salaries_source = {
     // The identity is exact only while the ranked column has no NULLs
     // (dense_rank ranks a NULL, count(distinct) ignores it). esbid is the inner
     // join key to nfl_games above, so it cannot be NULL here.
+    //
+    // Verified post-deploy on production 2026-08-30, not just pre-merge: the
+    // statement behind signal 126654, replayed verbatim from the postgres log,
+    // still runs 88,515ms with the old self-join and 418ms with this form --
+    // 212x, 500 rows byte-identical. That shape was 59% of all data-view
+    // execution time over the preceding ten days, so if you are tempted to
+    // simplify this back into a grouped aggregate, it is the single most
+    // expensive thing in the request path and the cost is still reproducible.
     const slate_size_expr = db.raw(
       'dense_rank() over (partition by "source_id", "source_contest_id" order by "esbid")' +
         ' + dense_rank() over (partition by "source_id", "source_contest_id" order by "esbid" desc)' +
