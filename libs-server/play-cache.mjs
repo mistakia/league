@@ -133,8 +133,24 @@ class PlayCache {
     timeout_team,
     home_score,
     away_score,
-    return_all_matches = false
+    return_all_matches = false,
+    ...unrecognized_criteria
   }) {
+    // A criterion this function does not name is DROPPED by the destructure,
+    // and a dropped criterion does not narrow anything -- an undefined filter
+    // matches every play, so the caller gets a wider match set while believing
+    // it constrained one more axis. That failure is silent in both directions
+    // it can go: an ambiguous set reads as "no confident match", and a
+    // single wrong survivor reads as a match. Two importers passed `qtr` and
+    // `dwn` here for two seasons on exactly that basis. Refusing the call is
+    // the only way the mistake announces itself.
+    const unrecognized_keys = Object.keys(unrecognized_criteria)
+    if (unrecognized_keys.length) {
+      throw new Error(
+        `find_play does not accept: ${unrecognized_keys.join(', ')} — a criterion it does not name is silently dropped, not applied`
+      )
+    }
+
     this._ensure_initialized()
 
     if (esbid && play_id) {

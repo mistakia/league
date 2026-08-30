@@ -116,8 +116,8 @@ async function process_game({ game, client, stats, dry = false }) {
     if (!db_play && source_play.down > 0) {
       const match_criteria = {
         esbid,
-        qtr: mapped_fields.qtr || source_play.quarter,
-        dwn: mapped_fields.dwn || source_play.down,
+        quarter: mapped_fields.qtr || source_play.quarter,
+        down_number: mapped_fields.dwn || source_play.down,
         yards_to_go: mapped_fields.yards_to_go || source_play.distance,
         yard_line_100: mapped_fields.yard_line_100,
         seconds_remaining_quarter: mapped_fields.seconds_remaining_quarter
@@ -136,7 +136,7 @@ async function process_game({ game, client, stats, dry = false }) {
           })
         } catch (inner_error) {
           log(
-            `multiple matches for play in game ${esbid}: qtr=${match_criteria.qtr} dwn=${match_criteria.dwn} ytg=${match_criteria.yards_to_go} ydl=${match_criteria.yard_line_100}`
+            `multiple matches for play in game ${esbid}: quarter=${match_criteria.quarter} down=${match_criteria.down_number} ytg=${match_criteria.yards_to_go} ydl=${match_criteria.yard_line_100}`
           )
         }
       }

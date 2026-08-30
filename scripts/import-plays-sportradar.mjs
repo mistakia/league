@@ -545,7 +545,7 @@ const map_sportradar_play_to_nfl_play = async ({
 const build_match_criteria = (game_esbid, mapped_play) => {
   const criteria = {
     esbid: game_esbid,
-    qtr: mapped_play.qtr,
+    quarter: mapped_play.qtr,
     play_type: mapped_play.play_type
   }
 
@@ -556,7 +556,7 @@ const build_match_criteria = (game_esbid, mapped_play) => {
     // FGXP plays have inconsistent dwn/ytg between systems
     // Database has dwn=null for extra points, Sportradar has situational values
     if (mapped_play.play_type !== 'FGXP') {
-      criteria.dwn = mapped_play.dwn
+      criteria.down_number = mapped_play.dwn
       criteria.yards_to_go = mapped_play.yards_to_go
     }
     criteria.offense_nfl_team = mapped_play.offense_nfl_team
