@@ -230,8 +230,7 @@ export default async function process_super_priority({
     pid,
     tid: original_tid,
     slot: target_slot,
-    transaction,
-    requires_waiver: Boolean(super_priority_record.requires_waiver)
+    transaction
   }
 }
 

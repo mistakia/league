@@ -27588,8 +27588,7 @@ CREATE TABLE public.super_priority (
     poach_timestamp timestamp with time zone NOT NULL,
     eligible smallint DEFAULT 1 NOT NULL,
     claimed smallint DEFAULT 0 NOT NULL,
-    claimed_at timestamp with time zone,
-    requires_waiver smallint DEFAULT 0 NOT NULL
+    claimed_at timestamp with time zone
 );
 
 

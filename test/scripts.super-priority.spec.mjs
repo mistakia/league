@@ -79,8 +79,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         poach_timestamp: epoch_to_timestamptz(poach_timestamp),
         eligible: 1,
-        claimed: 0,
-        requires_waiver: 1 // Manual waiver processing expected
+        claimed: 0
       })
 
       // Set date to free agency period
@@ -655,8 +654,8 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // is a SIGNING. Amendment XXXIV section 16 restores the designation the
       // player actually held, so a drafted return has to be seeded as a DRAFT
       // -- this test previously observed PSD off a PRACTICE_ADD fixture, which
-      // only passed because the slot was derived from requires_waiver instead
-      // of from the player's history.
+      // only passed because the slot was derived from the since-dropped
+      // requires_waiver column instead of from the player's history.
       await knex('transactions')
         .where({
           pid: player.pid,
@@ -709,8 +708,9 @@ describe('SCRIPTS - Super Priority Processing', function () {
     })
 
     it('should return a signed player to the signed slot on an automatic claim', async () => {
-      // requires_waiver is 0 on the shared fixture, so this is the automatic
-      // path. The player was added with PRACTICE_ADD, so the constitution
+      // The automatic path: the original team has practice-squad space, which
+      // the claim checks for itself. The player was added with PRACTICE_ADD, so
+      // the constitution
       // returns them SIGNED -- the designation must not follow the claim route.
       // Returning them as PSD would move a capped player into the uncapped
       // bucket, which is the only way this flow could overfill a practice squad.

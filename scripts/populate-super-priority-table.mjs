@@ -99,8 +99,7 @@ const run = async ({
               poach_timestamp: poach_tx.occurred_at,
               eligible: 1,
               claimed: 0,
-              claimed_at: null,
-              requires_waiver: 0
+              claimed_at: null
             })
             .onConflict([
               'pid',

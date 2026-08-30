@@ -14,16 +14,10 @@ import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
 import getLeague from './get-league.mjs'
 import get_super_priority_status from './get-super-priority-status.mjs'
-import get_original_practice_squad_add from './get-original-practice-squad-add.mjs'
 import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 // Helper function to check for super priority on release
-async function handle_super_priority_on_release({
-  pid,
-  releasing_tid,
-  lid,
-  player_row
-}) {
+async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   // Quick check: was this player poached by the releasing team?
   const poach_check = await db('transactions')
     .where({
@@ -58,41 +52,14 @@ async function handle_super_priority_on_release({
     return // Player not eligible for super priority
   }
 
-  // Determine if manual waiver is needed
-  let requires_waiver = 0
-
-  // Only a SIGNED return needs a slot: PSD/PSDP are uncapped, excluded from
-  // both practice_squad_slot_count and the position limits, so a drafted
-  // player always returns automatically.
-  const original_add = await get_original_practice_squad_add({
-    pid,
-    tid: super_priority_status.original_tid,
-    lid
-  })
-
-  if (original_add?.slot === roster_slot_types.PS) {
-    // The week matters: getRoster defaults to `fantasy_season_week`, which is 0
-    // outside the regular season, so an unqualified read measures space on a
-    // different week's roster than the claim will write to.
-    const original_team_roster = await getRoster({
-      tid: super_priority_status.original_tid,
-      week: current_season.week
-    })
-    const league = await getLeague({ lid })
-    const roster = new Roster({ roster: original_team_roster, league })
-
-    // Must be the SAME predicate process-super-priority enforces at claim time.
-    // `roster.practice.length` was the earlier form and counted drafted players
-    // against the signed cap, forcing a manual waiver on teams that had an open
-    // signed slot; it also ignored position capacity, which the claim-time
-    // check applies -- so a claim could be waived through as automatic and then
-    // refuse itself on a limit this side never measured.
-    if (
-      !roster.has_practice_squad_space_for_position(player_row.primary_position)
-    ) {
-      requires_waiver = 1 // No open PS slot, requires manual waiver
-    }
-  }
+  // No space check runs here, deliberately. It used to compute
+  // `requires_waiver`, a column dropped on 2026-08-30 because nothing branched
+  // on it: e43c7e89e made the waiver insert unconditional on 2025-11-06, and
+  // from that day the flag only recorded a prediction nobody read. The claim
+  // enforces practice-squad space itself, at claim time, against the roster as
+  // it stands then -- which is the only moment the answer is true. Measuring it
+  // at release time and storing it produced three rows asserting a manual
+  // waiver was required on claims that were then processed automatically.
 
   // Create or update super_priority record
   const existing_record = await db('super_priority')
@@ -113,14 +80,12 @@ async function handle_super_priority_on_release({
       lid,
       poach_timestamp: super_priority_status.poach_timestamp,
       eligible: 1,
-      claimed: 0,
-      requires_waiver
+      claimed: 0
     })
   } else if (!existing_record.eligible) {
-    // Update existing record to mark as eligible and set waiver requirement
     await db('super_priority')
       .where({ super_priority_id: existing_record.super_priority_id })
-      .update({ eligible: 1, requires_waiver })
+      .update({ eligible: 1 })
   }
 
   // Automatically create waiver for all eligible super priority cases
@@ -360,8 +325,7 @@ export default async function ({
   await handle_super_priority_on_release({
     pid: release_pid,
     releasing_tid: tid,
-    lid,
-    player_row: release_player_row
+    lid
   })
 
   if (create_notification) {

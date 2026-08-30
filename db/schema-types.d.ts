@@ -21363,7 +21363,6 @@ export interface SuperPriorityRow {
   eligible: number
   claimed: number
   claimed_at: Date | null
-  requires_waiver: number
 }
 
 export interface TeamsRow {
