@@ -15,7 +15,7 @@ import {
 } from '#constants'
 
 import { simulate_matchup } from './simulate-matchup.mjs'
-import { load_player_info } from './load-simulation-data.mjs'
+import { load_player_info } from './load-player-info.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
 import { load_teams_starters } from './load-team-rosters.mjs'
 import { load_bench_players_with_fallback } from './load-data-with-fallback.mjs'

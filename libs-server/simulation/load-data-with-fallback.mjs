@@ -16,7 +16,7 @@ import {
   reserve_short_term_slots
 } from '#constants'
 
-import { load_player_projections } from './load-simulation-data.mjs'
+import { load_player_projections } from './load-projection-data.mjs'
 
 const log = debug('simulation:load-data-with-fallback')
 

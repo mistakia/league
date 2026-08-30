@@ -9,7 +9,7 @@ import db from '#db'
 import { current_season } from '#constants'
 import { get_season_playoff_weeks } from '#libs-server'
 
-import { load_actual_playoff_points } from './load-simulation-data.mjs'
+import { load_actual_playoff_points } from './load-actual-points.mjs'
 import { simulate_playoff_weeks_correlated } from './simulate-playoff-weeks.mjs'
 import { load_simulation_context } from './simulation-helpers.mjs'
 

@@ -3,7 +3,7 @@
  * Identify correlation opportunities and insights between players.
  */
 
-import { load_player_info } from './load-simulation-data.mjs'
+import { load_player_info } from './load-player-info.mjs'
 import {
   load_correlations_between_sets,
   load_correlations_within_set

@@ -10,12 +10,12 @@ import { current_season } from '#constants'
 
 import {
   load_player_variance,
-  load_player_archetypes,
-  load_player_info,
-  load_actual_player_points,
-  load_scoring_format,
-  load_player_projection_stats
-} from './load-simulation-data.mjs'
+  load_player_archetypes
+} from './load-player-variance.mjs'
+import { load_player_projection_stats } from './load-projection-data.mjs'
+import { load_player_info } from './load-player-info.mjs'
+import { load_scoring_format } from './load-scoring-format.mjs'
+import { load_actual_player_points } from './load-actual-points.mjs'
 import { merge_player_projections } from './merge-player-projections.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'

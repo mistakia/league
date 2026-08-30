@@ -15,14 +15,16 @@ import {
 } from './simulation-helpers.mjs'
 import { load_teams_starters_by_week } from './load-team-rosters.mjs'
 import {
-  load_player_projections,
-  load_player_projection_stats,
   load_player_variance,
-  load_player_info,
-  load_actual_player_points,
-  load_player_archetypes,
-  load_scoring_format
-} from './load-simulation-data.mjs'
+  load_player_archetypes
+} from './load-player-variance.mjs'
+import {
+  load_player_projections,
+  load_player_projection_stats
+} from './load-projection-data.mjs'
+import { load_player_info } from './load-player-info.mjs'
+import { load_scoring_format } from './load-scoring-format.mjs'
+import { load_actual_player_points } from './load-actual-points.mjs'
 import { merge_player_projections } from './merge-player-projections.mjs'
 import { load_nfl_schedules_for_weeks } from './load-nfl-schedule.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'

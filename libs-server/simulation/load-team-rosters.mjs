@@ -19,10 +19,8 @@ import {
 } from '#constants'
 import { optimizeStandingsLineup } from '#libs-shared'
 
-import {
-  load_player_projections,
-  load_player_info
-} from './load-simulation-data.mjs'
+import { load_player_projections } from './load-projection-data.mjs'
+import { load_player_info } from './load-player-info.mjs'
 import { load_simulation_context } from './simulation-helpers.mjs'
 
 const log = debug('simulation:load-team-rosters')
