@@ -103,7 +103,10 @@ export const save_season_forecast = async ({
   year,
   week
 }) => {
-  const generated_at = Math.round(Date.now() / 1000)
+  // A Date, not an epoch integer: league_team_forecast.generated_at is
+  // timestamptz since the 2026-08-07 conform, and a seconds-epoch integer is
+  // rejected outright as a date out of range.
+  const generated_at = new Date()
   const inserts = Object.entries(forecast).map(([tid, team_forecast]) => ({
     tid: Number(tid),
     lid: league_id,
