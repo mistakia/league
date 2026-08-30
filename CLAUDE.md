@@ -42,7 +42,7 @@ These are the ones you cannot route to, because you hit them without deciding to
 
 **The working tree is shared with concurrent sessions.** Attribute uncommitted changes before acting on them, and never stash or revert work you did not author. `dist/` is a build artifact directory that survives commits and can hold a sibling's finished build of an undeployed change, so a clean `git status` is not evidence it is safe to ship.
 
-**A red master defers every session's push, not just yours.** The pre-push guard reads the latest run on the branch regardless of workflow, so a failure in one commit parks unrelated work behind it. If you turn master red, post a bulletin naming the cause so siblings do not debug your gate. Read which workflow and which step failed before attributing anything — an install failure and a real one are indistinguishable from a run's status alone.
+**A red master defers every session's push, not just yours.** The pre-push guard reads the latest run on the branch regardless of workflow, so a failure in one commit parks unrelated work behind it. The block is time-bounded — it lifts on its own once the branch has been red for an hour — so a queued fix that cannot push itself is a wait, not a deadlock. If you turn master red, post a bulletin naming the cause so siblings do not debug your gate. Read which workflow and which step failed before attributing anything — an install failure and a real one are indistinguishable from a run's status alone.
 
 **DDL, the schema export, and the code that depends on them ship in ONE commit.** Between the apply and the commit, any other session's `yarn export:schema` will carry your change without your sweep. This is stricter than the deploy rule: a deploy can lag, a commit cannot.
 
