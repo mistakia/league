@@ -31,9 +31,8 @@ const PLAY_METRIC_PLAYER_COLUMNS = {
  * Provides common functionality for processing market calculations without database access
  */
 class MarketDataHandler {
-  constructor(data, handler_type) {
+  constructor(handler_type) {
     this.handler_type = handler_type
-    this.data_by_game = group_by_game(data)
   }
 
   /**
@@ -114,7 +113,22 @@ class MarketDataHandler {
  */
 export class PlayerGamelogMarketHandler extends MarketDataHandler {
   constructor(player_gamelogs) {
-    super(player_gamelogs, HANDLER_TYPES.PLAYER_GAMELOG)
+    super(HANDLER_TYPES.PLAYER_GAMELOG)
+
+    // Every market looks its player up by (game, player), so scanning the
+    // game's gamelog array per market is a nested scan over the same
+    // collection -- a full slate preloads ~90 gamelogs per game against
+    // thousands of markets. Index once at construction and look up in
+    // constant time. The key is built with the same template coercion the
+    // data_by_game object keys use, so a bigint esbid from prop_markets_index
+    // and an integer esbid from player_gamelogs still meet.
+    this.gamelog_by_game_and_player = new Map()
+    for (const gamelog of player_gamelogs) {
+      this.gamelog_by_game_and_player.set(
+        `${gamelog.esbid}:${gamelog.pid}`,
+        gamelog
+      )
+    }
   }
 
   /**
@@ -124,9 +138,8 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
-    const game_gamelogs = this.data_by_game[market.esbid] || []
     const player_gamelog = this._find_player_gamelog(
-      game_gamelogs,
+      market.esbid,
       market.selection_pid
     )
 
@@ -147,13 +160,13 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
   }
 
   /**
-   * Find gamelog for specific player in game data
-   * @param {Array<object>} game_gamelogs - Array of gamelogs for a specific game
+   * Find the gamelog for one player in one game
+   * @param {number|string} esbid - Game ID to look in
    * @param {string} player_id - Player ID to find
    * @returns {object|null} Player gamelog or null if not found
    */
-  _find_player_gamelog(game_gamelogs, player_id) {
-    return game_gamelogs.find((gamelog) => gamelog.pid === player_id) || null
+  _find_player_gamelog(esbid, player_id) {
+    return this.gamelog_by_game_and_player.get(`${esbid}:${player_id}`) || null
   }
 }
 
@@ -163,7 +176,8 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
  */
 export class NFLPlaysMarketHandler extends MarketDataHandler {
   constructor(nfl_plays) {
-    super(nfl_plays, HANDLER_TYPES.NFL_PLAYS)
+    super(HANDLER_TYPES.NFL_PLAYS)
+    this.data_by_game = group_by_game(nfl_plays)
   }
 
   /**
@@ -495,7 +509,8 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
  */
 export class NFLGamesMarketHandler extends MarketDataHandler {
   constructor(nfl_games) {
-    super(nfl_games, HANDLER_TYPES.NFL_GAMES)
+    super(HANDLER_TYPES.NFL_GAMES)
+    this.data_by_game = group_by_game(nfl_games)
   }
 
   /**
