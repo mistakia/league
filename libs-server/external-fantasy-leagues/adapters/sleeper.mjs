@@ -225,6 +225,13 @@ export default class SleeperAdapter extends BaseAdapter {
 
     const rosters = await this.api_client.get(endpoint)
 
+    // A Sleeper roster entry is a bare player id string with no metadata, so
+    // the name/position/team a mapping fallback needs has to come from the
+    // global catalog. The roster sync used to fetch this itself immediately
+    // afterwards; carrying it here is the same request, and it lets every
+    // adapter's get_rosters be self-describing.
+    const player_catalog = await this.api_client.get('/players/nfl')
+
     const roster_data = rosters.map((roster) => {
       // Transform to standard roster format
       // Use owner_id as team_external_id to match league teams (which use user_id)
@@ -248,18 +255,35 @@ export default class SleeperAdapter extends BaseAdapter {
             player_id,
             roster
           )
+          const catalog_entry = player_catalog?.[player_id] || null
 
           return {
             player_ids: {
               sleeper_id: player_id,
-              espn_id: null,
-              yahoo_id: null,
+              espn_id: catalog_entry?.espn_id || null,
+              yahoo_id: catalog_entry?.yahoo_id || null,
               mfl_id: null,
               cbs_id: null,
               fleaflicker_id: null,
               nfl_id: null,
               rts_id: null
             },
+
+            // Fallback identifiers for player mapping, named as the ESPN
+            // adapter names them so the sync reads one shape for every
+            // platform. Null when the catalog does not carry the player --
+            // the external id above is the mapping identity, these only
+            // matter when a direct id lookup misses.
+            player_name: catalog_entry
+              ? catalog_entry.full_name ||
+                `${catalog_entry.first_name || ''} ${catalog_entry.last_name || ''}`.trim() ||
+                null
+              : null,
+            player_position: catalog_entry?.position
+              ? this.map_player_position_to_canonical(catalog_entry.position)
+              : null,
+            player_team: catalog_entry?.team || null,
+
             roster_slot: roster_slot_info.slot,
             roster_slot_category: roster_slot_info.category,
             acquisition_date: null, // Sleeper doesn't provide acquisition dates in roster data

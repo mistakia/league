@@ -399,100 +399,12 @@ export default class EspnAdapter extends BaseAdapter {
    * @returns {Promise<object[]>} Array of player objects in canonical format
    */
   async get_players({ filters = {} } = {}) {
-    // ESPN doesn't have a comprehensive standalone players endpoint,
-    // but we can get player data through the players view
-    this.log(
-      'info',
-      'ESPN player data retrieved through alternative endpoint',
-      { filters }
-    )
-
-    try {
-      // ESPN provides player data through a different endpoint structure
-      // For now, return empty array but in canonical format when players are available
-      const players = []
-
-      // If we had ESPN player data, it would be transformed like this:
-      const standard_players = players.map((player) => ({
-        player_ids: {
-          sleeper_id: null,
-          espn_id: player.id?.toString(),
-          yahoo_id: null,
-          mfl_id: null,
-          cbs_id: null,
-          fleaflicker_id: null,
-          nfl_id: null,
-          rts_id: null
-        },
-        player_name:
-          player.fullName ||
-          `${player.firstName || ''} ${player.lastName || ''}`.trim(),
-        position: this.map_position_to_canonical(player.defaultPositionId),
-        nfl_team: player.proTeamId
-          ? this.map_nfl_team_to_canonical(player.proTeamId)
-          : null,
-        roster_status: player_nfl_status.ACTIVE,
-        game_designation: player.injuryStatus
-          ? format_nfl_injury_status(
-              this.map_injury_status_to_canonical(player.injuryStatus)
-            )
-          : null,
-
-        // Physical attributes
-        height: null,
-        weight: null,
-        age: player.age || null,
-        years_exp: player.experience || null,
-
-        // Career information
-        drafted: {
-          year: null,
-          round: null,
-          pick: null,
-          team: null
-        },
-
-        // Cross-platform identifiers and external data sources
-        external_data_sources: {
-          espn_player_id: player.id?.toString(),
-          pro_team_id: player.proTeamId?.toString()
-        },
-
-        // Store original platform data
-        platform_data: {
-          player
-        }
-      }))
-
-      // Validate player data (sample validation for performance)
-      if (standard_players.length > 0) {
-        const sample_player = standard_players[0]
-        const validation = await schema_validator.validate_player(sample_player)
-        if (!validation.valid) {
-          this.log('warn', 'Standard player format validation failed', {
-            sample_player_id: sample_player.player_ids.espn_id,
-            errors: validation.errors,
-            data_summary: validation.data_summary
-          })
-        } else {
-          this.log(
-            'info',
-            'Player data successfully validated against canonical format',
-            {
-              player_count: standard_players.length
-            }
-          )
-        }
-      }
-
-      return standard_players
-    } catch (error) {
-      this.log('error', 'Failed to retrieve ESPN player data', {
-        error: error.message,
-        filters
-      })
-      return []
-    }
+    // No ESPN global player catalog endpoint is wired. Roster sync does not
+    // need one -- get_rosters carries each entry's name, position and team --
+    // so this throws rather than returning [], which read as "ESPN rosters
+    // contain nobody" and silently mapped every player to nothing.
+    this.log('warn', 'ESPN get_players not yet implemented', { filters })
+    throw new Error('ESPN adapter: get_players() is not yet implemented')
   }
 
   /**

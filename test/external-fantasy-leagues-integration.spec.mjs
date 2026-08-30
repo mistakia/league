@@ -348,11 +348,20 @@ describe('External Fantasy Leagues - Integration Tests', function () {
 
         sync_results.transactions = transactions_data
 
-        // Step 4: Sync players
-        const players_data = await adapter.get_players()
-        players_data.should.be.an('array') // ESPN returns empty array by design
+        // Step 4: players. ESPN has no global catalog endpoint wired, and the
+        // sync no longer wants one -- get_rosters above already carried each
+        // player's name, position and team. The catalog capability says so
+        // instead of returning [], which used to read as an empty league.
+        let players_error = null
+        try {
+          await adapter.get_players()
+        } catch (error) {
+          players_error = error
+        }
+        chai.expect(players_error).to.be.an('error')
+        chai.expect(players_error.message).to.match(/not yet implemented/)
 
-        sync_results.players = players_data
+        sync_results.players = []
 
         console.log(`Complete ESPN sync workflow validated:`)
         console.log(
@@ -362,7 +371,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
         console.log(
           `   - Transactions: ${transactions_data.length} transactions`
         )
-        console.log(`   - Players: ${players_data.length} players`)
+        console.log(`   - Players: carried on the rosters, no catalog fetched`)
       })
     })
   })

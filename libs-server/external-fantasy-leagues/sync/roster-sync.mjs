@@ -96,7 +96,6 @@ export class RosterSync {
 
       // Map players first
       await this._setup_player_mappings({
-        adapter,
         sync_context,
         sync_stats,
         rosters
@@ -392,31 +391,26 @@ export class RosterSync {
   }
 
   /**
-   * Setup player mappings from external players
+   * Setup player mappings from the players carried on the external rosters
    * @param {object} options - Player mapping setup options
-   * @param {object} options.adapter - Platform adapter instance
    * @param {object} options.sync_context - Sync context
    * @param {object} options.sync_stats - Sync statistics object
    * @param {object[]} options.rosters - External rosters in canonical format
    * @returns {Promise<void>}
    * @private
    */
-  async _setup_player_mappings({ adapter, sync_context, sync_stats, rosters }) {
-    const player_catalog = await adapter.get_players()
-
-    // Platform player endpoints are global (Sleeper's is the whole ~11k entry
-    // NFL catalog) and bulk_map_to_internal issues one sequential database
-    // lookup per entry, so narrow to the players actually on a roster in this
-    // league first -- the same trim the read-only fetch path applies.
-    const external_players = this.sync_utils.filter_players_to_rostered({
-      players: player_catalog,
-      rosters
-    })
+  async _setup_player_mappings({ sync_context, sync_stats, rosters }) {
+    // The sync asks "which pids are on these rosters?", not "what is this
+    // platform's entire player universe?". Those are different questions, and
+    // coupling them to get_players() is what made ESPN's empty catalog map
+    // every rostered player to nothing. Roster entries already carry the
+    // external id that IS the mapping identity, so read them directly.
+    const roster_players = rosters.flatMap((roster) => roster.players || [])
 
     const player_mappings = await this.player_mapper.bulk_map_to_internal({
       platform: sync_context.platform,
       players: this._build_player_mapping_inputs({
-        external_players,
+        external_players: roster_players,
         platform: sync_context.platform
       })
     })
@@ -431,9 +425,9 @@ export class RosterSync {
   }
 
   /**
-   * Build bulk_map_to_internal inputs from canonical external players
+   * Build bulk_map_to_internal inputs from canonical roster player entries
    * @param {object} options - Input building options
-   * @param {object[]} options.external_players - External players in canonical format
+   * @param {object[]} options.external_players - Roster player entries in canonical format
    * @param {string} options.platform - Platform identifier
    * @returns {object[]} Array of `{ external_id, fallback_data }` mapping inputs
    * @private
@@ -446,8 +440,8 @@ export class RosterSync {
         external_id: external_player.player_ids?.[player_id_key],
         fallback_data: {
           name: this._build_player_name({ external_player }),
-          position: external_player.position,
-          team: external_player.team_abbreviation
+          position: external_player.player_position,
+          team: external_player.player_team
         }
       }))
       .filter((mapping_input) => mapping_input.external_id != null)

@@ -735,13 +735,22 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
       })
     })
 
-    describe('get_players() canonical format transformation', function () {
-      it('should transform ESPN player data to canonical format', async function () {
-        const result = await espn_adapter.get_players()
+    describe('get_players() has no ESPN catalog to return', function () {
+      it('should throw rather than report an empty player universe', async function () {
+        // This case previously asserted only that an empty array was an array,
+        // which held however wrong the adapter was. ESPN has no global player
+        // endpoint wired, and returning [] made "no catalog" indistinguishable
+        // from "no players" -- roster sync then resolved nobody and still
+        // reported success. Roster sync no longer consults a catalog at all.
+        let threw = null
+        try {
+          await espn_adapter.get_players()
+        } catch (error) {
+          threw = error
+        }
 
-        result.should.be.an('array')
-        // ESPN player endpoint returns empty array by design
-        // This test validates the structure is correct when data is available
+        expect(threw).to.be.an('error')
+        expect(threw.message).to.match(/not yet implemented/)
       })
     })
   })
@@ -870,6 +879,11 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
           return sleeper_rosters_fixture.data.rosters
         if (url.includes('/transactions'))
           return sleeper_transactions_fixture.data.transactions
+        // get_rosters enriches its bare player-id entries from the catalog, so
+        // that name/position/team travel with the roster the way ESPN's already
+        // do and the sync needs no per-platform branch.
+        if (url.includes('/players/nfl'))
+          return sleeper_players_fixture.data.players
         if (url.includes('/league/')) return sleeper_league_fixture.data.league
         throw new Error(`Unexpected URL: ${url}`)
       }
