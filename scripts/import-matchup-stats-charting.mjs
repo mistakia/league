@@ -296,7 +296,12 @@ export async function import_matchup_stats_charting({
   week,
   esbid,
   dry = false,
-  proxy_pool = 'default',
+  // nfl_pro is the only sticky dedicated-ISP residential pool, and it is the
+  // ONE place this default lives. The yargs option below deliberately declares
+  // no `default`: it used to carry 'default' too, which silently won on every
+  // CLI invocation -- meaning every cron run -- so changing this line alone
+  // would have pinned nothing.
+  proxy_pool = 'nfl_pro',
   use_proxy = true,
   request_delay = 3000,
   season_type = null,
@@ -387,8 +392,7 @@ const main = async () => {
       })
       .option('proxy_pool', {
         type: 'string',
-        description: 'Proxy pool name',
-        default: 'default'
+        description: 'Proxy pool name (default: nfl_pro)'
       })
       .option('request_delay', {
         type: 'number',

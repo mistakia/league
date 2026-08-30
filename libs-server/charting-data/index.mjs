@@ -11,7 +11,11 @@ const CIRCUIT_BREAKER_COOLDOWN_MS = 60 * 1000
 
 class ChartingDataClient {
   constructor({
-    proxy_pool = 'default',
+    // nfl_pro is the only sticky dedicated-ISP residential pool: measured five
+    // calls, one address, against five distinct addresses from every other pool.
+    // Shared with the NFL Pro authenticated session, which is an accepted blast
+    // radius -- see user:guideline/software/vendor-egress-proxy-posture.md.
+    proxy_pool = 'nfl_pro',
     use_proxy = true,
     request_delay_ms = DEFAULT_REQUEST_DELAY_MS,
     max_retries = 3
@@ -94,6 +98,15 @@ class ChartingDataClient {
           Referer: `${this.base_url}/live/`
         },
         use_proxy: this.use_proxy,
+        // Tracks use_proxy rather than being its own knob, deliberately.
+        // proxy-manager is fail-open twice -- an unresolved pool name silently
+        // uses `default`, and an empty pool silently goes direct from the host
+        // WAN -- and both are log-only. For a pipeline pinned to a dedicated
+        // residential identity that is worse than an outage: the fetch succeeds
+        // and nothing reports it left from the address the pinning exists to
+        // avoid. `--no_proxy` is the explicit escape hatch; short of that, a
+        // caller that asked for a proxy gets one or gets an error.
+        requires_proxy: this.use_proxy,
         proxy_pool: this.proxy_pool,
         max_retries: this.max_retries,
         response_type: 'json'
