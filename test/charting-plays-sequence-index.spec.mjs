@@ -5,6 +5,7 @@ import {
   build_sequence_index,
   find_play_by_sequence
 } from '#scripts/import-plays-charting.mjs'
+import grade_plays_import_run from '#libs-server/charting-data/grade-plays-import-run.mjs'
 
 const expect = chai.expect
 
@@ -66,5 +67,75 @@ describe('SCRIPTS charting plays sequence index', function () {
       { play_id: 'y' }
     ])
     expect(index.size).to.equal(1)
+  })
+})
+
+// The oracle added when this import was first scheduled. Its match-rate floor
+// is set from the two measured states of the sequence lookup -- roughly 54
+// percent while it was broken, 99.9 percent once fixed -- so the case that
+// matters is that the broken state FAILS. An oracle that passed both would have
+// let the defect through its first scheduled run, which is exactly what
+// happened for four months with no oracle at all.
+describe('LIBS-SERVER charting plays import oracle', function () {
+  const healthy = {
+    games_selected: 16,
+    games_processed: 16,
+    games_failed: 0,
+    games_empty: 0,
+    total_plays_matched: 2560,
+    total_plays_unmatched: 3,
+    total_fields_updated: 30000
+  }
+
+  it('passes a healthy run', function () {
+    expect(grade_plays_import_run(healthy).passed).to.equal(true)
+  })
+
+  it('fails the match rate the broken sequence lookup produced', function () {
+    const grade = grade_plays_import_run({
+      ...healthy,
+      total_plays_matched: 517,
+      total_plays_unmatched: 444
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.summary).to.match(/play match rate/)
+  })
+
+  it('fails a scope that selected no games', function () {
+    const grade = grade_plays_import_run({
+      ...healthy,
+      games_selected: 0,
+      games_processed: 0,
+      total_plays_matched: 0,
+      total_plays_unmatched: 0,
+      total_fields_updated: 0
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.summary).to.match(/selected no games/)
+  })
+
+  // The steady state of a weekly cron: everything in scope is already imported,
+  // nothing to do, and that must not be an error.
+  it('passes when everything in scope is already covered', function () {
+    const grade = grade_plays_import_run({
+      games_selected: 16,
+      games_processed: 0,
+      games_failed: 0,
+      games_empty: 0,
+      total_plays_matched: 0,
+      total_plays_unmatched: 0,
+      total_fields_updated: 0
+    })
+    expect(grade.passed).to.equal(true)
+  })
+
+  it('names the game failure rate rather than the match rate when games fail', function () {
+    const grade = grade_plays_import_run({
+      ...healthy,
+      games_processed: 8,
+      games_failed: 8
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.summary).to.match(/game failure rate/)
   })
 })

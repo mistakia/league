@@ -12,11 +12,28 @@ import play_cache, {
 } from '#libs-server/play-cache.mjs'
 import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
 import { map_charting_play_to_db_fields } from '#libs-server/charting-data/field-mapping.mjs'
+import grade_plays_import_run from '#libs-server/charting-data/grade-plays-import-run.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const log = debug('import-plays-charting')
 
-async function get_games_for_import({ season_year, week, esbid, season_type }) {
+// A game that already carries charting values is skipped. Without this a weekly
+// cron re-fetches every game of the season every week, forever, on the pinned
+// residential address -- the same reason league-imports.cron gives for the
+// matchup importer's skip. Coverage is read off epa_charting, which this
+// importer writes on every charted play and no other source writes at all.
+//
+// --force is what asks for a game to be fetched again, and it is not a
+// theoretical flag: the 2025 games imported before the sequence-lookup fix
+// matched almost nothing, so they need exactly one forced re-run to pick up
+// what the broken matcher could not write.
+async function get_games_for_import({
+  season_year,
+  week,
+  esbid,
+  season_type,
+  force
+}) {
   const query = db('nfl_games')
     .select(
       'esbid',
@@ -42,7 +59,26 @@ async function get_games_for_import({ season_year, week, esbid, season_type }) {
   }
 
   query.orderBy(['season_year', 'week', 'esbid'])
-  return query
+  const games_selected = await query
+
+  if (force || games_selected.length === 0)
+    return { games_selected, games_to_process: games_selected }
+
+  const covered_rows = await db('nfl_plays')
+    .distinct('esbid')
+    .whereNotNull('epa_charting')
+    .whereIn(
+      'esbid',
+      games_selected.map((game) => game.esbid)
+    )
+  const covered_esbids = new Set(covered_rows.map((row) => row.esbid))
+
+  return {
+    games_selected,
+    games_to_process: games_selected.filter(
+      (game) => !covered_esbids.has(game.esbid)
+    )
+  }
 }
 
 // nfl_plays.sequence is numeric(10,1) and the pg driver hands it back as the
@@ -217,6 +253,7 @@ export async function import_plays_charting({
   use_proxy = true,
   request_delay = 3000,
   season_type = null,
+  force = false,
   collector = null
 } = {}) {
   console.time('import-plays-charting')
@@ -230,18 +267,16 @@ export async function import_plays_charting({
     request_delay_ms: request_delay
   })
 
-  const games = await get_games_for_import({
+  const { games_selected, games_to_process } = await get_games_for_import({
     season_year,
     week,
     esbid,
-    season_type
+    season_type,
+    force
   })
-  log(`found ${games.length} games to process`)
-
-  if (games.length === 0) {
-    console.timeEnd('import-plays-charting')
-    return { games_processed: 0 }
-  }
+  console.log(
+    `selected ${games_selected.length} game(s) in scope, ${games_to_process.length} needing import`
+  )
 
   const stats = {
     games_processed: 0,
@@ -253,7 +288,7 @@ export async function import_plays_charting({
     total_fields_updated: 0
   }
 
-  for (const game of games) {
+  for (const game of games_to_process) {
     await process_game({ game, client, stats, dry })
   }
 
@@ -267,6 +302,21 @@ export async function import_plays_charting({
   log(`plays unmatched: ${stats.total_plays_unmatched}`)
   log(`marker plays skipped: ${stats.total_plays_skipped_marker}`)
   log(`fields updated: ${stats.total_fields_updated}`)
+
+  // Graded here rather than in main() so every caller is graded --
+  // import-full-season.mjs runs this import too, and a stage that idles there
+  // is as invisible as one that idles under cron.
+  const grade = grade_plays_import_run({
+    ...stats,
+    games_selected: games_selected.length,
+    // A season-wide scope on the CURRENT season may hold no game yet; any
+    // narrower ask named something the caller expects to exist.
+    expects_games: Boolean(week || esbid) || season_year !== current_season.year
+  })
+  console.log(grade.summary)
+  if (!grade.passed) {
+    throw new Error(grade.summary)
+  }
 
   return stats
 }
@@ -310,6 +360,11 @@ const main = async () => {
         type: 'boolean',
         description: 'Disable proxy usage',
         default: false
+      })
+      .option('force', {
+        type: 'boolean',
+        description: 'Re-import games that already have charting values',
+        default: false
       }).argv
 
     enable_debug_namespaces('import-plays-charting,charting-data')
@@ -322,7 +377,8 @@ const main = async () => {
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,
-      season_type: argv.season_type
+      season_type: argv.season_type,
+      force: argv.force
     })
   } catch (err) {
     error = err

@@ -287,6 +287,46 @@ JOB_PROJECT=league
 ## through December.
 50 3 * 1,2,9-12 3 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-matchup-stats-charting.mjs >> /var/log/league/league-import-matchup-stats-charting.log 2>&1
 
+# Charting Plays
+
+## sumersports play-level charting -- coverage scheme, personnel, pressure,
+## alignment -- written onto nfl_plays. This was in NO crontab until 2026-08-30,
+## which is the direct cause of the 2025 weeks 1-11 hole and the whole of 2025
+## preseason being absent: it last ran by hand on 2026-04-02.
+##
+## Like the matchup line it passes no --year and no --seas_type, and it skips
+## games that already carry charting values. Without that skip a weekly run
+## would re-fetch every game of the season every week on the pinned residential
+## address, which is a standing ~46-minute weekly re-fetch of data we hold.
+## --force is what asks for a covered game again.
+##
+## Tuesday rather than Wednesday, and 03:20 rather than 03:50, so this finishes
+## before the matchup job starts and the two never share the vendor connection.
+## The host is America/New_York, so these times are already ET and land clear of
+## the 23:55-00:25 ET window the NFL Pro jobs occupy on base-storage.
+##
+## At 03:20 on Tuesday in January, February, and every month from September
+## through December.
+20 3 * 1,2,9-12 2 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-charting.mjs >> /var/log/league/league-import-plays-charting.log 2>&1
+
+# Charting Player Plays
+
+## The per-player-per-snap grain from the vendor's by-play endpoint, one row per
+## player per snap into nfl_player_play_charting. TWO vendor requests per game
+## rather than one, so this is the most expensive charting line here -- roughly
+## 32 requests for a normal week at ~13s mean spacing.
+##
+## It skips a game only when BOTH teams are already present: a game whose second
+## request failed part-way through an earlier run is half-imported, and skipping
+## it on the strength of the first team's rows would make that permanent.
+##
+## Wednesday, an hour after the matchup job, so the three charting lines never
+## overlap on the sticky residential address.
+##
+## At 04:50 on Wednesday in January, February, and every month from September
+## through December.
+50 4 * 1,2,9-12 3 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-player-plays-charting.mjs >> /var/log/league/league-import-player-plays-charting.log 2>&1
+
 # Betting Markets
 
 ## Every 20 minutes - Player hit rates calculation
