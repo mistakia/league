@@ -125,23 +125,27 @@ export async function mochaGlobalSetup() {
 // what makes an entry stale and why an unexercised entry is silent.
 export const mochaHooks = {
   afterAll() {
-    // A SUBSET suite exercises no API routes, so the hold-out check's
-    // zero-pairs guard fires on it every time -- correctly, in that it observed
-    // zero pairs, and uselessly, in that a run carrying no API specs was never
-    // going to observe any. That made `yarn test:private` structurally unable
-    // to pass, which is why nothing invoked it and why private/test rotted
+    // A declared SUBSET cannot judge the hold-out list in either direction, and
+    // both misreads are expensive. It may exercise no API route at all, so the
+    // zero-pairs guard fires every time -- which is what made `yarn test:private`
+    // structurally unable to pass, so nothing invoked it and private/test rotted
     // until a spec was still updating `seasons.year`, a column renamed to
-    // season_year.
+    // season_year. Or it may exercise a route and reach only the CONFORMANT one
+    // of a pair's several response shapes, reporting a live entry as stale; the
+    // documented remedy for stale is to delete the entry, and deleting a live
+    // one turns the full suite red.
     //
     // Declared by the invoking script rather than sniffed, and announced rather
     // than skipped silently: a suite that cannot judge API coverage has to say
     // so, or this becomes the same absent-check-reading-as-a-pass the guard
-    // exists to prevent.
+    // exists to prevent. The narrower zero-HTTP case needs no declaration and is
+    // handled inside the guard, so a bare `mocha` invocation gets it too.
     if (process.env.LEAGUE_SUITE_SUBSET) {
       console.log(
         '\nresponse validation hold-out NOT CHECKED -- LEAGUE_SUITE_SUBSET is ' +
-          'set, so this run exercises no API routes and cannot judge the ' +
-          'hold-out list. Run the full suite for that verdict.'
+          'set, so this run is a declared spec subset. Neither a stale-entry ' +
+          'report nor a zero-pairs report is trustworthy from a subset. Run ' +
+          'the full suite for that verdict.'
       )
       return
     }

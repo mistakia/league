@@ -162,5 +162,19 @@ describe('response validation ratchet', function () {
     const after = get_response_validation_report()
     expect(after.observed_pair_count).to.be.greaterThan(0)
     expect(after.observed_pair_count).to.be.at.least(before)
+
+    // The teardown check no longer fails a run that observed zero pairs while
+    // serving zero requests, because such a run cannot judge reachability
+    // either way -- that is what stopped every single-spec run reporting a
+    // spurious failure. The whole skip rests on this counter incrementing
+    // independently of whether the validator could place the request, so it
+    // gets its own assertion. If it ever stops counting, the teardown falls
+    // silent on a genuinely blind FULL run, and the case above is the only
+    // thing left holding that.
+    expect(
+      after.request_count,
+      'request_count is the subset-vs-blindness discriminator; at zero the ' +
+        'teardown check skips, so a counter that stops counting disables it'
+    ).to.be.greaterThan(0)
   })
 })

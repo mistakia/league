@@ -80,6 +80,21 @@ const holdout_key = ({ operation, status }) => `${operation} ${status}`
 // stays unconditional; only the message distinguishes.
 const observed_pairs = new Set()
 
+// Every request that reached the app, whether or not the validator could place
+// it in the spec. This is what separates the two causes above, and it works
+// because it is counted by OUR middleware, ahead of the validator's own: a
+// validator that has stopped matching requests still increments this, while a
+// subset that issues no HTTP request cannot. Zero requests means the run had no
+// way to judge validator reachability at all, which is a different statement
+// from "the validator is not reaching requests".
+//
+// It does NOT cover the whole blindness case on its own: if this middleware
+// stops being mounted in api/index.mjs, the counter stays 0 and the teardown
+// falls silent. That half is held by the fourth case in
+// test/api.response-validation-ratchet.spec.mjs, which drives a documented
+// route on the real server and asserts a pair is observed.
+let request_count = 0
+
 // Pairs where the validator DID raise and a hold-out entry swallowed it. An
 // entry with no hit here, whose pair was nonetheless observed, is reported
 // stale -- and that inference only holds for a FULL run. One (operation,
@@ -101,6 +116,7 @@ const operation_key = (req) => {
 // `req.openapi` is populated by the validator's own metadata middleware, which
 // runs after this one -- hence reading it on `finish` rather than inline.
 const record_observed_middleware = (req, res, next) => {
+  request_count += 1
   res.on('finish', () => {
     const operation = operation_key(req)
     if (operation) observed_pairs.add(`${operation} ${res.statusCode}`)
@@ -206,6 +222,7 @@ export const get_response_validation_report = () => {
   return {
     holdout_total: holdout.length,
     observed_pair_count: observed_pairs.size,
+    request_count,
     held: [...held_pairs.entries()].map(([key, count]) => ({ key, count })),
     stale,
     not_exercised
@@ -257,26 +274,37 @@ export const assert_holdout_is_current = () => {
     )
   }
 
+  // No request reached the app at all. Such a run cannot observe a pair and
+  // cannot judge validator reachability either way, so there is nothing here to
+  // be current or stale ABOUT. Failing it was the single largest source of
+  // false red in this suite: every ad-hoc single-spec run reported "1 failing"
+  // on a spec that passed, which teaches every reader, human and agent, that a
+  // red suite is noise. Announce, do not fail.
+  if (!report.request_count) {
+    console.log(
+      '\nresponse validation hold-out NOT CHECKED -- this run served zero HTTP ' +
+        'requests, so it observed no (operation, status) pairs and cannot ' +
+        'judge the hold-out list or validator reachability. Run the full suite ' +
+        'for that verdict.'
+    )
+    return report
+  }
+
   if (report.holdout_total && !report.observed_pair_count) {
     failures.push(
-      'Response validation observed ZERO (operation, status) pairs while the ' +
+      'Response validation observed ZERO (operation, status) pairs across the ' +
+        `${report.request_count} request(s) this run served, while the ` +
         `hold-out list carries ${report.holdout_total} entries. Every entry ` +
         'would otherwise read as merely NOT EXERCISED, which is silent.\n\n' +
-        'TWO causes, and they want opposite responses.\n\n' +
-        '  1. You ran a SPEC SUBSET that issues no HTTP requests at all. Any ' +
-        'data-views, libs-server or golden-corpus file on its own does this. ' +
-        'Then zero observed pairs is correct, this failure is an artifact of ' +
-        'the subset, and there is NOTHING TO REPAIR. Add a spec that exercises ' +
-        'a route -- test/data-view-organization.spec.mjs is a fast one -- and ' +
-        'it goes away. Do not go editing the hold-out list to silence it: its ' +
-        'entries are unexercised here, not stale, and deleting a live one ' +
-        'turns the full suite red.\n\n' +
-        '  2. The validator genuinely stopped reaching requests, which is the ' +
-        'case this guard exists for. Check that its middleware is mounted ' +
-        'BEFORE the route mounts in api/index.mjs and that the spec servers ' +
-        "basePath still matches the routes' mount path.\n\n" +
-        'A full run tells them apart: it observes pairs under cause 1 and ' +
-        'none under cause 2.'
+        'Requests WERE served and none of them could be placed in the spec, ' +
+        'so this is the blindness case the guard exists for -- not a subset ' +
+        'artifact, which serves no requests at all and is now reported rather ' +
+        'than failed. Check that the validator middleware is mounted BEFORE ' +
+        'the route mounts in api/index.mjs and that the spec servers basePath ' +
+        "still matches the routes' mount path.\n\n" +
+        'Do NOT edit the hold-out list to silence this. Its entries are ' +
+        'unexercised here, not stale, and deleting a live one turns the full ' +
+        'suite red.'
     )
   }
 

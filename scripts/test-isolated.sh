@@ -70,6 +70,21 @@ fi
 created=1
 echo "test database: ${DB_NAME}"
 
+# Arguments mean a SPEC SUBSET, so declare it. The response-validation teardown
+# reports a hold-out entry stale when the run produced its (operation, status)
+# and the response validated -- an inference that only holds for a full run,
+# because one pair can have several response shapes and a subset exercising only
+# the conformant one reports a LIVE entry as stale. Following that report deletes
+# an entry the full suite still needs and turns master red. Declared here rather
+# than sniffed inside the suite, so the flag tracks the invocation that knows.
+#
+# The other half of the artifact -- a subset that issues no HTTP at all being
+# failed for observing zero pairs -- is handled in the guard itself, on whether
+# any request was served, so it holds for a bare `mocha` invocation too.
+if [ "$#" -gt 0 ]; then
+  export LEAGUE_SUITE_SUBSET=1
+fi
+
 # `yarn test` blanks LEAGUE_DB_HOST/PORT, so invoke mocha directly. Loading the
 # rc (no --no-config) keeps local collection identical to CI's.
 LEAGUE_DB_HOST=127.0.0.1 \
