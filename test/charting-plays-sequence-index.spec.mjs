@@ -129,6 +129,46 @@ describe('LIBS-SERVER charting plays import oracle', function () {
     expect(grade.passed).to.equal(true)
   })
 
+  // Both shapes below were graded PASS by the first version of this oracle,
+  // reported by a review session and reproduced by execution. They are the
+  // exact no-op the oracle exists to catch, so they are the cases most worth
+  // pinning. The cause was that games_empty sat outside games_attempted, which
+  // made a fully-empty run skip every check.
+  it('fails a run where every game returned nothing', function () {
+    const grade = grade_plays_import_run({
+      games_selected: 16,
+      games_processed: 0,
+      games_failed: 0,
+      games_empty: 16,
+      total_plays_matched: 0,
+      total_plays_unmatched: 0,
+      total_fields_updated: 0,
+      // The cron shape: no --year, so this is false and the scope check above
+      // is disabled. Nothing else was left to fail on.
+      expects_games: false
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.summary).to.match(/no plays matched/)
+  })
+
+  it('fails a run where every game returned an empty play array', function () {
+    // Array.isArray([]) is true, so an empty array proceeds past the empty
+    // branch and counts as PROCESSED with zero plays -- a different path to
+    // the same silent success.
+    const grade = grade_plays_import_run({
+      games_selected: 16,
+      games_processed: 16,
+      games_failed: 0,
+      games_empty: 0,
+      total_plays_matched: 0,
+      total_plays_unmatched: 0,
+      total_fields_updated: 0,
+      expects_games: false
+    })
+    expect(grade.passed).to.equal(false)
+    expect(grade.summary).to.match(/no plays matched/)
+  })
+
   it('names the game failure rate rather than the match rate when games fail', function () {
     const grade = grade_plays_import_run({
       ...healthy,

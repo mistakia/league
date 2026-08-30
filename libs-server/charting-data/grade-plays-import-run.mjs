@@ -40,7 +40,15 @@ export default function grade_plays_import_run({
 }) {
   const failures = []
 
-  const games_attempted = games_processed + games_failed
+  // games_empty is part of the ATTEMPT. It used to be excluded, and that single
+  // omission made this oracle pass the total no-op it exists to catch: a game
+  // returning nothing increments only games_empty and returns early, so a run
+  // where EVERY game came back empty had games_attempted === 0, skipped this
+  // whole block, and was graded PASS. Under cron -- which passes no --year, so
+  // expects_games is false -- the scope check above is disabled too, and
+  // nothing was left to fail on. Reported by a review session 2026-08-30 and
+  // reproduced by execution before this fix.
+  const games_attempted = games_processed + games_failed + games_empty
   const game_failure_rate = games_attempted ? games_failed / games_attempted : 0
   const plays_seen = total_plays_matched + total_plays_unmatched
   const match_rate = plays_seen ? total_plays_matched / plays_seen : 0
@@ -50,14 +58,21 @@ export default function grade_plays_import_run({
   } else if (games_attempted > 0) {
     if (game_failure_rate > MAXIMUM_GAME_FAILURE_RATE) {
       failures.push(
-        `game failure rate ${format_rate(game_failure_rate)} exceeds ${format_rate(MAXIMUM_GAME_FAILURE_RATE)} (${games_failed} failed, ${games_empty} empty of ${games_attempted} attempted)`
+        `game failure rate ${format_rate(game_failure_rate)} exceeds ${format_rate(MAXIMUM_GAME_FAILURE_RATE)} (${games_failed} failed and ${games_empty} empty of ${games_attempted} attempted)`
       )
     }
 
-    // Guarded on plays_seen rather than folded into the rate: a run whose games
-    // all returned empty lists has no plays to match, and reporting a 0% match
-    // rate there would name the wrong defect.
-    if (plays_seen > 0 && match_rate < MINIMUM_PLAY_MATCH_RATE) {
+    // The zero-coverage rule, and it is the one that makes this oracle worth
+    // running. It is deliberately separate from the match rate below, which is
+    // guarded on plays_seen and therefore cannot see this case: a run that
+    // matched NOTHING has no plays to compute a rate from, so a rate check
+    // alone is silent exactly when the failure is total. The sibling
+    // grade-player-play-import-run.mjs has always carried the equivalent.
+    if (total_plays_matched === 0) {
+      failures.push(
+        `no plays matched across ${games_attempted} attempted game(s)`
+      )
+    } else if (plays_seen > 0 && match_rate < MINIMUM_PLAY_MATCH_RATE) {
       failures.push(
         `play match rate ${format_rate(match_rate)} below ${format_rate(MINIMUM_PLAY_MATCH_RATE)} (${total_plays_matched} of ${plays_seen} plays)`
       )
