@@ -7,7 +7,8 @@ import {
   calculate_wager_summary,
   format_american_odds_as_fractional,
   format_metric_result,
-  format_threshold_distance
+  format_threshold_distance,
+  is_real_price
 } from '#libs-server/wager-analysis/wager-calculations.mjs'
 import { create_wager_summary_table } from '#libs-server/wager-analysis/wager-table-formatters.mjs'
 
@@ -275,13 +276,67 @@ describe('LIBS-SERVER wager-calculations', function () {
       expect(format_american_odds_as_fractional(undefined)).to.equal('-')
     })
 
-    it('renders an unpriceable input as NaN/1, which the null guard does not cover', () => {
+    it('renders anything that is not a real price as a dash', () => {
       // b89f5ab53 removed a try/catch here. It was already dead code -- oddslib
-      // returns NaN rather than throwing -- so removing it changed nothing, but
-      // neither the old nor the new version reaches the '-' the null branch
-      // returns. This pins the gap rather than endorsing it: a fix belongs in
-      // the guard, and this case is what would then go red to announce it.
-      expect(format_american_odds_as_fractional(NaN)).to.equal('NaN/1')
+      // returns NaN rather than throwing -- so every one of these used to reach
+      // the arithmetic and render 'NaN/1' or '0.00/1' on the row.
+      expect(format_american_odds_as_fractional(NaN)).to.equal('-')
+      expect(format_american_odds_as_fractional(Infinity)).to.equal('-')
+      // Off-contract, and reachable: parsed_odds comes from three books' JSON
+      // exports, so a string is what a changed export shape actually delivers.
+      expect(format_american_odds_as_fractional('abc')).to.equal('-')
+    })
+  })
+
+  describe('is_real_price', function () {
+    it('agrees with the summary about which wagers carry a price', () => {
+      // The defect this closes: a 0-odds wager was excluded from the summary's
+      // odds statistics AND rendered as '0.00/1' by the formatter, so the same
+      // wager was unpriced in one half of the module and even money in the
+      // other. Asserting the two halves against the shared predicate is what
+      // stops them drifting apart again -- checking either alone cannot.
+      const unpriced = [0, NaN, null, undefined]
+
+      for (const parsed_odds of unpriced) {
+        const summary = calculate_wager_summary({
+          wagers: [
+            {
+              selections: [{ event_id: 1, selection_id: 1 }],
+              is_settled: false,
+              stake: 1,
+              potential_win: 1,
+              parsed_odds
+            }
+          ]
+        })
+
+        expect(
+          is_real_price(parsed_odds),
+          `${parsed_odds} is not a price`
+        ).to.equal(false)
+        expect(
+          summary.wagers_with_odds,
+          `the summary must not count ${parsed_odds} as a price`
+        ).to.equal(0)
+        expect(
+          format_american_odds_as_fractional(parsed_odds),
+          `the formatter must not render ${parsed_odds} as a price`
+        ).to.equal('-')
+      }
+    })
+
+    it('accepts the prices a book does offer', () => {
+      // Vacuity guard for the case above: without it, a predicate that
+      // returned false for everything would satisfy every assertion there.
+      for (const parsed_odds of [100, -110, 1, -1, 1000000]) {
+        expect(
+          is_real_price(parsed_odds),
+          `${parsed_odds} is a price`
+        ).to.equal(true)
+        expect(format_american_odds_as_fractional(parsed_odds)).to.not.equal(
+          '-'
+        )
+      }
     })
   })
 

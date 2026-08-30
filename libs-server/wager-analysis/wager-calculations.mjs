@@ -95,6 +95,25 @@ const calculate_gross_return = ({
 }
 
 /**
+ * Whether a value is a price a book could actually have offered.
+ *
+ * Odds of 0 are not a price, and neither is a non-finite or non-numeric value.
+ * The summary and the display formatter must agree on this: before it was
+ * declared once here, the summary excluded a 0-odds wager from its statistics
+ * while the formatter rendered the same wager as `0.00/1`, a real-looking
+ * even-money price. Anything that decides "is this priced" reads this.
+ *
+ * Declared as a type guard so a caller narrowing on it keeps the number:
+ * `is_real_price(wager.parsed_odds) ? wager.parsed_odds : null` is only
+ * well-typed because this returns `american_odds is number`.
+ *
+ * @param {unknown} american_odds
+ * @returns {american_odds is number}
+ */
+export const is_real_price = (american_odds) =>
+  Number.isFinite(american_odds) && american_odds !== 0
+
+/**
  * Helper to check if two props are equal.
  *
  * We don't compare market_id because FanDuel can assign different market IDs to
@@ -179,7 +198,7 @@ export const format_threshold_distance = (distance) => {
  * @param {number | null | undefined} american_odds
  */
 export const format_american_odds_as_fractional = (american_odds) => {
-  if (american_odds === null || american_odds === undefined) {
+  if (!is_real_price(american_odds)) {
     return '-'
   }
 
@@ -235,10 +254,11 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       // Track bonus bet amounts
       const bonus_bet_amount = wager.bonus_bet_amount || 0
 
-      // Odds of 0 are not a price a book can offer, so they mean the wager
-      // carries none; such a wager is left out of the odds statistics rather
-      // than counted as a real "< +100" price that drags the average down.
-      const wager_odds = wager.parsed_odds || null
+      // A wager carrying no real price is left out of the odds statistics
+      // rather than counted as a "< +100" price that drags the average down.
+      const wager_odds = is_real_price(wager.parsed_odds)
+        ? wager.parsed_odds
+        : null
 
       return {
         wagers: accumulator.wagers + 1,
