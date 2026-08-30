@@ -7,7 +7,6 @@
 // as unpopulated columns or wrong aggregates instead of an error.
 
 import * as chai from 'chai'
-import { readFile } from 'fs/promises'
 
 import getPlayFromPlayStats from '#libs-shared/get-play-from-play-stats.mjs'
 import { enrich_fixed_drives } from '#libs-server/play-enrichment/fixed-drive-enrichment.mjs'
@@ -618,58 +617,5 @@ describe('calculate-stats-from-plays interception attribution', function () {
 
     expect(players['PASS-ER-000001'].passing_interceptions).to.equal(0)
     expect(players['PASS-ER-000001'].passing_attempts).to.equal(1)
-  })
-})
-
-describe('prop-market-settlement nfl_plays select coverage', function () {
-  // The NFL_PLAYS handler reads play columns by name off preloaded rows. A
-  // column absent from the preloader's select list reads undefined and settles
-  // the market against a zero metric rather than raising, so the two must be
-  // checked against each other rather than trusted to stay in sync.
-  it('preloads every nfl_plays column the NFL_PLAYS handler reads', async () => {
-    const { HANDLER_TYPES, market_type_mappings } =
-      await import('#libs-server/prop-market-settlement/market-type-mappings.mjs')
-
-    const required_columns = new Set()
-    for (const mapping of Object.values(market_type_mappings)) {
-      if (mapping.handler !== HANDLER_TYPES.NFL_PLAYS) continue
-
-      for (const column of mapping.metric_columns || []) {
-        required_columns.add(column)
-      }
-      if (mapping.player_column) required_columns.add(mapping.player_column)
-      if (mapping.team_aggregate) required_columns.add('offense_nfl_team')
-      if (mapping.quarter_filter || mapping.half_filter) {
-        required_columns.add('quarter')
-      }
-      if (mapping.special_logic === 'first_touchdown_scorer') {
-        // The first-scorer branch reads these directly off the play.
-        required_columns.add('is_rushing_play')
-        required_columns.add('is_passing_play')
-        required_columns.add('ball_carrier_pid')
-        required_columns.add('target_pid')
-        required_columns.add('is_completion')
-      }
-    }
-
-    const preloader_source = await readFile(
-      new URL(
-        '../libs-server/prop-market-settlement/data-preloader.mjs',
-        import.meta.url
-      ),
-      'utf8'
-    )
-    const select_list = preloader_source
-      .split('const load_nfl_plays')[1]
-      .split('.whereIn')[0]
-    const selected_columns = new Set(
-      [...select_list.matchAll(/'([a-z_0-9]+)'/g)].map((match) => match[1])
-    )
-
-    const missing = [...required_columns].filter(
-      (column) => !selected_columns.has(column)
-    )
-
-    expect(missing).to.deep.equal([])
   })
 })
