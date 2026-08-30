@@ -90,21 +90,33 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 4: Success metrics
-    if (success) {
-      try {
-        enriched_plays = enrich_play_success(enriched_plays)
-      } catch (error) {
-        log(`Success metric enrichment failed: ${error.message}`)
-      }
-    }
-
-    // Phase 5: Yardage statistics from play_stats (always enabled)
+    // Phase 4: Yardage statistics from play_stats (always enabled)
+    //
+    // This MUST run before the success metric below, which reads yards_gained.
+    // The two were once ordered the other way, and the bug that produced was
+    // not a wrong value but a DISAGREEMENT between callers: this importer
+    // enriches feed-shaped plays that carry no yards_gained of their own, so
+    // success resolved to null on every play, while process-plays.mjs enriches
+    // rows read back from nfl_plays where yards_gained is already stored and
+    // resolved it to true/false. The importer then wrote its null over the
+    // stored value on every pass and process_plays wrote the value back,
+    // bumping nfl_plays.updated each time and defeating the finalization
+    // watermark guard permanently. Both callers must derive the same value
+    // from the same inputs; ordering is what makes that true here.
     if (play_stats.length > 0) {
       try {
         enriched_plays = enrich_yardage_stats(enriched_plays, play_stats)
       } catch (error) {
         log(`Yardage stat enrichment failed: ${error.message}`)
+      }
+    }
+
+    // Phase 5: Success metrics -- depends on yards_gained from Phase 4
+    if (success) {
+      try {
+        enriched_plays = enrich_play_success(enriched_plays)
+      } catch (error) {
+        log(`Success metric enrichment failed: ${error.message}`)
       }
     }
 

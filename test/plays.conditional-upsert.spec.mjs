@@ -157,4 +157,41 @@ describe('nfl_plays conditional upsert against a real database', function () {
 
     expect(written.length).to.equal(1)
   })
+
+  it('leaves a column alone for rows that do not mention it', async () => {
+    await upsert([
+      play_row({
+        play_id: 1,
+        updated: new Date('2026-02-01T00:00:00Z'),
+        down_number: 3
+      }),
+      play_row({
+        play_id: 2,
+        updated: new Date('2026-02-01T00:00:00Z'),
+        down_number: 3
+      })
+    ])
+
+    // Only play 1 asserts down_number on this pass. knex takes the UNION of
+    // both rows' keys for its single statement and fills DEFAULT for play 2,
+    // so without grouping the merge writes NULL over play 2's stored 3 -- and
+    // the predicate reports that clobber as a change, advancing `updated` for a
+    // row whose payload never mentioned the column. This is the same
+    // null-outranks-stored failure the drive_sequence coalesce covers for one
+    // column, arriving through the batch shape instead.
+    const written = await upsert([
+      play_row({
+        play_id: 1,
+        updated: new Date('2026-06-01T00:00:00Z'),
+        down_number: 4
+      }),
+      play_row({ play_id: 2, updated: new Date('2026-06-01T00:00:00Z') })
+    ])
+
+    expect(written.length).to.equal(1)
+
+    const rows = await db('nfl_plays').where({ esbid }).orderBy('play_id')
+    expect(rows[0].down_number).to.equal(4)
+    expect(rows[1].down_number).to.equal(3)
+  })
 })

@@ -126,17 +126,62 @@ export const build_plays_change_predicate = (table, rows) => {
  * @returns {Promise<object[]>} The rows written, one entry per real change
  */
 export const upsert_plays = async ({ table, rows, conflict_columns }) => {
-  const query = db(table)
-    .insert(rows)
-    .onConflict(conflict_columns)
-    .merge(build_plays_merge(table, rows))
+  const written = []
 
-  const change_predicate = build_plays_change_predicate(table, rows)
-  if (change_predicate) {
-    query.where(change_predicate)
+  for (const group of group_rows_by_column_set(rows)) {
+    const query = db(table)
+      .insert(group)
+      .onConflict(conflict_columns)
+      .merge(build_plays_merge(table, group))
+
+    const change_predicate = build_plays_change_predicate(table, group)
+    if (change_predicate) {
+      query.where(change_predicate)
+    }
+
+    written.push(...(await query.returning('play_id')))
   }
 
-  return query.returning('play_id')
+  return written
+}
+
+/**
+ * Partition a batch into groups that assert exactly the same columns.
+ *
+ * knex builds ONE statement per insert and takes the UNION of every row's keys
+ * as its column list, filling DEFAULT for any row that omits one. Under
+ * ON CONFLICT DO UPDATE that DEFAULT becomes a real write: a single row
+ * carrying an optional column drags a NULL over that column for every other
+ * row in the batch, and because the merge and the change predicate are both
+ * derived from the same union, the predicate reports it as a change and
+ * nfl_plays.updated advances for it. The row that never mentioned the column
+ * is the one that loses its stored value.
+ *
+ * Grouping first makes an absent key mean "this row asserts nothing about that
+ * column" rather than "write NULL". That distinction is what lets an enricher
+ * omit a field it could not compute instead of emitting a null that outranks
+ * stored data -- the failure this module's change predicate exists to detect.
+ *
+ * In practice the batch is near-uniform (getPlayData sets timeout_team only on
+ * TIMEOUT plays), so this yields one or two groups and one or two statements.
+ *
+ * @param {NflPlaysRow[]} rows - Rows to partition
+ * @returns {NflPlaysRow[][]} Groups, each internally column-uniform
+ */
+const group_rows_by_column_set = (rows) => {
+  const groups = new Map()
+
+  for (const row of rows) {
+    const signature = Object.keys(row).sort().join(' ')
+
+    if (!groups.has(signature)) {
+      groups.set(signature, [])
+    }
+
+    groups.get(signature).push(row)
+  }
+
+  return [...groups.values()]
 }
 
 const collect_columns = (rows) => {
