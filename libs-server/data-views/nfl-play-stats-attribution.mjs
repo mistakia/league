@@ -33,9 +33,9 @@ const create_play_stats_attribution = ({
   const gsis_alias = `${alias_prefix}_player_gsis`
 
   // `pid_expr` is a function of the base relation because the fallback below
-  // reads a pid column off it, and the two callers pass different relations
-  // (the physical nfl_plays for the role-union path, the filtered_plays CTE for
-  // the legacy `with` path). Roles without a fallback ignore the argument.
+  // reads a pid column off it, and the role-union path's relation is the
+  // physical nfl_plays. Roles without a fallback ignore the argument. The
+  // legacy `with` path reads the folded CTE instead and uses shared_pid_expr.
   const pid_expr = ({ plays_table } = {}) => {
     const resolved = `"${smart_alias}"."pid", "${gsis_alias}"."pid"`
     if (!fallback_pid_column) {
@@ -57,10 +57,12 @@ const create_play_stats_attribution = ({
     )
   }
 
-  // Attach the identity joins to a query whose base relation is `plays_table`
-  // (the physical nfl_plays for the role-union path, the filtered_plays CTE for
-  // the legacy `with` path). The inner join on nfl_play_stats is what restricts
-  // the role to the relevant plays, so no separate measure predicate is needed.
+  // Attach the identity joins to a query whose base relation is `plays_table`,
+  // the physical nfl_plays on the role-union path. The inner join on
+  // nfl_play_stats is what restricts the role to the relevant plays, so no
+  // separate measure predicate is needed. The legacy `with` path no longer
+  // calls this -- build_shared_play_stats_cte does the equivalent join once for
+  // every role instead.
   //
   // The join fans out to one row per matching stat row, which is intended: a
   // play carrying two stat rows credits two players, exactly as the gamelogs
@@ -86,8 +88,111 @@ const create_play_stats_attribution = ({
       )
   }
 
-  return { stat_ids, pid_expr, apply_joins }
+  // Shared-CTE variant of `pid_expr`, for the legacy `with` path once the seven
+  // roles' nfl_play_stats joins have been folded into one pre-joined CTE (see
+  // build_shared_play_stats_cte). The arm reads that CTE aliased as
+  // `${stats_alias}`, so every column the legacy expressions already name off
+  // that alias stays in scope -- the field-goal scoring expression's
+  // `stat_yards` and both external ids -- while the two resolved pids arrive as
+  // columns rather than as two more joins per role.
+  const shared_pid_expr = () => {
+    const resolved =
+      `"${stats_alias}"."attribution_smart_pid", ` +
+      `"${stats_alias}"."attribution_gsis_pid"`
+    if (!fallback_pid_column) {
+      return `COALESCE(${resolved})`
+    }
+    const has_no_external_id =
+      `NULLIF("${stats_alias}"."smart_player_id", '') IS NULL AND ` +
+      `NULLIF("${stats_alias}"."gsis_player_id", '') IS NULL`
+    return (
+      `COALESCE(${resolved}, CASE WHEN ${has_no_external_id} ` +
+      `THEN "${stats_alias}"."${fallback_pid_column}" END)`
+    )
+  }
+
+  return {
+    stat_ids,
+    pid_expr,
+    apply_joins,
+    shared_pid_expr,
+    stats_alias,
+    fallback_pid_column
+  }
 }
+
+// Fold the per-role nfl_play_stats joins into ONE join over the union of the
+// roles' stat_ids, for the legacy `with` path.
+//
+// Each role used to join nfl_play_stats to the filtered_plays CTE on
+// (esbid, play_id) itself, which made the planner re-sort the whole CTE once
+// per role and scan nfl_play_stats once per role. Measured on production
+// 2026-08-29 against the seven-role career-span statement, that was 3.6s of a
+// 6.7s query; one shared join took the same statement to 5.2s with byte-
+// identical output.
+//
+// This is exact rather than approximate because the roles' stat_id sets are
+// DISJOINT: no stat row can satisfy two roles, so restoring a role is just
+// `WHERE stat_id IN (its ids)` over the shared join, and the per-role fan-out
+// (one credited row per stat row) is preserved unchanged.
+//
+// The stat_ids come from the attributions actually in play, never a hardcoded
+// union: a query scoring one role must scan that role's ids alone, or folding
+// would make the narrow case slower than the joins it replaced.
+export const build_shared_play_stats_cte = ({
+  attributions,
+  plays_table,
+  carry_columns = []
+}) => {
+  const stat_ids = Array.from(
+    new Set(attributions.flatMap((attribution) => attribution.stat_ids))
+  ).sort((a, b) => a - b)
+
+  // Only fumble_lost carries one today, but read it off the attributions so a
+  // future role with a fallback does not silently lose its column here.
+  const fallback_columns = Array.from(
+    new Set(
+      attributions
+        .map((attribution) => attribution.fallback_pid_column)
+        .filter(Boolean)
+    )
+  )
+
+  const plays_columns = Array.from(
+    new Set([...carry_columns, ...fallback_columns])
+  ).map((column) => `${plays_table}.${column}`)
+
+  return db(plays_table)
+    .select([
+      ...plays_columns,
+      'shared_play_stats.stat_id',
+      'shared_play_stats.stat_yards',
+      'shared_play_stats.smart_player_id',
+      'shared_play_stats.gsis_player_id',
+      'attribution_smart.pid as attribution_smart_pid',
+      'attribution_gsis.pid as attribution_gsis_pid'
+    ])
+    .innerJoin('nfl_play_stats as shared_play_stats', function () {
+      this.on('shared_play_stats.esbid', '=', `${plays_table}.esbid`)
+        .andOn('shared_play_stats.play_id', '=', `${plays_table}.play_id`)
+        .andOnIn('shared_play_stats.stat_id', stat_ids)
+        .andOn(db.raw('"shared_play_stats"."is_valid" = true'))
+    })
+    .leftJoin(
+      'player as attribution_smart',
+      'attribution_smart.smart_player_id',
+      'shared_play_stats.smart_player_id'
+    )
+    .leftJoin(
+      'player as attribution_gsis',
+      'attribution_gsis.gsis_player_id',
+      'shared_play_stats.gsis_player_id'
+    )
+}
+
+// Name of the folded CTE the arms read. Exported because the arms alias it per
+// role and the alias is part of the scoring expressions' contract.
+export const SHARED_PLAY_STATS_CTE = 'play_stat_attribution'
 
 // stat_ids that credit a fumble return touchdown to the RECOVERING player:
 // own-fumble recovery TD (56), own-fumble recovery TD after a lateral (58),

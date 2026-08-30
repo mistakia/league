@@ -21,6 +21,10 @@ import {
   generate_milestone_conditional,
   resolve_stat_sourced_roles
 } from '#libs-server/data-views/fantasy-points-scoring-expressions.mjs'
+import {
+  build_shared_play_stats_cte,
+  SHARED_PLAY_STATS_CTE
+} from '#libs-server/data-views/nfl-play-stats-attribution.mjs'
 
 const FP_OUTPUT_PERIODS = [
   'game',
@@ -331,22 +335,28 @@ const fantasy_points_from_plays_with = async ({
   // column on nfl_plays -- see nfl-play-stats-attribution.mjs. Columns are
   // qualified because the joined nfl_play_stats shares esbid / play_id with the
   // CTE.
-  const play_stats_columns = subquery_output_columns_list.map(
-    (col) => `filtered_plays.${col}`
-  )
+  // Every stat-sourced arm reads the ONE folded attribution CTE rather than
+  // joining nfl_play_stats itself -- see build_shared_play_stats_cte. Each arm
+  // aliases that CTE as its own `${prefix}_stats`, which is what keeps the
+  // existing scoring expressions valid unchanged (the field-goal one reads
+  // `field_goal_stats.stat_yards`), and restricts itself with its own stat_ids.
   const build_play_stats_subquery = ({ attribution, scoring }) => {
-    const pid_expr = attribution.pid_expr({ plays_table: 'filtered_plays' })
+    const { stats_alias } = attribution
+    const pid_expr = attribution.shared_pid_expr()
+    const arm_columns = subquery_output_columns_list.map(
+      (col) => `${stats_alias}.${col}`
+    )
     const subquery = db
       .select(
         db.raw(`${pid_expr} as pid`),
         db.raw(`${scoring} as fantasy_points_from_plays`),
-        ...play_stats_columns
+        ...arm_columns
       )
-      .from('filtered_plays')
-    attribution.apply_joins({ query: subquery, plays_table: 'filtered_plays' })
+      .from(`${SHARED_PLAY_STATS_CTE} as ${stats_alias}`)
+      .whereIn(`${stats_alias}.stat_id`, attribution.stat_ids)
     return subquery
       .whereRaw(`${pid_expr} IS NOT NULL`)
-      .groupBy([db.raw(pid_expr), ...play_stats_columns])
+      .groupBy([db.raw(pid_expr), ...arm_columns])
   }
 
   // One UNION arm per scored stat-sourced role, in STAT_SOURCED_ROLES order.
@@ -372,8 +382,24 @@ const fantasy_points_from_plays_with = async ({
       ? subquery_output_columns_list
       : output_columns_list
 
-  let union_query = db
-    .with('filtered_plays', filtered_plays_cte)
+  // The folded CTE reads filtered_plays, so it is registered after it. Skipped
+  // entirely when no stat-sourced role is scored, which keeps a bc/psr/trg-only
+  // query byte-identical to what it generated before.
+  const register_shared_play_stats = (builder) => {
+    if (!stat_sourced_arms.length) return builder
+    return builder.withMaterialized(
+      SHARED_PLAY_STATS_CTE,
+      build_shared_play_stats_cte({
+        attributions: stat_sourced_roles.map(({ attribution }) => attribution),
+        plays_table: 'filtered_plays',
+        carry_columns: subquery_output_columns_list
+      })
+    )
+  }
+
+  let union_query = register_shared_play_stats(
+    db.with('filtered_plays', filtered_plays_cte)
+  )
     .select(
       'pid',
       db.raw('SUM(fantasy_points_from_plays) as fantasy_points_from_plays'),
