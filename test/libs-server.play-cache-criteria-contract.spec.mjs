@@ -44,13 +44,21 @@ describe('LIBS-SERVER play cache criteria contract', function () {
     ).to.throw(/does not accept: down, offense/)
   })
 
+  // week and season_year were accepted and then never used -- the same silent
+  // widening one step down, since the signature promised a narrowing the body
+  // did not perform. esbid already fixes the game, so they were redundant
+  // rather than unimplemented, and dropping them puts them under the guard.
+  it('rejects week and season_year, which esbid already determines', function () {
+    expect(() =>
+      find_play({ esbid: 99000001, week: 1, season_year: 2024 })
+    ).to.throw(/does not accept: week, season_year/)
+  })
+
   it('accepts every criterion it does name', function () {
     expect(() =>
       find_play({
         esbid: 99000001,
         play_id: 1,
-        week: 1,
-        season_year: 2024,
         offense_nfl_team: 'KC',
         defense_nfl_team: 'DEN',
         quarter: 1,

@@ -89,8 +89,6 @@ class PlayCache {
    * @param {object} params - Search parameters
    * @param {number} params.esbid - Game esbid
    * @param {number} params.play_id - Play ID
-   * @param {number} params.week - Week number (for context search)
-   * @param {number} params.season_year - Year (for context search)
    * @param {string} params.offense_nfl_team - Offensive team abbreviation
    * @param {string} params.defense_nfl_team - Defensive team abbreviation
    * @param {number} params.quarter - Quarter
@@ -115,8 +113,6 @@ class PlayCache {
   find_play({
     esbid,
     play_id,
-    week,
-    season_year,
     offense_nfl_team,
     defense_nfl_team,
     quarter,
