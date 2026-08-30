@@ -45,6 +45,35 @@ async function get_games_for_import({ season_year, week, esbid, season_type }) {
   return query
 }
 
+// nfl_plays.sequence is numeric(10,1) and the pg driver hands it back as the
+// STRING '888.0', while the vendor sends playSequenceNumber as the NUMBER 4178.
+// A Map compares keys by identity, so '888.0' and 888 are different keys and
+// this lookup never hit once -- measured 0 of 961 vendor plays across six 2025
+// games, 960 of 961 with both sides coerced. Every play fell through to the
+// context fallback instead, which is the matcher that was running without a
+// quarter or down constraint until 1b4133709.
+//
+// The coercion belongs on BOTH sides or it fixes nothing, which is why the
+// lookup goes through a function rather than being a bare Map.get at the call
+// site: a reader fixing one end and not the other gets the same silent zero.
+export function build_sequence_index(plays) {
+  const index = new Map()
+  for (const play of plays) {
+    if (play.sequence == null) continue
+    const key = Number(play.sequence)
+    if (Number.isNaN(key)) continue
+    index.set(key, play)
+  }
+  return index
+}
+
+export function find_play_by_sequence(index, sequence) {
+  if (sequence == null) return null
+  const key = Number(sequence)
+  if (Number.isNaN(key)) return null
+  return index.get(key) || null
+}
+
 async function process_game({ game, client, stats, dry = false }) {
   const { esbid, shield_game_id, week, home_nfl_team, away_nfl_team } = game
 
@@ -78,12 +107,7 @@ async function process_game({ game, client, stats, dry = false }) {
 
   // Build sequence-based index from cached plays for fast lookup
   const game_plays = play_cache.plays_by_esbid.get(esbid) || []
-  const plays_by_sequence = new Map()
-  for (const p of game_plays) {
-    if (p.sequence != null) {
-      plays_by_sequence.set(p.sequence, p)
-    }
-  }
+  const plays_by_sequence = build_sequence_index(game_plays)
 
   let plays_matched = 0
   let plays_unmatched = 0
@@ -100,7 +124,10 @@ async function process_game({ game, client, stats, dry = false }) {
     const mapped_fields = map_charting_play_to_db_fields(source_play)
 
     // Primary match: sequence number (most reliable)
-    let db_play = plays_by_sequence.get(source_play.playSequenceNumber) || null
+    let db_play = find_play_by_sequence(
+      plays_by_sequence,
+      source_play.playSequenceNumber
+    )
 
     // Fallback: try sequence - 1 for special plays (timeouts have off-by-one)
     if (
@@ -108,16 +135,18 @@ async function process_game({ game, client, stats, dry = false }) {
       source_play.down === 0 &&
       source_play.playSequenceNumber > 0
     ) {
-      db_play =
-        plays_by_sequence.get(source_play.playSequenceNumber - 1) || null
+      db_play = find_play_by_sequence(
+        plays_by_sequence,
+        source_play.playSequenceNumber - 1
+      )
     }
 
     // Fallback: context-based matching for plays without sequence match
     if (!db_play && source_play.down > 0) {
       const match_criteria = {
         esbid,
-        quarter: mapped_fields.qtr || source_play.quarter,
-        down_number: mapped_fields.dwn || source_play.down,
+        quarter: mapped_fields.quarter ?? source_play.quarter,
+        down_number: mapped_fields.down_number ?? source_play.down,
         yards_to_go: mapped_fields.yards_to_go || source_play.distance,
         yard_line_100: mapped_fields.yard_line_100,
         seconds_remaining_quarter: mapped_fields.seconds_remaining_quarter
