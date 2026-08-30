@@ -81,7 +81,23 @@ echo "test database: ${DB_NAME}"
 # The other half of the artifact -- a subset that issues no HTTP at all being
 # failed for observing zero pairs -- is handled in the guard itself, on whether
 # any request was served, so it holds for a bare `mocha` invocation too.
-if [ "$#" -gt 0 ]; then
+#
+# Matched against what NARROWS the run, not against "any argument was passed".
+# The earlier form tested `$# -gt 0`, which reads `--reporter dot` or `--bail`
+# on a FULL run as a subset and suppresses both checks -- including the
+# blindness check, the one the whole mechanism exists for. Nor can this be a
+# blanket "any non-flag argument", because that is exactly what a separated
+# flag value like the `dot` in `--reporter dot` looks like. So the two things
+# that genuinely narrow a run are named: a spec path, and a grep.
+declares_subset=0
+for arg in "$@"; do
+  case "$arg" in
+    *.spec.mjs | test/* | private/test/*) declares_subset=1 ;;
+    -g | --grep | --grep=* | --fgrep | --fgrep=*) declares_subset=1 ;;
+  esac
+done
+
+if [ "$declares_subset" -eq 1 ]; then
   export LEAGUE_SUITE_SUBSET=1
 fi
 
