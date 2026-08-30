@@ -720,6 +720,149 @@ const registry = [
   },
 
   {
+    check_id: 'prop-market-open-close-esbid-coherence',
+    invariant:
+      'A prop market’s OPEN and CLOSE index rows name the SAME game. prop_markets_index is keyed by time_type, so one market is two rows, and libs-server/prop-market-settlement/prop-market-utils.mjs treats a disagreement between them as a defect that "grades the selection against another game" — the settlement pass fetches and grades each time_type independently and stamps the result with that row’s own esbid, so a drifted OPEN row settles its selections against a game the market was never about. Nothing watches it. The sibling prop-markets-games-season-agreement check grades each row against the game its OWN esbid resolves to, which both rows pass while naming different games; it names this exact gap in its calibration as unowned. The obvious alternative predicate — whether the selection’s player holds a gamelog in the market’s game — is the WRONG instrument and was measured rather than assumed: of the 18,418 settled selection rows under today’s population, 11,930 have the player holding a gamelog at BOTH esbids, so a presence test scores them clean while the grade may still be against the wrong game. Presence is not correctness; esbid coherence is the property that actually fails.',
+    grain: ['source_id', 'source_market_id'],
+    rows: async () => {
+      // The un-gradeable arm's sentinel. An explicit string rather than a null,
+      // so its grain key cannot collide with the CLEAN sentinel a book emits
+      // when it has no drift -- the two mean opposite things and would
+      // otherwise be indistinguishable in the report.
+      const UNGRADEABLE_SENTINEL = '__ungradeable__'
+
+      // ONE aggregate at the market grain, from which BOTH arms are derived:
+      // the drifted markets and the population scanned. Sharing the expression
+      // is what stops the denominator drifting away from the scan predicate --
+      // the failure that had a neighbouring check reporting 27,748 against a
+      // 27,236 scan.
+      //
+      // A market is gradeable only where BOTH time_type rows carry an esbid. A
+      // null on either side is a different condition with a different owner
+      // (esbid resolution never reached the row), and grading it here would
+      // score an unresolved market as coherent.
+      //
+      // No market-type list appears anywhere in this check, and that is
+      // deliberate: it scans every market_type the table holds, so a type
+      // remapped in market_type_mappings cannot silently drop out of the
+      // population.
+      const market_grain = `
+        select
+          source_id,
+          source_market_id,
+          count(*) filter (where time_type = 'OPEN' and esbid is not null)
+            as open_esbid_rows,
+          count(*) filter (where time_type = 'CLOSE' and esbid is not null)
+            as close_esbid_rows,
+          count(distinct esbid) as distinct_esbids
+        from prop_markets_index
+        group by 1, 2
+      `
+
+      const { rows: per_source } = await db.raw(
+        `
+        with market_grain as (${market_grain})
+        select
+          source_id::text as source_id,
+          count(*) filter (
+            where open_esbid_rows > 0 and close_esbid_rows > 0
+          ) as gradeable_markets,
+          count(*) filter (
+            where not (open_esbid_rows > 0 and close_esbid_rows > 0)
+          ) as ungradeable_markets
+        from market_grain
+        group by 1
+        `
+      )
+
+      const { rows: drifted } = await db.raw(
+        `
+        with market_grain as (${market_grain})
+        select source_id::text as source_id, source_market_id
+        from market_grain
+        where open_esbid_rows > 0
+          and close_esbid_rows > 0
+          and distinct_esbids > 1
+        `
+      )
+
+      /** @type {Map<string, string[]>} */
+      const drifted_by_source = new Map()
+      for (const row of drifted) {
+        const found = drifted_by_source.get(row.source_id) || []
+        found.push(row.source_market_id)
+        drifted_by_source.set(row.source_id, found)
+      }
+
+      // Two arms PER BOOK rather than one global pair. The denominator floor
+      // reads the SMALLEST graded population, and the whole defect population
+      // today sits in one book -- so a global denominator would let PrizePicks
+      // stop resolving esbids entirely, report a clean sentinel, and hide
+      // behind DraftKings' three hundred thousand healthy markets.
+      return per_source.flatMap((/** @type {Record<string, any>} */ row) => {
+        const source_id = row.source_id
+        const gradeable_markets = Number(row.gradeable_markets)
+        const ungradeable_markets = Number(row.ungradeable_markets)
+        const found = drifted_by_source.get(source_id) || []
+
+        const graded = found.length
+          ? found.map((/** @type {string} */ source_market_id) => ({
+              source_id,
+              source_market_id,
+              numerator: 1,
+              denominator: gradeable_markets,
+              is_gradeable: true
+            }))
+          : [
+              {
+                source_id,
+                source_market_id: null,
+                numerator: 0,
+                denominator: gradeable_markets,
+                is_gradeable: true
+              }
+            ]
+
+        return [
+          ...graded,
+          // Declared, not discovered. A market missing a time_type row or
+          // carrying a null esbid on either side leaves the graded population,
+          // and without this row it would leave the SCAN as well -- reported
+          // nowhere, which is the shape that answers "no problems found" when
+          // the honest answer is "I found nothing to check".
+          {
+            source_id,
+            source_market_id: UNGRADEABLE_SENTINEL,
+            numerator: ungradeable_markets,
+            denominator: gradeable_markets + ungradeable_markets,
+            is_gradeable: false
+          }
+        ]
+      })
+    },
+    precondition: (/** @type {Record<string, any>} */ row) => row.is_gradeable,
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: a market’s two rows either name the same game or they do not, and there is no benign class — so max_count 0 is the only honest threshold and there is nothing here to tune. THIS CHECK IS RED THE DAY IT LANDS, which is a correct reading of a known defect rather than a broken detector, and it is also the demonstration that the predicate can speak. Measured on production 2026-08-30, BEFORE the stamping fix in user:task/league/stabilize-prop-market-esbid-stamping.md had landed: 9,160 drifted markets against 728,739 gradeable markets across eight books, spanning 19,152 selection rows of which 18,418 are settled, over seasons 2023-2025 and 24 market types. ALL 9,160 ARE PRIZEPICKS and the other seven books contribute exactly ZERO — DRAFTKINGS 0 of 362,990, FANDUEL 0 of 98,911, BETRIVERS 0 of 39,284, PINNACLE 0 of 23,932, CAESARS 0 of 15,157, BETMGM 0 of 7,879, FANATICS 0 of 5,990. That one-book concentration is why the denominator is per book: a single global figure would let the only book that has ever failed collapse to nothing and hide behind a healthy sibling. THE DRIFT IS OURS, NOT THE VENDOR’S, and this is the sharpest single reading in the calibration: every one of the 9,160 carries exactly ONE distinct source_event_id across its two rows, so PrizePicks named the same event both times and our esbid resolution disagreed with itself. Zero of them carry two events. NULL source_event_id IS A DIFFERENT CONDITION AND IS DELIBERATELY NOT NAMED IN THE PRECONDITION, having been measured rather than reasoned about: 701 PrizePicks markets (1,340 rows) carry one, and 516 of those are already un-gradeable on the null-esbid arm while the other 185 grade cleanly; ZERO of the 701 are drifted. It is also not a PrizePicks property — BETMGM carries 20,540 such markets and has never drifted — so adding it to the precondition would remove 185 gradeable markets and no findings, narrowing the check for nothing. THE UN-GRADEABLE POPULATION IS LARGE AND EXPECTED: 805,547 markets of 1,534,286 lack an esbid on at least one row, overwhelmingly futures and pre-resolution rows, which is why they are reported as a counted population rather than parked or silently dropped. COST, measured the same day: 3.9 seconds, an index scan over idx_24959_market feeding a group aggregate, run twice for the two arms. READ A RISE, NOT A FALL. Two live repairs act on this exact class while this check runs — the stamping fix above and the row adjudication in user:task/league/adjudicate-drifted-prop-market-settlements.md — so the count moves for reasons other than new defects, and a falling number is those repairs landing rather than evidence about the detector. A count that rises after the stamping fix deploys is the signal this exists to carry.',
+    // Eight rows when fully clean, one per book, so the row-count floor is very
+    // nearly a tautology and the denominator carries the signal. 6 sits under
+    // today's eight and still catches two books dropping out of the scan
+    // entirely.
+    min_gradeable_units: 6,
+    // REQUIRED here for the reason above: the graded row count is fixed by the
+    // number of books when clean and cannot fall with the corpus. Read against
+    // the SMALLEST graded population, which is FANATICS at 5,990 markets
+    // measured 2026-08-30. Nothing prunes prop_markets_index -- the importers
+    // upsert -- so every book's population only grows, and 3,000 leaves half
+    // its headroom against the reading this exists to catch: a book whose
+    // esbid resolution broke wholesale, which would otherwise emit a clean
+    // sentinel over a scan of nothing.
+    min_denominator: 3000,
+    repair_command:
+      'DO NOT REWRITE AN ESBID TO MAKE THE TWO ROWS AGREE. A finding names a market whose two rows disagree; it does not say which row is wrong, and picking the CLOSE row because it is later would settle 9,160 markets against whichever game the last scrape happened to resolve. Establish the correct game from the vendor’s own event first — every drifted market measured so far carries ONE source_event_id across both rows, so the vendor’s event is the oracle and our resolution is the side that moved. The cause is owned upstream by user:task/league/stabilize-prop-market-esbid-stamping.md (scripts/import-prizepicks-odds.mjs and libs-server/insert-prop-markets.mjs), and the standing rows are adjudicated by user:task/league/adjudicate-drifted-prop-market-settlements.md — which also owns re-settling the selections beneath them, since a repointed market leaves prop_market_selections_index still holding a result graded against the old game. Fixing the rows without re-settling swaps a visible finding for an invisible one. A rising count after the stamping fix has deployed is a REGRESSION in the importer and belongs back with that task, not with a data repair.'
+  },
+
+  {
     check_id: 'snaps-games-season-agreement',
     invariant:
       'Every nfl_snaps row carries the season_year of the game its esbid resolves to. season_year is functionally determined by esbid — a game belongs to exactly one season — so this is derivable rather than merely expected, and nothing enforces it: no foreign key, no CHECK, and the column is part of the primary key rather than a computed one. The writer NEVER READS nfl_games: private/libs-server/ngs.mjs takes the season straight off the vendor payload (`data.plays.find((play) => play.season)?.season`) and keys its delete-and-reinsert on esbid alone, so the two sides are stamped from independent sources and can only be compared after the fact. Two aggravating properties make a failure here silent rather than loud. The optional chain yields `undefined` when no play in the feed carries a season, against a NOT NULL column; and the whole snap write sits inside a try/catch that logs to a debug namespace and continues, so a rejected batch leaves the run green. A disagreement therefore drops the rows from every consumer that scopes snaps by season while the job reports success.',
