@@ -160,6 +160,18 @@ export default class SyncOrchestrator {
         data_type: 'rosters',
         progress_percentage: 40
       })
+      // validate_only answers "do these credentials reach this league?" and
+      // nothing more. Both callers -- the connection-validation route and the
+      // import socket -- read only league_config, teams, and the raw_data key
+      // list, so fetching rosters, transactions and the player catalog was
+      // work whose result was discarded. It was passed by both and read by
+      // NOTHING, which made the flag a claim the code did not honor.
+      //
+      // The keys stay present and empty rather than being omitted: both
+      // callers report Object.keys(raw_data) as a `parts` summary, so dropping
+      // them would change that surface.
+      const validate_only = fetch_options.validate_only === true
+
       // include_players is tri-state:
       //   'rostered' (default) -- intersect global catalog with roster pids
       //   'all' (or true)      -- return the platform's full player catalog
@@ -167,8 +179,9 @@ export default class SyncOrchestrator {
       // The platform endpoints we use are global (e.g. Sleeper /players/nfl),
       // so 'rostered' still pays the fetch cost; the intersection just trims
       // the returned shape to what's league-relevant.
-      const include_players_mode =
-        fetch_options.include_players === false
+      const include_players_mode = validate_only
+        ? false
+        : fetch_options.include_players === false
           ? false
           : fetch_options.include_players === 'all' ||
               fetch_options.include_players === true
@@ -192,12 +205,14 @@ export default class SyncOrchestrator {
       const [league_config, rosters, transactions, players_catalog] =
         await Promise.all([
           adapter.get_league(external_league_id, { year: fetch_options.year }),
-          adapter.get_rosters({
-            league_id: external_league_id,
-            week: fetch_options.week,
-            year: fetch_options.year
-          }),
-          fetch_options.include_transactions === false
+          validate_only
+            ? Promise.resolve([])
+            : adapter.get_rosters({
+                league_id: external_league_id,
+                week: fetch_options.week,
+                year: fetch_options.year
+              }),
+          validate_only || fetch_options.include_transactions === false
             ? Promise.resolve([])
             : this.sync_utils.fetch_transactions_in_range({
                 adapter,
@@ -455,11 +470,22 @@ export default class SyncOrchestrator {
         })
       }
 
-      log(`Completed sync for ${platform_name} league ${external_league_id}`)
+      // A sync that skipped every roster is not a successful sync. The errors
+      // array already records each skip, but nothing read it for the verdict,
+      // so a run that wrote nothing at all still reported success -- which is
+      // how ESPN's empty player catalog stayed invisible for as long as it did.
+      // Any skip is a failure: the caller asked for these rosters, and a
+      // partial answer that claims success is the shape that hides a defect.
+      const sync_succeeded = sync_stats.errors.length === 0
+
+      log(
+        `Completed sync for ${platform_name} league ${external_league_id}` +
+          (sync_succeeded ? '' : ` with ${sync_stats.errors.length} error(s)`)
+      )
 
       return this.sync_utils.create_standardized_output({
         platform: platform_name,
-        success: true,
+        success: sync_succeeded,
         validation: {
           league_config_valid: true,
           players_mapped: sync_stats.players_mapped,

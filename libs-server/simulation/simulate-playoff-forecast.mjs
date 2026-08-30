@@ -369,7 +369,8 @@ export async function simulate_championship_forecast({
     playoff_team_count: playoff_format.playoff_team_count,
     bye_count
   })
-  // Byes plus the wildcard survivors, which is one winner per wildcard pairing.
+  // Byes plus the wildcard survivors. The wildcard round is SCORED, not
+  // bracketed -- the top half by points advance, globally.
   const championship_team_count = bye_count + wildcard_survivor_count
 
   if (championship_tids.length !== championship_team_count) {

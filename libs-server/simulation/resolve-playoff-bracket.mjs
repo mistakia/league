@@ -36,7 +36,14 @@ export const find_highest_scoring_team = ({ team_ids, get_score }) => {
 }
 
 /**
- * The wildcard teams that advance: the highest scorers, one per pairing.
+ * The wildcard teams that advance: the `survivor_count` highest scorers in the
+ * round, taken globally.
+ *
+ * NOT one winner per head-to-head pairing, which is what this said before.
+ * There are no pairings to be one-per: the `playoffs` table records per-team
+ * points per playoff week and carries no opponent or matchup column, so the
+ * wildcard round is scored, not bracketed. A team can therefore be eliminated
+ * having outscored an advancing team's notional opponent.
  *
  * @param {object} params
  * @param {number[]} params.wildcard_tids - Teams playing the wildcard round
@@ -56,8 +63,12 @@ export const select_wildcard_winners = ({
     .map((r) => r.tid)
 
 /**
- * One winner per wildcard pairing. The championship round is the byes plus
- * these survivors.
+ * How many teams survive the wildcard round. The championship round is the
+ * byes plus these survivors.
+ *
+ * The halving is the field size, not a pairing count -- the round is scored
+ * rather than bracketed (see select_wildcard_winners). Half the non-bye field
+ * advances; `Math.floor` drops the odd team out at an odd field size.
  *
  * @param {object} params
  * @param {number} params.playoff_team_count - Size of the playoff field
