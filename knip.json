@@ -1,0 +1,74 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/index.js",
+    "server.mjs",
+
+    // The shared web worker. Every caller reaches it as
+    // `import('workerize-loader?inline!../worker')` -- a webpack loader-prefixed
+    // specifier that knip cannot resolve, so nothing links it to its callers.
+    "app/core/worker/index.js",
+
+    "webpack/*.mjs",
+    "eslint.config.mjs",
+    "test/**/*.mjs",
+    "scripts/**/*.mjs",
+    "cli/**/*.mjs",
+    "league-import/**/*.mjs",
+    "tools/**/*.mjs",
+
+    // pm2 workers. Each *.pm2.config.js names its script by absolute path
+    // string (/root/league/...), which knip cannot follow and which does not
+    // resolve on a dev checkout either.
+    "jobs/**/*.mjs",
+
+    // Custom eslint rules, loaded by name through eslint.config.mjs's plugin
+    // object rather than by a static import of each file.
+    "eslint-rules/**/*.mjs",
+
+    // The private submodule mirrors the public layout: private/scripts/ holds
+    // runnable importers, so it is an entry surface exactly like scripts/.
+    // Without this its libs-server/ modules read as unused too, because
+    // nothing traverses their only callers.
+    "private/scripts/**/*.mjs",
+
+    // Standalone db programs, none of them imported. Each is invoked by PATH:
+    // gates/ from .github/workflows/test.yml and `yarn check:*`, tools/ from
+    // `yarn generate:schema-types` and friends, adhoc/ as the dated one-off
+    // convention that contribution-guardrails.yml keys on, archive/ as the
+    // retired-one-off shelf. migrations/ and fixtures/ are loaded by knex from
+    // the directory rather than by name.
+    "db/gates/**/*.mjs",
+    "db/tools/**/*.mjs",
+    "db/adhoc/**/*.mjs",
+    "db/archive/**/*.mjs",
+    "db/migrations/**/*.mjs",
+    "db/fixtures/**/*.mjs"
+  ],
+  "project": [
+    "app/**/*.{js,mjs}",
+    "api/**/*.mjs",
+    "db/**/*.mjs",
+    "libs-server/**/*.mjs",
+    "libs-shared/**/*.mjs",
+    "config/**/*.mjs",
+    "private/**/*.mjs",
+    "jobs/**/*.mjs",
+    "scripts/**/*.mjs",
+    "cli/**/*.mjs",
+    "league-import/**/*.mjs",
+    "eslint-rules/**/*.mjs",
+    "tools/**/*.mjs",
+    "test/**/*.mjs",
+    "webpack/**/*.mjs",
+    "server.mjs"
+  ],
+  "paths": {
+    "@views/*": ["app/views/*"],
+    "@pages/*": ["app/views/pages/*"],
+    "@core/*": ["app/core/*"],
+    "@components/*": ["app/views/components/*"],
+    "@styles/*": ["app/styles/*"],
+    "@layouts/*": ["app/views/layouts/*"]
+  }
+}

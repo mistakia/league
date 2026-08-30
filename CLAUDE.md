@@ -17,17 +17,18 @@ Two consequences worth stating outright. **This file must be true without verifi
 
 ## Where the rules live
 
-| Before you...                                                    | Read                                             |
-| ---------------------------------------------------------------- | ------------------------------------------------ |
-| Apply any DDL — a rename, retype, drop, or grain-widening change | [docs/guides/schema.md](docs/guides/schema.md)   |
-| Commit for production, push, or deploy                           | [docs/guides/ship.md](docs/guides/ship.md)       |
-| Run or write a test                                              | [docs/guides/test.md](docs/guides/test.md)       |
-| Touch anything under `app/`                                      | [docs/guides/spa.md](docs/guides/spa.md)         |
-| Touch a data-view column, param, field factory or golden         | [docs/guides/data.md](docs/guides/data.md)       |
-| Touch anything under `api/`                                      | [docs/guides/api.md](docs/guides/api.md)         |
-| Touch `scripts/`, `jobs/` or a crontab                           | [docs/guides/scripts.md](docs/guides/scripts.md) |
-| Add a gate, check, ratchet or negative control                   | [docs/guides/gates.md](docs/guides/gates.md)     |
-| Put `//@ts-check` on a file, or opt one out                      | [docs/guides/gates.md](docs/guides/gates.md)     |
+| Before you...                                                      | Read                                                 |
+| ------------------------------------------------------------------ | ---------------------------------------------------- |
+| Apply any DDL — a rename, retype, drop, or grain-widening change   | [docs/guides/schema.md](docs/guides/schema.md)       |
+| Commit for production, push, or deploy                             | [docs/guides/ship.md](docs/guides/ship.md)           |
+| Run or write a test                                                | [docs/guides/test.md](docs/guides/test.md)           |
+| Touch anything under `app/`                                        | [docs/guides/spa.md](docs/guides/spa.md)             |
+| Touch a data-view column, param, field factory or golden           | [docs/guides/data.md](docs/guides/data.md)           |
+| Touch anything under `api/`                                        | [docs/guides/api.md](docs/guides/api.md)             |
+| Touch `scripts/`, `jobs/` or a crontab                             | [docs/guides/scripts.md](docs/guides/scripts.md)     |
+| Add a gate, check, ratchet or negative control                     | [docs/guides/gates.md](docs/guides/gates.md)         |
+| Put `//@ts-check` on a file, or opt one out                        | [docs/guides/gates.md](docs/guides/gates.md)         |
+| Act on a `yarn knip` finding, or delete a module that looks unused | [docs/guides/dead-code.md](docs/guides/dead-code.md) |
 
 Each guide carries the full arc of its undertaking, incidents included. They are long on purpose: a session doing one of these needs all of it at once, and none of it otherwise.
 
