@@ -2235,6 +2235,7 @@ export interface NflGamesRow {
   sportradar_season_id: string | null
   nfl_week_id: string | null
   pff_game_id: number | null
+  finalized_plays_updated_at: Date | null
 }
 
 export interface NflGamesChangelogRow {
