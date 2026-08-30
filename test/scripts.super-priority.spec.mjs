@@ -741,6 +741,64 @@ describe('SCRIPTS - Super Priority Processing', function () {
       expect(roster_entry).to.not.equal(undefined)
       expect(roster_entry.slot).to.equal(roster_slot_types.PS)
     })
+
+    // The slot and the salary both come off the original team's last practice
+    // squad add, so a player with no such add cannot be restored at all. What
+    // this pins is not the refusal but WHEN it happens: the salary used to be
+    // read in a second walk BELOW the roster insert, so this case wrote the
+    // roster row, then threw -- leaving the roster changed, no transaction
+    // recorded, and the claim still unclaimed, with no db transaction to unwind
+    // it. process_super_priority still holds no transaction, so the ordering is
+    // the only thing keeping the failure clean, and only the roster assertion
+    // below can tell the two orderings apart. The throw alone cannot: it
+    // happens either way.
+    it('refuses a claim with no practice squad add without writing a roster row', async () => {
+      // Remove the shared fixture's PRACTICE_ADD so the original team's log
+      // carries no add of any of the three restoring types. A TRADE is a real
+      // way onto a roster that is NOT a practice squad add, so this is the
+      // shape the gap actually takes rather than an empty log.
+      await knex('transactions')
+        .where({
+          pid: player.pid,
+          tid: 1,
+          lid: 1,
+          type: transaction_types.PRACTICE_ADD
+        })
+        .update({ type: transaction_types.TRADE })
+
+      let error
+      try {
+        await process_super_priority({
+          pid: player.pid,
+          original_tid: 1,
+          lid: 1,
+          super_priority_id: super_priority_record.super_priority_id
+        })
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.not.equal(undefined)
+      expect(error.message).to.match(/no practice squad add/i)
+
+      const roster_entry = await knex('rosters_players')
+        .where({
+          pid: player.pid,
+          tid: 1,
+          lid: 1,
+          week: current_season.week,
+          season_year: current_season.year
+        })
+        .first()
+
+      expect(roster_entry).to.equal(undefined)
+
+      const updated_record = await knex('super_priority')
+        .where({ super_priority_id: super_priority_record.super_priority_id })
+        .first()
+
+      expect(updated_record.claimed).to.equal(0)
+    })
   })
 
   describe('populate_super_priority_table script', function () {

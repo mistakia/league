@@ -14,7 +14,7 @@ import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
 import getLeague from './get-league.mjs'
 import get_super_priority_status from './get-super-priority-status.mjs'
-import get_original_practice_squad_designation from './get-original-practice-squad-designation.mjs'
+import get_original_practice_squad_add from './get-original-practice-squad-add.mjs'
 import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 // Helper function to check for super priority on release
@@ -64,13 +64,13 @@ async function handle_super_priority_on_release({
   // Only a SIGNED return needs a slot: PSD/PSDP are uncapped, excluded from
   // both practice_squad_slot_count and the position limits, so a drafted
   // player always returns automatically.
-  const original_designation = await get_original_practice_squad_designation({
+  const original_add = await get_original_practice_squad_add({
     pid,
     tid: super_priority_status.original_tid,
     lid
   })
 
-  if (original_designation === roster_slot_types.PS) {
+  if (original_add?.slot === roster_slot_types.PS) {
     // The week matters: getRoster defaults to `fantasy_season_week`, which is 0
     // outside the regular season, so an unqualified read measures space on a
     // different week's roster than the claim will write to.

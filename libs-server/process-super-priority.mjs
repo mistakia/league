@@ -10,7 +10,7 @@ import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import sendNotifications from './send-notifications.mjs'
 import processRelease from './process-release.mjs'
-import get_original_practice_squad_designation from './get-original-practice-squad-designation.mjs'
+import get_original_practice_squad_add from './get-original-practice-squad-add.mjs'
 import { is_main } from '#libs-server'
 
 export default async function process_super_priority({
@@ -85,15 +85,27 @@ export default async function process_super_priority({
   // as PSD, converting them to drafted and landing them in the uncapped bucket.
   // That was the only path by which this flow could overfill a practice squad.
   //
-  // A player with no practice squad history on the original team returns as
-  // drafted, which is both the prior behaviour and the safe reading -- PSD
-  // carries no salary-cap or position-limit claim on the roster.
-  const original_designation = await get_original_practice_squad_designation({
+  // The salary comes off the SAME add row, and is read here rather than after
+  // the roster write so a claim that cannot be restored refuses before it
+  // changes anything. It used to be a second walk below the insert, which meant
+  // a player with no practice squad add on this team had a roster row written
+  // and then threw -- leaving the roster changed, no transaction recorded, and
+  // the claim unmarked, with nothing to unwind it. This function holds no db
+  // transaction, so ordering is the only thing that makes the failure clean.
+  const original_add = await get_original_practice_squad_add({
     pid,
     tid: original_tid,
     lid
   })
-  const target_slot = original_designation || roster_slot_types.PSD
+
+  if (!original_add) {
+    throw new Error(
+      `No practice squad add for ${pid} on team ${original_tid}, so there is no designation or salary to restore`
+    )
+  }
+
+  const target_slot = original_add.slot
+  const player_salary = original_add.player_salary
 
   // Handle waiver releases - validate and simulate before checking space
   if (release.length) {
@@ -164,23 +176,6 @@ export default async function process_super_priority({
 
   // Create transaction
   const transaction_type = transaction_types.SUPER_PRIORITY
-
-  // Get original practice squad salary for the player
-  const last_transaction = await db('transactions')
-    .where({ pid, tid: original_tid, lid })
-    .whereIn('type', [
-      transaction_types.PRACTICE_ADD,
-      transaction_types.DRAFT,
-      transaction_types.ROSTER_DEACTIVATE
-    ])
-    .orderBy('occurred_at', 'desc')
-    .limit(1)
-
-  if (!last_transaction.length) {
-    throw new Error('No last transaction found')
-  }
-
-  const player_salary = last_transaction[0].player_salary
 
   const transaction = {
     user_id: user_id || 0, // use provided user_id or default to system user
