@@ -650,7 +650,22 @@ describe('SCRIPTS - Super Priority Processing', function () {
       expect(updated_record.claimed_at).to.be.instanceof(Date)
     })
 
-    it('should process automatic reversion for PS(D) player', async () => {
+    it('should return a drafted player to the drafted practice squad slot', async () => {
+      // The shared fixture adds the player to team 1 with PRACTICE_ADD, which
+      // is a SIGNING. Amendment XXXIV section 16 restores the designation the
+      // player actually held, so a drafted return has to be seeded as a DRAFT
+      // -- this test previously observed PSD off a PRACTICE_ADD fixture, which
+      // only passed because the slot was derived from requires_waiver instead
+      // of from the player's history.
+      await knex('transactions')
+        .where({
+          pid: player.pid,
+          tid: 1,
+          lid: 1,
+          type: transaction_types.PRACTICE_ADD
+        })
+        .update({ type: transaction_types.DRAFT })
+
       let error
       try {
         await process_super_priority({
@@ -691,6 +706,40 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
       expect(roster_entry).to.not.equal(undefined)
       expect(roster_entry.slot).to.equal(roster_slot_types.PSD)
+    })
+
+    it('should return a signed player to the signed slot on an automatic claim', async () => {
+      // requires_waiver is 0 on the shared fixture, so this is the automatic
+      // path. The player was added with PRACTICE_ADD, so the constitution
+      // returns them SIGNED -- the designation must not follow the claim route.
+      // Returning them as PSD would move a capped player into the uncapped
+      // bucket, which is the only way this flow could overfill a practice squad.
+      let error
+      try {
+        await process_super_priority({
+          pid: player.pid,
+          original_tid: 1,
+          lid: 1,
+          super_priority_id: super_priority_record.super_priority_id
+        })
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      const roster_entry = await knex('rosters_players')
+        .where({
+          pid: player.pid,
+          tid: 1,
+          lid: 1,
+          week: current_season.week,
+          season_year: current_season.year
+        })
+        .first()
+
+      expect(roster_entry).to.not.equal(undefined)
+      expect(roster_entry.slot).to.equal(roster_slot_types.PS)
     })
   })
 

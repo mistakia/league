@@ -10,6 +10,7 @@ import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import sendNotifications from './send-notifications.mjs'
 import processRelease from './process-release.mjs'
+import get_original_practice_squad_designation from './get-original-practice-squad-designation.mjs'
 import { is_main } from '#libs-server'
 
 export default async function process_super_priority({
@@ -76,12 +77,23 @@ export default async function process_super_priority({
     throw new Error('Super priority claim has already been processed')
   }
 
-  // A claim that had to clear waivers returns the player as a signed practice
-  // squad player; an automatic return (was PSD, or PS with an open slot) keeps
-  // the drafted designation it was released with.
-  const target_slot = super_priority_record.requires_waiver
-    ? roster_slot_types.PS
-    : roster_slot_types.PSD
+  // Amendment XXXIV section 16: the player is "placed back on the Practice
+  // Squad (drafted or signed)" -- the designation they held before the poach.
+  // It is NOT a function of whether the claim needed a waiver, which is how
+  // this read before: an originally-signed player whose team happened to have
+  // an open slot at release time took the requires_waiver=0 branch and returned
+  // as PSD, converting them to drafted and landing them in the uncapped bucket.
+  // That was the only path by which this flow could overfill a practice squad.
+  //
+  // A player with no practice squad history on the original team returns as
+  // drafted, which is both the prior behaviour and the safe reading -- PSD
+  // carries no salary-cap or position-limit claim on the roster.
+  const original_designation = await get_original_practice_squad_designation({
+    pid,
+    tid: original_tid,
+    lid
+  })
+  const target_slot = original_designation || roster_slot_types.PSD
 
   // Handle waiver releases - validate and simulate before checking space
   if (release.length) {
@@ -104,9 +116,14 @@ export default async function process_super_priority({
     }
   }
 
-  // Check practice squad space and position limits after simulated releases
+  // Check practice squad space and position limits after simulated releases.
+  // Gated on the TARGET SLOT rather than on requires_waiver: the cap and the
+  // position limits apply to signed slots (PS/PSP) and exclude PSD/PSDP, so
+  // this is the condition that decides whether there is anything to check.
+  // Applying it to a drafted return would refuse a claim against a limit that
+  // slot does not participate in.
   if (
-    super_priority_record.requires_waiver &&
+    target_slot === roster_slot_types.PS &&
     !roster.has_practice_squad_space_for_position(player_row.primary_position)
   ) {
     throw new Error(

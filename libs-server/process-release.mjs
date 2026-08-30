@@ -14,10 +14,16 @@ import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
 import getLeague from './get-league.mjs'
 import get_super_priority_status from './get-super-priority-status.mjs'
+import get_original_practice_squad_designation from './get-original-practice-squad-designation.mjs'
 import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 // Helper function to check for super priority on release
-async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
+async function handle_super_priority_on_release({
+  pid,
+  releasing_tid,
+  lid,
+  player_row
+}) {
   // Quick check: was this player poached by the releasing team?
   const poach_check = await db('transactions')
     .where({
@@ -55,31 +61,35 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   // Determine if manual waiver is needed
   let requires_waiver = 0
 
-  // Check if player was originally a PS (signed) player, not PSD (drafted)
-  const original_roster = await db('rosters_players')
-    .join('rosters', 'rosters_players.roster_id', 'rosters.roster_id')
-    .where({
-      'rosters_players.pid': pid,
-      'rosters_players.tid': super_priority_status.original_tid,
-      'rosters_players.lid': lid
-    })
-    .where('rosters.season_year', current_season.year)
-    .whereIn('rosters_players.slot', [
-      roster_slot_types.PS,
-      roster_slot_types.PSP
-    ]) // PS or PSP
-    .orderBy('rosters.week', 'desc')
-    .first()
+  // Only a SIGNED return needs a slot: PSD/PSDP are uncapped, excluded from
+  // both practice_squad_slot_count and the position limits, so a drafted
+  // player always returns automatically.
+  const original_designation = await get_original_practice_squad_designation({
+    pid,
+    tid: super_priority_status.original_tid,
+    lid
+  })
 
-  if (original_roster) {
-    // Player was originally PS (signed), check if original team has open PS slot
+  if (original_designation === roster_slot_types.PS) {
+    // The week matters: getRoster defaults to `fantasy_season_week`, which is 0
+    // outside the regular season, so an unqualified read measures space on a
+    // different week's roster than the claim will write to.
     const original_team_roster = await getRoster({
-      tid: super_priority_status.original_tid
+      tid: super_priority_status.original_tid,
+      week: current_season.week
     })
     const league = await getLeague({ lid })
     const roster = new Roster({ roster: original_team_roster, league })
 
-    if (roster.practice.length >= league.practice_squad_slot_count) {
+    // Must be the SAME predicate process-super-priority enforces at claim time.
+    // `roster.practice.length` was the earlier form and counted drafted players
+    // against the signed cap, forcing a manual waiver on teams that had an open
+    // signed slot; it also ignored position capacity, which the claim-time
+    // check applies -- so a claim could be waived through as automatic and then
+    // refuse itself on a limit this side never measured.
+    if (
+      !roster.has_practice_squad_space_for_position(player_row.primary_position)
+    ) {
       requires_waiver = 1 // No open PS slot, requires manual waiver
     }
   }
@@ -350,7 +360,8 @@ export default async function ({
   await handle_super_priority_on_release({
     pid: release_pid,
     releasing_tid: tid,
-    lid
+    lid,
+    player_row: release_player_row
   })
 
   if (create_notification) {
