@@ -33,5 +33,8 @@
 
 # Poaching Claims
 
-## Process Poaching Claims Every Hour
-0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-claims.mjs >> /var/log/league/league-process-poaching-claims.log 2>&1
+## Process Poaching Claims Every Hour, at :13 rather than :00 so it does not
+## start in the same second as the other hourly jobs on this box. :13 sits off
+## BOTH five-minute grids in use here -- the 0/5 waiver one and the 2/5 lineage
+## one -- which :00 and :10 do not.
+13 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-claims.mjs >> /var/log/league/league-process-poaching-claims.log 2>&1

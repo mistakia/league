@@ -93,7 +93,11 @@
 ## itself cached for 5 minutes. Matches the cadence class of every other frequent
 ## league job. Raise it only for a consumer that reads the graph directly and needs
 ## sub-5-minute freshness.
-*/5 * * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
+##
+## Phase-shifted off :00 (2-59/5, not */5) so it does not land on the same
+## second as every hour-scheduled job on the box. The cadence is unchanged; only
+## the offset is. Do not "tidy" this back to */5.
+2-59/5 * * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
 
 ## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
 15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1
@@ -167,8 +171,9 @@
 ## Every day at 0:00
 20 0 * * * job-wrapper.sh league-cleanup-puppeteer find /tmp -maxdepth 1 -name 'puppeteer*' -mtime +2 -exec rm -rf {} \; >> /var/log/league/league-cleanup-puppeteer.log 2>&1
 
-## Check disk space every hour
-0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
+## Check disk space every hour, at :25 rather than :00 so the hourly jobs on
+## this box do not all start in the same second.
+25 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
 
 ## Close rookie drafts whose window elapsed with picks unmade (hourly)
 ## Expires those picks per the 2023-09-03 ruling. Nothing else closes a draft
@@ -194,4 +199,6 @@
 ## it is rewritten hourly as proof the config pull is still running. Removing
 ## the line would make that monitor report a stale config backup, and the cause
 ## would not be visible from either repo alone.
-0 * * * * crontab -l > /tmp/league-crontab.txt
+## Runs at :40 rather than :00 to keep the hourly jobs off one shared minute.
+## The monitor above asserts a 48h freshness bound, so the offset is free.
+40 * * * * crontab -l > /tmp/league-crontab.txt
