@@ -58861,6 +58861,7 @@ ALTER TABLE ONLY public.seasons
 
 GRANT USAGE ON SCHEMA public TO league_reader;
 GRANT USAGE ON SCHEMA public TO league_data_view_reader;
+GRANT USAGE ON SCHEMA public TO league_contribution_reader;
 
 
 --
@@ -58939,6 +58940,7 @@ GRANT SELECT ON SEQUENCE public.admission_votes_admission_vote_id_seq TO league_
 
 GRANT SELECT ON TABLE public.adp_format TO league_reader;
 GRANT SELECT ON TABLE public.adp_format TO league_data_view_reader;
+GRANT SELECT ON TABLE public.adp_format TO league_contribution_reader;
 
 
 --
@@ -58961,6 +58963,7 @@ GRANT SELECT ON SEQUENCE public.bid_changelog_change_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_reader;
 GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_data_view_reader;
+GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_contribution_reader;
 
 
 --
@@ -58976,6 +58979,7 @@ GRANT SELECT ON SEQUENCE public.composite_market_value_blend_weights_version_id_
 
 GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_reader;
 GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_data_view_reader;
+GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_contribution_reader;
 
 
 --
@@ -58984,6 +58988,7 @@ GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_data_v
 
 GRANT SELECT ON TABLE public.composite_market_value_daily TO league_reader;
 GRANT SELECT ON TABLE public.composite_market_value_daily TO league_data_view_reader;
+GRANT SELECT ON TABLE public.composite_market_value_daily TO league_contribution_reader;
 
 
 --
@@ -59062,6 +59067,7 @@ GRANT SELECT ON SEQUENCE public.data_view_sql_audit_audit_id_seq TO league_reade
 
 GRANT SELECT ON TABLE public.dfs_contests TO league_reader;
 GRANT SELECT ON TABLE public.dfs_contests TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dfs_contests TO league_contribution_reader;
 
 
 --
@@ -59070,6 +59076,7 @@ GRANT SELECT ON TABLE public.dfs_contests TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.draft TO league_reader;
 GRANT SELECT ON TABLE public.draft TO league_data_view_reader;
+GRANT SELECT ON TABLE public.draft TO league_contribution_reader;
 
 
 --
@@ -59085,6 +59092,7 @@ GRANT SELECT ON SEQUENCE public.draft_draft_pick_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.draftkings_category_activity TO league_reader;
 GRANT SELECT ON TABLE public.draftkings_category_activity TO league_data_view_reader;
+GRANT SELECT ON TABLE public.draftkings_category_activity TO league_contribution_reader;
 
 
 --
@@ -59093,6 +59101,7 @@ GRANT SELECT ON TABLE public.draftkings_category_activity TO league_data_view_re
 
 GRANT SELECT ON TABLE public.dvoa_team_drive_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_drive_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_drive_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59101,6 +59110,7 @@ GRANT SELECT ON TABLE public.dvoa_team_drive_seasonlogs TO league_data_view_read
 
 GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_contribution_reader;
 
 
 --
@@ -59109,6 +59119,7 @@ GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_contribution_reader;
 
 
 --
@@ -59117,6 +59128,7 @@ GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_data_view_re
 
 GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_contribution_reader;
 
 
 --
@@ -59125,6 +59137,7 @@ GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_data_view_read
 
 GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_contribution_reader;
 
 
 --
@@ -59133,6 +59146,7 @@ GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_data_vi
 
 GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_reader;
 GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_contribution_reader;
 
 
 --
@@ -59141,6 +59155,7 @@ GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_data_view
 
 GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_reader;
 GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_contribution_reader;
 
 
 --
@@ -59149,6 +59164,7 @@ GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_data_view_r
 
 GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_reader;
 GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_contribution_reader;
 
 
 --
@@ -59157,6 +59173,7 @@ GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_reader;
 GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_contribution_reader;
 
 
 --
@@ -59165,6 +59182,7 @@ GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_data_view_
 
 GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_reader;
 GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_contribution_reader;
 
 
 --
@@ -59173,6 +59191,7 @@ GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_reader;
 GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_contribution_reader;
 
 
 --
@@ -59230,6 +59249,7 @@ GRANT SELECT ON TABLE public.external_leagues TO league_reader;
 
 GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_reader;
 GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_data_view_reader;
+GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_contribution_reader;
 
 
 --
@@ -59238,6 +59258,7 @@ GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_data_view_
 
 GRANT SELECT ON TABLE public.historical_injury_index TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index TO league_contribution_reader;
 
 
 --
@@ -59246,6 +59267,7 @@ GRANT SELECT ON TABLE public.historical_injury_index TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_contribution_reader;
 
 
 --
@@ -59254,6 +59276,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_contribution_reader;
 
 
 --
@@ -59262,6 +59285,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_contribution_reader;
 
 
 --
@@ -59270,6 +59294,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_contribution_reader;
 
 
 --
@@ -59278,6 +59303,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_contribution_reader;
 
 
 --
@@ -59286,6 +59312,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_contribution_reader;
 
 
 --
@@ -59294,6 +59321,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_contribution_reader;
 
 
 --
@@ -59302,6 +59330,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_contribution_reader;
 
 
 --
@@ -59310,6 +59339,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_contribution_reader;
 
 
 --
@@ -59318,6 +59348,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_contribution_reader;
 
 
 --
@@ -59326,6 +59357,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_contribution_reader;
 
 
 --
@@ -59334,6 +59366,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_contribution_reader;
 
 
 --
@@ -59342,6 +59375,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_contribution_reader;
 
 
 --
@@ -59350,6 +59384,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_contribution_reader;
 
 
 --
@@ -59358,6 +59393,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_contribution_reader;
 
 
 --
@@ -59366,6 +59402,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_contribution_reader;
 
 
 --
@@ -59374,6 +59411,7 @@ GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_data_view_re
 
 GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_contribution_reader;
 
 
 --
@@ -59403,6 +59441,7 @@ GRANT SELECT ON SEQUENCE public.jobs_job_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_reader;
 GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_data_view_reader;
+GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_contribution_reader;
 
 
 --
@@ -59411,6 +59450,7 @@ GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.keeptradecut_pick TO league_reader;
 GRANT SELECT ON TABLE public.keeptradecut_pick TO league_data_view_reader;
+GRANT SELECT ON TABLE public.keeptradecut_pick TO league_contribution_reader;
 
 
 --
@@ -59419,6 +59459,7 @@ GRANT SELECT ON TABLE public.keeptradecut_pick TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.keeptradecut_valuations TO league_reader;
 GRANT SELECT ON TABLE public.keeptradecut_valuations TO league_data_view_reader;
+GRANT SELECT ON TABLE public.keeptradecut_valuations TO league_contribution_reader;
 
 
 --
@@ -59427,6 +59468,7 @@ GRANT SELECT ON TABLE public.keeptradecut_valuations TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_baselines TO league_reader;
 GRANT SELECT ON TABLE public.league_baselines TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_baselines TO league_contribution_reader;
 
 
 --
@@ -59442,6 +59484,7 @@ GRANT SELECT ON TABLE public.league_cutlist TO league_reader;
 
 GRANT SELECT ON TABLE public.league_divisions TO league_reader;
 GRANT SELECT ON TABLE public.league_divisions TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_divisions TO league_contribution_reader;
 
 
 --
@@ -59450,6 +59493,7 @@ GRANT SELECT ON TABLE public.league_divisions TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_reader;
 GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_contribution_reader;
 
 
 --
@@ -59458,6 +59502,7 @@ GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_data_view_
 
 GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_contribution_reader;
 
 
 --
@@ -59466,6 +59511,7 @@ GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_data_view
 
 GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_contribution_reader;
 
 
 --
@@ -59474,6 +59520,7 @@ GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_data_view_r
 
 GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_contribution_reader;
 
 
 --
@@ -59482,6 +59529,7 @@ GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_da
 
 GRANT SELECT ON TABLE public.league_format_player_projection_values_history TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_projection_values_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_projection_values_history TO league_contribution_reader;
 
 
 --
@@ -59490,6 +59538,7 @@ GRANT SELECT ON TABLE public.league_format_player_projection_values_history TO l
 
 GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values TO league_contribution_reader;
 
 
 --
@@ -59498,6 +59547,7 @@ GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_valu
 
 GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values_history TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_values_history TO league_contribution_reader;
 
 
 --
@@ -59506,6 +59556,7 @@ GRANT SELECT ON TABLE public.league_format_player_rest_of_season_projection_valu
 
 GRANT SELECT ON TABLE public.league_format_player_season_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_season_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_season_projection_values TO league_contribution_reader;
 
 
 --
@@ -59514,6 +59565,7 @@ GRANT SELECT ON TABLE public.league_format_player_season_projection_values TO le
 
 GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59522,6 +59574,7 @@ GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_data_view
 
 GRANT SELECT ON TABLE public.league_formats TO league_reader;
 GRANT SELECT ON TABLE public.league_formats TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_formats TO league_contribution_reader;
 
 
 --
@@ -59558,6 +59611,7 @@ GRANT SELECT ON SEQUENCE public.league_migrations_lock_index_seq TO league_reade
 
 GRANT SELECT ON TABLE public.league_nfl_team_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_nfl_team_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_nfl_team_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59580,6 +59634,7 @@ GRANT SELECT ON SEQUENCE public.league_notifications_notification_id_seq TO leag
 
 GRANT SELECT ON TABLE public.league_pauses TO league_reader;
 GRANT SELECT ON TABLE public.league_pauses TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_pauses TO league_contribution_reader;
 
 
 --
@@ -59595,6 +59650,7 @@ GRANT SELECT ON SEQUENCE public.league_pauses_pause_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.league_player_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_player_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_player_projection_values TO league_contribution_reader;
 
 
 --
@@ -59603,6 +59659,7 @@ GRANT SELECT ON TABLE public.league_player_projection_values TO league_data_view
 
 GRANT SELECT ON TABLE public.league_player_rest_of_season_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_player_rest_of_season_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_player_rest_of_season_projection_values TO league_contribution_reader;
 
 
 --
@@ -59611,6 +59668,7 @@ GRANT SELECT ON TABLE public.league_player_rest_of_season_projection_values TO l
 
 GRANT SELECT ON TABLE public.league_player_season_projection_values TO league_reader;
 GRANT SELECT ON TABLE public.league_player_season_projection_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_player_season_projection_values TO league_contribution_reader;
 
 
 --
@@ -59619,6 +59677,7 @@ GRANT SELECT ON TABLE public.league_player_season_projection_values TO league_da
 
 GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59627,6 +59686,7 @@ GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.league_scoring_formats TO league_reader;
 GRANT SELECT ON TABLE public.league_scoring_formats TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_scoring_formats TO league_contribution_reader;
 
 
 --
@@ -59635,6 +59695,7 @@ GRANT SELECT ON TABLE public.league_scoring_formats TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_season_baselines TO league_reader;
 GRANT SELECT ON TABLE public.league_season_baselines TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_season_baselines TO league_contribution_reader;
 
 
 --
@@ -59643,6 +59704,7 @@ GRANT SELECT ON TABLE public.league_season_baselines TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_team_careerlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_team_careerlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_careerlogs TO league_contribution_reader;
 
 
 --
@@ -59651,6 +59713,7 @@ GRANT SELECT ON TABLE public.league_team_careerlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_team_daily_values TO league_reader;
 GRANT SELECT ON TABLE public.league_team_daily_values TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_daily_values TO league_contribution_reader;
 
 
 --
@@ -59659,6 +59722,7 @@ GRANT SELECT ON TABLE public.league_team_daily_values TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.league_team_forecast TO league_reader;
 GRANT SELECT ON TABLE public.league_team_forecast TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_forecast TO league_contribution_reader;
 
 
 --
@@ -59667,6 +59731,7 @@ GRANT SELECT ON TABLE public.league_team_forecast TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_reader;
 GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_contribution_reader;
 
 
 --
@@ -59675,6 +59740,7 @@ GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_dat
 
 GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_reader;
 GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_contribution_reader;
 
 
 --
@@ -59683,6 +59749,7 @@ GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_data_vie
 
 GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_reader;
 GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_contribution_reader;
 
 
 --
@@ -59691,6 +59758,7 @@ GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.league_team_lineups TO league_reader;
 GRANT SELECT ON TABLE public.league_team_lineups TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_lineups TO league_contribution_reader;
 
 
 --
@@ -59699,6 +59767,7 @@ GRANT SELECT ON TABLE public.league_team_lineups TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59707,6 +59776,7 @@ GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_data_view_r
 
 GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -59715,6 +59785,7 @@ GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.league_user_careerlogs TO league_reader;
 GRANT SELECT ON TABLE public.league_user_careerlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.league_user_careerlogs TO league_contribution_reader;
 
 
 --
@@ -59723,6 +59794,7 @@ GRANT SELECT ON TABLE public.league_user_careerlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.leagues TO league_reader;
 GRANT SELECT ON TABLE public.leagues TO league_data_view_reader;
+GRANT SELECT ON TABLE public.leagues TO league_contribution_reader;
 
 
 --
@@ -59745,6 +59817,7 @@ GRANT SELECT ON SEQUENCE public.manager_waitlist_submissions_submission_id_seq T
 
 GRANT SELECT ON TABLE public.matchups TO league_reader;
 GRANT SELECT ON TABLE public.matchups TO league_data_view_reader;
+GRANT SELECT ON TABLE public.matchups TO league_contribution_reader;
 
 
 --
@@ -59760,6 +59833,7 @@ GRANT SELECT ON SEQUENCE public.matchups_matchup_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.nfl_coaches TO league_reader;
 GRANT SELECT ON TABLE public.nfl_coaches TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_coaches TO league_contribution_reader;
 
 
 --
@@ -59768,6 +59842,7 @@ GRANT SELECT ON TABLE public.nfl_coaches TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_reader;
 GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_contribution_reader;
 
 
 --
@@ -59776,6 +59851,7 @@ GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_data_view_read
 
 GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_reader;
 GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_contribution_reader;
 
 
 --
@@ -59784,6 +59860,7 @@ GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.nfl_game_coaches TO league_reader;
 GRANT SELECT ON TABLE public.nfl_game_coaches TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_game_coaches TO league_contribution_reader;
 
 
 --
@@ -59792,6 +59869,7 @@ GRANT SELECT ON TABLE public.nfl_game_coaches TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_games TO league_reader;
 GRANT SELECT ON TABLE public.nfl_games TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_games TO league_contribution_reader;
 
 
 --
@@ -59800,6 +59878,7 @@ GRANT SELECT ON TABLE public.nfl_games TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_games_changelog TO league_reader;
 GRANT SELECT ON TABLE public.nfl_games_changelog TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_games_changelog TO league_contribution_reader;
 
 
 --
@@ -59815,6 +59894,7 @@ GRANT SELECT ON SEQUENCE public.nfl_games_changelog_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_reader;
 GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_contribution_reader;
 
 
 --
@@ -59823,6 +59903,7 @@ GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_play_stats TO league_reader;
 GRANT SELECT ON TABLE public.nfl_play_stats TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_play_stats TO league_contribution_reader;
 
 
 --
@@ -59831,6 +59912,7 @@ GRANT SELECT ON TABLE public.nfl_play_stats TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_reader;
 GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_contribution_reader;
 
 
 --
@@ -59839,6 +59921,7 @@ GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_reader;
 GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_contribution_reader;
 
 
 --
@@ -59847,6 +59930,7 @@ GRANT SELECT ON TABLE public.nfl_player_play_charting TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.nfl_plays TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays TO league_contribution_reader;
 
 
 --
@@ -59855,6 +59939,7 @@ GRANT SELECT ON TABLE public.nfl_plays TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_contribution_reader;
 
 
 --
@@ -59863,6 +59948,7 @@ GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_passer TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_passer TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_passer TO league_contribution_reader;
 
 
 --
@@ -59871,6 +59957,7 @@ GRANT SELECT ON TABLE public.nfl_plays_passer TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_player TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_player TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_player TO league_contribution_reader;
 
 
 --
@@ -59879,6 +59966,7 @@ GRANT SELECT ON TABLE public.nfl_plays_player TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_contribution_reader;
 
 
 --
@@ -59887,6 +59975,7 @@ GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_contribution_reader;
 
 
 --
@@ -59895,6 +59984,7 @@ GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_contribution_reader;
 
 
 --
@@ -59903,6 +59993,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_contribution_reader;
 
 
 --
@@ -59911,6 +60002,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_contribution_reader;
 
 
 --
@@ -59919,6 +60011,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_contribution_reader;
 
 
 --
@@ -59927,6 +60020,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_contribution_reader;
 
 
 --
@@ -59935,6 +60029,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_contribution_reader;
 
 
 --
@@ -59943,6 +60038,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_contribution_reader;
 
 
 --
@@ -59951,6 +60047,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_contribution_reader;
 
 
 --
@@ -59959,6 +60056,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_contribution_reader;
 
 
 --
@@ -59967,6 +60065,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_contribution_reader;
 
 
 --
@@ -59975,6 +60074,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_contribution_reader;
 
 
 --
@@ -59983,6 +60083,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_contribution_reader;
 
 
 --
@@ -59991,6 +60092,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_contribution_reader;
 
 
 --
@@ -59999,6 +60101,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_contribution_reader;
 
 
 --
@@ -60007,6 +60110,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_contribution_reader;
 
 
 --
@@ -60015,6 +60119,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_contribution_reader;
 
 
 --
@@ -60023,6 +60128,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_contribution_reader;
 
 
 --
@@ -60031,6 +60137,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_contribution_reader;
 
 
 --
@@ -60039,6 +60146,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_contribution_reader;
 
 
 --
@@ -60047,6 +60155,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_contribution_reader;
 
 
 --
@@ -60055,6 +60164,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_contribution_reader;
 
 
 --
@@ -60063,6 +60173,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_contribution_reader;
 
 
 --
@@ -60071,6 +60182,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_contribution_reader;
 
 
 --
@@ -60079,6 +60191,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_contribution_reader;
 
 
 --
@@ -60087,6 +60200,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_contribution_reader;
 
 
 --
@@ -60095,6 +60209,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_contribution_reader;
 
 
 --
@@ -60103,6 +60218,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_contribution_reader;
 
 
 --
@@ -60111,6 +60227,7 @@ GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps TO league_contribution_reader;
 
 
 --
@@ -60119,6 +60236,7 @@ GRANT SELECT ON TABLE public.nfl_snaps TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_contribution_reader;
 
 
 --
@@ -60127,6 +60245,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_contribution_reader;
 
 
 --
@@ -60135,6 +60254,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_contribution_reader;
 
 
 --
@@ -60143,6 +60263,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_contribution_reader;
 
 
 --
@@ -60151,6 +60272,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_contribution_reader;
 
 
 --
@@ -60159,6 +60281,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_contribution_reader;
 
 
 --
@@ -60167,6 +60290,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_contribution_reader;
 
 
 --
@@ -60175,6 +60299,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_contribution_reader;
 
 
 --
@@ -60183,6 +60308,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_contribution_reader;
 
 
 --
@@ -60191,6 +60317,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_contribution_reader;
 
 
 --
@@ -60199,6 +60326,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_contribution_reader;
 
 
 --
@@ -60207,6 +60335,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_contribution_reader;
 
 
 --
@@ -60215,6 +60344,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_contribution_reader;
 
 
 --
@@ -60223,6 +60353,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_contribution_reader;
 
 
 --
@@ -60231,6 +60362,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_contribution_reader;
 
 
 --
@@ -60239,6 +60371,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_contribution_reader;
 
 
 --
@@ -60247,6 +60380,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_contribution_reader;
 
 
 --
@@ -60255,6 +60389,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_contribution_reader;
 
 
 --
@@ -60263,6 +60398,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_contribution_reader;
 
 
 --
@@ -60271,6 +60407,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_contribution_reader;
 
 
 --
@@ -60279,6 +60416,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_contribution_reader;
 
 
 --
@@ -60287,6 +60425,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_contribution_reader;
 
 
 --
@@ -60295,6 +60434,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_contribution_reader;
 
 
 --
@@ -60303,6 +60443,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_contribution_reader;
 
 
 --
@@ -60311,6 +60452,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_contribution_reader;
 
 
 --
@@ -60319,6 +60461,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_contribution_reader;
 
 
 --
@@ -60327,6 +60470,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_contribution_reader;
 
 
 --
@@ -60335,6 +60479,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_reader;
 GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_contribution_reader;
 
 
 --
@@ -60343,6 +60488,7 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_stadium TO league_reader;
 GRANT SELECT ON TABLE public.nfl_stadium TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_stadium TO league_contribution_reader;
 
 
 --
@@ -60351,6 +60497,7 @@ GRANT SELECT ON TABLE public.nfl_stadium TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60359,6 +60506,7 @@ GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60366,6 +60514,7 @@ GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_data_view_reader;
 --
 
 GRANT SELECT ON TABLE public.nfl_year_week_timestamp TO league_reader;
+GRANT SELECT ON TABLE public.nfl_year_week_timestamp TO league_contribution_reader;
 
 
 --
@@ -60374,6 +60523,7 @@ GRANT SELECT ON TABLE public.nfl_year_week_timestamp TO league_reader;
 
 GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_reader;
 GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_contribution_reader;
 
 
 --
@@ -60382,6 +60532,7 @@ GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_reader;
 GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_contribution_reader;
 
 
 --
@@ -60389,6 +60540,7 @@ GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_data_view_reade
 --
 
 GRANT SELECT ON TABLE public.opening_days TO league_reader;
+GRANT SELECT ON TABLE public.opening_days TO league_contribution_reader;
 
 
 --
@@ -60397,6 +60549,7 @@ GRANT SELECT ON TABLE public.opening_days TO league_reader;
 
 GRANT SELECT ON TABLE public.percentiles TO league_reader;
 GRANT SELECT ON TABLE public.percentiles TO league_data_view_reader;
+GRANT SELECT ON TABLE public.percentiles TO league_contribution_reader;
 
 
 --
@@ -60405,6 +60558,7 @@ GRANT SELECT ON TABLE public.percentiles TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60413,6 +60567,7 @@ GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60421,6 +60576,7 @@ GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.pff_player_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_player_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_player_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60429,6 +60585,7 @@ GRANT SELECT ON TABLE public.pff_player_gamelogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60437,6 +60594,7 @@ GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_reader;
 GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_contribution_reader;
 
 
 --
@@ -60461,6 +60619,7 @@ GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_pff_team_gamelog_id_seq TO lea
 GRANT ALL ON TABLE public.pff_team_gamelogs TO postgres;
 GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60478,6 +60637,7 @@ GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_pff_team_seasonlog_id_seq TO
 GRANT ALL ON TABLE public.pff_team_seasonlogs TO postgres;
 GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60486,6 +60646,7 @@ GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.pff_unresolved_players TO league_reader;
 GRANT SELECT ON TABLE public.pff_unresolved_players TO league_data_view_reader;
+GRANT SELECT ON TABLE public.pff_unresolved_players TO league_contribution_reader;
 
 
 --
@@ -60508,6 +60669,7 @@ GRANT SELECT ON SEQUENCE public.placed_wagers_wager_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.play_changelog TO league_reader;
 GRANT SELECT ON TABLE public.play_changelog TO league_data_view_reader;
+GRANT SELECT ON TABLE public.play_changelog TO league_contribution_reader;
 
 
 --
@@ -60523,6 +60685,7 @@ GRANT SELECT ON SEQUENCE public.play_changelog_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.player TO league_reader;
 GRANT SELECT ON TABLE public.player TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player TO league_contribution_reader;
 
 
 --
@@ -60531,6 +60694,7 @@ GRANT SELECT ON TABLE public.player TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_adp_history TO league_reader;
 GRANT SELECT ON TABLE public.player_adp_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_adp_history TO league_contribution_reader;
 
 
 --
@@ -60539,6 +60703,7 @@ GRANT SELECT ON TABLE public.player_adp_history TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_adp_index TO league_reader;
 GRANT SELECT ON TABLE public.player_adp_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_adp_index TO league_contribution_reader;
 
 
 --
@@ -60547,6 +60712,7 @@ GRANT SELECT ON TABLE public.player_adp_index TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_aliases TO league_reader;
 GRANT SELECT ON TABLE public.player_aliases TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_aliases TO league_contribution_reader;
 
 
 --
@@ -60555,6 +60721,7 @@ GRANT SELECT ON TABLE public.player_aliases TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_archetypes TO league_reader;
 GRANT SELECT ON TABLE public.player_archetypes TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_archetypes TO league_contribution_reader;
 
 
 --
@@ -60563,6 +60730,7 @@ GRANT SELECT ON TABLE public.player_archetypes TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_changelog TO league_reader;
 GRANT SELECT ON TABLE public.player_changelog TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_changelog TO league_contribution_reader;
 
 
 --
@@ -60578,6 +60746,7 @@ GRANT SELECT ON SEQUENCE public.player_changelog_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.player_college_careerlogs TO league_reader;
 GRANT SELECT ON TABLE public.player_college_careerlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_college_careerlogs TO league_contribution_reader;
 
 
 --
@@ -60586,6 +60755,7 @@ GRANT SELECT ON TABLE public.player_college_careerlogs TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60594,6 +60764,7 @@ GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_contracts TO league_reader;
 GRANT SELECT ON TABLE public.player_contracts TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_contracts TO league_contribution_reader;
 
 
 --
@@ -60602,6 +60773,7 @@ GRANT SELECT ON TABLE public.player_contracts TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60610,6 +60782,7 @@ GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.player_dfs_ownership TO league_reader;
 GRANT SELECT ON TABLE public.player_dfs_ownership TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_dfs_ownership TO league_contribution_reader;
 
 
 --
@@ -60625,6 +60798,7 @@ GRANT SELECT ON TABLE public.player_field_override TO league_reader;
 
 GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_reader;
 GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_contribution_reader;
 
 
 --
@@ -60633,6 +60807,7 @@ GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_data_vie
 
 GRANT SELECT ON TABLE public.player_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60641,6 +60816,7 @@ GRANT SELECT ON TABLE public.player_gamelogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_gamelogs_default TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_default TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_default TO league_contribution_reader;
 
 
 --
@@ -60649,6 +60825,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_default TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_contribution_reader;
 
 
 --
@@ -60657,6 +60834,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_contribution_reader;
 
 
 --
@@ -60665,6 +60843,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_contribution_reader;
 
 
 --
@@ -60673,6 +60852,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_contribution_reader;
 
 
 --
@@ -60681,6 +60861,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_contribution_reader;
 
 
 --
@@ -60689,6 +60870,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_contribution_reader;
 
 
 --
@@ -60697,6 +60879,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_contribution_reader;
 
 
 --
@@ -60705,6 +60888,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_contribution_reader;
 
 
 --
@@ -60713,6 +60897,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_contribution_reader;
 
 
 --
@@ -60721,6 +60906,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_contribution_reader;
 
 
 --
@@ -60729,6 +60915,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_contribution_reader;
 
 
 --
@@ -60737,6 +60924,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_contribution_reader;
 
 
 --
@@ -60745,6 +60933,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_contribution_reader;
 
 
 --
@@ -60753,6 +60942,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_contribution_reader;
 
 
 --
@@ -60761,6 +60951,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_contribution_reader;
 
 
 --
@@ -60769,6 +60960,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_contribution_reader;
 
 
 --
@@ -60777,6 +60969,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_contribution_reader;
 
 
 --
@@ -60785,6 +60978,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_contribution_reader;
 
 
 --
@@ -60793,6 +60987,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_contribution_reader;
 
 
 --
@@ -60801,6 +60996,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_contribution_reader;
 
 
 --
@@ -60809,6 +61005,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_contribution_reader;
 
 
 --
@@ -60817,6 +61014,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_contribution_reader;
 
 
 --
@@ -60825,6 +61023,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_contribution_reader;
 
 
 --
@@ -60833,6 +61032,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_contribution_reader;
 
 
 --
@@ -60841,6 +61041,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_contribution_reader;
 
 
 --
@@ -60849,6 +61050,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_contribution_reader;
 
 
 --
@@ -60857,6 +61059,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_reader;
 GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_contribution_reader;
 
 
 --
@@ -60865,6 +61068,7 @@ GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_pair_correlations TO league_reader;
 GRANT SELECT ON TABLE public.player_pair_correlations TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_pair_correlations TO league_contribution_reader;
 
 
 --
@@ -60873,6 +61077,7 @@ GRANT SELECT ON TABLE public.player_pair_correlations TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60888,6 +61093,7 @@ GRANT SELECT ON SEQUENCE public.player_pid_serial_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.player_prospect_profile TO league_reader;
 GRANT SELECT ON TABLE public.player_prospect_profile TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_prospect_profile TO league_contribution_reader;
 
 
 --
@@ -60896,6 +61102,7 @@ GRANT SELECT ON TABLE public.player_prospect_profile TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_rankings_history TO league_reader;
 GRANT SELECT ON TABLE public.player_rankings_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_rankings_history TO league_contribution_reader;
 
 
 --
@@ -60904,6 +61111,7 @@ GRANT SELECT ON TABLE public.player_rankings_history TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_rankings_index TO league_reader;
 GRANT SELECT ON TABLE public.player_rankings_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_rankings_index TO league_contribution_reader;
 
 
 --
@@ -60912,6 +61120,7 @@ GRANT SELECT ON TABLE public.player_rankings_index TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60920,6 +61129,7 @@ GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_contribution_reader;
 
 
 --
@@ -60928,6 +61138,7 @@ GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_salaries TO league_reader;
 GRANT SELECT ON TABLE public.player_salaries TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_salaries TO league_contribution_reader;
 
 
 --
@@ -60936,6 +61147,7 @@ GRANT SELECT ON TABLE public.player_salaries TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -60944,6 +61156,7 @@ GRANT SELECT ON TABLE public.player_seasonlogs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.player_team_extension_state TO league_reader;
 GRANT SELECT ON TABLE public.player_team_extension_state TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_team_extension_state TO league_contribution_reader;
 
 
 --
@@ -60952,6 +61165,7 @@ GRANT SELECT ON TABLE public.player_team_extension_state TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.player_variance TO league_reader;
 GRANT SELECT ON TABLE public.player_variance TO league_data_view_reader;
+GRANT SELECT ON TABLE public.player_variance TO league_contribution_reader;
 
 
 --
@@ -60960,6 +61174,7 @@ GRANT SELECT ON TABLE public.player_variance TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.players_status TO league_reader;
 GRANT SELECT ON TABLE public.players_status TO league_data_view_reader;
+GRANT SELECT ON TABLE public.players_status TO league_contribution_reader;
 
 
 --
@@ -60968,6 +61183,7 @@ GRANT SELECT ON TABLE public.players_status TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.playoffs TO league_reader;
 GRANT SELECT ON TABLE public.playoffs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.playoffs TO league_contribution_reader;
 
 
 --
@@ -60976,6 +61192,7 @@ GRANT SELECT ON TABLE public.playoffs TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.poach_releases TO league_reader;
 GRANT SELECT ON TABLE public.poach_releases TO league_data_view_reader;
+GRANT SELECT ON TABLE public.poach_releases TO league_contribution_reader;
 
 
 --
@@ -60984,6 +61201,7 @@ GRANT SELECT ON TABLE public.poach_releases TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.poaches TO league_reader;
 GRANT SELECT ON TABLE public.poaches TO league_data_view_reader;
+GRANT SELECT ON TABLE public.poaches TO league_contribution_reader;
 
 
 --
@@ -60999,6 +61217,7 @@ GRANT SELECT ON SEQUENCE public.poaches_poach_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_reader;
 GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_data_view_reader;
+GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_contribution_reader;
 
 
 --
@@ -61007,6 +61226,7 @@ GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_data_view_
 
 GRANT SELECT ON TABLE public.position_vocabulary_backfill_audit TO league_reader;
 GRANT SELECT ON TABLE public.position_vocabulary_backfill_audit TO league_data_view_reader;
+GRANT SELECT ON TABLE public.position_vocabulary_backfill_audit TO league_contribution_reader;
 
 
 --
@@ -61022,6 +61242,7 @@ GRANT SELECT ON SEQUENCE public.position_vocabulary_backfill_audit_audit_id_seq 
 
 GRANT SELECT ON TABLE public.practice TO league_reader;
 GRANT SELECT ON TABLE public.practice TO league_data_view_reader;
+GRANT SELECT ON TABLE public.practice TO league_contribution_reader;
 
 
 --
@@ -61030,6 +61251,7 @@ GRANT SELECT ON TABLE public.practice TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_history TO league_reader;
 GRANT SELECT ON TABLE public.projections_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history TO league_contribution_reader;
 
 
 --
@@ -61038,6 +61260,7 @@ GRANT SELECT ON TABLE public.projections_history TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_history_default TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_default TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_default TO league_contribution_reader;
 
 
 --
@@ -61046,6 +61269,7 @@ GRANT SELECT ON TABLE public.projections_history_default TO league_data_view_rea
 
 GRANT SELECT ON TABLE public.projections_history_y2020 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2020 TO league_contribution_reader;
 
 
 --
@@ -61054,6 +61278,7 @@ GRANT SELECT ON TABLE public.projections_history_y2020 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2021 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2021 TO league_contribution_reader;
 
 
 --
@@ -61062,6 +61287,7 @@ GRANT SELECT ON TABLE public.projections_history_y2021 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2022 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2022 TO league_contribution_reader;
 
 
 --
@@ -61070,6 +61296,7 @@ GRANT SELECT ON TABLE public.projections_history_y2022 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2023 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2023 TO league_contribution_reader;
 
 
 --
@@ -61078,6 +61305,7 @@ GRANT SELECT ON TABLE public.projections_history_y2023 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2024 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2024 TO league_contribution_reader;
 
 
 --
@@ -61086,6 +61314,7 @@ GRANT SELECT ON TABLE public.projections_history_y2024 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2025 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2025 TO league_contribution_reader;
 
 
 --
@@ -61094,6 +61323,7 @@ GRANT SELECT ON TABLE public.projections_history_y2025 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_history_y2026 TO league_reader;
 GRANT SELECT ON TABLE public.projections_history_y2026 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_history_y2026 TO league_contribution_reader;
 
 
 --
@@ -61102,6 +61332,7 @@ GRANT SELECT ON TABLE public.projections_history_y2026 TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_index TO league_reader;
 GRANT SELECT ON TABLE public.projections_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index TO league_contribution_reader;
 
 
 --
@@ -61110,6 +61341,7 @@ GRANT SELECT ON TABLE public.projections_index TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_default TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_default TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_default TO league_contribution_reader;
 
 
 --
@@ -61118,6 +61350,7 @@ GRANT SELECT ON TABLE public.projections_index_default TO league_data_view_reade
 
 GRANT SELECT ON TABLE public.projections_index_y2020 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2020 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2020 TO league_contribution_reader;
 
 
 --
@@ -61126,6 +61359,7 @@ GRANT SELECT ON TABLE public.projections_index_y2020 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2021 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2021 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2021 TO league_contribution_reader;
 
 
 --
@@ -61134,6 +61368,7 @@ GRANT SELECT ON TABLE public.projections_index_y2021 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2022 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2022 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2022 TO league_contribution_reader;
 
 
 --
@@ -61142,6 +61377,7 @@ GRANT SELECT ON TABLE public.projections_index_y2022 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2023 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2023 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2023 TO league_contribution_reader;
 
 
 --
@@ -61150,6 +61386,7 @@ GRANT SELECT ON TABLE public.projections_index_y2023 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2024 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2024 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2024 TO league_contribution_reader;
 
 
 --
@@ -61158,6 +61395,7 @@ GRANT SELECT ON TABLE public.projections_index_y2024 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2025 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2025 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2025 TO league_contribution_reader;
 
 
 --
@@ -61166,6 +61404,7 @@ GRANT SELECT ON TABLE public.projections_index_y2025 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.projections_index_y2026 TO league_reader;
 GRANT SELECT ON TABLE public.projections_index_y2026 TO league_data_view_reader;
+GRANT SELECT ON TABLE public.projections_index_y2026 TO league_contribution_reader;
 
 
 --
@@ -61174,6 +61413,7 @@ GRANT SELECT ON TABLE public.projections_index_y2026 TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.prop_market_selections_history TO league_reader;
 GRANT SELECT ON TABLE public.prop_market_selections_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_market_selections_history TO league_contribution_reader;
 
 
 --
@@ -61182,6 +61422,7 @@ GRANT SELECT ON TABLE public.prop_market_selections_history TO league_data_view_
 
 GRANT SELECT ON TABLE public.prop_market_selections_index TO league_reader;
 GRANT SELECT ON TABLE public.prop_market_selections_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_market_selections_index TO league_contribution_reader;
 
 
 --
@@ -61190,6 +61431,7 @@ GRANT SELECT ON TABLE public.prop_market_selections_index TO league_data_view_re
 
 GRANT SELECT ON TABLE public.prop_markets_history TO league_reader;
 GRANT SELECT ON TABLE public.prop_markets_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_markets_history TO league_contribution_reader;
 
 
 --
@@ -61198,6 +61440,7 @@ GRANT SELECT ON TABLE public.prop_markets_history TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.prop_markets_index TO league_reader;
 GRANT SELECT ON TABLE public.prop_markets_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_markets_index TO league_contribution_reader;
 
 
 --
@@ -61206,6 +61449,7 @@ GRANT SELECT ON TABLE public.prop_markets_index TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.prop_pairing_props TO league_reader;
 GRANT SELECT ON TABLE public.prop_pairing_props TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_pairing_props TO league_contribution_reader;
 
 
 --
@@ -61214,6 +61458,7 @@ GRANT SELECT ON TABLE public.prop_pairing_props TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.prop_pairings TO league_reader;
 GRANT SELECT ON TABLE public.prop_pairings TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_pairings TO league_contribution_reader;
 
 
 --
@@ -61222,6 +61467,7 @@ GRANT SELECT ON TABLE public.prop_pairings TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.props TO league_reader;
 GRANT SELECT ON TABLE public.props TO league_data_view_reader;
+GRANT SELECT ON TABLE public.props TO league_contribution_reader;
 
 
 --
@@ -61230,6 +61476,7 @@ GRANT SELECT ON TABLE public.props TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.props_index TO league_reader;
 GRANT SELECT ON TABLE public.props_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.props_index TO league_contribution_reader;
 
 
 --
@@ -61245,6 +61492,7 @@ GRANT SELECT ON SEQUENCE public.props_index_prop_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.rest_of_season_projections TO league_reader;
 GRANT SELECT ON TABLE public.rest_of_season_projections TO league_data_view_reader;
+GRANT SELECT ON TABLE public.rest_of_season_projections TO league_contribution_reader;
 
 
 --
@@ -61267,6 +61515,7 @@ GRANT SELECT ON SEQUENCE public.restricted_free_agency_bids_bid_id_seq TO league
 
 GRANT SELECT ON TABLE public.restricted_free_agency_nominations TO league_reader;
 GRANT SELECT ON TABLE public.restricted_free_agency_nominations TO league_data_view_reader;
+GRANT SELECT ON TABLE public.restricted_free_agency_nominations TO league_contribution_reader;
 
 
 --
@@ -61282,6 +61531,7 @@ GRANT SELECT ON SEQUENCE public.restricted_free_agency_nominations_nomination_id
 
 GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_reader;
 GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_data_view_reader;
+GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_contribution_reader;
 
 
 --
@@ -61290,6 +61540,7 @@ GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_data_view
 
 GRANT SELECT ON TABLE public.roster_asset_holding TO league_reader;
 GRANT SELECT ON TABLE public.roster_asset_holding TO league_data_view_reader;
+GRANT SELECT ON TABLE public.roster_asset_holding TO league_contribution_reader;
 
 
 --
@@ -61305,6 +61556,7 @@ GRANT SELECT ON SEQUENCE public.roster_asset_holding_holding_id_seq TO league_re
 
 GRANT SELECT ON TABLE public.roster_asset_lineage_refresh_state TO league_reader;
 GRANT SELECT ON TABLE public.roster_asset_lineage_refresh_state TO league_data_view_reader;
+GRANT SELECT ON TABLE public.roster_asset_lineage_refresh_state TO league_contribution_reader;
 
 
 --
@@ -61313,6 +61565,7 @@ GRANT SELECT ON TABLE public.roster_asset_lineage_refresh_state TO league_data_v
 
 GRANT SELECT ON TABLE public.roster_asset_transformation TO league_reader;
 GRANT SELECT ON TABLE public.roster_asset_transformation TO league_data_view_reader;
+GRANT SELECT ON TABLE public.roster_asset_transformation TO league_contribution_reader;
 
 
 --
@@ -61328,6 +61581,7 @@ GRANT SELECT ON SEQUENCE public.roster_asset_transformation_transformation_row_i
 
 GRANT SELECT ON TABLE public.rosters TO league_reader;
 GRANT SELECT ON TABLE public.rosters TO league_data_view_reader;
+GRANT SELECT ON TABLE public.rosters TO league_contribution_reader;
 
 
 --
@@ -61335,6 +61589,7 @@ GRANT SELECT ON TABLE public.rosters TO league_data_view_reader;
 --
 
 GRANT SELECT ON TABLE public.rosters_players TO league_reader;
+GRANT SELECT ON TABLE public.rosters_players TO league_contribution_reader;
 
 
 --
@@ -61350,6 +61605,7 @@ GRANT SELECT ON SEQUENCE public.rosters_roster_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_contribution_reader;
 
 
 --
@@ -61358,6 +61614,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_data_vie
 
 GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_contribution_reader;
 
 
 --
@@ -61366,6 +61623,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_data_view_
 
 GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_contribution_reader;
 
 
 --
@@ -61374,6 +61632,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_d
 
 GRANT SELECT ON TABLE public.scoring_format_player_rest_of_season_projection_points TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_rest_of_season_projection_points TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_rest_of_season_projection_points TO league_contribution_reader;
 
 
 --
@@ -61382,6 +61641,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_rest_of_season_projection_poi
 
 GRANT SELECT ON TABLE public.scoring_format_player_season_projection_points TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_season_projection_points TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_season_projection_points TO league_contribution_reader;
 
 
 --
@@ -61390,6 +61650,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_season_projection_points TO l
 
 GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_reader;
 GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_data_view_reader;
+GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_contribution_reader;
 
 
 --
@@ -61398,6 +61659,7 @@ GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_data_vie
 
 GRANT SELECT ON TABLE public.season_projections_history TO league_reader;
 GRANT SELECT ON TABLE public.season_projections_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.season_projections_history TO league_contribution_reader;
 
 
 --
@@ -61406,6 +61668,7 @@ GRANT SELECT ON TABLE public.season_projections_history TO league_data_view_read
 
 GRANT SELECT ON TABLE public.season_projections_index TO league_reader;
 GRANT SELECT ON TABLE public.season_projections_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.season_projections_index TO league_contribution_reader;
 
 
 --
@@ -61414,6 +61677,7 @@ GRANT SELECT ON TABLE public.season_projections_index TO league_data_view_reader
 
 GRANT SELECT ON TABLE public.seasons TO league_reader;
 GRANT SELECT ON TABLE public.seasons TO league_data_view_reader;
+GRANT SELECT ON TABLE public.seasons TO league_contribution_reader;
 
 
 --
@@ -61422,6 +61686,7 @@ GRANT SELECT ON TABLE public.seasons TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.selection_combination_definitions TO league_reader;
 GRANT SELECT ON TABLE public.selection_combination_definitions TO league_data_view_reader;
+GRANT SELECT ON TABLE public.selection_combination_definitions TO league_contribution_reader;
 
 
 --
@@ -61437,6 +61702,7 @@ GRANT SELECT ON SEQUENCE public.selection_combination_definitions_combination_id
 
 GRANT SELECT ON TABLE public.selection_combination_odds_history TO league_reader;
 GRANT SELECT ON TABLE public.selection_combination_odds_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.selection_combination_odds_history TO league_contribution_reader;
 
 
 --
@@ -61452,6 +61718,7 @@ GRANT SELECT ON SEQUENCE public.selection_combination_odds_history_history_id_se
 
 GRANT SELECT ON TABLE public.selection_combination_odds_index TO league_reader;
 GRANT SELECT ON TABLE public.selection_combination_odds_index TO league_data_view_reader;
+GRANT SELECT ON TABLE public.selection_combination_odds_index TO league_contribution_reader;
 
 
 --
@@ -61474,6 +61741,7 @@ GRANT SELECT ON SEQUENCE public.sources_source_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.super_priority TO league_reader;
 GRANT SELECT ON TABLE public.super_priority TO league_data_view_reader;
+GRANT SELECT ON TABLE public.super_priority TO league_contribution_reader;
 
 
 --
@@ -61489,6 +61757,7 @@ GRANT SELECT ON SEQUENCE public.super_priority_super_priority_id_seq TO league_r
 
 GRANT SELECT ON TABLE public.teams TO league_reader;
 GRANT SELECT ON TABLE public.teams TO league_data_view_reader;
+GRANT SELECT ON TABLE public.teams TO league_contribution_reader;
 
 
 --
@@ -61504,6 +61773,7 @@ GRANT SELECT ON SEQUENCE public.teams_team_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.trade_releases TO league_reader;
 GRANT SELECT ON TABLE public.trade_releases TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trade_releases TO league_contribution_reader;
 
 
 --
@@ -61512,6 +61782,7 @@ GRANT SELECT ON TABLE public.trade_releases TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.trades TO league_reader;
 GRANT SELECT ON TABLE public.trades TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trades TO league_contribution_reader;
 
 
 --
@@ -61520,6 +61791,7 @@ GRANT SELECT ON TABLE public.trades TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.trades_picks TO league_reader;
 GRANT SELECT ON TABLE public.trades_picks TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trades_picks TO league_contribution_reader;
 
 
 --
@@ -61528,6 +61800,7 @@ GRANT SELECT ON TABLE public.trades_picks TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.trades_players TO league_reader;
 GRANT SELECT ON TABLE public.trades_players TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trades_players TO league_contribution_reader;
 
 
 --
@@ -61536,6 +61809,7 @@ GRANT SELECT ON TABLE public.trades_players TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.trades_slots TO league_reader;
 GRANT SELECT ON TABLE public.trades_slots TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trades_slots TO league_contribution_reader;
 
 
 --
@@ -61551,6 +61825,7 @@ GRANT SELECT ON SEQUENCE public.trades_trade_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.trades_transactions TO league_reader;
 GRANT SELECT ON TABLE public.trades_transactions TO league_data_view_reader;
+GRANT SELECT ON TABLE public.trades_transactions TO league_contribution_reader;
 
 
 --
@@ -61559,6 +61834,7 @@ GRANT SELECT ON TABLE public.trades_transactions TO league_data_view_reader;
 
 GRANT SELECT ON TABLE public.transactions TO league_reader;
 GRANT SELECT ON TABLE public.transactions TO league_data_view_reader;
+GRANT SELECT ON TABLE public.transactions TO league_contribution_reader;
 
 
 --
@@ -61637,6 +61913,7 @@ GRANT SELECT ON TABLE public.users_teams TO league_reader;
 
 GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_reader;
 GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_data_view_reader;
+GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_contribution_reader;
 
 
 --
@@ -61645,6 +61922,7 @@ GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_data_view_
 
 GRANT SELECT ON TABLE public.view_trade_asset_flow TO league_reader;
 GRANT SELECT ON TABLE public.view_trade_asset_flow TO league_data_view_reader;
+GRANT SELECT ON TABLE public.view_trade_asset_flow TO league_contribution_reader;
 
 
 --
@@ -61674,6 +61952,7 @@ GRANT SELECT ON SEQUENCE public.waivers_waiver_id_seq TO league_reader;
 
 GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_reader;
 GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_data_view_reader;
+GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_contribution_reader;
 
 
 --

@@ -2,7 +2,10 @@
 -- reproduction substrate connects as when it re-executes a reported query
 -- against production to confirm a bug.
 --
--- STATUS: NOT YET APPLIED
+-- STATUS: APPLIED 2026-08-31 against league_production
+--
+-- Banner set by hand rather than by `yarn db:exec`, which owns it for every
+-- other file here but could not run this one -- see WHO RUNS THIS below.
 --
 -- WHO RUNS THIS. Not `yarn db:exec`, which connects as league_writer. CREATE
 -- ROLE needs a superuser, so this file is applied by hand on the league host:
@@ -21,7 +24,15 @@
 -- Then author the same value into config/config-production.json under
 -- `postgres_contribution_sandbox` per user:guideline/homelab/sops-age-authoring.md.
 -- A pg_hba.conf entry is also required before this role can authenticate
--- remotely, exactly as it was for league_data_view_reader.
+-- remotely, exactly as it was for league_data_view_reader. Added 2026-08-31 as
+-- the line immediately after that role's, same shape:
+--
+--     host    all    league_contribution_reader    38.242.199.45/32    scram-sha-256
+--
+-- Narrow on purpose. The loopback catch-all at 127.0.0.1/32 already admits any
+-- role over the league-tunnel SSH forward, so this entry is only what the app's
+-- own config needs, which connects to the host's public address rather than to
+-- localhost.
 --
 -- WHY NOT REUSE league_data_view_reader. Measured 2026-08-31 against the 280
 -- stored data-view fixtures: all 280 fail that tier's statement guard, 227 on

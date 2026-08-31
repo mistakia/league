@@ -79,6 +79,20 @@ required_patterns=(
     '^ALTER ROLE league_reader SET default_transaction_read_only TO '
     '^ALTER ROLE league_reader SET log_min_duration_statement TO '
     '^GRANT pg_read_all_data TO league_reader'
+    # The two scoped sandbox reader roles. Neither was gated when it was
+    # created, so the artifact could have stopped carrying either one silently --
+    # and these are the roles whose absence is hardest to notice, because the app
+    # boots fine without them and only the data-view SQL tier and the
+    # contribution reproduction path stop working. Their CONNECTION LIMIT is
+    # part of the sandbox (server-side, unraisable from inside a session), so it
+    # is gated too rather than left to be restored by hand.
+    '^CREATE ROLE league_data_view_reader;'
+    '^ALTER ROLE league_data_view_reader WITH .*LOGIN.*CONNECTION LIMIT .*PASSWORD '
+    '^ALTER ROLE league_data_view_reader SET default_transaction_read_only TO '
+    '^CREATE ROLE league_contribution_reader;'
+    '^ALTER ROLE league_contribution_reader WITH .*LOGIN.*CONNECTION LIMIT .*PASSWORD '
+    '^ALTER ROLE league_contribution_reader SET default_transaction_read_only TO '
+    '^ALTER ROLE league_contribution_reader SET work_mem TO '
 )
 
 # Ciphertext at rest, but the plaintext exists for the duration of one dump and
