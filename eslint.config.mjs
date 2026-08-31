@@ -35,7 +35,14 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['dist/*', 'tmp/*', '.yarn/**/*', '.cache/**']
+    // `scratch/` is gitignored (.gitignore:62) -- the working tier, where every
+    // session drops throwaway probes and one-off scripts. Linting it gated the
+    // repo on files git will never track, and since `yarn verify` became a
+    // pre-push gate that meant one session's scratch probe blocked EVERY
+    // session's push in this shared working tree. Measured 2026-08-31: 26 lint
+    // errors, all of them under scratch/, none belonging to the change being
+    // pushed.
+    ignores: ['dist/*', 'tmp/*', 'scratch/**', '.yarn/**/*', '.cache/**']
   },
   ...compat
     .extends('standard', 'standard-jsx', 'standard-react', 'prettier')
