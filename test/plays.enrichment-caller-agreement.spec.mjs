@@ -89,6 +89,27 @@ describe('enrich_plays agrees across its two callers', function () {
     expect(enriched.is_successful_play).to.equal(true)
   })
 
+  it('omits is_successful_play entirely when it cannot be computed', async () => {
+    // "No opinion" has to be an ABSENT key, not a null one. A null is
+    // authoritative: upsert_plays carries it into the merge and it overwrites a
+    // stored true/false, which is exactly what kept nfl_plays.updated moving
+    // past the finalization watermark after the ordering fix landed. The
+    // yardage enricher already expresses no-opinion by omission; this is the
+    // same contract on the same pass.
+    // The production shape: down and distance are known, but no yardage stat
+    // exists on the play, so the yardage enricher omits yards_gained and the
+    // verdict is unknowable from this caller's inputs alone.
+    const [enriched] = await enrich_plays({
+      plays: [
+        { esbid, play_id, down_number: 1, yards_to_go: 10, play_type: 'RUSH' }
+      ],
+      play_stats: play_stats.filter((stat) => stat.stat_id !== 10)
+    })
+
+    expect(enriched).to.not.have.property('yards_gained')
+    expect(enriched).to.not.have.property('is_successful_play')
+  })
+
   it('assigns tackle slots independently of play_stats arrival order', async () => {
     // The two callers arrive with different orders: process_plays reads via
     // get_play_stats, which has no ORDER BY and returns heap order that moves
