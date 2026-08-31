@@ -55,6 +55,36 @@ SET statement_timeout = 0;
 
 **A `VALUES` list restoring a wide table types every column from the FIRST row, so a backup replay of a sparse table fails on a column that is `NULL` everywhere.** Postgres infers `text` for an all-`NULL` column and then rejects it against the real type — `column "jnum" is of type smallint but expression is of type text` — naming one column when the problem is the whole list. Cast every value in the first row (`CAST(NULL AS int2)`, `CAST(2001093004 AS int4)`, ...) and the remaining rows coerce to it. Hit 2026-08-04 replaying 256 `player_gamelogs` rows across 106 columns, 57 of them null on every row; the rollback-only dry run caught it before the real apply.
 
+## A `numeric` column reads back as a STRING, and `===` against it is silently false
+
+**node-postgres returns `numeric` as a JavaScript string to avoid float precision loss, so any
+reader that compares one to a number is comparing `'888.0'` to `888` and always losing.** It is not
+a type error, throws nothing, and logs nothing — the comparison simply never matches, so the code
+takes its fallback path forever and looks like it is merely finding nothing.
+
+Measured 2026-08-30 on `nfl_plays.sequence`, which is `numeric(10,1)`. The charting play importer
+built a `Map` keyed on the value the driver returned and probed it with the vendor's plain number.
+Its PRIMARY matcher matched **0 of 961** plays across six games and had done since its first run in
+April; every play silently fell through to a context matcher that resolved about 54 percent of them.
+With both sides coerced through `Number()` the rate is 99.9 percent. Four months of a dead code path
+with no error anywhere.
+
+Three things that make this worth its own note rather than a comment at the one site:
+
+- **The scale is right, which is what fools you.** The two sides agreed on min and max. Nothing about
+  the numbers looked wrong, because nothing about them WAS wrong — only their types differed.
+- **A spec written from the caller's side certifies the bug.** An index built from plain numbers
+  passes whatever the lookup does. The load-bearing test case is the numeric STRING, i.e. what the
+  driver actually hands you, so write the fixture from a real row rather than from the value you
+  expect.
+- **It bites JS-side only.** A stored-versus-`EXCLUDED` comparison inside Postgres is same-type on
+  both sides and cannot hit this, so a conditional-upsert predicate is safe where a
+  `compute_play_changes`-style diff in JavaScript is not.
+
+Coerce at BOTH ends or you have fixed nothing, and prefer routing the comparison through one function
+so the two ends cannot drift — a reader who fixes the lookup and not the index build gets the same
+silent zero.
+
 ## A green suite is not evidence a writer can execute
 
 **A writer that names a column which does not exist passes the whole suite, because `test/global.mjs` loads the SAME `db/schema.postgres.sql` that is missing it.** The two halves of the check fail together, so a green suite is not evidence the writer can execute against any database — and the number is reassuringly large while it happens. On 2026-08-04 `dd48ce077` shipped `generate-league-format-player-seasonlogs.mjs` writing `points_added_net_rank`, `points_added_net_position_rank`, `points_added_net_per_game_rank`, `points_added_net_per_game_position_rank` and `points_added_net_cap_dollars`; none of the five existed, 2947 tests passed, and the commit was pushed and deployed. It would have thrown `column ... does not exist` on the generator's next run and taken the stats pipeline with it (`libs-server/stats-pipeline.mjs`). The gap is that no spec runs that generator, so nothing ever executed the insert. **When a commit adds a column to an insert object, check the column exists in `db/schema.postgres.sql` — a `git show HEAD:db/schema.postgres.sql | grep` costs one command** — and prefer running the generator itself over trusting the suite — where it has a `--dry` flag, which builds the full insert and logs samples without writing. **Check for the flag rather than assuming it: only 98 of the 240 scripts have one, and it is absent from several of the highest-risk generators.** A 2026-08-05 validation pass reached for it on `generate-rosters`, `generate-league-formats`, `calculate-league-careerlogs`, `process-projections`, `project-lineups`, `import-rotowire-practice-report` and `generate-nfl-team-seasonlogs` and **none of the seven had it**, so the intended validation could not run as written. The fallback that needs no execution and no writes: extract the insert payload's keys and check each against `information_schema` for the target table, plus the `onConflict` target and the `merge()` list. That is what found three nonexistent columns in `generate-player-snaps` (2026-08-05, `6ba0d1d02`). Note this is the exact inverse of the deploy-lag rule in [the shipping guide](ship.md): there, committed code was ahead of a deployed schema; here, committed code was ahead of the schema file that both production AND the suite derive from, which is why neither could see it.
