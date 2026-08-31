@@ -12,6 +12,7 @@ import { matchup_sagas } from './matchups'
 import { trade_sagas } from './trade'
 import { league_sagas } from './leagues'
 import { source_sagas } from './sources'
+import { api_key_sagas } from './api-keys'
 import { setting_sagas } from './settings'
 import { stat_sagas } from './stats'
 import { waiver_sagas } from './waivers'
@@ -49,6 +50,7 @@ export default function* rootSaga() {
     ...trade_sagas,
     ...league_sagas,
     ...source_sagas,
+    ...api_key_sagas,
     ...setting_sagas,
     ...stat_sagas,
     ...waiver_sagas,

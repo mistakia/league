@@ -92,7 +92,7 @@ api.use((req, res, next) => {
   // link, and in browser history.
   res.set(
     'Access-Control-Allow-Headers',
-    'Authorization, Origin, X-Requested-With, Content-Type, Accept, x-contribution-claim-token'
+    'Authorization, Origin, X-Requested-With, Content-Type, Accept, x-contribution-claim-token, x-api-key'
   )
   res.set('Vary', 'Origin')
   next()

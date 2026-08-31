@@ -18,6 +18,7 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.user_api_keys DROP CONSTRAINT IF EXISTS user_api_keys_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.scoring_format_player_seasonlogs DROP CONSTRAINT IF EXISTS scoring_format_player_seasonlogs_scoring_format_id_fkey;
@@ -81,6 +82,7 @@ DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
+DROP INDEX IF EXISTS public.user_api_keys_user_id_idx;
 DROP INDEX IF EXISTS public.trades_slots_trade_id_idx;
 DROP INDEX IF EXISTS public.scoring_format_player_projection_points_pid_id_week_season_year;
 DROP INDEX IF EXISTS public.roster_asset_transformation_trade_id_idx;
@@ -502,6 +504,8 @@ ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_te
 ALTER TABLE IF EXISTS ONLY public.user_plays_views DROP CONSTRAINT IF EXISTS user_plays_views_pkey;
 ALTER TABLE IF EXISTS ONLY public.user_data_view_tags DROP CONSTRAINT IF EXISTS user_data_view_tags_pkey;
 ALTER TABLE IF EXISTS ONLY public.user_data_view_favorites DROP CONSTRAINT IF EXISTS user_data_view_favorites_pkey;
+ALTER TABLE IF EXISTS ONLY public.user_api_keys DROP CONSTRAINT IF EXISTS user_api_keys_pkey;
+ALTER TABLE IF EXISTS ONLY public.user_api_keys DROP CONSTRAINT IF EXISTS user_api_keys_key_hash_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
@@ -753,6 +757,7 @@ DROP TABLE IF EXISTS public.user_plays_views;
 DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.user_data_view_tags;
 DROP TABLE IF EXISTS public.user_data_view_favorites;
+DROP TABLE IF EXISTS public.user_api_keys;
 DROP TABLE IF EXISTS public.urls;
 DROP SEQUENCE IF EXISTS public.transactions_transaction_id_seq;
 DROP TABLE IF EXISTS public.transactions;
@@ -27799,6 +27804,36 @@ CREATE TABLE public.urls (
 
 
 --
+-- Name: user_api_keys; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_api_keys (
+    api_key_id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    key_hash character(64) NOT NULL,
+    key_prefix character varying(12) NOT NULL,
+    name character varying(60) DEFAULT ''::character varying NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    last_used_at timestamp with time zone,
+    revoked_at timestamp with time zone
+);
+
+
+--
+-- Name: user_api_keys_api_key_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.user_api_keys ALTER COLUMN api_key_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.user_api_keys_api_key_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: user_data_view_favorites; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -27865,7 +27900,8 @@ CREATE TABLE public.users (
     password character varying(60) DEFAULT ''::character varying NOT NULL,
     watchlist text,
     last_visit_at timestamp with time zone,
-    invite_code character varying(20)
+    invite_code character varying(20),
+    data_view_export_max_rows integer DEFAULT 100000
 );
 
 
@@ -30772,6 +30808,22 @@ ALTER TABLE ONLY public.super_priority
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_hash_key UNIQUE (url_hash);
+
+
+--
+-- Name: user_api_keys user_api_keys_key_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_api_keys
+    ADD CONSTRAINT user_api_keys_key_hash_key UNIQUE (key_hash);
+
+
+--
+-- Name: user_api_keys user_api_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_api_keys
+    ADD CONSTRAINT user_api_keys_pkey PRIMARY KEY (api_key_id);
 
 
 --
@@ -45887,6 +45939,13 @@ CREATE INDEX trades_slots_trade_id_idx ON public.trades_slots USING btree (trade
 
 
 --
+-- Name: user_api_keys_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_api_keys_user_id_idx ON public.user_api_keys USING btree (user_id);
+
+
+--
 -- Name: user_data_view_favorites_user_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -58856,6 +58915,14 @@ ALTER TABLE ONLY public.seasons
 
 
 --
+-- Name: user_api_keys user_api_keys_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_api_keys
+    ADD CONSTRAINT user_api_keys_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
@@ -61849,6 +61916,20 @@ GRANT SELECT ON SEQUENCE public.transactions_transaction_id_seq TO league_reader
 --
 
 GRANT SELECT ON TABLE public.urls TO league_reader;
+
+
+--
+-- Name: TABLE user_api_keys; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.user_api_keys TO league_reader;
+
+
+--
+-- Name: SEQUENCE user_api_keys_api_key_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.user_api_keys_api_key_id_seq TO league_reader;
 
 
 --

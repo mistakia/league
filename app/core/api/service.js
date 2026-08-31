@@ -238,6 +238,18 @@ export const api = {
     const url = `${API_URL}/me`
     return { url, ...PUT(data) }
   },
+  get_api_keys() {
+    const url = `${API_URL}/settings/api-keys`
+    return { url }
+  },
+  post_api_key({ name }) {
+    const url = `${API_URL}/settings/api-keys`
+    return { url, ...POST({ name }) }
+  },
+  delete_api_key({ api_key_id }) {
+    const url = `${API_URL}/settings/api-keys/${api_key_id}`
+    return { url, method: 'DELETE' }
+  },
   get_charted_plays(params) {
     const url = `${API_URL}/plays/charted?${queryString.stringify(params)}`
     return { url }

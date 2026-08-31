@@ -8,6 +8,7 @@ import { teams_reducer } from './teams'
 import { players_reducer } from './players'
 import { rosters_reducer } from './rosters'
 import { sources_reducer } from './sources'
+import { api_keys_reducer } from './api-keys'
 import { transactions_reducer } from './transactions'
 import { matchups_reducer } from './matchups'
 import { trade_reducer } from './trade'
@@ -55,6 +56,7 @@ const rootReducer = (router, dynamic_reducers = {}) =>
     players: players_reducer,
     rosters: rosters_reducer,
     sources: sources_reducer,
+    api_keys: api_keys_reducer,
     transactions: transactions_reducer,
     matchups: matchups_reducer,
     notification: notification_reducer,

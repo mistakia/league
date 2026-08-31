@@ -222,14 +222,25 @@ const offset_schema = {
 }
 export const offset_validator = v.compile(offset_schema)
 
-const limit_schema = {
+// The ceiling every INTERACTIVE data-view path enforces -- the websocket, the
+// search route, the plays view. It is a property of the caller, not of the
+// query: only the export route raises it, and only for a caller presenting an
+// export API key (libs-server/data-views/export-api-keys.mjs). Nothing that
+// serves a browser table should page past this.
+export const DATA_VIEW_DEFAULT_MAX_LIMIT = 2000
+
+// `max_limit: null` means no ceiling. It is reachable only from the export
+// route with a key whose max_export_rows is null.
+const build_limit_schema = (max_limit) => ({
   type: 'number',
   optional: true,
   integer: true,
   min: 1,
-  max: 2000,
+  ...(max_limit === null ? {} : { max: max_limit }),
   $$root: true
-}
+})
+
+const limit_schema = build_limit_schema(DATA_VIEW_DEFAULT_MAX_LIMIT)
 export const limit_validator = v.compile(limit_schema)
 
 const row_axes_schema = {
@@ -250,16 +261,47 @@ const row_grain_schema = {
   default: ['player']
 }
 
-const table_state_schema = {
+const build_table_state_schema = (limit) => ({
   offset: offset_schema,
-  limit: limit_schema,
+  limit,
   sort: sort_schema,
   columns: columns_schema,
   where: where_schema,
   row_axes: row_axes_schema,
   row_grain: row_grain_schema
-}
+})
+
+const table_state_schema = build_table_state_schema(limit_schema)
 export const table_state_validator = v.compile(table_state_schema)
+
+// Compiling a fastest-validator schema walks the whole column/where tree, so the
+// per-ceiling validators are memoized rather than built per request. The key
+// space is bounded by the configured API keys plus the default, not by anything
+// a caller supplies.
+const table_state_validators_by_max_limit = new Map([
+  [DATA_VIEW_DEFAULT_MAX_LIMIT, table_state_validator]
+])
+
+/**
+ * The table-state validator for a given limit ceiling.
+ *
+ * @param {object} [opts]
+ * @param {number|null} [opts.max_limit] - null for no ceiling
+ * @returns {(table_state: object) => true|Array<object>} compiled validator --
+ *   true when valid, otherwise the array of field errors
+ */
+export const get_table_state_validator = ({
+  max_limit = DATA_VIEW_DEFAULT_MAX_LIMIT
+} = {}) => {
+  const cached = table_state_validators_by_max_limit.get(max_limit)
+  if (cached) return cached
+
+  const validator = v.compile(
+    build_table_state_schema(build_limit_schema(max_limit))
+  )
+  table_state_validators_by_max_limit.set(max_limit, validator)
+  return validator
+}
 
 const short_url_schema = {
   type: 'string',

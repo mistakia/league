@@ -328,6 +328,7 @@ import type {
   TradesTransactionsRow,
   TransactionsRow,
   UrlsRow,
+  UserApiKeysRow,
   UserDataViewFavoritesRow,
   UserDataViewTagsRow,
   UserDataViewsRow,
@@ -649,6 +650,7 @@ declare module 'knex/types/tables' {
     trades_transactions: TradesTransactionsRow
     transactions: TransactionsRow
     urls: UrlsRow
+    user_api_keys: UserApiKeysRow
     user_data_view_favorites: UserDataViewFavoritesRow
     user_data_view_tags: UserDataViewTagsRow
     user_data_views: UserDataViewsRow

@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { get_data_view_results, redis_cache, emit_signal } from '#libs-server'
+import { DATA_VIEW_DEFAULT_MAX_LIMIT } from '#libs-server/validators.mjs'
 
 // The single entry every path that executes a data-view query calls. Holds both
 // the bounded-concurrency admission gate and the telemetry/signal
@@ -328,6 +329,10 @@ const release_slot = () => {
  * @param {number|null} opts.user_id
  * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' | 'sql'
  * @param {string} opts.cache_key - the redis key the caller already computed
+ * @param {number|null} [opts.max_limit] - server-resolved ceiling on the table
+ *   state's limit; null for no ceiling (export API key only)
+ * @param {number|null} [opts.timeout_ms] - server-resolved statement_timeout
+ *   override; null keeps the signed-in / signed-out default
  * @param {AbortSignal} [opts.signal] - abort while waiting (disconnect / supersede)
  * @param {(state: 'waiting'|'executing') => boolean} [opts.on_heartbeat] - called
  *   every interval while queued or in flight; return false (socket closed) to stop.
@@ -351,6 +356,8 @@ export async function execute_data_view_request({
   signal,
   on_heartbeat,
   on_status,
+  max_limit = DATA_VIEW_DEFAULT_MAX_LIMIT,
+  timeout_ms = null,
   run_query = get_data_view_results,
   signal_emitter = emit_signal,
   cache_get = (key) => redis_cache.get(key),
@@ -362,9 +369,12 @@ export async function execute_data_view_request({
   const exec_id = execution_id || mint_execution_id()
   const request_started_at = Date.now()
   const started_at = new Date(request_started_at).toISOString()
-  const timeout = user_id
-    ? DATA_VIEW_SIGNED_IN_TIMEOUT_MS
-    : DATA_VIEW_SIGNED_OUT_TIMEOUT_MS
+  // timeout_ms is a SERVER-resolved override (the export route raises it for a
+  // key-holding bulk caller), never a value read off a request body. The
+  // viewer-derived default stands for every other path.
+  const timeout =
+    timeout_ms ||
+    (user_id ? DATA_VIEW_SIGNED_IN_TIMEOUT_MS : DATA_VIEW_SIGNED_OUT_TIMEOUT_MS)
   const is_pagination_request = params.offset > 0 && params.append_results
   const calculate_total_count = !is_pagination_request
 
@@ -462,8 +472,11 @@ export async function execute_data_view_request({
         calculate_total_count,
         // Timeout after the spread: the client's table state must not be able to
         // name its own deadline. `timeout` reaches Postgres as SET LOCAL
-        // statement_timeout verbatim.
+        // statement_timeout verbatim. `max_limit` is here for the same reason --
+        // a table state carrying its own `max_limit` would otherwise raise the
+        // ceiling the route resolved for the caller.
         timeout,
+        max_limit,
         user_id: user_id || null
       })
 

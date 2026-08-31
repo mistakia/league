@@ -648,6 +648,7 @@ const english_words = [
   'press',
   'pressure',
   'pressures',
+  'prefix',
   'previous',
   'pricing',
   'primary',
@@ -729,6 +730,7 @@ const english_words = [
   'returns',
   'reverse',
   'review',
+  'revoked',
   'right',
   'risk',
   'road',
@@ -1095,6 +1097,12 @@ const domain_words = [
 // exempted `epa` and `iqr` as bare names (see proprietary_metric_names in the
 // audit), applied to the token position.
 const ratified_system_names = [
+  // The interface itself publishes this name -- HTTP APIs, the API key a user
+  // generates in settings, every piece of documentation the caller reads. Same
+  // category as `llm` below: an industry term nobody spells out, not an
+  // abbreviation this schema is declining to expand. Ratified 2026-08-31 with
+  // user_api_keys.
+  'api',
   'cbs',
   'cfbref',
   'draftkings',

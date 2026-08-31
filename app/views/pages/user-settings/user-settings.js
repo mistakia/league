@@ -5,6 +5,7 @@ import Grid from '@mui/material/Grid'
 
 import PageLayout from '@layouts/page'
 import EditableSettingField from '@components/editable-setting-field'
+import UserSettingsApiKeys from '@components/user-settings-api-keys'
 
 import './user-settings.styl'
 
@@ -59,6 +60,7 @@ export default function UserSettingsPage({ user, update }) {
           />
         </Grid>
       </div>
+      <UserSettingsApiKeys />
     </div>
   )
 

@@ -13,6 +13,11 @@ import get_param_option_counts, {
   collect_other_params
 } from '#libs-server/data-views/get-param-option-counts.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
+import {
+  resolve_export_api_key,
+  resolve_export_max_limit,
+  EXPORT_CACHE_MAX_ROWS
+} from '#libs-server/data-views/export-api-keys.mjs'
 import { nfl_plays_column_params } from '#libs-shared'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 import { render_participation_null } from '#libs-shared/data-views/participation-cell.mjs'
@@ -24,6 +29,34 @@ import toggle_favorite from '#libs-server/view-organization/toggle-favorite.mjs'
 const router = express.Router()
 
 const PARTICIPATION_STATUS_KEY = 'participation_status'
+
+// A key holder's export runs long by design, so it gets its own deadline rather
+// than the 40s an anonymous viewer gets or the 5 minutes a signed-in one does.
+const EXPORT_API_KEY_TIMEOUT_MS = 30 * 60 * 1000
+
+// Distinct from null, which means the parameter was absent. `Number('abc')` is
+// NaN and `Number('')` is 0, so a bare `Number(...) || null` reads a typo as
+// "no limit" -- which, with the ceiling in play, is the most permissive reading
+// of the most malformed input.
+const INVALID_PARAM = Symbol('invalid_param')
+
+const parse_integer_param = (raw_value, { minimum }) => {
+  if (raw_value === undefined || raw_value === '') return null
+  const parsed = Number(raw_value)
+  if (!Number.isInteger(parsed) || parsed < minimum) return INVALID_PARAM
+  return parsed
+}
+
+const parse_positive_integer_param = (raw_value) =>
+  parse_integer_param(raw_value, { minimum: 1 })
+
+const parse_non_negative_integer_param = (raw_value) =>
+  parse_integer_param(raw_value, { minimum: 0 })
+
+const read_total_count = (data_view_metadata) =>
+  data_view_metadata && data_view_metadata.total_count != null
+    ? data_view_metadata.total_count
+    : null
 
 // Apply the hidden week-grain participation signal to an export, then drop it.
 // For week-grain views the query injects one `participation_status` per row; a
@@ -448,8 +481,36 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
  *       schema:
  *         type: integer
  *         minimum: 1
- *       description: 'Maximum number of records to export'
+ *       description: >
+ *         Maximum number of records to export. The cap is the caller's
+ *         users.data_view_export_max_rows — 100000 for an anonymous caller,
+ *         and whatever the user carries otherwise, up to no cap at all. A
+ *         limit above the cap is rejected with 400 rather than clamped.
+ *         Defaults to the cap.
  *       example: 1000
+ *
+ *     exportOffset:
+ *       name: offset
+ *       in: query
+ *       required: false
+ *       schema:
+ *         type: integer
+ *         minimum: 0
+ *       description: >
+ *         Row offset for pagination. Overrides the saved view's own offset.
+ *         Pair with limit and read x-total-count to walk a large result set.
+ *       example: 0
+ *
+ *     exportApiKey:
+ *       name: x-api-key
+ *       in: header
+ *       required: false
+ *       schema:
+ *         type: string
+ *       description: >
+ *         Export API key, generated under user settings. It authenticates its
+ *         owner for this route, so the export runs as that user and carries
+ *         that user's row cap. A JWT, when both are presented, wins.
  */
 
 /**
@@ -1201,8 +1262,16 @@ router.post('/debug/?', async (req, res) => {
  *       **File naming**: Exported files are named using the pattern:
  *       `{view_name}-{timestamp}.{format}`
  *
- *       **Performance**: Use the `limit` parameter to control the number of
- *       records exported for large datasets.
+ *       **Pagination**: `limit` and `offset` page the result set, and the
+ *       response headers carry what a client needs to walk it —
+ *       `x-total-count` (rows before LIMIT), `x-data-view-offset`,
+ *       `x-data-view-limit` and `x-data-view-returned-rows`.
+ *
+ *       **Row cap**: a property of the caller — 100000 rows anonymously, and
+ *       `users.data_view_export_max_rows` for a signed-in caller or one
+ *       presenting an `x-api-key` header, which may be uncapped. A `limit`
+ *       above the caller's cap is a 400, never a silent truncation. Results
+ *       above the interactive ceiling are not cached in either direction.
  *     tags:
  *       - Data Views
  *     parameters:
@@ -1210,9 +1279,28 @@ router.post('/debug/?', async (req, res) => {
  *       - $ref: '#/components/parameters/exportFormat'
  *       - $ref: '#/components/parameters/ignoreCache'
  *       - $ref: '#/components/parameters/exportLimit'
+ *       - $ref: '#/components/parameters/exportOffset'
+ *       - $ref: '#/components/parameters/exportApiKey'
  *     responses:
  *       '200':
  *         description: Data view exported successfully
+ *         headers:
+ *           x-total-count:
+ *             schema:
+ *               type: integer
+ *             description: 'Total rows matching the view before LIMIT is applied'
+ *           x-data-view-offset:
+ *             schema:
+ *               type: integer
+ *             description: 'Offset this response starts at'
+ *           x-data-view-limit:
+ *             schema:
+ *               type: integer
+ *             description: 'Row limit applied; absent when the export was unbounded'
+ *           x-data-view-returned-rows:
+ *             schema:
+ *               type: integer
+ *             description: 'Rows in this response'
  *         content:
  *           text/csv:
  *             schema:
@@ -1273,7 +1361,51 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
   try {
     const { view_id, export_format } = req.params
     const ignore_cache = req.query.ignore_cache === 'true'
-    const limit = req.query.limit ? Number(req.query.limit) || null : null
+
+    // An API key authenticates its owner for this route, so a script exporting
+    // with a key sees exactly what its owner sees in the browser. The JWT wins
+    // when both are presented: a header must not be able to switch a signed-in
+    // caller onto another identity.
+    const api_key = await resolve_export_api_key({ headers: req.headers })
+    const user_id = req.auth
+      ? req.auth.userId
+      : api_key
+        ? api_key.user_id
+        : null
+
+    // The row ceiling belongs to the USER (users.data_view_export_max_rows,
+    // where NULL means no ceiling), so a whitelisted user gets it from the
+    // browser as well as from a script. Anonymous callers get the platform
+    // default.
+    const max_limit = await resolve_export_max_limit({ user_id })
+
+    const parsed_limit = parse_positive_integer_param(req.query.limit)
+    if (parsed_limit === INVALID_PARAM) {
+      return res.status(400).send({ error: 'invalid limit' })
+    }
+    const parsed_offset = parse_non_negative_integer_param(req.query.offset)
+    if (parsed_offset === INVALID_PARAM) {
+      return res.status(400).send({ error: 'invalid offset' })
+    }
+
+    // Refuse a limit above the ceiling rather than silently clamping to it: a
+    // clamped page looks like a complete one to a paginating client, which then
+    // walks the result set with a stride larger than the pages it receives and
+    // skips rows without any error to notice.
+    if (
+      max_limit !== null &&
+      parsed_limit !== null &&
+      parsed_limit > max_limit
+    ) {
+      return res.status(400).send({
+        error: `limit exceeds the maximum of ${max_limit} for this caller`
+      })
+    }
+
+    // An absent limit means "the ceiling", not "unbounded". Only a key with no
+    // max_export_rows produces a null limit and therefore a query with no LIMIT
+    // clause.
+    const limit = parsed_limit === null ? max_limit : parsed_limit
 
     // Validate view_id exists
     const view = await db('user_data_views')
@@ -1294,26 +1426,48 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
 
     const { table_state } = view
 
-    const user_id = req.auth ? req.auth.userId : null
+    // An explicit offset wins over the saved view's own; without one the view's
+    // offset stands, which is what the route did before pagination existed.
+    const offset = parsed_offset === null ? table_state.offset : parsed_offset
 
-    // Generate cache key
-    const cache_key = `/data-views/${get_data_view_hash({
+    // The params the query actually runs with, and the ones the cache key
+    // hashes. `limit` and `offset` were omitted from the key until pagination
+    // landed, so every export of a view shared ONE entry regardless of how many
+    // rows it asked for or where it started -- a 5,000-row page returned the
+    // 500-row body some other caller had written, and page 2 returned page 1.
+    const query_params = {
       where: table_state.where,
       columns: table_state.columns,
       sort: table_state.sort,
-      offset: table_state.offset,
+      offset,
       prefix_columns: table_state.prefix_columns,
       row_axes: table_state.row_axes,
       row_grain: table_state.row_grain,
+      limit
+    }
+
+    // Generate cache key
+    const cache_key = `/data-views/${get_data_view_hash({
+      ...query_params,
       user_id
     })}`
 
-    let data_view_results
+    // A bulk export is not cached in either direction. The value is serialized
+    // whole on every read and write of a redis instance shared with the
+    // interactive paths, so a six-figure export would evict the working set to
+    // serve a request that is not going to repeat. Everything a browser table
+    // could have asked for still caches exactly as before.
+    const use_cache =
+      !ignore_cache && limit !== null && limit <= EXPORT_CACHE_MAX_ROWS
 
-    if (!ignore_cache) {
+    let data_view_results
+    let total_count = null
+
+    if (use_cache) {
       const cache_value = await redis_cache.get(cache_key)
       if (cache_value && cache_value.data_view_results) {
         data_view_results = cache_value.data_view_results
+        total_count = read_total_count(cache_value.data_view_metadata)
       }
     }
 
@@ -1323,23 +1477,39 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       // skip_cache so the executor's admission re-check does not defeat it.
       const result = await execute_data_view_request({
         request_id: null,
-        params: {
-          where: table_state.where,
-          columns: table_state.columns,
-          sort: table_state.sort,
-          offset: table_state.offset,
-          prefix_columns: table_state.prefix_columns,
-          row_axes: table_state.row_axes,
-          row_grain: table_state.row_grain,
-          limit
-        },
+        params: query_params,
         user_id,
         path: 'export',
         cache_key,
-        skip_cache: ignore_cache
+        max_limit,
+        // A bulk export outruns the viewer-derived statement_timeout -- an
+        // anonymous caller gets 40s, which a six-figure page will not finish in.
+        // Only a key holder can reach this, and only for the rows the key allows.
+        timeout_ms: api_key ? EXPORT_API_KEY_TIMEOUT_MS : null,
+        skip_cache: !use_cache
       })
       data_view_results = result.data_view_results
+      total_count = read_total_count(result.data_view_metadata)
     }
+
+    // Pagination metadata as headers, so every format carries it and no format's
+    // body shape changes. A client pages by walking offset until the rows
+    // returned run out or offset + returned reaches x-total-count.
+    res.setHeader('x-data-view-offset', String(offset || 0))
+    res.setHeader(
+      'x-data-view-returned-rows',
+      String((data_view_results || []).length)
+    )
+    if (limit !== null) {
+      res.setHeader('x-data-view-limit', String(limit))
+    }
+    if (total_count !== null) {
+      res.setHeader('x-total-count', String(total_count))
+    }
+    res.setHeader(
+      'Access-Control-Expose-Headers',
+      'x-data-view-offset, x-data-view-limit, x-data-view-returned-rows, x-total-count'
+    )
 
     // Format the results based on export_format
     let formatted_results

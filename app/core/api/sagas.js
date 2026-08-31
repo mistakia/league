@@ -93,6 +93,11 @@ import { put_league_actions, get_league_actions } from '@core/leagues/actions'
 import { get_sources_actions, put_source_actions } from '@core/sources/actions'
 import { put_setting_actions } from '@core/settings/actions'
 import {
+  get_api_keys_actions,
+  post_api_key_actions,
+  delete_api_key_actions
+} from '@core/api-keys/actions'
+import {
   post_poach_actions,
   put_poach_actions,
   post_process_poach_actions
@@ -425,6 +430,22 @@ export const api_put_setting = fetch.bind(
   null,
   api.put_setting,
   put_setting_actions
+)
+
+export const api_get_api_keys = fetch.bind(
+  null,
+  api.get_api_keys,
+  get_api_keys_actions
+)
+export const api_post_api_key = fetch.bind(
+  null,
+  api.post_api_key,
+  post_api_key_actions
+)
+export const api_delete_api_key = fetch.bind(
+  null,
+  api.delete_api_key,
+  delete_api_key_actions
 )
 
 export const api_post_waiver = fetch.bind(

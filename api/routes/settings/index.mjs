@@ -1,6 +1,7 @@
 import express from 'express'
 
 import sources from './sources.mjs'
+import api_keys from './api-keys.mjs'
 
 /**
  * @swagger
@@ -27,7 +28,9 @@ const router = express.Router()
 /**
  * Settings subroutes:
  * - /sources - Projection source weight management
+ * - /api-keys - Data-view export API key generation and revocation
  */
 router.use('/sources', sources)
+router.use('/api-keys', api_keys)
 
 export default router

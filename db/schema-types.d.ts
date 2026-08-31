@@ -21448,6 +21448,17 @@ export interface UrlsRow {
   created_at: Date | null
 }
 
+export interface UserApiKeysRow {
+  api_key_id: number
+  user_id: number
+  key_hash: string
+  key_prefix: string
+  name: string
+  created_at: Date
+  last_used_at: Date | null
+  revoked_at: Date | null
+}
+
 export interface UserDataViewFavoritesRow {
   user_id: number
   view_id: string
@@ -21491,6 +21502,7 @@ export interface UsersRow {
   watchlist: string | null
   last_visit_at: Date | null
   invite_code: string | null
+  data_view_export_max_rows: number | null
 }
 
 export interface UsersSourcesRow {

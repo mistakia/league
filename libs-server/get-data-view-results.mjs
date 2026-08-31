@@ -1607,13 +1607,17 @@ export const get_data_view_results_query = async ({
   offset = 0,
   limit = 500,
   row_grain = ['player'],
+  // Server-resolved ceiling on `limit`, never client-supplied -- the executor
+  // applies it AFTER spreading the caller's table state for that reason. Null
+  // means no ceiling, which only an export API key can ask for.
+  max_limit = validators.DATA_VIEW_DEFAULT_MAX_LIMIT,
   // Server-resolved identity of the caller, never client-supplied. Reaches a
   // column definition as `data_view_options.viewer_user_id`, which is how a
   // viewer-scoped column (see `data-views/viewer-scoped-columns.mjs`) decides
   // what it may disclose. Null for an anonymous caller.
   user_id = null
 } = {}) => {
-  const validator_result = validators.table_state_validator({
+  const validator_result = validators.get_table_state_validator({ max_limit })({
     row_axes,
     where,
     columns,
@@ -2346,7 +2350,14 @@ export const get_data_view_results_query = async ({
   if (offset) {
     players_query.offset(offset)
   }
-  players_query.limit(limit)
+  // A null limit emits NO LIMIT clause -- the whole result set. knex reaches the
+  // same end by warning and skipping the clause, so this states the unbounded
+  // case rather than arriving at it through a warning nobody reads. Only the
+  // export route can produce it, and only for a caller whose API key carries no
+  // row ceiling; every other path is bounded by DATA_VIEW_DEFAULT_MAX_LIMIT.
+  if (limit !== null && limit !== undefined) {
+    players_query.limit(limit)
+  }
 
   return {
     data_view_metadata,
@@ -2371,6 +2382,7 @@ export default async function ({
   timeout = null,
   calculate_total_count = true,
   row_grain = ['player'],
+  max_limit = validators.DATA_VIEW_DEFAULT_MAX_LIMIT,
   user_id = null
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
@@ -2382,6 +2394,7 @@ export default async function ({
     offset,
     limit,
     row_grain,
+    max_limit,
     user_id
   })
 
