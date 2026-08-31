@@ -1,7 +1,8 @@
 import {
   build_grant_plan,
-  read_schema_sql
-} from '#db/tools/generate-data-view-reader-grants.mjs'
+  read_schema_sql,
+  DATA_VIEW_ROLE
+} from '#db/tools/generate-reader-role-grants.mjs'
 
 // The parse-time table allowlist and the role's GRANT list are the SAME list,
 // derived from the same classification, so they cannot drift apart. Two hand
@@ -21,7 +22,13 @@ let memoized_allowlist = null
 
 export const get_sandbox_relation_allowlist = () => {
   if (!memoized_allowlist) {
-    memoized_allowlist = new Set(build_grant_plan(read_schema_sql()).granted)
+    // Pinned to the data-view role explicitly. The parser guards THIS tier, and
+    // a second reader role now exists with a wider list -- resolving the role by
+    // default would silently widen what the parser accepts if that default ever
+    // moved.
+    memoized_allowlist = new Set(
+      build_grant_plan(read_schema_sql(), { role: DATA_VIEW_ROLE }).granted
+    )
   }
   return memoized_allowlist
 }

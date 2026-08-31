@@ -1,5 +1,6 @@
 import db from '#db'
-import { get_data_view_sandbox_db } from '#db/data-view-sandbox.mjs'
+import { get_sandbox_db } from '#db/sandbox-pool.mjs'
+import { run_sandboxed_read } from '#libs-server/sandboxed-read.mjs'
 import {
   TOTAL_COUNT_KEY,
   extract_total_count
@@ -20,20 +21,16 @@ import validate_generated_sql, {
 // THE CONTROLS, and which of them is actually load-bearing:
 //
 //   - the parser (validate-generated-sql.mjs), rejecting writes, DDL, locking
-//     clauses, non-allowlisted relations and unaliased projections
-//   - a SECOND connection pool held by league_data_view_reader, whose GRANTs are
-//     an enumerated allowlist. Not `SET ROLE` on the main pool -- `RESET ROLE`
-//     is available from inside any session, so SET ROLE is not a control
-//   - `SET TRANSACTION READ ONLY` inside an explicit transaction. NOT
-//     `SET LOCAL default_transaction_read_only`, which is a measured no-op for
-//     the statement it would guard: that setting only applies at transaction
-//     start, so setting it inside a BEGIN leaves transaction_read_only at `off`
-//     and a subsequent INSERT succeeds
-//   - `SET LOCAL statement_timeout`, well under the server's measured 30s
-//     baseline, issued inside the same transaction block so it actually lands
-//   - a plain `EXPLAIN` preflight. Plain EXPLAIN does not execute; EXPLAIN
-//     ANALYZE does, on both a volatile side-effecting function and a CTE
-//     containing an INSERT, so it is never used here
+//     clauses, non-allowlisted relations and unaliased projections. This one is
+//     specific to THIS tier: its caller wrote the statement
+//   - a SEPARATE connection pool held by league_data_view_reader, whose GRANTs
+//     are an enumerated allowlist. Not `SET ROLE` on the main pool -- see
+//     db/sandbox-pool.mjs
+//   - the read-only transaction, statement timeout and EXPLAIN preflight, all
+//     of which live in libs-server/sandboxed-read.mjs because the contribution
+//     reproduction substrate runs inside the same envelope. Each carries a
+//     non-obvious reason to be exactly what it is; that reasoning is kept in
+//     one copy there rather than duplicated per caller
 //   - a hard row cap applied as the outer LIMIT
 //
 // RESULT CACHING SHIPS OFF. Every request through here runs skip_cache with no
@@ -44,11 +41,6 @@ import validate_generated_sql, {
 // turns caching on.
 
 const MAX_ROW_CAP = 10000
-const DEFAULT_STATEMENT_TIMEOUT_MS = 20000
-// The measured server baseline is 30s. Staying under it means the sandbox's own
-// timeout is what cancels a runaway statement, with a diagnosable error, rather
-// than the server-wide one.
-const MAX_STATEMENT_TIMEOUT_MS = 25000
 
 const SUPPORTED_OPERATORS = new Set([
   '=',
@@ -285,43 +277,18 @@ export default async function execute_generated_sql({
     calculate_total_count
   })
 
-  const statement_timeout_ms = Math.min(
-    Number(timeout) || DEFAULT_STATEMENT_TIMEOUT_MS,
-    MAX_STATEMENT_TIMEOUT_MS
-  )
-
-  const pool = sandbox_db || get_data_view_sandbox_db()
+  const pool = sandbox_db || get_sandbox_db('data_view')
   const started_at = Date.now()
 
   let rows
   let fields
   try {
-    await pool.transaction(async (trx) => {
-      // FIRST statement in the transaction, and it must be: Postgres refuses
-      // SET TRANSACTION READ ONLY once the transaction has done any work.
-      await trx.raw('SET TRANSACTION READ ONLY')
-      // Not parameterized because SET does not take a binding on the extended
-      // protocol; the value is an integer this function computed, never
-      // caller-supplied text.
-      await trx.raw(`SET LOCAL statement_timeout = ${statement_timeout_ms}`)
-
-      // Plain EXPLAIN, never EXPLAIN ANALYZE. This is a planner-level check that
-      // the wrapped statement resolves against the relations the role can
-      // actually see, so a privilege denial surfaces before execution.
-      await trx.raw(`EXPLAIN ${query_string}`, bindings)
-
-      // Filter VALUES are bound, never interpolated. That is the whole of what
-      // binding buys here: a statement with no filters carries an empty
-      // bindings array, and `pg.query(sql, [])` stays on the SIMPLE protocol,
-      // which executes every statement in the string -- measured with a
-      // positive control that dropped the victim table. So the control against
-      // multi-statement injection is the parser's single-statement rule, not
-      // the protocol, and it cannot be otherwise: a binding cannot be forced
-      // into arbitrary generated SQL.
-      const response = await trx.raw(query_string, bindings)
-      rows = response.rows
-      fields = response.fields
-    })
+    ;({ rows, fields } = await run_sandboxed_read({
+      pool,
+      query_string,
+      bindings,
+      timeout
+    }))
   } catch (error) {
     await record_audit({
       audit_writer,

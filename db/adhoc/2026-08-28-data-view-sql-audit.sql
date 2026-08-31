@@ -21,7 +21,7 @@
 --
 -- ONE STEP AFTER THIS FILE, IN THE SAME COMMIT. Run `yarn export:schema`, and
 -- add `data_view_sql_audit` to EXCLUDED_RELATIONS in
--- db/tools/generate-data-view-reader-grants.mjs with the reason
+-- db/tools/generate-reader-role-grants.mjs with the reason
 -- "the sandbox's own audit trail; a sandbox that can read back other users'
 -- statements is not one". That generator grants every relation it is not told to
 -- exclude, so this table becomes readable by the sandbox role the moment it

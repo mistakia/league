@@ -40,7 +40,7 @@
 -- PRIVILEGES grants that league_reader holds. There are TWO of those in
 -- db/schema.postgres.sql, the SEQUENCES arm and the TABLES arm, and this role
 -- must avoid BOTH: every future table and every future sequence is then denied
--- until someone adds a line to db/tools/generate-data-view-reader-grants.mjs
+-- until someone adds a line to db/tools/generate-reader-role-grants.mjs
 -- and grants it. The allowlist ratchets in the safe direction.
 --
 -- WHY THE THREE PUBLIC LINES BELOW. A 2026-08-28 review against the live
@@ -64,7 +64,7 @@
 -- found (public.config, the ballot-content table, a second saved-views table,
 -- and seven others). Regenerate and diff with:
 --
---     node db/tools/generate-data-view-reader-grants.mjs --report
+--     node db/tools/generate-reader-role-grants.mjs --role league_data_view_reader --report
 --
 -- 316 relations in public at authoring time: 273 granted below, 43 excluded
 -- with a stated reason in that tool.

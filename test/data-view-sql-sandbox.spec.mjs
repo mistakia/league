@@ -360,6 +360,35 @@ describe('DATA VIEW SQL sandbox', function () {
       expect(result.data_view_results[0].flag).to.equal('on')
     })
 
+    it('sets read-only ITSELF, on a role carrying no read-only attribute', async function () {
+      // The assertion above cannot see this control. sandbox_pool's role holds
+      // `default_transaction_read_only = on`, so transaction_read_only reads
+      // `on` whether or not the envelope issued SET TRANSACTION READ ONLY --
+      // deleting that statement leaves the assertion green. Measured on
+      // 2026-08-31 by removing it: all 24 assertions still passed.
+      //
+      // The unhardened role carries no such attribute, so on this pool the flag
+      // is `off` unless the envelope set it. This is the assertion that goes red
+      // when the control is removed, which is the only reason to trust it.
+      const baseline = await unhardened_pool.transaction(async (trx) => {
+        const { rows } = await trx.raw(
+          "select current_setting('transaction_read_only') as flag"
+        )
+        return rows[0].flag
+      })
+      expect(
+        baseline,
+        'unhardened control role must not be read-only by attribute'
+      ).to.equal('off')
+
+      const result = await execute_generated_sql({
+        sql_text: "select current_setting('transaction_read_only') as flag",
+        sandbox_db: unhardened_pool,
+        audit_writer
+      })
+      expect(result.data_view_results[0].flag).to.equal('on')
+    })
+
     it('truncates at the row cap', async function () {
       const result = await execute_generated_sql({
         sql_text: 'select generate_series(1, 5000) as n',

@@ -1,8 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * Emits the explicit `GRANT SELECT` list for `league_data_view_reader`, the
- * role the sandboxed-SQL data-view tier connects as.
+ * Emits the explicit `GRANT SELECT` list for each scoped reader role.
+ *
+ * Two roles exist, and they are deliberately NOT one role holding the union:
+ *
+ *   - `league_data_view_reader` -- the sandboxed-SQL data-view tier, whose
+ *     caller writes the statement.
+ *   - `league_contribution_reader` -- the contribution reproduction substrate,
+ *     which re-executes registry-generated SQL from a captured table_state to
+ *     confirm a reported bug.
+ *
+ * They read overlapping but different relation sets. Widening the data-view
+ * tier's allowlist to serve reproduction would weaken a user-facing control for
+ * an unrelated reason, so each role's list is reviewed on its own terms and the
+ * shared machinery is only the classification method below.
  *
  * The method is the point. An earlier draft of this allowlist was "grant
  * broadly across the football-data tables, minus these exclusions", with the
@@ -25,8 +37,8 @@
  * from the live database and which the schema-conformance ratchet keeps honest.
  *
  * Usage:
- *   node db/tools/generate-data-view-reader-grants.mjs            # grant lines
- *   node db/tools/generate-data-view-reader-grants.mjs --report   # + exclusions
+ *   node db/tools/generate-reader-role-grants.mjs --role <role>            # grant lines
+ *   node db/tools/generate-reader-role-grants.mjs --role <role> --report   # + exclusions
  *
  * This is a TOOL, not a gate: it carries no verdict wired to a run. It does
  * throw on the two conditions that would make its output wrong -- a granted
@@ -46,10 +58,12 @@ const repo_root = path.resolve(
   '..'
 )
 
-export const SANDBOX_ROLE = 'league_data_view_reader'
+export const DATA_VIEW_ROLE = 'league_data_view_reader'
+export const CONTRIBUTION_ROLE = 'league_contribution_reader'
 
-// Every excluded relation and the reason. Grouped by why, because the reason
-// is what a reviewer checks -- a name alone cannot be reviewed.
+// Every excluded relation and the reason, for the data-view role. Grouped by
+// why, because the reason is what a reviewer checks -- a name alone cannot be
+// reviewed.
 export const EXCLUDED_RELATIONS = new Map([
   // Account and identity
   ['users', 'password hash, email, invite code'],
@@ -146,31 +160,95 @@ export const EXCLUDED_RELATIONS = new Map([
 
   // Migration bookkeeping: no analytical content, and a moving target
   ['league_migrations', 'migration bookkeeping'],
-  ['league_migrations_lock', 'migration bookkeeping']
+  ['league_migrations_lock', 'migration bookkeeping'],
+
+  // Materialized views. Until 2026-08-31 these were invisible to this tool --
+  // it matched CREATE TABLE and CREATE VIEW only, so a MATERIALIZED VIEW was
+  // neither granted nor classified, and `--report` claimed to enumerate every
+  // relation in public while silently omitting them. They are denied to the
+  // data-view role here rather than granted, which preserves the shipped
+  // allowlist exactly: the tier has always been unable to read them, and this
+  // entry makes that a reviewed decision instead of an accident of a regex.
+  ['opening_days', 'not reachable by the registry tier; denied pending review'],
+  [
+    'nfl_year_week_timestamp',
+    'not reachable by the registry tier; denied pending review'
+  ]
+])
+
+// The contribution reproduction substrate re-executes registry-generated SQL,
+// which reaches three relations the data-view tier's caller cannot name. All
+// three were measured against the 280 stored data-view fixtures on 2026-08-31:
+// without them, 53 of 280 fail to execute.
+//
+// `rosters_players` is the one worth a second look. It is excluded above
+// because it backs the viewer-scoped roster tags, which is a correctness
+// concern for an agent composing its own SQL rather than a secrecy one. The
+// reproduction path re-runs a query a visitor already ran, so it reaches
+// nothing that visitor could not already see.
+const CONTRIBUTION_ADDITIONS = new Set([
+  'opening_days',
+  'nfl_year_week_timestamp',
+  'rosters_players'
+])
+
+export const EXCLUDED_RELATIONS_BY_ROLE = new Map([
+  [DATA_VIEW_ROLE, EXCLUDED_RELATIONS],
+  [
+    CONTRIBUTION_ROLE,
+    new Map(
+      [...EXCLUDED_RELATIONS].filter(
+        ([relation]) => !CONTRIBUTION_ADDITIONS.has(relation)
+      )
+    )
+  ]
 ])
 
 const relations_from_schema = (schema_sql) => {
   const tables = []
   const views = []
   const table_pattern = /^CREATE TABLE public\.([a-z0-9_]+) \(/gm
+  // `CREATE VIEW` must not also swallow `CREATE MATERIALIZED VIEW`: the two are
+  // classified alike here but a matview's body is introduced differently, and
+  // the view-body check below indexes on the exact CREATE line.
   const view_pattern = /^CREATE VIEW public\.([a-z0-9_]+) AS/gm
+  const materialized_view_pattern =
+    /^CREATE MATERIALIZED VIEW public\.([a-z0-9_]+) AS/gm
   let match
   while ((match = table_pattern.exec(schema_sql))) tables.push(match[1])
   while ((match = view_pattern.exec(schema_sql))) views.push(match[1])
-  return { tables, views }
+  const materialized_views = []
+  while ((match = materialized_view_pattern.exec(schema_sql))) {
+    materialized_views.push(match[1])
+  }
+  return { tables, views, materialized_views }
 }
 
 // A view runs with its OWNER's privileges, so granting SELECT on a view hands
 // out everything the view reads regardless of the table-level exclusions. This
 // reads each granted view's body out of the dump and refuses any that names an
 // excluded relation.
-const assert_no_view_reads_an_excluded_relation = ({ schema_sql, views }) => {
-  for (const view of views) {
-    const start = schema_sql.indexOf(`CREATE VIEW public.${view} AS`)
+const assert_no_view_reads_an_excluded_relation = ({
+  schema_sql,
+  views,
+  materialized_views = [],
+  excluded_relations
+}) => {
+  const bodies = [
+    ...views.map((view) => ({ view, header: `CREATE VIEW public.${view} AS` })),
+    // A matview runs with its owner's privileges exactly as a view does, so
+    // granting one hands out everything it reads. Same check, same reason.
+    ...materialized_views.map((view) => ({
+      view,
+      header: `CREATE MATERIALIZED VIEW public.${view} AS`
+    }))
+  ]
+  for (const { view, header } of bodies) {
+    const start = schema_sql.indexOf(header)
     if (start === -1) throw new Error(`view ${view} not found in schema dump`)
     const end = schema_sql.indexOf('\n\n', start)
     const body = schema_sql.slice(start, end === -1 ? undefined : end)
-    for (const excluded of EXCLUDED_RELATIONS.keys()) {
+    for (const excluded of excluded_relations.keys()) {
       const reads_it = new RegExp(`\\bpublic\\.${excluded}\\b`).test(body)
       if (reads_it) {
         throw new Error(
@@ -182,9 +260,14 @@ const assert_no_view_reads_an_excluded_relation = ({ schema_sql, views }) => {
   }
 }
 
-const assert_no_stale_exclusion = ({ tables, views }) => {
-  const present = new Set([...tables, ...views])
-  const stale = [...EXCLUDED_RELATIONS.keys()].filter((r) => !present.has(r))
+const assert_no_stale_exclusion = ({
+  tables,
+  views,
+  materialized_views,
+  excluded_relations
+}) => {
+  const present = new Set([...tables, ...views, ...materialized_views])
+  const stale = [...excluded_relations.keys()].filter((r) => !present.has(r))
   if (stale.length) {
     throw new Error(
       `exclusion list names ${stale.length} relation(s) absent from the schema: ${stale.join(', ')}`
@@ -192,24 +275,56 @@ const assert_no_stale_exclusion = ({ tables, views }) => {
   }
 }
 
-export const build_grant_plan = (schema_sql) => {
-  const { tables, views } = relations_from_schema(schema_sql)
-  assert_no_stale_exclusion({ tables, views })
+/**
+ * @param {string} schema_sql
+ * @param {object} [opts]
+ * @param {string} [opts.role] - one of DATA_VIEW_ROLE, CONTRIBUTION_ROLE
+ */
+export const build_grant_plan = (
+  schema_sql,
+  { role = DATA_VIEW_ROLE } = {}
+) => {
+  const excluded_relations = EXCLUDED_RELATIONS_BY_ROLE.get(role)
+  if (!excluded_relations) {
+    throw new Error(
+      `unknown reader role ${role}; expected one of ${[...EXCLUDED_RELATIONS_BY_ROLE.keys()].join(', ')}`
+    )
+  }
 
-  const granted_tables = tables.filter((t) => !EXCLUDED_RELATIONS.has(t))
-  const granted_views = views.filter((v) => !EXCLUDED_RELATIONS.has(v))
-  assert_no_view_reads_an_excluded_relation({
-    schema_sql,
-    views: granted_views
+  const { tables, views, materialized_views } =
+    relations_from_schema(schema_sql)
+  assert_no_stale_exclusion({
+    tables,
+    views,
+    materialized_views,
+    excluded_relations
   })
 
+  const granted_tables = tables.filter((t) => !excluded_relations.has(t))
+  const granted_views = views.filter((v) => !excluded_relations.has(v))
+  const granted_materialized_views = materialized_views.filter(
+    (v) => !excluded_relations.has(v)
+  )
+  assert_no_view_reads_an_excluded_relation({
+    schema_sql,
+    views: granted_views,
+    materialized_views: granted_materialized_views,
+    excluded_relations
+  })
+
+  const all_relations = [...tables, ...views, ...materialized_views]
   return {
-    granted: [...granted_tables, ...granted_views].sort(),
-    excluded: [...tables, ...views]
-      .filter((r) => EXCLUDED_RELATIONS.has(r))
+    role,
+    granted: [
+      ...granted_tables,
+      ...granted_views,
+      ...granted_materialized_views
+    ].sort(),
+    excluded: all_relations
+      .filter((r) => excluded_relations.has(r))
       .sort()
-      .map((r) => ({ relation: r, reason: EXCLUDED_RELATIONS.get(r) })),
-    relation_count: tables.length + views.length
+      .map((r) => ({ relation: r, reason: excluded_relations.get(r) })),
+    relation_count: all_relations.length
   }
 }
 
@@ -217,10 +332,13 @@ export const read_schema_sql = () =>
   fs.readFileSync(path.join(repo_root, 'db', 'schema.postgres.sql'), 'utf8')
 
 const main = () => {
-  const plan = build_grant_plan(read_schema_sql())
+  const role_index = process.argv.indexOf('--role')
+  const role = role_index === -1 ? DATA_VIEW_ROLE : process.argv[role_index + 1]
+  const plan = build_grant_plan(read_schema_sql(), { role })
   const report = process.argv.includes('--report')
 
   if (report) {
+    console.log(`-- role ${plan.role}`)
     console.log(`-- ${plan.relation_count} relations in public`)
     console.log(
       `-- ${plan.granted.length} granted, ${plan.excluded.length} excluded`
@@ -233,13 +351,13 @@ const main = () => {
   }
 
   for (const relation of plan.granted) {
-    console.log(`GRANT SELECT ON public.${relation} TO ${SANDBOX_ROLE};`)
+    console.log(`GRANT SELECT ON public.${relation} TO ${plan.role};`)
   }
 }
 
 if (
   process.argv[1] &&
-  process.argv[1].endsWith('generate-data-view-reader-grants.mjs')
+  process.argv[1].endsWith('generate-reader-role-grants.mjs')
 ) {
   main()
 }

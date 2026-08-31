@@ -34,6 +34,20 @@
       "max": 2
     }
   },
+  "postgres_contribution_sandbox": {
+    "client": "pg",
+    "connection": {
+      "host": "127.0.0.1",
+      "user": "league_contribution_reader",
+      "database": "league_test",
+      "password": "test-only-not-a-secret-sandbox-role",
+      "port": 5432
+    },
+    "pool": {
+      "min": 0,
+      "max": 2
+    }
+  },
   "url": "http://127.0.0.1:8080",
   "email": {
     "resend_api_key": "re_test_000000000000000000000000000000",

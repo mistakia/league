@@ -26,5 +26,17 @@ BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'league_data_view_reader') THEN
     CREATE ROLE league_data_view_reader;
   END IF;
+  -- The contribution reproduction role. It enters the schema dump the same way
+  -- once db/adhoc/2026-08-31-create-contribution-reader-role.sql is applied to
+  -- production and the schema is re-exported; created here ahead of that so the
+  -- load does not start failing on the commit that exports it.
+  --
+  -- This script runs ONLY on first initialization of an empty data volume, so a
+  -- container whose volume predates this line will never have the role. If a
+  -- spec fails with 28000 or an unresolvable GRANT, recreate the volume rather
+  -- than assuming this ran.
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'league_contribution_reader') THEN
+    CREATE ROLE league_contribution_reader;
+  END IF;
 END
 $$;
