@@ -878,6 +878,43 @@ const has_quoted_literal_placeholder = (raw_sql) => {
   })
 }
 
+// A placeholder that IS a whole aliased select item defines a derived COLUMN,
+// and NULL substitution gives that column no type it can carry. Postgres resolves
+// a bare `NULL AS id_count` to `text`, so every downstream use of the alias is
+// typed against text and a perfectly ordinary `WHERE id_count = 0` raises
+// `operator does not exist: text = integer` — a type error the gate would then
+// report as a defect in SQL that runs correctly in production.
+//
+// This is the third face of the same documented cost as the identifier and
+// quoted-literal shapes above: substitution cannot produce runnable SQL, so the
+// statement is uncovered rather than a finding. It is what
+// `libs-server/duplicate-person-row-pairs.mjs` hit, where the placeholder is a
+// `num_nonnulls(...)` call assembled in JavaScript and the alias is compared to
+// an integer inside a later CTE.
+//
+// Structural, and it reads no placeholder NAME: the placeholder must fill the
+// select item on its own — select-list position before it, an alias after it.
+// A placeholder that is only PART of an expression (`${count} + 1 AS n`) still
+// substitutes to a typed expression and stays checkable, so it is not matched.
+const SELECT_LIST_PREFIX_RE = /(?:,|\bSELECT\b|\bSELECT\s+DISTINCT\b)\s*$/i
+const ALIAS_SUFFIX_RE = /^\s*\bAS\b\s+[a-z_][a-z0-9_]*/i
+
+const has_derived_column_placeholder = (raw_sql) => {
+  const sql = strip_block_comments(raw_sql).replace(/--[^\n]*/g, '')
+  return PLACEHOLDER_PATTERNS.some((pattern) => {
+    const scan = new RegExp(pattern.source, 'gi')
+    let match
+    while ((match = scan.exec(sql))) {
+      const before = sql.slice(0, match.index)
+      const after = sql.slice(match.index + match[0].length)
+      if (SELECT_LIST_PREFIX_RE.test(before) && ALIAS_SUFFIX_RE.test(after)) {
+        return true
+      }
+    }
+    return false
+  })
+}
+
 const substitute_placeholders = (sql) => {
   let out = sql
   let substitutions = 0
@@ -1183,6 +1220,12 @@ const complete_dangling_with = (original) => {
 // the reference query in `text/league/data-model-reference.md` that had a GROUP BY
 // with no aggregates.
 const UNCOVERED_ERROR_CODES = new Set(['42601'])
+
+// undefined_function (which is what Postgres raises for an absent OPERATOR, so
+// `text = integer` lands here) and datatype_mismatch. Never uncovered on their
+// own — a real stale column produces exactly these — only in combination with
+// the derived-column shape below.
+const TYPE_ERROR_CODES = new Set(['42883', '42804'])
 
 const collect_sql_blocks = (
   corpus,
@@ -2082,6 +2125,33 @@ const explain_statements = async ({
         })
         continue
       }
+      // A type error raised on a statement whose interpolation DEFINES an
+      // aliased column is the substitution's own artifact, not a defect. NULL
+      // carries no type, so `${expr} AS id_count` resolves the column to text
+      // and a later `WHERE id_count = 0` fails as `text = integer` — in SQL that
+      // runs correctly in production, which is what
+      // libs-server/duplicate-person-row-pairs.mjs demonstrated.
+      //
+      // Deliberately narrow on BOTH halves, because either alone would blind
+      // real defects. The error code alone would swallow every genuine operator
+      // and type mismatch this gate exists to find. The shape alone would
+      // withdraw statements that EXPLAIN perfectly well — measured at six of
+      // them across gates 3 and 4 — because nothing downstream ever compares the
+      // alias to a typed value. Only the pair means "the gate broke this."
+      if (
+        TYPE_ERROR_CODES.has(error.code) &&
+        has_derived_column_placeholder(statement.raw)
+      ) {
+        uncovered.push({
+          path: statement.path,
+          line: statement.line,
+          reason:
+            'interpolation defines an aliased select-list column, and NULL substitution typed ' +
+            `it as text (${explain_error_detail(error)}); the type error is this gate's ` +
+            'substitution, not the statement'
+        })
+        continue
+      }
       explained++
       const site = {
         gate,
@@ -2837,6 +2907,76 @@ const run_negative_control = async ({
     cases.push([
       'gate 3 reads a template-literal SQL constant and declines a .raw() expression fragment',
       took_the_constant && declined_the_fragments
+    ])
+  }
+
+  // 13a. A type error raised BY the NULL substitution is withdrawn, and a type
+  //      error that is a real defect is not. This has to be driven through
+  //      EXPLAIN rather than through extraction, because the shape alone is not
+  //      the signal -- the same shape EXPLAINs perfectly well whenever nothing
+  //      downstream compares the alias to a typed value, and withdrawing on shape
+  //      alone measurably blinded six real statements across gates 3 and 4.
+  //
+  //      THREE directions, because any two of them pass on a rule that is wrong
+  //      in the third:
+  //        - the shape WITH a substitution-induced type error  -> uncovered
+  //        - the same shape that EXPLAINs                      -> still checked
+  //        - a type error with NO such shape                   -> still a finding
+  //
+  //      The corpus instance is libs-server/duplicate-person-row-pairs.mjs, whose
+  //      SQL runs correctly in production and was reported as a type error.
+  if (db) {
+    // Assembled rather than written literally: a `${...}` inside a quoted string
+    // is what `no-template-curly-in-string` exists to catch, and here it is the
+    // subject rather than a mistake.
+    const interpolation = `$\{expr('p')}`
+    const statement = ({ sql, raw }) => ({
+      path: 'db/gates/__negative_control_derived_column__.mjs',
+      line: 1,
+      sql,
+      raw,
+      substitutions: 1
+    })
+
+    // The gate's own substitution output: `${...}` already replaced by NULL.
+    const withdrawn = statement({
+      raw: `with c as (select p.pid, ${interpolation} as id_count from player p)\nselect c.pid from c where c.id_count = 0`,
+      sql: 'with c as (select p.pid, NULL as id_count from player p) select c.pid from c where c.id_count = 0'
+    })
+    // Same shape, no downstream typed comparison, so it EXPLAINs.
+    const still_checked = statement({
+      raw: `select p.pid, ${interpolation} as id_count from player p`,
+      sql: 'select p.pid, NULL as id_count from player p'
+    })
+    // A real type error with no derived-column interpolation anywhere.
+    const still_reported = statement({
+      raw: 'select p.pid from player p where p.first_name = 1',
+      sql: 'select p.pid from player p where p.first_name = 1'
+    })
+
+    const run = async (one) =>
+      explain_statements({
+        db,
+        statements: [one],
+        adjudications: [],
+        gate: 3
+      })
+
+    const withdrawn_result = await run(withdrawn)
+    const still_checked_result = await run(still_checked)
+    const still_reported_result = await run(still_reported)
+
+    cases.push([
+      'gate 3 withdraws a type error its own NULL substitution caused, while still checking the same shape and still reporting a real one',
+      withdrawn_result.findings.length === 0 &&
+        withdrawn_result.uncovered.some((entry) =>
+          /defines an aliased select-list column/.test(entry.reason)
+        ) &&
+        still_checked_result.findings.length === 0 &&
+        still_checked_result.uncovered.length === 0 &&
+        still_checked_result.explained === 1 &&
+        still_reported_result.findings.length === 1 &&
+        still_reported_result.uncovered.length === 0
     ])
   }
 
