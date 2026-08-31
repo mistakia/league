@@ -7,7 +7,8 @@ import {
   parse_clock_to_seconds,
   convert_field_position_to_ydl_100,
   map_qb_alignment,
-  normalize_coverage_type
+  normalize_coverage_type,
+  FIELD_MAPPINGS
 } from '#libs-server/charting-data/field-mapping.mjs'
 
 chai.should()
@@ -347,6 +348,165 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       const result = map_charting_play_to_db_fields(source)
       expect(result).to.not.have.property('off')
       expect(result).to.not.have.property('def')
+    })
+
+    // The allowlist below is the whole point of this block, and it is written
+    // out by hand rather than derived from FIELD_MAPPINGS on purpose: a list
+    // built from the mapper would agree with the mapper by construction and
+    // could never fail. Adding a mapping means adding its column here, which is
+    // the moment a reviewer gets to ask whether the NFL feed already owns it.
+    //
+    // This importer calls update_play with no protected_fields, so any column
+    // named here is filled wherever the authoritative feed left NULL. That is
+    // correct for the charting-exclusive columns and silent corruption for a
+    // column another source owns -- the failure that put three vocabularies
+    // into offense_formation, offense_personnel and defense_personnel. Those
+    // three are absent from this list, and the test above pins them
+    // individually; this one catches the NEXT column instead of the last three.
+    const ALLOWED_OUTPUT_COLUMNS = [
+      // Direct mappings onto columns the charting vendor may fill
+      'quarter',
+      'down_number',
+      'yards_to_go',
+      'is_passing_play',
+      'is_rushing_play',
+      'pass_yards',
+      'rush_yards',
+      'is_penalty',
+      'penalty_yards',
+      'is_touchdown',
+      'is_fumble',
+      'is_fumble_lost',
+      'is_interception',
+      'is_sack',
+      'yards_gained',
+      'is_completion',
+      'is_screen_pass',
+      'is_play_action',
+      'is_qb_pressure',
+      'is_scoring_play',
+      'is_qb_hit',
+      'is_qb_rush',
+      'is_qb_scramble',
+      'is_stunt',
+      'is_qb_hurry',
+      'box_defenders',
+      'yards_after_any_contact',
+      'yards_after_catch',
+      'is_run_play_option',
+      'time_to_pressure',
+      'time_to_throw',
+      'depth_of_target',
+      'is_qb_dropback',
+      'pass_rushers',
+      'is_blitz',
+
+      // Charting-exclusive columns -- this vendor is the only writer
+      'epa_charting',
+      'dropback_depth',
+      'play_action_concept',
+      'run_concept',
+      'run_gap_intent',
+      'run_gap_intent_side',
+      'run_gap_outcome',
+      'run_gap_outcome_side',
+      'mofc_played',
+      'mofc_look',
+      'pass_width',
+      'quarterback_scramble_side',
+      'is_split_run',
+      'is_reverse_run',
+      'is_pitch_run',
+      'is_option_run',
+      'is_qb_left_pocket',
+      'is_end_around_run',
+      'is_jet_sweep_run',
+      'is_lead_run',
+      'is_own_fumble_recovery',
+      'charting_play_type',
+      'charting_penalty_outcome',
+      'coverage_defenders',
+      'receiver_alignment_charting',
+
+      // Written by the transformation block rather than a direct mapping
+      'yard_line_100',
+      'seconds_remaining_quarter',
+      'coverage_type',
+      'man_zone',
+      'quarterback_position',
+      'run_location',
+      'field_goal_result',
+      'extra_point_result',
+      'two_point_result',
+      'home_score',
+      'away_score',
+      'offense_nfl_team',
+      'defense_nfl_team'
+    ]
+
+    // The INPUT is derived from FIELD_MAPPINGS and the OUTPUT allowlist is not,
+    // and that split is deliberate. Deriving the input is what gives coverage:
+    // the mapper only writes a column when its source key is present, so a
+    // fixture that hand-lists vendor keys is blind to a mapping added under a
+    // key nobody thought to add -- which is precisely how the next bad mapping
+    // arrives. Caught here by controlled experiment: with the vendor keys hand
+    // listed, adding boxDefenders2 -> box_defenders_charted passed this test.
+    // Deriving the assertion too would make it vacuous, so only the input is.
+    //
+    // The transformation block reads keys that are not in FIELD_MAPPINGS, so
+    // those stay hand-listed below; they change by editing that block, which is
+    // not the mechanical add this guards against.
+    const transformation_source_keys = {
+      fieldPosition: -25,
+      clock: '0:02:00',
+      coverageScheme: 'COVER 3',
+      manZoneCoverage: 'ZONE',
+      quarterbackAlignment: 'SHOTGUN',
+      runSide: 'left',
+      fieldGoalMade: null,
+      extraPointMade: null,
+      twoPointMade: null,
+      homeScoreAtStartOfPlay: 14,
+      awayScoreAtStartOfPlay: 7,
+      sumerOffenseTeamId: '645fddd1-df20-5323-93e4-c7c176baa507',
+      sumerDefenseTeamId: 'e871178d-ca00-52ff-9e93-e3f7a8a9bc9f',
+
+      // Read by nothing, and that is the assertion -- see the isMotion note in
+      // field-mapping.mjs. Present here so a restored mapping fails this test.
+      isMotion: true,
+      offensivePersonnelBasic: '11',
+      defensivePersonnelPackage: 'Nickel'
+    }
+
+    // A placeholder for the mapped keys, which are copied through verbatim, so
+    // this covers a mapping added under a key this file has never heard of.
+    const build_every_source_key = () => {
+      const source = { ...transformation_source_keys }
+      for (const source_field of Object.keys(FIELD_MAPPINGS)) {
+        if (!(source_field in source)) source[source_field] = 1
+      }
+      return source
+    }
+
+    it('writes only allowlisted columns', () => {
+      const result = map_charting_play_to_db_fields(build_every_source_key())
+
+      const written = Object.keys(result).sort()
+      const allowed = [...ALLOWED_OUTPUT_COLUMNS].sort()
+
+      // Reported as two directed differences rather than a set comparison, so a
+      // failure says which way it drifted instead of printing two long lists.
+      const unexpected = written.filter((c) => !allowed.includes(c))
+      const missing = allowed.filter((c) => !written.includes(c))
+
+      expect(
+        unexpected,
+        'mapper writes a column that is not on the allowlist -- if the charting vendor may legitimately own it, add it to ALLOWED_OUTPUT_COLUMNS; if an NFL feed owns it, this is the corruption class the allowlist exists to catch'
+      ).to.deep.equal([])
+      expect(
+        missing,
+        'allowlist names a column the mapper no longer writes -- remove it if the mapping was dropped on purpose'
+      ).to.deep.equal([])
     })
 
     it('does not include undefined fields in output', () => {
