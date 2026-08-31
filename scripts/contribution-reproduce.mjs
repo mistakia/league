@@ -27,14 +27,22 @@
 // writes the statement text, and its alias contract is one that registry SQL
 // cannot satisfy -- measured 2026-08-31, all 280 stored fixtures fail it.
 //
-// WHAT CONFIRMING DOES NOT ESTABLISH. get_data_view_results_query silently
-// DROPS a column_id it does not recognize and builds a valid query without it
-// (measured 2026-08-31). So a report captured before a column was renamed
-// reproduces against a query that no longer asks the reported question, and
-// lands on `reproduced` or `no_rows` rather than on anything saying the
-// table_state is stale. An outcome from this script is evidence about the data,
-// never evidence that the captured request is still well-formed. Closing that
-// needs the builder to report dropped columns.
+// THE STALE-REQUEST FALSE NEGATIVE, and how it is closed here.
+// get_data_view_results_query silently DROPS a column_id it does not recognize
+// and builds a valid query without it (measured 2026-08-31). A report captured
+// before a column was renamed would therefore reproduce against a query that no
+// longer asks the reported question, and land on `reproduced` or `no_rows` --
+// both of which read as evidence about the defect when they are nothing of the
+// kind.
+//
+// So the captured column_ids are checked against the registry BEFORE generation
+// and an unrecognized one is its own outcome, `stale_request`. The check is
+// deliberately OUTSIDE the builder: making the builder report dropped columns
+// would be the more complete fix and it touches every caller of a core path, so
+// it stays a separate change. What matters for this substrate is that a stale
+// capture can no longer be mistaken for a reproduction, and that does not
+// require the builder's cooperation -- the registry is a plain object and the
+// captured request names its keys.
 //
 // Usage:
 //   NODE_ENV=production node scripts/contribution-reproduce.mjs --submission-id <uuid>
@@ -51,21 +59,81 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import is_main from '#libs-server/is-main.mjs'
 import { get_data_view_results_query } from '#libs-server'
+import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import { get_sandbox_db } from '#db/sandbox-pool.mjs'
 import { run_sandboxed_read } from '#libs-server/sandboxed-read.mjs'
 
 // The outcome vocabulary IS the deliverable of this step. Every branch below
-// resolves to exactly one of these, and the distinction that matters most is
-// allowlist_gap versus no_rows: both are "the query returned nothing useful",
-// and only one of them means the report is not a defect.
+// resolves to exactly one of these, and the two distinctions that matter most
+// are both cases where a wrong answer would look like a clean result:
+//
+//   allowlist_gap versus no_rows -- both are "the query returned nothing
+//   useful", and only one of them means the report is not a defect.
+//
+//   stale_request versus either -- the query ran, but it was not the query the
+//   submitter ran, so nothing it returned is evidence about the report.
 export const REPRODUCTION_OUTCOMES = {
   reproduced: 'the query ran and returned rows to compare against the report',
   no_rows: 'the query ran and returned nothing',
   allowlist_gap: 'the query names a relation the reproduction role cannot read',
+  stale_request:
+    'the captured table_state names a column the registry no longer defines',
   timed_out: 'the query exceeded the sandbox statement timeout',
   generation_failed: 'the captured table_state did not produce a query',
   execution_error: 'the query failed for some other reason'
 }
+
+/**
+ * Every column_id a captured table_state references, across each of the four
+ * places a data-view request can name one.
+ *
+ * A column is either a bare string or an object carrying `column_id`; both
+ * forms are live in the stored fixtures, so both are handled rather than
+ * assumed away.
+ *
+ * @param {object} table_state
+ * @returns {Array<string>}
+ */
+export const collect_referenced_column_ids = (table_state) => {
+  const ids = []
+  const push = (/** @type {any} */ entry) => {
+    if (!entry) return
+    if (typeof entry === 'string') ids.push(entry)
+    else if (entry.column_id) ids.push(entry.column_id)
+  }
+  for (const key of ['columns', 'where', 'sort', 'prefix_columns']) {
+    const value = table_state && table_state[key]
+    if (Array.isArray(value)) value.forEach(push)
+  }
+  return ids
+}
+
+/**
+ * Name the referenced column_ids the registry does not define.
+ *
+ * THE FALSE NEGATIVE THIS EXISTS TO PREVENT. The builder drops an unrecognized
+ * column_id and returns a valid query without it. Reported as `reproduced`,
+ * that says "the defect is real" about a query that never asked the reported
+ * question; reported as `no_rows`, it says "the submitter was wrong". Both are
+ * confident and both are unfounded, so the condition gets its own outcome
+ * rather than being folded into either.
+ *
+ * @param {object} opts
+ * @param {object} opts.table_state
+ * @param {Record<string, any>} [opts.column_definitions] - test seam
+ * @returns {Array<string>} sorted, deduplicated
+ */
+export const find_unrecognized_column_ids = ({
+  table_state,
+  column_definitions = data_views_column_definitions
+}) =>
+  [
+    ...new Set(
+      collect_referenced_column_ids(table_state).filter(
+        (id) => !column_definitions[id]
+      )
+    )
+  ].sort()
 
 // Postgres SQLSTATEs this script must tell apart. Read off error.code, never
 // matched against a message string.
@@ -145,13 +213,33 @@ export const load_captured_table_state = async ({
  * @param {number} [opts.sample_rows]
  * @param {number|null} [opts.timeout]
  * @param {object} [opts.sandbox_db] - test seam for the contribution pool
+ * @param {Record<string, any>} [opts.column_definitions] - test seam
  */
 export const reproduce_from_table_state = async ({
   table_state,
   sample_rows = 5,
   timeout = null,
-  sandbox_db = null
+  sandbox_db = null,
+  column_definitions = data_views_column_definitions
 }) => {
+  // BEFORE generation, because after it the evidence is gone: the builder has
+  // already dropped the column and produced a query that looks entirely valid.
+  const unrecognized = find_unrecognized_column_ids({
+    table_state,
+    column_definitions
+  })
+  if (unrecognized.length) {
+    return {
+      outcome: 'stale_request',
+      detail:
+        `the captured table_state names ${unrecognized.length} column_id(s) the ` +
+        `registry no longer defines: ${unrecognized.join(', ')}. The builder ` +
+        'would drop them and answer a different question.',
+      query_string: null,
+      unrecognized_column_ids: unrecognized
+    }
+  }
+
   let query_string
   try {
     const { query } = await get_data_view_results_query(table_state)

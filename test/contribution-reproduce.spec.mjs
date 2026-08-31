@@ -10,6 +10,7 @@ import {
   classify_execution_error,
   reproduce_from_table_state,
   load_captured_table_state,
+  find_unrecognized_column_ids,
   REPRODUCTION_OUTCOMES
 } from '../scripts/contribution-reproduce.mjs'
 
@@ -166,6 +167,7 @@ describe('CONTRIBUTION reproduction', function () {
         'reproduced',
         'no_rows',
         'allowlist_gap',
+        'stale_request',
         'timed_out',
         'generation_failed',
         'execution_error'
@@ -194,26 +196,72 @@ describe('CONTRIBUTION reproduction', function () {
       expect(result.query_string).to.equal(null)
     })
 
-    it('DOES NOT catch a table_state naming a column that no longer exists', async function () {
-      // Measured 2026-08-31, and recorded as a known limit rather than asserted
-      // as correct. get_data_view_results_query silently DROPS an unknown
-      // column_id and builds a valid query without it -- the same
+    it('reports stale_request on a table_state naming a column that no longer exists', async function () {
+      // get_data_view_results_query silently DROPS an unknown column_id and
+      // builds a valid query without it (measured 2026-08-31) -- the same
       // silently-dropped-key trap CLAUDE.md documents for map_dispatch_to_props
-      // and Immutable Record.
+      // and Immutable Record. Left uncaught, a report captured before a column
+      // rename reproduces against a query that no longer selects the column the
+      // report is about, and lands on `reproduced` or `no_rows`: a confident
+      // answer about a question nobody asked.
       //
-      // The reproduction consequence: a report captured before a column was
-      // renamed reproduces against a query that no longer selects the column
-      // the report is about, and lands on no_rows or reproduced rather than on
-      // anything that says "this table_state is stale". Confirming a report
-      // therefore does NOT establish that the query still asks the reported
-      // question. Closing that needs the builder to report dropped columns; it
-      // is not something this script can detect from the outside.
+      // The check runs against the registry BEFORE generation, so it needs no
+      // cooperation from the builder.
       const result = await reproduce_from_table_state({
         table_state: { columns: [{ column_id: 'not_a_real_column_id' }] },
         sandbox_db: contribution_pool
       })
-      expect(result.outcome).to.not.equal('generation_failed')
-      expect(result.query_string).to.be.a('string')
+      expect(result.outcome).to.equal('stale_request')
+      expect(result.unrecognized_column_ids).to.deep.equal([
+        'not_a_real_column_id'
+      ])
+      // No query was built, so nothing downstream can mistake this for evidence
+      // about the data.
+      expect(result.query_string).to.equal(null)
+    })
+
+    it('finds an unrecognized column_id in each place a request names one', function () {
+      const table_state = {
+        columns: [{ column_id: 'gone_from_columns' }],
+        where: [{ column_id: 'gone_from_where', operator: 'IN', value: [1] }],
+        sort: [{ column_id: 'gone_from_sort', desc: true }],
+        prefix_columns: ['gone_from_prefix']
+      }
+      expect(
+        find_unrecognized_column_ids({
+          table_state,
+          column_definitions: { player_name: {} }
+        })
+      ).to.deep.equal([
+        'gone_from_columns',
+        'gone_from_prefix',
+        'gone_from_sort',
+        'gone_from_where'
+      ])
+    })
+
+    // THE NEGATIVE CONTROL. A check that called everything unrecognized would
+    // pass the assertions above while turning every real report into
+    // stale_request -- a refusal that looks like diligence.
+    it('calls nothing unrecognized in a table_state the registry still defines', function () {
+      expect(
+        find_unrecognized_column_ids({
+          table_state: {
+            columns: ['player_name', { column_id: 'player_position' }],
+            where: [
+              { column_id: 'player_position', operator: 'IN', value: ['WR'] }
+            ],
+            sort: [{ column_id: 'player_name' }],
+            prefix_columns: ['player_name']
+          }
+        })
+      ).to.deep.equal([])
+    })
+
+    it('tolerates a table_state carrying none of the four column-bearing keys', function () {
+      expect(find_unrecognized_column_ids({ table_state: {} })).to.deep.equal(
+        []
+      )
     })
 
     it('separates an empty result from a denied one', async function () {
