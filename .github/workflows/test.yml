@@ -38,191 +38,29 @@ jobs:
           rm -rf node_modules
           yarn install --immutable
 
-      # Fails when a test file under test/ is not collected by mocha. Runs
-      # before the database setup so an uncollected spec fails in seconds
-      # rather than after a full suite that silently skipped it.
-      - name: Test collection guard
-        run: yarn check:test-collection
-
-      # Fails when a non-production config names league_production or a remote
-      # host, or when a destructive entrypoint stops consulting the target
-      # guard. Static, needs no database, and cannot go red on a sibling's
-      # in-flight migration, so it runs first and costs a second.
-      - name: Destructive database guard
-        run: node db/gates/check-destructive-db-guard.mjs
-
-      # Fails when a floating surface sets a global-layer z-index as a bare
-      # number instead of taking it from the scale in app/styles/variables.styl.
-      # Runs here for the same reason as the guard above — it is a static read
-      # and answers in under a second.
-      - name: z-index scale guard
-        run: yarn check:z-index-scale
-
-      # Fails when a table-qualified column literal in server code does not
-      # resolve against db/schema.postgres.sql. GATE 1 ONLY, deliberately: it
-      # needs no rename list and no base ref, so it cannot drift and cannot go
-      # red on a sibling's in-flight migration. Static read, no database.
+      # THE HERMETIC SET, and the ONE definition of it. `yarn verify` is
+      # scripts/verify.mjs: every check that reads only the checked-out tree and
+      # node_modules -- no database, no base ref, no user-base ancestor, no
+      # network. It replaced fourteen separate steps here plus the `yarn lint`
+      # line in the suite step below, and each of those steps' rationale moved
+      # into the script beside the command it explains.
       #
-      # Gate 2 is NOT wired and must not be until it can see `year`. It diffs
-      # the schema against a base ref, which makes it depend on which ref CI
-      # picks, and its findings need per-site adjudication by someone who knows
-      # the cluster. Run it by hand per rename cluster:
-      #   node db/gates/check-renamed-column-consumers.mjs --gate 2 \
-      #     --base <pre-cluster-ref> --unadjudicated
-      - name: Renamed-column consumer gate (gate 1)
-        run: node db/gates/check-renamed-column-consumers.mjs --gate 1
-
-      # The companion to the gate above, covering the references that name no
-      # table LITERALLY: an alias-qualified 'r.year' bound by a join, and an
-      # unqualified object key like .where({ lid, year }). Both were invisible to
-      # every gate until 2026-08-07, which is how the season_grain conform left
-      # rosters_players.year live in compute-roster-slot-metrics (37cc9f36b) and
-      # three more 42703s on master besides.
+      # The pre-push gate (user:cli/lib/pre-push-guard-local-verify.sh) runs THIS
+      # SAME script against the outgoing SHA in a persistent, submodule-free
+      # worktree. That shared definition is the point: two lists drift, and a
+      # push that passes locally then reddens master anyway -- which defers every
+      # session's push to mistakia/league fleet-wide. Measured 2026-08-30: 47s.
       #
-      # CI-eligible on exactly gate 1's terms: it resolves against the current
-      # schema, so it needs no rename list and no base ref, cannot drift, and
-      # cannot go red on a sibling's in-flight migration. Static read, no
-      # database. Its ten negative controls run on every invocation, and four of
-      # them are what proves the scan is not vacuous -- each has to find real
-      # corpus material of its shape before it can mutate it, so all four go red
-      # when the walk reaches nothing. That is why this gate asserts no coverage
-      # floor: the numbers a floor would guard are already guarded, and coverage
-      # is instead asserted per corpus root, where the controls are blind.
-      - name: Knex column resolution gate
-        run: node db/gates/check-knex-column-resolution.mjs
-
-      # Fails when a league-scoped table in db/schema.postgres.sql is not
-      # cleared by the per-league test fixture, does not cascade from something
-      # the fixture clears, and carries no adjudication. The class has produced
-      # two incidents (a restricted-free-agency table in 2026-08, league_pauses
-      # in 2026-08-13) and both were "a human has to remember to edit a list".
+      # Fail-fast inside the script matches what these steps did as YAML. None of
+      # them carried `if: !cancelled()`, so the first red already skipped the
+      # rest.
       #
-      # CI-eligible on the same terms as the conformance ratchet: it reads the
-      # committed schema and the committed fixture, needs no base ref and no
-      # database, and answers in a quarter of a second. It CAN go red on a table
-      # someone adds without adjudicating it — that is the gate working, and
-      # both of its inputs land in the same commit under this repo's one-commit
-      # rule for DDL plus schema export plus dependent code, so it cannot go red
-      # on a sibling's in-flight migration the way the base-ref gates can.
-      - name: League fixture reset coverage
-        run: node db/gates/check-league-fixture-reset-coverage.mjs
-
-      # The three gates below were out of CI by OMISSION rather than by
-      # structure: each is `requires: none` in the check:cluster manifest, needs
-      # no database and no base ref, and answers in about a second. Each was run
-      # green on a clean checkout before being wired here, because a red master
-      # defers every session's push to mistakia/league fleet-wide.
-
-      # Fails when a swagger response schema disagrees with itself — a `required`
-      # name absent from the resolved properties, or a $ref that does not
-      # resolve. GATE 1 ONLY: the gate's own header names it the CI-eligible
-      # half, since it reads the spec against ITSELF and so cannot go red on a
-      # schema change at all.
-      #
-      # Gate 2 (wholesale single-table handlers vs db/schema.postgres.sql) is
-      # deliberately NOT wired. It is green today, so this is a wiring decision
-      # rather than a repair — but it reads the checked-out schema file, and
-      # CLAUDE.md's standing verdict is that it stays out and runs per cluster
-      # from a clean worktree:
-      #   node db/gates/check-api-response-shapes.mjs
-      - name: API response shape gate (gate 1)
-        run: node db/gates/check-api-response-shapes.mjs --gate 1
-
-      # GATE 1 ONLY, for the same reason as the gate above: gate 1 is the knex
-      # half, over this repo's own server roots against db/schema.postgres.sql,
-      # so it needs nothing outside the checkout. Gate 2 reads a SQL corpus that
-      # lives in user-base, which a runner has no ancestor for, and runs per
-      # cluster via yarn check:cluster.
-      - name: Stranded vocabulary literal gate (gate 1)
-        run: node db/gates/check-stranded-vocabulary-literals.mjs --gate 1
-
-      # Reads only the checked-out tree and walks it in Node, so it needs no
-      # database, no base ref and no binary that is not node itself.
-      - name: Dropped table consumer gate
-        run: node db/gates/check-dropped-table-consumers.mjs
-
-      # NOT WIRED, deliberately, and written down here because the omission
-      # otherwise reads as an oversight: db/gates/check-returned-property-reads.mjs
-      # and its dual db/gates/check-call-site-param-contracts.mjs are both
-      # workstation-only, run by yarn check:cluster.
-      #
-      # They pass the cheap half of the CI test — static reads of the checkout,
-      # no database, no base ref, no user-base ancestor, about two seconds each
-      # — and fail the half that decides it. Every gate wired above compares a
-      # spec or the schema file against ITSELF, and where the two inputs are a
-      # schema and its consumers, this repo's one-commit rule for DDL plus
-      # export plus dependent code makes them arrive together. These two compare
-      # a PRODUCER in one root against a CONSUMER in another, and no rule
-      # requires those to land in the same commit. A sibling renaming a returned
-      # key ahead of its consumer repair would turn master red on a finding
-      # invisible in every other session's diff, and a red master makes the
-      # sync-all pre-push guard defer EVERY push to mistakia/league.
-      #
-      # The return-side gate landed at zero findings over 608 judged reads, so
-      # this is a wiring judgement rather than a debt problem, and it is the one
-      # that should be revisited if the producer/consumer one-commit discipline
-      # ever becomes a rule rather than a habit.
-
-      # The incremental //@ts-check tier. Two steps because they answer two
-      # different questions, and the second is the one a green first step cannot
-      # cover.
-      #
-      # check:types regenerates db/schema-types.d.ts from db/schema.postgres.sql
-      # and fails if the committed copy disagrees, then runs tsc over the files
-      # carrying the pragma. Both halves read only the checkout and node_modules
-      # -- no database, no base ref, no user-base ancestor, and no binary beyond
-      # node -- so this is CI-eligible on exactly gate 1's terms and cannot go
-      # red on a sibling's in-flight migration. Verified from a /tmp worktree
-      # with rg off PATH, which is the only place the two environment
-      # dependencies that reverted the last two CI wirings are both absent.
-      - name: Type check
-        run: yarn check:types
-
-      # The ratchet. tsc is STRUCTURALLY UNABLE to see a file that has been
-      # un-adopted: deleting one comment makes a type error disappear, and the
-      # step above still exits 0 (measured). This compares the committed
-      # adoption list against the tree in both directions so the covered set can
-      # only grow, and it carries four always-on negative controls.
-      - name: ts-check adoption ratchet
-        run: node db/gates/check-ts-check-ratchet.mjs
-
-      # The knex table-type map, which is what makes the row types reach ~1,500
-      # `db('<table>')` call sites without any of them annotating anything. It
-      # only applies if db/knex-tables.d.ts is in the program, and every
-      # `include` pattern in tsconfig.json ends in *.mjs and matches no .d.ts --
-      # so the file is listed there explicitly, and losing that one line leaves
-      # both steps above exiting 0 over a tree that is no longer covered. This
-      # asserts the behavior as a red/green pair and the wiring separately.
-      - name: knex table types in effect
-        run: node db/gates/check-knex-table-types.mjs
-
-      # The bare-container JSDoc ratchet's DOWNWARD half. `yarn lint` already
-      # errors on any occurrence past a file's allowance, so the upward
-      # direction is held by the lint step. This is the other one: it fails when
-      # a baseline entry allows MORE than the file contains, which is the slack
-      # a later regression would be reabsorbed into silently. Without it the
-      # ratchet decays into a floor that only ever ran once.
-      - name: bare-container JSDoc baseline
-        run: yarn check:jsdoc-baseline
-
-      # Dead code. Its own step rather than a line inside the `yarn test` block
-      # below, on the independent-signal rule: a knip failure, a lint failure and
-      # a test failure are three different facts and none should mask another.
-      # In this job, so it costs no extra runner spin-up.
-      #
-      # `--include files` deliberately. Only the unused-FILES report is a gate.
-      # The unused-EXPORTS report is not trustworthy and must never be acted on
-      # -- see docs/guides/dead-code.md. Dependency reports are a separate
-      # cleanup and are not clean yet.
-      #
-      # private/ is a submodule this workflow does not check out, so on the
-      # runner it is an empty directory. That is benign for knip -- the files
-      # are absent rather than unreferenced, and core never statically imports
-      # #private, so the rest of the graph is unchanged. Verified green in that
-      # shape. It does mean this step covers everything EXCEPT private/, which
-      # has to be checked from a local clone.
-      - name: Dead code (knip)
-        run: yarn knip --include files
+      # What stays OUT of it, and why, is documented in scripts/verify.mjs:
+      # `yarn test` and check:private-tests need a database, and the
+      # producer-versus-consumer gates would go red on a sibling's in-flight
+      # rename.
+      - name: Verify (hermetic checks)
+        run: yarn verify
 
       - name: Install PostgreSQL client
         run: |
@@ -261,9 +99,7 @@ jobs:
           PGDATABASE: league_test
           PGUSER: league_test
           PGPASSWORD: league_test
-        run: |
-          yarn lint
-          yarn test
+        run: yarn test
 
   # Failing beacuse virtual framebuffer not installed
   #          yarn build-e2e
