@@ -863,6 +863,167 @@ const registry = [
   },
 
   {
+    check_id: 'prop-market-selection-grade-consistency',
+    invariant:
+      'A settled OVER/UNDER selection’s result is the grade its OWN stored numbers produce: selection_result is a total function of metric_result_value against selection_metric_line, with over-the-line WON for OVER and LOST for UNDER, under-the-line the reverse, and equal a PUSH. Both operands sit on the row being graded, so this needs no reference and no join — the check reads one table and asks whether a row agrees with itself. Nothing enforces it. libs-server/prop-market-settlement/selection-result-writer.mjs writes both columns in one UPDATE today, but they are two independent CASE expressions over an updates array rather than one derivation, so a row can carry a metric from one game and a result from another and no constraint objects. Before 15c18bae8 the two columns were written by SEPARATE statements against DIFFERENT tables at DIFFERENT grains — selection_result at selection grain on prop_market_selections_index, metric_result_value at market grain on prop_markets_index, and the latter only where the metric was non-null — which is the concrete path by which a row acquires divergent provenance. THE SIBLING CHECK CANNOT SEE THIS. prop-market-open-close-esbid-coherence grades whether a market’s two rows name the same game and never reads a result value at all; a market can be perfectly coherent on esbid and still carry a selection graded against the wrong line, and it can be drifted while every selection beneath it agrees with itself. This is also the only oracle in the registry that reads settlement OUTPUT rather than its inputs, so a settlement defect that writes a wrong answer into a well-formed row is invisible everywhere else.',
+    grain: [
+      'source_id',
+      'source_market_id',
+      'source_selection_id',
+      'time_type'
+    ],
+    rows: async () => {
+      // The un-gradeable arm's sentinel, and the clean arm's. Explicit strings
+      // rather than nulls so the two cannot collide in the report -- a book
+      // with nothing to grade and a book with nothing wrong mean opposite
+      // things.
+      const UNGRADEABLE_SENTINEL = '__ungradeable__'
+      const CLEAN_SENTINEL = '__clean__'
+
+      // ONE scan predicate and ONE grade expression, shared by the violation
+      // arm and the denominator arm. Sharing them is what stops the
+      // denominator drifting away from the population actually scanned -- the
+      // failure a neighbouring check hit by borrowing a sibling's count.
+      //
+      // Scoped to OVER/UNDER deliberately. The other settled selection types
+      // (YES/NO and the touchdown-scorer family, 160,420 rows) grade by a
+      // different rule that these two operands do not express, so folding them
+      // in would swamp the un-gradeable arm with an expected class rather than
+      // report anything.
+      const graded_scope = `
+        selection_result is not null
+        and selection_type in ('OVER', 'UNDER')
+      `
+      const has_operands = `
+        metric_result_value is not null
+        and selection_metric_line is not null
+      `
+      const expected_grade = `
+        case
+          when metric_result_value > selection_metric_line
+            then case when selection_type = 'OVER' then 'WON' else 'LOST' end
+          when metric_result_value < selection_metric_line
+            then case when selection_type = 'OVER' then 'LOST' else 'WON' end
+          else 'PUSH'
+        end
+      `
+
+      const { rows: per_source } = await db.raw(
+        `
+        select
+          source_id::text as source_id,
+          count(*) filter (where ${has_operands}) as gradeable_rows,
+          count(*) filter (where not (${has_operands})) as ungradeable_rows
+        from prop_market_selections_index
+        where ${graded_scope}
+        group by 1
+        `
+      )
+
+      const { rows: disagreeing } = await db.raw(
+        `
+        select
+          source_id::text as source_id,
+          source_market_id::text as source_market_id,
+          source_selection_id::text as source_selection_id,
+          time_type::text as time_type
+        from prop_market_selections_index
+        where ${graded_scope}
+          and ${has_operands}
+          and selection_result::text is distinct from (${expected_grade})
+        `
+      )
+
+      /** @type {Map<string, Record<string, any>[]>} */
+      const disagreeing_by_source = new Map()
+      for (const row of disagreeing) {
+        const found = disagreeing_by_source.get(row.source_id) || []
+        found.push(row)
+        disagreeing_by_source.set(row.source_id, found)
+      }
+
+      // Two arms PER BOOK rather than one global pair. The defect lives in
+      // shared settlement code rather than in one vendor's importer, so the
+      // split is not about where the bug is -- it is the only thing that makes
+      // a COLLAPSE legible. A book that stops settling entirely drops out of
+      // the graded set and takes min_gradeable_units below its floor; under a
+      // single global denominator it would vanish silently behind DraftKings'
+      // million healthy rows.
+      return per_source.flatMap((/** @type {Record<string, any>} */ row) => {
+        const source_id = row.source_id
+        const gradeable_rows = Number(row.gradeable_rows)
+        const ungradeable_rows = Number(row.ungradeable_rows)
+        const found = disagreeing_by_source.get(source_id) || []
+
+        // A book with nothing to grade is UN-GRADEABLE, never clean: it
+        // scanned no population, so there is nothing for a zero to be a
+        // finding about.
+        const graded = !gradeable_rows
+          ? []
+          : found.length
+            ? found.map((/** @type {Record<string, any>} */ found_row) => ({
+                source_id,
+                source_market_id: found_row.source_market_id,
+                source_selection_id: found_row.source_selection_id,
+                time_type: found_row.time_type,
+                numerator: 1,
+                denominator: gradeable_rows,
+                is_gradeable: true
+              }))
+            : [
+                {
+                  source_id,
+                  source_market_id: CLEAN_SENTINEL,
+                  source_selection_id: CLEAN_SENTINEL,
+                  time_type: CLEAN_SENTINEL,
+                  numerator: 0,
+                  denominator: gradeable_rows,
+                  is_gradeable: true
+                }
+              ]
+
+        return [
+          ...graded,
+          // Declared, not discovered. A settled OVER/UNDER row missing either
+          // operand cannot be graded against itself, and without this arm it
+          // would leave the SCAN as well -- a settlement path writing results
+          // with no metric would shrink the population and report cleaner.
+          {
+            source_id,
+            source_market_id: UNGRADEABLE_SENTINEL,
+            source_selection_id: UNGRADEABLE_SENTINEL,
+            time_type: UNGRADEABLE_SENTINEL,
+            numerator: ungradeable_rows,
+            denominator: gradeable_rows + ungradeable_rows,
+            is_gradeable: false
+          }
+        ]
+      })
+    },
+    precondition: (/** @type {Record<string, any>} */ row) => row.is_gradeable,
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: the grade is a total function of two columns on the row itself, so a disagreement is a defect by definition and there is nothing here to tune. THIS CHECK IS RED THE DAY IT LANDS with 6 findings, which is a correct reading of a real defect rather than a broken detector. Measured on production 2026-08-30 at selection grain, by running the SHIPPED queries rather than a paraphrase of them: 1,647,010 gradeable rows across six books, of which exactly 6 disagree — 3 carrying WON where the numbers give LOST and 3 the reverse. ALL 6 ARE time_type CLOSE, across three markets, two sides each: FANDUEL market 734.77171513 (Amon-Ra St. Brown, line 162.5, metric 156.0, OVER recorded WON), PRIZEPICKS 1807454 (Keenan Allen, 64.5, 68.0, OVER recorded LOST) and PRIZEPICKS 3313862 (George Kittle, 51.5, 57.0, OVER recorded LOST). THE PUSH BOUNDARY IS CLEAN AND WAS MEASURED RATHER THAN ASSUMED: all 2,204 rows where metric equals line carry PUSH and none carry anything else, so the third branch is live and costs no findings. DEMONSTRATED RED rather than inferred: the shipped predicate reports 6, and inverting it to `is not distinct from` over the same corpus reports 1,647,004 — the two summing to the 1,647,010 scanned — so both the comparison and the enum cast are speaking and the 6 is a finding rather than a query that cannot match. TWO BOOKS ARE UN-GRADEABLE BY POPULATION, not by defect — BETRIVERS and BETMGM each hold ZERO settled OVER/UNDER rows, so they emit no graded arm at all; that is why the row-count floor sits at 6 rather than 8. THE 6 SPAN TWO BOOKS AND TWO DISTINCT CAUSES, which is the reading that matters for anyone acting on a finding. The FanDuel pair is a LINE MIS-PAIRING with no esbid involvement: that market carries two lines, 88.5 and 162.5, the metric 156.0 is correct and the player was active, and the 88.5 grade was written onto the 162.5 selections. The four PrizePicks rows are the ESBID DRIFT surfacing in settlement output: each market names one game on its OPEN row and another on its CLOSE row, the metric was derived from the drifted esbid while the result was graded against the other game, and both players were inactive with 0 receiving yards in the game their market actually belongs to. UN-GRADEABLE IS SMALL AND WORTH WATCHING: 215 settled OVER/UNDER rows lack a metric or a line (DRAFTKINGS 163, PRIZEPICKS 48, FANDUEL 4), and a RISE there means settlement has begun writing results it cannot substantiate, which this check would otherwise read as a shrinking population and report cleaner. SCOPE IS OVER/UNDER ONLY: 160,420 settled rows of other selection types grade by a rule these two operands do not express and are outside the invariant by construction, not by omission.',
+    // Six rows when fully clean, one per book that settles anything, so the
+    // row-count floor is nearly a tautology and the denominator carries the
+    // signal. 6 is today's exact count, which makes this floor the real
+    // collapse detector: a book that stops settling entirely becomes
+    // un-gradeable, drops out of the graded set, and fires it.
+    min_gradeable_units: 6,
+    // REQUIRED here for the reason above: the graded row count is fixed by the
+    // number of settling books when clean and cannot fall with the corpus.
+    // Read against the SMALLEST graded population, which is FANATICS at 220
+    // settled rows measured 2026-08-30 -- genuinely small because that book
+    // settles little, not because anything collapsed. The floor is therefore
+    // deliberately low and catches a book shrinking drastically without
+    // vanishing; a book vanishing outright is caught by the row floor above,
+    // which is the stronger of the two instruments here.
+    min_denominator: 100,
+    repair_command:
+      'A FINDING NAMES A ROW THAT CONTRADICTS ITSELF; IT DOES NOT SAY WHICH COLUMN MOVED. Do not rewrite selection_result to match the metric — that is the obvious repair and it was wrong for every row measured so far. Establish which side is wrong first, and expect at least two causes. Where the market’s OPEN and CLOSE rows name different games (the sibling prop-market-open-close-esbid-coherence check), the METRIC is the moved side: it was derived from the drifted esbid while the result was graded against the other game, so the repair is to correct the esbid and force a re-settle, never to flip the result. Note that prop_market_selections_index carries NO esbid, so repointing the market alone changes nothing beneath it — the esbid fix and the re-settle (missing_only false) ship together or the finding merely goes invisible. Where the market is esbid-coherent, look instead for two lines under one market: the measured FanDuel case had one line’s grade written onto the other line’s selections, which is a settlement-writer defect and needs a code fix rather than a data repair. The upstream causes are owned by user:task/league/stabilize-prop-market-esbid-stamping.md and user:task/league/adjudicate-drifted-prop-market-settlements.md.'
+  },
+
+  {
     check_id: 'snaps-games-season-agreement',
     invariant:
       'Every nfl_snaps row carries the season_year of the game its esbid resolves to. season_year is functionally determined by esbid — a game belongs to exactly one season — so this is derivable rather than merely expected, and nothing enforces it: no foreign key, no CHECK, and the column is part of the primary key rather than a computed one. The writer NEVER READS nfl_games: private/libs-server/ngs.mjs takes the season straight off the vendor payload (`data.plays.find((play) => play.season)?.season`) and keys its delete-and-reinsert on esbid alone, so the two sides are stamped from independent sources and can only be compared after the fact. Two aggravating properties make a failure here silent rather than loud. The optional chain yields `undefined` when no play in the feed carries a season, against a NOT NULL column; and the whole snap write sits inside a try/catch that logs to a debug namespace and continues, so a rejected batch leaves the run green. A disagreement therefore drops the rows from every consumer that scopes snaps by season while the job reports success.',
