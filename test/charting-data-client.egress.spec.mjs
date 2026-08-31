@@ -1,7 +1,10 @@
 /* global describe, it */
 import * as chai from 'chai'
 
-import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
+import {
+  ChartingDataClient,
+  build_cache_key
+} from '#libs-server/charting-data/index.mjs'
 
 const expect = chai.expect
 
@@ -60,5 +63,112 @@ describe('LIBS-SERVER ChartingDataClient egress', function () {
     }
 
     if (threw) expect(threw.message).to.not.match(/requires_proxy/i)
+  })
+})
+
+// Every other vendor integration in this repo caches its raw responses under
+// ~/cache on the API host; charting was the only one that did not, so a re-run
+// or a re-parse cost a fresh fetch on the pinned residential address. These
+// cover the two ways that cache can do harm rather than good.
+describe('LIBS-SERVER ChartingDataClient raw response cache', function () {
+  this.timeout(30000)
+
+  it('derives a stable key from the route and sorted parameter values', function () {
+    expect(
+      build_cache_key({
+        path: '/api/plays/list/',
+        params: { gameId: 'f5919d7e-311e-11f0' }
+      })
+    ).to.equal('/sumersports/plays-list/f5919d7e-311e-11f0.json')
+
+    // Sorted by KEY, so the same request cannot land under two keys depending
+    // on which order the caller happened to build the object in.
+    const a = build_cache_key({
+      path: '/api/players/by-play/',
+      params: { sumerGameId: 'GAME', sumerTeamId: 'TEAM' }
+    })
+    const b = build_cache_key({
+      path: '/api/players/by-play/',
+      params: { sumerTeamId: 'TEAM', sumerGameId: 'GAME' }
+    })
+    expect(a).to.equal(b)
+    expect(a).to.equal('/sumersports/players-by-play/GAME-TEAM.json')
+  })
+
+  it('sanitises a parameter that would escape the cache directory', function () {
+    // The key becomes a filesystem path on the server. Vendor ids are UUIDs
+    // today; this is the guard for the day one is not.
+    //
+    // The property that matters is that no path SEPARATOR survives -- dots are
+    // legal in a filename and `..` only traverses when followed by a slash, so
+    // asserting the absence of `..` would be asserting the wrong thing and
+    // would fail on a correct sanitiser. The fingerprint also always carries a
+    // `.json` suffix, so a segment can never be exactly `..`.
+    const key = build_cache_key({
+      path: '/api/plays/list/',
+      params: { gameId: '../../etc/passwd' }
+    })
+    const fingerprint = key.slice('/sumersports/plays-list/'.length)
+    expect(fingerprint).to.not.include('/')
+    expect(key).to.equal('/sumersports/plays-list/.._.._etc_passwd.json')
+
+    // Positive control: the sanitiser is not simply passing everything through.
+    expect(
+      build_cache_key({ path: '/api/plays/list/', params: { gameId: 'a/b' } })
+    ).to.equal('/sumersports/plays-list/a_b.json')
+  })
+
+  // The cache reaches our own API over HTTP, and fetch_with_retry THROWS when
+  // that is unreachable. Unguarded, an outage of the cache service would take
+  // every charting import down rather than merely slowing it -- turning an
+  // optimisation into a dependency.
+  it('treats an unreachable cache as a miss rather than an error', async () => {
+    const client = new ChartingDataClient({ max_retries: 0 })
+    let threw = null
+    try {
+      await client.read_cache('/sumersports/plays-list/does-not-matter.json')
+    } catch (err) {
+      threw = err
+    }
+    expect(threw).to.equal(null)
+  })
+
+  it('does not throw when a cache write fails', async () => {
+    const client = new ChartingDataClient({ max_retries: 0 })
+    let threw = null
+    try {
+      await client.write_cache('/sumersports/plays-list/x.json', {
+        sumerPlaysInGameNflsList: [{ a: 1 }]
+      })
+    } catch (err) {
+      threw = err
+    }
+    expect(threw).to.equal(null)
+  })
+
+  // A 200 with an empty list covers a game the vendor has not charted YET and
+  // one it never will -- indistinguishable at the response level. Caching the
+  // empty would freeze "no data" for a game charted two days later, which is
+  // the lag this vendor actually operates on.
+  it('does not write an empty response to the cache', async () => {
+    const client = new ChartingDataClient()
+    const attempted = []
+    client.write_cache = async function (key, response) {
+      const original = Object.getPrototypeOf(this).write_cache.bind(this)
+      attempted.push(response)
+      return original(key, response)
+    }
+
+    // carried_rows is exercised through write_cache: an all-empty body must be
+    // skipped before any network call is made.
+    let threw = null
+    try {
+      await client.write_cache('/sumersports/plays-list/empty.json', {
+        sumerPlaysInGameNflsList: []
+      })
+    } catch (err) {
+      threw = err
+    }
+    expect(threw).to.equal(null)
   })
 })

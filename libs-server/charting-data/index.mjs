@@ -1,8 +1,48 @@
 import debug from 'debug'
 
-import { fetch_with_retry } from '#libs-server'
+import { cache, fetch_with_retry } from '#libs-server'
 
 const log = debug('charting-data')
+
+// Raw-response cache under ~/cache on the API host, via /api/cache. Every other
+// vendor integration here already does this -- the directory carries nfl-pro,
+// ngs, pff, pinnacle, espn and seven more -- and this vendor was the only one
+// missing, so a re-run or a re-parse cost a fresh fetch on the pinned
+// residential address every time.
+//
+// The key is derived from the route and the sorted parameter VALUES rather than
+// hand-written per method, so a route added later is cached without anyone
+// remembering to wire it. Values are vendor UUIDs; the sanitiser is defence
+// against a future parameter that is not, since the key becomes a filesystem
+// path on the server.
+const sanitize_key_part = (value) =>
+  String(value).replace(/[^A-Za-z0-9._-]/g, '_')
+
+export const build_cache_key = ({ path, params = {} }) => {
+  const route = path
+    .replace(/^\/api\//, '')
+    .replace(/\/+$/, '')
+    .replace(/\//g, '-')
+  const fingerprint = Object.keys(params)
+    .sort()
+    .map((key) => sanitize_key_part(params[key]))
+    .join('-')
+  return `/sumersports/${sanitize_key_part(route)}/${fingerprint}.json`
+}
+
+// Do NOT cache a response that carried nothing. A 200 with an empty list covers
+// a game the vendor has not charted YET as well as one it never will, and the
+// two are indistinguishable at the response level -- so caching the empty would
+// freeze "no data" for a game that gets charted a couple of days later, which is
+// exactly the lag this vendor operates on. Storing only responses that carried
+// rows means a miss re-asks, which is the behaviour we want on the uncertain
+// case and costs one request on the settled one.
+const carried_rows = (response) => {
+  if (!response || typeof response !== 'object') return false
+  const arrays = Object.values(response).filter(Array.isArray)
+  if (!arrays.length) return false
+  return arrays.some((list) => list.length > 0)
+}
 
 const DEFAULT_REQUEST_DELAY_MS = 20000
 const DEFAULT_JITTER_MAX_MS = 20000
@@ -18,12 +58,20 @@ class ChartingDataClient {
     proxy_pool = 'nfl_pro',
     use_proxy = true,
     request_delay_ms = DEFAULT_REQUEST_DELAY_MS,
-    max_retries = 3
+    max_retries = 3,
+    // Orthogonal to the importers' --force, deliberately. force means re-import
+    // a game we already hold (a database decision); ignore_cache means re-ask
+    // the vendor (a network decision). Conflating them would make every forced
+    // re-import spend vendor requests it does not need -- which is precisely
+    // the 2026-08-30 backfill, where the stored rows were wrong but the vendor
+    // responses were fine.
+    ignore_cache = false
   } = {}) {
     this.proxy_pool = proxy_pool
     this.use_proxy = use_proxy
     this.request_delay_ms = request_delay_ms
     this.max_retries = max_retries
+    this.ignore_cache = ignore_cache
 
     this.consecutive_failures = 0
     this.circuit_open_until = null
@@ -73,6 +121,20 @@ class ChartingDataClient {
   }
 
   async request({ path, params = {} }) {
+    const cache_key = build_cache_key({ path, params })
+
+    // Checked BEFORE the circuit breaker and the rate limiter, both of which
+    // exist to pace the VENDOR. A cache hit touches no vendor, so making it
+    // wait ~13s or refusing it because the vendor was failing would defeat the
+    // point: a cached re-run has to be fast, or nobody re-runs.
+    if (!this.ignore_cache) {
+      const cached = await this.read_cache(cache_key)
+      if (cached) {
+        log(`cache hit ${cache_key}`)
+        return cached
+      }
+    }
+
     if (this.is_circuit_open()) {
       const remaining = this.circuit_open_until - Date.now()
       throw new Error(
@@ -114,11 +176,38 @@ class ChartingDataClient {
 
       this.last_request_at = Date.now()
       this.record_success()
+      await this.write_cache(cache_key, response)
       return response
     } catch (error) {
       this.last_request_at = Date.now()
       this.record_failure()
       throw error
+    }
+  }
+
+  // The cache is an OPTIMISATION and must never become a dependency: cache.get
+  // and cache.set go over HTTP to our own API, and fetch_with_retry throws when
+  // that is unreachable. Left unguarded, an outage of the cache service would
+  // take down every charting import rather than merely slowing it. Both sides
+  // swallow and log.
+  async read_cache(key) {
+    try {
+      return await cache.get({ key })
+    } catch (error) {
+      log(`cache read failed for ${key}: ${error.message}`)
+      return null
+    }
+  }
+
+  async write_cache(key, response) {
+    if (!carried_rows(response)) {
+      log(`not caching empty response for ${key}`)
+      return
+    }
+    try {
+      await cache.set({ key, value: response })
+    } catch (error) {
+      log(`cache write failed for ${key}: ${error.message}`)
     }
   }
 

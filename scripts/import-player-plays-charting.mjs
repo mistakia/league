@@ -291,6 +291,7 @@ export async function import_player_plays_charting({
   dry = false,
   // nfl_pro is the only sticky dedicated-ISP residential pool, and it is the
   // ONE place this default lives -- the yargs option below declares none.
+  ignore_cache = false,
   proxy_pool = 'nfl_pro',
   use_proxy = true,
   request_delay = 3000,
@@ -303,6 +304,7 @@ export async function import_player_plays_charting({
   )
 
   const client = new ChartingDataClient({
+    ignore_cache,
     proxy_pool,
     use_proxy,
     request_delay_ms: request_delay
@@ -379,6 +381,11 @@ const main = async () => {
         description: 'Dry run mode',
         default: false
       })
+      .option('ignore_cache', {
+        type: 'boolean',
+        description: 'Re-ask the vendor instead of reading the raw cache',
+        default: false
+      })
       .option('proxy_pool', {
         type: 'string',
         description: 'Proxy pool name (default: nfl_pro)'
@@ -415,6 +422,7 @@ const main = async () => {
       week: argv.week,
       esbid: argv.esbid,
       dry: argv.dry,
+      ignore_cache: argv.ignore_cache,
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,

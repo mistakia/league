@@ -301,6 +301,7 @@ export async function import_matchup_stats_charting({
   // no `default`: it used to carry 'default' too, which silently won on every
   // CLI invocation -- meaning every cron run -- so changing this line alone
   // would have pinned nothing.
+  ignore_cache = false,
   proxy_pool = 'nfl_pro',
   use_proxy = true,
   request_delay = 3000,
@@ -314,6 +315,7 @@ export async function import_matchup_stats_charting({
   )
 
   const client = new ChartingDataClient({
+    ignore_cache,
     proxy_pool,
     use_proxy,
     request_delay_ms: request_delay
@@ -390,6 +392,11 @@ const main = async () => {
         description: 'Dry run mode',
         default: false
       })
+      .option('ignore_cache', {
+        type: 'boolean',
+        description: 'Re-ask the vendor instead of reading the raw cache',
+        default: false
+      })
       .option('proxy_pool', {
         type: 'string',
         description: 'Proxy pool name (default: nfl_pro)'
@@ -426,6 +433,7 @@ const main = async () => {
       week: argv.week,
       esbid: argv.esbid,
       dry: argv.dry,
+      ignore_cache: argv.ignore_cache,
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,
