@@ -67,6 +67,19 @@ export const is_administrative_play = (play) => {
  * callers reach through enrich_plays, so agreement holds by construction
  * rather than by two call sites remembering to match each other.
  *
+ * What has to be total is the order WITHIN a stat_id family, since
+ * getPlayFromPlayStats pushes each family's members into its own array and the
+ * slots are filled from that. player_name plus gsis_player_id supplies it;
+ * nfl_play_stats carries a unique key on (esbid, play_id, stat_id,
+ * player_name), so there are no ties left to break.
+ *
+ * The stat_id coercion is therefore defensive rather than load-bearing:
+ * retyping the column would change the order ACROSS families, which no
+ * positional assignment reads. It is kept because it costs nothing and the
+ * cross-family order is the kind of thing a later reader may start depending
+ * on, but it deliberately has no test -- a case written against it cannot be
+ * made to fail, and a green that cannot go red is not evidence.
+ *
  * @param {object} stat - Play stat object
  * @returns {(string|number)[]} Comparable tuple
  */
