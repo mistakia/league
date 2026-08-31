@@ -46,6 +46,7 @@
     "libs-shared/simulation/run-simulation.mjs",
     "libs-shared/week-dynamic-values.mjs",
     "scripts/audit-drive-seq-coherence.mjs",
+    "scripts/contribution-distill.mjs",
     "scripts/create-season-partitions.mjs",
     "scripts/reset-protected-designation.mjs"
   ]
