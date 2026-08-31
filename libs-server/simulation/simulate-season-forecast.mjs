@@ -53,6 +53,40 @@ const SIMULATIONS = 10000
 const MINIMUM_CONDITIONAL_DRAWS = 100
 
 /**
+ * The matchups belonging to weeks that were actually played.
+ *
+ * Whether a week has been played is a property of the WEEK, not of any row in
+ * it. This used to be a `whereNotNull` on the two points columns, which cannot
+ * ever exclude a row: both are declared NOT NULL DEFAULT 0.00, so the schedule
+ * is written ahead of the season as a full slate of 0-0 rows and scored in
+ * place. That test therefore qualified every unplayed week instead of
+ * filtering it, and a historical-mode forecast started from a season of ties --
+ * league 1's 2026 schedule carried seventy such rows before a game was played.
+ *
+ * Requiring some team in the week to have scored above zero is what separates
+ * the two. A per-matchup test instead would drop a genuine 0-0 game out of a
+ * week that was played and report a partial week, which is its own wrong
+ * answer. The same oracle guards the playoff weeks in load-actual-points.mjs.
+ *
+ * @param {object} params
+ * @param {object[]} params.matchups - Matchups carrying home_points/away_points
+ * @returns {object[]} The subset whose week has a real result
+ */
+const select_played_matchups = ({ matchups }) => {
+  const matchups_by_week = groupBy(matchups, 'week')
+
+  return Object.values(matchups_by_week)
+    .filter((week_matchups) =>
+      week_matchups.some(
+        (matchup) =>
+          parseFloat(matchup.home_points) > 0 ||
+          parseFloat(matchup.away_points) > 0
+      )
+    )
+    .flat()
+}
+
+/**
  * Load everything the forecast reads out of the database.
  *
  * Split out as an injectable parameter because every entry point below opens
@@ -67,7 +101,7 @@ const MINIMUM_CONDITIONAL_DRAWS = 100
  * @param {number | null} params.week - The caller's week override, if any
  * @param {number} params.regular_season_final_week - Last regular season week
  */
-const load_forecast_context = async ({
+export const load_forecast_context = async ({
   league_id,
   year,
   current_week,
@@ -83,11 +117,19 @@ const load_forecast_context = async ({
   if (week) {
     // Historical mode: the seasonlogs row describes the finished season, not
     // the season as of this week, so tally the completed matchups instead.
-    const completed_matchups = await db('matchups')
+    const prior_matchups = await db('matchups')
       .where({ lid: league_id, season_year: year })
       .where('week', '<', current_week)
-      .whereNotNull('home_points')
-      .whereNotNull('away_points')
+
+    const played_matchups = select_played_matchups({
+      matchups: prior_matchups
+    })
+
+    if (played_matchups.length < prior_matchups.length) {
+      log(
+        `ignoring ${prior_matchups.length - played_matchups.length} matchup(s) before week ${current_week} whose week was never played`
+      )
+    }
 
     for (const team of teams) {
       team_stats_by_tid[team.team_id] = {
@@ -105,7 +147,7 @@ const load_forecast_context = async ({
 
     const scores_by_week = new Map()
 
-    for (const m of completed_matchups) {
+    for (const m of played_matchups) {
       const home_stats = team_stats_by_tid[m.home_team_id]
       const away_stats = team_stats_by_tid[m.away_team_id]
 
@@ -743,7 +785,16 @@ async function build_post_season_forecast({
     season_year: year
   })
 
-  const { division_winner_tids } = get_playoff_seeding({
+  // Byes come from the seeding itself, not from a rank read back out of
+  // league_team_seasonlogs. The two answer the same question, and the seeding
+  // is the one that reads the league's configured bye ladder: under a format
+  // whose byes go to All Play, `regular_season_finish <= bye_count` is right
+  // only because calculate-standings happens to write that finish from this
+  // same function. It also fails silently, and in the direction that looks
+  // like an answer -- a missing or null finish awarded NO team a bye, which
+  // sent the whole playoff field into the wildcard round and reported
+  // championship odds off a bracket the league never plays.
+  const { division_winner_tids, bye_tids } = get_playoff_seeding({
     teams: teams.map((team) => ({
       ...(team_stats_by_tid[team.team_id] || {}),
       tid: team.team_id,
@@ -752,23 +803,16 @@ async function build_post_season_forecast({
     ...playoff_format
   })
   const division_winner_tid_set = new Set(division_winner_tids)
+  const bye_tid_set = new Set(bye_tids)
 
   const result = {}
   const playoff_tids = []
-  const bye_tids = []
 
   for (const team of teams) {
-    const stats = team_stats_by_tid[team.team_id]
     const is_playoff_team = playoffs.some((p) => p.tid === team.team_id)
-    // Number.isInteger first: the optional chain guards undefined, not null,
-    // and a null finish coerces to 0 <= bye_count, awarding a bye to every team
-    // with no recorded finish.
-    const has_bye =
-      Number.isInteger(stats?.regular_season_finish) &&
-      stats.regular_season_finish <= playoff_format.bye_count
+    const has_bye = bye_tid_set.has(team.team_id)
 
     if (is_playoff_team) playoff_tids.push(team.team_id)
-    if (has_bye) bye_tids.push(team.team_id)
 
     result[team.team_id] = {
       tid: team.team_id,
@@ -788,6 +832,22 @@ async function build_post_season_forecast({
   if (!playoff_tids.length) {
     log('No playoff field recorded - leaving championship odds at zero')
     return result
+  }
+
+  // The recorded field and the standings ladder are written by two different
+  // scripts -- process-playoffs seeds `playoffs`, process-matchups writes the
+  // standings this seeding runs on -- so they can disagree when one of them
+  // ran on stale data. Refusing is the only honest move: resolve_simulated_
+  // champion takes the wildcard round to be the field MINUS the byes, so a bye
+  // team outside the field silently promotes it into the championship round
+  // and shortens the wildcard round by one, producing odds that read fine.
+  const byes_outside_field = bye_tids.filter(
+    (tid) => !playoff_tids.includes(tid)
+  )
+  if (byes_outside_field.length) {
+    throw new Error(
+      `league ${league_id} seeds team(s) ${byes_outside_field.join(', ')} on a bye for ${year}, but the recorded playoff field does not include them; the playoffs table and the standings disagree about who made the post-season`
+    )
   }
 
   if (!wildcard_week || !championship_weeks.length) {
