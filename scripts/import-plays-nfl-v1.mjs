@@ -19,6 +19,7 @@ import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
+import { build_snap_roster_by_esbid } from '#libs-server/play-enrichment/build-snap-roster.mjs'
 import { upsert_plays } from '#libs-server/upsert-plays.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
@@ -485,11 +486,30 @@ const importPlaysForWeek = async ({
     // Enrich plays before database insertion
     try {
       const games_map = { [game.esbid]: game }
+
+      // The snap roster is NOT optional here, and omitting it was a permanent
+      // disagreement with the other caller rather than a missing nicety.
+      //
+      // When the feed emits a role stat with a NULL gsis_player_id, the owned
+      // writer in player-identification-enrichment recovers the actor from this
+      // index; without it the writer NULL-clears the role instead. process_plays
+      // passes it and this importer did not, so on every pass the importer wrote
+      // null over ball_carrier/passer/target/interceptor/fumble_lost and the
+      // finalization that followed wrote the value straight back -- invisibly,
+      // because update_play logs no changelog row when it fills a NULL.
+      // Measured 2026-08-31: 205 rows ping-ponged on three consecutive
+      // full-season passes, partitioning exactly into those five families
+      // (target 119, ball_carrier 79, passer 4, fumble_lost 2, interceptor 1).
+      const snap_roster_by_esbid = await build_snap_roster_by_esbid([
+        game.esbid
+      ])
+
       const enriched_plays = await enrich_plays({
         plays: play_inserts,
         play_stats: play_stat_inserts,
         games_map,
-        player_cache
+        player_cache,
+        snap_roster_by_esbid
       })
       // Replace play_inserts with enriched plays
       play_inserts.length = 0

@@ -49,6 +49,27 @@ const play_stats = [
   }
 ]
 
+// The NFL feed emits a target stat (statId 115) naming the receiver but
+// carrying no gsisId. This is the exact shape the snap-roster recovery exists
+// for, and the shape that NULL-clears the role without it.
+const target_stat_without_gsis = [
+  { esbid, play_id, stat_id: 115, player_name: 'D Receiver' }
+]
+
+const snap_roster_by_esbid = new Map([
+  [
+    esbid,
+    new Map([
+      ['d receiver', [{ pid: 'DREC-EIVE-000001', gsisid: '00-0000004' }]]
+    ])
+  ]
+])
+
+const player_cache_stub = {
+  find_player: ({ gsis_player_id }) =>
+    gsis_player_id === '00-0000004' ? { pid: 'DREC-EIVE-000001' } : null
+}
+
 describe('enrich_plays agrees across its two callers', function () {
   it('derives is_successful_play without a caller-supplied yards_gained', async () => {
     // The importer's shape: getPlayData produces down_number and yards_to_go
@@ -108,6 +129,40 @@ describe('enrich_plays agrees across its two callers', function () {
 
     expect(enriched).to.not.have.property('yards_gained')
     expect(enriched).to.not.have.property('is_successful_play')
+  })
+
+  it('recovers a role whose stat row carries no gsisId, given the snap roster', async () => {
+    const [enriched] = await enrich_plays({
+      plays: [{ esbid, play_id, play_type: 'PASS' }],
+      play_stats: target_stat_without_gsis,
+      player_cache: player_cache_stub,
+      snap_roster_by_esbid
+    })
+
+    expect(enriched.target_gsis_player_id).to.equal('00-0000004')
+    expect(enriched.target_pid).to.equal('DREC-EIVE-000001')
+  })
+
+  it('NULL-clears that same role when the snap roster is not supplied', async () => {
+    // This is not a tolerable degradation, it is the second caller-disagreement
+    // defect on this path. process_plays passes snap_roster_by_esbid and the
+    // importer did not, so the importer wrote null over the role on every pass
+    // and the finalization that followed wrote it straight back -- invisibly,
+    // since update_play logs no changelog row when it fills a NULL. Measured
+    // 2026-08-31: 205 rows ping-ponged across three consecutive full-season
+    // passes, partitioning exactly into the five owned families.
+    //
+    // The case is written to PIN the asymmetry rather than to bless it: it is
+    // the reason every caller must supply the roster, and it fails the moment
+    // someone makes the omission harmless by another route.
+    const [enriched] = await enrich_plays({
+      plays: [{ esbid, play_id, play_type: 'PASS' }],
+      play_stats: target_stat_without_gsis,
+      player_cache: player_cache_stub
+    })
+
+    expect(enriched.target_gsis_player_id).to.equal(null)
+    expect(enriched.target_pid).to.equal(null)
   })
 
   it('assigns tackle slots independently of play_stats arrival order', async () => {
