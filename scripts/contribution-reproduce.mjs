@@ -189,6 +189,14 @@ export const reproduce_from_table_state = async ({
   }
 }
 
+// Resolves only once the bytes have actually left, so process.exit() cannot
+// truncate them.
+const write_stdout = (text) =>
+  new Promise((resolve) => {
+    if (process.stdout.write(text)) resolve()
+    else process.stdout.once('drain', resolve)
+  })
+
 const main = async () => {
   const argv = yargs(hideBin(process.argv))
     .option('submission-id', { type: 'string' })
@@ -223,7 +231,12 @@ const main = async () => {
   // production and what came back, and it must not depend on namespace
   // resolution.
   if (argv.json) {
-    console.log(JSON.stringify(result, null, 2))
+    // Awaited, not console.log'd. stdout to a PIPE is async in node, and the
+    // process.exit() below does not wait for it to drain -- measured
+    // 2026-08-31, a 500-row report was truncated at 65526 bytes mid-string
+    // when piped, which is the JSON oracle silently losing its tail. Same
+    // dance scripts/data-view-regression-build-sql.mjs does, for this reason.
+    await write_stdout(JSON.stringify(result, null, 2) + '\n')
   } else {
     console.log(
       `outcome:  ${result.outcome} -- ${REPRODUCTION_OUTCOMES[result.outcome]}`
