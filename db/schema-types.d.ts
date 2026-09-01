@@ -21333,6 +21333,10 @@ export interface SeasonsRow {
   restricted_free_agency_processing_paused_at: Date | null
   head_to_head_berth_count: number
   rookie_draft_end_at: Date | null
+  is_auction_election_mode_enabled: boolean
+  auction_block_notice_minutes: number
+  auction_final_block_pace_minutes: number
+  auction_final_block_buffer_hours: number
 }
 
 export interface SelectionCombinationDefinitionsRow {
