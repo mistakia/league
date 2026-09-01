@@ -201,7 +201,14 @@ export const job_types = {
   // nothing for an entire season_type therefore left no row anywhere, which is
   // how 2024 PRE and 2026 PRE both reached zero aggregated snaps unnoticed.
   GENERATE_PLAYER_SNAPS: 141,
-  IMPORT_PLAYER_PLAYS_CHARTING: 142
+  IMPORT_PLAYER_PLAYS_CHARTING: 142,
+
+  // pff_player_gamelogs had no live writer at all until 2026-09-01 -- the
+  // archive ingest is operator-run and reads a frozen corpus, so it reports
+  // under no schedule and the current season simply had no rows. IMPORT_PFF_GRADES
+  // (65) covers the season-grain table only and its green rows said nothing
+  // about the game grain.
+  IMPORT_PFF_GAMELOGS: 143
 }
 
 export const job_title_by_id = {
@@ -345,5 +352,6 @@ export const job_title_by_id = {
   139: 'Run Data Checks',
   140: 'Announce Draft Slate',
   141: 'Generate Player Snaps',
-  142: 'Import Player Plays (Charting)'
+  142: 'Import Player Plays (Charting)',
+  143: 'Import PFF Gamelogs'
 }
