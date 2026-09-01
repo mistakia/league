@@ -1,5 +1,7 @@
-/* global describe it */
+/* global describe it before */
 import * as chai from 'chai'
+
+import { get_data_view_results_query } from '#libs-server'
 
 import { identity_for } from '#libs-server/data-views/row-grain-registry.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
@@ -228,6 +230,74 @@ describe('data views line row axis', function () {
         data_views_column_definitions
       })
       expect(sources).to.have.length(0)
+    })
+  })
+  // The half that makes the axis do anything: with it live the markets CTE
+  // stops deduping and the join selects the rung. Emitted-SQL assertions rather
+  // than executed rows, because CI holds no betting data at all -- the executed
+  // oracle for the ladder belongs in a seeded result-equivalence fixture.
+  describe('markets CTE under the axis', function () {
+    const market_params = {
+      source_id: ['FANDUEL'],
+      selection_type: ['OVER'],
+      time_type: ['CLOSE'],
+      single_nfl_week_id: ['2024_REG_WEEK_1', '2024_REG_WEEK_2'],
+      market_type: ['GAME_ALT_PASSING_YARDS']
+    }
+
+    const emit = async (row_axes) => {
+      const { query } = await get_data_view_results_query({
+        columns: [
+          {
+            column_id: 'player_game_prop_line_from_betting_markets',
+            params: market_params
+          },
+          {
+            column_id: 'player_game_prop_american_odds_from_betting_markets',
+            params: market_params
+          }
+        ],
+        prefix_columns: ['player_name'],
+        row_axes,
+        row_grain: ['player']
+      })
+      return String(query)
+    }
+
+    let without_axis
+    let with_axis
+
+    before(async function () {
+      without_axis = await emit(['year', 'week'])
+      with_axis = await emit(['year', 'week', 'line'])
+    })
+
+    it('keeps the dedup and builds no rung CTE without the axis', () => {
+      expect(without_axis).to.match(/distinct on/)
+      expect(without_axis).to.not.include('player_years_weeks_lines')
+    })
+
+    it('suppresses the dedup under the axis', () => {
+      expect(with_axis).to.not.match(/distinct on/)
+    })
+
+    it('builds the rung CTE and correlates the join on the rung', () => {
+      expect(with_axis).to.include('player_years_weeks_lines')
+      // Quoted on the CTE side, bare on the reference side, because the
+      // reference is emitted through db.raw from the identity.
+      expect(with_axis).to.match(
+        /"selection_metric_line" = player_years_weeks_lines\.selection_metric_line/
+      )
+    })
+
+    // Line and odds share one CTE, so the rendered pair always belongs to one
+    // selection. Rows multiplying is exactly the change that could break that,
+    // which is why it is asserted here rather than assumed.
+    it('keeps line and odds on one shared CTE', () => {
+      const cte_names = [...with_axis.matchAll(/"(t[0-9a-f]{32})" as \(/g)].map(
+        (match) => match[1]
+      )
+      expect(new Set(cte_names).size).to.equal(1)
     })
   })
 })

@@ -15,6 +15,7 @@ import {
 } from '#libs-server/data-views/week-scoped-cte.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import { apply_market_row_dedup } from '#libs-server/data-views/market-row-dedup.mjs'
+import { resolve_line_scope } from '#libs-server/data-views/line-axis-sources.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // The column's GRAIN, derived rather than passed.
@@ -332,6 +333,10 @@ const player_betting_market_with = ({
 
   const is_week_scoped = market_grain === 'game'
 
+  // Read off the identity reference, never off row_axes; see resolve_line_scope
+  // for why a base-grain column is handed an empty row_axes under a live axis.
+  const { line_split } = resolve_line_scope({ data_view_options })
+
   // The weeks this CTE spans. Resolved through the same helper the join reads,
   // so a CTE cannot hold weeks the join has no predicate to select between --
   // which fans a week cell into one row per week.
@@ -437,11 +442,27 @@ const player_betting_market_with = ({
     if (is_week_scoped) {
       qb.select('m.year', 'm.week')
 
-      // One row per player per game, or the LEFT JOIN multiplies the cell.
-      // Keyed on the game rather than on (year, week) because the game is what
-      // the market attaches to and it fixes the week as a consequence; see
-      // market-row-dedup.mjs for why the coarser key is the unsafe direction.
-      apply_market_row_dedup({ qb })
+      // THE DEDUP IS SUPPRESSED ONLY UNDER A LIVE LINE AXIS, and gating on the
+      // AXIS rather than on the market type is the whole point. An alt column
+      // in a view with no line axis still has one cell to fill, so collapsing
+      // its ladder to one deterministic rung remains the correct render there;
+      // a `market_type like 'GAME_ALT_%'` branch would have changed that too.
+      // Axis-gating also leaves the single-line guarantee untouched by
+      // construction -- 194 of 544 DRAFTKINGS CLOSE GAME_SPREAD team-weeks in
+      // 2025 carry a duplicated market, and every one of them still dedups.
+      //
+      // With the axis live the rung is part of the cell key, so the rows the
+      // dedup would discard are exactly the rows being asked for. The join
+      // below correlates on the rung, so nothing fans out: each cell selects
+      // the one selection at its own line.
+      if (!line_split) {
+        // One row per player per game, or the LEFT JOIN multiplies the cell.
+        // Keyed on the game rather than on (year, week) because the game is
+        // what the market attaches to and it fixes the week as a consequence;
+        // see market-row-dedup.mjs for why the coarser key is the unsafe
+        // direction.
+        apply_market_row_dedup({ qb })
+      }
     }
 
     if (career_year.length) {
@@ -505,6 +526,21 @@ const player_betting_market_join = ({
       cte_name: table_name,
       data_view_options
     })
+
+    // Under a line axis the CTE holds every rung of the ladder, because the
+    // dedup that would have collapsed it is suppressed. Without this predicate
+    // the cell matches every rung and fans out -- the same failure the week
+    // correlation above exists to prevent, one axis further down.
+    const { line_split, line_reference } = resolve_line_scope({
+      data_view_options
+    })
+    if (line_split) {
+      this.andOn(
+        `${table_name}.selection_metric_line`,
+        '=',
+        db.raw(line_reference)
+      )
+    }
   })
 }
 

@@ -1969,6 +1969,7 @@ export const get_data_view_results_query = async ({
   data_view_options.team_reference = references.team_reference
   data_view_options.year_reference = references.year_reference
   data_view_options.week_reference = references.week_reference
+  data_view_options.line_reference = references.line_reference
   query_context.data_view_options = data_view_options
 
   // sanitize parameters

@@ -34,6 +34,7 @@ export const build_query_context = ({
     team_reference: identity.team_column,
     year_reference: identity.year_column,
     week_reference: identity.week_column,
+    line_reference: identity.line_column || null,
     is_team: is_team_identity(identity_id),
     position_filter_sql,
     applied_bridges: new Set(),

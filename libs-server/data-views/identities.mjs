@@ -247,12 +247,21 @@ export const is_team_identity = (identity_id) => identity_id.startsWith('team')
 export const resolve_references = ({ identity_id, from_table_name }) => {
   const identity = get_identity(identity_id)
 
+  // line_reference is the line axis's ACTIVE SIGNAL, not just a column name --
+  // it exists exactly when the cell has a rung to correlate against. Columns
+  // read it the way they read week_reference and for the same reason: a column
+  // declared at the base `player` grain is handed an EMPTY row_axes even under
+  // a line-axis request, because group_tables_by_supported_row_axes intersects
+  // the request axes with those of the identity its source.grain names. Asking
+  // row_axes would therefore answer "no line axis" on exactly the columns that
+  // need to know.
   if (identity.row_grain === 'team') {
     return {
       pid_reference: identity.team_column,
       team_reference: identity.team_column,
       year_reference: identity.year_column,
-      week_reference: identity.week_column
+      week_reference: identity.week_column,
+      line_reference: null
     }
   }
 
@@ -261,14 +270,18 @@ export const resolve_references = ({ identity_id, from_table_name }) => {
       pid_reference: identity.pid_column,
       team_reference: null,
       year_reference: identity.year_column,
-      week_reference: identity.week_column
+      week_reference: identity.week_column,
+      line_reference: identity.line_column || null
     }
   }
 
+  // A fact-table FROM exposes its own pid/year/week by data-model convention
+  // and has no rung column, so the line axis cannot be correlated against it.
   return {
     pid_reference: `${from_table_name}.pid`,
     team_reference: null,
     year_reference: `${from_table_name}.year`,
-    week_reference: `${from_table_name}.week`
+    week_reference: `${from_table_name}.week`,
+    line_reference: null
   }
 }

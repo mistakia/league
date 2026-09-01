@@ -18,10 +18,35 @@
 /**
  * Is the line row axis active for this request?
  *
+ * Request-level, for the two bridge-chain sites in get-data-view-results, which
+ * run before any identity reference is mirrored. A COLUMN must not ask this --
+ * see resolve_line_scope.
+ *
  * @param {string[]} [row_axes]
  * @returns {boolean}
  */
 export const is_line_axis_active = (row_axes = []) => row_axes.includes('line')
+
+/**
+ * Does this cell have a rung to correlate against?
+ *
+ * The column-facing question, and deliberately NOT `row_axes.includes('line')`.
+ * A column declared at the base `player` grain is handed an EMPTY row_axes even
+ * under a line-axis request, because group_tables_by_supported_row_axes
+ * intersects the request axes with those of the identity its source.grain
+ * names -- so row_axes answers "no line axis" on exactly the betting columns
+ * that need to know. line_reference is the identity-derived reference itself
+ * and exists exactly when the axis is live, which is the same reasoning
+ * week-scoped-cte.mjs records for week_split.
+ *
+ * @param {object} args
+ * @param {object} [args.data_view_options] - carries the identity references
+ * @returns {{line_split: boolean, line_reference: string|null}}
+ */
+export const resolve_line_scope = ({ data_view_options } = {}) => {
+  const line_reference = data_view_options?.line_reference || null
+  return { line_split: Boolean(line_reference), line_reference }
+}
 
 const as_array = (value) => {
   if (value == null) return []
