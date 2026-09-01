@@ -1,0 +1,7405 @@
+{
+  "description": "Second-price replay of every auction win in league 1 from 2021 through 2025. This is the PRICING corpus: it is evidence that second-price resolution reproduces live-auction prices, and it says nothing about completeness or settlement mechanics. Each team's implied maximum is the highest amount it bid on that player, which is a lower bound on the winner's true ceiling and an exact reading of every runner-up's, since a runner-up was outbid at theirs.",
+  "measured_at": "2026-09-01",
+  "source": "league_production, league 1, transactions type 6 (AUCTION_BID) and type 7 (AUCTION_PROCESSED)",
+  "expectation_derivation": "expected_winner_tid and expected_price are computed by the SQL below, independently of libs-server/resolve-auction-player.mjs. The spec asserts the resolver reproduces them, so a divergence is an engine bug rather than a new finding.",
+  "summary": {
+    "players": 300,
+    "identical": 292,
+    "cheaper": 8,
+    "dearer": 0,
+    "winner_changes": 0,
+    "actual_dollars": 1613,
+    "second_price_dollars": 1591,
+    "delta": -22
+  },
+  "claims_sql": "with bids as (\n  select pid, season_year, tid, player_salary as amount, occurred_at, transaction_id\n  from transactions\n  where lid = 1 and type = 6 and season_year between 2021 and 2025\n),\nopening as (\n  select distinct on (season_year, pid)\n    season_year, pid, tid as nominating_team_id, amount as opening_bid\n  from bids\n  order by season_year, pid, occurred_at, transaction_id\n),\nteam_max as (\n  select distinct on (season_year, pid, tid)\n    season_year, pid, tid, amount as maximum_bid, occurred_at as amount_set_at\n  from bids\n  order by season_year, pid, tid, amount desc, occurred_at, transaction_id\n),\nwins as (\n  select distinct on (season_year, pid)\n    season_year, pid, tid as actual_winner_tid, player_salary as actual_price\n  from transactions\n  where lid = 1 and type = 7 and season_year between 2021 and 2025\n  order by season_year, pid, occurred_at, transaction_id\n)\nselect json_agg(rec order by season_year, pid) as players from (\n  select w.season_year, w.pid,\n    json_build_object(\n      'season_year', w.season_year,\n      'pid', w.pid,\n      'nominating_team_id', o.nominating_team_id,\n      'opening_bid', o.opening_bid,\n      'claims', json_agg(\n        json_build_object(\n          'tid', tm.tid,\n          'maximum_bid', tm.maximum_bid,\n          'amount_set_at', to_char(tm.amount_set_at at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"')\n        ) order by tm.maximum_bid desc, tm.amount_set_at, tm.tid\n      ),\n      'actual_winner_tid', w.actual_winner_tid,\n      'actual_price', w.actual_price\n    ) as rec\n  from wins w\n  join opening o on o.season_year = w.season_year and o.pid = w.pid\n  join team_max tm on tm.season_year = w.season_year and tm.pid = w.pid\n  group by w.season_year, w.pid, w.actual_winner_tid, w.actual_price,\n    o.nominating_team_id, o.opening_bid\n) grouped",
+  "expectations_sql": "with bids as (\n  select pid, season_year, tid, player_salary as amount, occurred_at, transaction_id\n  from transactions where lid = 1 and type = 6 and season_year between 2021 and 2025\n),\nopening as (\n  select distinct on (season_year, pid) season_year, pid, tid as nominating_team_id, amount as opening_bid\n  from bids order by season_year, pid, occurred_at, transaction_id\n),\nteam_max as (\n  select distinct on (season_year, pid, tid) season_year, pid, tid, amount as maximum_bid, occurred_at as amount_set_at\n  from bids order by season_year, pid, tid, amount desc, occurred_at, transaction_id\n),\nranked as (\n  select tm.*, o.nominating_team_id, o.opening_bid,\n    row_number() over (partition by tm.season_year, tm.pid order by tm.maximum_bid desc,\n      (case when tm.tid = o.nominating_team_id then 0 else 1 end), tm.amount_set_at, tm.tid) as rnk\n  from team_max tm join opening o on o.season_year = tm.season_year and o.pid = tm.pid\n)\nselect json_agg(json_build_object(\n  'season_year', r1.season_year, 'pid', r1.pid,\n  'expected_winner_tid', r1.tid,\n  'expected_price', least(r1.maximum_bid, greatest(coalesce(r2.maximum_bid + 1, r1.opening_bid), r1.opening_bid))\n) order by r1.season_year, r1.pid) as expected\nfrom ranked r1\nleft join ranked r2 on r2.season_year = r1.season_year and r2.pid = r1.pid and r2.rnk = 2\nwhere r1.rnk = 1",
+  "players": [
+    {
+      "season_year": 2021,
+      "pid": "ALEX-MATT-015714",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:27:54Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "ANTO-BROW-026435",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:36:20Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:36:15Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 1,
+      "expected_winner_tid": 4,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "ARI",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:57:07Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:57:04Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "BAL",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:47:58Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:47:55Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 2,
+      "expected_winner_tid": 10,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "BRAN-COOK-007229",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 9,
+          "amount_set_at": "2021-09-03T00:03:52Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 8,
+          "amount_set_at": "2021-09-03T00:03:50Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-03T00:03:32Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:03:19Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:03:16Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:03:12Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 9,
+      "expected_winner_tid": 12,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2021,
+      "pid": "BRAN-MCMA-004867",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:28:43Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:28:33Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:28:30Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "BUF",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:39:55Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "CHRI-GODW-016044",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 25,
+          "amount_set_at": "2021-09-02T23:56:03Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 24,
+          "amount_set_at": "2021-09-02T23:56:00Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 20,
+          "amount_set_at": "2021-09-02T23:55:27Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-02T23:54:52Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:54:32Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 25,
+      "expected_winner_tid": 11,
+      "expected_price": 25
+    },
+    {
+      "season_year": 2021,
+      "pid": "COLE-BEAS-026836",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:49:45Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "COOP-KUPP-007530",
+      "nominating_team_id": 4,
+      "opening_bid": 5,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 13,
+          "amount_set_at": "2021-09-02T23:50:23Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 12,
+          "amount_set_at": "2021-09-02T23:50:12Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-02T23:50:06Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 8,
+          "amount_set_at": "2021-09-02T23:49:47Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 13,
+      "expected_winner_tid": 10,
+      "expected_price": 13
+    },
+    {
+      "season_year": 2021,
+      "pid": "CORE-DAVI-016455",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-02T23:52:30Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:52:21Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:52:16Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 3,
+      "expected_winner_tid": 11,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "COUR-SUTT-007204",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-02T23:58:22Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 10,
+          "amount_set_at": "2021-09-02T23:58:10Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:57:42Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 11,
+      "expected_winner_tid": 4,
+      "expected_price": 11
+    },
+    {
+      "season_year": 2021,
+      "pid": "CURT-SAMU-007421",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:33:47Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:33:42Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:33:39Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:33:30Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 3,
+      "expected_winner_tid": 8,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "DAMI-HARR-015645",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 18,
+          "amount_set_at": "2021-09-02T23:56:57Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 17,
+          "amount_set_at": "2021-09-02T23:56:54Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 16,
+          "amount_set_at": "2021-09-02T23:56:52Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 15,
+          "amount_set_at": "2021-09-02T23:56:50Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 18,
+      "expected_winner_tid": 9,
+      "expected_price": 18
+    },
+    {
+      "season_year": 2021,
+      "pid": "DARN-MOON-007213",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:42:56Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "DAVI-JOHN-006005",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:29:13Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:29:09Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:29:06Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 3,
+      "expected_winner_tid": 8,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "DEN",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:28:15Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "DESH-WATS-000081",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:02:08Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:01:54Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:01:46Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:01:41Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 4,
+      "expected_winner_tid": 3,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2021,
+      "pid": "DEVA-PARK-017630",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:31:31Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:31:18Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 3,
+      "expected_winner_tid": 4,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "DEVO-BOOK-006681",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:58:09Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "EMMA-SAND-007614",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:50:31Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "ERIC-EBRO-027535",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:52:20Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "EZEK-ELLI-005700",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 55,
+          "amount_set_at": "2021-09-02T23:43:43Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 54,
+          "amount_set_at": "2021-09-02T23:43:28Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 39,
+          "amount_set_at": "2021-09-02T23:42:36Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 28,
+          "amount_set_at": "2021-09-02T23:42:00Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 26,
+          "amount_set_at": "2021-09-02T23:41:55Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-02T23:41:46Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-02T23:41:44Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 55,
+      "expected_winner_tid": 12,
+      "expected_price": 55
+    },
+    {
+      "season_year": 2021,
+      "pid": "GIOV-BERN-005793",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:06:37Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "GUSX-EDWA-025907",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 28,
+          "amount_set_at": "2021-09-02T23:47:17Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 27,
+          "amount_set_at": "2021-09-02T23:47:09Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 25,
+          "amount_set_at": "2021-09-02T23:46:51Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 22,
+          "amount_set_at": "2021-09-02T23:46:43Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 20,
+          "amount_set_at": "2021-09-02T23:46:36Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:46:27Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 28,
+      "expected_winner_tid": 6,
+      "expected_price": 28
+    },
+    {
+      "season_year": 2021,
+      "pid": "HARR-BUTK-027718",
+      "nominating_team_id": 7,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-02T23:48:57Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:48:43Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 3,
+      "expected_winner_tid": 7,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "IND",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:54:37Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "JAKO-MEYE-017624",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:46:23Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:46:20Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "JALE-REAG-026888",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:42:27Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "JAMA-WILL-005494",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 8,
+          "amount_set_at": "2021-09-03T00:17:49Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 7,
+          "amount_set_at": "2021-09-03T00:17:35Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 6,
+          "amount_set_at": "2021-09-03T00:17:21Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-03T00:17:09Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:16:36Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:16:31Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 8,
+      "expected_winner_tid": 3,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2021,
+      "pid": "JAME-CONN-005150",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 14,
+          "amount_set_at": "2021-09-03T00:11:17Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 13,
+          "amount_set_at": "2021-09-03T00:11:10Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-03T00:10:53Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-03T00:10:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:09:58Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 14,
+      "expected_winner_tid": 11,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2021,
+      "pid": "JAME-WHIT-005575",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:25:29Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:25:26Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 3,
+      "expected_winner_tid": 8,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "JAMI-CROW-007596",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:53:33Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "JARE-COOK-027683",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:32:24Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:32:19Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "JARE-GOFF-002009",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 21,
+          "amount_set_at": "2021-09-02T23:38:22Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 20,
+          "amount_set_at": "2021-09-02T23:38:09Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 18,
+          "amount_set_at": "2021-09-02T23:16:35Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-02T23:15:02Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 21,
+      "expected_winner_tid": 12,
+      "expected_price": 21
+    },
+    {
+      "season_year": 2021,
+      "pid": "JIMM-GARO-003276",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:27:48Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:27:33Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:27:22Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 2,
+      "expected_winner_tid": 10,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "JUST-TUCK-027589",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:00:38Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:00:34Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:00:32Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 3,
+      "expected_winner_tid": 8,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2021,
+      "pid": "KENY-DRAK-006849",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-03T00:12:49Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 10,
+          "amount_set_at": "2021-09-03T00:12:45Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 9,
+          "amount_set_at": "2021-09-03T00:12:38Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 6,
+          "amount_set_at": "2021-09-03T00:12:10Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:11:50Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 11,
+      "expected_winner_tid": 2,
+      "expected_price": 11
+    },
+    {
+      "season_year": 2021,
+      "pid": "LEON-FOUR-025850",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 8,
+          "amount_set_at": "2021-09-02T23:59:59Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 7,
+          "amount_set_at": "2021-09-02T23:59:47Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-02T23:59:33Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:59:10Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 8,
+      "expected_winner_tid": 8,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2021,
+      "pid": "MALC-BROW-006795",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:59:11Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "MARQ-CALL-026922",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:51:26Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "MARV-JONE-007301",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 10,
+          "amount_set_at": "2021-09-03T00:23:30Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 9,
+          "amount_set_at": "2021-09-03T00:23:27Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:23:00Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 10,
+      "expected_winner_tid": 12,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2021,
+      "pid": "MATT-GAYX-004830",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:15:20Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:15:16Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 2,
+      "expected_winner_tid": 9,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "MELV-GORD-006926",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 15,
+          "amount_set_at": "2021-09-02T23:54:01Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 12,
+          "amount_set_at": "2021-09-02T23:53:58Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-02T23:53:54Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:53:29Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-02T23:53:16Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 15,
+      "expected_winner_tid": 12,
+      "expected_price": 13
+    },
+    {
+      "season_year": 2021,
+      "pid": "MICH-GALL-025759",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 7,
+          "amount_set_at": "2021-09-03T00:14:30Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 6,
+          "amount_set_at": "2021-09-03T00:14:27Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:14:13Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 7,
+      "expected_winner_tid": 8,
+      "expected_price": 7
+    },
+    {
+      "season_year": 2021,
+      "pid": "MIKE-DAVI-006059",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 28,
+          "amount_set_at": "2021-09-03T00:06:13Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 27,
+          "amount_set_at": "2021-09-03T00:06:11Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 21,
+          "amount_set_at": "2021-09-03T00:06:04Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 15,
+          "amount_set_at": "2021-09-03T00:05:47Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 12,
+          "amount_set_at": "2021-09-03T00:05:40Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:05:22Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:05:19Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:05:09Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 28,
+      "expected_winner_tid": 9,
+      "expected_price": 28
+    },
+    {
+      "season_year": 2021,
+      "pid": "MIKE-WILL-006058",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:39:03Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:38:48Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 1,
+      "expected_winner_tid": 4,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "NELS-AGHO-007396",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:45:12Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "NYHE-HINE-006644",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:41:23Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:41:20Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:41:14Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "ODEL-BECK-007161",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 9,
+          "amount_set_at": "2021-09-02T23:45:51Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 8,
+          "amount_set_at": "2021-09-02T23:45:37Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-02T23:45:13Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:44:56Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 9,
+      "expected_winner_tid": 3,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2021,
+      "pid": "PHIL-LIND-025927",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:38:02Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "PIT",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-03T00:26:46Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:26:32Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:26:29Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 2,
+      "expected_winner_tid": 3,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "RAHE-MOST-006761",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 14,
+          "amount_set_at": "2021-09-02T23:39:49Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 13,
+          "amount_set_at": "2021-09-02T23:39:35Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 10,
+          "amount_set_at": "2021-09-02T23:39:25Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2021-09-02T23:39:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:39:00Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 14,
+      "expected_winner_tid": 10,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2021,
+      "pid": "ROBB-GOUL-027533",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:42:02Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "ROBE-TONY-004846",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2021-09-02T23:44:18Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:44:15Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-02T23:44:09Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 2,
+      "expected_winner_tid": 4,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2021,
+      "pid": "RUSS-GAGE-001868",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:09:29Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "RYAN-FITZ-002105",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 31,
+          "amount_set_at": "2021-09-02T23:40:57Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 30,
+          "amount_set_at": "2021-09-02T23:40:45Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 6,
+          "amount_set_at": "2021-09-02T23:40:39Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-02T23:40:37Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-02T23:40:34Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:40:18Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 31,
+      "expected_winner_tid": 12,
+      "expected_price": 31
+    },
+    {
+      "season_year": 2021,
+      "pid": "SEA",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:34:25Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "SF",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-02T23:51:42Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-02T23:51:38Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 1,
+      "expected_winner_tid": 8,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "SONY-MICH-015716",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:21:08Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:20:54Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:20:37Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 4,
+      "expected_winner_tid": 2,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2021,
+      "pid": "STER-SHEP-025882",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:56:10Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "TB",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:19:01Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2021-09-03T00:18:58Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:18:45Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 4,
+      "expected_winner_tid": 9,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2021,
+      "pid": "TEN",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:43:17Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "TEVI-COLE-015433",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:08:27Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYLE-BASS-027580",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:09:14Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:09:01Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 1,
+      "expected_winner_tid": 6,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYLE-CONK-027880",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:22:05Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYLE-HIGB-027754",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 6,
+          "amount_set_at": "2021-09-03T00:19:57Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 5,
+          "amount_set_at": "2021-09-03T00:19:50Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 6,
+      "expected_winner_tid": 8,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYRE-WILL-015242",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2021-09-03T00:35:36Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:35:29Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYRO-TAYL-015194",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 13,
+          "amount_set_at": "2021-09-03T00:07:40Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 12,
+          "amount_set_at": "2021-09-03T00:07:26Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 11,
+          "amount_set_at": "2021-09-03T00:07:25Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 7,
+          "amount_set_at": "2021-09-03T00:07:12Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:06:48Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 13,
+      "expected_winner_tid": 3,
+      "expected_price": 13
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYSO-WILL-014806",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:55:29Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "TYXX-HILT-025411",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T01:02:51Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2021,
+      "pid": "YOUN-KOOX-027725",
+      "nominating_team_id": 3,
+      "opening_bid": 4,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 4,
+          "amount_set_at": "2021-09-03T00:29:38Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 4,
+      "expected_winner_tid": 3,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2021,
+      "pid": "ZACH-ERTZ-027584",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2021-09-03T00:36:59Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 0,
+      "expected_winner_tid": 12,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "AARO-RODG-002284",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 44,
+          "amount_set_at": "2022-08-21T20:07:09Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 43,
+          "amount_set_at": "2022-08-21T20:06:54Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:06:42Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:06:35Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 44,
+      "expected_winner_tid": 4,
+      "expected_price": 44
+    },
+    {
+      "season_year": 2022,
+      "pid": "ADAM-THIE-007349",
+      "nominating_team_id": 1,
+      "opening_bid": 4,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 11,
+          "amount_set_at": "2022-08-21T20:33:53Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:33:45Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 8,
+          "amount_set_at": "2022-08-21T20:33:30Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T20:33:23Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:33:16Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 11,
+      "expected_winner_tid": 4,
+      "expected_price": 11
+    },
+    {
+      "season_year": 2022,
+      "pid": "ALBE-OKWU-004654",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:35:56Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "ALEX-MATT-015714",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:25:47Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "BAKE-MAYF-002054",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:36:20Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 9,
+          "amount_set_at": "2022-08-21T20:36:09Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:35:36Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:35:25Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:35:21Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 10,
+      "expected_winner_tid": 2,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2022,
+      "pid": "BRAN-AIYU-006142",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T21:00:04Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T20:59:59Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:59:36Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 6,
+      "expected_winner_tid": 1,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2022,
+      "pid": "BRAN-MCMA-004867",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:44:20Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "BUF",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:15:05Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "CARS-WENT-003811",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 12,
+          "amount_set_at": "2022-08-21T20:20:00Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 11,
+          "amount_set_at": "2022-08-21T20:19:53Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:19:49Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T20:19:45Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:19:39Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:19:24Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 12,
+      "expected_winner_tid": 12,
+      "expected_price": 12
+    },
+    {
+      "season_year": 2022,
+      "pid": "CHAS-CLAY-025826",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T21:10:12Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T21:09:59Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:09:54Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:09:42Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 5,
+      "expected_winner_tid": 4,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2022,
+      "pid": "CHAS-EDMO-025922",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 18,
+          "amount_set_at": "2022-08-21T20:28:31Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 17,
+          "amount_set_at": "2022-08-21T20:28:20Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 12,
+          "amount_set_at": "2022-08-21T20:27:39Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 9,
+          "amount_set_at": "2022-08-21T20:27:31Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:27:12Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:27:08Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 18,
+      "expected_winner_tid": 9,
+      "expected_price": 18
+    },
+    {
+      "season_year": 2022,
+      "pid": "CLE",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:45:20Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "CORE-DAVI-016455",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:39:08Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "COUR-SUTT-007204",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 12,
+          "amount_set_at": "2022-08-21T20:44:27Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 11,
+          "amount_set_at": "2022-08-21T20:44:14Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:43:21Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:43:09Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 12,
+      "expected_winner_tid": 3,
+      "expected_price": 12
+    },
+    {
+      "season_year": 2022,
+      "pid": "DANI-CARL-027639",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:28:03Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "DARR-WILL-006055",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:37:25Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 0,
+      "expected_winner_tid": 11,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "DAVI-NJOK-027570",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:07:35Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "DEVA-PARK-017630",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:29:21Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:29:08Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 1,
+      "expected_winner_tid": 2,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "DION-JOHN-025319",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 13,
+          "amount_set_at": "2022-08-21T20:24:52Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 12,
+          "amount_set_at": "2022-08-21T20:24:50Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:24:44Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T20:24:18Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:24:06Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 13,
+      "expected_winner_tid": 5,
+      "expected_price": 13
+    },
+    {
+      "season_year": 2022,
+      "pid": "DJXX-CHAR-025201",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:38:04Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "DREW-LOCK-002992",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:53:49Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:53:43Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 4,
+      "expected_winner_tid": 1,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2022,
+      "pid": "EVAN-ENGR-027555",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:41:10Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "EVAN-MCPH-027551",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:24:04Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 0,
+      "expected_winner_tid": 3,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "EZEK-ELLI-005700",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 32,
+          "amount_set_at": "2022-08-21T20:18:20Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 31,
+          "amount_set_at": "2022-08-21T20:18:17Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 29,
+          "amount_set_at": "2022-08-21T20:18:03Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 17,
+          "amount_set_at": "2022-08-21T20:17:41Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:17:24Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T20:17:18Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:16:57Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 32,
+      "expected_winner_tid": 4,
+      "expected_price": 32
+    },
+    {
+      "season_year": 2022,
+      "pid": "GENO-SMIT-015193",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:55:55Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "GERA-EVER-027602",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:57:05Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:57:01Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 1,
+      "expected_winner_tid": 4,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "GREG-JOSE-027726",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:06:32Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:06:23Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 2,
+      "expected_winner_tid": 12,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "HARR-BUTK-027718",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:22:35Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "HAYD-HURS-027795",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:42:17Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "HUNT-HENR-027587",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:31:23Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T20:31:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:31:00Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 3,
+      "expected_winner_tid": 9,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2022,
+      "pid": "IRVX-SMIT-027793",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:18:48Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "ISAI-MCKE-026920",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:13:48Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 0,
+      "expected_winner_tid": 11,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "JACO-BRIS-003646",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:03:44Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:03:34Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 1,
+      "expected_winner_tid": 2,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "JAKO-MEYE-017624",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T21:10:45Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:10:43Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:10:40Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 3,
+      "expected_winner_tid": 9,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2022,
+      "pid": "JAMA-WILL-005494",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T21:04:34Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:04:31Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:04:22Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 3,
+      "expected_winner_tid": 4,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2022,
+      "pid": "JDXX-MCKI-026209",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:21:04Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:21:00Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:20:58Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 2,
+      "expected_winner_tid": 5,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "JERI-MCKI-015732",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:43:19Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "JIMM-GARO-003276",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:30:22Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 0,
+      "expected_winner_tid": 11,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "JOEX-FLAC-003102",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:05:46Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "JUST-TUCK-027589",
+      "nominating_team_id": 10,
+      "opening_bid": 8,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 8,
+          "amount_set_at": "2022-08-21T20:29:02Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 8,
+      "expected_winner_tid": 10,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2022,
+      "pid": "KARE-HUNT-006153",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 13,
+          "amount_set_at": "2022-08-21T20:38:43Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 12,
+          "amount_set_at": "2022-08-21T20:38:33Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:38:16Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 8,
+          "amount_set_at": "2022-08-21T20:38:02Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:37:27Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 13,
+      "expected_winner_tid": 3,
+      "expected_price": 13
+    },
+    {
+      "season_year": 2022,
+      "pid": "KENN-GAIN-005953",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T21:02:53Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T21:02:45Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:02:37Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 4,
+      "expected_winner_tid": 2,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2022,
+      "pid": "LA",
+      "nominating_team_id": 10,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:49:02Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 1,
+      "expected_winner_tid": 10,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "LAC",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:15:34Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "LAVI-SHEN-027299",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:26:49Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:26:43Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 2,
+      "expected_winner_tid": 1,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "LOGA-THOM-005040",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:40:09Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "MARK-INGR-004625",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:00:35Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 0,
+      "expected_winner_tid": 3,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "MARQ-BROW-018173",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:45:59Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 9,
+          "amount_set_at": "2022-08-21T20:45:55Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 7,
+          "amount_set_at": "2022-08-21T20:45:39Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:45:25Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T20:45:19Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 10,
+      "expected_winner_tid": 1,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2022,
+      "pid": "MARV-JONE-007301",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:58:55Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 0,
+      "expected_winner_tid": 9,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "MATT-GAYX-004830",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:26:10Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "MECO-HARD-025944",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:34:46Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "MELV-GORD-006926",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 7,
+          "amount_set_at": "2022-08-21T20:23:43Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T20:23:38Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:23:29Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:23:13Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 7,
+      "expected_winner_tid": 9,
+      "expected_price": 7
+    },
+    {
+      "season_year": 2022,
+      "pid": "MICH-CART-000282",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2022-08-21T20:54:52Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T20:54:38Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:54:35Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:54:32Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:54:26Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 7,
+      "expected_winner_tid": 12,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2022,
+      "pid": "MICH-GALL-025759",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:31:20Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:31:09Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 1,
+      "expected_winner_tid": 11,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "MIKE-GESI-027599",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:52:29Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:52:26Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "MILE-SAND-015718",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 21,
+          "amount_set_at": "2022-08-21T20:22:28Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 20,
+          "amount_set_at": "2022-08-21T20:22:20Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:21:30Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:21:17Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:21:09Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 21,
+      "expected_winner_tid": 4,
+      "expected_price": 21
+    },
+    {
+      "season_year": 2022,
+      "pid": "MITC-TRUB-002142",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:46:32Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:46:27Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "PATX-FREI-025189",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:08:36Z"
+        }
+      ],
+      "actual_winner_tid": 8,
+      "actual_price": 0,
+      "expected_winner_tid": 8,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "PIT",
+      "nominating_team_id": 3,
+      "opening_bid": 5,
+      "claims": [
+        {
+          "tid": 3,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T21:12:04Z"
+        }
+      ],
+      "actual_winner_tid": 3,
+      "actual_price": 5,
+      "expected_winner_tid": 3,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2022,
+      "pid": "RAHE-MOST-006761",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T20:50:36Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:50:31Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:50:07Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:49:56Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 5,
+      "expected_winner_tid": 1,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2022,
+      "pid": "REXX-BURK-006502",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:11:39Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "RHAM-STEV-011789",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 11,
+          "amount_set_at": "2022-08-21T20:42:30Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 10,
+          "amount_set_at": "2022-08-21T20:42:17Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 9,
+          "amount_set_at": "2022-08-21T20:42:10Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:41:53Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T20:41:48Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:41:42Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 11,
+      "expected_winner_tid": 2,
+      "expected_price": 11
+    },
+    {
+      "season_year": 2022,
+      "pid": "ROBB-ANDE-017101",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:19:56Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:19:51Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2022,
+      "pid": "ROBB-GOUL-027533",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:17:47Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 0,
+      "expected_winner_tid": 12,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "ROBE-TONY-004846",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:25:23Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 0,
+      "expected_winner_tid": 11,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "ROBE-WOOD-026968",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:48:15Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:48:05Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:47:42Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:47:33Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 4,
+      "expected_winner_tid": 9,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2022,
+      "pid": "RUSS-GAGE-001868",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:32:18Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:32:14Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "SF",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T21:21:45Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T21:21:39Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 2,
+      "expected_winner_tid": 9,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "TERR-MCLA-007049",
+      "nominating_team_id": 3,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 18,
+          "amount_set_at": "2022-08-21T20:26:06Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 17,
+          "amount_set_at": "2022-08-21T20:26:04Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 13,
+          "amount_set_at": "2022-08-21T20:25:53Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T20:25:36Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:25:19Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 18,
+      "expected_winner_tid": 4,
+      "expected_price": 18
+    },
+    {
+      "season_year": 2022,
+      "pid": "TJXX-HOCK-027527",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2022-08-21T20:32:44Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2022-08-21T20:32:40Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:32:16Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 4,
+      "expected_winner_tid": 2,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2022,
+      "pid": "TYLE-BOYD-025136",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T21:14:33Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2022,
+      "pid": "TYLE-HIGB-027754",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 2,
+          "amount_set_at": "2022-08-21T20:58:28Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:58:19Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:58:06Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 2,
+      "expected_winner_tid": 12,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2022,
+      "pid": "TYLE-LOCK-025269",
+      "nominating_team_id": 8,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 6,
+          "amount_set_at": "2022-08-21T20:40:31Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 5,
+          "amount_set_at": "2022-08-21T20:40:28Z"
+        },
+        {
+          "tid": 3,
+          "maximum_bid": 1,
+          "amount_set_at": "2022-08-21T20:39:57Z"
+        },
+        {
+          "tid": 8,
+          "maximum_bid": 0,
+          "amount_set_at": "2022-08-21T20:39:48Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 6,
+      "expected_winner_tid": 9,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2023,
+      "pid": "AARO-JONE-006686",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 31,
+          "amount_set_at": "2023-09-03T19:25:14Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 30,
+          "amount_set_at": "2023-09-03T19:25:09Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T19:24:17Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:24:13Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 31,
+      "expected_winner_tid": 9,
+      "expected_price": 31
+    },
+    {
+      "season_year": 2023,
+      "pid": "AMAR-COOP-007280",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:31:24Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 13,
+          "amount_set_at": "2023-09-03T19:31:18Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 14,
+      "expected_winner_tid": 12,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2023,
+      "pid": "ANTO-GIBS-025139",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:17:53Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:17:40Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 1,
+      "expected_winner_tid": 6,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "BAKE-MAYF-002054",
+      "nominating_team_id": 7,
+      "opening_bid": 3,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T19:49:49Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 3,
+      "expected_winner_tid": 7,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2023,
+      "pid": "BAL",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:18:23Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "BRIA-ROBI-011947",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 6,
+          "amount_set_at": "2023-09-03T20:03:10Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 5,
+          "amount_set_at": "2023-09-03T20:03:06Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T20:03:03Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:02:40Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 6,
+      "expected_winner_tid": 9,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2023,
+      "pid": "BROC-PURD-004112",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:12:52Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 13,
+          "amount_set_at": "2023-09-03T19:12:38Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 10,
+          "amount_set_at": "2023-09-03T19:12:17Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:11:57Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T19:11:43Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:11:21Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 14,
+      "expected_winner_tid": 4,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2023,
+      "pid": "BUF",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T20:07:16Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T20:07:13Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 4,
+      "expected_winner_tid": 4,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2023,
+      "pid": "CHRI-GODW-016044",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T19:59:50Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T19:59:47Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:59:33Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 3,
+      "expected_winner_tid": 4,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2023,
+      "pid": "CHRI-KIRK-007500",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:23:28Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 6,
+          "amount_set_at": "2023-09-03T19:23:25Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:22:56Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 7,
+      "expected_winner_tid": 12,
+      "expected_price": 7
+    },
+    {
+      "season_year": 2023,
+      "pid": "CHUB-HUBB-005827",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:30:26Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "COLE-KMET-002218",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:29:18Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "COUR-SUTT-007204",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:22:53Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "DAL",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:55:54Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 6,
+          "amount_set_at": "2023-09-03T19:55:43Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 7,
+      "expected_winner_tid": 12,
+      "expected_price": 7
+    },
+    {
+      "season_year": 2023,
+      "pid": "DALL-GOED-027610",
+      "nominating_team_id": 12,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 11,
+          "amount_set_at": "2023-09-03T20:00:54Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T20:00:50Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 11,
+      "expected_winner_tid": 12,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2023,
+      "pid": "DALT-SCHU-027841",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:16:18Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "DARR-WALL-027833",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 17,
+          "amount_set_at": "2023-09-03T19:45:12Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 16,
+          "amount_set_at": "2023-09-03T19:45:02Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T19:44:15Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:44:10Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 17,
+      "expected_winner_tid": 12,
+      "expected_price": 17
+    },
+    {
+      "season_year": 2023,
+      "pid": "DAVI-MONT-005910",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:35:22Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 13,
+          "amount_set_at": "2023-09-03T19:35:09Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 10,
+          "amount_set_at": "2023-09-03T19:34:40Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:34:34Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T19:34:10Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:33:58Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 14,
+      "expected_winner_tid": 7,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2023,
+      "pid": "DAVI-NJOK-027570",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:16:43Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "DEAN-HOPK-007348",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:54:05Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 13,
+          "amount_set_at": "2023-09-03T19:53:54Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 12,
+          "amount_set_at": "2023-09-03T19:53:45Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:52:54Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 14,
+      "expected_winner_tid": 12,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2023,
+      "pid": "DEEB-SAMU-001425",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 16,
+          "amount_set_at": "2023-09-03T19:09:50Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 15,
+          "amount_set_at": "2023-09-03T19:09:43Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:09:32Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 11,
+          "amount_set_at": "2023-09-03T19:09:16Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 6,
+          "amount_set_at": "2023-09-03T19:07:19Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 5,
+          "amount_set_at": "2023-09-03T19:07:05Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 16,
+      "expected_winner_tid": 6,
+      "expected_price": 16
+    },
+    {
+      "season_year": 2023,
+      "pid": "DEN",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:57:09Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 0,
+      "expected_winner_tid": 11,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "DEVI-SING-015648",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:28:15Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "DION-JOHN-025319",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 5,
+          "amount_set_at": "2023-09-03T20:08:44Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T20:08:30Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T20:08:26Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 5,
+      "expected_winner_tid": 11,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2023,
+      "pid": "ELIJ-MOOR-007466",
+      "nominating_team_id": 1,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:27:33Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 1,
+      "expected_winner_tid": 1,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "EVAN-ENGR-027555",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:13:31Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "EZEK-ELLI-005700",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:14:31Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:14:26Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 1,
+      "expected_winner_tid": 2,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "GABR-DAVI-025770",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T20:11:26Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:11:15Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 4,
+      "expected_winner_tid": 9,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "GARR-WILS-005891",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 28,
+          "amount_set_at": "2023-09-03T19:21:34Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 27,
+          "amount_set_at": "2023-09-03T19:21:22Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 20,
+          "amount_set_at": "2023-09-03T19:20:47Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:20:29Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:20:05Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 28,
+      "expected_winner_tid": 11,
+      "expected_price": 28
+    },
+    {
+      "season_year": 2023,
+      "pid": "GUSX-EDWA-025907",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:23:33Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:23:20Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 1,
+      "expected_winner_tid": 7,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "JAHA-DOTS-014665",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T20:04:19Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T20:04:15Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:04:02Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 3,
+      "expected_winner_tid": 11,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2023,
+      "pid": "JAYL-WARR-017934",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:30:52Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "JEFF-WILS-005980",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:26:54Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "JERI-MCKI-015732",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T19:50:41Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:50:30Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 1,
+      "expected_winner_tid": 9,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "JERO-FORD-006086",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:29:48Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "JKXX-DOBB-011954",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 19,
+          "amount_set_at": "2023-09-03T19:15:08Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 18,
+          "amount_set_at": "2023-09-03T19:15:00Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 16,
+          "amount_set_at": "2023-09-03T19:14:38Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:13:42Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 19,
+      "expected_winner_tid": 1,
+      "expected_price": 19
+    },
+    {
+      "season_year": 2023,
+      "pid": "JOEX-MIXO-005692",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 31,
+          "amount_set_at": "2023-09-03T19:16:43Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 30,
+          "amount_set_at": "2023-09-03T19:16:39Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 25,
+          "amount_set_at": "2023-09-03T19:16:08Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 14,
+          "amount_set_at": "2023-09-03T19:15:59Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 12,
+          "amount_set_at": "2023-09-03T19:15:54Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T19:15:47Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 31,
+      "expected_winner_tid": 4,
+      "expected_price": 31
+    },
+    {
+      "season_year": 2023,
+      "pid": "JOSH-DOBB-008704",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:24:55Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "JUJU-SMIT-007583",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:15:05Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "KC",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:20:58Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "KEEN-ALLE-025291",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 18,
+          "amount_set_at": "2023-09-03T19:48:55Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 17,
+          "amount_set_at": "2023-09-03T19:48:43Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:47:32Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 18,
+      "expected_winner_tid": 12,
+      "expected_price": 18
+    },
+    {
+      "season_year": 2023,
+      "pid": "KENN-PICK-005920",
+      "nominating_team_id": 7,
+      "opening_bid": 6,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 10,
+          "amount_set_at": "2023-09-03T19:32:41Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 9,
+          "amount_set_at": "2023-09-03T19:32:35Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:32:17Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 6,
+          "amount_set_at": "2023-09-03T19:32:07Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 10,
+      "expected_winner_tid": 9,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2023,
+      "pid": "KHAL-HERB-006068",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:51:57Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:51:45Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 8,
+      "expected_winner_tid": 9,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2023,
+      "pid": "KIRK-COUS-003689",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 34,
+          "amount_set_at": "2023-09-03T19:19:19Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 33,
+          "amount_set_at": "2023-09-03T19:19:17Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 17,
+          "amount_set_at": "2023-09-03T19:18:33Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 10,
+          "amount_set_at": "2023-09-03T19:18:29Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:18:20Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 34,
+      "expected_winner_tid": 9,
+      "expected_price": 34
+    },
+    {
+      "season_year": 2023,
+      "pid": "MACX-JONE-002656",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:38:41Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:38:38Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T19:37:40Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:37:27Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 8,
+      "expected_winner_tid": 6,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2023,
+      "pid": "MARK-ANDR-027703",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 25,
+          "amount_set_at": "2023-09-03T19:29:37Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 24,
+          "amount_set_at": "2023-09-03T19:29:26Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 18,
+          "amount_set_at": "2023-09-03T19:28:51Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:28:27Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:28:07Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 25,
+      "expected_winner_tid": 4,
+      "expected_price": 25
+    },
+    {
+      "season_year": 2023,
+      "pid": "MARQ-BROW-018173",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:12:35Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:12:30Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 1,
+      "expected_winner_tid": 6,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "MICH-THOM-007488",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T20:19:28Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:19:23Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 1,
+      "expected_winner_tid": 2,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "MIKE-EVAN-007308",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 9,
+          "amount_set_at": "2023-09-03T19:58:54Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:58:47Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T19:58:24Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:58:12Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 9,
+      "expected_winner_tid": 9,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2023,
+      "pid": "NICO-COLL-025146",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:20:13Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "ODEL-BECK-007161",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:41:18Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "PATX-FREI-025189",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:04:43Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 0,
+      "expected_winner_tid": 9,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "RACH-WHIT-011949",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 25,
+          "amount_set_at": "2023-09-03T19:37:02Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 24,
+          "amount_set_at": "2023-09-03T19:36:59Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 20,
+          "amount_set_at": "2023-09-03T19:36:48Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 25,
+      "expected_winner_tid": 4,
+      "expected_price": 25
+    },
+    {
+      "season_year": 2023,
+      "pid": "RAHE-MOST-006761",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T19:42:42Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T19:42:39Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:42:16Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 4,
+      "expected_winner_tid": 12,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2023,
+      "pid": "RASH-SHAH-026090",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:33:09Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "RUSS-WILS-003975",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 9,
+          "amount_set_at": "2023-09-03T19:27:05Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 8,
+          "amount_set_at": "2023-09-03T19:26:51Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 7,
+          "amount_set_at": "2023-09-03T19:26:39Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T19:26:08Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:25:39Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 9,
+      "expected_winner_tid": 9,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2023,
+      "pid": "RYAN-TANN-002047",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2023-09-03T19:46:23Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T19:46:18Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 1,
+      "expected_winner_tid": 12,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2023,
+      "pid": "SF",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2023-09-03T19:40:22Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2023-09-03T19:40:12Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 3,
+      "expected_winner_tid": 9,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2023,
+      "pid": "TYLE-BOYD-025136",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:21:52Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "TYLE-HIGB-027754",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2023-09-03T20:25:54Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 0,
+      "expected_winner_tid": 2,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2023,
+      "pid": "TYLE-LOCK-025269",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 5,
+          "amount_set_at": "2023-09-03T20:06:12Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 4,
+          "amount_set_at": "2023-09-03T20:06:09Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 5,
+      "expected_winner_tid": 2,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2024,
+      "pid": "AARO-JONE-006686",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 14,
+          "amount_set_at": "2024-08-25T23:07:14Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 13,
+          "amount_set_at": "2024-08-25T23:07:10Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 9,
+          "amount_set_at": "2024-08-25T23:06:37Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:06:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:06:14Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:06:11Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 14,
+      "expected_winner_tid": 9,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2024,
+      "pid": "AJXX-DILL-006067",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:59:46Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "ALEX-MATT-015714",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-26T00:01:08Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "ATL",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:51:16Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "AUST-EKEL-025428",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:05:28Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:05:18Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:05:07Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 2,
+      "expected_winner_tid": 10,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2024,
+      "pid": "CALV-RIDL-018203",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:31:18Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:31:16Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:31:02Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 5,
+      "expected_winner_tid": 12,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2024,
+      "pid": "CHRI-GODW-016044",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 6,
+          "amount_set_at": "2024-08-25T23:19:40Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:19:35Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:19:10Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 6,
+      "expected_winner_tid": 9,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2024,
+      "pid": "CHRI-WATS-007263",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:18:29Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:18:16Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:18:02Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:17:50Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 3,
+      "expected_winner_tid": 12,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2024,
+      "pid": "CHUB-HUBB-005827",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:49:44Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:49:41Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 3,
+      "expected_winner_tid": 5,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2024,
+      "pid": "CIN",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:57:19Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "CLE",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:04:19Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "COOP-KUPP-007530",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 16,
+          "amount_set_at": "2024-08-25T23:10:27Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 15,
+          "amount_set_at": "2024-08-25T23:10:20Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:09:19Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:09:16Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:09:06Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 16,
+      "expected_winner_tid": 9,
+      "expected_price": 16
+    },
+    {
+      "season_year": 2024,
+      "pid": "COUR-SUTT-007204",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:43:16Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "CURT-SAMU-007421",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:57:48Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "DAL",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:44:11Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 0,
+      "expected_winner_tid": 12,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "DALL-GOED-027610",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:41:47Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "DALT-SCHU-027841",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:45:55Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "DAVI-NJOK-027570",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:29:02Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:28:58Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 1,
+      "expected_winner_tid": 9,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2024,
+      "pid": "DEAN-HOPK-007348",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:38:44Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:38:32Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:38:15Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 4,
+      "expected_winner_tid": 6,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2024,
+      "pid": "DEMA-DOUG-003730",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:33:49Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "DERE-CARR-002877",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 14,
+          "amount_set_at": "2024-08-25T23:24:49Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 13,
+          "amount_set_at": "2024-08-25T23:24:47Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 9,
+          "amount_set_at": "2024-08-25T23:24:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:23:06Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 14,
+      "expected_winner_tid": 9,
+      "expected_price": 14
+    },
+    {
+      "season_year": 2024,
+      "pid": "DESH-WATS-000081",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 15,
+          "amount_set_at": "2024-08-25T23:12:10Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 14,
+          "amount_set_at": "2024-08-25T23:11:57Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 11,
+          "amount_set_at": "2024-08-25T23:11:41Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:11:01Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 15,
+      "expected_winner_tid": 2,
+      "expected_price": 15
+    },
+    {
+      "season_year": 2024,
+      "pid": "DEVI-SING-015648",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:48:17Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:48:15Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:47:59Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 5,
+      "expected_winner_tid": 4,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2024,
+      "pid": "DION-JOHN-025319",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:35:22Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:35:09Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:34:49Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:34:27Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 5,
+      "expected_winner_tid": 7,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2024,
+      "pid": "GARD-MINS-004459",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:16:46Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:16:37Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:16:31Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 2,
+      "expected_winner_tid": 12,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2024,
+      "pid": "JAMA-WILL-005494",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:56:41Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "JAVO-WILL-012162",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 9,
+          "amount_set_at": "2024-08-25T23:26:02Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 8,
+          "amount_set_at": "2024-08-25T23:25:49Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 7,
+          "amount_set_at": "2024-08-25T23:25:36Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2024-08-25T23:25:33Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 9,
+      "expected_winner_tid": 11,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2024,
+      "pid": "JAYL-WADD-007092",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 23,
+          "amount_set_at": "2024-08-25T23:03:49Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 22,
+          "amount_set_at": "2024-08-25T23:03:37Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 12,
+          "amount_set_at": "2024-08-25T23:02:37Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 8,
+          "amount_set_at": "2024-08-25T23:02:16Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:01:54Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:01:51Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 23,
+      "expected_winner_tid": 9,
+      "expected_price": 23
+    },
+    {
+      "season_year": 2024,
+      "pid": "JERO-FORD-006086",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 6,
+          "amount_set_at": "2024-08-25T23:37:16Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:37:06Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:36:53Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:36:50Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 6,
+      "expected_winner_tid": 11,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2024,
+      "pid": "JOSH-PALM-015241",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:50:14Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "JUST-FIEL-015182",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:36:06Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:36:02Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:35:59Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 2,
+      "expected_winner_tid": 10,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2024,
+      "pid": "KEEN-ALLE-025291",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:27:22Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:27:16Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:27:06Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 3,
+      "expected_winner_tid": 2,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2024,
+      "pid": "KEND-MILL-012077",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:56:02Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 0,
+      "expected_winner_tid": 4,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "KENN-GAIN-005953",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-26T00:00:16Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "MARK-ANDR-027703",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 18,
+          "amount_set_at": "2024-08-25T23:16:02Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 17,
+          "amount_set_at": "2024-08-25T23:15:54Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:14:11Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:14:00Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:13:56Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 18,
+      "expected_winner_tid": 1,
+      "expected_price": 18
+    },
+    {
+      "season_year": 2024,
+      "pid": "MARQ-BROW-018173",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:55:32Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:55:22Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2024,
+      "pid": "NAJE-HARR-012125",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 10,
+          "amount_set_at": "2024-08-25T23:22:21Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 9,
+          "amount_set_at": "2024-08-25T23:22:09Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:21:51Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:21:41Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 10,
+      "expected_winner_tid": 9,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2024,
+      "pid": "NYJ",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:48:53Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "PHI",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:40:06Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:39:56Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 1,
+      "expected_winner_tid": 4,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2024,
+      "pid": "RASH-BATE-000115",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:47:22Z"
+        }
+      ],
+      "actual_winner_tid": 1,
+      "actual_price": 0,
+      "expected_winner_tid": 1,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "RASH-SHAH-026090",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:39:31Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:39:20Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 1,
+      "expected_winner_tid": 10,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2024,
+      "pid": "RUSS-WILS-003975",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2024-08-25T23:28:11Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:27:57Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2024,
+      "pid": "SAMX-DARN-005673",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:21:02Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 4,
+          "amount_set_at": "2024-08-25T23:20:59Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 5,
+      "expected_winner_tid": 9,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2024,
+      "pid": "SF",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:45:17Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:45:04Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 1,
+      "expected_winner_tid": 12,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2024,
+      "pid": "TERR-MCLA-007049",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 6,
+          "amount_set_at": "2024-08-25T23:08:35Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:08:24Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:08:00Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:07:46Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 6,
+      "expected_winner_tid": 11,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2024,
+      "pid": "TONY-POLL-006632",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 10,
+          "amount_set_at": "2024-08-25T23:32:55Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 7,
+          "amount_set_at": "2024-08-25T23:32:46Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2024-08-25T23:32:44Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:32:21Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 10,
+      "expected_winner_tid": 12,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2024,
+      "pid": "TYLE-ALLG-015545",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 5,
+          "amount_set_at": "2024-08-25T23:52:21Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2024-08-25T23:52:15Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 5,
+      "expected_winner_tid": 6,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2024,
+      "pid": "TYXX-CHAN-015688",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:46:28Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2024,
+      "pid": "ZACH-CHAR-011978",
+      "nominating_team_id": 1,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2024-08-25T23:41:16Z"
+        },
+        {
+          "tid": 1,
+          "maximum_bid": 0,
+          "amount_set_at": "2024-08-25T23:41:12Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "AARO-RODG-002284",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T01:48:27Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 5,
+          "amount_set_at": "2025-09-01T01:48:19Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T01:48:04Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:47:53Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 7,
+      "expected_winner_tid": 12,
+      "expected_price": 6
+    },
+    {
+      "season_year": 2025,
+      "pid": "AJXX-BROW-007507",
+      "nominating_team_id": 4,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 38,
+          "amount_set_at": "2025-09-01T01:17:15Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 37,
+          "amount_set_at": "2025-09-01T01:17:04Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 35,
+          "amount_set_at": "2025-09-01T01:16:45Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 17,
+          "amount_set_at": "2025-09-01T01:09:15Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:08:46Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2025-09-01T01:08:41Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:08:37Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:08:25Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 38,
+      "expected_winner_tid": 11,
+      "expected_price": 38
+    },
+    {
+      "season_year": 2025,
+      "pid": "ANTH-RICH-015654",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:21:02Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:20:49Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 1,
+      "expected_winner_tid": 5,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "ARI",
+      "nominating_team_id": 12,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T15:54:08Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 1,
+      "expected_winner_tid": 12,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "BRAE-ALLE-000637",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 12,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T02:11:12Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T02:11:09Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:10:34Z"
+        }
+      ],
+      "actual_winner_tid": 12,
+      "actual_price": 8,
+      "expected_winner_tid": 12,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2025,
+      "pid": "BRAN-AIYU-006142",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T02:09:59Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T02:09:56Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T02:09:14Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:09:03Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 8,
+      "expected_winner_tid": 2,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2025,
+      "pid": "BRIA-ROBI-011947",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:50:03Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T01:49:59Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T01:49:14Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 8,
+      "expected_winner_tid": 9,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2025,
+      "pid": "BUF",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T02:03:16Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:03:10Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2025,
+      "pid": "CHRI-GODW-016044",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:01:10Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "COOP-KUPP-007530",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:34:13Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:33:58Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T01:33:55Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:33:36Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 4,
+      "expected_winner_tid": 7,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2025,
+      "pid": "DANI-JONE-003986",
+      "nominating_team_id": 12,
+      "opening_bid": 1,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T02:17:29Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T02:17:15Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:17:11Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 3,
+      "expected_winner_tid": 6,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2025,
+      "pid": "DAVI-NJOK-027570",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T02:15:20Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T02:15:18Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 9,
+      "expected_winner_tid": 9,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2025,
+      "pid": "DEN",
+      "nominating_team_id": 4,
+      "opening_bid": 3,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T02:01:47Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 3,
+      "expected_winner_tid": 4,
+      "expected_price": 3
+    },
+    {
+      "season_year": 2025,
+      "pid": "DET",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:29:30Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "DJXX-MOOR-007273",
+      "nominating_team_id": 2,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 14,
+          "amount_set_at": "2025-09-01T01:18:52Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T01:18:47Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:18:27Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 14,
+      "expected_winner_tid": 9,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2025,
+      "pid": "GB",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:04:31Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:04:22Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 1,
+      "expected_winner_tid": 11,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "ISIA-PACH-015734",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 23,
+          "amount_set_at": "2025-09-01T01:42:21Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 22,
+          "amount_set_at": "2025-09-01T01:42:19Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 16,
+          "amount_set_at": "2025-09-01T01:35:56Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 14,
+          "amount_set_at": "2025-09-01T01:35:44Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T01:35:24Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2025-09-01T01:35:22Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:35:15Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 23,
+      "expected_winner_tid": 7,
+      "expected_price": 23
+    },
+    {
+      "season_year": 2025,
+      "pid": "JAKO-MEYE-017624",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:27:19Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "JAME-WILL-007093",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 10,
+          "amount_set_at": "2025-09-01T01:58:29Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T01:58:20Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:58:14Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T01:57:08Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:57:00Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 10,
+      "expected_winner_tid": 2,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2025,
+      "pid": "JAUA-JENN-026160",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:15:53Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:15:47Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 1,
+      "expected_winner_tid": 6,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "JAYD-REED-008824",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:08:23Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:08:17Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 1,
+      "expected_winner_tid": 10,
+      "expected_price": 1
+    },
+    {
+      "season_year": 2025,
+      "pid": "JAYL-WADD-007092",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 10,
+          "amount_set_at": "2025-09-01T02:00:18Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T02:00:05Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:59:26Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 10,
+      "expected_winner_tid": 11,
+      "expected_price": 10
+    },
+    {
+      "season_year": 2025,
+      "pid": "JERO-FORD-006086",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T02:16:45Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:16:39Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 2,
+      "expected_winner_tid": 11,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2025,
+      "pid": "JERR-JEUD-007131",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T01:56:02Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:55:55Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:55:23Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 9,
+      "expected_winner_tid": 9,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2025,
+      "pid": "JKXX-DOBB-011954",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:19:43Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "KENN-PICK-005920",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:23:48Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 0,
+      "expected_winner_tid": 7,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "MICH-PITT-007119",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T11:25:16Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "NAJE-HARR-012125",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T01:53:43Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T01:53:31Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:53:28Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 2,
+      "expected_winner_tid": 2,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2025,
+      "pid": "NICK-CHUB-015302",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:29:07Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "PHI",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T02:12:24Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T02:12:09Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:12:06Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 2,
+      "expected_winner_tid": 9,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2025,
+      "pid": "RASH-BATE-000115",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 10,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:11:32Z"
+        }
+      ],
+      "actual_winner_tid": 10,
+      "actual_price": 0,
+      "expected_winner_tid": 10,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "RHAM-STEV-011789",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 9,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:07:44Z"
+        }
+      ],
+      "actual_winner_tid": 9,
+      "actual_price": 0,
+      "expected_winner_tid": 9,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "RICO-DOWD-006404",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:29:59Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "RUSS-WILS-003975",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 5,
+          "amount_set_at": "2025-09-01T02:14:20Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T02:14:10Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:13:41Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 5,
+      "expected_winner_tid": 5,
+      "expected_price": 5
+    },
+    {
+      "season_year": 2025,
+      "pid": "STEF-DIGG-016071",
+      "nominating_team_id": 11,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T15:41:15Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T15:41:07Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 2,
+      "expected_winner_tid": 11,
+      "expected_price": 2
+    },
+    {
+      "season_year": 2025,
+      "pid": "TANK-BIGS-011965",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 11,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:47:14Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 7,
+          "amount_set_at": "2025-09-01T01:47:12Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T01:46:18Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:46:14Z"
+        }
+      ],
+      "actual_winner_tid": 11,
+      "actual_price": 8,
+      "expected_winner_tid": 11,
+      "expected_price": 8
+    },
+    {
+      "season_year": 2025,
+      "pid": "TJXX-HOCK-027527",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:54:45Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:54:34Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:54:09Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 4,
+      "expected_winner_tid": 2,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2025,
+      "pid": "TRAV-ETIE-012339",
+      "nominating_team_id": 12,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:43:26Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:43:12Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T01:43:10Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 4,
+      "expected_winner_tid": 7,
+      "expected_price": 4
+    },
+    {
+      "season_year": 2025,
+      "pid": "TRAV-KELC-002004",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 7,
+          "maximum_bid": 9,
+          "amount_set_at": "2025-09-01T01:31:26Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:31:22Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 6,
+          "amount_set_at": "2025-09-01T01:31:16Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 5,
+          "amount_set_at": "2025-09-01T01:20:48Z"
+        }
+      ],
+      "actual_winner_tid": 7,
+      "actual_price": 9,
+      "expected_winner_tid": 7,
+      "expected_price": 9
+    },
+    {
+      "season_year": 2025,
+      "pid": "TREV-LAWR-000024",
+      "nominating_team_id": 9,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 24,
+          "amount_set_at": "2025-09-01T01:33:12Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 23,
+          "amount_set_at": "2025-09-01T01:33:01Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 22,
+          "amount_set_at": "2025-09-01T01:32:53Z"
+        },
+        {
+          "tid": 12,
+          "maximum_bid": 10,
+          "amount_set_at": "2025-09-01T01:32:25Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:32:19Z"
+        },
+        {
+          "tid": 6,
+          "maximum_bid": 3,
+          "amount_set_at": "2025-09-01T01:32:17Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 2,
+          "amount_set_at": "2025-09-01T01:32:14Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 24,
+      "expected_winner_tid": 2,
+      "expected_price": 24
+    },
+    {
+      "season_year": 2025,
+      "pid": "TUAX-TAGO-005436",
+      "nominating_team_id": 7,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 4,
+          "maximum_bid": 21,
+          "amount_set_at": "2025-09-01T01:52:45Z"
+        },
+        {
+          "tid": 2,
+          "maximum_bid": 20,
+          "amount_set_at": "2025-09-01T01:52:42Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:51:04Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 6,
+          "amount_set_at": "2025-09-01T01:50:59Z"
+        },
+        {
+          "tid": 7,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T01:50:45Z"
+        }
+      ],
+      "actual_winner_tid": 4,
+      "actual_price": 21,
+      "expected_winner_tid": 4,
+      "expected_price": 21
+    },
+    {
+      "season_year": 2025,
+      "pid": "TUCK-KRAF-015675",
+      "nominating_team_id": 6,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 6,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T02:18:14Z"
+        }
+      ],
+      "actual_winner_tid": 6,
+      "actual_price": 0,
+      "expected_winner_tid": 6,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "ZACH-CHAR-011978",
+      "nominating_team_id": 5,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 5,
+          "maximum_bid": 0,
+          "amount_set_at": "2025-09-01T16:24:40Z"
+        }
+      ],
+      "actual_winner_tid": 5,
+      "actual_price": 0,
+      "expected_winner_tid": 5,
+      "expected_price": 0
+    },
+    {
+      "season_year": 2025,
+      "pid": "ZAYX-FLOW-024987",
+      "nominating_team_id": 10,
+      "opening_bid": 0,
+      "claims": [
+        {
+          "tid": 2,
+          "maximum_bid": 20,
+          "amount_set_at": "2025-09-01T01:45:25Z"
+        },
+        {
+          "tid": 9,
+          "maximum_bid": 19,
+          "amount_set_at": "2025-09-01T01:45:21Z"
+        },
+        {
+          "tid": 10,
+          "maximum_bid": 8,
+          "amount_set_at": "2025-09-01T01:44:34Z"
+        },
+        {
+          "tid": 11,
+          "maximum_bid": 6,
+          "amount_set_at": "2025-09-01T01:44:29Z"
+        },
+        {
+          "tid": 4,
+          "maximum_bid": 4,
+          "amount_set_at": "2025-09-01T01:44:24Z"
+        },
+        {
+          "tid": 5,
+          "maximum_bid": 1,
+          "amount_set_at": "2025-09-01T01:44:12Z"
+        }
+      ],
+      "actual_winner_tid": 2,
+      "actual_price": 20,
+      "expected_winner_tid": 2,
+      "expected_price": 20
+    }
+  ]
+}
