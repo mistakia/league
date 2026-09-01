@@ -3,6 +3,7 @@ import { create_season_cache_info } from '#libs-server/data-views/cache-info-uti
 import resolve_single_nfl_week_id, {
   resolve_nfl_week_ids
 } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { week_scope_alias_key } from '#libs-server/data-views/week-scoped-cte.mjs'
 
 const get_params = ({ params = {} }) => {
   const nfl_week_id = resolve_single_nfl_week_id({ params })
@@ -34,10 +35,15 @@ const get_params = ({ params = {} }) => {
 const get_cache_info = create_season_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const { nfl_week, career_year, career_game, platform_source_id } = get_params(
-    { params }
-  )
-  const key = `player_dfs_salaries_${nfl_week.join('_')}_${career_year.join('_')}_${career_game.join('_')}_${platform_source_id.join('_')}`
+  const { career_year, career_game, platform_source_id } = get_params({
+    params
+  })
+  // The FULL requested week list. This hashed get_params, which collapses the
+  // list to its first entry, so two columns naming [w1,w2] and [w1,w3] hashed
+  // identically and collapsed onto one join group -- while the attach, which
+  // reads the full list, registered two CTEs under that one name. See
+  // week-scoped-cte.mjs for why the finer key is the safe direction.
+  const key = `player_dfs_salaries_${week_scope_alias_key({ params })}_${career_year.join('_')}_${career_game.join('_')}_${platform_source_id.join('_')}`
   return get_table_hash(key)
 }
 

@@ -124,6 +124,14 @@ const game_source = {
       ? 'player_year_teams.year'
       : query_context.year_reference
 
+    // The cell's own week, when it has one. Unlike the year there is no
+    // player_year_teams substitute: that CTE is year-grained, so the week can
+    // only come from the cell identity. Read through the
+    // dv.X ?? query_context.X fallback the dispatcher documents.
+    const week_reference =
+      query_context.data_view_options?.week_reference ??
+      query_context.week_reference
+
     const { nfl_week: base_nfl_week } = get_params({ params })
     const offset_range = resolve_year_offset_range(params)
     const nfl_week = offset_expand_nfl_weeks(base_nfl_week, offset_range)
@@ -176,6 +184,20 @@ const game_source = {
         })
       } else {
         this.andOn(`${cte_name}.season_year`, '=', year_reference)
+
+        // Under a week axis the CTE spans every requested week, so year alone
+        // does not select a row: a team with games in weeks 1 and 2 matched
+        // BOTH CTE rows in EVERY week cell, duplicating the row and rendering
+        // the wrong opponent in one of them.
+        //
+        // Only on the non-offset path. The offset branch above correlates the
+        // offset-expanded game YEAR through the offset and legitimately fans
+        // out across the window, and its weeks are the base week shifted by
+        // year -- a week predicate there would be correlating the cell against
+        // a week the offset already accounts for.
+        if (week_reference) {
+          this.andOn(db.raw(`${cte_name}.week = ${week_reference}`))
+        }
       }
     })
   }

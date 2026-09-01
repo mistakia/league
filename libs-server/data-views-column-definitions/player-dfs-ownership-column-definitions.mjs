@@ -3,6 +3,11 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import {
+  resolve_week_scope,
+  week_scope_alias_key,
+  correlate_week_scoped_cte
+} from '#libs-server/data-views/week-scoped-cte.mjs'
 
 const get_params = ({ params = {} }) => {
   const nfl_week_id = resolve_single_nfl_week_id({ params })
@@ -22,20 +27,40 @@ const get_params = ({ params = {} }) => {
 const get_cache_info = create_season_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const { nfl_week, platform_source_id } = get_params({ params })
-  const key = `player_dfs_ownership_${nfl_week.join('_')}_${platform_source_id.join('_')}`
+  const { platform_source_id } = get_params({ params })
+  // The FULL requested week list, not the single week a pinned CTE ends up
+  // holding -- see week-scoped-cte.mjs for why the finer key is the safe
+  // direction.
+  const key = `player_dfs_ownership_${week_scope_alias_key({ params })}_${platform_source_id.join('_')}`
   return get_table_hash(key)
 }
 
 const player_dfs_ownership_source = {
-  // Grain 'player': the CTE collapses each player to one row via the
-  // nfl_week_id + draft-group ranking filter, so pid-only equality is the
-  // correct join predicate regardless of the cell's split shape.
+  // Grain 'player': the CTE holds one row per (pid, year, week) via the
+  // draft-group ranking filter, so the cell's own year and week are what select
+  // between them under a week axis.
   grain: 'player',
   attach: ({ query_context, params, table_alias, join_type }) => {
-    const { nfl_week, platform_source_id } = get_params({ params })
+    const { platform_source_id } = get_params({ params })
     const { players_query, pid_reference } = query_context
     const cte_name = table_alias
+
+    // The identity-aware references, via the dv.X ?? query_context.X fallback
+    // the dispatcher documents for attach helpers.
+    const dv = query_context.data_view_options || {}
+    const week_scope_options = {
+      year_reference: dv.year_reference ?? query_context.year_reference,
+      week_reference: dv.week_reference ?? query_context.week_reference
+    }
+
+    // The weeks this CTE spans, resolved through the same helper the join
+    // reads. get_params collapsed the list to its first entry, so under a week
+    // axis the CTE held week 1 alone and the pid-only join below broadcast that
+    // week's ownership onto every week row.
+    const { nfl_week_ids: nfl_week } = resolve_week_scope({
+      params,
+      data_view_options: week_scope_options
+    })
 
     // Parse nfl_week identifiers back to year/week pairs for filtering
     const year_week_pairs = nfl_week.map((nwi) => {
@@ -84,6 +109,17 @@ const player_dfs_ownership_source = {
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
     players_query[join_method](cte_name, function () {
       this.on(`${cte_name}.pid`, '=', pid_reference)
+
+      // Under a week axis the CTE holds every requested week, so the cell's own
+      // year and week are what select the row. The CTE has always projected
+      // season_year and week; nothing read them.
+      correlate_week_scoped_cte({
+        builder: this,
+        db,
+        cte_name,
+        data_view_options: week_scope_options,
+        year_column: 'season_year'
+      })
     })
   }
 }
