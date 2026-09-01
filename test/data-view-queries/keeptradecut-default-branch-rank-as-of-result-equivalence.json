@@ -3,12 +3,20 @@
   "description": "The wide table's daily importer path writes value-only rows, so the latest observation for almost every player carries no rank at all -- measured on production 2026-07-31, 731 of the 742 players who have ever had a position rank. Under the old EAV shape the correlated MAX subquery carried its own `type` predicate, which made 'latest' mean 'latest row of THIS metric'. Removing the discriminator without replacing that predicate returns the latest row of any kind, and the rank reads NULL for ~98.5% of the population -- valid SQL, no error, an empty column. The fix is `IS NOT NULL` on the requested metric inside the correlated subquery. Seed a player whose newest observation is value-only and whose rank sits on the prior day; the correct answer is that prior day's rank, and reverting the predicate returns NULL.",
   "request": {
     "prefix_columns": ["player_name"],
-    "columns": [{ "column_id": "player_keeptradecut_position_rank" }],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_position_rank"
+      }
+    ],
     "where": [
-      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"player\".\"primary_position\" from \"player\" left join \"keeptradecut_valuations\" as \"t90891809356f9407f65875d649680396\" on \"t90891809356f9407f65875d649680396\".\"pid\" = \"player\".\"pid\" and \"t90891809356f9407f65875d649680396\".\"is_superflex\" = true and \"t90891809356f9407f65875d649680396\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"player\".\"primary_position\" from \"player\" left join \"keeptradecut_valuations\" as \"tbf04492c2be2dffcbb2d34ce116d8cdf\" on \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"pid\" = \"player\".\"pid\" and \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"is_superflex\" = true and \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"position_rank\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-000909', 'Test', 'Ktcw', 'T.Ktcw', 'Test Ktcw', 'MLB', 'MLB', '2000-01-01', 2020, 'ZWA')",
