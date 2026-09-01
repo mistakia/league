@@ -354,7 +354,7 @@ const import_for_year = async ({
           week: parseInt(row.week, 10),
           season_year: year,
           season_type: 'REG',
-          inj: inj_text,
+          injury_type: inj_text,
           game_designation: practice_game_designation,
           practice_status,
           source: source_sentinel
