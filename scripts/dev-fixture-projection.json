@@ -435,7 +435,8 @@
       "password": "'$2a$10$devfixturedevfixturedevfixtureoWQ1qQnQ1qQnQ1qQnQ1qQnQ1qQnQ1q'",
       "watchlist": "keep",
       "last_visit_at": "keep",
-      "invite_code": "NULL"
+      "invite_code": "NULL",
+      "data_view_export_max_rows": "keep"
     },
     "users_sources": {
       "user_id": "keep",
