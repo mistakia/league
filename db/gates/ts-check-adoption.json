@@ -26,6 +26,7 @@
     "libs-server/player-pid-references.mjs",
     "libs-server/proxy-manager.mjs",
     "libs-server/resolve-canonical-player.mjs",
+    "libs-server/rotowire/index.mjs",
     "libs-server/sandboxed-read.mjs",
     "libs-server/simulation/index.mjs",
     "libs-server/simulation/load-actual-points.mjs",

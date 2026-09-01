@@ -222,7 +222,12 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  // Carry the outcome in the exit code, not only in the `jobs` table. Reporting
+  // the error and then exiting 0 makes job-wrapper record a success and the runs
+  // oracle open no signal — which is how 43 `HTTP 403: Forbidden` runs failed in
+  // the ledger's blind spot and cost five weeks of 2025 salaries before a user
+  // noticed the holes in a data view.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

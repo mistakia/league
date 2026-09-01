@@ -271,7 +271,12 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  // Carry the outcome in the exit code, not only in the `jobs` table — see the
+  // matching note in import-draftkings-salaries.mjs. FanDuel's stakes are higher
+  // than DraftKings': a missed FanDuel week is UNRECOVERABLE, because FanDuel
+  // expires its fixture lists and no historical source carries its salaries past
+  // 2021. Every week this job fails silently is gone for good.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
