@@ -1,6 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
+import batch_insert from './batch-insert.mjs'
 import record_projection_history from './record-projection-history.mjs'
 
 const log = debug('save-projections')
@@ -77,14 +78,29 @@ export default async function save_projections({
 
   log(`${table}: deleting ${deleted} stale rows, saving ${rows.length}`)
 
-  await db(table)
-    .insert(rows)
-    .onConflict(
-      is_season
-        ? ['source_id', 'pid', 'season_year']
-        : ['source_id', 'pid', 'week', 'season_year', 'season_type']
-    )
-    .merge()
+  // Batched because the postgres wire protocol counts bind parameters in a
+  // uint16: rows * columns must stay under 65535 or the driver emits a
+  // malformed Bind and the server answers "bind message has N parameter
+  // formats but 0 parameters" -- an error that names neither the table nor the
+  // size, and so reads as data corruption rather than a batch that is too big.
+  // At ~16 stat columns a single insert crosses the limit at about 4,000 rows,
+  // which is an ordinary season-long projection set; the Sleeper season import
+  // hit it at 8,507 rows. Every projection source shares this helper, so the
+  // bound belongs here rather than at one caller.
+  await batch_insert({
+    items: rows,
+    batch_size: 1000,
+    save: async (items) => {
+      await db(table)
+        .insert(items)
+        .onConflict(
+          is_season
+            ? ['source_id', 'pid', 'season_year']
+            : ['source_id', 'pid', 'week', 'season_year', 'season_type']
+        )
+        .merge()
+    }
+  })
 
   await record_projection_history({ inserts: rows, period, generated_at })
 
