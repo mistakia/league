@@ -1039,8 +1039,14 @@ export default {
   team_game_implied_team_total_from_betting_markets: {
     column_name: 'implied_team_total',
     select_as: () => 'team_game_implied_team_total_betting_market',
-    with_where: ({ table_name }) =>
-      `CASE WHEN player.current_nfl_team = ${table_name}.h THEN ${table_name}.home_implied_total ELSE ${table_name}.away_implied_total END`,
+    // No with_where. The CTE projects implied_team_total directly, so there is
+    // nothing to re-derive here. The property carried a CASE naming
+    // `<table>.h`, home_implied_total and away_implied_total -- three columns no
+    // CTE in this file has ever projected -- left behind when the home/away
+    // shape was replaced by a single computed total. It was dead rather than
+    // broken: a filter on this column emits the projected column and never
+    // reaches the CASE, verified by executing the filter path and confirming
+    // neither name appears in the generated SQL.
     table_alias: (args) =>
       betting_markets_table_alias({
         ...args,
