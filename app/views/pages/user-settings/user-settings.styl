@@ -16,6 +16,19 @@
   + .setting-section
     margin-top 16px
 
+  // THE FIELD CAP IS HERE, NOT IN THE `grid` PROP. EditableSettingField takes
+  // MUI Grid breakpoints, and a breakpoint is a FRACTION of the container: the
+  // `xs: 8` those two fields carry resolved to two-thirds of a 1200px page, so
+  // a 20-character username sat in a ~770px box. Widening the browser made it
+  // worse, which is the tell that the wrong axis was being specified.
+  //
+  // Capping the item rather than changing the fraction keeps the field at
+  // $field_width on a wide page and lets it collapse with the container on a
+  // narrow one. Two classes deep, so it beats MUI's own single-class
+  // `.MuiGrid-grid-xs-8` without !important.
+  .MuiGrid-item
+    max-width $field_width
+
   h2
     // The gap is the heading's, not the first control's. The Account section
     // opens straight onto its inputs with nothing between them, so a 4px margin
