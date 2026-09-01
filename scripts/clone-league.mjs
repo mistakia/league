@@ -105,13 +105,48 @@ const main = async () => {
     return
   }
 
+  // SAY SOMETHING WHILE IT WORKS. The copy takes minutes against a remote
+  // database, and the first production run printed nothing between the table
+  // plan and the summary -- so the operator could not tell it from a hang and
+  // killed it. This repository's own rule is that a run silent for more than a
+  // minute should be TREATED as a hang, and a script that requires the operator
+  // to break that rule in order to use it is defective however correct its
+  // writes are.
+  const started_at = Date.now()
+  const elapsed = () => `${Math.round((Date.now() - started_at) / 1000)}s`
+  const on_progress = ({ phase, table, copied, total }) => {
+    if (phase === 'plan') return console.log(`[${elapsed()}] resolving scope`)
+    if (phase === 'count-source') {
+      return console.log(`[${elapsed()}] counting league ${args.from}`)
+    }
+    if (phase === 'verify-source') {
+      return console.log(
+        `[${elapsed()}] verifying league ${args.from} unwritten`
+      )
+    }
+    if (phase === 'wipe') {
+      // Only the endpoints: 41 tables would otherwise bury the copy below it.
+      if (copied === 0)
+        return console.log(`[${elapsed()}] wiping ${total} tables`)
+      if (copied === total)
+        return console.log(`[${elapsed()}] wiped ${total} tables`)
+      return
+    }
+    if (copied === 0) return console.log(`[${elapsed()}] ${table}: 0/${total}`)
+    if (copied === total) {
+      return console.log(`[${elapsed()}] ${table}: ${copied}/${total} done`)
+    }
+    console.log(`[${elapsed()}] ${table}: ${copied}/${total}`)
+  }
+
   const result = await db.transaction((trx) =>
     clone_league({
       trx,
       from_lid: args.from,
       to_lid: args.sync ? args.to : undefined,
       season_year: current_season.year,
-      name: args.name
+      name: args.name,
+      on_progress
     })
   )
 

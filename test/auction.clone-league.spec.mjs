@@ -13,6 +13,7 @@ import Auction from '#api/sockets/auction.mjs'
 import { get_active_auction_nomination } from '#libs-server/auction-settlement.mjs'
 import {
   LEAGUE_SCOPED_TABLES,
+  CLONED_BOARD_TABLES,
   parse_league_scoped_tables,
   parent_table_for,
   parent_key_for,
@@ -962,6 +963,127 @@ describe('clone-league', function () {
         .first()
       expect(season, 'a seasons row was created').to.not.equal(undefined)
       expect(season.is_auction_election_mode_enabled).to.equal(false)
+    })
+  })
+
+  describe('reporting what it is doing', function () {
+    this.timeout(60 * 1000)
+
+    // The first production run wrote correctly and was killed anyway: it printed
+    // nothing for 26 minutes, and this repository's own rule says a run silent
+    // for over a minute should be TREATED as a hang. Correct writes nobody can
+    // wait through are not a working script.
+    before(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(
+        current_season.regular_season_start.subtract('1', 'month').toISOString()
+      )
+      await knex.seed.run()
+    })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('reports progress for every table it copies', async function () {
+      const events = []
+      await knex.transaction((trx) =>
+        clone_league({
+          trx,
+          from_lid: source_lid,
+          season_year,
+          on_progress: (event) => events.push(event)
+        })
+      )
+
+      // Every copied table has to appear, or a silent one is exactly the stall
+      // the operator cannot distinguish from a hang.
+      const tables = new Set(events.filter((e) => e.table).map((e) => e.table))
+      for (const table of CLONED_BOARD_TABLES) {
+        expect(tables.has(table), `no progress reported for ${table}`).to.equal(
+          true
+        )
+      }
+      expect(events.some((e) => e.phase === 'wipe')).to.equal(false)
+      expect(events.some((e) => e.phase === 'verify-source')).to.equal(true)
+    })
+
+    it('reports the wipe as well on a re-sync', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const events = []
+      await knex.transaction((trx) =>
+        clone_league({
+          trx,
+          from_lid: source_lid,
+          to_lid: lid,
+          season_year,
+          on_progress: (event) => events.push(event)
+        })
+      )
+
+      const wipe_events = events.filter((e) => e.phase === 'wipe')
+      expect(wipe_events.length).to.be.greaterThan(0)
+      expect(wipe_events[wipe_events.length - 1].copied).to.equal(
+        LEAGUE_SCOPED_TABLES.length
+      )
+    })
+
+    it('counts every row it claims to have copied', async function () {
+      // The batched insert returns its own count rather than the length of the
+      // list it was handed, so a batch that silently inserted fewer rows cannot
+      // be reported as a full copy. Checked against the database, not the
+      // return value alone.
+      const { copied } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      expect(copied.users_teams).to.equal(12)
+
+      expect(
+        await knex('users_teams').whereIn(
+          'tid',
+          (await knex('teams').where({ lid })).map((t) => t.team_id)
+        )
+      ).to.have.length(copied.users_teams)
+    })
+
+    it('copies a row count that spans several batches', async function () {
+      // 500 rows to a batch, so the single-batch path is the only one the other
+      // specs reach. Seed past the boundary and the multi-batch path -- the one
+      // production actually takes with 12,195 transactions -- runs too.
+      const player = await selectPlayer({ random: false })
+      const rows = []
+      for (let index = 0; index < 620; index++) {
+        rows.push({
+          user_id: 1,
+          tid: 1,
+          pid: player.pid,
+          lid: source_lid,
+          type: transaction_types.ROSTER_ADD,
+          player_salary: 1,
+          week: 0,
+          season_year: season_year - 1,
+          occurred_at: new Date()
+        })
+      }
+      await knex.batchInsert('transactions', rows, 200)
+
+      const { lid, copied } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      // 620 rows at 500 to a batch is two batches, and the count is the batched
+      // insert's own tally rather than the length of the list handed to it.
+      expect(copied.transactions).to.equal(620)
+      expect(
+        await knex('transactions').where({ lid, season_year: season_year - 1 })
+      ).to.have.length(620)
     })
   })
 

@@ -276,6 +276,44 @@ const reconcile_sequence = async ({ trx, table, column }) => {
   )
 }
 
+// Rows per INSERT. The copy's cost is round trips, not work: league 1 carries
+// 12,195 transactions and 587 roster players, and one insert per row against a
+// remote database took 26 minutes end to end -- during which the script printed
+// nothing at all, so the operator could not tell it from a hang and killed it.
+// This repository's own rule is that a run silent for more than a minute should
+// be TREATED as a hang, so the script was requiring the operator to break it.
+//
+// 500 keeps each statement well inside postgres's 65535 bind-parameter ceiling
+// for the widest table here, and turns ~12,900 round trips into ~30.
+const INSERT_BATCH_SIZE = 500
+
+/**
+ * Insert rows in batches, reporting progress as it goes.
+ *
+ * Deliberately NOT knex's `batchInsert`: that opens its own transaction unless
+ * handed one, and the whole clone must live or die inside the caller's single
+ * transaction. Chunking the caller's `trx` keeps that guarantee.
+ *
+ * Returns the number of rows inserted, so the caller cannot report a count it
+ * did not verify.
+ */
+const insert_in_batches = async ({
+  trx,
+  table,
+  rows,
+  on_progress = () => {}
+}) => {
+  on_progress({ table, copied: 0, total: rows.length })
+  let copied = 0
+  for (let index = 0; index < rows.length; index += INSERT_BATCH_SIZE) {
+    const batch = rows.slice(index, index + INSERT_BATCH_SIZE)
+    await trx(table).insert(batch)
+    copied += batch.length
+    on_progress({ table, copied, total: rows.length })
+  }
+  return copied
+}
+
 const refuse_league_one = (lid, verb) => {
   if (Number(lid) === 1) {
     throw new Error(
@@ -336,19 +374,29 @@ export const wipe_order = (plan) => {
  * is that it cannot be pointed at it by a mistyped argument at three in the
  * morning.
  */
-export const wipe_league = async ({ trx, lid, plan }) => {
+export const wipe_league = async ({
+  trx,
+  lid,
+  plan,
+  on_progress = () => {}
+}) => {
   if (!lid) throw new Error('wipe_league requires an explicit lid')
   refuse_league_one(lid, 'wipe')
 
   const resolved = plan || (await build_scope_plan({ trx }))
+  const order = wipe_order(resolved)
   const cleared = {}
-  for (const table of wipe_order(resolved)) {
+  on_progress({ phase: 'wipe', copied: 0, total: order.length })
+  let wiped = 0
+  for (const table of order) {
     cleared[table] = await scoped_query({
       trx,
       table,
       lid,
       plan: resolved
     }).del()
+    wiped += 1
+    on_progress({ phase: 'wipe', copied: wiped, total: order.length })
   }
   return cleared
 }
@@ -452,7 +500,8 @@ export const clone_league_board = async ({
   trx,
   from_lid,
   to_lid,
-  season_year
+  season_year,
+  on_progress = () => {}
 }) => {
   refuse_league_one(to_lid, 'clone into')
 
@@ -474,6 +523,7 @@ export const clone_league_board = async ({
     .orderBy('season_year')
   const team_id_map = new Map()
 
+  on_progress({ table: 'teams', copied: 0, total: teams.length })
   for (const team of teams) {
     const { team_id, ...rest } = team
     const known = team_id_map.get(team_id)
@@ -500,13 +550,16 @@ export const clone_league_board = async ({
     'tid',
     Array.from(team_id_map.keys())
   )
-  for (const row of users_teams) {
-    await trx('users_teams').insert({ ...row, tid: map_tid(row.tid) })
-  }
-  copied.users_teams = users_teams.length
+  copied.users_teams = await insert_in_batches({
+    trx,
+    table: 'users_teams',
+    rows: users_teams.map((row) => ({ ...row, tid: map_tid(row.tid) })),
+    on_progress
+  })
 
   const rosters = await trx('rosters').where({ lid: from_lid, season_year })
   const roster_id_map = new Map()
+  on_progress({ table: 'rosters', copied: 0, total: rosters.length })
   for (const roster of rosters) {
     const { roster_id, ...rest } = roster
     const [inserted] = await trx('rosters')
@@ -520,15 +573,17 @@ export const clone_league_board = async ({
     lid: from_lid,
     season_year
   })
-  for (const row of roster_players) {
-    await trx('rosters_players').insert({
+  copied.rosters_players = await insert_in_batches({
+    trx,
+    table: 'rosters_players',
+    rows: roster_players.map((row) => ({
       ...row,
       lid: to_lid,
       tid: map_tid(row.tid),
       roster_id: roster_id_map.get(row.roster_id)
-    })
-  }
-  copied.rosters_players = roster_players.length
+    })),
+    on_progress
+  })
 
   const transactions = await trx('transactions')
     .where({ lid: from_lid })
@@ -538,15 +593,15 @@ export const clone_league_board = async ({
         transaction_types.AUCTION_PROCESSED
       ])
     })
-  for (const row of transactions) {
-    const { transaction_id, ...rest } = row
-    await trx('transactions').insert({
-      ...rest,
-      lid: to_lid,
-      tid: map_tid(row.tid)
-    })
-  }
-  copied.transactions = transactions.length
+  copied.transactions = await insert_in_batches({
+    trx,
+    table: 'transactions',
+    rows: transactions.map((row) => {
+      const { transaction_id, ...rest } = row
+      return { ...rest, lid: to_lid, tid: map_tid(row.tid) }
+    }),
+    on_progress
+  })
 
   return { copied, team_id_map }
 }
@@ -625,20 +680,23 @@ export const clone_league = async ({
   from_lid,
   to_lid,
   season_year,
-  name
+  name,
+  on_progress = () => {}
 }) => {
   if (Number(from_lid) === Number(to_lid)) {
     throw new Error('refusing to clone a league into itself')
   }
   if (to_lid !== undefined) refuse_league_one(to_lid, 'clone into')
 
+  on_progress({ phase: 'plan' })
   const plan = await build_scope_plan({ trx })
+  on_progress({ phase: 'count-source' })
   const source_before = await count_league_rows({ trx, lid: from_lid, plan })
 
   let configuration = null
   if (to_lid !== undefined) {
     configuration = await capture_league_configuration({ trx, lid: to_lid })
-    await wipe_league({ trx, lid: to_lid, plan })
+    await wipe_league({ trx, lid: to_lid, plan, on_progress })
   }
 
   const { lid } = configuration
@@ -649,9 +707,11 @@ export const clone_league = async ({
     trx,
     from_lid,
     to_lid: lid,
-    season_year
+    season_year,
+    on_progress
   })
 
+  on_progress({ phase: 'verify-source' })
   const source_after = await count_league_rows({ trx, lid: from_lid, plan })
   const drift = diff_counts(source_before, source_after)
   if (drift.length) {
