@@ -511,6 +511,19 @@ const import_nflverse_injuries = async ({
   let total_written = 0
   const shortfalls = []
   for (const y of years) {
+    // nflverse publishes injuries_<year>.csv only once the REGULAR season it
+    // covers begins -- this importer filters to game_type='REG' for the same
+    // reason. Between the schedule release and Week 1 the asset does not
+    // exist, so the daily poll would 404 every day for a season that has no
+    // injury reports yet. Skip that window rather than fail through it. The
+    // guard is scoped to the CURRENT season: a 404 on any other year is a
+    // real break and stays fatal.
+    if (y === current_season.year && current_season.is_offseason) {
+      log(
+        `skipping ${y}: regular season has not started, nflverse has not published injuries_${y}.csv yet`
+      )
+      continue
+    }
     const { shortfall, inserts_written } = await import_for_year({
       year: y,
       source_sentinel,

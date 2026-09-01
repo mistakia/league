@@ -169,6 +169,18 @@ const generate_historical_injury_index = async ({
   let total_written = 0
   const shortfalls = []
   for (const y of years) {
+    // The rebuild spine is team_spans (player_gamelogs) joined to REG
+    // nfl_games, so a season whose regular season has not kicked off yet has
+    // an empty spine BY CONSTRUCTION -- the schedule is loaded but no REG
+    // gamelog exists to anchor a span. Zero rows there is the correct answer,
+    // not a shortfall. Scoped to the CURRENT season: zero rows for any
+    // historical year is still a real failure.
+    if (y === current_season.year && current_season.is_offseason) {
+      log(
+        `skipping ${y}: regular season has not started, no REG gamelogs to build a spine from`
+      )
+      continue
+    }
     const { shortfall, rows_written } = await generate_for_year({
       year: y,
       pid,

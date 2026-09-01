@@ -266,10 +266,10 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
       season_year: year,
       nfl_team: game.tm,
       opponent_nfl_team: game.opp,
-      // player_gamelogs.pos is player.primary_position by definition -- the
-      // generator derives it the same way. Writing the vendor's spelling here
-      // is what put UNK, KR and PR in the column.
-      pos: pid_match.primary_position,
+      // player_gamelogs.player_position is player.primary_position by
+      // definition -- the generator derives it the same way. Writing the
+      // vendor's spelling here is what put UNK, KR and PR in the column.
+      player_position: pid_match.primary_position,
       is_active: STATUS_ACTIVE.has(row.status),
       source: SOURCE_SENTINEL
     })
@@ -390,8 +390,8 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     batch_size: BATCH_SIZE,
     save: async (batch) => {
       // Narrow merge to `is_active` only. Existing rows from other importers
-      // (gameday-rosters, stat builders) keep their source/pos/nfl_team/
-      // opponent_nfl_team -- we
+      // (gameday-rosters, stat builders) keep their source/player_position/
+      // nfl_team/opponent_nfl_team -- we
       // only assert authority over the boolean this importer exists to
       // populate. New INSERTs still tag source='nflverse-weekly-rosters'
       // for revert by sentinel.

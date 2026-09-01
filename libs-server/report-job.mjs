@@ -162,6 +162,25 @@ export const resolve_log_forensic_link = ({
   }
 }
 
+// `--reason` is an ARGV element, and argv is a fixed-size kernel budget shared
+// by the whole command. A knex insert that fails renders every bind parameter
+// into error.message, so a batch of a few thousand rows produces a megabytes-
+// long reason and `base run report` dies with E2BIG -- the job's failure is
+// then never recorded at all. That is strictly worse than the failure it was
+// trying to report: the runs ledger keeps the last SUCCESS, the job reads as
+// silent rather than failing, and it surfaces days later as a stale-run signal
+// pointing at the wrong thing entirely.
+//
+// Both ends are kept because the two error dialects put their meaning at
+// opposite ends: the application message leads, while postgres puts the part
+// that names the defect ("column ... does not exist") after the parameter list.
+const REASON_ARGV_LIMIT = 4000
+const bound_reason_for_argv = (reason) => {
+  if (reason.length <= REASON_ARGV_LIMIT) return reason
+  const keep = Math.floor((REASON_ARGV_LIMIT - 80) / 2)
+  return `${reason.slice(0, keep)}\n... [${reason.length - keep * 2} characters elided to fit the argv limit] ...\n${reason.slice(-keep)}`
+}
+
 export default async function report_job({
   job_type,
   job_success = true,
@@ -227,7 +246,7 @@ export default async function report_job({
     '--exit-code',
     job_success ? '0' : '1'
   ]
-  if (job_reason) args.push('--reason', job_reason)
+  if (job_reason) args.push('--reason', bound_reason_for_argv(job_reason))
 
   const forensic_args = []
   const forensic_link = job_success ? null : resolve_log_forensic_link()

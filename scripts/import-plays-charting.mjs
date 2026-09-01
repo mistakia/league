@@ -34,6 +34,13 @@ async function get_games_for_import({
   season_type,
   force
 }) {
+  // FINAL, not merely scheduled: the vendor has no plays for a game that has
+  // not kicked off, and it answers with an empty list rather than an error. A
+  // scope of every game in the season therefore reads as "0 of 0 matched"
+  // across hundreds of games -- a denominator of zero, which is the shape of a
+  // broken matcher rather than of an empty upstream. Run daily from the moment
+  // a season's schedule lands, that is a failing job every day until the first
+  // game is played, which is how it becomes wallpaper.
   const query = db('nfl_games')
     .select(
       'esbid',
@@ -45,6 +52,7 @@ async function get_games_for_import({
       'away_nfl_team'
     )
     .whereNotNull('shield_game_id')
+    .where('status', 'FINAL')
 
   if (esbid) {
     query.where('esbid', esbid)
