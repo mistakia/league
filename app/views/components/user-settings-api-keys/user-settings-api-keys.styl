@@ -16,11 +16,15 @@
     gap 12px
     margin-bottom 16px
 
+  // $control_height and vertical-padding-free, so this and the Generate button
+  // beside it are the same height by construction rather than by two padding
+  // values that happen to add up. prose_input() already sets box-sizing.
   &__create-input
     prose_input()
     flex 0 1 280px
+    height $control_height
+    padding 0 10px
     font-size 14px
-    padding 8px 10px
 
   // THE GENERATED KEY IS THE ONE THING ON THIS PAGE THAT CANNOT BE READ TWICE,
   // so it is the one thing that gets to shout. It was prose_message's set-apart

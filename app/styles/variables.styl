@@ -46,6 +46,38 @@ $z_banner = 2000                 // app-wide notice banner, above every surface
 // Button styles
 $button_border_radius = 4px
 
+// THE CONTROL HEIGHT, shared by every button and text input that sits on a row
+// with one. A button and the input beside it lining up is not a coincidence to
+// be re-tuned per surface — it is one number, and two surfaces that each pick
+// their own drift the moment either changes its padding or its font size.
+// Every control taking this must also set `box-sizing: border-box`, or a border
+// makes the outer box 2px taller than the number says.
+$control_height = 36px
+
+// The resting fill of a control that is not the point of its surface. Light
+// enough to sit under body text without competing, dark enough to read as a
+// control against both the app's white cards and its $backgroundColor ground.
+$control_fill = #e9e9ec
+
+$hover_background = rgba(255, 255, 255, 0.8)
+
+// THE HOVER LIFT, shared. `.menu__section:hover` is where this started and it
+// is still the only other caller; it is here rather than in menu.styl so a
+// second surface cannot arrive at a near-miss copy of it.
+//
+// $box_shadow is a HARD offset — `$borderColor 4px 4px 0 0`, no blur radius —
+// which is why it belongs on a flat surface at all. A blurred shadow simulates
+// a light source and puts the object on a fake z-axis; an unblurred offset
+// block is a graphic device, closer to a printed drop shadow than to Material's
+// elevation, and it reads as emphasis rather than as height.
+//
+// The caller keeps its own border-color change if it wants one. This is the
+// lift, not a whole hover state, and the menu's near-black border edge is the
+// menu's business.
+hover_lift()
+  background $hover_background
+  box-shadow $box_shadow
+
 $qb_color = tint(red, 25%)
 $wr_color = tint(orange, 25%)
 $rb_color = tint(green, 25%)

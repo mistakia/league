@@ -1,4 +1,3 @@
-$hoverBackground = rgba(255, 255, 255, 0.8)
 
 .main__menu
   absolute left 0 right 0 top 0 bottom 0
@@ -287,9 +286,11 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   .main__menu a:hover
     background-color rgba(0,0,0,0.08)
   .menu__section:hover
+    // The lift itself is shared — see hover_lift() in app/styles/variables.styl,
+    // which the flat button now calls too. The border edge stays here because it
+    // is this surface's own, not part of the effect.
     border-color rgba(0, 0, 0, 0.23)
-    background $hoverBackground
-    box-shadow $box_shadow
+    hover_lift()
 
 // The three buttons above are the only things in this file that move on their
 // own. The drawer's own slide is untouched here, since it predates this rule.

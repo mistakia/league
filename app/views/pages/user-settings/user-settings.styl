@@ -17,7 +17,10 @@
     margin-top 16px
 
   h2
-    margin 0 0 4px
+    // The gap is the heading's, not the first control's. The Account section
+    // opens straight onto its inputs with nothing between them, so a 4px margin
+    // put the label of the first field against the section title.
+    margin 0 0 16px
     font-family $prose_mono
     font-weight $prose_bold
     font-size 13px

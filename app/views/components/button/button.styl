@@ -30,7 +30,11 @@
   display inline-flex
   align-items center
   justify-content center
-  height 36px
+  // $control_height, and box-sizing with it, so this lines up EXACTLY with a
+  // text input beside it. The border is inside the box, which is what lets the
+  // border go from transparent to visible on hover without the button growing.
+  box-sizing border-box
+  height $control_height
   min-width 30px
   padding 0 16px
   vertical-align middle
@@ -42,23 +46,37 @@
   // button read as a different typeface from the label beside it.
   letter-spacing 0
   color $prose_ink
-  background transparent
+  // A LIGHT FILL RATHER THAN AN OUTLINE. The button used to be defined by its
+  // edge — a 1px near-black rule around nothing — which is the outlined-button
+  // idiom and the heaviest way to draw a control that is rarely the point of
+  // its surface. The fill carries the shape now and the border is invisible at
+  // rest, so a row of buttons reads as a row of soft blocks rather than as a
+  // row of boxes.
+  background $control_fill
   background-image none
-  border 1px solid $prose_rule_strong
+  // Transparent rather than absent: it holds the 1px in the box model, so the
+  // hover state can colour it in without the button changing size.
+  border 1px solid transparent
   border-radius $button_border_radius
   outline none
   cursor pointer
-  transition background-color 120ms ease, border-color 120ms ease, color 120ms ease
-
-  &:hover:not(:disabled)
-  &:hover:not([disabled])
-    background-color rgba(23, 24, 26, 0.05)
-    border-color $prose_muted
+  transition background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease
 
   // The press is a deeper fill, not a lift.
   &:active:not(:disabled)
   &:active:not([disabled])
-    background-color rgba(23, 24, 26, 0.1)
+    background rgba(23, 24, 26, 0.12)
+    box-shadow none
+
+  // THE HOVER IS THE MENU SECTIONS' LIFT, shared from variables.styl rather
+  // than reproduced here. Gated on a fine pointer for the reason every hover
+  // state should be: a touch device has no un-hover, so the lift would stick to
+  // the last button tapped until something else was.
+  @media (pointer: fine)
+    &:hover:not(:disabled)
+    &:hover:not([disabled])
+      hover_lift()
+      border-color $prose_rule_strong
 
   // The ring is the focus indicator rather than a colour swap alone: a border
   // that only changes hue is invisible to anyone who cannot separate the two.
@@ -88,15 +106,23 @@
     border-radius 99em
     background rgba(255, 255, 255, 0.6)
 
+  // The quiet one in a pair, and the only variant with no fill and no lift. A
+  // text button that carried the light ground would be a filled button with a
+  // different name, and one that lifted on hover would be a filled button that
+  // waited. It sits inside table rows, where a hard offset shadow under a
+  // one-word action reads as the row itself moving. The ink is the whole
+  // response, so both the base fill and the base lift are undone here.
   &.button__text
-    border-color transparent
-    // A text button is the quiet one in a pair, so its ink is quiet too until
-    // it is pointed at.
     color $prose_muted
-    &:hover:not(:disabled)
-    &:hover:not([disabled])
-      color $prose_ink
-      border-color transparent
+    background transparent
+    border-color transparent
+    @media (pointer: fine)
+      &:hover:not(:disabled)
+      &:hover:not([disabled])
+        color $prose_ink
+        background transparent
+        border-color transparent
+        box-shadow none
 
   &.active
   &.button__active
