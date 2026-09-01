@@ -18,7 +18,14 @@ import { auction_election_outcomes, AUCTION_BID_INCREMENT } from '#constants'
  *   team at settlement time: `{ available_space, available_cap, is_eligible_for_slot }`.
  *   Supplied by the caller from `Roster`, never derived here.
  * @param {number} params.nominating_team_id - holds the opening claim and wins ties on it
- * @param {number} params.opening_bid - the nominating team's bid; the price floor
+ * @param {number} params.opening_bid - THE PRICE FLOOR: the highest binding
+ *   amount already on the wire for this player. That is the nominating team's
+ *   opening bid until somebody bids above it, and the highest placed bid
+ *   thereafter. It is not merely the opening bid, because a placed bid is
+ *   binding: a team that bid $11 and then withdrew its $30 ceiling wins at $11
+ *   if nobody outbids, and must not be refunded down to $1 because its rivals
+ *   folded. In election mode the nomination is usually the only bid and the two
+ *   readings coincide.
  * @returns {{ winner_tid: number|null, price: number, outcomes: Map<number, {outcome: string}> }}
  */
 export const resolve_auction_player = ({

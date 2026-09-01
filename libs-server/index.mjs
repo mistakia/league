@@ -183,6 +183,9 @@ export {
   redis_cache
 } from './redis_adapter.mjs'
 export * as auction_slow_mode_redis from './auction-slow-mode-redis.mjs'
+export * as auction_elections from './auction-elections.mjs'
+export * as auction_settlement from './auction-settlement.mjs'
+export { resolve_auction_player } from './resolve-auction-player.mjs'
 export * as sleeper from './sleeper.mjs'
 export * as player_name_utils from './player-name-utils.mjs'
 export * as player_identity_collision_oracle from './player-identity-collision-oracle.mjs'
