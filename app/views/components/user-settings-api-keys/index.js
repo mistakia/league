@@ -11,7 +11,8 @@ const map_state_to_props = createSelector(get_api_keys_state, (api_keys) => ({
   api_keys: api_keys.get('keys'),
   data_view_export_max_rows: api_keys.get('data_view_export_max_rows'),
   generated_key: api_keys.get('generated_key'),
-  is_pending: api_keys.get('is_pending')
+  is_pending: api_keys.get('is_pending'),
+  rename_rejection_count: api_keys.get('rename_rejection_count')
 }))
 
 const map_dispatch_to_props = {

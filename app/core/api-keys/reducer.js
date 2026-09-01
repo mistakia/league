@@ -11,7 +11,12 @@ const initial_state = new Map({
   is_pending: false,
   // The plaintext of a key just generated. Present for one render pass through
   // the settings page and never written anywhere else.
-  generated_key: null
+  generated_key: null,
+  // A refused rename leaves `keys` byte-identical, so nothing downstream can
+  // tell it from a rename that was never attempted. This counter is the only
+  // thing that moves, and the name field watches it to put the rejected text
+  // back to the stored name.
+  rename_rejection_count: 0
 })
 
 export function api_keys_reducer(state = initial_state, { payload, type }) {
@@ -22,9 +27,14 @@ export function api_keys_reducer(state = initial_state, { payload, type }) {
     case api_key_actions.DELETE_API_KEY_PENDING:
       return state.set('is_pending', true)
 
+    case api_key_actions.PUT_API_KEY_FAILED:
+      return state.merge({
+        is_pending: false,
+        rename_rejection_count: state.get('rename_rejection_count') + 1
+      })
+
     case api_key_actions.GET_API_KEYS_FAILED:
     case api_key_actions.POST_API_KEY_FAILED:
-    case api_key_actions.PUT_API_KEY_FAILED:
     case api_key_actions.DELETE_API_KEY_FAILED:
       return state.set('is_pending', false)
 

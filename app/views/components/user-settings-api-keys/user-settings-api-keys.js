@@ -27,18 +27,22 @@ const MAX_NAME_LENGTH = 60
 // beside it: it is the only mutable field on the row, and the interaction the
 // app already uses for an editable setting is a field that commits on blur.
 //
-// The committed name is `saved_name`, not local state — a rename that the API
-// rejects leaves the store holding the old value, and reading from it is what
-// puts the input back rather than leaving what was typed sitting there looking
-// saved. Escape restores it without a request.
-function ApiKeyNameField({ saved_name, is_editable, rename }) {
+// The committed name is `saved_name` from the store, never local state, so what
+// the box shows after a request is what the server has. Escape restores it
+// without a request.
+function ApiKeyNameField({ saved_name, is_editable, rejection_count, rename }) {
   const [value, set_value] = useState(saved_name)
 
-  // A rename that lands (or one the server normalized) arrives as a new
-  // `saved_name`, and a field the user is not editing has to follow it.
+  // Two things put the box back to the stored name, and the second is why
+  // `rejection_count` is a dependency rather than dead weight. A rename that
+  // LANDS arrives as a new `saved_name` and the box follows it. A rename the
+  // API REJECTS leaves `saved_name` exactly as it was, so this effect would
+  // never re-run and the typed value would sit there looking saved — a name the
+  // server does not have. The count moves on every rejection, which is what
+  // makes the failed case reachable at all.
   useEffect(() => {
     set_value(saved_name)
-  }, [saved_name])
+  }, [saved_name, rejection_count])
 
   if (!is_editable) {
     return <span className='api-keys__name-static'>{saved_name || '—'}</span>
@@ -64,8 +68,8 @@ function ApiKeyNameField({ saved_name, is_editable, rename }) {
       className='api-keys__name-input'
       type='text'
       value={value}
-      aria-label='API key name'
-      placeholder='unnamed'
+      aria-label='API key label'
+      placeholder='api key label'
       maxLength={MAX_NAME_LENGTH}
       onChange={(event) => set_value(event.target.value)}
       onBlur={commit}
@@ -77,6 +81,7 @@ function ApiKeyNameField({ saved_name, is_editable, rename }) {
 ApiKeyNameField.propTypes = {
   saved_name: PropTypes.string,
   is_editable: PropTypes.bool,
+  rejection_count: PropTypes.number,
   rename: PropTypes.func
 }
 
@@ -85,6 +90,7 @@ export default function UserSettingsApiKeys({
   data_view_export_max_rows,
   generated_key,
   is_pending,
+  rename_rejection_count,
   load,
   create,
   rename,
@@ -136,8 +142,8 @@ export default function UserSettingsApiKeys({
           className='api-keys__create-input'
           type='text'
           value={name}
-          aria-label='Name'
-          placeholder='what this key is for'
+          aria-label='API key label'
+          placeholder='api key label'
           maxLength={MAX_NAME_LENGTH}
           onChange={(event) => set_name(event.target.value)}
         />
@@ -169,6 +175,7 @@ export default function UserSettingsApiKeys({
                     <ApiKeyNameField
                       saved_name={api_key.get('name') || ''}
                       is_editable={!revoked_at}
+                      rejection_count={rename_rejection_count}
                       rename={({ name }) => rename({ api_key_id, name })}
                     />
                   </div>
@@ -210,6 +217,7 @@ UserSettingsApiKeys.propTypes = {
   data_view_export_max_rows: PropTypes.number,
   generated_key: PropTypes.string,
   is_pending: PropTypes.bool,
+  rename_rejection_count: PropTypes.number,
   load: PropTypes.func,
   create: PropTypes.func,
   rename: PropTypes.func,
