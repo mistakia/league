@@ -7,10 +7,8 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import ListItemText from '@mui/material/ListItemText'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 
+import Accordion from '@components/accordion'
 import Icon from '@components/icon'
 import Loading from '@components/loading'
 import { job_title_by_id } from '#libs-shared/job-constants.mjs'
@@ -88,35 +86,34 @@ export default function StatusPage({ load, status }) {
       body={
         <div className='league-container' style={{ marginTop: '64px' }}>
           {error_items.length > 0 && (
-            <Accordion defaultExpanded>
-              <AccordionSummary
-                expandIcon={<Icon name='arrow-drop-down' />}
-                className='status-error'
-              >
+            <Accordion
+              default_expanded
+              className='status-error'
+              icon_name='arrow-drop-down'
+              summary={
                 <div className='status-error-summary'>
                   <Icon name='warning' />
                   <div className='status-error-title'>
                     {error_items.length} Issues
                   </div>
                 </div>
-              </AccordionSummary>
-              <AccordionDetails>
-                <List>{error_items}</List>
-              </AccordionDetails>
+              }
+            >
+              <List>{error_items}</List>
             </Accordion>
           )}
-          <Accordion>
-            <AccordionSummary expandIcon={<Icon name='arrow-drop-down' />}>
+          <Accordion
+            icon_name='arrow-drop-down'
+            summary={
               <div className='status-success-summary'>
                 <Icon name='task-complete' />
                 <div className='status-success-title'>
                   {success_items.length} Jobs Operational
                 </div>
               </div>
-            </AccordionSummary>
-            <AccordionDetails>
-              <List>{success_items}</List>
-            </AccordionDetails>
+            }
+          >
+            <List>{success_items}</List>
           </Accordion>
         </div>
       }

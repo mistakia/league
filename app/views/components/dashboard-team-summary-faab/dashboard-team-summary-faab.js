@@ -2,11 +2,8 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 
-import Icon from '@components/icon'
+import Accordion from '@components/accordion'
 import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
@@ -25,25 +22,27 @@ export default function DashboardTeamSummaryFAAB({ teams, tid }) {
   }
 
   return (
-    <Accordion TransitionProps={{ unmountOnExit: true }}>
-      <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
-        <Grid container>
-          <Grid item xs={7}>
-            Free Agency Budget
+    <Accordion
+      unmount_on_collapse
+      summary={
+        <>
+          <Grid container>
+            <Grid item xs={7}>
+              Free Agency Budget
+            </Grid>
+            <Grid item xs={3}>
+              ${team.free_agent_acquisition_budget_balance}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
+            </Grid>
           </Grid>
-          <Grid item xs={3}>
-            ${team.free_agent_acquisition_budget_balance}
-          </Grid>
-          <Grid item xs={2}>
-            <Rank rank={rank} size={teams.size} />
-          </Grid>
-        </Grid>
-      </AccordionSummary>
-      <AccordionDetails>
-        <table>
-          <tbody>{items}</tbody>
-        </table>
-      </AccordionDetails>
+        </>
+      }
+    >
+      <table>
+        <tbody>{items}</tbody>
+      </table>
     </Accordion>
   )
 }

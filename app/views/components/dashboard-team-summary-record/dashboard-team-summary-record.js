@@ -2,11 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Grid from '@mui/material/Grid'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 
-import Icon from '@components/icon'
+import Accordion from '@components/accordion'
 import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
@@ -64,46 +61,48 @@ export default function DashboardTeamSummaryRecord({
     standings.teams.groupBy((t) => t.get('division')).size > 1
 
   return (
-    <Accordion TransitionProps={{ unmountOnExit: true }}>
-      <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
-        <Grid container>
-          <Grid item xs={7}>
-            Record
+    <Accordion
+      unmount_on_collapse
+      summary={
+        <>
+          <Grid container>
+            <Grid item xs={7}>
+              Record
+            </Grid>
+            <Grid item xs={3}>
+              {team.getIn(['stats', 'regular_season_wins'], 0)}-
+              {team.getIn(['stats', 'regular_season_losses'], 0)}-
+              {team.getIn(['stats', 'regular_season_ties'], 0)}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={standings.teams.size} />
+            </Grid>
           </Grid>
-          <Grid item xs={3}>
-            {team.getIn(['stats', 'regular_season_wins'], 0)}-
-            {team.getIn(['stats', 'regular_season_losses'], 0)}-
-            {team.getIn(['stats', 'regular_season_ties'], 0)}
-          </Grid>
-          <Grid item xs={2}>
-            <Rank rank={rank} size={standings.teams.size} />
-          </Grid>
-        </Grid>
-      </AccordionSummary>
-      <AccordionDetails style={{ flexWrap: 'wrap' }}>
-        {has_divisions && (
-          <table>
-            <thead>
-              <tr>
-                <td>Division</td>
-                <td>Rec</td>
-                <td>PF</td>
-              </tr>
-            </thead>
-            <tbody>{divStandings}</tbody>
-          </table>
-        )}
+        </>
+      }
+    >
+      {has_divisions && (
         <table>
           <thead>
             <tr>
-              <td>Overall</td>
+              <td>Division</td>
               <td>Rec</td>
               <td>PF</td>
             </tr>
           </thead>
-          <tbody>{leagueStandings}</tbody>
+          <tbody>{divStandings}</tbody>
         </table>
-      </AccordionDetails>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <td>Overall</td>
+            <td>Rec</td>
+            <td>PF</td>
+          </tr>
+        </thead>
+        <tbody>{leagueStandings}</tbody>
+      </table>
     </Accordion>
   )
 }

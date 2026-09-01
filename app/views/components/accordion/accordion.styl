@@ -1,0 +1,80 @@
+// The paint comes from the prose-form tokens (app/styles/prose-form.styl,
+// injected into every stylesheet), so a disclosure is ruled in the same ink as
+// the modal and the buttons around it.
+//
+// FLAT, like button.styl and modal.styl. MUI's Accordion is a Paper: a white
+// card with a blurred elevation shadow, rounded corners that square off when
+// two sit adjacent, and a margin that appears only while expanded. None of that
+// is reproduced. A disclosure is a row with a rule under it; what separates one
+// from the next is the rule, not a simulated light source.
+//
+// THE SIZES ARE IN PIXELS, for the reason modal.styl records: no stylesheet in
+// this app sets a font-size on `body` or `html`, so an `em` in the app's chrome
+// resolves against the browser default rather than against anything the project
+// chose. The tokens are the prose language's; only the sizing is local.
+
+.accordion
+  border-bottom 1px solid $prose_rule
+
+.accordion__header
+  display flex
+  align-items stretch
+
+// A REAL BUTTON, so it is reset here rather than inheriting the UA's control
+// paint. normalize.css already strips the border and the background from
+// `button`, but not the font — a button does not inherit the page's typeface on
+// any browser, so an unset one renders the summary in the platform UI font
+// while the body beside it is in Inter.
+.accordion__summary
+  flex 1
+  display flex
+  align-items center
+  gap 12px
+  min-height $control_height
+  padding 10px 12px
+  border none
+  background none
+  font-family $prose_sans
+  font-size 14px
+  font-weight $prose_bold
+  line-height 1.4
+  color $prose_ink
+  text-align left
+  cursor pointer
+
+  &:hover
+    background $control_fill
+
+  // Keyboard focus only. A disclosure is clicked far more often than it is
+  // tabbed to, and a ring on every mouse click reads as a stuck state.
+  &:focus-visible
+    outline 2px solid $prose_action
+    outline-offset -2px
+
+.accordion__summary-content
+  flex 1
+  min-width 0
+
+.accordion__chevron
+  flex none
+  color $prose_muted
+
+// The trailing control on a summary row, a SIBLING of the button rather than a
+// child of it — see the nested-button note in accordion.js.
+.accordion__action
+  display flex
+  align-items center
+  padding-right 12px
+
+.accordion__details
+  padding 4px 12px 16px
+  font-size 14px
+  line-height 1.5
+  color $prose_body
+
+  // `hidden` is what collapses a panel that stays mounted, and the UA's
+  // `[hidden] { display: none }` loses to any `display` a rule here sets. Stated
+  // explicitly so a later `display: flex` on the block above cannot silently
+  // un-hide every closed panel in the app.
+  &[hidden]
+    display none

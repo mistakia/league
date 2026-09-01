@@ -13,5 +13,13 @@
 .status-success-summary
   color #3bd671
 
-.status-error.MuiAccordionSummary-root
+// The amber ground is on the SUMMARY ROW, not the whole panel — the list of
+// issues below it reads as a list, and painting the body amber too would make
+// the panel a warning box rather than a warning heading with detail under it.
+// `.status-error` is now on the accordion root (the class MUI put on the
+// summary is gone with it), so this reaches down one level.
+.status-error .accordion__summary
   background #FFCD60
+
+  &:hover
+    background darken(#FFCD60, 6%)

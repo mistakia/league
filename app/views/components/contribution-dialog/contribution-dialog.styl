@@ -23,10 +23,16 @@
   &__kind
     margin-bottom 8px
 
+  // A boxed aside inside the dialog rather than a row in it, so the whole
+  // border is drawn here — the accordion's own rule is a bottom border only,
+  // which is right for a stack of siblings and not for a single panel.
+  //
+  // The `box-shadow: none` this replaced was cancelling MUI's Paper elevation.
+  // There is no shadow to cancel now, and leaving the declaration behind would
+  // read as a rule doing something.
   &__context
     margin-top 16px
-    box-shadow none
-    border 1px solid rgba(0, 0, 0, 0.12)
+    border 1px solid $prose_rule
 
   &__context-preview
     margin 0

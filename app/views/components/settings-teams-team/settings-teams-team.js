@@ -1,11 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 import IconButton from '@mui/material/IconButton'
 
+import Accordion from '@components/accordion'
 import Icon from '@components/icon'
 import EditableSettingField from '@components/editable-setting-field'
 import SettingsTeamsTeamPlayer from '@components/settings-teams-team-player'
@@ -65,37 +63,37 @@ export default class SettingsTeamsTeam extends React.Component {
         />
       )
     }
+    // The delete button is the accordion's `action` rather than part of its
+    // summary. It used to sit INSIDE the summary, which MUI renders as a
+    // <button> — so this was a button nested in a button, and clicking delete
+    // also toggled the panel open.
     return (
-      <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
-          <div className='settings__section-title'>{team.name}</div>
-          <div className='settings__section-action'>
-            {team.team_id !== teamId && (
-              <Button
-                text
-                onClick={() => this.handleConfirmation(team.team_id)}
-              >
-                delete
-              </Button>
-            )}
-          </div>
-        </AccordionSummary>
-        <AccordionDetails>
-          <EditableSettingField
-            label='Team Name'
-            field='name'
-            limit={100}
-            data={this.props.team}
-            on_change={this.onChange}
-          />
-          <div className='heading__section-title'>
-            Players
-            <IconButton onClick={this.handleAdd}>
-              <Icon name='add-circle-outline' />
-            </IconButton>
-          </div>
-          <div className='settings__teams-team-roster empty'>{rosterItems}</div>
-        </AccordionDetails>
+      <Accordion
+        expanded={this.state.open}
+        on_toggle={this.handleChange}
+        summary={<div className='settings__section-title'>{team.name}</div>}
+        action={
+          team.team_id !== teamId && (
+            <Button text onClick={() => this.handleConfirmation(team.team_id)}>
+              delete
+            </Button>
+          )
+        }
+      >
+        <EditableSettingField
+          label='Team Name'
+          field='name'
+          limit={100}
+          data={this.props.team}
+          on_change={this.onChange}
+        />
+        <div className='heading__section-title'>
+          Players
+          <IconButton onClick={this.handleAdd}>
+            <Icon name='add-circle-outline' />
+          </IconButton>
+        </div>
+        <div className='settings__teams-team-roster empty'>{rosterItems}</div>
       </Accordion>
     )
   }

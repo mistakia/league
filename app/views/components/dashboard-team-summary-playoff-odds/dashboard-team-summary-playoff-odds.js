@@ -2,12 +2,9 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 
 import { toPercent } from '#libs-shared'
-import Icon from '@components/icon'
+import Accordion from '@components/accordion'
 import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
@@ -26,25 +23,27 @@ export default function DashboardTeamSummaryPlayoffOdds({ teams, tid }) {
   }
 
   return (
-    <Accordion TransitionProps={{ unmountOnExit: true }}>
-      <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
-        <Grid container>
-          <Grid item xs={7}>
-            Playoff Odds
+    <Accordion
+      unmount_on_collapse
+      summary={
+        <>
+          <Grid container>
+            <Grid item xs={7}>
+              Playoff Odds
+            </Grid>
+            <Grid item xs={3}>
+              {toPercent(team.playoff_odds)}
+            </Grid>
+            <Grid item xs={2}>
+              <Rank rank={rank} size={teams.size} />
+            </Grid>
           </Grid>
-          <Grid item xs={3}>
-            {toPercent(team.playoff_odds)}
-          </Grid>
-          <Grid item xs={2}>
-            <Rank rank={rank} size={teams.size} />
-          </Grid>
-        </Grid>
-      </AccordionSummary>
-      <AccordionDetails>
-        <table>
-          <tbody>{items}</tbody>
-        </table>
-      </AccordionDetails>
+        </>
+      }
+    >
+      <table>
+        <tbody>{items}</tbody>
+      </table>
     </Accordion>
   )
 }

@@ -4,15 +4,13 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
 import Alert from '@mui/material/Alert'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import Modal from '@components/modal'
+import Accordion from '@components/accordion'
 import Button from '@components/button'
 import { capture_contribution_context } from '@core/contribution-context'
 
@@ -302,21 +300,24 @@ export default function ContributionDialog({
       {/* The submitter sees exactly what is being sent before they send it.
           Every field here is allowlisted at capture -- see
           app/core/contribution-context.js. */}
-      <Accordion className='contribution-dialog__context' disableGutters>
-        <AccordionSummary>
-          {is_capturing
+      {/* This one had no expandIcon under MUI, so it was a disclosure with no
+          affordance — the only way to learn it opened was to click it. It takes
+          the shared chevron now. */}
+      <Accordion
+        className='contribution-dialog__context'
+        summary={
+          is_capturing
             ? 'Collecting page details…'
-            : 'What gets sent with this report'}
-        </AccordionSummary>
-        <AccordionDetails>
-          {is_capturing ? (
-            <CircularProgress size={20} />
-          ) : (
-            <pre className='contribution-dialog__context-preview'>
-              {JSON.stringify(captured_context, null, 2)}
-            </pre>
-          )}
-        </AccordionDetails>
+            : 'What gets sent with this report'
+        }
+      >
+        {is_capturing ? (
+          <CircularProgress size={20} />
+        ) : (
+          <pre className='contribution-dialog__context-preview'>
+            {JSON.stringify(captured_context, null, 2)}
+          </pre>
+        )}
       </Accordion>
 
       {submit_error && <Alert severity='error'>{submit_error}</Alert>}

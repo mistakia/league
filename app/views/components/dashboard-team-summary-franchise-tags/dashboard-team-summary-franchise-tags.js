@@ -1,11 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
-import Accordion from '@mui/material/Accordion'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import AccordionSummary from '@mui/material/AccordionSummary'
 
-import Icon from '@components/icon'
+import Accordion from '@components/accordion'
 
 export default class DashboardTeamSummaryFranchiseTags extends React.Component {
   render = () => {
@@ -38,19 +35,21 @@ export default class DashboardTeamSummaryFranchiseTags extends React.Component {
     )
 
     return (
-      <Accordion TransitionProps={{ unmountOnExit: true }}>
-        <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
-          <Grid container>
-            <Grid item xs={12}>
-              Franchise Tag Salaries
+      <Accordion
+        unmount_on_collapse
+        summary={
+          <>
+            <Grid container>
+              <Grid item xs={12}>
+                Franchise Tag Salaries
+              </Grid>
             </Grid>
-          </Grid>
-        </AccordionSummary>
-        <AccordionDetails>
-          <table>
-            <tbody>{items}</tbody>
-          </table>
-        </AccordionDetails>
+          </>
+        }
+      >
+        <table>
+          <tbody>{items}</tbody>
+        </table>
       </Accordion>
     )
   }
