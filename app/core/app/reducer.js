@@ -2,12 +2,12 @@ import { Record, List } from 'immutable'
 import { set_user as set_error_user } from '@core/bugsnag'
 
 import { app_actions } from './actions'
-import { setting_actions } from '@core/settings'
+import { setting_actions } from '@core/settings/actions'
 import { uuidv4 } from '#libs-shared'
 import { current_season, league_defaults } from '#constants'
-import { roster_actions } from '@core/rosters'
-import { team_actions } from '@core/teams'
-import { matchups_actions } from '@core/matchups'
+import { roster_actions } from '@core/rosters/actions'
+import { team_actions } from '@core/teams/actions'
+import { matchups_actions } from '@core/matchups/actions'
 import { data_views_actions } from '@core/data-views/actions'
 import { default_data_view_view_id } from '@core/data-views/default-data-views'
 import { plays_views_actions } from '@core/plays-view/actions'
@@ -57,11 +57,28 @@ export function app_reducer(state = initialState(), { payload, type }) {
         state.set('is_loaded_rosters', payload.opts.leagueId)
       })
 
+    // Resolve the viewing team from the league actually on screen.
+    //
+    // AUTH_FULFILLED can only adopt a teamId when the route's league is the
+    // user's FIRST one, so a manager in more than one league had no team in any
+    // other league and every team-scoped surface silently rendered as if they
+    // owned nothing. This is the payload that knows the answer: it carries the
+    // teams of the league in view, and `teamIds` carries the ones the user owns.
+    //
+    // The auction page is where it bit first. Its elections fetch is gated on
+    // teamId, so the request was never issued at all and the standing-elections
+    // panel rendered "No elections yet" -- which, as this design keeps saying,
+    // is indistinguishable from a manager who chose not to elect.
     case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
-        const team = payload.data.teams.find((t) => t.team_id === teamId)
-        if (!team) state.set('teamId', null)
+        if (payload.data.teams.some((t) => t.team_id === teamId)) return
+
+        const owned_team_ids = state.get('teamIds')
+        const owned = payload.data.teams.find((t) =>
+          owned_team_ids.includes(t.team_id)
+        )
+        state.set('teamId', owned ? owned.team_id : null)
       })
 
     // teamId belongs to the league it was resolved in, so a league change must
