@@ -61,7 +61,10 @@ import db from '#db'
 import { recompute_route_share } from '#libs-server'
 import { pfr_gamelog_agreement_rows } from '#libs-server/pfr-gamelog-agreement.mjs'
 import { erased_role_attribution_by_play_type } from '#libs-server/erased-role-attribution.mjs'
-import { game_prop_column_resolution_rows } from '#libs-server/game-prop-column-resolution.mjs'
+import {
+  game_prop_column_resolution_rows,
+  game_prop_line_differential_rows
+} from '#libs-server/game-prop-column-resolution.mjs'
 import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 
@@ -1512,6 +1515,25 @@ const registry = [
     // it would report a real week as un-gradeable forever.
     repair_command:
       'Confirm the direction before touching anything. A numerator of 0 against a non-zero denominator is the COLUMN, not the data: execute the emitted SQL for the failing week (get_data_view_results_query with an explicit {year, seas_type, week}) and check that the prop_markets_index CTE still carries its inner join to nfl_games on esbid, season_year, season_type and week. That join is the change 6e724c02c shipped and the one this check watches. A denominator that has fallen to 0 for a week that used to grade is the opposite condition and belongs to the odds importer — check the runs ledger for the FanDuel market import rather than reading it as a column defect.'
+  },
+
+  {
+    check_id: 'betting-market-game-prop-line-differential',
+    invariant:
+      'Where the base tables hold DIFFERENT lines for a player in two adjacent weeks of the same season, the player game-prop data-view COLUMN renders different lines in those weeks, and where they hold the same line, it renders the same. A week-scoped column can resolve the right player SET and still lie about values: a CTE pinned to the first requested week broadcasts that week line onto every week row, and the resolution check (betting-market-game-prop-column-resolution) grades such a column 1.0000 because the players it returns are exactly right. That was the shape of the live report the week-scope migration fixed (league fc4a84ca0): every player 2024 prop line identical across weeks 1 and 2. Nothing else can see the value dimension: the query-match fixtures normalize against the column build, and CI runs against a throwaway Postgres holding no betting markets at all, so the only place the question can be answered is a production run against real adjacent-week markets.',
+    grain: ['season_year', 'season_type', 'week_b'],
+    rows: async () => game_prop_line_differential_rows(),
+    min_rate: 1.0,
+    calibration:
+      'EXACT agreement, not a tolerance. A compared player is one with an unambiguous base line in both weeks (a week holding duplicate markets at different lines has no single reference line and is excluded) that the shipped column resolved in both weeks; it is a disagreement when column-diff and ref-diff disagree, so min_rate 1.0 is a live invariant and the healthy reading is 1.0. FALSE, the reading this check exists for, is the broadcaster: it renders every compared player equal, so each adjacent-week pair reads 0/N however many players it resolves — the count of players comes from the resolution check, the VALUE comes from here, and the two never overlap because a player the column dropped from a week is not compared. A player the base holds equal across the pair but the column renders different is the same disagreement from the other side and counts the same way. The seeded corpus (data-checks.game-prop-column-resolution.spec.mjs) drives a differer and an equal-lines control through 2025 REG weeks 13 and 14.',
+    min_gradeable_units: 15,
+    // The floor mirrors the resolution check: a prior season (2025 REG) produces
+    // 17 adjacent pairs plus 2-3 postseason, so 15 sits under the
+    // smallest observed season while far above a scan that stopped reaching the
+    // markets tables. The current season contributes pairs only once it has two
+    // weeks of player props, and is expected to be absent early on.
+    repair_command:
+      'Confirm the direction before touching anything. A disagreement is the COLUMN, not the data: execute the column over the failing pair (get_data_view_results with single_nfl_week_id naming both weeks, row_axes year+week) and check whether every player renders the same line in both weeks while the base tables hold different selections — that is the broadcast signature of a CTE pinned to one week, the class fc4a84ca0 migrated. A disagreement on a player whose base week holds duplicate markets at different lines is the reference ambiguity, not a broadcast: the differential excludes such weeks, so a finding there means the population the check scanned diverged from the column, and the odds importer or the market dedup policy owns it rather than the column.'
   },
 
   {
