@@ -1540,6 +1540,32 @@ export interface HistoricalInjuryIndex2025Row {
   updated_at: Date
 }
 
+export interface HistoricalInjuryIndex2026Row {
+  pid: string
+  season_year: number
+  week: number
+  esbid: number
+  nfl_team: string | null
+  is_played: boolean | null
+  snap_count: number | null
+  snaps_offense: number | null
+  snaps_defense: number | null
+  snaps_special_teams: number | null
+  is_gamelog_active: boolean | null
+  is_ruled_out_in_game: boolean | null
+  has_practice_listed_injury: boolean | null
+  is_practice_questionable_or_worse: boolean | null
+  practice_designation: string | null
+  has_changelog_injury_event: boolean | null
+  is_changelog_unavailable: boolean | null
+  has_changelog_nfl_reserve_event: boolean | null
+  missed_reason: string | null
+  source_concurrence: number | null
+  confidence: string | null
+  inserted_at: Date
+  updated_at: Date
+}
+
 export interface InviteCodesRow {
   code: string
   created_by: number

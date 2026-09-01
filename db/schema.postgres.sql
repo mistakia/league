@@ -660,6 +660,7 @@ ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2026 DROP CONSTRAINT IF EXISTS historical_injury_index_2026_pkey;
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2025 DROP CONSTRAINT IF EXISTS historical_injury_index_2025_pkey;
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2024 DROP CONSTRAINT IF EXISTS historical_injury_index_2024_pkey;
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2023 DROP CONSTRAINT IF EXISTS historical_injury_index_2023_pkey;
@@ -1041,6 +1042,7 @@ DROP TABLE IF EXISTS public.keeptradecut_liquidity;
 DROP SEQUENCE IF EXISTS public.jobs_job_id_seq;
 DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.invite_codes;
+DROP TABLE IF EXISTS public.historical_injury_index_2026;
 DROP TABLE IF EXISTS public.historical_injury_index_2025;
 DROP TABLE IF EXISTS public.historical_injury_index_2024;
 DROP TABLE IF EXISTS public.historical_injury_index_2023;
@@ -4235,6 +4237,37 @@ CREATE TABLE public.historical_injury_index_2024 (
 --
 
 CREATE TABLE public.historical_injury_index_2025 (
+    pid character varying(25) NOT NULL,
+    season_year smallint NOT NULL,
+    week smallint NOT NULL,
+    esbid integer NOT NULL,
+    nfl_team character varying(3),
+    is_played boolean,
+    snap_count integer,
+    snaps_offense smallint,
+    snaps_defense smallint,
+    snaps_special_teams smallint,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
+    practice_designation character varying(16),
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
+    missed_reason character varying(24),
+    source_concurrence smallint,
+    confidence character varying(8),
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: historical_injury_index_2026; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.historical_injury_index_2026 (
     pid character varying(25) NOT NULL,
     season_year smallint NOT NULL,
     week smallint NOT NULL,
@@ -28342,6 +28375,13 @@ ALTER TABLE ONLY public.historical_injury_index ATTACH PARTITION public.historic
 
 
 --
+-- Name: historical_injury_index_2026; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.historical_injury_index ATTACH PARTITION public.historical_injury_index_2026 FOR VALUES FROM ('2026') TO ('2027');
+
+
+--
 -- Name: nfl_plays_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
 --
 
@@ -29740,6 +29780,14 @@ ALTER TABLE ONLY public.historical_injury_index_2024
 
 ALTER TABLE ONLY public.historical_injury_index_2025
     ADD CONSTRAINT historical_injury_index_2025_pkey PRIMARY KEY (pid, season_year, week, esbid);
+
+
+--
+-- Name: historical_injury_index_2026 historical_injury_index_2026_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.historical_injury_index_2026
+    ADD CONSTRAINT historical_injury_index_2026_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -31340,6 +31388,20 @@ CREATE INDEX historical_injury_index_2025_pid_season_year_idx ON public.historic
 --
 
 CREATE INDEX historical_injury_index_2025_season_year_week_idx ON public.historical_injury_index_2025 USING btree (season_year, week);
+
+
+--
+-- Name: historical_injury_index_2026_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX historical_injury_index_2026_pid_year_idx ON public.historical_injury_index_2026 USING btree (pid, season_year);
+
+
+--
+-- Name: historical_injury_index_2026_year_week_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX historical_injury_index_2026_year_week_idx ON public.historical_injury_index_2026 USING btree (season_year, week);
 
 
 --
@@ -46484,6 +46546,27 @@ ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION
 
 
 --
+-- Name: historical_injury_index_2026_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2026_pid_year_idx;
+
+
+--
+-- Name: historical_injury_index_2026_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historical_injury_index_2026_pkey;
+
+
+--
+-- Name: historical_injury_index_2026_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2026_year_week_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -59667,6 +59750,13 @@ GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_contribution
 GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_data_view_reader;
 GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_contribution_reader;
+
+
+--
+-- Name: TABLE historical_injury_index_2026; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.historical_injury_index_2026 TO league_reader;
 
 
 --

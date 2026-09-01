@@ -82,6 +82,7 @@ import type {
   HistoricalInjuryIndex2023Row,
   HistoricalInjuryIndex2024Row,
   HistoricalInjuryIndex2025Row,
+  HistoricalInjuryIndex2026Row,
   InviteCodesRow,
   JobsRow,
   KeeptradecutLiquidityRow,
@@ -406,6 +407,7 @@ declare module 'knex/types/tables' {
     historical_injury_index_2023: HistoricalInjuryIndex2023Row
     historical_injury_index_2024: HistoricalInjuryIndex2024Row
     historical_injury_index_2025: HistoricalInjuryIndex2025Row
+    historical_injury_index_2026: HistoricalInjuryIndex2026Row
     invite_codes: InviteCodesRow
     jobs: JobsRow
     keeptradecut_liquidity: KeeptradecutLiquidityRow
