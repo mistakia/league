@@ -1,4 +1,4 @@
-import { Record, List } from 'immutable'
+import { Record, List, Map, fromJS } from 'immutable'
 
 import { transaction_types, fantasy_positions } from '#constants'
 import { auction_actions } from './actions'
@@ -26,8 +26,21 @@ const initialState = new Record({
   timer: null,
   muted: true,
   pause_on_team_disconnect: true,
-  is_slow_mode: false,
-  slow_mode_state: null
+  // 'election' or 'live'. Election mode carries no clock at all: a nominated
+  // player settles when every eligible team has elected on it.
+  auction_mode: 'live',
+  // Team ids only, on the active nomination. A standing maximum is a sealed bid
+  // -- no other team's amount ever reaches this client, the commissioner's
+  // included, since the commissioner is a competing manager here.
+  outstanding_election_tids: new List(),
+  // Map<pid, Map> of THE VIEWING TEAM'S OWN live elections, and no others.
+  // Bounded by the players one manager elected on rather than 395 by ten, and
+  // sealed by construction: no other team's amount is ever sent to any client.
+  //
+  // fromJS maps rather than a Record, matching restricted-free-agency/reducer.js
+  // -- app/core/auction/ has no record.js and adding one would pull the slice
+  // under app.record-declares-reducer-key.spec.mjs for no gain.
+  standing_elections: new Map()
 })
 
 export function auction_reducer(state = initialState(), { payload, type }) {
@@ -125,8 +138,10 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         nominating_team_id: payload.nominating_team_id,
         isComplete: payload.complete,
         pause_on_team_disconnect: payload.pause_on_team_disconnect,
-        is_slow_mode: payload.slow_mode || false,
-        slow_mode_state: payload.slow_mode_state
+        auction_mode: payload.auction_mode || 'live',
+        outstanding_election_tids: new List(
+          payload.outstanding_election_tids || []
+        )
       })
     }
 
@@ -159,9 +174,19 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         lineupBudget: Math.round(payload.data.leagues[0].salary_cap * 0.9)
       })
 
-    case auction_actions.AUCTION_SLOW_MODE_STATE_UPDATE:
+    case auction_actions.GET_AUCTION_ELECTIONS_FULFILLED: {
+      let elections = new Map()
+      for (const election of payload.data) {
+        elections = elections.set(election.pid, fromJS(election))
+      }
+      return state.merge({ standing_elections: elections })
+    }
+
+    case auction_actions.AUCTION_SETTLEMENT_STATUS:
       return state.merge({
-        slow_mode_state: payload.slow_mode_state
+        outstanding_election_tids: new List(
+          payload.outstanding_election_tids || []
+        )
       })
 
     default:

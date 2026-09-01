@@ -263,10 +263,12 @@ const get_leagues_with_pending_active_waivers = async () => {
 const should_skip_league_in_offseason = async (lid) => {
   const league = await getLeague({ lid })
 
-  if (league.free_agency_live_auction_start) {
+  if (league.free_agency_period_start) {
     const fa_period = get_free_agent_period(league)
-    if (current_season.now.isBefore(fa_period.free_agency_live_auction_start)) {
-      // skip leagues during offseason before start of free agency auction
+    if (current_season.now.isBefore(fa_period.start)) {
+      // skip leagues during the offseason before the free agency period opens.
+      // The auction runs the whole period, so the period start is the instant
+      // the auction begins.
       return true
     }
   } else {

@@ -21293,7 +21293,6 @@ export interface SeasonsRow {
   draft_start: Date | null
   free_agency_period_start: Date | null
   free_agency_period_end: Date | null
-  free_agency_live_auction_start: Date | null
   trade_deadline_at: Date | null
   draft_type: string | null
   draft_hour_min: number | null
@@ -21309,11 +21308,9 @@ export interface SeasonsRow {
   rookie_tag_limit: number
   restricted_free_agency_tag_limit: number
   season_due_amount: number | null
-  free_agency_live_auction_end: Date | null
   wildcard_round: number | null
   championship_round: number[] | null
   rookie_draft_completed_at: Date | null
-  is_free_agency_auction_slow_mode: boolean
   season_finalized_at: Date | null
   scoring_format_id: string
   league_format_id: string

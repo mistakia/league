@@ -70,7 +70,7 @@ const get_eligible_leagues_for_free_agency_period_notifications = async ({
     .where({
       'seasons.season_year': current_season.year
     })
-    .whereNotNull('free_agency_live_auction_start')
+    .whereNotNull('free_agency_period_start')
 
   log(
     `Found ${leagues_with_free_agency.length} leagues with free agency period configured`
@@ -216,9 +216,9 @@ const announce_free_agency_period_notification = async ({
     throw new Error(`League with lid ${lid} not found`)
   }
 
-  if (!league.free_agency_live_auction_start) {
+  if (!league.free_agency_period_start) {
     throw new Error(
-      `League with lid ${lid} does not have a free_agency_live_auction_start date`
+      `League with lid ${lid} does not have a free_agency_period_start date`
     )
   }
 
@@ -285,7 +285,6 @@ const announce_free_agency_period_notification = async ({
       message: notification_message,
       metadata: {
         notice_type,
-        free_agency_live_auction_start: league.free_agency_live_auction_start,
         free_agency_period_start: league.free_agency_period_start,
         free_agency_period_end: league.free_agency_period_end
       }

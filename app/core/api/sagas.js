@@ -113,6 +113,11 @@ import {
 } from '@core/waivers/actions'
 import { get_restricted_free_agency_auctions_actions } from '@core/restricted-free-agency/actions'
 import {
+  get_auction_elections_actions,
+  post_auction_election_actions,
+  delete_auction_election_actions
+} from '@core/auction/actions'
+import {
   get_trade_review_actions,
   get_trade_review_trade_actions
 } from '@core/trade-review/actions'
@@ -494,6 +499,21 @@ export const api_get_restricted_free_agency_auctions = fetch.bind(
   null,
   api.get_restricted_free_agency_auctions,
   get_restricted_free_agency_auctions_actions
+)
+export const api_get_auction_elections = fetch.bind(
+  null,
+  api.get_auction_elections,
+  get_auction_elections_actions
+)
+export const api_post_auction_election = fetch.bind(
+  null,
+  api.post_auction_election,
+  post_auction_election_actions
+)
+export const api_delete_auction_election = fetch.bind(
+  null,
+  api.delete_auction_election,
+  delete_auction_election_actions
 )
 
 export const api_get_trade_review = fetch.bind(

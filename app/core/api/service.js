@@ -314,6 +314,20 @@ export const api = {
     }/restricted-free-agency?${queryString.stringify(params)}`
     return { url }
   },
+  get_auction_elections(params) {
+    const url = `${API_URL}/leagues/${
+      params.leagueId
+    }/auction-elections?${queryString.stringify(params)}`
+    return { url }
+  },
+  post_auction_election({ leagueId, ...data }) {
+    const url = `${API_URL}/leagues/${leagueId}/auction-elections`
+    return { url, ...POST(data) }
+  },
+  delete_auction_election({ leagueId, ...data }) {
+    const url = `${API_URL}/leagues/${leagueId}/auction-elections`
+    return { url, ...DELETE(data) }
+  },
   post_poach(data) {
     const url = `${API_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }

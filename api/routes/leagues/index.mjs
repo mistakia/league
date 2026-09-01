@@ -38,6 +38,7 @@ import trades from './trades.mjs'
 import trade_review from './trade-review.mjs'
 import waivers from './waivers/index.mjs'
 import restricted_free_agency from './restricted-free-agency.mjs'
+import auction_elections from './auction-elections.mjs'
 import poaches from './poaches.mjs'
 import teams from './teams.mjs'
 import rosters from './rosters.mjs'
@@ -502,6 +503,7 @@ router.use('/:leagueId/trades', trades)
 router.use('/:leagueId/trade-review', trade_review)
 router.use('/:leagueId/waivers', waivers)
 router.use('/:leagueId/restricted-free-agency', restricted_free_agency)
+router.use('/:leagueId/auction-elections', auction_elections)
 router.use('/:leagueId/poaches', poaches)
 router.use('/:leagueId/teams', teams)
 router.use('/:leagueId/rosters', rosters)

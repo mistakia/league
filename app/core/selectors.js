@@ -365,7 +365,7 @@ export const is_nominated_player_eligible = createSelector(
 export const is_free_agent_period = createSelector(
   get_current_league,
   (league) => {
-    if (!league.free_agency_live_auction_start) {
+    if (!league.free_agency_period_start) {
       return false
     }
 
@@ -772,35 +772,29 @@ export const get_league_events = createSelector(
       })
     }
 
-    if (league.free_agency_live_auction_start) {
+    if (league.free_agency_period_start) {
       const faPeriod = get_free_agent_period(league)
-      const date = dayjs(league.free_agency_live_auction_start)
-      if (now.isBefore(date)) {
-        if (now.isBefore(faPeriod.start)) {
-          events.push({
-            detail: 'Free Agency Period Begins',
-            date: faPeriod.start
-          })
-        }
-
+      // The period opening IS the auction opening -- elections and nominations
+      // both open there -- so this is one event where it used to be two.
+      if (now.isBefore(faPeriod.start)) {
         events.push({
-          detail: 'Auction',
-          date
+          detail: 'Free Agency Period Begins',
+          date: faPeriod.start
         })
       }
 
-      if (league.free_agency_live_auction_end) {
+      {
         const next_waiver_processing = now.hour() < 15 ? now : now.add(1, 'day')
         const waiver_processing_time = next_waiver_processing
           .hour(15)
           .minute(0)
           .second(0)
 
-        // Only show daily waiver processing if we're after the live auction has ended
-        // and the waiver processing time is before the free agency period ends
+        // Daily waiver processing runs inside the free agency period. It used
+        // to be gated on the live auction having ENDED, which no longer names
+        // an instant: the auction ends when the period does.
         if (
-          faPeriod.free_agency_live_auction_end &&
-          now.isAfter(faPeriod.free_agency_live_auction_end) &&
+          now.isAfter(faPeriod.start) &&
           now.isBefore(faPeriod.end) &&
           now.isBefore(waiver_processing_time) &&
           waiver_processing_time.isBefore(faPeriod.end)

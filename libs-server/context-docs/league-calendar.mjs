@@ -22,12 +22,9 @@ export const league_calendar_events = [
   { field: 'draft_start', label: 'Rookie Draft Begins' },
   { field: 'rookie_draft_end_at', label: 'Rookie Draft Ends' },
   { field: 'extension_deadline_at', label: 'Extension Deadline' },
+  // The auction runs the whole free agency period, so these two instants are
+  // the auction's beginning and end and there is nothing separate to label.
   { field: 'free_agency_period_start', label: 'Free Agency Period Begins' },
-  {
-    field: 'free_agency_live_auction_start',
-    label: 'Free Agency Live Auction'
-  },
-  { field: 'free_agency_live_auction_end', label: 'Free Agency Auction Ends' },
   { field: 'free_agency_period_end', label: 'Free Agency Period Ends' },
   {
     field: 'restricted_free_agency_period_start',
@@ -124,25 +121,14 @@ export function resolve_current_phase({ league, now_unix }) {
     return 'Extension Window'
   }
 
-  if (league.free_agency_live_auction_start) {
+  if (league.free_agency_period_start) {
     const fa = get_free_agent_period(league)
     const fa_start = fa.start ? fa.start.unix() : null
     const fa_end = fa.end ? fa.end.unix() : null
-    const auction_start = fa.free_agency_live_auction_start
-      ? fa.free_agency_live_auction_start.unix()
-      : null
-    const auction_end = fa.free_agency_live_auction_end
-      ? fa.free_agency_live_auction_end.unix()
-      : null
 
-    if (
-      auction_start &&
-      auction_end &&
-      now >= auction_start &&
-      now <= auction_end
-    ) {
-      return 'Free Agency (live auction)'
-    }
+    // One phase, not two. There is no longer a live-auction window nested
+    // inside the free agency period -- the auction IS the period, so a separate
+    // 'Free Agency (live auction)' phase would name a state that cannot occur.
     if (fa_start && fa_end && now >= fa_start && now <= fa_end) {
       return 'Free Agency'
     }

@@ -89,7 +89,7 @@ const format_player_display = (player) => {
  * @param {string} team_id - Team ID that nominated the player
  * @param {string} player_id - Player ID
  * @param {number} bid_amount - Current bid amount
- * @param {number[]} eligible_teams - Array of eligible team IDs
+ * @param {number[]} eligible_teams - team ids the auction is still waiting on
  * @param {boolean} is_nomination - Whether the message is for a nomination or a bid
  * @returns {Promise<string>} Formatted Discord message
  */
@@ -114,7 +114,7 @@ export const format_nomination_message = async ({
   const team_name = team.name || `Team ${team.team_id}`
   const teams_display = await format_team_list(eligible_teams)
 
-  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Eligible teams: ${teams_display}. Eligible teams must pass or bid.`
+  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Waiting on: ${teams_display}. Each must set a maximum bid or decline before this player settles.`
 }
 
 /**

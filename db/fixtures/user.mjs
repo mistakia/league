@@ -30,7 +30,7 @@ export default async function (knex) {
     // `seasons_rookie_draft_end_at_set_with_start`; same value the league
     // fixture uses, for the same reason.
     rookie_draft_end_at: default_rookie_draft_end_at(draft_start_timestamp),
-    free_agency_live_auction_start: current_season.regular_season_start
+    free_agency_period_start: current_season.regular_season_start
       .add(1, 'week')
       .subtract(5, 'days')
       .unix(),

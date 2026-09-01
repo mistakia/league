@@ -12,20 +12,30 @@ import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import {
   format_nomination_message,
   format_nomination_complete_message
-} from '#libs-server/format-slow-mode-discord-message.mjs'
+} from '#libs-server/format-auction-discord-message.mjs'
 import {
-  initialize_slow_mode_nomination,
-  record_team_pass,
-  update_current_bid,
-  check_nomination_complete,
-  complete_slow_mode_nomination,
-  clear_slow_mode_nomination,
-  get_slow_mode_nomination_state
-} from '#libs-server/auction-slow-mode-redis.mjs'
+  settle_auction_player_if_complete,
+  get_active_auction_nomination,
+  get_auction_team_capacities,
+  get_outstanding_team_ids
+} from '#libs-server/auction-settlement.mjs'
 import debug from 'debug'
 
+// The real timers, and the default injection.
+//
+// Nothing in this repository fakes timers -- there is no sinon and no
+// useFakeTimers in any spec -- and MockDate moves Date.now without moving
+// setTimeout. So while these were called directly, NO bid-clock or
+// nomination-clock behavior was testable at all, which is exactly why slow
+// mode's timer suspension shipped unexercised. Taking them as an injected
+// interface is what makes the clock addressable from a spec.
+export const real_auction_timers = {
+  set_timeout: (fn, ms) => setTimeout(fn, ms),
+  clear_timeout: (handle) => clearTimeout(handle)
+}
+
 export default class Auction {
-  constructor({ wss, lid }) {
+  constructor({ wss, lid, timers = real_auction_timers }) {
     this._wss = wss
     this._lid = lid
     this._league = null
@@ -39,18 +49,12 @@ export default class Auction {
     this._transactions = []
     this._connected = {}
     this._connected_client_ids = {}
-    this._slow_mode = false
-
-    // Slow mode Redis operations
-    this._slow_mode_redis = {
-      initialize_slow_mode_nomination,
-      record_team_pass,
-      update_current_bid,
-      check_nomination_complete,
-      complete_slow_mode_nomination,
-      clear_slow_mode_nomination,
-      get_slow_mode_nomination_state
-    }
+    // Election mode carries NO clock of any kind: a nominated player settles
+    // when every eligible team has elected on it, however long that takes. Live
+    // mode is the open-outcry path on the bid clock. This flag says which is in
+    // force; the timers below are suspended entirely in election mode.
+    this._election_mode = false
+    this._timers = timers
 
     this.logger = debug(`auction:league:${lid}`)
   }
@@ -190,11 +194,12 @@ export default class Auction {
 
       const nominating_team_id = this.nominating_team_id
       if (!nominating_team_id) {
-        await db('seasons').where('lid', this._lid).update({
-          free_agency_live_auction_end: new Date()
-        })
-
-        this._league = await getLeague({ lid: this._lid })
+        // An exhausted nomination rotation IS the auction-complete condition:
+        // every team signs exactly as many players as it has open active spots,
+        // so no team having roster space means the auction has placed everyone
+        // it had to. Nothing is stamped on `seasons` -- the auction runs the
+        // whole free agency period and ends when the period does, so there is
+        // no separate auction-end instant to record.
         return this.broadcast({ type: 'AUCTION_COMPLETE' })
       }
 
@@ -222,7 +227,6 @@ export default class Auction {
     this._locked = true
 
     try {
-      const { tid, pid, value } = message
       const current = this._transactions[0]
 
       // Validate bid
@@ -234,9 +238,13 @@ export default class Auction {
       const bid = await this._create_bid_record(message)
       this._transactions.unshift(bid)
 
-      // Handle slow mode updates if enabled
-      if (this._slow_mode) {
-        await this._handle_slow_mode_bid_update(pid, value, tid)
+      // A manual bid SUPERSEDES that team's standing maximum: bidding below
+      // your own ceiling means you meant that amount, bidding above it raises
+      // the ceiling to match, and either way the engine stops proxying for you
+      // on this player. `build_auction_claims` implements that by binding the
+      // team's claim to what it actually bid.
+      if (this._election_mode) {
+        await this._settle_if_complete()
       } else {
         this._start_bid_timer()
       }
@@ -278,8 +286,12 @@ export default class Auction {
       return
     }
 
-    // Clear nomination timer and create bid (only in normal mode)
-    if (!this._slow_mode) {
+    // In LIVE mode a nomination opens at $0 unless the commissioner set an
+    // amount. In election mode the nominating team states its own opening bid,
+    // because nominating is bidding and that bid is the team's claim -- forcing
+    // it to $0 would strip the nominator of the position the tie rule awards
+    // them.
+    if (!this._election_mode) {
       this._clear_nomination_timer()
 
       if (user_id !== this._league.commissioner_user_id) {
@@ -297,247 +309,23 @@ export default class Auction {
     )
     this._transactions.unshift(bid)
 
-    // Handle slow mode initialization if enabled
-    if (this._slow_mode) {
-      await this._initialize_slow_mode_nomination(
-        pid,
-        value,
+    if (this._election_mode) {
+      await this._send_nomination_notification({
+        player_id: pid,
+        bid_amount: value,
+        eligible_team_ids: await this._get_outstanding_election_tids(),
         nominating_team_id
-      )
+      })
+      // An uncontested nomination can be complete the instant it opens: if
+      // every other team is ineligible or has already elected -- days ago,
+      // possibly -- the player sells immediately to its nominator.
+      await this._settle_if_complete()
     }
 
     this._locked = false
     this._start_bid_timer()
 
     return true
-  }
-
-  async handle_pass_nomination(message, { user_id, tid }) {
-    if (await this._refresh_league_pause()) return
-
-    if (!this._slow_mode) {
-      this.logger(`pass nomination rejected - not in slow mode`)
-      return
-    }
-
-    const { pid } = message
-    const current = this._transactions[0]
-
-    // Validate pass nomination
-    if (!this._validate_pass_nomination(message, current, tid)) {
-      return
-    }
-
-    this.logger(`received pass for ${pid} from team_id ${tid}`)
-
-    try {
-      // Record pass in Redis state
-      await this._slow_mode_redis.record_team_pass(this._lid, pid, tid)
-
-      // Check completion and handle accordingly
-      return await this._handle_pass_completion_check(pid)
-    } catch (error) {
-      this.logger('error handling pass nomination', error)
-      return false
-    }
-  }
-
-  // ============================================================================
-  // SLOW MODE METHODS
-  // ============================================================================
-
-  async _get_current_slow_mode_state() {
-    if (!this._slow_mode) return null
-
-    const current = this._transactions[0]
-    if (!current || current.type !== transaction_types.AUCTION_BID) {
-      return null
-    }
-
-    try {
-      return await this._slow_mode_redis.get_slow_mode_nomination_state({
-        lid: this._lid,
-        pid: current.pid
-      })
-    } catch (error) {
-      this.logger('error getting slow mode state:', error)
-      return null
-    }
-  }
-
-  async _broadcast_slow_mode_state_update() {
-    if (!this._slow_mode) return
-
-    try {
-      const state = await this._get_current_slow_mode_state()
-      if (state) {
-        this._wss.clients.forEach((client) => {
-          if (
-            client.league_id === this._lid &&
-            client.readyState === WebSocket.OPEN
-          ) {
-            client.send(
-              JSON.stringify({
-                type: 'AUCTION_SLOW_MODE_STATE_UPDATE',
-                payload: {
-                  slow_mode_state: state
-                }
-              })
-            )
-          }
-        })
-      }
-      return true
-    } catch (error) {
-      this.logger('error broadcasting slow mode state update:', error)
-      return false
-    }
-  }
-
-  async _handle_slow_mode_bid_update(pid, value, tid) {
-    this.logger(
-      `updating slow mode state for bid ${value} on ${pid} from team ${tid}`
-    )
-
-    try {
-      // Get player info for position checking
-      const players = await db('player').where('pid', pid)
-      const player_info = players[0]
-
-      // Calculate eligible teams after bid placement
-      const eligible_team_ids = await this._calculate_eligible_teams(
-        value,
-        player_info.primary_position,
-        tid
-      )
-
-      // Update Redis state - this resets all passes on new bid
-      await this._slow_mode_redis.update_current_bid(
-        this._lid,
-        pid,
-        value,
-        tid,
-        eligible_team_ids
-      )
-
-      // Check if nomination is complete
-      const completion_check =
-        await this._slow_mode_redis.check_nomination_complete({
-          lid: this._lid,
-          pid
-        })
-
-      if (completion_check.complete) {
-        this.logger(
-          `nomination complete for ${pid} - reason: ${completion_check.reason}`
-        )
-        await this._complete_slow_mode_nomination(pid)
-      } else {
-        await this._send_bid_update_notification(
-          pid,
-          value,
-          eligible_team_ids,
-          tid
-        )
-        await this._broadcast_slow_mode_state_update()
-      }
-      return true
-    } catch (error) {
-      this.logger('error updating slow mode state for bid', error)
-      return false
-    }
-  }
-
-  async _initialize_slow_mode_nomination(pid, value, nominating_team_id) {
-    this.logger(`initializing slow mode nomination for ${pid}`)
-
-    try {
-      // Calculate eligible teams
-      const players = await db('player').where('pid', pid)
-      const player_info = players[0]
-      const eligible_team_ids = await this._calculate_eligible_teams(
-        value,
-        player_info.primary_position,
-        nominating_team_id
-      )
-
-      // Initialize Redis state
-      await this._slow_mode_redis.initialize_slow_mode_nomination({
-        lid: this._lid,
-        pid,
-        initial_bid: value,
-        eligible_teams: eligible_team_ids,
-        nominating_team_id
-      })
-
-      const completion_check =
-        await this._slow_mode_redis.check_nomination_complete({
-          lid: this._lid,
-          pid
-        })
-
-      if (completion_check.complete) {
-        this.logger(
-          `nomination complete for ${pid} - reason: ${completion_check.reason}`
-        )
-        await this._complete_slow_mode_nomination(pid)
-        return true
-      }
-
-      // Send Discord notification
-      await this._send_nomination_notification({
-        player_id: pid,
-        bid_amount: value,
-        eligible_team_ids,
-        nominating_team_id
-      })
-
-      // Broadcast initial state
-      await this._broadcast_slow_mode_state_update()
-      return true
-    } catch (error) {
-      this.logger('error initializing slow mode nomination', error)
-      // Fall back to normal mode on error
-      this._start_bid_timer()
-      return false
-    }
-  }
-
-  async _complete_slow_mode_nomination(pid) {
-    try {
-      this.logger(`completing slow mode nomination for ${pid}`)
-
-      await this.sold()
-
-      // Clean up Redis state
-      await this._slow_mode_redis.complete_slow_mode_nomination(this._lid, pid)
-
-      // Send Discord notification
-      await this._send_completion_notification(pid)
-
-      return true
-    } catch (error) {
-      this.logger('error completing slow mode nomination', error)
-      return false
-    }
-  }
-
-  async _handle_pass_completion_check(pid) {
-    const completion_check =
-      await this._slow_mode_redis.check_nomination_complete({
-        lid: this._lid,
-        pid
-      })
-
-    if (completion_check.complete) {
-      this.logger(
-        `nomination complete for ${pid} - reason: ${completion_check.reason}`
-      )
-      return await this._complete_slow_mode_nomination(pid)
-    } else {
-      await this._broadcast_slow_mode_state_update()
-      return false
-    }
   }
 
   // ============================================================================
@@ -602,8 +390,9 @@ export default class Auction {
       return false
     }
 
-    // In slow mode, allow commish to nominate at any time
-    if (this._slow_mode && user_id === this._league.commissioner_user_id) {
+    // In election mode there is no nomination clock, so the commissioner can
+    // nominate at any time rather than only after a timer expires.
+    if (this._election_mode && user_id === this._league.commissioner_user_id) {
       return true
     }
 
@@ -878,6 +667,111 @@ export default class Auction {
   }
 
   // ============================================================================
+  // ELECTION MODE
+  // ============================================================================
+
+  /**
+   * Teams the auction is still waiting on for the open player.
+   *
+   * Delegates to the settlement module rather than re-deriving the predicate.
+   * The eligible-set rule advances the entire auction in election mode, so a
+   * second implementation of it here is the exact shape of the disagreement
+   * this redesign removed -- three comparisons of the same budget term lived in
+   * this file, and only one of them was right.
+   */
+  async _get_outstanding_election_tids() {
+    const nomination = await get_active_auction_nomination({ lid: this._lid })
+    if (!nomination) return []
+
+    const players = await db('player').where('pid', nomination.pid)
+    if (!players.length) return []
+
+    const capacities = await get_auction_team_capacities({
+      team_ids: this._tids,
+      league: this._league,
+      player_position: players[0].primary_position,
+      current_price: nomination.current_price
+    })
+
+    const elections = await db('auction_elections')
+      .where({
+        lid: this._lid,
+        season_year: current_season.year,
+        pid: nomination.pid
+      })
+      .whereNull('withdrawn_at')
+      .whereNull('settled_at')
+
+    return get_outstanding_team_ids({
+      capacities,
+      elections,
+      bids: nomination.bids,
+      nominating_team_id: nomination.nominating_team_id
+    })
+  }
+
+  /**
+   * Ask the settlement engine whether the open player is done.
+   *
+   * The socket never settles anything itself. Elections arrive over REST and
+   * bids arrive over this socket, but both land in the one service module that
+   * owns validation, completeness and settlement -- two write paths into the
+   * same state is how the original atomicity bug got in.
+   */
+  async _settle_if_complete() {
+    try {
+      const settlement = await settle_auction_player_if_complete({
+        lid: this._lid,
+        league: this._league
+      })
+
+      if (!settlement) {
+        return this._broadcast_settlement_status()
+      }
+
+      await this._reload_after_settlement()
+      await this._send_completion_notification(settlement)
+
+      this.broadcast({
+        type: 'AUCTION_PROCESSED',
+        payload: {
+          pid: settlement.pid,
+          tid: settlement.winner_tid,
+          player_salary: settlement.price
+        }
+      })
+
+      const nominating_team_id = this.nominating_team_id
+      if (!nominating_team_id) {
+        return this.broadcast({ type: 'AUCTION_COMPLETE' })
+      }
+
+      return this.broadcast({
+        type: 'AUCTION_NOMINATION_INFO',
+        payload: { nominating_team_id }
+      })
+    } catch (error) {
+      this.logger('error settling election', error)
+      return false
+    }
+  }
+
+  async _reload_after_settlement() {
+    await this._load_transactions()
+    await this._calculate_team_capacities()
+  }
+
+  async _broadcast_settlement_status() {
+    this.broadcast({
+      type: 'AUCTION_SETTLEMENT_STATUS',
+      payload: {
+        outstanding_election_tids: await this._get_outstanding_election_tids()
+      }
+    })
+    return true
+  }
+
+  // ============================================================================
   // HELPER METHODS
   // ============================================================================
 
@@ -900,8 +794,14 @@ export default class Auction {
         league: this._league
       })
 
+      // `>=`, not `>`. min_bid is $0 and 36% of historical wins went for
+      // exactly $0, so a team with an open roster spot participates at $0
+      // regardless of remaining budget -- the strict form silently excluded a
+      // $0-cap team from every free player, which matching $0 can win under the
+      // nomination tiebreak. `has_bench_space_for_position` already subsumes
+      // both the roster-space and position-limit terms.
       if (
-        team_roster_obj.availableCap > bid_value &&
+        team_roster_obj.availableCap >= bid_value &&
         team_roster_obj.has_bench_space_for_position(player_pos)
       ) {
         eligible_team_ids.push(team.team_id)
@@ -937,67 +837,37 @@ export default class Auction {
       return true
     } catch (error) {
       this.logger(
-        `Discord notification error for slow mode nomination: ${error.message}`
+        `Discord notification error for auction nomination: ${error.message}`
       )
       return false
     }
   }
 
-  async _send_bid_update_notification(
-    pid,
-    value,
-    eligible_team_ids,
-    current_bidder_tid
-  ) {
+  async _send_completion_notification({ pid, winner_tid, price }) {
+    // Takes the settlement itself rather than reading `_transactions[0]`. The
+    // settled row is written inside the settlement transaction, so the socket's
+    // cached transaction list has not necessarily caught up when this runs --
+    // reading the cache here announced the wrong price for one bid clock.
     try {
-      const bid_update_message = await format_nomination_message({
-        team_id: current_bidder_tid,
+      const format_message = await format_nomination_complete_message({
         player_id: pid,
-        bid_amount: value,
-        eligible_teams: eligible_team_ids,
-        is_nomination: false
+        winning_bid_amount: price,
+        winning_team_id: winner_tid
       })
 
-      if (bid_update_message) {
-        this.logger(bid_update_message)
+      if (format_message) {
+        this.logger(format_message)
         await sendNotifications({
           league: this._league,
-          message: bid_update_message,
+          message: format_message,
           notifyLeague: true
         })
       }
       return true
     } catch (error) {
-      this.logger(`Discord notification error for bid update: ${error.message}`)
+      this.logger('error sending Discord notification for completion', error)
       return false
     }
-  }
-
-  async _send_completion_notification(pid) {
-    const current = this._transactions[0]
-    if (current && current.pid === pid) {
-      try {
-        const format_message = await format_nomination_complete_message({
-          player_id: current.pid,
-          winning_bid_amount: current.player_salary,
-          winning_team_id: current.tid
-        })
-
-        if (format_message) {
-          this.logger(format_message)
-          await sendNotifications({
-            league: this._league,
-            message: format_message,
-            notifyLeague: true
-          })
-        }
-        return true
-      } catch (error) {
-        this.logger('error sending Discord notification for completion', error)
-        return false
-      }
-    }
-    return false
   }
 
   // ============================================================================
@@ -1042,12 +912,6 @@ export default class Auction {
             tid: message.payload.tid
           })
 
-        case 'AUCTION_PASS_NOMINATION':
-          return this.handle_pass_nomination(message.payload, {
-            user_id,
-            tid: message.payload.tid
-          })
-
         case 'KEEPALIVE':
           return
 
@@ -1083,12 +947,9 @@ export default class Auction {
 
   async _send_auction_init(user_id) {
     const nominating_team_id = this.nominating_team_id
-
-    // Get current slow mode state if applicable
-    let slow_mode_state = null
-    if (this._slow_mode) {
-      slow_mode_state = await this._get_current_slow_mode_state()
-    }
+    const outstanding_election_tids = this._election_mode
+      ? await this._get_outstanding_election_tids()
+      : []
 
     this.broadcast({
       type: 'AUCTION_INIT',
@@ -1101,11 +962,13 @@ export default class Auction {
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
         nominating_team_id,
-        complete:
-          !nominating_team_id || this._league.free_agency_live_auction_end,
+        complete: !nominating_team_id,
         pause_on_team_disconnect: this._pause_on_team_disconnect,
-        slow_mode: this._slow_mode,
-        slow_mode_state
+        auction_mode: this._election_mode ? 'election' : 'live',
+        // Team ids only. A standing maximum is a sealed bid and no client ever
+        // receives another team's amount -- the commissioner's included, since
+        // in this league the commissioner is a competing manager.
+        outstanding_election_tids
       }
     })
   }
@@ -1133,11 +996,15 @@ export default class Auction {
 
   async _load_league() {
     this._league = await getLeague({ lid: this._lid })
-    this._slow_mode = this._league?.is_free_agency_auction_slow_mode || false
-    if (this._slow_mode) {
+    this._election_mode =
+      this._league?.is_auction_election_mode_enabled || false
+    if (this._election_mode) {
+      // Election mode has no clock to pause. The auction advances on elections
+      // arriving over REST, so a socket-level pause would stop nothing and
+      // would only hide the board from whoever is connected.
       this._paused = false
     }
-    this.logger(`slow mode enabled: ${this._slow_mode}`)
+    this.logger(`election mode enabled: ${this._election_mode}`)
 
     await this._refresh_league_pause()
   }
@@ -1145,15 +1012,15 @@ export default class Auction {
   /**
    * Reads the league-wide pause into its OWN flag.
    *
-   * `_paused` cannot carry this. Slow mode force-clears `_paused` on every
+   * `_paused` cannot carry this. Election mode force-clears `_paused` on every
    * `_load_league` (three lines above), so a league pause stored there would be
-   * silently dropped the moment slow mode is on -- which is precisely when the
-   * auction runs unattended for days and a pause matters most.
+   * silently dropped the moment election mode is on -- which is precisely when
+   * the auction runs unattended for days and a pause matters most.
    *
    * `_paused` is the auction's own clock; `_league_paused` is the league's. The
    * auction is additionally driven into its own paused state here so the timers
    * stop and every connected client sees AUCTION_PAUSED, but the two flags stay
-   * separate because only one of them survives slow mode.
+   * separate because only one of them survives election mode.
    *
    * Re-read rather than cached at the three write paths below: the commissioner
    * pauses over HTTP, in a different process, so a flag set at connect time
@@ -1190,16 +1057,15 @@ export default class Auction {
   }
 
   async _start_nomination_timer() {
-    // Don't start nomination timer in slow mode
-    if (this._slow_mode) {
-      this.logger('nomination timer suspended in slow mode')
+    if (this._election_mode) {
+      this.logger('nomination timer suspended in election mode')
       return
     }
 
     this._nomination_timer_expired = false
     this._clear_nomination_timer()
 
-    this._nomination_timer = setTimeout(() => {
+    this._nomination_timer = this._timers.set_timeout(() => {
       this._nomination_timer_expired = true
     }, config.nominationTimer)
 
@@ -1207,23 +1073,27 @@ export default class Auction {
   }
 
   _clear_nomination_timer() {
-    if (this._nomination_timer) clearTimeout(this._nomination_timer)
+    if (this._nomination_timer) {
+      this._timers.clear_timeout(this._nomination_timer)
+    }
   }
 
   _start_bid_timer() {
-    // Don't start bid timer in slow mode
-    if (this._slow_mode) {
-      this.logger('bid timer suspended in slow mode')
+    if (this._election_mode) {
+      this.logger('bid timer suspended in election mode')
       return
     }
 
     this._clear_bid_timer()
     // padded by one second for connection latency
-    this._bid_timer = setTimeout(() => this.sold(), config.bidTimer + 1000)
+    this._bid_timer = this._timers.set_timeout(
+      () => this.sold(),
+      config.bidTimer + 1000
+    )
   }
 
   _clear_bid_timer() {
-    if (this._bid_timer) clearTimeout(this._bid_timer)
+    if (this._bid_timer) this._timers.clear_timeout(this._bid_timer)
   }
 
   // ============================================================================

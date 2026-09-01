@@ -1,9 +1,9 @@
 [
   {
     "path": "libs-server/create-league.mjs",
-    "column": "free_agency_live_auction_start",
+    "column": "free_agency_period_start",
     "kind": "retyped_read_in_epoch_arithmetic",
-    "reason": "Not a column read. `league_params` is the caller's INPUT bag, which takes epoch seconds by contract -- every test fixture and the league-create route pass epoch -- and this file converts at the write boundary with `epoch_to_timestamptz` on all six temporal params (lines 84-102). So the `dayjs.unix()` at line 19 reads the parameter in its declared unit to enforce the Article XII section 2 auction window, not the retyped column. Re-verified 2026-08-08 against the conversion at line 99."
+    "reason": "Not a column read. `league_params` is the caller's INPUT bag, which takes epoch seconds by contract -- every test fixture and the league-create route pass epoch -- and this file converts at the write boundary with `epoch_to_timestamptz` on all six temporal params (lines 84-102). So the `dayjs.unix()` at line 19 reads the parameter in its declared unit to enforce the Article XII section 2 auction window (the bound moved onto free_agency_period_start on 2026-09-01, when the auction became the whole free agency period and the separate live-auction timestamps were dropped), not the retyped column. Re-verified 2026-08-08 against the conversion at line 99."
   },
   {
     "path": "test/api.super-priority.spec.mjs",

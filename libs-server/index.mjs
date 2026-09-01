@@ -182,7 +182,6 @@ export {
   RedisCacheAdapter,
   redis_cache
 } from './redis_adapter.mjs'
-export * as auction_slow_mode_redis from './auction-slow-mode-redis.mjs'
 export * as auction_elections from './auction-elections.mjs'
 export * as auction_settlement from './auction-settlement.mjs'
 export { resolve_auction_player } from './resolve-auction-player.mjs'

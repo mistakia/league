@@ -199,11 +199,6 @@ const seed_full_league = async () => {
     .update({
       season_started_at: t.subtract(20, 'weeks').toDate(),
       free_agency_period_start: t.subtract(6, 'weeks').toDate(),
-      free_agency_live_auction_start: t.subtract(5, 'weeks').toDate(),
-      free_agency_live_auction_end: t
-        .subtract(5, 'weeks')
-        .add(1, 'day')
-        .toDate(),
       free_agency_period_end: t.subtract(2, 'weeks').toDate(),
       restricted_free_agency_period_start: t.subtract(4, 'weeks').toDate(),
       restricted_free_agency_first_window_at: t
@@ -390,9 +385,10 @@ describe('context documents', function () {
         'Rookie Draft Begins',
         'Rookie Draft Ends',
         'Extension Deadline',
+        // Two rows, not four: the auction runs the whole free agency period, so
+        // its beginning and end ARE these two instants and there is no separate
+        // live-auction window to label.
         'Free Agency Period Begins',
-        'Free Agency Live Auction',
-        'Free Agency Auction Ends',
         'Free Agency Period Ends',
         'Restricted Free Agency Begins',
         'Restricted Free Agency First Window Opens',

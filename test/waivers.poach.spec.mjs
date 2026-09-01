@@ -39,7 +39,7 @@ describe('API /waivers - poach', function () {
 
     await knex('seasons')
       .update({
-        free_agency_live_auction_start: regular_season_start
+        free_agency_period_start: regular_season_start
           .subtract('1', 'week')
           .toDate()
       })

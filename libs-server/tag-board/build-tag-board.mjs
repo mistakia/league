@@ -1199,8 +1199,6 @@ const CALENDAR_EVENTS = [
   ['Restricted Free Agency Ends', 'restricted_free_agency_period_end'],
   ['Rookie Draft', 'draft_start'],
   ['Free Agency Period Begins', 'free_agency_period_start'],
-  ['Free Agency Auction Begins', 'free_agency_live_auction_start'],
-  ['Free Agency Auction Ends', 'free_agency_live_auction_end'],
   ['Free Agency Period Ends', 'free_agency_period_end'],
   ['Trade Deadline', 'trade_deadline_at']
 ]

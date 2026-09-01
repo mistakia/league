@@ -81,17 +81,12 @@ router.post('/?', async (req, res) => {
     }
 
     const league = await getLeague({ lid: leagueId })
-    if (
-      !current_season.is_regular_season &&
-      league.free_agency_live_auction_start
-    ) {
+    if (!current_season.is_regular_season && league.free_agency_period_start) {
       const faPeriod = get_free_agent_period(league)
-      // Sanctuary period 3 (Amendment XXXV): start of FA Period through
-      // conclusion of FA Auction. Falls back to period end when auction-end
-      // is not set.
-      const sanctuary_end =
-        faPeriod.free_agency_live_auction_end || faPeriod.end
-      if (current_season.now.isBetween(faPeriod.start, sanctuary_end)) {
+      // Sanctuary period 3 (Amendment XXXV): start of the free agency period
+      // through the conclusion of the auction. The auction runs the whole
+      // period, so its conclusion is the period end.
+      if (current_season.now.isBetween(faPeriod.start, faPeriod.end)) {
         return res.status(400).send({ error: 'Player on Sanctuary Period' })
       }
     }

@@ -265,7 +265,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       await knex('seasons')
         .where({ lid: 1, season_year: current_season.year })
         .update({
-          free_agency_live_auction_start:
+          free_agency_period_start:
             free_agency_auction_regular_season_start.toDate(),
           // Draft completed before FA. The hard end has to move with the
           // start: it is a stated column now rather than a projection off the

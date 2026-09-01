@@ -107,7 +107,7 @@ export default function LeagueHomePage({
 
   const notice_items = [...rfa_notices]
 
-  if (league.free_agency_live_auction_start) {
+  if (league.free_agency_period_start) {
     const fa_period = get_free_agent_period(league)
     if (current_season.now.isBefore(fa_period.start)) {
       notice_items.push(

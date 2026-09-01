@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
@@ -8,277 +8,247 @@ import Button from '@components/button'
 import ButtonGroup from '@components/button-group'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
-import AuctionSlowModeStatus from '@components/auction-slow-mode-status'
-import AuctionPassButton from '@components/auction-pass-button'
+import AuctionSettlementStatus from '@components/auction-settlement-status'
+import AuctionElectionControl from '@components/auction-election-control'
 
 import './auction-main-bid.styl'
 
-export default class AuctionMainBid extends React.Component {
-  constructor(props) {
-    super(props)
+// Converted from a class while being edited, deliberately.
+// test/app.connected-component-props.spec.mjs states in its own header that it
+// is blind to connected components written as classes -- so the gate that
+// exists to catch exactly this edit (dropping a prop its children needed) could
+// not see this file at all while it was one.
+export default function AuctionMainBid({
+  bid,
+  availableCap,
+  nominated_pid,
+  bidValue,
+  showNotification,
+  nominate,
+  selected_pid,
+  isPaused,
+  isComplete,
+  isLocked,
+  isEligible,
+  isAboveCap,
+  isNominating,
+  isCommish,
+  nominating_team_id,
+  timer,
+  isWinningBid,
+  league,
+  isStarted,
+  free_agency_period_start,
+  auction_mode
+}) {
+  const [value, set_value] = useState(0)
+  const previous = useRef({ bidValue, nominated_pid })
 
-    this.state = {
-      value: 0
-    }
-  }
+  // Election mode carries no clock of any kind, so there is no timer to render
+  // and no bid clock to run down. Live mode is the open-outcry path.
+  const is_election_mode = auction_mode === 'election'
 
-  isValid = (value) => {
-    if (value !== 0 && !value) {
-      return false
-    }
+  const is_valid = useCallback(
+    (candidate) => {
+      if (candidate !== 0 && !candidate) return false
+      if (!Number.isInteger(candidate)) return false
+      if (candidate > availableCap) return false
+      if (nominated_pid && candidate <= bidValue) return false
+      if (candidate < 0) return false
+      return true
+    },
+    [availableCap, nominated_pid, bidValue]
+  )
 
-    if (!Number.isInteger(value)) {
-      return false
-    }
-
-    if (value > this.props.availableCap) {
-      return false
-    }
-
-    if (this.props.nominated_pid && value <= this.props.bidValue) {
-      return false
-    } else if (value < 0) {
-      return false
-    }
-
-    return true
-  }
-
-  handleChange = (event) => {
-    const value = event.target.value ? Number(event.target.value) : ''
-    if (value && !Number.isInteger(value)) {
-      return
-    }
-
-    if (value && value > this.props.availableCap) {
-      return
-    }
-
-    this.setState({ value })
-  }
-
-  handleUpClick = () => {
-    const value = this.state.value + 1
-    if (!this.isValid(value)) {
-      return
-    }
-    this.setState({ value })
-  }
-
-  handleDownClick = () => {
-    const value = this.state.value - 1
-    if (!this.isValid(value)) {
-      return
-    }
-    this.setState({ value })
-  }
-
-  handleClickBid = () => {
-    if (!this.isValid(this.state.value)) {
-      this.props.showNotification({
-        message: 'missing or invalid bid amount',
-        severity: 'warning'
-      })
-      return
-    }
-
-    this.props.bid(this.state.value)
-  }
-
-  handleClickNominate = () => {
-    if (!this.isValid(this.state.value)) {
-      this.props.showNotification({
-        message: 'missing or invalid bid amount',
-        severity: 'warning'
-      })
-      return
-    }
-
-    this.props.nominate(this.state.value)
-  }
-
-  componentDidUpdate = ({ bidValue, nominated_pid }, { value }) => {
-    if (!nominated_pid && this.props.nominated_pid) {
+  useEffect(() => {
+    const was = previous.current
+    if (!was.nominated_pid && nominated_pid) {
       // new player nominated
-      this.setState({ value: this.props.bidValue + 1 })
-    } else if (!this.props.nominated_pid && nominated_pid) {
+      set_value(bidValue + 1)
+    } else if (!nominated_pid && was.nominated_pid) {
       // waiting on nomination
-      this.setState({ value: 0 })
-    } else if (this.props.bidValue > bidValue) {
+      set_value(0)
+    } else if (bidValue > was.bidValue) {
       // received new bid
-      this.setState({ value: this.props.bidValue + 1 })
+      set_value(bidValue + 1)
     }
+    previous.current = { bidValue, nominated_pid }
+  }, [bidValue, nominated_pid])
+
+  const handle_change = (event) => {
+    const next = event.target.value ? Number(event.target.value) : ''
+    if (next && !Number.isInteger(next)) return
+    if (next && next > availableCap) return
+    set_value(next)
   }
 
-  render = () => {
-    const {
-      isPaused,
-      isComplete,
-      isLocked,
-      isEligible,
-      isAboveCap,
-      nominated_pid,
-      isNominating,
-      selected_pid,
-      isCommish,
-      nominating_team_id,
-      timer,
-      isWinningBid,
-      league,
-      isStarted,
-      free_agency_live_auction_start,
-      is_slow_mode
-    } = this.props
+  const handle_up_click = () => {
+    const next = value + 1
+    if (!is_valid(next)) return
+    set_value(next)
+  }
 
-    const classNames = []
-    let action = null
-    let disabled = false
-    if (!league.free_agency_live_auction_start || !isStarted || isComplete) {
-      action = null
-    } else if (isPaused) {
-      action = null
-    } else if (isLocked) {
+  const handle_down_click = () => {
+    const next = value - 1
+    if (!is_valid(next)) return
+    set_value(next)
+  }
+
+  const handle_click_bid = () => {
+    if (!is_valid(value)) {
+      showNotification({
+        message: 'missing or invalid bid amount',
+        severity: 'warning'
+      })
+      return
+    }
+    bid(value)
+  }
+
+  const handle_click_nominate = () => {
+    if (!is_valid(value)) {
+      showNotification({
+        message: 'missing or invalid bid amount',
+        severity: 'warning'
+      })
+      return
+    }
+    nominate(value)
+  }
+
+  const classNames = []
+  let action = null
+  let disabled = false
+  if (!league.free_agency_period_start || !isStarted || isComplete) {
+    action = null
+  } else if (isPaused) {
+    action = null
+  } else if (isLocked) {
+    disabled = true
+    action = (
+      <Button small disabled>
+        Locked
+      </Button>
+    )
+  } else if (nominated_pid) {
+    if (isWinningBid) {
+      disabled = true
+      classNames.push('winning')
+      action = (
+        <Button small disabled>
+          Winning Bid
+        </Button>
+      )
+    } else if (isAboveCap) {
       disabled = true
       action = (
         <Button small disabled>
-          Locked
+          Exceeded CAP
         </Button>
       )
-    } else if (nominated_pid) {
-      if (isWinningBid) {
-        disabled = true
-        classNames.push('winning')
-        action = (
-          <Button small disabled>
-            Winning Bid
-          </Button>
-        )
-      } else if (isAboveCap) {
-        disabled = true
-        action = (
-          <Button small disabled>
-            Exceeded CAP
-          </Button>
-        )
-      } else if (!isEligible) {
-        disabled = true
-        action = (
-          <Button small disabled>
-            Ineligible
-          </Button>
-        )
-      } else {
-        action = (
-          <Button small onClick={this.handleClickBid}>
-            Bid ${this.state.value}
-          </Button>
-        )
-      }
-    } else if (isNominating || isCommish) {
-      disabled = !selected_pid
-      action = (
-        <Button
-          small
-          disabled={!selected_pid}
-          onClick={this.handleClickNominate}
-        >
-          Nominate ${this.state.value}
-        </Button>
-      )
-    } else {
+    } else if (!isEligible) {
       disabled = true
-      action = <LoadingButton disabled variant='contained' loading />
-    }
-
-    let main
-    if (!league.free_agency_live_auction_start) {
-      main = <div className='auction__text'>Auction is not scheduled</div>
-    } else if (isComplete) {
-      main = <div className='auction__text'>Auction is complete</div>
-    } else if (!isStarted) {
-      main = (
-        <div className='auction__text'>
-          Auction will begin on{' '}
-          {free_agency_live_auction_start.format('dddd, MMMM D YYYY, ha')}
-        </div>
+      action = (
+        <Button small disabled>
+          Ineligible
+        </Button>
       )
-    } else if (isPaused) {
-      main = <div className='auction__text'>Auction is paused</div>
-    } else if (nominated_pid) {
-      main = <AuctionNominatedPlayer pid={nominated_pid} />
-    } else if (selected_pid) {
-      main = <AuctionNominatedPlayer pid={selected_pid} />
-    } else if (isNominating) {
-      main = <div className='auction__text'>Your turn to nominate a player</div>
     } else {
-      main = (
-        <div className='auction__text'>
-          Waiting for a nomination by{' '}
-          <TeamName tid={nominating_team_id} abbrv />
-        </div>
+      action = (
+        <Button small onClick={handle_click_bid}>
+          Bid ${value}
+        </Button>
       )
     }
+  } else if (isNominating || isCommish) {
+    disabled = !selected_pid
+    action = (
+      <Button small disabled={!selected_pid} onClick={handle_click_nominate}>
+        Nominate ${value}
+      </Button>
+    )
+  } else {
+    disabled = true
+    action = <LoadingButton disabled variant='contained' loading />
+  }
 
-    return (
-      <div className='auction__bar'>
-        <div className='auction__bar-body'>
-          <div className='auction__bid-info'>
-            <AuctionSlowModeStatus />
-            {main}
-          </div>
-          {isStarted && !isComplete && !isPaused && (
-            <div className='auction__bid-actions'>
-              {!is_slow_mode && (
-                <div className='auction__main-timer'>
-                  <Timer
-                    expiration={timer}
-                    alert={isNominating || Boolean(nominated_pid)}
-                  />
-                </div>
-              )}
-              <div className='auction__main-action'>
-                {/* `small` and `disabled` are on each button rather than on
-                    the group. The group propagates nothing — see
-                    button-group.js. */}
-                <ButtonGroup className={classNames.join(' ')}>
-                  {(!nominated_pid || !isWinningBid) && (
-                    <Button
-                      small
-                      disabled={disabled}
-                      onClick={this.handleDownClick}
-                    >
-                      <Icon name='remove' />
-                    </Button>
-                  )}
-                  {action}
-                  {(!nominated_pid || !isWinningBid) && (
-                    <Button
-                      small
-                      disabled={disabled}
-                      onClick={this.handleUpClick}
-                    >
-                      <Icon name='add' />
-                    </Button>
-                  )}
-                </ButtonGroup>
-                {is_slow_mode && nominated_pid && !disabled && (
-                  <AuctionPassButton />
-                )}
-              </div>
-              <div className='auction__main-input'>
-                <label>Enter Bid</label>
-                <input
-                  type='number'
-                  value={this.state.value}
-                  onChange={this.handleChange}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+  let main
+  if (!league.free_agency_period_start) {
+    main = <div className='auction__text'>Auction is not scheduled</div>
+  } else if (isComplete) {
+    main = <div className='auction__text'>Auction is complete</div>
+  } else if (!isStarted) {
+    main = (
+      <div className='auction__text'>
+        Auction will begin on{' '}
+        {free_agency_period_start.format('dddd, MMMM D YYYY, ha')}
+      </div>
+    )
+  } else if (isPaused) {
+    main = <div className='auction__text'>Auction is paused</div>
+  } else if (nominated_pid) {
+    main = <AuctionNominatedPlayer pid={nominated_pid} />
+  } else if (selected_pid) {
+    main = <AuctionNominatedPlayer pid={selected_pid} />
+  } else if (isNominating) {
+    main = <div className='auction__text'>Your turn to nominate a player</div>
+  } else {
+    main = (
+      <div className='auction__text'>
+        Waiting for a nomination by <TeamName tid={nominating_team_id} abbrv />
       </div>
     )
   }
+
+  return (
+    <div className='auction__bar'>
+      <div className='auction__bar-body'>
+        <div className='auction__bid-info'>
+          <AuctionSettlementStatus />
+          {main}
+        </div>
+        {isStarted && !isComplete && !isPaused && (
+          <div className='auction__bid-actions'>
+            {!is_election_mode && (
+              <div className='auction__main-timer'>
+                <Timer
+                  expiration={timer}
+                  alert={isNominating || Boolean(nominated_pid)}
+                />
+              </div>
+            )}
+            <div className='auction__main-action'>
+              {/* `small` and `disabled` are on each button rather than on
+                  the group. The group propagates nothing — see
+                  button-group.js. */}
+              <ButtonGroup className={classNames.join(' ')}>
+                {(!nominated_pid || !isWinningBid) && (
+                  <Button small disabled={disabled} onClick={handle_down_click}>
+                    <Icon name='remove' />
+                  </Button>
+                )}
+                {action}
+                {(!nominated_pid || !isWinningBid) && (
+                  <Button small disabled={disabled} onClick={handle_up_click}>
+                    <Icon name='add' />
+                  </Button>
+                )}
+              </ButtonGroup>
+              {/* Where the pass button used to sit. A decline is the same
+                  action the pass was, and a maximum is the one it never had. */}
+              {is_election_mode && nominated_pid && (
+                <AuctionElectionControl pid={nominated_pid} />
+              )}
+            </div>
+            <div className='auction__main-input'>
+              <label>Enter Bid</label>
+              <input type='number' value={value} onChange={handle_change} />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 AuctionMainBid.propTypes = {
@@ -301,6 +271,6 @@ AuctionMainBid.propTypes = {
   isWinningBid: PropTypes.bool,
   league: PropTypes.object,
   isStarted: PropTypes.bool,
-  free_agency_live_auction_start: PropTypes.object,
-  is_slow_mode: PropTypes.bool
+  free_agency_period_start: PropTypes.object,
+  auction_mode: PropTypes.string
 }

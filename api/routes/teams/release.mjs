@@ -136,7 +136,7 @@ router.post('/?', async (req, res) => {
     const league = await getLeague({ lid: leagueId })
     const is_commish = league.commissioner_user_id === req.auth.userId
 
-    if (league.free_agency_live_auction_start) {
+    if (league.free_agency_period_start) {
       const rosterRow = await getRoster({ tid })
       const roster = new Roster({ roster: rosterRow, league })
       if (!roster.has(pid)) {

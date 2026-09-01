@@ -20,22 +20,19 @@ const map_state_to_props = createSelector(
   (app, league, auction) => {
     const faPeriod = get_free_agent_period(league)
     const now = dayjs()
-    const free_agency_live_auction_start = league.free_agency_live_auction_start
-      ? dayjs(league.free_agency_live_auction_start)
-      : null
-    const auction_is_ended = now.isAfter(faPeriod.end)
+    // The free agency period IS the auction, so its two boundaries are the
+    // auction's. There is no separate scheduled start days later, and no
+    // auction-end instant distinct from the period end.
     const auction_is_started =
-      free_agency_live_auction_start &&
-      free_agency_live_auction_start.isBefore(now)
+      Boolean(faPeriod.start) && faPeriod.start.isBefore(now)
+    const auction_is_ended = now.isAfter(faPeriod.end)
 
     return {
       isPending: app.isPending,
       is_hosted: Boolean(league.is_hosted),
       isCommish: app.userId === league.commissioner_user_id,
       is_auction_live:
-        auction_is_started &&
-        !(auction.isComplete || auction_is_ended) &&
-        !league.free_agency_live_auction_end,
+        auction_is_started && !(auction.isComplete || auction_is_ended),
       is_logged_in: Boolean(app.userId)
     }
   }

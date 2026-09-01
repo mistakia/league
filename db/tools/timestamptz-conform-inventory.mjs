@@ -140,18 +140,6 @@ export const cluster_columns = [
   },
   {
     table: 'seasons',
-    column: 'free_agency_live_auction_start',
-    audit: false,
-    rename: null
-  },
-  {
-    table: 'seasons',
-    column: 'free_agency_live_auction_end',
-    audit: false,
-    rename: null
-  },
-  {
-    table: 'seasons',
     column: 'restricted_free_agency_period_start',
     audit: false,
     rename: null

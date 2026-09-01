@@ -419,8 +419,7 @@ router.post('/?', async (req, res) => {
         // reject active roster waivers before start of free agenct period
         if (
           type === waiver_types.FREE_AGENCY &&
-          (!league.free_agency_live_auction_start ||
-            dayjs().isBefore(faPeriod.start))
+          (!league.free_agency_period_start || dayjs().isBefore(faPeriod.start))
         ) {
           return res
             .status(400)
@@ -458,7 +457,7 @@ router.post('/?', async (req, res) => {
               !super_priority &&
               league.draft_start &&
               dayjs().isAfter(draft_dates.waiverEnd) &&
-              (!league.free_agency_live_auction_start ||
+              (!league.free_agency_period_start ||
                 dayjs().isBefore(faPeriod.start))
             ) {
               const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
@@ -473,7 +472,7 @@ router.post('/?', async (req, res) => {
             // Skip this check for super priority claims which can be made anytime after poaching
             if (
               !super_priority &&
-              (!league.free_agency_live_auction_start ||
+              (!league.free_agency_period_start ||
                 dayjs().isBefore(faPeriod.start))
             ) {
               return res.status(400).send({

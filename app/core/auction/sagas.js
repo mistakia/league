@@ -11,6 +11,11 @@ import {
   getPlayersForWatchlist
 } from '@core/selectors'
 import { auction_actions } from './actions'
+import {
+  api_get_auction_elections,
+  api_post_auction_election,
+  api_delete_auction_election
+} from '@core/api'
 import { send } from '@core/ws'
 import { get_eligible_slots } from '#libs-shared'
 import {
@@ -201,19 +206,23 @@ export function toggle_pause_on_team_disconnect() {
   send({ type: auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT })
 }
 
-export function* submit_pass() {
-  const { userId, teamId } = yield select(get_app)
-  const { nominated_pid } = yield select(get_auction_state)
+export function* load_auction_elections({ payload }) {
+  yield call(api_get_auction_elections, payload)
+}
 
-  const message = {
-    type: auction_actions.AUCTION_PASS_NOMINATION,
-    payload: {
-      user_id: userId,
-      tid: teamId,
-      pid: nominated_pid
-    }
-  }
-  send(message)
+export function* submit_auction_election({ payload }) {
+  yield call(api_post_auction_election, payload)
+}
+
+export function* withdraw_auction_election({ payload }) {
+  yield call(api_delete_auction_election, payload)
+}
+
+export function* reload_auction_elections() {
+  const { leagueId } = yield select(get_current_league)
+  const { teamId } = yield select(get_app)
+  if (!leagueId || !teamId) return
+  yield call(api_get_auction_elections, { leagueId, teamId })
 }
 
 //= ====================================
@@ -270,15 +279,49 @@ export function* watch_auction_paused() {
   yield takeLatest(auction_actions.AUCTION_PAUSED, sound_notification)
 }
 
+export function* watch_load_auction_elections() {
+  yield takeLatest(
+    auction_actions.LOAD_AUCTION_ELECTIONS,
+    load_auction_elections
+  )
+}
+
+export function* watch_submit_auction_election() {
+  yield takeLatest(
+    auction_actions.SUBMIT_AUCTION_ELECTION,
+    submit_auction_election
+  )
+}
+
+export function* watch_withdraw_auction_election() {
+  yield takeLatest(
+    auction_actions.WITHDRAW_AUCTION_ELECTION,
+    withdraw_auction_election
+  )
+}
+
+// A settled election is removed from the standing list and gains an outcome, and
+// the server owns both. Refetching the team's own rows after a write is cheaper
+// and less error-prone than mirroring the settlement rules in the reducer.
+export function* watch_post_auction_election_fulfilled() {
+  yield takeLatest(
+    auction_actions.POST_AUCTION_ELECTION_FULFILLED,
+    reload_auction_elections
+  )
+}
+
+export function* watch_delete_auction_election_fulfilled() {
+  yield takeLatest(
+    auction_actions.DELETE_AUCTION_ELECTION_FULFILLED,
+    reload_auction_elections
+  )
+}
+
 export function* watch_auction_toggle_pause_on_team_disconnect() {
   yield takeLatest(
     auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT,
     toggle_pause_on_team_disconnect
   )
-}
-
-export function* watch_auction_pass_nomination() {
-  yield takeLatest(auction_actions.AUCTION_PASS_NOMINATION, submit_pass)
 }
 
 //= ====================================
@@ -299,5 +342,9 @@ export const auction_sagas = [
   fork(watch_auction_start),
   fork(watch_auction_paused),
   fork(watch_auction_toggle_pause_on_team_disconnect),
-  fork(watch_auction_pass_nomination)
+  fork(watch_load_auction_elections),
+  fork(watch_submit_auction_election),
+  fork(watch_withdraw_auction_election),
+  fork(watch_post_auction_election_fulfilled),
+  fork(watch_delete_auction_election_fulfilled)
 ]

@@ -25,7 +25,8 @@ const map_state_to_props = createSelector(
     const faPeriod = get_free_agent_period(league)
     const now = dayjs()
     const isEnded = now.isAfter(faPeriod.end)
-    const isStarted = faPeriod.free_agency_live_auction_start.isBefore(now)
+    // The period opening IS the auction opening.
+    const isStarted = Boolean(faPeriod.start) && faPeriod.start.isBefore(now)
 
     return {
       isPaused: auction.isPaused,
@@ -45,9 +46,9 @@ const map_state_to_props = createSelector(
       nominated_pid: auction.nominated_pid,
       isEligible,
       isStarted,
-      free_agency_live_auction_start: faPeriod.free_agency_live_auction_start,
+      free_agency_period_start: faPeriod.start,
       league,
-      is_slow_mode: auction.is_slow_mode
+      auction_mode: auction.auction_mode
     }
   }
 )

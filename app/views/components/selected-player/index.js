@@ -43,13 +43,11 @@ const map_state_to_props = createSelector(
     )
 
     const free_agency_period_dates = get_free_agent_period(league)
-    const is_before_live_auction_end =
-      current_season.now.isBefore(free_agency_period_dates.end) &&
-      (free_agency_period_dates.free_agency_live_auction_end
-        ? current_season.now.isBefore(
-            free_agency_period_dates.free_agency_live_auction_end
-          )
-        : true)
+    // The auction concludes when the free agency period does, so one
+    // comparison replaces the pair.
+    const is_before_live_auction_end = current_season.now.isBefore(
+      free_agency_period_dates.end
+    )
 
     return {
       player_map,

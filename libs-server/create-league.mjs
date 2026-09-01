@@ -12,13 +12,13 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
   const default_league_params = create_default_league({ commissioner_user_id })
   const league_params = Object.assign({}, default_league_params, params)
 
-  // Article XII §2 (Amendment XLVII): the Free Agency Live Auction must be
-  // scheduled no earlier than ten (10) days and no later than two (2) hours
-  // prior to the start of the Regular Season.
-  if (league_params.free_agency_live_auction_start) {
-    const auction_start = dayjs.unix(
-      league_params.free_agency_live_auction_start
-    )
+  // Article XII §2 (Amendment XLVII): the free agency auction must be scheduled
+  // no earlier than ten (10) days and no later than two (2) hours prior to the
+  // start of the Regular Season. The auction now runs the whole free agency
+  // period rather than starting at its own instant, so the bound applies to the
+  // period start -- same rule, same citation, one fewer timestamp.
+  if (league_params.free_agency_period_start) {
+    const auction_start = dayjs.unix(league_params.free_agency_period_start)
     const regular_season_first_day = current_season.regular_season_start.add(
       1,
       'week'
@@ -27,7 +27,7 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
     const latest = regular_season_first_day.subtract(2, 'hours')
     if (auction_start.isBefore(earliest) || auction_start.isAfter(latest)) {
       throw new Error(
-        'free_agency_live_auction_start must be no earlier than 10 days and no later than 2 hours prior to the start of the Regular Season (Article XII §2)'
+        'free_agency_period_start must be no earlier than 10 days and no later than 2 hours prior to the start of the Regular Season (Article XII §2)'
       )
     }
   }
@@ -94,6 +94,16 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
       league_params.restricted_free_agency_period_end
     ),
 
+    // The free agency period IS the auction. Persisted here because the Article
+    // XII Section 2 bound above now validates it, and a validated field the
+    // insert dropped would be checked and then thrown away.
+    free_agency_period_start: epoch_to_timestamptz(
+      league_params.free_agency_period_start
+    ),
+    free_agency_period_end: epoch_to_timestamptz(
+      league_params.free_agency_period_end
+    ),
+
     extension_deadline_at: epoch_to_timestamptz(
       league_params.extension_deadline_at
     ),
@@ -111,9 +121,6 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
       league_params.rookie_draft_end_at
     ),
 
-    free_agency_live_auction_start: epoch_to_timestamptz(
-      league_params.free_agency_live_auction_start
-    ),
     trade_deadline_at: epoch_to_timestamptz(league_params.trade_deadline_at)
   })
 

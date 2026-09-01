@@ -69,7 +69,6 @@ export default async function (knex, league_params = {}) {
     draft_pick_interval: 3,
     draft_hour_min: 11,
     draft_hour_max: 24,
-    free_agency_live_auction_start: null,
     trade_deadline_at: current_season.regular_season_start
       .add('12', 'weeks')
       .unix(),

@@ -110,11 +110,14 @@ export default async function ({
 
     // check if during free agency period for veterans
     if (player_row.nfl_draft_year !== current_season.year) {
-      if (league.free_agency_live_auction_start) {
+      if (league.free_agency_period_start) {
         const faPeriod = get_free_agent_period(league)
-        if (
-          current_season.now.isBefore(faPeriod.free_agency_live_auction_start)
-        ) {
+        // The auction runs the WHOLE period now, so direct veteran signing is
+        // closed for the whole period rather than only until a scheduled
+        // auction start. That is a real behavior change and the intended one:
+        // the old shape left a window in which a manager could simply sign a
+        // player instead of bidding on them.
+        if (current_season.now.isBefore(faPeriod.start)) {
           throw new Error('veteran free agency not open')
         }
 
