@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-09-01 against league_production
 --
 -- Void 18 PrizePicks prop selection rows that carry a settled result graded
 -- against a game the bet was never offered on. Each row's market had its
