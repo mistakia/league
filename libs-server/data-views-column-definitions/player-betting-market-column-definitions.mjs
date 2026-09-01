@@ -13,6 +13,7 @@ import {
   week_scope_alias_key,
   correlate_week_scoped_cte
 } from '#libs-server/data-views/week-scoped-cte.mjs'
+import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // The column's GRAIN, derived rather than passed.
@@ -65,6 +66,35 @@ const resolve_market_week_scope = ({
   ]
 
   return { nfl_week_ids, market_season_years }
+}
+
+// The player cell maps to a market selection through the TEAM the player was on
+// that year, not through player.current_nfl_team -- the current roster
+// misattributes every past-season row (a 2024 line would render for the team he
+// plays for in 2026, or nothing once the week correlation forces the right year
+// and the current team has no market in it). Register the player_year_teams
+// bridge the way game_opponent does: it materializes (pid, year, team) from the
+// REG gamelogs, and the team joins below reference player_year_teams.team.
+//
+// The bridge's year is anchored to the season(s) the resolved week scope names,
+// so a view-level nfl_week list (no params.year) does not fall back to
+// current_season.year. Registration is a no-op once applied (applied_bridges),
+// so the first team column in a query wins and the rest reuse the join.
+const register_team_attribution_bridge = ({
+  data_view_options,
+  params,
+  market_season_years
+}) => {
+  const query_context = data_view_options?.query_context
+  if (!query_context) return
+  apply_bridge({
+    query_context,
+    from: 'player_year',
+    to: 'team_year',
+    mode: 'default',
+    params: { ...params, year: market_season_years },
+    source: null
+  })
 }
 
 const get_default_params = ({
@@ -490,20 +520,26 @@ const team_betting_market_join = ({
   })
 
   query[join_func](table_name, function () {
+    // The player's team for the cell's year, not player.current_nfl_team: a
+    // team-game market selection is keyed by the team that played in the game,
+    // and the current roster is the wrong team for any past-season row. The
+    // bridge (player_year_teams) is registered by the with builder.
+    const team_reference = 'player_year_teams.team'
+
     if (
       market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD ||
       market_type === bookmaker_constants.team_game_market_types.GAME_ALT_SPREAD
     ) {
-      this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
+      this.on(`${table_name}.selection_pid`, '=', team_reference)
     } else {
       // Parenthesised, or the week predicate below would bind to the OR's
       // right arm alone and the away-team branch would match every week.
       this.on(function () {
-        this.on(
-          `${table_name}.home_nfl_team`,
+        this.on(`${table_name}.home_nfl_team`, '=', team_reference).orOn(
+          `${table_name}.away_nfl_team`,
           '=',
-          'player.current_nfl_team'
-        ).orOn(`${table_name}.away_nfl_team`, '=', 'player.current_nfl_team')
+          team_reference
+        )
       })
     }
 
@@ -546,6 +582,15 @@ const team_betting_market_with = ({
   const { nfl_week_ids, market_season_years } = resolve_market_week_scope({
     params,
     data_view_options
+  })
+
+  // The player maps to the market through the team he was on that year
+  // (player_year_teams.team), so the bridge must be in the query before the
+  // join below references it.
+  register_team_attribution_bridge({
+    data_view_options,
+    params,
+    market_season_years
   })
 
   const markets_cte = `${with_table_name}_markets`
@@ -673,6 +718,15 @@ const team_game_implied_team_total_with = ({
     }
   }
 
+  // The player maps to the market through the team he was on that year
+  // (player_year_teams.team), so the bridge must be in the query before the
+  // join below references it.
+  register_team_attribution_bridge({
+    data_view_options,
+    params,
+    market_season_years
+  })
+
   const spread_cte = `${with_table_name}_spread`
   const total_cte = `${with_table_name}_total`
 
@@ -762,7 +816,10 @@ const team_game_implied_team_total_join = ({
   const join_func = get_join_func(join_type)
 
   query[join_func](table_name, function () {
-    this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
+    // Same attribution rule as team_betting_market_join: the team for the
+    // cell's year, supplied by the player_year_teams bridge registered in the
+    // with builder above.
+    this.on(`${table_name}.selection_pid`, '=', 'player_year_teams.team')
 
     // Under a week axis the CTE holds every requested week, so the cell's own
     // year and week are what select the row. Without this the join was on the

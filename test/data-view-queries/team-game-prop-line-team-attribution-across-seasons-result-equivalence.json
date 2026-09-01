@@ -1,0 +1,65 @@
+{
+  "name": "team game prop line is that year's team's line, not the current roster's (executed-result parity)",
+  "description": "Seed a player who switched teams between seasons -- ZTA on a 2023 REG week 1 game, ZTB on a 2024 REG week 1 game -- with a DraftKings CLOSE GAME_SPREAD market per game whose selection_pid is that year's team (line -3.5 in 2023, +1.5 in 2024), and a current_nfl_team of ZZZ that matches neither. Request the column over both weeks under a year+week row axis; each year's row must carry that year's team's line. Pre-item-6 team_game_prop_line_from_betting_markets joined on player.current_nfl_team, so both rows were null (the year correlation forces the cell's year and no market exists for the current team); the fix routes the join through player_year_teams -- the team the REG gamelogs assign to the player for that year, the game_opponent route -- exactly the wrong-team defect item 4 deliberately did not touch. Oracle values are the seeded selection lines, derived from the seed not from output.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_game_prop_line_from_betting_markets",
+        "params": {
+          "source_id": ["DRAFTKINGS"],
+          "selection_type": ["OVER"],
+          "time_type": ["CLOSE"],
+          "market_type": ["GAME_SPREAD"],
+          "single_nfl_week_id": ["2023_REG_WEEK_1", "2024_REG_WEEK_1"]
+        }
+      }
+    ],
+    "row_axes": ["year", "week"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.week IN (1)), \"player_year_teams\" as (select \"pid\", \"year\", (array_agg(nfl_team ORDER BY game_count DESC, nfl_team ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\" as \"year\", \"player_gamelogs\".\"nfl_team\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023, 2024) and \"player_gamelogs\".\"season_year\" in (2023, 2024) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\", \"player_gamelogs\".\"nfl_team\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"tace59ca77b4d92a6244ce6fb5c22033f_markets\" as (select \"source_id\", \"source_market_id\", \"time_type\", \"nfl_games\".\"home_nfl_team\", \"nfl_games\".\"away_nfl_team\", \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\" as \"week\" from \"prop_markets_index\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"prop_markets_index\".\"esbid\" and \"nfl_games\".\"season_year\" = \"prop_markets_index\".\"season_year\" and nfl_games.nfl_week_id in ('2023_REG_WEEK_1', '2024_REG_WEEK_1') where \"market_type\" = 'GAME_SPREAD' and \"time_type\" = 'CLOSE' and \"source_id\" = 'DRAFTKINGS' and \"prop_markets_index\".\"season_year\" in (2023, 2024)), \"tace59ca77b4d92a6244ce6fb5c22033f\" as (select \"pms\".\"selection_pid\", \"m\".\"home_nfl_team\", \"m\".\"away_nfl_team\", \"m\".\"year\", \"m\".\"week\", pms.selection_metric_line from \"tace59ca77b4d92a6244ce6fb5c22033f_markets\" as \"m\" inner join \"prop_market_selections_index\" as \"pms\" on \"pms\".\"source_id\" = \"m\".\"source_id\" and \"pms\".\"source_market_id\" = \"m\".\"source_market_id\" and \"pms\".\"time_type\" = \"m\".\"time_type\" where \"pms\".\"selection_type\" in ('OVER')), \"player_participation_weeks\" as (SELECT pid, year, week, bool_or(is_active) AS is_active\n          FROM (SELECT pgl.pid, 2023::int AS year, g.week, pgl.is_active\n       FROM player_gamelogs_year_2023 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2023 UNION ALL SELECT pgl.pid, 2024::int AS year, g.week, pgl.is_active\n       FROM player_gamelogs_year_2024 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2024) src\n          GROUP BY pid, year, week), \"player_years_teams\" as (SELECT pid, year, array_agg(DISTINCT team_code) AS teams\n          FROM (SELECT pgl.pid, 2023::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2023 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2023 UNION ALL SELECT pgl.pid, 2024::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2024 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2024) src\n          GROUP BY pid, year), \"team_weeks_played\" as (select distinct \"team\", \"year\", \"week\" from ((select \"home_nfl_team\" as \"team\", \"season_year\" as \"year\", \"week\" from \"nfl_games\" where \"nfl_games\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2024_REG_WEEK_1') and \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023, 2024)) union all (select \"away_nfl_team\" as \"team\", \"season_year\" as \"year\", \"week\" from \"nfl_games\" where \"nfl_games\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2024_REG_WEEK_1') and \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023, 2024))) as \"g\") select \"player\".\"pid\", player.first_name, player.last_name, \"tace59ca77b4d92a6244ce6fb5c22033f\".\"selection_metric_line\" AS \"team_game_prop_line_betting_market_0\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", CASE\n     WHEN player_participation_weeks.is_active THEN 'active'\n     WHEN player_participation_weeks.pid IS NULL\n          AND player_years_teams.teams IS NOT NULL\n          AND NOT EXISTS (\n            SELECT 1 FROM team_weeks_played\n            WHERE team_weeks_played.year = player_years_weeks.year\n              AND team_weeks_played.week = player_years_weeks.week\n              AND team_weeks_played.team = ANY(player_years_teams.teams)\n          )\n       THEN 'bye'\n     ELSE NULL\n   END AS participation_status, \"player\".\"primary_position\" from \"player\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = \"player_years_weeks\".\"year\" left join \"tace59ca77b4d92a6244ce6fb5c22033f\" on \"tace59ca77b4d92a6244ce6fb5c22033f\".\"selection_pid\" = \"player_year_teams\".\"team\" and tace59ca77b4d92a6244ce6fb5c22033f.year = player_years_weeks.year and tace59ca77b4d92a6244ce6fb5c22033f.week = player_years_weeks.week left join \"player_participation_weeks\" on \"player_participation_weeks\".\"pid\" = \"player\".\"pid\" and \"player_participation_weeks\".\"year\" = \"player_years_weeks\".\"year\" and \"player_participation_weeks\".\"week\" = \"player_years_weeks\".\"week\" left join \"player_years_teams\" on \"player_years_teams\".\"pid\" = \"player\".\"pid\" and \"player_years_teams\".\"year\" = \"player_years_weeks\".\"year\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"tace59ca77b4d92a6244ce6fb5c22033f\".\"selection_metric_line\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", CASE\n     WHEN player_participation_weeks.is_active THEN 'active'\n     WHEN player_participation_weeks.pid IS NULL\n          AND player_years_teams.teams IS NOT NULL\n          AND NOT EXISTS (\n            SELECT 1 FROM team_weeks_played\n            WHERE team_weeks_played.year = player_years_weeks.year\n              AND team_weeks_played.week = player_years_weeks.week\n              AND team_weeks_played.team = ANY(player_years_teams.teams)\n          )\n       THEN 'bye'\n     ELSE NULL\n   END, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "betting_markets",
+    "team",
+    "row_axes",
+    "year",
+    "week",
+    "result-equivalence",
+    "attribution"
+  ],
+  "timeout_ms": 40000,
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TAS-990701', 'Test', 'Taschange', 'T.Taschange', 'Test Taschange', 'MLB', 'MLB', '2000-01-01', 2020, 'ZZZ')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (977001, 2023, 1, 'REG', 'ZTA', 'ZTX', '2023-09-10')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (977002, 2024, 1, 'REG', 'ZTB', 'ZTY', '2024-09-08')",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, is_active, season_year) VALUES (977001, 'TEST-TAS-990701', 'ZTX', 'ZTA', 'MLB', true, 2023)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, is_active, season_year) VALUES (977002, 'TEST-TAS-990701', 'ZTY', 'ZTB', 'MLB', true, 2024)",
+      "REFRESH MATERIALIZED VIEW nfl_year_week_timestamp",
+      "INSERT INTO prop_markets_index (market_type, source_id, source_market_id, esbid, selection_count, time_type, observed_at, season_year) VALUES ('GAME_SPREAD', 'DRAFTKINGS', 'TEST-SPREAD-2023', 977001, 2, 'CLOSE', '2023-09-10T16:00:00Z', 2023)",
+      "INSERT INTO prop_markets_index (market_type, source_id, source_market_id, esbid, selection_count, time_type, observed_at, season_year) VALUES ('GAME_SPREAD', 'DRAFTKINGS', 'TEST-SPREAD-2024', 977002, 2, 'CLOSE', '2024-09-08T16:00:00Z', 2024)",
+      "INSERT INTO prop_market_selections_index (source_id, source_market_id, source_selection_id, selection_pid, selection_metric_line, odds_american, odds_decimal, observed_at, time_type, selection_type) VALUES ('DRAFTKINGS', 'TEST-SPREAD-2023', 'TEST-SPSEL-2023', 'ZTA', -3.5, -110, 1.909, '2023-09-10T16:00:00Z', 'CLOSE', 'OVER')",
+      "INSERT INTO prop_market_selections_index (source_id, source_market_id, source_selection_id, selection_pid, selection_metric_line, odds_american, odds_decimal, observed_at, time_type, selection_type) VALUES ('DRAFTKINGS', 'TEST-SPREAD-2024', 'TEST-SPSEL-2024', 'ZTB', 1.5, -110, 1.909, '2024-09-08T16:00:00Z', 'CLOSE', 'OVER')"
+    ],
+    "expected_rows": [
+      {
+        "year": "2023",
+        "week": "1",
+        "team_game_prop_line_betting_market_0": "-3.5"
+      },
+      {
+        "year": "2024",
+        "week": "1",
+        "team_game_prop_line_betting_market_0": "1.5"
+      }
+    ],
+    "compare_columns": ["year", "week", "team_game_prop_line_betting_market_0"]
+  }
+}
