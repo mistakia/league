@@ -61,6 +61,10 @@ import {
   resolve_references
 } from '#libs-server/data-views/identities.mjs'
 import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
+import {
+  is_line_axis_active,
+  resolve_line_axis_sources
+} from '#libs-server/data-views/line-axis-sources.mjs'
 import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.mjs'
 
 // Row axes inherently supported by the column's row shape. `source.grain` is
@@ -986,6 +990,21 @@ const setup_from_table_and_player_joins = ({
       player_year_week_bridge.join_cte({ query_context })
       query_context.joined_split_bridges.add('player_year->player_year_week')
     }
+    if (
+      is_line_axis_active(row_axes) &&
+      !query_context.joined_split_bridges.has(
+        'player_year_week->player_year_week_line'
+      )
+    ) {
+      const player_year_week_line_bridge = resolve_bridge(
+        'player_year_week',
+        'player_year_week_line'
+      )
+      player_year_week_line_bridge.join_cte({ query_context })
+      query_context.joined_split_bridges.add(
+        'player_year_week->player_year_week_line'
+      )
+    }
   }
 
   log(
@@ -1899,6 +1918,26 @@ export const get_data_view_results_query = async ({
         )
         player_year_week_bridge.add_cte({ query_context })
         query_context.applied_bridges.add('player_year->player_year_week')
+      }
+
+      // The line axis refines the week axis rather than replacing it, so it
+      // extends the same chain. row-grain-registry refuses a line request
+      // without a week, which is what makes the nesting here total rather than
+      // a case that silently does nothing.
+      if (is_line_axis_active(row_axes)) {
+        query_context.line_axis_sources = resolve_line_axis_sources({
+          columns,
+          prefix_columns,
+          data_views_column_definitions
+        })
+        const player_year_week_line_bridge = resolve_bridge(
+          'player_year_week',
+          'player_year_week_line'
+        )
+        player_year_week_line_bridge.add_cte({ query_context })
+        query_context.applied_bridges.add(
+          'player_year_week->player_year_week_line'
+        )
       }
     }
   }

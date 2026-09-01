@@ -97,6 +97,59 @@ export const identities = {
     }
   },
 
+  // One row per alternate line a book actually posted for the player's game.
+  //
+  // The first axis whose rows come from DATA rather than from NFL structure,
+  // and that difference is the whole design. `year` and `week` cross-join a
+  // fixed universe -- every player against nfl_year_week_timestamp -- so no
+  // column influences which rows exist. A ladder has no such universe: the
+  // rungs are a property of the betting columns in the request, they differ per
+  // book (FanDuel posts a fixed 25-yard grid, DraftKings centres a finer ladder
+  // on each player), and they differ per player-game within one column.
+  //
+  // So the rows ARE the selections. player_years_weeks_lines is built from the
+  // market rows themselves rather than from a synthesised domain, which is both
+  // the honest reading ("one row per line the book posted") and the only shape
+  // that stays small -- a globally-unioned rung domain left-joined per cell
+  // would be overwhelmingly null.
+  //
+  // year and week come from player_years_weeks rather than from the line CTE,
+  // for the reason player_year_week records: the week relation is always joined
+  // whenever the week bridge attaches, and the line CTE is built ON it, so the
+  // two are equal by construction and the shallower reference is the safe one.
+  player_year_week_line: {
+    id: 'player_year_week_line',
+    row_grain: 'player',
+    row_axes: ['year', 'week', 'line'],
+    key_columns: ['pid', 'year', 'week', 'selection_metric_line'],
+    pid_column: 'player.pid',
+    team_column: null,
+    year_column: 'player_years_weeks.year',
+    week_column: 'player_years_weeks.week',
+    line_column: 'player_years_weeks_lines.selection_metric_line',
+    // Never consulted on the player path -- setup_from_table_and_player_joins
+    // calls from_source only in its team branch, and the player axis CTEs are
+    // registered by identity bridges instead. Declared to match its siblings
+    // rather than to be called; the rung CTE lives in the bridge.
+    from_source: ({ year_range, position_filter_sql = null }) => {
+      const where = position_filter_sql ? ` WHERE ${position_filter_sql}` : ''
+      return {
+        table: 'player',
+        with: [
+          { name: 'base_years', sql: base_years_sql({ year_range }) },
+          {
+            name: 'player_years',
+            sql: `SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years${where}`
+          },
+          {
+            name: 'player_years_weeks',
+            sql: player_years_weeks_sql({ year_range })
+          }
+        ]
+      }
+    }
+  },
+
   team: {
     id: 'team',
     row_grain: 'team',

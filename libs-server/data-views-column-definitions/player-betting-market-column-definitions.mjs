@@ -844,6 +844,13 @@ const create_player_betting_market_field = ({
   column_name,
   main_select,
   main_group_by,
+  // Declared on the definition, not only captured in the closures below,
+  // because the line row axis has to identify betting columns from OUTSIDE the
+  // column -- the rung domain is built before any column's CTE exists. The
+  // alternative is inferring it from the presence of a market_type param,
+  // which is the infer-instead-of-declare shape this column family has been
+  // bitten by repeatedly.
+  is_player_game_prop,
   select_as: () => column_alias,
   with_where: with_where || (() => select_string || `pms.${column_name}`),
   with_select:
