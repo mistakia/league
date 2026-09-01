@@ -1,0 +1,32 @@
+-- STATUS: APPLIED 2026-09-01 against league_production
+--
+-- Drop is_auction_election_mode_enabled, added earlier today in
+-- 2026-09-01-add-seasons-auction-election-configuration.sql. That file is
+-- append-only history and is not edited; this is the correction.
+--
+-- THE MODE IS DERIVED, NOT CONFIGURED. The auction runs election mode from the
+-- opening nomination and leaves it only for a live block, so which mode is in
+-- force is a function of the block schedule and the current instant. That is
+-- what libs-server/auction-modes.mjs computes. A league-level boolean answering
+-- the same question is a second source of truth for it, and the two would drift
+-- the moment a block convened.
+--
+-- The column was added as a rollout control for a production dry run -- a second
+-- hosted league running election mode while league 1 stayed false on the same
+-- deployment. That dry run is deleted from the plan rather than deferred: the
+-- 2026 auction answers the question it existed to ask, with the same ten
+-- managers. So the column outlived its only consumer.
+--
+-- One correction to the reasoning, recorded because it changes what may be
+-- deleted next: the `false` branch did NOT select a nonexistent auction. It
+-- selects the live open-outcry path with its bid and nomination clocks, which is
+-- fully intact and must stay intact, because that is the path a live block runs
+-- on. What has gone away is any reason to select it for the WHOLE period, which
+-- is the only thing a league-level flag could express. Do not read this drop as
+-- licence to delete the timer path.
+--
+-- The three tunables added in the same file stay: auction_block_notice_minutes,
+-- auction_final_block_pace_minutes and auction_final_block_buffer_hours are read
+-- by the final-block computation and are genuinely per-season.
+
+ALTER TABLE public.seasons DROP COLUMN is_auction_election_mode_enabled;

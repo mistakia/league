@@ -27460,7 +27460,6 @@ CREATE TABLE public.seasons (
     restricted_free_agency_processing_paused_at timestamp with time zone,
     head_to_head_berth_count smallint DEFAULT 0 NOT NULL,
     rookie_draft_end_at timestamp with time zone,
-    is_auction_election_mode_enabled boolean DEFAULT false NOT NULL,
     auction_block_notice_minutes smallint DEFAULT 60 NOT NULL,
     auction_final_block_pace_minutes smallint DEFAULT 2 NOT NULL,
     auction_final_block_buffer_hours smallint DEFAULT 12 NOT NULL,

@@ -996,15 +996,25 @@ export default class Auction {
 
   async _load_league() {
     this._league = await getLeague({ lid: this._lid })
-    this._election_mode =
-      this._league?.is_auction_election_mode_enabled || false
-    if (this._election_mode) {
-      // Election mode has no clock to pause. The auction advances on elections
-      // arriving over REST, so a socket-level pause would stop nothing and
-      // would only hide the board from whoever is connected.
-      this._paused = false
-    }
-    this.logger(`election mode enabled: ${this._election_mode}`)
+
+    // ELECTION MODE IS NOT CONFIGURED, IT IS DERIVED.
+    //
+    // The auction runs election mode from the opening nomination and leaves it
+    // only for a live block, so the mode is a function of the block schedule
+    // and the instant -- not a league setting somebody flips. There are no
+    // blocks yet, so this is unconditionally true; when `auction-modes.mjs`
+    // lands it becomes a query against the finalized block set for `now`.
+    //
+    // The live open-outcry path below is NOT dead and must not be deleted: it
+    // is what a block runs on. What has gone away is any reason to select it
+    // for the whole period, which is the only thing a league-level flag could
+    // have expressed.
+    this._election_mode = true
+
+    // Election mode has no clock to pause. The auction advances on elections
+    // arriving over REST, so a socket-level pause would stop nothing and would
+    // only hide the board from whoever is connected.
+    this._paused = false
 
     await this._refresh_league_pause()
   }
