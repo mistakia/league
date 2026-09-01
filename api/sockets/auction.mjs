@@ -223,6 +223,7 @@ export default class Auction {
 
   async bid(message) {
     if (await this._refresh_league_pause()) return
+    if (this._refuse_while_paused('bid', message.user_id)) return
     if (this._locked) return
     this._locked = true
 
@@ -261,6 +262,7 @@ export default class Auction {
 
   async nominate(message = {}, { user_id, tid }) {
     if (await this._refresh_league_pause()) return
+    if (this._refuse_while_paused('nomination', message.user_id)) return
 
     const nominating_team_id = this.nominating_team_id
     // The socket-authenticated `user_id` above and the one the CLIENT sends in
@@ -1023,6 +1025,32 @@ export default class Auction {
     this.logger(`election mode enabled: ${this._election_mode}`)
 
     await this._refresh_league_pause()
+  }
+
+  /**
+   * Refuse a write while the auction is paused.
+   *
+   * PAUSED HAS TO MEAN A REFUSAL, not merely an absence. Before this, `_paused`
+   * stopped the timers and the client hid its controls, but neither write path
+   * consulted it -- so a raw socket message could nominate or bid on a paused
+   * auction and a nomination would start a bid clock, which is the one thing a
+   * pause is supposed to prevent.
+   *
+   * That matters because pausing is the rollback lever. `is_auction_election_mode_enabled`
+   * false leaves the auction paused (`_paused` defaults true and only election
+   * mode force-clears it), so "nothing happens until the commissioner resumes"
+   * is the property the whole lever rests on. A property that holds only because
+   * the UI declines to offer a button is not a property.
+   *
+   * Inert on the mainline: election mode force-clears `_paused`, so this never
+   * fires while the auction is running normally.
+   */
+  _refuse_while_paused(action, user_id) {
+    if (!this._paused) return false
+
+    this.logger(`refusing ${action} -- auction is paused`)
+    if (user_id) this.reply(user_id, 'auction is paused')
+    return true
   }
 
   /**
