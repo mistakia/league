@@ -85,7 +85,7 @@ Stated once here because it applies to every undertaking, and it is the single m
 **Testing**
 
 - `yarn test:isolated` — the suite against a private database on the shared `:5433` container, dropped afterwards; takes mocha arguments
-- `yarn test:db:up` / `yarn test:local` / `yarn test:db:down` — throwaway Postgres 16 on `:5433` and the suite against its shared default database
+- `yarn test:db:up` / `yarn test:local` / `yarn test:db:down` — throwaway Postgres 16 on `:5433` and the suite against its shared default database. `test:db:up` only reaches for docker when nothing is already serving the port, so the suite runs unchanged inside a container that has no docker
 
 **Build and deploy**
 

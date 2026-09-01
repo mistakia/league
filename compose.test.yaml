@@ -17,6 +17,12 @@ services:
   league-test-pg:
     image: postgres:16
     container_name: league-test-pg
+    # Comes back after a host reboot without anyone remembering to start it.
+    # That matters now that base-container runs the suite against this port
+    # without any docker of its own: a container session cannot start this
+    # service, it can only find it already serving. `yarn test:db:down` still
+    # removes it deliberately.
+    restart: unless-stopped
     environment:
       POSTGRES_USER: league_test
       POSTGRES_PASSWORD: league_test

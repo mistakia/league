@@ -31,14 +31,22 @@
 
 set -euo pipefail
 
-CONTAINER=league-test-pg
 DB_USER=league_test
+DB_HOST="${LEAGUE_TEST_DB_HOST:-127.0.0.1}"
+DB_PORT="${LEAGUE_TEST_DB_PORT:-5433}"
 SLUG="${LEAGUE_TEST_SLUG:-$$}"
 DB_NAME="league_test_${SLUG}"
 created=0
 
+# Admin statements go over TCP through `pg`, the same driver and the same port
+# mocha uses below -- NOT `docker exec ... psql`, which needed a docker socket
+# purely to borrow a psql client and so made the entire isolated runner
+# unavailable inside base-container. Output is psql -tAc shaped; see the script.
 psql_admin() {
-  docker exec -u postgres "$CONTAINER" psql -U "$DB_USER" -d "$DB_USER" -tAc "$1"
+  LEAGUE_TEST_DB_HOST="$DB_HOST" \
+  LEAGUE_TEST_DB_PORT="$DB_PORT" \
+  LEAGUE_TEST_DB_USER="$DB_USER" \
+    node scripts/test-db-admin.mjs "$1"
 }
 
 cleanup() {
@@ -103,8 +111,8 @@ fi
 
 # `yarn test` blanks LEAGUE_DB_HOST/PORT, so invoke mocha directly. Loading the
 # rc (no --no-config) keeps local collection identical to CI's.
-LEAGUE_DB_HOST=127.0.0.1 \
-LEAGUE_DB_PORT=5433 \
+LEAGUE_DB_HOST="$DB_HOST" \
+LEAGUE_DB_PORT="$DB_PORT" \
 LEAGUE_DB_DATABASE="$DB_NAME" \
 TZ=America/New_York \
 NODE_ENV=test \
