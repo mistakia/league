@@ -405,6 +405,20 @@ const column_lines_for_weeks = async ({ season_year, season_type, weeks }) => {
 }
 
 /**
+ * Reads what the SHIPPED column rendered, keyed `pid|week`. `truncated` says the
+ * read came back at the result limit, so the rows past the cut are unknown
+ * rather than absent and the caller must refuse to grade rather than grade the
+ * prefix.
+ *
+ * @callback read_column_lines_fn
+ * @param {object} args
+ * @param {number} args.season_year
+ * @param {string} args.season_type
+ * @param {Array<number>} args.weeks
+ * @returns {Promise<{lines: Map<string, number>, truncated: boolean}>}
+ */
+
+/**
  * Line-value rows for the check betting-market-game-prop-line-value: one row
  * per (season_year, season_type, week), graded on whether the column renders
  * the line the base tables hold.
@@ -412,8 +426,9 @@ const column_lines_for_weeks = async ({ season_year, season_type, weeks }) => {
  * @param {object} [args]
  * @param {{year: number, seas_type: string, week: number}} [args.live_week]
  * @param {number} [args.seasons_of_history]
- * @param {Function} [args.read_column_lines] Seam for the spec. Same contract
- *   as column_lines_for_weeks: returns { lines, truncated }.
+ * @param {read_column_lines_fn} [args.read_column_lines] Seam for the spec, so
+ *   the failing arms drive this function rather than asserting hand-built
+ *   numerator and denominator literals.
  * @returns {Promise<Array<Record<string, any>>>}
  */
 export const game_prop_line_value_rows = async ({
