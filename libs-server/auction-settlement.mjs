@@ -543,11 +543,98 @@ export const sweep_unnominated_auction_elections = async ({
     })
 }
 
+/**
+ * Broadcast a settlement to every client in the league.
+ *
+ * IN ELECTION MODE THE SOCKET IS NOT THE WRITER. Managers elect over REST and
+ * settlement fires from the write path, so a settlement happens somewhere the
+ * socket never hears about and every socket cache of `transactions` is stale by
+ * default. Without this the connected clients sit on a board showing a player
+ * that has already sold, and the socket's own view of whose nomination turn it
+ * is never advances.
+ *
+ * One function so the payload shape cannot drift between the three places a
+ * REST settlement can originate: an election, a trade, and a commissioner
+ * override release.
+ */
+export const broadcast_auction_settlement = ({ broadcast, lid, settlement }) =>
+  broadcast(Number(lid), {
+    type: 'AUCTION_PROCESSED',
+    payload: {
+      pid: settlement.pid,
+      tid: settlement.winner_tid,
+      player_salary: settlement.price
+    }
+  })
+
+/**
+ * Re-evaluate the active nomination after a roster change the auction did not
+ * make, and settle it if the eligible set is now complete.
+ *
+ * ELIGIBILITY IS OTHERWISE MONOTONE. Rosters are fixed for the whole free agency
+ * period -- no releases, no poaches, no waiver claims -- so open spots only fall
+ * and a team that leaves an eligible set never re-enters it. Exactly two things
+ * break that, and both are why this exists:
+ *
+ * - A TRADE. `trade_deadline_at` for 2026 is in December, so trades are legal
+ *   throughout the auction. A trade that fills a team's last active spot drops
+ *   them out of the eligible set for the open player, and without this call the
+ *   outstanding set is never recomputed -- the player waits on a team that can
+ *   no longer sign anyone and stalls to the final block. A two-for-one runs the
+ *   other way and can pull a team BACK into a set it had left, which is the one
+ *   non-monotone lever in the design.
+ * - A COMMISSIONER OVERRIDE RELEASE. Voluntary active-roster releases are
+ *   refused for the whole period; the commissioner is the sanctioned exception,
+ *   and it has to go through this path rather than around it.
+ *
+ * A DIRECT CALL, NOT A `jobs/` RUNNER. One player is open at a time and there is
+ * no settlement cascade, so folding it into the two handlers that can cause the
+ * change removes a runner, its log, its channel and its failure signal.
+ *
+ * It never fails its caller. The trade or the release has already committed by
+ * the time this runs, and refusing a completed trade because a settlement threw
+ * would be strictly worse than the stall it is preventing -- the auction is
+ * degraded, not corrupt, and the next election or the final block resolves it.
+ * The throw is logged rather than swallowed so it is attributable.
+ */
+export const reevaluate_auction_after_roster_change = async ({
+  lid,
+  season_year = current_season.year,
+  broadcast,
+  logger,
+  trigger
+}) => {
+  try {
+    const settlement = await settle_auction_player_if_complete({
+      lid,
+      season_year
+    })
+
+    if (!settlement) return null
+
+    log(
+      `${trigger} completed the eligible set: settled ${settlement.pid} to team ${settlement.winner_tid} at $${settlement.price}`
+    )
+
+    if (broadcast) {
+      broadcast_auction_settlement({ broadcast, lid, settlement })
+    }
+
+    return settlement
+  } catch (error) {
+    log(`auction re-evaluation after ${trigger} failed for league ${lid}`)
+    if (logger) logger(error)
+    return null
+  }
+}
+
 export default {
   get_active_auction_nomination,
   get_auction_team_capacities,
   get_outstanding_team_ids,
   build_auction_claims,
   settle_auction_player_if_complete,
+  broadcast_auction_settlement,
+  reevaluate_auction_after_roster_change,
   sweep_unnominated_auction_elections
 }

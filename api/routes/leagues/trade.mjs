@@ -8,6 +8,7 @@ import {
   transaction_types
 } from '#constants'
 import validate_trade_roster_slots from '#libs-server/validate-trade-roster-slots.mjs'
+import { reevaluate_auction_after_roster_change } from '#libs-server/auction-settlement.mjs'
 import {
   getRoster,
   getLeague,
@@ -495,7 +496,7 @@ router.get('/?', get_trade)
 router.post(
   '/accept',
   async (req, res, next) => {
-    const { db, logger } = req.app.locals
+    const { db, logger, broadcast } = req.app.locals
     try {
       const { tradeId, leagueId } = req.params
 
@@ -1110,6 +1111,21 @@ router.post(
             .update({ cancelled: new Date() })
         }
       }) // Close transaction
+
+      // A trade is the ONLY thing that can change auction eligibility while a
+      // player is open. Rosters are otherwise fixed for the whole free agency
+      // period, so open spots only fall and completeness is monotone -- except
+      // here. Run this after the commit, because the eligible set has to be
+      // evaluated against the rosters the trade actually left behind.
+      //
+      // It no-ops in one query when nothing is nominated, which is every trade
+      // outside the auction.
+      await reevaluate_auction_after_roster_change({
+        lid: Number(leagueId),
+        broadcast,
+        logger,
+        trigger: `trade ${tradeId}`
+      })
 
       const teams = await db('teams').where({
         lid: leagueId,

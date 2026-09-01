@@ -10,6 +10,7 @@ import {
   getRoster
 } from '#libs-server'
 import { require_auth } from '#api/routes/leagues/middleware.mjs'
+import { reevaluate_auction_after_roster_change } from '#libs-server/auction-settlement.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -178,6 +179,19 @@ router.post('/?', async (req, res) => {
     broadcast(lid, {
       type: 'ROSTER_TRANSACTION',
       payload: { data }
+    })
+
+    // A commissioner override release is the second of the two things that can
+    // change auction eligibility while a player is open, and the rarer one.
+    // Every other release is refused for the whole free agency period by the
+    // guard above, so nothing else reaches here mid-auction. Freeing a spot can
+    // pull a team back into an eligible set it had left, which leaves the
+    // outstanding set stale until it is recomputed.
+    await reevaluate_auction_after_roster_change({
+      lid,
+      broadcast,
+      logger,
+      trigger: `commissioner release of ${pid}`
     })
 
     // send notification
