@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
-import CheckIcon from '@mui/icons-material/Check'
 
 import { BASE_URL } from '@core/constants'
 import copy_to_clipboard from '@core/utils/copy-to-clipboard'
 
 import './copy-markdown-button.styl'
+
+import Icon from '@components/icon'
 
 // Copies the absolute URL of a markdown context document to the clipboard with
 // a 2-second success toggle. `path` is the doc's app-relative markdown path
@@ -32,11 +32,7 @@ export default function CopyMarkdownButton({
       className='copy-markdown-button'
       onClick={handle_click}
     >
-      {copied ? (
-        <CheckIcon fontSize='inherit' />
-      ) : (
-        <ContentCopyOutlinedIcon fontSize='inherit' />
-      )}
+      {copied ? <Icon name='check' /> : <Icon name='content-copy' />}
       <span>{copied ? 'copied' : label}</span>
     </button>
   )

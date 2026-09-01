@@ -4,11 +4,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams } from 'react-router-dom'
 import { List } from 'immutable'
 import Toolbar from '@mui/material/Toolbar'
-import NotInterestedIcon from '@mui/icons-material/NotInterested'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import Alert from '@mui/material/Alert'
 
+import Icon from '@components/icon'
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardPlayersTable from '@components/dashboard-players-table'
@@ -165,12 +163,12 @@ export default function LeagueTeam({
       >
         {is_practice_squad_drafted_expanded ? (
           <>
-            <ExpandLessIcon fontSize='small' />
+            <Icon name='arrow-up' small />
             hide ({additional_practice_squad_drafted_count})
           </>
         ) : (
           <>
-            <ExpandMoreIcon fontSize='small' />
+            <Icon name='arrow-down' small />
             show all ({additional_practice_squad_drafted_count})
           </>
         )}
@@ -294,7 +292,7 @@ export default function LeagueTeam({
               title={
                 <>
                   Cutlist
-                  <NotInterestedIcon />
+                  <Icon name='not-interested' />
                 </>
               }
               cutlist={cutlist}

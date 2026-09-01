@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
+import Icon from '@components/icon'
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import format_lineage_event, {
@@ -861,7 +861,7 @@ export default function TradeReviewTrade({
           {is_interactive && (
             <div className='trade-review-trade__open'>
               <span>Lineage</span>
-              <ChevronRightIcon />
+              <Icon name='chevron-right' />
             </div>
           )}
         </div>

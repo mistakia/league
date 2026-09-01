@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { Popper } from '@mui/base/Popper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Paper from '@mui/material/Paper'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import Icon from '@components/icon'
 import TeamImage from '@components/team-image'
 
 import './league-select-team.styl'
@@ -66,7 +66,7 @@ export default function LeagueSelectTeam({
               ref={anchor_el}
             >
               {selected_team.name}
-              <ArrowDropDownIcon />
+              <Icon name='arrow-drop-down' />
             </div>
             <div className='league-select-team-meta'>
               <div>{historical_rank.number_seasons} Seasons</div>

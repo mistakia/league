@@ -4,8 +4,6 @@ import Backdrop from '@mui/material/Backdrop'
 import SpeedDial from '@mui/material/SpeedDial'
 import SpeedDialIcon from '@mui/material/SpeedDialIcon'
 import SpeedDialAction from '@mui/material/SpeedDialAction'
-import SafetyCheckIcon from '@mui/icons-material/SafetyCheck'
-import RemoveModeratorIcon from '@mui/icons-material/RemoveModerator'
 
 import Icon from '@components/icon'
 
@@ -73,9 +71,9 @@ export default class AuctionCommissionerControls extends React.Component {
           <SpeedDialAction
             icon={
               pause_on_team_disconnect ? (
-                <RemoveModeratorIcon />
+                <Icon name='remove-moderator' />
               ) : (
-                <SafetyCheckIcon />
+                <Icon name='safety-check' />
               )
             }
             tooltipTitle={

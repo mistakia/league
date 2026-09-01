@@ -3,20 +3,15 @@ import dayjs from 'dayjs'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { green, red } from '@mui/material/colors'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import ListItemText from '@mui/material/ListItemText'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import ErrorIcon from '@mui/icons-material/Error'
 import Accordion from '@mui/material/Accordion'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
-import WarningIcon from '@mui/icons-material/Warning'
-import TaskAltIcon from '@mui/icons-material/TaskAlt'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
+import Icon from '@components/icon'
 import Loading from '@components/loading'
 import { job_title_by_id } from '#libs-shared/job-constants.mjs'
 import PageLayout from '@layouts/page'
@@ -26,10 +21,13 @@ import './status.styl'
 const StatusItem = ({ status_item, index }) => {
   const [expanded, set_expanded] = React.useState(false)
   const is_operational = Boolean(status_item.is_successful)
+  // The app's own status colours from general.styl rather than MUI's palette
+  // module. `.icon` fills with currentColor, so a text colour class paints the
+  // glyph.
   const icon = is_operational ? (
-    <CheckCircleOutlineIcon style={{ color: green[500] }} />
+    <Icon name='check-circle-outline' className='text-green' />
   ) : (
-    <ErrorIcon style={{ color: red[500] }} />
+    <Icon name='error' className='text-red' />
   )
 
   // jobs.run_at is timestamptz, so this arrives as an ISO string.
@@ -92,11 +90,11 @@ export default function StatusPage({ load, status }) {
           {error_items.length > 0 && (
             <Accordion defaultExpanded>
               <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
+                expandIcon={<Icon name='arrow-drop-down' />}
                 className='status-error'
               >
                 <div className='status-error-summary'>
-                  <WarningIcon />
+                  <Icon name='warning' />
                   <div className='status-error-title'>
                     {error_items.length} Issues
                   </div>
@@ -108,9 +106,9 @@ export default function StatusPage({ load, status }) {
             </Accordion>
           )}
           <Accordion>
-            <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
+            <AccordionSummary expandIcon={<Icon name='arrow-drop-down' />}>
               <div className='status-success-summary'>
-                <TaskAltIcon />
+                <Icon name='task-complete' />
                 <div className='status-success-title'>
                   {success_items.length} Jobs Operational
                 </div>

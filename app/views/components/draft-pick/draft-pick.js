@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import RepeatIcon from '@mui/icons-material/Repeat'
 import Tooltip from '@mui/material/Tooltip'
 
+import Icon from '@components/icon'
 import TeamName from '@components/team-name'
 import DraftPickSheet from '@components/draft-pick-sheet'
 
@@ -91,7 +91,7 @@ export default function DraftPick({
           </div>
           {trade_count > 0 && (
             <div className='draft__pick-trades'>
-              <RepeatIcon />
+              <Icon name='repeat' />
               <span>{trade_count}</span>
             </div>
           )}

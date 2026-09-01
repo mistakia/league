@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 import { nfl_week_identifier } from '#libs-shared'
 
+import Icon from '@components/icon'
 import NflWeekSelectorYearPopper from './nfl-week-selector-year-popper.js'
 import {
   apply_year_selection,
@@ -161,7 +161,7 @@ export default function NflWeekSelectorYearRow({
             className='nfl-week-selector-year-caret'
             onClick={(e) => handle_caret_click(year, e)}
           >
-            <ArrowDropDownIcon fontSize='small' />
+            <Icon name='arrow-drop-down' small />
           </div>
         </div>
       ))}

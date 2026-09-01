@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import LockIcon from '@mui/icons-material/Lock'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 
 import './trade-slot-selector.styl'
 import { roster_slot_types, starting_lineup_slots } from '#constants'
+
+import Icon from '@components/icon'
 
 const slot_options = [
   {
@@ -173,7 +174,7 @@ export default function TradeSlotSelector({
   if (!is_editable) {
     return (
       <div className='trade-slot-selector-readonly'>
-        <LockIcon fontSize='small' className='trade-slot-selector-lock-icon' />
+        <Icon name='lock' small className='trade-slot-selector-lock-icon' />
         <span className='trade-slot-selector-readonly-text'>
           <strong>{player_name}</strong> will be placed on{' '}
           <strong>

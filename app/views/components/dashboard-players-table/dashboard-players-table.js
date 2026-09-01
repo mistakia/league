@@ -22,8 +22,8 @@ import {
   restrictToParentElement
 } from '@dnd-kit/modifiers'
 import Toolbar from '@mui/material/Toolbar'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 
+import Icon from '@components/icon'
 import PlayerRoster from '@components/player-roster'
 import PlayerRosterHeader from '@components/player-roster-header'
 import PlayerRosterTotal from '@components/player-roster-total'
@@ -32,7 +32,7 @@ import './dashboard-players-table.styl'
 
 const SortableHandle = () => (
   <div className='player__item-action reorder table__cell'>
-    <DragIndicatorIcon />
+    <Icon name='drag-indicator' />
   </div>
 )
 

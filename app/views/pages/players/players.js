@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import InfiniteScroll from 'react-infinite-scroller'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Button from '@mui/material/Button'
 import dayjs from 'dayjs'
-import ClearIcon from '@mui/icons-material/Clear'
 
+import Icon from '@components/icon'
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
 import HighlightTeam from '@components/highlight-team'
@@ -229,14 +228,14 @@ export default function PlayersPage({
           {is_player_filter_options_changed && (
             <Button
               variant='text'
-              startIcon={<ClearIcon />}
+              startIcon={<Icon name='clear' />}
               onClick={reset_player_filter_options}
             >
               Reset Filters
             </Button>
           )}
           <Button
-            endIcon={<KeyboardArrowDownIcon />}
+            endIcon={<Icon name='arrow-down' />}
             onClick={handleClick}
             className='players__head-expand'
           >

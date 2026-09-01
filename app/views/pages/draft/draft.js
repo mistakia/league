@@ -9,9 +9,8 @@ import List from 'react-virtualized-compat/dist/es/List'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
-import SearchIcon from '@mui/icons-material/Search'
-import ClearIcon from '@mui/icons-material/Clear'
 
+import Icon from '@components/icon'
 import Button from '@components/button'
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
@@ -253,7 +252,7 @@ export default function DraftPage({
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <SearchIcon fontSize='small' />
+              <Icon name='search' small />
             </InputAdornment>
           ),
           endAdornment: player_filter ? (
@@ -263,7 +262,7 @@ export default function DraftPage({
                 aria-label='Clear player filter'
                 onClick={() => set_player_filter('')}
               >
-                <ClearIcon fontSize='small' />
+                <Icon name='clear' small />
               </IconButton>
             </InputAdornment>
           ) : null

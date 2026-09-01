@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
+import Icon from '@components/icon'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import { current_season, roster_slot_types } from '#constants'
@@ -124,7 +124,10 @@ export default function PlayerName({
           <PlayerLabel label='P' description='Protected Practice Squad' />
         )}
         {isOnCutlist && (
-          <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
+          <PlayerLabel
+            label={<Icon name='not-interested' />}
+            description='Cutlist'
+          />
         )}
         <PlayerStatus player_map={player_map} />
         <PlayerTag {...{ player_map, reserve_eligible }} />

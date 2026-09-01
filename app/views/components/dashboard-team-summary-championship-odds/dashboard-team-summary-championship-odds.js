@@ -5,9 +5,9 @@ import Grid from '@mui/material/Grid'
 import Accordion from '@mui/material/Accordion'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { toPercent } from '#libs-shared'
+import Icon from '@components/icon'
 import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
@@ -27,7 +27,7 @@ export default function DashboardTeamSummaryChampionshipOdds({ teams, tid }) {
 
   return (
     <Accordion TransitionProps={{ unmountOnExit: true }}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+      <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
         <Grid container>
           <Grid item xs={7}>
             Championship Odds

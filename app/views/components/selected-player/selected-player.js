@@ -7,13 +7,11 @@ import { Tab } from '@mui/base/Tab'
 import { TabPanel } from '@mui/base/TabPanel'
 import { TabsList } from '@mui/base/TabsList'
 import Drawer from '@mui/material/Drawer'
-import CloseIcon from '@mui/icons-material/Close'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import IconButton from '@mui/material/IconButton'
 import { Map, List } from 'immutable'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
+import Icon from '@components/icon'
 import PlayerName from '@components/player-name'
 import { nth } from '#libs-shared'
 import TeamName from '@components/team-name'
@@ -402,7 +400,11 @@ export default function SelectedPlayer({
 
             {show_collapse && (
               <IconButton onClick={handleToggleExpand}>
-                {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                {collapsed ? (
+                  <Icon name='arrow-down' />
+                ) : (
+                  <Icon name='arrow-up' />
+                )}
               </IconButton>
             )}
           </div>
@@ -483,7 +485,7 @@ export default function SelectedPlayer({
         </div>
         <div className='selected__player-actions-close'>
           <Button variant='contained' onClick={handleClose}>
-            <CloseIcon />
+            <Icon name='clear' />
           </Button>
         </div>
       </div>

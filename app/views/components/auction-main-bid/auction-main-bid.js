@@ -1,12 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import Icon from '@components/icon'
 import TeamName from '@components/team-name'
 import Button from '@mui/material/Button'
 import LoadingButton from '@mui/lab/LoadingButton'
 import ButtonGroup from '@mui/material/ButtonGroup'
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
 import AuctionSlowModeStatus from '@components/auction-slow-mode-status'
@@ -240,13 +239,13 @@ export default class AuctionMainBid extends React.Component {
                 >
                   {(!nominated_pid || !isWinningBid) && (
                     <Button onClick={this.handleDownClick}>
-                      <RemoveIcon />
+                      <Icon name='remove' />
                     </Button>
                   )}
                   {action}
                   {(!nominated_pid || !isWinningBid) && (
                     <Button onClick={this.handleUpClick}>
-                      <AddIcon />
+                      <Icon name='add' />
                     </Button>
                   )}
                 </ButtonGroup>

@@ -1,9 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
+import Icon from '@components/icon'
 import PlayerRosterRow from '@components/player-roster-row'
 import { Roster as RosterBuilder } from '#libs-shared'
 import TeamName from '@components/team-name'
@@ -279,12 +278,12 @@ export default class Roster extends React.Component {
           >
             {is_psd_expanded ? (
               <>
-                <ExpandLessIcon fontSize='small' />
+                <Icon name='arrow-up' small />
                 hide ({hidden_count})
               </>
             ) : (
               <>
-                <ExpandMoreIcon fontSize='small' />
+                <Icon name='arrow-down' small />
                 show all ({hidden_count})
               </>
             )}

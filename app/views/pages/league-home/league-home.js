@@ -6,8 +6,8 @@ import dayjs from 'dayjs'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import Grid from '@mui/material/Grid'
-import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
+import Icon from '@components/icon'
 import LeagueHeader from '@components/league-header'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
@@ -324,7 +324,7 @@ export default function LeagueHomePage({
               title={
                 <>
                   Cutlist
-                  <NotInterestedIcon />
+                  <Icon name='not-interested' />
                 </>
               }
               cutlist={cutlist}

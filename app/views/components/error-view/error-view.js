@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
-import CheckIcon from '@mui/icons-material/Check'
 
 import { DISCORD_URL } from '@core/constants'
 import './error-view.styl'
 import '@styles/button.styl'
+
+import Icon from '@components/icon'
 
 // This component is the FallbackComponent rendered by the app ErrorBoundary
 const ErrorView = ({ error, info }) => {
@@ -56,9 +56,9 @@ const ErrorView = ({ error, info }) => {
               title='Copy to clipboard'
             >
               {copy_success ? (
-                <CheckIcon fontSize='small' />
+                <Icon name='check' small />
               ) : (
-                <ContentCopyOutlinedIcon fontSize='small' />
+                <Icon name='content-copy' small />
               )}
             </div>
           </div>

@@ -1,9 +1,25 @@
+// FILL IS `currentColor`, AND THAT IS A DELIBERATE CHANGE FOR THE OLDER GLYPHS.
+// Every sprite <symbol> is a bare <path> with no fill of its own, so an icon
+// used to paint the browser default — black — regardless of the ink around it.
+// MUI's SvgIcon set `fill: currentColor`, so the icons converted off it need
+// this to look as they did. The nine glyphs that were already on the sprite
+// change with them, which is the intent rather than a side effect: rules like
+// `.button__icon { color: $prose_muted }` were written to set the ink of the
+// control and had no effect on the glyph inside it.
 .icon
   width 24px
   height 24px
   pointer-events none
   vertical-align middle
+  fill currentColor
+  transition transform 150ms ease
 
 .icon--small
   width 18px
   height 18px
+
+// The chevron on a disclosure control, turned over while the thing it points at
+// is open. Transitioned rather than swapped so the two states read as one
+// control moving instead of two different icons.
+.icon--flipped
+  transform rotate(180deg)

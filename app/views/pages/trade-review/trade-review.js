@@ -2,8 +2,8 @@ import React, { useEffect, useLayoutEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
+import Icon from '@components/icon'
 import Loading from '@components/loading'
 import TradeReviewTrade from '@components/trade-review-trade'
 import PageLayout from '@layouts/page'
@@ -179,7 +179,7 @@ export default function TradeReviewPage({
           className='trade-review__back'
           onClick={go_to_list}
         >
-          <ChevronLeftIcon />
+          <Icon name='chevron-left' />
           Back to all trades
         </button>
       )}

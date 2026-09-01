@@ -4,10 +4,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Accordion from '@mui/material/Accordion'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import IconButton from '@mui/material/IconButton'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
+import Icon from '@components/icon'
 import EditableSettingField from '@components/editable-setting-field'
 import SettingsTeamsTeamPlayer from '@components/settings-teams-team-player'
 
@@ -68,7 +67,7 @@ export default class SettingsTeamsTeam extends React.Component {
     }
     return (
       <Accordion expanded={this.state.open} onChange={this.handleChange}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary expandIcon={<Icon name='arrow-down' />}>
           <div className='settings__section-title'>{team.name}</div>
           <div className='settings__section-action'>
             {team.team_id !== teamId && (
@@ -92,7 +91,7 @@ export default class SettingsTeamsTeam extends React.Component {
           <div className='heading__section-title'>
             Players
             <IconButton onClick={this.handleAdd}>
-              <AddCircleOutlineIcon />
+              <Icon name='add-circle-outline' />
             </IconButton>
           </div>
           <div className='settings__teams-team-roster empty'>{rosterItems}</div>

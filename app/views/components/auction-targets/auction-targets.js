@@ -9,8 +9,8 @@ import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
 import List from 'react-virtualized-compat/dist/es/List'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
-import AddIcon from '@mui/icons-material/Add'
 
+import Icon from '@components/icon'
 import NFLTeamBye from '@components/nfl-team-bye'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
@@ -76,7 +76,7 @@ export default function AuctionTargets({
             <div className='auction__player-nominate'>
               <Tooltip title='Nominate'>
                 <IconButton size='small' onClick={() => select(pid)}>
-                  <AddIcon fontSize='small' />
+                  <Icon name='add' small />
                 </IconButton>
               </Tooltip>
             </div>

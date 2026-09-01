@@ -4,10 +4,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useMediaQuery, useTheme } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
-import RepeatIcon from '@mui/icons-material/Repeat'
 
 import { draft_actions } from '@core/draft'
+import Icon from '@components/icon'
 import TeamName from '@components/team-name'
 import DraftPickItem from '@components/draft-pick-item'
 
@@ -139,7 +138,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
               <div key={item.trade_id} className={item_class}>
                 <div className='timeline-connector' />
                 <div className='timeline-marker'>
-                  <RepeatIcon className='timeline-marker-icon' />
+                  <Icon name='repeat' className='timeline-marker-icon' />
                 </div>
                 <div className='timeline-content'>
                   <div className='timeline-date'>
@@ -242,7 +241,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
           }
         }}
       >
-        <CloseIcon />
+        <Icon name='clear' />
       </IconButton>
 
       <div className='draft-pick-sheet-body'>

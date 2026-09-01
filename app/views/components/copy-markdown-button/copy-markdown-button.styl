@@ -20,8 +20,13 @@
   font-weight 400
   line-height 1
 
-  svg
-    font-size 14px
+  // 14px explicitly, not via font-size. This was `svg { font-size: 14px }`
+  // paired with MUI's `fontSize='inherit'`, which resolved the glyph to 1em —
+  // a chain that only worked because SvgIcon sized itself in em. A plain svg
+  // takes its box from width and height, and ignores font-size entirely.
+  .icon
+    width 14px
+    height 14px
 
   &:hover
     color rgba(0, 0, 0, 0.87)

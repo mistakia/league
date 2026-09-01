@@ -6,9 +6,10 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Checkbox from '@mui/material/Checkbox'
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 
 import './players-view-manager.styl'
+
+import Icon from '@components/icon'
 
 const fields_grouping = {
   'Player Biography': [],
@@ -70,12 +71,10 @@ function PlayerFieldGroup({ title, value, fields }) {
     <Box>
       <ListItemButton onClick={() => set_open(!open)}>
         <ListItemText primary={title} />
-        <KeyboardArrowDown
-          sx={{
-            mr: -1,
-            transform: open ? 'rotate(-180deg)' : 'rotate(0)',
-            transition: '0.2s'
-          }}
+        <Icon
+          name='arrow-down'
+          flipped={open}
+          className='players__view-manager-group-toggle'
         />
       </ListItemButton>
       {open && items}

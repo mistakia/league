@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import IconButton from '@mui/material/IconButton'
-import UndoIcon from '@mui/icons-material/Undo'
-import RedoIcon from '@mui/icons-material/Redo'
+
+import Icon from '@components/icon'
 
 export default function NflWeekSelectorHistoryControls({
   can_undo,
@@ -13,10 +13,10 @@ export default function NflWeekSelectorHistoryControls({
   return (
     <div className='nfl-week-selector-history-controls'>
       <IconButton size='small' disabled={!can_undo} onClick={on_undo}>
-        <UndoIcon fontSize='small' />
+        <Icon name='undo' small />
       </IconButton>
       <IconButton size='small' disabled={!can_redo} onClick={on_redo}>
-        <RedoIcon fontSize='small' />
+        <Icon name='redo' small />
       </IconButton>
     </div>
   )

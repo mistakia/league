@@ -36,3 +36,9 @@
 
 .players__view-manager-field.MuiListItemButton-root
   padding-left 32px
+
+// The group chevron sits tight to the right edge of its row. It carried MUI's
+// `sx={{ mr: -1 }}` — a negative 8px, which is MUI's spacing unit — to pull it
+// back over the ListItemButton's own right padding.
+.players__view-manager-group-toggle
+  margin-right -8px

@@ -6,11 +6,11 @@ import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import { Popper } from '@mui/base/Popper'
 import InputAdornment from '@mui/material/InputAdornment'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Paper from '@mui/material/Paper'
 
 import { fuzzy_search } from '@core/utils'
+import Icon from '@components/icon'
 import PlayersViewManager from '@components/players-view-manager'
 
 import './players-view-menu.styl'
@@ -90,7 +90,7 @@ export default function PlayersViewMenu({
               onBlur: handleInputBlur,
               endAdornment: (
                 <InputAdornment position='end'>
-                  <ArrowDropDownIcon />
+                  <Icon name='arrow-drop-down' />
                 </InputAdornment>
               )
             }}
