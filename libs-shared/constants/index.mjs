@@ -139,6 +139,19 @@ export {
   is_valid_restricted_free_agency_bid_outcome
 } from './restricted-free-agency-constants.mjs'
 
+// Free agency auction constants
+export {
+  auction_election_outcomes,
+  auction_election_outcome_values,
+  auction_election_outcome_display_names,
+  auction_election_outcome_descriptions,
+  is_winning_auction_election_outcome,
+  is_valid_auction_election_outcome,
+  AUCTION_BID_INCREMENT,
+  AUCTION_BLOCK_GRANULARITY_MINUTES,
+  AUCTION_MINIMUM_ELECTION_WINDOW_HOURS
+} from './auction-constants.mjs'
+
 // Amendment XLIII admission vote constants
 export {
   admission_vote_statuses,
