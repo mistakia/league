@@ -5,16 +5,32 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
-import { current_season } from '#constants'
+import { current_season, transaction_types } from '#constants'
+import { Roster } from '#libs-shared'
+import { getRoster, getLeague } from '#libs-server'
 import {
   LEAGUE_SCOPED_TABLES,
   parse_league_scoped_tables,
+  parent_table_for,
+  parent_key_for,
+  resolve_scope,
+  build_scope_plan,
+  count_league_rows,
+  diff_counts,
+  wipe_order,
   wipe_league,
-  clone_league_board
+  clone_league_metadata,
+  clone_league_board,
+  clone_league
 } from '#libs-server/clone-league.mjs'
+import { selectPlayer } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
+
+const source_lid = 1
+const season_year = current_season.year
+const roster_week = 0
 
 describe('clone-league', function () {
   describe('the table set', function () {
@@ -64,6 +80,143 @@ describe('clone-league', function () {
     })
   })
 
+  describe('scoping a table to one league', function () {
+    // Driven with a SYNTHETIC schema rather than the real one, because each
+    // case has to isolate the tier under test. A real table carries several
+    // scoping columns at once, so a case built on one cannot say which tier
+    // answered -- the resolver would look right while choosing for the wrong
+    // reason.
+    const scoped_tables = ['waivers', 'waiver_releases', 'poaches', 'teams']
+
+    it('prefers a league column over a team column', function () {
+      expect(
+        resolve_scope({
+          table: 'waivers',
+          columns: ['waiver_id', 'tid', 'lid'],
+          scoped_tables
+        })
+      ).to.deep.equal({ tier: 'league', column: 'lid' })
+    })
+
+    it('falls to the team column when there is no league column', function () {
+      expect(
+        resolve_scope({
+          table: 'users_teams',
+          columns: ['user_id', 'tid', 'season_year'],
+          scoped_tables
+        })
+      ).to.deep.equal({ tier: 'team', column: 'tid' })
+    })
+
+    it('reaches a parent row id when the table carries neither', function () {
+      expect(
+        resolve_scope({
+          table: 'waiver_releases',
+          columns: ['waiver_id', 'pid'],
+          scoped_tables,
+          columns_by_table: { waivers: ['waiver_id', 'lid'] }
+        })
+      ).to.deep.equal({
+        tier: 'parent',
+        column: 'waiver_id',
+        parent: 'waivers',
+        parent_key: 'waiver_id'
+      })
+    })
+
+    it('resolves a parent key spelled differently from the child column', function () {
+      // restricted_free_agency_releases.restricted_free_agency_bid_id points at
+      // restricted_free_agency_bids.bid_id. Assuming the two names match scopes
+      // the delete on a column the parent does not have.
+      expect(
+        parent_key_for({
+          column: 'restricted_free_agency_bid_id',
+          parent_columns: ['bid_id', 'pid', 'tid', 'lid']
+        })
+      ).to.equal('bid_id')
+    })
+
+    it('does not mistake a table for its own parent', function () {
+      expect(
+        parent_table_for({
+          column: 'admission_vote_candidate_id',
+          table: 'admission_vote_candidates',
+          scoped_tables: ['admission_vote_candidates', 'admission_votes']
+        })
+      ).to.equal(null)
+    })
+
+    it('clears a grandchild before the parent it is scoped through', function () {
+      // The reset list runs parent-before-child. A scoped delete cannot: once
+      // `waivers` is empty the subquery that reaches `waiver_releases` matches
+      // nothing and the grandchild survives a wipe that reports success.
+      const plan = {
+        waivers: { tier: 'league', column: 'lid' },
+        waiver_releases: {
+          tier: 'parent',
+          column: 'waiver_id',
+          parent: 'waivers',
+          parent_key: 'waiver_id'
+        },
+        users_teams: { tier: 'team', column: 'tid' },
+        teams: { tier: 'league', column: 'lid' }
+      }
+      const order = wipe_order(plan)
+      expect(order.indexOf('waiver_releases')).to.be.lessThan(
+        order.indexOf('waivers')
+      )
+      expect(order.indexOf('users_teams')).to.be.lessThan(
+        order.indexOf('teams')
+      )
+    })
+
+    it('orders the real table set the same way', function () {
+      // The synthetic case above proves the rule; this proves the rule reaches
+      // every table the clone actually wipes.
+      const plan = {}
+      for (const table of LEAGUE_SCOPED_TABLES) {
+        plan[table] = { tier: 'league', column: 'lid' }
+      }
+      plan.waiver_releases = {
+        tier: 'parent',
+        column: 'waiver_id',
+        parent: 'waivers',
+        parent_key: 'waiver_id'
+      }
+      plan.poach_releases = {
+        tier: 'parent',
+        column: 'poach_id',
+        parent: 'poaches',
+        parent_key: 'poach_id'
+      }
+      const order = wipe_order(plan)
+      expect(order).to.have.length(LEAGUE_SCOPED_TABLES.length)
+      expect(order.indexOf('waiver_releases')).to.be.lessThan(
+        order.indexOf('waivers')
+      )
+      expect(order.indexOf('poach_releases')).to.be.lessThan(
+        order.indexOf('poaches')
+      )
+      // The foreign key ordering the reset list encodes is preserved for
+      // tables with no scoping relation between them.
+      expect(order.indexOf('roster_asset_transformation')).to.be.lessThan(
+        order.indexOf('roster_asset_holding')
+      )
+    })
+
+    it('throws rather than scoping a table it cannot key', function () {
+      // The fail-loud direction. A resolver that returned null here would leave
+      // the table unwiped and report a clean run.
+      expect(() =>
+        resolve_scope({
+          table: 'mystery',
+          columns: ['pid', 'week'],
+          scoped_tables
+        })
+      ).to.throw('cannot scope mystery')
+    })
+  })
+
   describe('the league 1 refusal', function () {
     it('refuses to wipe league 1, with no flag to override', async function () {
       // The whole safety property of this script. A mistyped --to must not be
@@ -86,7 +239,7 @@ describe('clone-league', function () {
           trx: knex,
           from_lid: 2,
           to_lid: 1,
-          season_year: current_season.year
+          season_year
         })
       } catch (err) {
         error = err
@@ -109,7 +262,9 @@ describe('clone-league', function () {
     })
   })
 
-  describe('cloning a board', function () {
+  describe('against the database', function () {
+    this.timeout(60 * 1000)
+
     before(async function () {
       this.timeout(60 * 1000)
       MockDate.set(
@@ -118,71 +273,403 @@ describe('clone-league', function () {
       await knex.seed.run()
     })
 
+    // Three rostered players at DISTINCT salaries, so a cloned team's
+    // availableCap is a value only a correct copy produces. With the bare
+    // fixture every roster is empty and every team's availableCap is the salary
+    // cap, which cannot tell a working clone from one that copies no players at
+    // all.
+    //
+    // The salary transaction is dated to the PRIOR season on purpose. That is
+    // where a real league's salaries live -- a player signed in an earlier year
+    // has his transaction in that year -- and it is the case that distinguishes
+    // copying the whole transaction history from copying only the current
+    // season.
+    const seeded = []
+
+    const seed_roster = async () => {
+      seeded.length = 0
+      const exclude_pids = []
+      for (const { tid, player_salary } of [
+        { tid: 1, player_salary: 25 },
+        { tid: 2, player_salary: 40 },
+        { tid: 3, player_salary: 5 }
+      ]) {
+        const player = await selectPlayer({ exclude_pids, random: false })
+        exclude_pids.push(player.pid)
+
+        const roster = await knex('rosters')
+          .where({ tid, lid: source_lid, season_year, week: roster_week })
+          .first()
+
+        await knex('rosters_players').insert({
+          roster_id: roster.roster_id,
+          slot: 0,
+          pid: player.pid,
+          player_position: player.pos || 'RB',
+          tid,
+          lid: source_lid,
+          week: roster_week,
+          season_year
+        })
+
+        await knex('transactions').insert({
+          user_id: tid,
+          tid,
+          pid: player.pid,
+          lid: source_lid,
+          type: transaction_types.AUCTION_PROCESSED,
+          player_salary,
+          week: roster_week,
+          season_year: season_year - 1,
+          occurred_at: new Date()
+        })
+
+        seeded.push({ tid, pid: player.pid, player_salary })
+      }
+    }
+
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
+      await seed_roster()
     })
 
-    it('copies the board and leaves the auction history behind', async function () {
-      const season_year = current_season.year
-      const to_lid = 99
+    const board_of = async ({ lid }) => {
+      const league_row = await getLeague({ lid, year: season_year })
+      const teams = await knex('teams')
+        .where({ lid, season_year })
+        .orderBy('draft_order')
 
-      const source_teams = await knex('teams').where({ lid: 1, season_year })
-      expect(source_teams.length).to.be.greaterThan(0)
-
-      await knex.transaction(async (trx) => {
-        await clone_league_board({
-          trx,
-          from_lid: 1,
-          to_lid,
-          season_year
+      const board = []
+      for (const team of teams) {
+        const roster_row = await getRoster({
+          tid: team.team_id,
+          week: roster_week,
+          year: season_year
         })
-      })
+        const roster = new Roster({ roster: roster_row, league: league_row })
+        board.push({
+          name: team.name,
+          draft_order: team.draft_order,
+          salary_cap: team.salary_cap,
+          free_agent_acquisition_budget_balance:
+            team.free_agent_acquisition_budget_balance,
+          player_count: roster.all.length,
+          availableCap: roster.availableCap,
+          availableSpace: roster.availableSpace
+        })
+      }
+      return board
+    }
 
-      const cloned_teams = await knex('teams').where({
-        lid: to_lid,
-        season_year
-      })
-      expect(cloned_teams.length).to.equal(source_teams.length)
+    it('copies the board so every team matches the source', async function () {
+      const source_board = await board_of({ lid: source_lid })
+      expect(source_board).to.have.length(12)
+      // The input has to be able to fail. If no team carries a player, every
+      // availableCap below is the bare salary cap and the assertion is vacuous.
+      expect(
+        source_board.filter((team) => team.player_count > 0)
+      ).to.have.length(3)
+      expect(
+        new Set(source_board.map((team) => team.availableCap)).size
+      ).to.be.greaterThan(1)
 
-      // New team ids, not the source's. A clone that reused them would be
-      // writing into the source league's rows.
-      const source_ids = new Set(source_teams.map((t) => t.team_id))
-      for (const team of cloned_teams) {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      expect(lid).to.not.equal(source_lid)
+
+      expect(await board_of({ lid })).to.deep.equal(source_board)
+    })
+
+    it('gives the copy new team ids', async function () {
+      const source_ids = new Set(
+        (await knex('teams').where({ lid: source_lid })).map((t) => t.team_id)
+      )
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const cloned = await knex('teams').where({ lid, season_year })
+      expect(cloned).to.have.length(12)
+      for (const team of cloned) {
         expect(source_ids.has(team.team_id)).to.equal(false)
       }
-
-      // The socket reads AUCTION_BID rows to find the last nomination, so a
-      // copied auction history would make it resume mid-auction on a league
-      // that never started one.
-      const auction_rows = await knex('transactions')
-        .where({ lid: to_lid })
-        .whereIn('type', [6, 7])
-      expect(auction_rows).to.have.length(0)
     })
 
-    it('wipes what it cloned', async function () {
-      const season_year = current_season.year
-      const to_lid = 98
-
-      await knex.transaction(async (trx) => {
-        await clone_league_board({ trx, from_lid: 1, to_lid, season_year })
-      })
-      expect(
-        (await knex('teams').where({ lid: to_lid, season_year })).length
-      ).to.be.greaterThan(0)
-
-      await knex.transaction(async (trx) => {
-        await wipe_league({ trx, lid: to_lid })
+    it('is hosted and reaches no Discord channel', async function () {
+      // Asserted rather than assumed: a test auction announcing its nominations
+      // into the real league's channel is the loudest way to get this wrong.
+      await knex('leagues').where({ league_id: source_lid }).update({
+        discord_webhook_url: 'https://discord.example/source',
+        discord_announcements_webhook_url: 'https://discord.example/announce'
       })
 
-      expect(await knex('teams').where({ lid: to_lid })).to.have.length(0)
-      expect(
-        await knex('rosters_players').where({ lid: to_lid })
-      ).to.have.length(0)
-      expect(await knex('transactions').where({ lid: to_lid })).to.have.length(
-        0
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
       )
+
+      const cloned = await knex('leagues').where({ league_id: lid }).first()
+      expect(cloned.discord_webhook_url).to.equal(null)
+      expect(cloned.discord_announcements_webhook_url).to.equal(null)
+      expect(cloned.is_hosted).to.equal(true)
+    })
+
+    it('carries the salary history but not the current auction', async function () {
+      // Both halves at once, because they pull opposite ways and a clone that
+      // drops all transactions passes either one alone.
+      await knex('transactions').insert({
+        user_id: 1,
+        tid: 1,
+        pid: seeded[0].pid,
+        lid: source_lid,
+        type: transaction_types.AUCTION_BID,
+        player_salary: 3,
+        week: roster_week,
+        season_year,
+        occurred_at: new Date()
+      })
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const auction_rows = await knex('transactions')
+        .where({ lid, season_year })
+        .whereIn('type', [
+          transaction_types.AUCTION_BID,
+          transaction_types.AUCTION_PROCESSED
+        ])
+      expect(auction_rows).to.have.length(0)
+
+      const history = await knex('transactions').where({
+        lid,
+        season_year: season_year - 1
+      })
+      expect(history).to.have.length(3)
+    })
+
+    it('lets the same users reach the copy', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const cloned_tids = (await knex('teams').where({ lid, season_year })).map(
+        (team) => team.team_id
+      )
+      const owners = await knex('users_teams')
+        .whereIn('tid', cloned_tids)
+        .where({ season_year })
+      expect(owners.map((row) => row.user_id).sort()).to.deep.equal(
+        (
+          await knex('users_teams')
+            .whereIn(
+              'tid',
+              (await knex('teams').where({ lid: source_lid, season_year })).map(
+                (team) => team.team_id
+              )
+            )
+            .where({ season_year })
+        )
+          .map((row) => row.user_id)
+          .sort()
+      )
+    })
+
+    it('leaves the source unwritten across a full run', async function () {
+      const plan = await build_scope_plan({ trx: knex })
+      const before_counts = await count_league_rows({
+        trx: knex,
+        lid: source_lid,
+        plan
+      })
+      // The oracle has to be able to move, or an unchanged source proves
+      // nothing about it.
+      expect(before_counts.teams).to.equal(12)
+      expect(before_counts.rosters_players).to.equal(3)
+      expect(before_counts.waiver_releases).to.equal(0)
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+
+      const after_counts = await count_league_rows({
+        trx: knex,
+        lid: source_lid,
+        plan
+      })
+      expect(diff_counts(before_counts, after_counts)).to.deep.equal([])
+    })
+
+    it('re-syncs to the same state, twice over', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      // A live auction's worth of writes on the copy, which the re-sync has to
+      // clear. Without them the second run has nothing to undo and the
+      // comparison cannot fail.
+      const cloned_team = await knex('teams')
+        .where({ lid, season_year })
+        .orderBy('draft_order')
+        .first()
+      await knex('transactions').insert({
+        user_id: 1,
+        tid: cloned_team.team_id,
+        pid: seeded[0].pid,
+        lid,
+        type: transaction_types.AUCTION_BID,
+        player_salary: 11,
+        week: roster_week,
+        season_year,
+        occurred_at: new Date()
+      })
+      await knex('league_pauses').insert({
+        league_id: lid,
+        paused_at: new Date(),
+        pause_reason: 'clone-league re-sync spec',
+        paused_by_user_id: 1
+      })
+
+      const plan = await build_scope_plan({ trx: knex })
+      const dirty = await count_league_rows({ trx: knex, lid, plan })
+      expect(dirty.league_pauses).to.equal(1)
+
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+      const first = await board_of({ lid })
+      const first_counts = await count_league_rows({ trx: knex, lid, plan })
+      expect(first_counts.league_pauses).to.equal(0)
+
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+      const second = await board_of({ lid })
+      const second_counts = await count_league_rows({ trx: knex, lid, plan })
+
+      expect(second).to.deep.equal(first)
+      expect(diff_counts(first_counts, second_counts)).to.deep.equal([])
+    })
+
+    it('keeps the copy reachable after a re-sync', async function () {
+      // The wipe clears `leagues` and `seasons` too -- they are league-scoped
+      // and the reset list names them. A sync that did not put them back left
+      // the target league id pointing at nothing, which reads as a successful
+      // sync until someone opens the page.
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+
+      const cloned = await knex('leagues').where({ league_id: lid }).first()
+      expect(cloned, 'the leagues row survived the re-sync').to.not.equal(
+        undefined
+      )
+      const season = await knex('seasons').where({ lid, season_year }).first()
+      expect(season, 'the seasons row survived the re-sync').to.not.equal(
+        undefined
+      )
+      expect((await getLeague({ lid, year: season_year })).salary_cap).to.equal(
+        (await getLeague({ lid: source_lid, year: season_year })).salary_cap
+      )
+    })
+
+    it('wipes a grandchild table that carries no league key', async function () {
+      // waiver_releases is scoped only through waivers.waiver_id. The tier that
+      // reaches it is the one a column-name rule alone would miss.
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      const [waiver] = await knex('waivers')
+        .insert({
+          user_id: 1,
+          pid: seeded[0].pid,
+          tid: (await knex('teams').where({ lid, season_year }).first())
+            .team_id,
+          lid,
+          type: 1,
+          bid_amount: 1,
+          submitted: new Date()
+        })
+        .returning('waiver_id')
+      await knex('waiver_releases').insert({
+        waiver_id: waiver.waiver_id,
+        pid: seeded[1].pid
+      })
+      expect(
+        await knex('waiver_releases').where({ waiver_id: waiver.waiver_id })
+      ).to.have.length(1)
+
+      await knex.transaction((trx) => wipe_league({ trx, lid }))
+
+      expect(
+        await knex('waiver_releases').where({ waiver_id: waiver.waiver_id })
+      ).to.have.length(0)
+    })
+
+    it('refuses to clone a league into itself', async function () {
+      let error = null
+      try {
+        await knex.transaction((trx) =>
+          clone_league({
+            trx,
+            from_lid: source_lid,
+            to_lid: source_lid,
+            season_year
+          })
+        )
+      } catch (err) {
+        error = err
+      }
+      expect(error).to.not.equal(null)
+      expect(error.message).to.include('into itself')
+    })
+
+    it('reports a source write instead of committing it', async function () {
+      // The negative control for the source-unwritten assertion: a run that DID
+      // write the source must be reported and rolled back. Nothing in
+      // clone_league writes the source, so the write is injected here.
+      let error = null
+      try {
+        await knex.transaction(async (trx) => {
+          const result = await clone_league_metadata({
+            trx,
+            from_lid: source_lid
+          })
+          // One row, named explicitly. `.limit(1)` on a delete is ignored by
+          // postgres, so the same line written that way clears all twelve and
+          // the assertion below reads 12 -> 0.
+          await trx('teams').where({ lid: source_lid, team_id: 12 }).del()
+          const plan = await build_scope_plan({ trx })
+          const before = { teams: 12 }
+          const after = await count_league_rows({
+            trx,
+            lid: source_lid,
+            plan
+          })
+          const drift = diff_counts(before, after)
+          if (drift.length) {
+            throw new Error(`source league was written: ${drift.join(', ')}`)
+          }
+          return result
+        })
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.not.equal(null)
+      expect(error.message).to.include('teams: 12 -> 11')
+      // Rolled back, so the source still has its twelve teams.
+      expect(
+        await knex('teams').where({ lid: source_lid, season_year })
+      ).to.have.length(12)
     })
   })
 })

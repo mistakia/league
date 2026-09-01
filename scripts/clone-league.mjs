@@ -4,8 +4,8 @@ import { current_season } from '#constants'
 import {
   LEAGUE_SCOPED_TABLES,
   CLONED_BOARD_TABLES,
-  wipe_league,
-  clone_league_board
+  NOT_CLONED_REASONS,
+  clone_league
 } from '#libs-server/clone-league.mjs'
 
 /**
@@ -23,10 +23,10 @@ import {
  * destructive-against-production need "should get its own single-purpose script
  * that names the target as an explicit argument, not a bypass flag threaded
  * through here." This is that script. The target league id is a required
- * argument, never defaulted, and league 1 is refused unconditionally.
+ * argument for --sync, never defaulted, and league 1 is refused unconditionally.
  *
  * usage:
- *   node scripts/clone-league.mjs --create --from 1
+ *   node scripts/clone-league.mjs --create --from 1 --execute
  *   node scripts/clone-league.mjs --sync --from 1 --to 2 --execute
  *
  * Dry run by default. Nothing is written without --execute.
@@ -47,17 +47,23 @@ const parse_args = (argv) => {
   return args
 }
 
-const main = async () => {
-  const args = parse_args(process.argv.slice(2))
-
+export const validate_args = (args) => {
+  if (args.create && args.sync) {
+    throw new Error('--create and --sync are different verbs; pick one')
+  }
   if (!args.create && !args.sync) {
     throw new Error('one of --create or --sync is required')
   }
   if (!args.from) {
     throw new Error('--from <lid> is required')
   }
-
-  // REFUSE LEAGUE 1 BEFORE OPENING A CONNECTION. wipe_league refuses it too,
+  if (args.sync && !args.to) {
+    throw new Error('--sync requires an explicit --to <lid>')
+  }
+  if (args.create && args.to !== undefined) {
+    throw new Error('--create allocates the target league id; drop --to')
+  }
+  // REFUSE LEAGUE 1 BEFORE OPENING A CONNECTION. clone_league refuses it too,
   // but that check runs inside a transaction, so a mistyped --to failed with a
   // database error rather than a clear refusal -- and on a host that could not
   // reach the database it never got as far as refusing at all. The argument is
@@ -67,6 +73,11 @@ const main = async () => {
       'refusing --to 1: league 1 is the live league running the real auction'
     )
   }
+  return args
+}
+
+const main = async () => {
+  const args = validate_args(parse_args(process.argv.slice(2)))
 
   // console rather than debug(): a dry-run plan is the script's OUTPUT, and a
   // plan nobody sees unless they set DEBUG is not a dry run. The debug logger
@@ -75,38 +86,45 @@ const main = async () => {
     `league-scoped tables from the fixture reset list: ${LEAGUE_SCOPED_TABLES.length}`
   )
   console.log(`board tables copied: ${CLONED_BOARD_TABLES.join(', ')}`)
+  for (const [table, reason] of Object.entries(NOT_CLONED_REASONS)) {
+    console.log(`  not copied -- ${table}: ${reason}`)
+  }
 
-  if (args.sync) {
-    if (!args.to) {
-      throw new Error('--sync requires an explicit --to <lid>')
-    }
-    if (!args.execute) {
-      console.log('DRY RUN. Re-run with --execute to apply.')
+  if (!args.execute) {
+    console.log('DRY RUN. Re-run with --execute to apply.')
+    if (args.sync) {
       console.log(
         `would wipe league ${args.to} across ${LEAGUE_SCOPED_TABLES.length} tables`
       )
+      console.log(`would re-copy league ${args.from} into league ${args.to}`)
+    } else {
       console.log(
-        `would copy league ${args.from}'s board into league ${args.to}`
+        `would create a new hosted league from league ${args.from} at season ${current_season.year}`
       )
-      return
     }
-
-    await db.transaction(async (trx) => {
-      await wipe_league({ trx, lid: args.to })
-      await clone_league_board({
-        trx,
-        from_lid: args.from,
-        to_lid: args.to,
-        season_year: current_season.year
-      })
-    })
-    console.log(`synced league ${args.from} -> league ${args.to}`)
     return
   }
 
-  throw new Error(
-    '--create is not implemented yet; create the target league through the ' +
-      'normal league-creation path, then --sync into it'
+  const result = await db.transaction((trx) =>
+    clone_league({
+      trx,
+      from_lid: args.from,
+      to_lid: args.sync ? args.to : undefined,
+      season_year: current_season.year,
+      name: args.name
+    })
+  )
+
+  for (const [table, count] of Object.entries(result.copied)) {
+    console.log(`copied ${table}: ${count}`)
+  }
+  console.log(
+    args.sync
+      ? `synced league ${args.from} -> league ${result.lid}`
+      : `created league ${result.lid} from league ${args.from}`
+  )
+  console.log(
+    `re-sync it with: node scripts/clone-league.mjs --sync --from ${args.from} --to ${result.lid} --execute`
   )
 }
 

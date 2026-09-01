@@ -2,6 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { transaction_types } from '#constants'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const RESET_LIST_PATH = path.join(
@@ -42,19 +44,173 @@ export const LEAGUE_SCOPED_TABLES = parse_league_scoped_tables(
   fs.readFileSync(RESET_LIST_PATH, 'utf8')
 )
 
+// The two scoping vocabularies this schema actually uses, in the same order and
+// with the same both-spellings-are-live reasoning as the coverage gate's
+// DIRECT_SCOPE_COLUMNS. Split into two tiers here because the gate only has to
+// decide WHETHER a table is league-scoped, while this file has to build the
+// predicate: a league column compares to the lid, a team column has to go
+// through `teams`.
+const LEAGUE_SCOPE_COLUMNS = ['lid', 'league_id']
+const TEAM_SCOPE_COLUMNS = ['tid', 'team_id']
+
+/**
+ * The parent a grandchild table is scoped THROUGH, or null.
+ *
+ * Five of the reset list's tables carry no league or team column at all --
+ * `waiver_releases`, `poach_releases`, `trades_transactions`,
+ * `restricted_free_agency_releases` and `admission_vote_candidates`. They are
+ * scoped through a parent ROW ID, which is the coverage gate's tier 2, so the
+ * derivation is the same one: a column `<X>_id` where `<X>` pluralizes to a
+ * table already known league-scoped.
+ *
+ * The parent's own key is NOT always spelled the same as the child's column --
+ * `restricted_free_agency_releases.restricted_free_agency_bid_id` points at
+ * `restricted_free_agency_bids.bid_id`. So the key is resolved against the
+ * parent's real columns, longest suffix first, and an unresolvable one throws
+ * rather than silently scoping to nothing.
+ */
+export const parent_table_for = ({ column, table, scoped_tables }) => {
+  const match = column.match(/^(.*?)_?id$/)
+  if (!match || !match[1]) return null
+  const stem = match[1]
+  for (const candidate of [`${stem}s`, `${stem}es`]) {
+    if (candidate !== table && scoped_tables.includes(candidate)) {
+      return candidate
+    }
+  }
+  return null
+}
+
+export const parent_key_for = ({ column, parent_columns }) => {
+  if (parent_columns.includes(column)) return column
+  const suffix_matches = parent_columns
+    .filter((candidate) => column.endsWith(candidate))
+    .sort((a, b) => b.length - a.length)
+  return suffix_matches[0] || null
+}
+
+/**
+ * How one table's rows are narrowed to one league.
+ *
+ * Pure: it takes the columns rather than reading them, so a spec can drive it
+ * with a synthetic schema and see each tier chosen for a reason it controls.
+ */
+export const resolve_scope = ({
+  table,
+  columns,
+  scoped_tables,
+  columns_by_table = {}
+}) => {
+  const league_column = LEAGUE_SCOPE_COLUMNS.find((c) => columns.includes(c))
+  if (league_column) return { tier: 'league', column: league_column }
+
+  const team_column = TEAM_SCOPE_COLUMNS.find((c) => columns.includes(c))
+  if (team_column) return { tier: 'team', column: team_column }
+
+  for (const column of columns) {
+    const parent = parent_table_for({ column, table, scoped_tables })
+    if (!parent) continue
+    const parent_key = parent_key_for({
+      column,
+      parent_columns: columns_by_table[parent] || []
+    })
+    if (!parent_key) {
+      throw new Error(
+        `${table}.${column} points at ${parent}, which has no column it could key on`
+      )
+    }
+    return { tier: 'parent', column, parent, parent_key }
+  }
+
+  throw new Error(`cannot scope ${table} to a league: no key of any tier`)
+}
+
+const columns_of = async ({ trx, table }) =>
+  Object.keys(await trx(table).columnInfo())
+
+/**
+ * Resolve every league-scoped table's predicate once, against the LIVE schema.
+ *
+ * Reading columns from the database rather than from the committed schema dump
+ * is deliberate: this script runs against a real database, and a dump that has
+ * drifted from it would produce a wipe that misses rows while reporting none.
+ */
+export const build_scope_plan = async ({
+  trx,
+  tables = LEAGUE_SCOPED_TABLES
+}) => {
+  const columns_by_table = {}
+  for (const table of tables) {
+    columns_by_table[table] = await columns_of({ trx, table })
+  }
+
+  const plan = {}
+  for (const table of tables) {
+    plan[table] = resolve_scope({
+      table,
+      columns: columns_by_table[table],
+      scoped_tables: tables,
+      columns_by_table
+    })
+  }
+  return plan
+}
+
+const scoped_query = ({ trx, table, lid, plan }) => {
+  const entry = plan[table]
+  const query = trx(table)
+
+  if (entry.tier === 'league')
+    return query.where(`${table}.${entry.column}`, lid)
+
+  if (entry.tier === 'team') {
+    return query.whereIn(
+      `${table}.${entry.column}`,
+      trx('teams').distinct('team_id').where('lid', lid)
+    )
+  }
+
+  return query.whereIn(
+    `${table}.${entry.column}`,
+    scoped_query({ trx, table: entry.parent, lid, plan }).select(
+      `${entry.parent}.${entry.parent_key}`
+    )
+  )
+}
+
+/**
+ * Row counts per league-scoped table, for one league.
+ *
+ * This is the oracle for the source-is-unwritten assertion, so it deliberately
+ * covers the WHOLE derived table set rather than the small set a clone copies:
+ * a defect that wrote the source would most likely write a table the copy never
+ * touches, and a narrow count would report clean.
+ */
+export const count_league_rows = async ({ trx, lid, plan }) => {
+  const resolved = plan || (await build_scope_plan({ trx }))
+  const counts = {}
+  for (const table of Object.keys(resolved)) {
+    const [row] = await scoped_query({ trx, table, lid, plan: resolved }).count(
+      '* as count'
+    )
+    counts[table] = Number(row.count)
+  }
+  return counts
+}
+
+export const diff_counts = (before, after) =>
+  Object.keys(before)
+    .filter((table) => before[table] !== after[table])
+    .map((table) => `${table}: ${before[table]} -> ${after[table]}`)
+
 /**
  * What a clone actually copies, and why it is NOT the full list above.
  *
  * The wipe is complete by construction; the COPY is deliberately small and
- * reviewed. Eight of the league-scoped tables carry no league key at all --
- * `waiver_releases`, `poach_releases`, the four admission-vote children and the
- * trade children are grandchildren keyed on a parent row's surrogate id. Copying
- * those means remapping every id a sequence hands out, and a clone that gets
- * that subtly wrong is worse than one that never claims to have done it.
- *
- * None of them bear on an auction. What an auction walk needs is the BOARD:
- * who the teams are, who manages them, what they roster, and what those players
- * cost.
+ * reviewed. Trade, waiver, poach, RFA and governance history has no bearing on
+ * an auction, and copying it means remapping every surrogate id a sequence hands
+ * out -- a clone that gets that subtly wrong is worse than one that never
+ * claims to have done it.
  *
  * `transactions` is in the set for a reason that is easy to miss: `getRoster`
  * INNER JOINs it to source each rostered player's salary, because
@@ -86,15 +242,57 @@ export const NOT_CLONED_REASONS = {
   draft: 'the rookie draft precedes free agency and does not affect the board'
 }
 
-const LEAGUE_KEY_COLUMNS = {
-  leagues: 'league_id',
-  restricted_free_agency_nominations: 'league_id',
-  bid_changelog: 'league_id',
-  league_pauses: 'league_id',
-  admission_votes: 'league_id'
+const refuse_league_one = (lid, verb) => {
+  if (Number(lid) === 1) {
+    throw new Error(
+      `refusing to ${verb} league 1: that is the live league running the real auction`
+    )
+  }
 }
 
-const league_key_for = (table) => LEAGUE_KEY_COLUMNS[table] || 'lid'
+/**
+ * The order the tables must be cleared in, which is NOT the reset list's order.
+ *
+ * The reset list runs PARENT BEFORE CHILD -- `waivers` then `waiver_releases`,
+ * `poaches` then `poach_releases`, `trades` then `trades_transactions` -- and
+ * that is right for it, because it deletes whole tables and only has to respect
+ * the two real foreign keys. Here the delete is SCOPED, and a grandchild with no
+ * league key of its own is reached through a subquery on its parent. Clearing
+ * the parent first empties that subquery, so the grandchild matches nothing and
+ * survives a wipe that reports success. That is what the spec caught.
+ *
+ * So a table is emitted before anything it is scoped THROUGH: before its parent,
+ * and before `teams` if it is team-scoped. Tables with no such relation keep
+ * their reset-list order relative to each other, which preserves the
+ * children-before-parents foreign key ordering that list encodes.
+ */
+export const wipe_order = (plan) => {
+  const tables = Object.keys(plan)
+  const scoped_through = (table) => {
+    if (plan[table].tier === 'parent') return plan[table].parent
+    if (plan[table].tier === 'team') return 'teams'
+    return null
+  }
+
+  const emitted = new Set()
+  const order = []
+  const visit = (table, stack) => {
+    if (emitted.has(table)) return
+    if (stack.includes(table)) {
+      throw new Error(`scoping cycle: ${[...stack, table].join(' -> ')}`)
+    }
+    for (const other of tables) {
+      if (other !== table && scoped_through(other) === table) {
+        visit(other, [...stack, table])
+      }
+    }
+    emitted.add(table)
+    order.push(table)
+  }
+
+  for (const table of tables) visit(table, [])
+  return order
+}
 
 /**
  * Clear every league-scoped row for one league.
@@ -104,33 +302,126 @@ const league_key_for = (table) => LEAGUE_KEY_COLUMNS[table] || 'lid'
  * is that it cannot be pointed at it by a mistyped argument at three in the
  * morning.
  */
-export const wipe_league = async ({ trx, lid }) => {
+export const wipe_league = async ({ trx, lid, plan }) => {
   if (!lid) throw new Error('wipe_league requires an explicit lid')
-  if (Number(lid) === 1) {
-    throw new Error(
-      'refusing to wipe league 1: that is the live league running the real auction'
-    )
-  }
+  refuse_league_one(lid, 'wipe')
 
+  const resolved = plan || (await build_scope_plan({ trx }))
   const cleared = {}
-  // In reset-list order, which is children before parents -- the ordering is
-  // load-bearing where a foreign key actually exists.
-  for (const table of LEAGUE_SCOPED_TABLES) {
-    const key = league_key_for(table)
-    const has_key = await trx(table).columnInfo()
-    if (!has_key[key]) continue
-    cleared[table] = await trx(table).where(key, lid).del()
+  for (const table of wipe_order(resolved)) {
+    cleared[table] = await scoped_query({
+      trx,
+      table,
+      lid,
+      plan: resolved
+    }).del()
   }
   return cleared
 }
 
 /**
+ * Copy the league's own row and its season configuration.
+ *
+ * The copy IS HOSTED. `is_hosted` false means an external read-only mirror,
+ * which is what sync-external-league.mjs maintains; a league you cannot write to
+ * cannot host an auction test.
+ *
+ * Four fields are cleared rather than copied, and each would reach OUT of the
+ * copy if it were not:
+ *
+ *   the two Discord webhooks    a test auction announcing its nominations into
+ *                               the real league's channel is the loudest
+ *                               possible way to get this wrong
+ *   the four external league ids  they claim an ESPN/Sleeper/MFL/Fleaflicker
+ *                               league that the source already claims, so an
+ *                               import against the copy would write the source's
+ *                               upstream identity
+ *   archived_at                 a clone is live by definition
+ *
+ * `seasons` is copied for EVERY year, not just the target one. A roster page and
+ * the cap arithmetic behind it read the season row for the year they render, and
+ * the rows are a handful.
+ */
+export const clone_league_metadata = async ({
+  trx,
+  from_lid,
+  to_lid,
+  name
+}) => {
+  if (to_lid !== undefined) refuse_league_one(to_lid, 'clone into')
+
+  const source_league = await trx('leagues')
+    .where({ league_id: from_lid })
+    .first()
+  if (!source_league) {
+    throw new Error(`source league ${from_lid} not found`)
+  }
+
+  const { league_id, ...rest } = source_league
+  const row = {
+    ...rest,
+    name: (name || `${source_league.name} clone`).slice(0, 50),
+    is_hosted: true,
+    discord_webhook_url: null,
+    discord_announcements_webhook_url: null,
+    espn_league_id: null,
+    sleeper_league_id: null,
+    mfl_league_id: null,
+    fleaflicker_league_id: null,
+    archived_at: null
+  }
+  if (to_lid !== undefined) {
+    row.league_id = to_lid
+  } else {
+    // ADVANCE THE SEQUENCE PAST WHAT IS ALREADY THERE. A league inserted with an
+    // explicit league_id -- which is what --sync does on every run, and what the
+    // test fixture does for league 1 -- does not move
+    // `leagues_league_id_seq`, so the next --create draws an id that already
+    // exists and fails on the primary key. Reconciling immediately before the
+    // insert is the same repair the league fixture applies to the teams
+    // sequence, and it is idempotent.
+    await trx.raw(
+      "SELECT setval(pg_get_serial_sequence('leagues', 'league_id'), (SELECT COALESCE(MAX(league_id), 1) FROM leagues))"
+    )
+  }
+
+  const [inserted] = await trx('leagues').insert(row).returning('league_id')
+  const new_lid = Number(inserted.league_id)
+  refuse_league_one(new_lid, 'clone into')
+
+  const seasons = await trx('seasons').where({ lid: from_lid })
+  for (const season of seasons) {
+    await trx('seasons').insert({ ...season, lid: new_lid })
+  }
+
+  return { lid: new_lid, seasons: seasons.length }
+}
+
+/**
  * Copy one league's board into another.
  *
- * Leaves `transactions` of type AUCTION_BID and AUCTION_PROCESSED behind
- * deliberately: `_load_transactions` reads them to find the last nomination, so
- * copying an auction history would make the socket resume mid-auction on a
- * league that has not started one.
+ * TEAM IDENTITY IS ALLOCATED ONCE PER TEAM, NOT ONCE PER ROW. `teams` is keyed
+ * on (team_id, season_year), so one team is several rows and the id is stable
+ * across them. Inserting each row bare would draw a NEW id from the sequence for
+ * every year and shatter one team into several, which then breaks every
+ * historical transaction that names it.
+ *
+ * WHAT `transactions` CARRIES, which is the one judgment call in this file.
+ * Every season's rows are copied EXCEPT the current season's AUCTION_BID and
+ * AUCTION_PROCESSED. Both halves of that are load-bearing and they pull opposite
+ * ways:
+ *
+ *   The history has to come, because `getRoster` INNER JOINs the newest
+ *   transaction at or before the roster's (year, week) to find each player's
+ *   salary. A player signed in an earlier season has that row in that earlier
+ *   season, so copying only the current year drops most of the roster silently
+ *   and reports a cap that is wrong in the direction of "plenty of room".
+ *
+ *   The current season's auction rows must NOT come, because
+ *   `Auction._load_transactions` reads exactly those two types for exactly the
+ *   current year to find the last nomination. Carrying them resumes the socket
+ *   mid-auction on a league that has never started one, which is the opposite of
+ *   the clean slate this exists to provide.
  */
 export const clone_league_board = async ({
   trx,
@@ -138,32 +429,44 @@ export const clone_league_board = async ({
   to_lid,
   season_year
 }) => {
-  if (Number(to_lid) === 1) {
-    throw new Error('refusing to clone into league 1')
-  }
+  refuse_league_one(to_lid, 'clone into')
 
   const copied = {}
 
-  const teams = await trx('teams').where({ lid: from_lid, season_year })
+  const teams = await trx('teams')
+    .where({ lid: from_lid })
+    .orderBy('team_id')
+    .orderBy('season_year')
   const team_id_map = new Map()
 
   for (const team of teams) {
     const { team_id, ...rest } = team
+    const known = team_id_map.get(team_id)
+    if (known) {
+      await trx('teams').insert({ ...rest, team_id: known, lid: to_lid })
+      continue
+    }
     const [inserted] = await trx('teams')
       .insert({ ...rest, lid: to_lid })
       .returning('team_id')
-    team_id_map.set(team_id, inserted.team_id)
+    team_id_map.set(team_id, Number(inserted.team_id))
   }
   copied.teams = teams.length
 
-  const users_teams = await trx('users_teams')
-    .whereIn('tid', Array.from(team_id_map.keys()))
-    .where({ season_year })
+  const map_tid = (tid) => {
+    const mapped = team_id_map.get(tid)
+    if (!mapped) {
+      throw new Error(`no cloned team for source tid ${tid}`)
+    }
+    return mapped
+  }
+
+  const users_teams = await trx('users_teams').whereIn(
+    'tid',
+    Array.from(team_id_map.keys())
+  )
   for (const row of users_teams) {
-    await trx('users_teams').insert({
-      ...row,
-      tid: team_id_map.get(row.tid)
-    })
+    await trx('users_teams').insert({ ...row, tid: map_tid(row.tid) })
   }
   copied.users_teams = users_teams.length
 
@@ -172,13 +475,9 @@ export const clone_league_board = async ({
   for (const roster of rosters) {
     const { roster_id, ...rest } = roster
     const [inserted] = await trx('rosters')
-      .insert({
-        ...rest,
-        lid: to_lid,
-        tid: team_id_map.get(roster.tid)
-      })
+      .insert({ ...rest, lid: to_lid, tid: map_tid(roster.tid) })
       .returning('roster_id')
-    roster_id_map.set(roster_id, inserted.roster_id)
+    roster_id_map.set(roster_id, Number(inserted.roster_id))
   }
   copied.rosters = rosters.length
 
@@ -190,27 +489,77 @@ export const clone_league_board = async ({
     await trx('rosters_players').insert({
       ...row,
       lid: to_lid,
-      tid: team_id_map.get(row.tid),
+      tid: map_tid(row.tid),
       roster_id: roster_id_map.get(row.roster_id)
     })
   }
   copied.rosters_players = roster_players.length
 
-  // Salary-bearing transactions only, and never the auction's own rows.
-  const salary_transactions = await trx('transactions')
-    .where({ lid: from_lid, season_year })
-    .whereNotIn('type', [6, 7])
-  for (const row of salary_transactions) {
+  const transactions = await trx('transactions')
+    .where({ lid: from_lid })
+    .whereNot(function () {
+      this.where('season_year', season_year).whereIn('type', [
+        transaction_types.AUCTION_BID,
+        transaction_types.AUCTION_PROCESSED
+      ])
+    })
+  for (const row of transactions) {
     const { transaction_id, ...rest } = row
     await trx('transactions').insert({
       ...rest,
       lid: to_lid,
-      tid: team_id_map.get(row.tid)
+      tid: map_tid(row.tid)
     })
   }
-  copied.transactions = salary_transactions.length
+  copied.transactions = transactions.length
 
   return { copied, team_id_map }
+}
+
+/**
+ * Stand up a new copy, or reset an existing one and re-copy it.
+ *
+ * One function for both verbs, because they differ only in whether the target
+ * league id already exists. Everything runs inside ONE transaction the caller
+ * owns, and the source count comparison happens INSIDE it -- a source write
+ * detected after a commit is a report, while one detected before it is a
+ * rollback.
+ */
+export const clone_league = async ({
+  trx,
+  from_lid,
+  to_lid,
+  season_year,
+  name
+}) => {
+  if (Number(from_lid) === Number(to_lid)) {
+    throw new Error('refusing to clone a league into itself')
+  }
+
+  const plan = await build_scope_plan({ trx })
+  const source_before = await count_league_rows({ trx, lid: from_lid, plan })
+
+  if (to_lid !== undefined) {
+    await wipe_league({ trx, lid: to_lid, plan })
+  }
+
+  const { lid } = await clone_league_metadata({ trx, from_lid, to_lid, name })
+  const { copied } = await clone_league_board({
+    trx,
+    from_lid,
+    to_lid: lid,
+    season_year
+  })
+
+  const source_after = await count_league_rows({ trx, lid: from_lid, plan })
+  const drift = diff_counts(source_before, source_after)
+  if (drift.length) {
+    throw new Error(
+      `source league ${from_lid} was written during the clone: ${drift.join(', ')}`
+    )
+  }
+
+  return { lid, copied }
 }
 
 export default {
@@ -218,6 +567,15 @@ export default {
   CLONED_BOARD_TABLES,
   NOT_CLONED_REASONS,
   parse_league_scoped_tables,
+  parent_table_for,
+  parent_key_for,
+  resolve_scope,
+  build_scope_plan,
+  count_league_rows,
+  diff_counts,
+  wipe_order,
   wipe_league,
-  clone_league_board
+  clone_league_metadata,
+  clone_league_board,
+  clone_league
 }
