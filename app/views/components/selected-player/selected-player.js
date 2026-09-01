@@ -28,6 +28,7 @@ import SelectedPlayerTransactions from '@components/selected-player-transactions
 import SelectedPlayerMarkets from '@components/selected-player-markets'
 import SelectedPlayerPlays from '@components/selected-player-plays'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
+import AuctionElectionControl from '@components/auction-election-control'
 import PlayerContextMenu from '@components/player-context-menu'
 
 import './selected-player.styl'
@@ -53,7 +54,8 @@ export default function SelectedPlayer({
   deselect,
   load_all_players,
   load_player_seasonlogs,
-  is_hosted_league
+  is_hosted_league,
+  can_elect_on_player
 }) {
   const projectionView = 0
   const transactionsView = 9
@@ -241,6 +243,13 @@ export default function SelectedPlayer({
           player_map={player_map}
         />
         <PlayerWatchlistAction pid={pid} />
+        {/* Set, raise, withdraw or decline a maximum bid on this player,
+            whether or not anyone has nominated them. This is where a manager
+            states every bid they intend to make before the auction opens --
+            the behavior the whole design rests on. */}
+        {is_logged_in && is_hosted_league && can_elect_on_player && (
+          <AuctionElectionControl pid={pid} />
+        )}
         <div className='selected__player-header-secondary'>
           <div className='selected__player-header-section'>
             {/* Always visible: Status */}
@@ -499,5 +508,6 @@ SelectedPlayer.propTypes = {
   is_before_live_auction_end: PropTypes.bool,
   load_all_players: PropTypes.func,
   load_player_seasonlogs: PropTypes.func,
-  is_hosted_league: PropTypes.bool
+  is_hosted_league: PropTypes.bool,
+  can_elect_on_player: PropTypes.bool
 }

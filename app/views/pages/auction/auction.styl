@@ -6,7 +6,7 @@
 .auction__menu
   display flex
   height 100%
-  flex-direction column
+  flex-direction row
 
   .base-TabPanel-root
     height 100%
@@ -27,3 +27,22 @@
 @media (max-width 800px)
   .auction__main
     margin 0
+
+// The election-mode side rail. In election mode the PAGE is the auction: the
+// live bid bar is app-level chrome that mounts for blocks, so what a manager
+// needs between blocks lives here.
+.auction__side
+  flex 0 0 320px
+  display flex
+  flex-direction column
+  overflow-y auto
+  border-left 1px solid rgba(0, 0, 0, 0.12)
+
+@media (max-width 800px)
+  .auction__menu
+    flex-direction column
+
+  .auction__side
+    flex 0 0 auto
+    border-left none
+    border-top 1px solid rgba(0, 0, 0, 0.12)
