@@ -1,6 +1,7 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
 import fs from 'fs'
+import { spawn } from 'child_process'
 import MockDate from 'mockdate'
 
 import knex from '#db'
@@ -8,6 +9,8 @@ import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types } from '#constants'
 import { Roster } from '#libs-shared'
 import { getRoster, getLeague } from '#libs-server'
+import Auction from '#api/sockets/auction.mjs'
+import { get_active_auction_nomination } from '#libs-server/auction-settlement.mjs'
 import {
   LEAGUE_SCOPED_TABLES,
   parse_league_scoped_tables,
@@ -670,6 +673,526 @@ describe('clone-league', function () {
       expect(
         await knex('teams').where({ lid: source_lid, season_year })
       ).to.have.length(12)
+    })
+  })
+
+  describe('the shape league 1 actually has', function () {
+    this.timeout(60 * 1000)
+
+    // The shared fixture builds ONE season. League 1 does not: measured
+    // read-only against production, it carries eight team-years, twelve
+    // distinct team ids of which only ten are in the current season, seven
+    // `seasons` rows, and twelve thousand transactions spread across those
+    // years. Every one of those differences exercises a branch the
+    // single-season fixture cannot reach, and the team-identity branch below
+    // does not run AT ALL against it.
+    const prior_years = [season_year - 1, season_year - 2]
+    const retired_team_ids = [13, 14]
+
+    before(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(
+        current_season.regular_season_start.subtract('1', 'month').toISOString()
+      )
+      await knex.seed.run()
+    })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+
+      const current_teams = await knex('teams').where({
+        lid: source_lid,
+        season_year
+      })
+
+      // The same twelve teams in two earlier years, so one team is several
+      // rows, plus two that folded and appear ONLY in those earlier years.
+      const team_rows = []
+      const users_teams_rows = []
+      for (const year of prior_years) {
+        for (const team of current_teams) {
+          const { team_id, ...rest } = team
+          team_rows.push({ ...rest, team_id, season_year: year })
+          users_teams_rows.push({
+            user_id: team_id,
+            tid: team_id,
+            season_year: year
+          })
+        }
+        for (const team_id of retired_team_ids) {
+          team_rows.push({
+            team_id,
+            season_year: year,
+            lid: source_lid,
+            division: 1,
+            name: `Retired${team_id}`,
+            abbreviation: `RT${team_id}`,
+            waiver_order: team_id,
+            draft_order: team_id,
+            salary_cap: current_teams[0].salary_cap,
+            free_agent_acquisition_budget_balance: 0
+          })
+          users_teams_rows.push({
+            user_id: team_id,
+            tid: team_id,
+            season_year: year
+          })
+        }
+      }
+      await knex('teams').insert(team_rows)
+      await knex('users_teams').insert(users_teams_rows)
+
+      // A transaction in an earlier year belonging to a team that no longer
+      // exists in the current season. `map_tid` throws on an unmapped tid, so
+      // this is the case that says whether the clone reaches historical teams
+      // or dies on them.
+      const player = await selectPlayer({ random: false })
+      await knex('transactions').insert({
+        user_id: 13,
+        tid: 13,
+        pid: player.pid,
+        lid: source_lid,
+        type: transaction_types.ROSTER_ADD,
+        player_salary: 7,
+        week: 0,
+        season_year: prior_years[0],
+        occurred_at: new Date()
+      })
+    })
+
+    it('gives one source team one cloned id across every year it played', async function () {
+      const source_teams = await knex('teams').where({ lid: source_lid })
+      expect(source_teams).to.have.length(12 * 3 + 4)
+      expect(new Set(source_teams.map((t) => t.team_id)).size).to.equal(14)
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const cloned = await knex('teams').where({ lid })
+      expect(cloned).to.have.length(source_teams.length)
+      expect(new Set(cloned.map((t) => t.team_id)).size).to.equal(14)
+
+      // The property that a row-at-a-time insert breaks: one team is one id in
+      // every year, so a name appears under exactly one cloned team_id.
+      const ids_by_name = new Map()
+      for (const team of cloned) {
+        if (!ids_by_name.has(team.name)) ids_by_name.set(team.name, new Set())
+        ids_by_name.get(team.name).add(team.team_id)
+      }
+      for (const [name, ids] of ids_by_name) {
+        expect(
+          ids.size,
+          `${name} was split across ${ids.size} cloned ids`
+        ).to.equal(1)
+      }
+    })
+
+    it('carries a transaction belonging to a team that has since folded', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const retired_clone = await knex('teams')
+        .where({ lid, name: 'Retired13' })
+        .first()
+      expect(retired_clone, 'the folded team was cloned').to.not.equal(
+        undefined
+      )
+
+      const carried = await knex('transactions').where({
+        lid,
+        tid: retired_clone.team_id,
+        season_year: prior_years[0]
+      })
+      expect(carried).to.have.length(1)
+      expect(carried[0].player_salary).to.equal(7)
+    })
+
+    it('leaves only the current season on the board the auction reads', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      // `_load_teams` filters on the current season, so the folded teams must
+      // not appear on the board however many historical rows they have.
+      const board = await knex('teams').where({ lid, season_year })
+      expect(board).to.have.length(12)
+      expect(board.map((t) => t.name)).to.not.include('Retired13')
+    })
+
+    it('re-syncs a multi-season league to the same state', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      const plan = await build_scope_plan({ trx: knex })
+
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+      const first = await count_league_rows({ trx: knex, lid, plan })
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+      const second = await count_league_rows({ trx: knex, lid, plan })
+
+      expect(first.teams).to.equal(12 * 3 + 4)
+      expect(diff_counts(first, second)).to.deep.equal([])
+    })
+  })
+
+  describe('what a re-sync must not overwrite', function () {
+    this.timeout(60 * 1000)
+
+    // The auction mirror differs from league 1 on purpose, and the differences
+    // ARE the reason it exists: election mode on, free agency period already
+    // open. League 1 has election mode off and a period that opens days from
+    // now. A sync that re-copied the source's season row would turn the mirror
+    // off and push its period into the future, and the next election would be
+    // refused with nothing in the sync's output saying why.
+    before(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(
+        current_season.regular_season_start.subtract('1', 'month').toISOString()
+      )
+      await knex.seed.run()
+    })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+      // The source's own settings, deliberately the OPPOSITE of the mirror's on
+      // both columns. Without this the source and target agree and the test
+      // cannot tell preserving from overwriting.
+      await knex('seasons').where({ lid: source_lid, season_year }).update({
+        is_auction_election_mode_enabled: false,
+        free_agency_period_start: current_season.regular_season_start.toDate()
+      })
+    })
+
+    const make_mirror = async () => {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      const period_start = current_season.regular_season_start
+        .subtract(2, 'months')
+        .toDate()
+      await knex('seasons').where({ lid, season_year }).update({
+        is_auction_election_mode_enabled: true,
+        free_agency_period_start: period_start
+      })
+      return { lid, period_start }
+    }
+
+    it('keeps the mirror in election mode with its period still open', async function () {
+      const { lid, period_start } = await make_mirror()
+
+      const result = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+      expect(result.configuration_preserved).to.equal(true)
+
+      const season = await knex('seasons').where({ lid, season_year }).first()
+      expect(season.is_auction_election_mode_enabled).to.equal(true)
+      expect(season.free_agency_period_start.getTime()).to.equal(
+        period_start.getTime()
+      )
+    })
+
+    it('names the columns where the mirror and the source disagree', async function () {
+      const { lid } = await make_mirror()
+
+      const result = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+
+      expect(result.configuration_drift).to.include(
+        `${season_year}.is_auction_election_mode_enabled`
+      )
+      expect(result.configuration_drift).to.include(
+        `${season_year}.free_agency_period_start`
+      )
+
+      // The report is computed from the configuration captured BEFORE the wipe,
+      // so on its own it would still read correct even if the sync then wrote
+      // the source's values over the top. Confirm against what the database
+      // actually holds afterwards, or the report is a claim about an
+      // intermediate value nobody can observe.
+      const [target, source] = await Promise.all([
+        knex('seasons').where({ lid, season_year }).first(),
+        knex('seasons').where({ lid: source_lid, season_year }).first()
+      ])
+      for (const column of [
+        'is_auction_election_mode_enabled',
+        'free_agency_period_start'
+      ]) {
+        expect(
+          String(target[column]),
+          `${column} still differs from the source after the sync`
+        ).to.not.equal(String(source[column]))
+      }
+    })
+
+    it('still re-copies the board while keeping the settings', async function () {
+      // Preserving configuration must not turn into preserving everything --
+      // the board is exactly what a sync is for.
+      const { lid } = await make_mirror()
+      await knex('teams').where({ lid, season_year }).del()
+      expect(await knex('teams').where({ lid, season_year })).to.have.length(0)
+
+      await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: lid, season_year })
+      )
+
+      expect(await knex('teams').where({ lid, season_year })).to.have.length(12)
+    })
+
+    it('copies the source settings when the target does not exist yet', async function () {
+      // --sync into a league id nothing has created. There is no configuration
+      // to preserve, so the source's is the only sensible answer.
+      const result = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, to_lid: 4242, season_year })
+      )
+      expect(result.lid).to.equal(4242)
+      expect(result.configuration_preserved).to.equal(false)
+
+      const season = await knex('seasons')
+        .where({ lid: 4242, season_year })
+        .first()
+      expect(season, 'a seasons row was created').to.not.equal(undefined)
+      expect(season.is_auction_election_mode_enabled).to.equal(false)
+    })
+  })
+
+  describe('the auction reading the copy', function () {
+    this.timeout(60 * 1000)
+
+    before(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(
+        current_season.regular_season_start.subtract('1', 'month').toISOString()
+      )
+      await knex.seed.run()
+    })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('rotates nominations in the source league draft order', async function () {
+      // The claim the whole clone rests on: `_load_teams` sorts on draft_order
+      // and `_tids` IS the nomination rotation, so a copy that lost the order
+      // nominates in an arbitrary sequence and the walk proves nothing.
+      //
+      // Driven through the real Auction object rather than a re-implementation
+      // of its query, because a re-implementation cannot tell whether the SOCKET
+      // agrees with the clone.
+      const source_auction = new Auction({ wss: null, lid: source_lid })
+      await source_auction._load_teams()
+      expect(source_auction._tids).to.have.length(12)
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const clone_auction = new Auction({ wss: null, lid })
+      await clone_auction._load_teams()
+
+      expect(clone_auction._tids).to.have.length(12)
+      expect(clone_auction._teams.map((t) => t.draft_order)).to.deep.equal(
+        source_auction._teams.map((t) => t.draft_order)
+      )
+      expect(clone_auction._teams.map((t) => t.name)).to.deep.equal(
+        source_auction._teams.map((t) => t.name)
+      )
+      // A different league, so different ids -- the ORDER is what carries.
+      expect(clone_auction._tids).to.not.deep.equal(source_auction._tids)
+    })
+
+    it('opens on a clean board rather than resuming the source auction', async function () {
+      // Mid-auction on the source: a nomination the socket would resume from.
+      const player = await selectPlayer({ random: false })
+      await knex('transactions').insert({
+        user_id: 1,
+        tid: 1,
+        pid: player.pid,
+        lid: source_lid,
+        type: transaction_types.AUCTION_BID,
+        player_salary: 4,
+        week: 0,
+        season_year,
+        occurred_at: new Date()
+      })
+      expect(
+        await get_active_auction_nomination({ lid: source_lid, season_year })
+      ).to.not.equal(null)
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const clone_auction = new Auction({ wss: null, lid })
+      await clone_auction._load_teams()
+      await clone_auction._load_transactions()
+      expect(clone_auction._transactions).to.have.length(0)
+      expect(
+        await get_active_auction_nomination({ lid, season_year })
+      ).to.equal(null)
+    })
+  })
+
+  describe('the command line', function () {
+    this.timeout(120 * 1000)
+
+    // The specs above all call the library. Nothing had ever run the SCRIPT,
+    // so its argument wiring, its season, its transaction and its exit codes
+    // were unexercised -- and the script is the only surface the operator
+    // touches.
+    const run_cli = (args) =>
+      new Promise((resolve) => {
+        const child = spawn('node', ['scripts/clone-league.mjs', ...args], {
+          env: process.env
+        })
+        let stdout = ''
+        let stderr = ''
+        child.stdout.on('data', (chunk) => {
+          stdout += chunk
+        })
+        child.stderr.on('data', (chunk) => {
+          stderr += chunk
+        })
+        child.on('close', (code) => resolve({ code, stdout, stderr }))
+      })
+
+    const lid_from = (stdout) => {
+      const match = stdout.match(/created league (\d+) from league/)
+      expect(match, `no created league in output:\n${stdout}`).to.not.equal(
+        null
+      )
+      return Number(match[1])
+    }
+
+    before(async function () {
+      this.timeout(60 * 1000)
+      MockDate.set(
+        current_season.regular_season_start.subtract('1', 'month').toISOString()
+      )
+      await knex.seed.run()
+    })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('creates a league end to end', async function () {
+      const before_leagues = (await knex('leagues')).length
+
+      const { code, stdout, stderr } = await run_cli([
+        '--create',
+        '--from',
+        '1',
+        '--execute'
+      ])
+      expect(code, `stderr:\n${stderr}`).to.equal(0)
+
+      const lid = lid_from(stdout)
+      expect(lid).to.not.equal(source_lid)
+      expect(await knex('leagues')).to.have.length(before_leagues + 1)
+      expect(await knex('teams').where({ lid, season_year })).to.have.length(12)
+      expect(stdout).to.include('copied teams: 12')
+    })
+
+    it('writes nothing without --execute', async function () {
+      // A dry run that quietly wrote would be the worst defect this script
+      // could carry, because the whole safety story is "look before you leap".
+      const before_leagues = (await knex('leagues')).length
+      const before_teams = (await knex('teams')).length
+
+      const { code, stdout } = await run_cli(['--create', '--from', '1'])
+      expect(code).to.equal(0)
+      expect(stdout).to.include('DRY RUN')
+
+      expect(await knex('leagues')).to.have.length(before_leagues)
+      expect(await knex('teams')).to.have.length(before_teams)
+    })
+
+    it('re-syncs from the command line and clears what the auction wrote', async function () {
+      const created = await run_cli(['--create', '--from', '1', '--execute'])
+      expect(created.code, created.stderr).to.equal(0)
+      const lid = lid_from(created.stdout)
+
+      const player = await selectPlayer({ random: false })
+      const cloned_team = await knex('teams')
+        .where({ lid, season_year })
+        .first()
+      await knex('transactions').insert({
+        user_id: 1,
+        tid: cloned_team.team_id,
+        pid: player.pid,
+        lid,
+        type: transaction_types.AUCTION_BID,
+        player_salary: 9,
+        week: 0,
+        season_year,
+        occurred_at: new Date()
+      })
+
+      const synced = await run_cli([
+        '--sync',
+        '--from',
+        '1',
+        '--to',
+        String(lid),
+        '--execute'
+      ])
+      expect(synced.code, synced.stderr).to.equal(0)
+      expect(synced.stdout).to.include(`synced league 1 -> league ${lid}`)
+
+      expect(
+        await knex('transactions')
+          .where({ lid, season_year })
+          .whereIn('type', [
+            transaction_types.AUCTION_BID,
+            transaction_types.AUCTION_PROCESSED
+          ])
+      ).to.have.length(0)
+      expect(await knex('teams').where({ lid, season_year })).to.have.length(12)
+    })
+
+    it('refuses --to 1 with a non-zero exit and touches nothing', async function () {
+      const before_teams = (
+        await knex('teams').where({ lid: source_lid, season_year })
+      ).length
+      expect(before_teams).to.equal(12)
+
+      const { code, stderr } = await run_cli([
+        '--sync',
+        '--from',
+        '2',
+        '--to',
+        '1',
+        '--execute'
+      ])
+      expect(code).to.equal(1)
+      expect(stderr).to.include('refusing --to 1')
+
+      expect(
+        await knex('teams').where({ lid: source_lid, season_year })
+      ).to.have.length(12)
+    })
+
+    it('exits non-zero on an unknown argument rather than guessing', async function () {
+      const { code, stderr } = await run_cli([
+        '--create',
+        '--from',
+        '1',
+        '--exceute'
+      ])
+      expect(code).to.equal(1)
+      expect(stderr).to.include('unknown argument')
     })
   })
 })

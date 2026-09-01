@@ -118,6 +118,21 @@ const main = async () => {
   for (const [table, count] of Object.entries(result.copied)) {
     console.log(`copied ${table}: ${count}`)
   }
+
+  // Say which configuration the copy is running under. A sync re-copies the
+  // BOARD and keeps the target's own league and season rows, because a mirror
+  // differs from its source on purpose -- election mode on, free agency period
+  // already open -- and re-copying would silently undo exactly the settings that
+  // make it walkable. That is invisible from the row counts above, so it is
+  // stated, along with every column where the two now disagree.
+  if (result.configuration_preserved) {
+    console.log(`kept league ${result.lid}'s own league and season settings`)
+    console.log(
+      result.configuration_drift.length
+        ? `differs from league ${args.from} at: ${result.configuration_drift.join(', ')}`
+        : `identical to league ${args.from}'s settings`
+    )
+  }
   console.log(
     args.sync
       ? `synced league ${args.from} -> league ${result.lid}`

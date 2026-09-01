@@ -242,6 +242,40 @@ export const NOT_CLONED_REASONS = {
   draft: 'the rookie draft precedes free agency and does not affect the board'
 }
 
+/**
+ * Move a table's id sequence past the largest id already in it.
+ *
+ * EVERY id this clone draws needs this first, and the reason is not tidiness.
+ * A row inserted with an EXPLICIT id does not advance the sequence behind that
+ * column, so any such insert leaves the sequence pointing at an id that already
+ * exists. The next `nextval` then collides on the primary key and aborts the
+ * whole clone transaction partway through.
+ *
+ * This is not hypothetical and it is not test-only. `--sync` re-inserts the
+ * `leagues` row and every team's second-and-later season rows under explicit
+ * ids; the league fixture creates league 1 and its twelve teams that way; a
+ * bulk import does the same. Production's four sequences happened to be in sync
+ * when this was written, which is exactly the condition that makes the failure
+ * arrive later and look like corruption rather than drift.
+ *
+ * Only ever moves the sequence FORWARD. Setting it back to `max(id)` would be
+ * the more obvious spelling and is wrong: a sequence legitimately ahead of the
+ * table -- ids drawn by a concurrent transaction, or by rows since deleted --
+ * would be rewound to hand those ids out a second time.
+ */
+const reconcile_sequence = async ({ trx, table, column }) => {
+  await trx.raw(
+    `SELECT setval(
+       pg_get_serial_sequence(?, ?),
+       GREATEST(
+         (SELECT COALESCE(MAX(??), 1) FROM ??),
+         COALESCE(pg_sequence_last_value(pg_get_serial_sequence(?, ?)), 1)
+       )
+     )`,
+    [table, column, column, table, table, column]
+  )
+}
+
 const refuse_league_one = (lid, verb) => {
   if (Number(lid) === 1) {
     throw new Error(
@@ -373,16 +407,7 @@ export const clone_league_metadata = async ({
   if (to_lid !== undefined) {
     row.league_id = to_lid
   } else {
-    // ADVANCE THE SEQUENCE PAST WHAT IS ALREADY THERE. A league inserted with an
-    // explicit league_id -- which is what --sync does on every run, and what the
-    // test fixture does for league 1 -- does not move
-    // `leagues_league_id_seq`, so the next --create draws an id that already
-    // exists and fails on the primary key. Reconciling immediately before the
-    // insert is the same repair the league fixture applies to the teams
-    // sequence, and it is idempotent.
-    await trx.raw(
-      "SELECT setval(pg_get_serial_sequence('leagues', 'league_id'), (SELECT COALESCE(MAX(league_id), 1) FROM leagues))"
-    )
+    await reconcile_sequence({ trx, table: 'leagues', column: 'league_id' })
   }
 
   const [inserted] = await trx('leagues').insert(row).returning('league_id')
@@ -432,6 +457,16 @@ export const clone_league_board = async ({
   refuse_league_one(to_lid, 'clone into')
 
   const copied = {}
+
+  // Every id below comes from a sequence, and each of these tables holds rows
+  // this clone itself inserts under explicit ids. See reconcile_sequence.
+  await reconcile_sequence({ trx, table: 'teams', column: 'team_id' })
+  await reconcile_sequence({ trx, table: 'rosters', column: 'roster_id' })
+  await reconcile_sequence({
+    trx,
+    table: 'transactions',
+    column: 'transaction_id'
+  })
 
   const teams = await trx('teams')
     .where({ lid: from_lid })
@@ -517,13 +552,73 @@ export const clone_league_board = async ({
 }
 
 /**
+ * The target's own `leagues` and `seasons` rows, taken before a wipe clears
+ * them, so a re-sync can put THEM back rather than the source's.
+ *
+ * WHY A SYNC MUST NOT RE-COPY THE CONFIGURATION. A mirror is not a byte copy of
+ * its source; it differs on purpose, and the differences are exactly what make
+ * it walkable. The auction mirror runs with election mode ON and its free agency
+ * period ALREADY OPEN, while league 1 has election mode off and a period that
+ * opens days from now. Re-copying league 1's season row would turn election mode
+ * off and push the period into the future, so the next election would be refused
+ * -- and nothing about the sync's output would say why.
+ *
+ * The BOARD is what a sync re-copies. The configuration is the target's.
+ *
+ * Returns null when the target has no `leagues` row, which is a --sync into a
+ * league id that does not exist yet. That falls back to copying the source's
+ * configuration, because there is nothing else to preserve.
+ */
+export const capture_league_configuration = async ({ trx, lid }) => {
+  const league_row = await trx('leagues').where({ league_id: lid }).first()
+  if (!league_row) return null
+  const seasons = await trx('seasons').where({ lid })
+  return { league: league_row, seasons }
+}
+
+export const restore_league_configuration = async ({ trx, configuration }) => {
+  await trx('leagues').insert(configuration.league)
+  for (const season of configuration.seasons) {
+    await trx('seasons').insert(season)
+  }
+  return {
+    lid: Number(configuration.league.league_id),
+    seasons: configuration.seasons.length
+  }
+}
+
+/**
+ * Season columns where the preserved target differs from the source.
+ *
+ * Reported rather than reconciled. A sync that silently keeps a stale setting is
+ * the same failure as one that silently overwrites a deliberate one -- the
+ * operator has to be able to see which of the two happened.
+ */
+export const configuration_drift = ({ configuration, source_seasons }) => {
+  const source_by_year = new Map(
+    source_seasons.map((season) => [season.season_year, season])
+  )
+  const drift = []
+  for (const season of configuration.seasons) {
+    const source = source_by_year.get(season.season_year)
+    if (!source) continue
+    for (const column of Object.keys(season)) {
+      if (column === 'lid') continue
+      if (String(season[column]) !== String(source[column])) {
+        drift.push(`${season.season_year}.${column}`)
+      }
+    }
+  }
+  return drift
+}
+
+/**
  * Stand up a new copy, or reset an existing one and re-copy it.
  *
  * One function for both verbs, because they differ only in whether the target
- * league id already exists. Everything runs inside ONE transaction the caller
- * owns, and the source count comparison happens INSIDE it -- a source write
- * detected after a commit is a report, while one detected before it is a
- * rollback.
+ * already exists. Everything runs inside ONE transaction the caller owns, and
+ * the source count comparison happens INSIDE it -- a source write detected after
+ * a commit is a report, while one detected before it is a rollback.
  */
 export const clone_league = async ({
   trx,
@@ -535,15 +630,21 @@ export const clone_league = async ({
   if (Number(from_lid) === Number(to_lid)) {
     throw new Error('refusing to clone a league into itself')
   }
+  if (to_lid !== undefined) refuse_league_one(to_lid, 'clone into')
 
   const plan = await build_scope_plan({ trx })
   const source_before = await count_league_rows({ trx, lid: from_lid, plan })
 
+  let configuration = null
   if (to_lid !== undefined) {
+    configuration = await capture_league_configuration({ trx, lid: to_lid })
     await wipe_league({ trx, lid: to_lid, plan })
   }
 
-  const { lid } = await clone_league_metadata({ trx, from_lid, to_lid, name })
+  const { lid } = configuration
+    ? await restore_league_configuration({ trx, configuration })
+    : await clone_league_metadata({ trx, from_lid, to_lid, name })
+
   const { copied } = await clone_league_board({
     trx,
     from_lid,
@@ -559,7 +660,17 @@ export const clone_league = async ({
     )
   }
 
-  return { lid, copied }
+  return {
+    lid,
+    copied,
+    configuration_preserved: Boolean(configuration),
+    configuration_drift: configuration
+      ? configuration_drift({
+          configuration,
+          source_seasons: await trx('seasons').where({ lid: from_lid })
+        })
+      : []
+  }
 }
 
 export default {
