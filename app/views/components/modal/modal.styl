@@ -54,20 +54,44 @@
   border-radius 3px
   outline none
 
+// THE SIZES ARE IN PIXELS, NOT em, AND THAT IS THE POINT OF NOT CALLING
+// prose_label() HERE. That mixin sets 0.9375em, which is right inside
+// prose_page() because the page declares a 17px base for it to be relative to.
+// The modal portals to document.body, and NO stylesheet in this app sets a
+// font-size on body or html — so the em was resolving against the browser
+// default and the title was rendering at 15px, a number nothing in the project
+// chose. The tokens are still the prose language's; only the sizing is local.
 .modal__title
   padding 20px 24px 0
-  prose_label()
+  font-family $prose_mono
+  font-weight $prose_bold
+  // Large enough to be read as a heading rather than as a bold first line. Mono
+  // sets wider than the body face at the same size, so this is a smaller step
+  // up from the content than the numbers suggest, and it takes the negative
+  // tracking mono needs above ~16px to stop looking like a terminal dump.
+  font-size 17px
+  line-height 1.35
+  letter-spacing -0.01em
+  color $prose_ink
 
 .modal__content
   padding 16px 24px
-  font-size 14px
-  line-height 1.5
+  // 15px over 14px, and 1.6 leading over 1.5. These paragraphs are the only
+  // prose in the app's chrome — several interpolate a player's full name and
+  // position into a sentence and then explain a roster consequence — so they
+  // are read rather than scanned, and they were set at the density of a table
+  // cell. At 480px with 24px of padding either side the measure is about 60
+  // characters, which is what the leading is sized for.
+  font-size 15px
+  line-height 1.6
   color $prose_body
 
   // What DialogContentText used to be. Call sites write a plain paragraph now,
-  // so the muted ink and the spacing between them belong here.
+  // so the ink and the spacing between them belong here. The gap is set in em
+  // deliberately — this one IS relative to a font-size declared just above it,
+  // so it tracks the text rather than drifting from it.
   p
-    margin 0 0 12px
+    margin 0 0 0.75em
     &:last-child
       margin-bottom 0
 
