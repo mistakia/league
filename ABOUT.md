@@ -688,12 +688,17 @@ observations:
     plus the doubled-selector z-index pins in app/styles/general.styl must stay until react-table is
     converted too. The app-side @mui/x-date-pickers dependency and its webpack alias exist only to
     dedupe react-tables copy.
+  - >-
+    [pattern] 2026-09-01 A betting column showing ONE value where the book posted a ladder is the
+    market key being FINER than the cell key -- the fourth axis in the key-mismatch family, and the
+    only one no correlation can fix: the cell has to gain a dimension. Tell is count(distinct
+    selection_metric_line) per (selection_pid, esbid) exceeding 1.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-01T04:47:01.832Z'
+updated_at: '2026-09-01T22:47:09.188Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
