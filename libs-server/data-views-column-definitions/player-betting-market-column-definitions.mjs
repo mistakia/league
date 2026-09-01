@@ -32,6 +32,41 @@ import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param
 const resolve_market_grain = ({ is_player_game_prop, is_team_game_prop }) =>
   is_player_game_prop || is_team_game_prop ? 'game' : 'season'
 
+// The weeks a game-grain market CTE spans, and the seasons that list names.
+// One resolution shared by the player and team paths, so the two cannot drift
+// the way the alias and the CTE did.
+//
+// Games are filtered by nfl_week_id rather than by a (season_year, season_type,
+// week) triple. The triple cannot express a list at all, and its two failure
+// modes are both live: POST week 1 and REG week 1 share a (year, week) key --
+// production holds 2024 playoff markets sitting on week 1 beside the September
+// ones -- and a week list spanning two seasons has no single year to pin. The
+// identifier carries all three components, so one IN-list is exact.
+//
+// A SEASON market carries no week at all, so the week scope is not its to read:
+// resolve_week_scope falls back to the current week when a request names none,
+// which would narrow a season market to a game. Callers pass is_week_scoped
+// false for those and get an empty scope, leaving the scalar-year path in place.
+const resolve_market_week_scope = ({
+  params,
+  data_view_options,
+  is_week_scoped = true
+}) => {
+  if (!is_week_scoped) return { nfl_week_ids: [], market_season_years: [] }
+
+  const { nfl_week_ids } = resolve_week_scope({ params, data_view_options })
+  const market_season_years = [
+    ...new Set(
+      nfl_week_ids
+        .map((identifier) => parse_nfl_week_identifier({ identifier }))
+        .filter(Boolean)
+        .map((parsed) => parsed.year)
+    )
+  ]
+
+  return { nfl_week_ids, market_season_years }
+}
+
 const get_default_params = ({
   params,
   is_player_game_prop = false,
@@ -256,36 +291,16 @@ const player_betting_market_with = ({
     is_player_game_prop
   })
 
+  const is_week_scoped = market_grain === 'game'
+
   // The weeks this CTE spans. Resolved through the same helper the join reads,
   // so a CTE cannot hold weeks the join has no predicate to select between --
   // which fans a week cell into one row per week.
-  const { nfl_week_ids } = resolve_week_scope({
+  const { nfl_week_ids, market_season_years } = resolve_market_week_scope({
     params,
-    data_view_options
+    data_view_options,
+    is_week_scoped
   })
-
-  // Season markets carry no week at all, so the week scope is not theirs to
-  // read: resolve_week_scope falls back to the current week when a request
-  // names none, which would narrow a season market to a game.
-  const is_week_scoped = market_grain === 'game'
-
-  // Filter the games by nfl_week_id rather than by a (season_year, season_type,
-  // week) triple. The triple cannot express a list at all, and its two failure
-  // modes are both live: POST week 1 and REG week 1 share a (year, week) key --
-  // production holds 2024 playoff markets sitting on week 1 beside the
-  // September ones -- and a week list spanning two seasons has no single year
-  // to pin. The identifier carries all three components, so one IN-list is
-  // exact.
-  const market_season_years = is_week_scoped
-    ? [
-        ...new Set(
-          nfl_week_ids
-            .map((identifier) => parse_nfl_week_identifier({ identifier }))
-            .filter(Boolean)
-            .map((parsed) => parsed.year)
-        )
-      ]
-    : []
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -296,7 +311,7 @@ const player_betting_market_with = ({
       .andWhere('time_type', time_type)
 
     // A week list can name several seasons, which a scalar year cannot hold.
-    if (is_week_scoped && market_season_years.length) {
+    if (market_season_years.length) {
       qb.whereIn('prop_markets_index.season_year', market_season_years)
     } else {
       qb.andWhere('prop_markets_index.season_year', year)
@@ -464,7 +479,8 @@ const team_betting_market_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
 
@@ -480,12 +496,26 @@ const team_betting_market_join = ({
     ) {
       this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
     } else {
-      this.on(
-        `${table_name}.home_nfl_team`,
-        '=',
-        'player.current_nfl_team'
-      ).orOn(`${table_name}.away_nfl_team`, '=', 'player.current_nfl_team')
+      // Parenthesised, or the week predicate below would bind to the OR's
+      // right arm alone and the away-team branch would match every week.
+      this.on(function () {
+        this.on(
+          `${table_name}.home_nfl_team`,
+          '=',
+          'player.current_nfl_team'
+        ).orOn(`${table_name}.away_nfl_team`, '=', 'player.current_nfl_team')
+      })
     }
+
+    // Under a week axis the CTE holds every requested week, so the cell's own
+    // year and week are what select the row. Without this the join was on the
+    // team alone and one week's line rendered on every week row.
+    correlate_week_scoped_cte({
+      builder: this,
+      db,
+      cte_name: table_name,
+      data_view_options
+    })
   })
 }
 
@@ -496,7 +526,8 @@ const team_betting_market_with = ({
   select_strings = [],
   having_clauses,
   where_clauses,
-  row_axes
+  row_axes,
+  data_view_options
 }) => {
   const {
     time_type,
@@ -511,6 +542,12 @@ const team_betting_market_with = ({
     is_team_game_prop: true
   })
 
+  // The weeks this CTE spans, resolved through the same helper the join reads.
+  const { nfl_week_ids, market_season_years } = resolve_market_week_scope({
+    params,
+    data_view_options
+  })
+
   const markets_cte = `${with_table_name}_markets`
 
   query.with(markets_cte, (qb) => {
@@ -519,21 +556,40 @@ const team_betting_market_with = ({
       'source_market_id',
       'time_type',
       'nfl_games.home_nfl_team',
-      'nfl_games.away_nfl_team'
+      'nfl_games.away_nfl_team',
+      'nfl_games.season_year as year',
+      'nfl_games.week as week'
     )
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
-      .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
+
+    // A week list can name several seasons, which a scalar year cannot hold.
+    if (market_season_years.length) {
+      qb.whereIn('prop_markets_index.season_year', market_season_years)
+    } else {
+      qb.andWhere('prop_markets_index.season_year', year)
+    }
 
     // home_nfl_team/away_nfl_team are projected unconditionally above (and read
     // as m.home_nfl_team/m.away_nfl_team downstream), so nfl_games must always
-    // be joined; only the week/season_type narrowing is conditional.
+    // be joined; only the week narrowing is conditional.
     qb.join('nfl_games', function () {
       this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
       this.andOn(`nfl_games.season_year`, '=', `prop_markets_index.season_year`)
-      if (week) {
+      if (nfl_week_ids.length) {
+        // By nfl_week_id rather than a (season_year, season_type, week)
+        // triple: the triple cannot express a list, and POST week 1 collides
+        // with REG week 1 -- production holds 2024 playoff markets on week 1
+        // beside the September ones.
+        this.andOn(
+          db.raw(
+            `nfl_games.nfl_week_id in (${nfl_week_ids.map(() => '?').join(', ')})`,
+            nfl_week_ids
+          )
+        )
+      } else if (week) {
         this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
         this.andOn(`nfl_games.season_type`, '=', db.raw('?', [seas_type]))
       }
@@ -541,7 +597,13 @@ const team_betting_market_with = ({
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select('pms.selection_pid', 'm.home_nfl_team', 'm.away_nfl_team')
+    qb.select(
+      'pms.selection_pid',
+      'm.home_nfl_team',
+      'm.away_nfl_team',
+      'm.year',
+      'm.week'
+    )
       .from(`${markets_cte} as m`)
       .join('prop_market_selections_index as pms', function () {
         this.on('pms.source_id', '=', 'm.source_id')
@@ -580,12 +642,36 @@ const team_game_implied_team_total_with = ({
   with_table_name,
   having_clauses,
   where_clauses,
-  row_axes
+  row_axes,
+  data_view_options
 }) => {
   const { time_type, source_id, year, week, seas_type } = get_default_params({
     params,
     is_team_game_prop: true
   })
+
+  const { nfl_week_ids, market_season_years } = resolve_market_week_scope({
+    params,
+    data_view_options
+  })
+
+  // Both halves scan the same games, so the year and week narrowing is written
+  // once and applied to each. Divergence here is the class this whole migration
+  // exists to close.
+  const apply_market_scope = (qb) => {
+    if (market_season_years.length) {
+      qb.whereIn('prop_markets_index.season_year', market_season_years)
+    } else {
+      qb.andWhere('prop_markets_index.season_year', year)
+    }
+
+    if (nfl_week_ids.length) {
+      qb.whereIn('nfl_games.nfl_week_id', nfl_week_ids)
+    } else {
+      qb.andWhere('nfl_games.week', week)
+      qb.andWhere('nfl_games.season_type', db.raw('?', [seas_type]))
+    }
+  }
 
   const spread_cte = `${with_table_name}_spread`
   const total_cte = `${with_table_name}_total`
@@ -594,7 +680,9 @@ const team_game_implied_team_total_with = ({
     qb.select(
       'prop_markets_index.esbid',
       'pms.selection_pid',
-      'pms.selection_metric_line as spread'
+      'pms.selection_metric_line as spread',
+      'nfl_games.season_year as year',
+      'nfl_games.week as week'
     )
       .from('prop_markets_index')
       .join('prop_market_selections_index as pms', function () {
@@ -619,10 +707,9 @@ const team_game_implied_team_total_with = ({
         bookmaker_constants.team_game_market_types.GAME_SPREAD
       )
       .andWhere('prop_markets_index.time_type', time_type)
-      .andWhere('prop_markets_index.season_year', year)
       .andWhere('prop_markets_index.source_id', source_id)
-      .andWhere('nfl_games.week', week)
-      .andWhere('nfl_games.season_type', db.raw('?', [seas_type]))
+
+    apply_market_scope(qb)
   })
 
   query.with(total_cte, (qb) => {
@@ -650,14 +737,15 @@ const team_game_implied_team_total_with = ({
         bookmaker_constants.team_game_market_types.GAME_TOTAL
       )
       .andWhere('prop_markets_index.time_type', time_type)
-      .andWhere('prop_markets_index.season_year', year)
       .andWhere('prop_markets_index.source_id', source_id)
-      .andWhere('nfl_games.week', week)
-      .andWhere('nfl_games.season_type', db.raw('?', [seas_type]))
+
+    apply_market_scope(qb)
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select('s.esbid', 's.selection_pid')
+    // year and week ride out of the spread half; the total half is joined on
+    // esbid, which already fixes the game and therefore the week.
+    qb.select('s.esbid', 's.selection_pid', 's.year', 's.week')
       .from(`${spread_cte} as s`)
       .join(`${total_cte} as t`, 's.esbid', 't.esbid')
       .select(db.raw('(t.total - s.spread) / 2 as implied_team_total'))
@@ -668,12 +756,23 @@ const team_game_implied_team_total_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
 
   query[join_func](table_name, function () {
     this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
+
+    // Under a week axis the CTE holds every requested week, so the cell's own
+    // year and week are what select the row. Without this the join was on the
+    // team alone and one week's implied total rendered on every week row.
+    correlate_week_scoped_cte({
+      builder: this,
+      db,
+      cte_name: table_name,
+      data_view_options
+    })
   })
 }
 
