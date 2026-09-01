@@ -292,9 +292,9 @@
   gap 2px
   margin-right 6px
 
-  .MuiIconButton-root
-    padding 3px
-
-  .MuiSvgIcon-root
-    width 15px
-    height 15px
+  // Tighter than a stock small icon button: these sit inline in a param row
+  // rather than in a toolbar. The glyph needs no rule -- `small` on the button
+  // now sizes it (see button.styl).
+  .button__icon
+    +button_override()
+      padding 0 4px

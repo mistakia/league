@@ -86,6 +86,34 @@ hover_lift()
   background $hover_background
   box-shadow $box_shadow
 
+// OVERRIDING A .button DECLARATION FROM A COMPONENT STYLESHEET.
+//
+// button.styl's base rule is guarded by a four-:not() chain that keeps it off
+// MUI's own buttons — react-table still ships them — which puts it at 0,5,0,
+// and its nested .button__small and .button__icon blocks a step higher again.
+// A component rule written at its natural specificity therefore LOSES SILENTLY:
+// it emits, it is right there in the stylesheet, and it never applies.
+//
+// That is not hypothetical. Six rules went dead exactly this way when the app's
+// buttons moved off MUI — each had been live, and each dropped its styling with
+// no error, no build failure and nothing to grep for, since the CSS is present.
+// Same family as the unimported-mixin and undefined-variable traps this file's
+// neighbours record: the failure is silence.
+//
+// Call it as a block mixin:
+//
+//   .my-thing .button__icon
+//     +button_override()
+//       padding 0 4px
+//
+// It repeats the guard chain AND the .button class, so the result clears both
+// the base rule and its small/icon variants whatever the chunk order turns out
+// to be. Only reach for it on a property button.styl actually sets — a property
+// it does not set (min-height, white-space, margin) applies without this.
+button_override()
+  &.button:not(.MuiButton-root):not(.MuiIconButton-root):not(.MuiFab-root):not(.MuiButtonBase-root)
+    {block}
+
 $qb_color = tint(red, 25%)
 $wr_color = tint(orange, 25%)
 $rb_color = tint(green, 25%)

@@ -68,9 +68,13 @@
   .team__name
     line-height 1.5em
 
-.MuiButtonGroup-root.winning .MuiButtonGroup-grouped
-  background-color rgb(46, 125, 50)
-  color rgba(255,255,255,0.8)
+// The stepper goes green while you hold the winning bid. `winning` is pushed
+// onto the group's className in auction-main-bid.js; it reached the buttons
+// through MUI's own group classes until the group became @components/button-group.
+.button-group.winning > .button
+  +button_override()
+    background rgb(46, 125, 50)
+    color rgba(255,255,255,0.8)
 
 @media (min-width 800px)
   .auction__bid-actions

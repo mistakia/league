@@ -266,9 +266,10 @@
   border-top 1px solid $borderColor
   justify-content flex-end
   align-items stretch
-  .MuiButton-root
+  .button
     white-space nowrap
-    font-size 10px
+    +button_override()
+      font-size 10px
 
 .selected__player-actions-close
   display flex
@@ -286,7 +287,9 @@
 
 @media (max-width 600px)
   .selected__player-actions-container
-    .MuiButtonBase-root
+    // A bigger touch target on a phone. min-height is not a property
+    // button.styl sets, so it needs no override chain.
+    .button
       min-height 32px
 
   .selected__player-actions
@@ -311,8 +314,9 @@
     .player__name
       padding 8px 0
 
-  .selected__player-header-section .MuiButton-root
-    font-size 9px
+  .selected__player-header-section .button
+    +button_override()
+      font-size 9px
 
   .selected__player-header-secondary
     flex-basis 100%

@@ -49,12 +49,13 @@
     + table
       margin-top 16px
 
-  .MuiPaper-root
+  // The dashboard-team-summary accordions. `box-shadow: none` is gone with the
+  // MUI Paper elevation it was cancelling.
+  .accordion
     background transparent
-    box-shadow none
     transition background 120ms ease-in 0s
 
-    &.Mui-expanded
+    &.accordion--expanded
       background white
 
     &:hover

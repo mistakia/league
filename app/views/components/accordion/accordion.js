@@ -55,10 +55,13 @@ export default function Accordion({
     if (on_toggle) on_toggle(next)
   }
 
-  // No `accordion--expanded` modifier. The open state is already on the DOM as
-  // the summary's `aria-expanded`, which is selectable, and a class emitted by
-  // this component that no stylesheet reads is a hook nobody asked for.
+  // `accordion--expanded` is the open state on the ROOT. `aria-expanded` already
+  // carries it, but that lives on the summary button, so a caller wanting to
+  // paint the whole panel while it is open has nothing to hang a rule on —
+  // league-team.styl does exactly that for the nine dashboard summaries, which
+  // is the rule MUI's `.Mui-expanded` used to serve.
   const class_names = ['accordion']
+  if (is_expanded) class_names.push('accordion--expanded')
   if (className) class_names.push(className)
 
   // `unmount_on_collapse` is what MUI's `TransitionProps={{ unmountOnExit }}`

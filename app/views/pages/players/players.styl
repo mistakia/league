@@ -4,15 +4,17 @@
   flex-direction column
   width 100%
 
-.players__head-expand.MuiButtonBase-root
-  flex 1 1 100%
-  display flex
-  height 20px
+.players__head-expand
   margin-bottom 4px
-  .MuiSvgIcon-root
-    transition opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+  +button_override()
+    flex 1 1 100%
+    display flex
+    height 20px
+
+  .icon
     border-radius 99em
-  &:hover .MuiSvgIcon-root
+
+  &:hover .icon
     background white
 
 .players__filters
@@ -21,8 +23,8 @@
   flex-direction column
   width 100%
 
-  &.expanded .players__head-expand .MuiSvgIcon-root
-    transform rotate(180deg)
+  // The chevron's turn is `flipped={expanded}` on the Icon now (players.js),
+  // shared with every other disclosure rather than redrawn as a rotate here.
 
 .players__filters-row
   flex 0 0 auto
@@ -64,8 +66,9 @@
   .players__head
     margin-top 8px
 
-  .players__view-export.MuiButton-root
-    display none
+  .players__view-export
+    +button_override()
+      display none
 
   .players__filters-row
     padding 4px
