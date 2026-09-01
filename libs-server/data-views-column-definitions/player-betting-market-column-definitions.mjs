@@ -595,6 +595,7 @@ const team_betting_market_with = ({
       'source_id',
       'source_market_id',
       'time_type',
+      'prop_markets_index.esbid',
       'nfl_games.home_nfl_team',
       'nfl_games.away_nfl_team',
       'nfl_games.season_year as year',
@@ -654,6 +655,12 @@ const team_betting_market_with = ({
     if (selection_type.length) {
       qb.whereIn('pms.selection_type', selection_type)
     }
+
+    // One row per side per game, or the LEFT JOIN multiplies the cell. A book
+    // posting the same market twice is the common case here rather than the
+    // rare one: 194 of 544 DRAFTKINGS CLOSE GAME_SPREAD team-weeks in 2025
+    // carry more than one row, 188 of them at conflicting lines.
+    apply_market_row_dedup({ qb })
 
     // Add any additional select strings
     for (const select_string of select_strings) {
@@ -759,6 +766,14 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.source_id', source_id)
 
     apply_market_scope(qb)
+
+    // One spread per side per game. Both halves must dedup: the two are joined
+    // on esbid below, so a duplicate on EITHER side multiplies the product.
+    apply_market_row_dedup({
+      qb,
+      game_column: 'prop_markets_index.esbid',
+      source_market_id_column: 'prop_markets_index.source_market_id'
+    })
   })
 
   query.with(total_cte, (qb) => {
@@ -789,6 +804,14 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.source_id', source_id)
 
     apply_market_scope(qb)
+
+    // A game total carries no side, so selection_pid is NULL on every row and
+    // the key collapses to one row per game -- which is what a game total is.
+    apply_market_row_dedup({
+      qb,
+      game_column: 'prop_markets_index.esbid',
+      source_market_id_column: 'prop_markets_index.source_market_id'
+    })
   })
 
   query.with(with_table_name, (qb) => {
