@@ -21,10 +21,19 @@ const log = debug('play-enrichment:player-identification')
  * @param {object[]} plays - Array of play objects with esbid and play_id
  * @param {object[]} play_stats - Array of play stat objects with GSIS IDs
  * @param {object} player_cache - Player cache instance with find_player method
- * @param {Map<number, Map<string, object[]>>} [snap_roster_by_esbid] - Optional week-accurate participation
+ * @param {Map<number, Map<string, object[]>>} [snap_roster_by_esbid] - Week-accurate participation
  *   index: esbid -> Map(normalized player name -> [{ pid, gsisid }]) built from
  *   nfl_snaps (who was on the field that game). Enables the source-NULL-gsisId
  *   fallback below.
+ *
+ *   Optional at THIS level only, so the unit tests can exercise the no-roster
+ *   branch directly. It is REQUIRED of production callers, and `enrich_plays`
+ *   throws without it -- omitting it NULL-clears recoverable roles and puts this
+ *   enricher into permanent disagreement with any caller that supplies it, which
+ *   is a defect this codebase has shipped three times. Reach this function
+ *   through `enrich_plays`. The one production caller that does not,
+ *   `scripts/backfill-role-pids.mjs`, supplies the roster explicitly and records
+ *   why at its call site.
  * @returns {object[]} Plays with all player _pid fields populated
  */
 export const enrich_player_identifications = (

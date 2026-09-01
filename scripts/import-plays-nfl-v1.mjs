@@ -487,19 +487,17 @@ const importPlaysForWeek = async ({
     try {
       const games_map = { [game.esbid]: game }
 
-      // The snap roster is NOT optional here, and omitting it was a permanent
-      // disagreement with the other caller rather than a missing nicety.
-      //
-      // When the feed emits a role stat with a NULL gsis_player_id, the owned
-      // writer in player-identification-enrichment recovers the actor from this
-      // index; without it the writer NULL-clears the role instead. process_plays
-      // passes it and this importer did not, so on every pass the importer wrote
-      // null over ball_carrier/passer/target/interceptor/fumble_lost and the
-      // finalization that followed wrote the value straight back -- invisibly,
-      // because update_play logs no changelog row when it fills a NULL.
-      // Measured 2026-08-31: 205 rows ping-ponged on three consecutive
-      // full-season passes, partitioning exactly into those five families
-      // (target 119, ball_carrier 79, passer 4, fumble_lost 2, interceptor 1).
+      // Required by enrich_plays, which throws without it. When the feed emits a
+      // role stat with a NULL gsis_player_id, the owned writer recovers the
+      // actor from this index; without it the writer NULL-clears the role
+      // instead. This importer omitted it while process_plays supplied it, so on
+      // every pass it wrote null over
+      // ball_carrier/passer/target/interceptor/fumble_lost and the finalization
+      // that followed wrote the value straight back -- invisibly, because
+      // update_play logs no changelog row when it fills a NULL. Measured
+      // 2026-08-31: 205 rows ping-ponged on three consecutive full-season
+      // passes, partitioning exactly into those five families (target 119,
+      // ball_carrier 79, passer 4, fumble_lost 2, interceptor 1).
       const snap_roster_by_esbid = await build_snap_roster_by_esbid([
         game.esbid
       ])

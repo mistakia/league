@@ -143,22 +143,49 @@ describe('enrich_plays agrees across its two callers', function () {
     expect(enriched.target_pid).to.equal('DREC-EIVE-000001')
   })
 
-  it('NULL-clears that same role when the snap roster is not supplied', async () => {
-    // This is not a tolerable degradation, it is the second caller-disagreement
-    // defect on this path. process_plays passes snap_roster_by_esbid and the
-    // importer did not, so the importer wrote null over the role on every pass
-    // and the finalization that followed wrote it straight back -- invisibly,
-    // since update_play logs no changelog row when it fills a NULL. Measured
-    // 2026-08-31: 205 rows ping-ponged across three consecutive full-season
-    // passes, partitioning exactly into the five owned families.
+  it('REFUSES to enrich at all when the snap roster is not supplied', async () => {
+    // This case used to assert the NULL-clear, pinning the asymmetry as harmful
+    // but reachable. It is now unreachable: omitting the roster throws.
     //
-    // The case is written to PIN the asymmetry rather than to bless it: it is
-    // the reason every caller must supply the roster, and it fails the moment
-    // someone makes the omission harmless by another route.
+    // Why that changed. Omission was a silent opt-out from the
+    // source-NULL-gsisId fallback rather than a decision, and it produced the
+    // same defect three times -- backfill-role-pids in 2026-08, then the
+    // importer and the private ngs writer. Each time the owned writer wrote
+    // null over the role on every pass and the finalization wrote it straight
+    // back, invisibly, since update_play logs no changelog row when it fills a
+    // NULL. Measured 2026-08-31: 205 rows ping-ponged across three consecutive
+    // full-season passes, partitioning exactly into the five owned families.
+    // Fixing the three callers does not stop a fourth; removing the default
+    // does.
+    let thrown = null
+    try {
+      await enrich_plays({
+        plays: [{ esbid, play_id, play_type: 'PASS' }],
+        play_stats: target_stat_without_gsis,
+        player_cache: player_cache_stub
+      })
+    } catch (error) {
+      thrown = error
+    }
+
+    expect(thrown, 'omitting snap_roster_by_esbid must throw').to.be.instanceof(
+      TypeError
+    )
+    expect(thrown.message).to.match(/snap_roster_by_esbid/)
+  })
+
+  it('still enriches when the snap roster is supplied but empty', async () => {
+    // The negative control on the check above. An empty Map is a legitimate
+    // input -- a game with no snap data has nothing to recover from -- and must
+    // not be conflated with omission, or the check would push callers toward
+    // passing something arbitrary to get past it. This is also what proves the
+    // throw keys on SUPPLIED rather than POPULATED; without this case, a check
+    // requiring a non-empty Map would pass the suite identically.
     const [enriched] = await enrich_plays({
       plays: [{ esbid, play_id, play_type: 'PASS' }],
       play_stats: target_stat_without_gsis,
-      player_cache: player_cache_stub
+      player_cache: player_cache_stub,
+      snap_roster_by_esbid: new Map()
     })
 
     expect(enriched.target_gsis_player_id).to.equal(null)

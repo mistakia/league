@@ -26,6 +26,9 @@ const log = debug('play-enrichment')
  * @param {boolean} params.options.players - Enable player identification enrichment (default: true)
  * @param {boolean} params.options.fixed_drives - Enable fixed drive sequence enrichment (default: true)
  * @param {boolean} params.options.drive_counts - Enable drive play count enrichment (default: true)
+ * @param {Map<number, Map<string, object[]>>} params.snap_roster_by_esbid - Week-accurate
+ *   participation, built by `build_snap_roster_by_esbid`. REQUIRED whenever player
+ *   identification will run; see the check below for why it has no default.
  * @returns {Promise<object[]>} Enriched play objects (does NOT persist to database)
  */
 export const enrich_plays = async ({
@@ -33,7 +36,7 @@ export const enrich_plays = async ({
   play_stats = [],
   games_map = {},
   player_cache = null,
-  snap_roster_by_esbid = null,
+  snap_roster_by_esbid,
   options = {}
 }) => {
   // Default options - enable all enrichments by default
@@ -56,6 +59,32 @@ export const enrich_plays = async ({
   if (plays.length === 0) {
     log('No plays to enrich')
     return []
+  }
+
+  // The snap roster is REQUIRED, not optional, and this throw is the whole point.
+  //
+  // It was an optional parameter defaulting to null for most of its life, which
+  // made omitting it a silent opt-out of the source-NULL-gsisId fallback rather
+  // than a decision. That produced the same defect three separate times --
+  // backfill-role-pids in 2026-08, then the importer and the private ngs writer,
+  // each caught only by measuring row churn in production. Without the roster the
+  // owned writer NULL-clears a role instead of recovering the actor, the next
+  // finalization writes it straight back, and nothing logs either half.
+  //
+  // Gated on the identification phase actually running, because that is the only
+  // phase that reads it. An EMPTY Map is legitimate -- a game with no snap data
+  // has nothing to recover from -- so this checks for a supplied Map, not a
+  // populated one. There is deliberately no opt-out flag: every production caller
+  // knows its esbids and can call build_snap_roster_by_esbid.
+  //
+  // This throws BEFORE the try blocks below on purpose. Each phase swallows its
+  // own errors and continues, which is exactly how a missing roster would go
+  // silent again.
+  const will_identify_players = players && play_stats.length > 0 && player_cache
+  if (will_identify_players && !(snap_roster_by_esbid instanceof Map)) {
+    throw new TypeError(
+      'enrich_plays requires snap_roster_by_esbid (a Map from build_snap_roster_by_esbid) when player identification runs; omitting it silently NULL-clears recoverable roles'
+    )
   }
 
   log(`Starting enrichment for ${plays.length} plays`)
@@ -121,7 +150,10 @@ export const enrich_plays = async ({
     }
 
     // Phase 6: Player identifications
-    if (players && play_stats.length > 0 && player_cache) {
+    // Same condition as the snap-roster requirement above, and deliberately the
+    // same expression: if these two ever drift apart, the phase runs without the
+    // roster the guard was supposed to have demanded.
+    if (will_identify_players) {
       try {
         enriched_plays = enrich_player_identifications(
           enriched_plays,
