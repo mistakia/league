@@ -55,6 +55,12 @@ export default async function reset_league_tables(knex) {
   // carries a bid id the next file's sequence will hand out again, so an
   // assertion on "this bid's history" would read another spec's rows.
   await knex('bid_changelog').del()
+  // Elections span the whole free agency period rather than one nomination, so
+  // a leftover row outlives every transaction the auction wrote around it: a
+  // stale live election on a player the next spec nominates joins that
+  // nomination's eligible set and settles it against another spec's maximum.
+  await knex('auction_elections').del()
+  await knex('auction_block_opt_ins').del()
   await knex('poaches').del()
   await knex('poach_releases').del()
   await knex('draft').del()

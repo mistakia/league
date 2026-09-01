@@ -110,6 +110,33 @@ export interface AdpFormatRow {
   contest_style: string
 }
 
+export interface AuctionBlockOptInsRow {
+  opt_in_id: number
+  lid: number
+  season_year: number
+  block_at: Date
+  tid: number
+  user_id: number
+  opted_in_at: Date
+  withdrawn_at: Date | null
+}
+
+export interface AuctionElectionsRow {
+  election_id: number
+  lid: number
+  season_year: number
+  pid: string
+  tid: number
+  user_id: number
+  maximum_bid: number | null
+  submitted_at: Date
+  amount_set_at: Date
+  withdrawn_at: Date | null
+  settled_at: Date | null
+  outcome: string | null
+  outcome_detail: string | null
+}
+
 export interface BidChangelogRow {
   change_id: number
   bid_type: string

@@ -496,6 +496,10 @@ DROP INDEX IF EXISTS public.cmv_pick_unique_idx;
 DROP INDEX IF EXISTS public.cmv_pick_date_idx;
 DROP INDEX IF EXISTS public.cmv_date_category_type_idx;
 DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
+DROP INDEX IF EXISTS public.auction_elections_one_live_per_team_player;
+DROP INDEX IF EXISTS public.auction_elections_league_season_team;
+DROP INDEX IF EXISTS public.auction_elections_league_season_player;
+DROP INDEX IF EXISTS public.auction_block_opt_ins_league_season_block;
 DROP INDEX IF EXISTS public.adp_format_axis_unique;
 DROP INDEX IF EXISTS public.admission_votes_one_open_vote_per_league_season;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
@@ -708,6 +712,9 @@ ALTER TABLE IF EXISTS ONLY public.composite_market_value_daily DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_calibration DROP CONSTRAINT IF EXISTS composite_market_value_calibration_pkey;
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_blend_weights DROP CONSTRAINT IF EXISTS composite_market_value_blend_weights_pkey;
 ALTER TABLE IF EXISTS ONLY public.bid_changelog DROP CONSTRAINT IF EXISTS bid_changelog_pkey;
+ALTER TABLE IF EXISTS ONLY public.auction_elections DROP CONSTRAINT IF EXISTS auction_elections_pkey;
+ALTER TABLE IF EXISTS ONLY public.auction_block_opt_ins DROP CONSTRAINT IF EXISTS auction_block_opt_ins_pkey;
+ALTER TABLE IF EXISTS ONLY public.auction_block_opt_ins DROP CONSTRAINT IF EXISTS auction_block_opt_ins_one_per_team_block;
 ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_pkey;
 ALTER TABLE IF EXISTS ONLY public.admission_votes DROP CONSTRAINT IF EXISTS admission_votes_pkey;
 ALTER TABLE IF EXISTS ONLY public.admission_vote_eligible_teams DROP CONSTRAINT IF EXISTS admission_vote_eligible_teams_pkey;
@@ -743,6 +750,8 @@ ALTER TABLE IF EXISTS public.jobs ALTER COLUMN job_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN draft_pick_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.auction_elections ALTER COLUMN election_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.auction_block_opt_ins ALTER COLUMN opt_in_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_waiver_id_seq;
 DROP TABLE IF EXISTS public.waivers;
@@ -1087,6 +1096,10 @@ DROP TABLE IF EXISTS public.composite_market_value_calibration;
 DROP SEQUENCE IF EXISTS public.composite_market_value_blend_weights_version_id_seq;
 DROP TABLE IF EXISTS public.composite_market_value_blend_weights;
 DROP TABLE IF EXISTS public.bid_changelog;
+DROP SEQUENCE IF EXISTS public.auction_elections_election_id_seq;
+DROP TABLE IF EXISTS public.auction_elections;
+DROP SEQUENCE IF EXISTS public.auction_block_opt_ins_opt_in_id_seq;
+DROP TABLE IF EXISTS public.auction_block_opt_ins;
 DROP TABLE IF EXISTS public.adp_format;
 DROP TABLE IF EXISTS public.admission_votes;
 DROP TABLE IF EXISTS public.admission_vote_eligible_teams;
@@ -2118,6 +2131,83 @@ CREATE TABLE public.adp_format (
     CONSTRAINT adp_format_num_qb_check CHECK ((number_quarterback >= 1)),
     CONSTRAINT adp_format_scoring_class_check CHECK ((scoring_class = ANY (ARRAY['STANDARD'::text, 'PPR'::text, 'HALF_PPR'::text])))
 );
+
+
+--
+-- Name: auction_block_opt_ins; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auction_block_opt_ins (
+    opt_in_id integer NOT NULL,
+    lid integer NOT NULL,
+    season_year smallint NOT NULL,
+    block_at timestamp with time zone NOT NULL,
+    tid integer NOT NULL,
+    user_id integer NOT NULL,
+    opted_in_at timestamp with time zone NOT NULL,
+    withdrawn_at timestamp with time zone
+);
+
+
+--
+-- Name: auction_block_opt_ins_opt_in_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.auction_block_opt_ins_opt_in_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: auction_block_opt_ins_opt_in_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.auction_block_opt_ins_opt_in_id_seq OWNED BY public.auction_block_opt_ins.opt_in_id;
+
+
+--
+-- Name: auction_elections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auction_elections (
+    election_id integer NOT NULL,
+    lid integer NOT NULL,
+    season_year smallint NOT NULL,
+    pid character varying(25) NOT NULL,
+    tid integer NOT NULL,
+    user_id integer NOT NULL,
+    maximum_bid integer,
+    submitted_at timestamp with time zone NOT NULL,
+    amount_set_at timestamp with time zone NOT NULL,
+    withdrawn_at timestamp with time zone,
+    settled_at timestamp with time zone,
+    outcome character varying(32),
+    outcome_detail text
+);
+
+
+--
+-- Name: auction_elections_election_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.auction_elections_election_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: auction_elections_election_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.auction_elections_election_id_seq OWNED BY public.auction_elections.election_id;
 
 
 --
@@ -28941,6 +29031,20 @@ ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_in
 
 
 --
+-- Name: auction_block_opt_ins opt_in_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_block_opt_ins ALTER COLUMN opt_in_id SET DEFAULT nextval('public.auction_block_opt_ins_opt_in_id_seq'::regclass);
+
+
+--
+-- Name: auction_elections election_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_elections ALTER COLUMN election_id SET DEFAULT nextval('public.auction_elections_election_id_seq'::regclass);
+
+
+--
 -- Name: composite_market_value_blend_weights version_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -29192,6 +29296,30 @@ ALTER TABLE ONLY public.admission_votes
 
 ALTER TABLE ONLY public.adp_format
     ADD CONSTRAINT adp_format_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: auction_block_opt_ins auction_block_opt_ins_one_per_team_block; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_block_opt_ins
+    ADD CONSTRAINT auction_block_opt_ins_one_per_team_block UNIQUE (lid, season_year, block_at, tid);
+
+
+--
+-- Name: auction_block_opt_ins auction_block_opt_ins_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_block_opt_ins
+    ADD CONSTRAINT auction_block_opt_ins_pkey PRIMARY KEY (opt_in_id);
+
+
+--
+-- Name: auction_elections auction_elections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_elections
+    ADD CONSTRAINT auction_elections_pkey PRIMARY KEY (election_id);
 
 
 --
@@ -30886,6 +31014,34 @@ CREATE UNIQUE INDEX admission_votes_one_open_vote_per_league_season ON public.ad
 --
 
 CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, number_quarterback, number_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
+
+
+--
+-- Name: auction_block_opt_ins_league_season_block; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auction_block_opt_ins_league_season_block ON public.auction_block_opt_ins USING btree (lid, season_year, block_at);
+
+
+--
+-- Name: auction_elections_league_season_player; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auction_elections_league_season_player ON public.auction_elections USING btree (lid, season_year, pid);
+
+
+--
+-- Name: auction_elections_league_season_team; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auction_elections_league_season_team ON public.auction_elections USING btree (lid, season_year, tid);
+
+
+--
+-- Name: auction_elections_one_live_per_team_player; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX auction_elections_one_live_per_team_player ON public.auction_elections USING btree (lid, season_year, pid, tid) WHERE (withdrawn_at IS NULL);
 
 
 --
@@ -59008,6 +59164,34 @@ GRANT SELECT ON SEQUENCE public.admission_votes_admission_vote_id_seq TO league_
 GRANT SELECT ON TABLE public.adp_format TO league_reader;
 GRANT SELECT ON TABLE public.adp_format TO league_data_view_reader;
 GRANT SELECT ON TABLE public.adp_format TO league_contribution_reader;
+
+
+--
+-- Name: TABLE auction_block_opt_ins; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.auction_block_opt_ins TO league_reader;
+
+
+--
+-- Name: SEQUENCE auction_block_opt_ins_opt_in_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.auction_block_opt_ins_opt_in_id_seq TO league_reader;
+
+
+--
+-- Name: TABLE auction_elections; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.auction_elections TO league_reader;
+
+
+--
+-- Name: SEQUENCE auction_elections_election_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.auction_elections_election_id_seq TO league_reader;
 
 
 --

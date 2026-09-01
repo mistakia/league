@@ -28,6 +28,8 @@ import type {
   AdmissionVoteEligibleTeamsRow,
   AdmissionVotesRow,
   AdpFormatRow,
+  AuctionBlockOptInsRow,
+  AuctionElectionsRow,
   BidChangelogRow,
   CompositeMarketValueBlendWeightsRow,
   CompositeMarketValueCalibrationRow,
@@ -350,6 +352,8 @@ declare module 'knex/types/tables' {
     admission_vote_eligible_teams: AdmissionVoteEligibleTeamsRow
     admission_votes: AdmissionVotesRow
     adp_format: AdpFormatRow
+    auction_block_opt_ins: AuctionBlockOptInsRow
+    auction_elections: AuctionElectionsRow
     bid_changelog: BidChangelogRow
     composite_market_value_blend_weights: CompositeMarketValueBlendWeightsRow
     composite_market_value_calibration: CompositeMarketValueCalibrationRow

@@ -306,6 +306,7 @@ const english_words = [
   'edited',
   'effective',
   'efficiency',
+  'election',
   'eligible',
   'elusive',
   'elusiveness',
@@ -569,6 +570,10 @@ const english_words = [
   'opportunity',
   'optimal',
   'option',
+  // The verb, as in a team opting into a live auction block -- not an
+  // abbreviation of 'option', which is the noun two lines up.
+  'opt',
+  'opted',
   'or',
   'order',
   'origin',
@@ -996,6 +1001,7 @@ const english_words = [
   'wide',
   'width',
   'win',
+  'withdrawn',
   'wind',
   'window',
   'winner',
