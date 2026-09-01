@@ -1,5 +1,5 @@
 import db from '#db'
-import { Roster } from '#libs-shared'
+import { Roster, get_free_agent_period } from '#libs-shared'
 import { current_season } from '#constants'
 import {
   lock_auction_for_league,
@@ -19,6 +19,36 @@ const log = debug('auction-elections')
 // without matching on message text.
 export const auction_election_error = (message) =>
   Object.assign(new Error(message), { is_auction_election_error: true })
+
+/**
+ * Refuse an election outside the free agency period.
+ *
+ * The period IS the auction under this design, so a write before it opens or
+ * after it closes is bidding on an auction that has not started or has already
+ * finished. Everything else in this module said "at any point in the free
+ * agency period" and enforced only the first half of that sentence -- the module
+ * did not import a date library at all.
+ *
+ * No commissioner exception. A commissioner is a competing manager here, and an
+ * election placed outside the window is not an administrative act.
+ */
+const assert_within_free_agency_period = (league) => {
+  const period = get_free_agent_period(league)
+
+  if (!period.start) {
+    throw auction_election_error(
+      'this league has no free agency period configured'
+    )
+  }
+
+  if (current_season.now.isBefore(period.start)) {
+    throw auction_election_error('free agency period has not opened')
+  }
+
+  if (current_season.now.isAfter(period.end)) {
+    throw auction_election_error('free agency period has closed')
+  }
+}
 
 const get_live_election = async ({ trx, lid, season_year, pid, tid }) => {
   const rows = await trx('auction_elections')
@@ -62,6 +92,8 @@ export const submit_auction_election = async ({
   const normalized_maximum = maximum_bid === undefined ? null : maximum_bid
 
   const league = await getLeague({ lid })
+  assert_within_free_agency_period(league)
+
   const players = await db('player').where('pid', pid)
   const player_row = players[0]
   if (!player_row) {
@@ -168,8 +200,10 @@ export const withdraw_auction_election = async ({
   tid,
   pid,
   season_year = current_season.year
-}) =>
-  db.transaction(async (trx) => {
+}) => {
+  assert_within_free_agency_period(await getLeague({ lid }))
+
+  return db.transaction(async (trx) => {
     await lock_auction_for_league({ trx, lid })
 
     const existing = await get_live_election({
@@ -200,6 +234,7 @@ export const withdraw_auction_election = async ({
 
     return { settlement }
   })
+}
 
 /**
  * Every live election a team holds, with the effective maximum each would carry

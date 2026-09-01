@@ -40,6 +40,21 @@ describe('auction settlement against postgres', function () {
   beforeEach(async function () {
     this.timeout(60 * 1000)
     await league(knex)
+
+    // The elections write path refuses outside the free agency period, and the
+    // shared league fixture configures none. Set it HERE rather than in the
+    // fixture: free_agency_period_start also closes veteran signing, blocks
+    // active-roster releases and opens the sanctuary period, so putting it in
+    // the shared fixture would silently change behavior for the waiver, poach
+    // and release suites.
+    await knex('seasons')
+      .where({ lid: league_id, season_year })
+      .update({
+        free_agency_period_start: current_season.regular_season_start
+          .subtract(2, 'months')
+          .toDate(),
+        free_agency_period_end: current_season.regular_season_start.toDate()
+      })
   })
 
   // The nomination IS the opening bid, written to `transactions` exactly as the
