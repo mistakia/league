@@ -32,20 +32,21 @@
 // ordinary red instead. Run this from a worktree pinned to the pushed ref when
 // the tree is dirty, or the dirt decides what you find.
 //
-// STILL OUTSTANDING, and the reason the paragraph above says 256 rather than
-// 287: run WITH a database and two more fixtures drift, both moving the same
-// hash (t4463168f... -> tc76ec176...):
+// RUN IT WITH A DATABASE, or it under-reports. The seven above came from a
+// no-database run, which cannot generate 31 fixtures at all. Re-running with one
+// found two MORE, both moving the same hash:
 //
 //   test-condition-for-scoring-format-id-param-multiple-fantasy-points-from-play.json
 //   year-split-with-multiple-rate-type-with-statements.json
 //
-// Those two are NOT blessed. They are invisible to the no-database run that
-// blessed the other seven, which is exactly the blind spot the last paragraph of
-// this header describes -- and finding them is what proved the blind spot was
-// real rather than theoretical. Bless them from a worktree pinned to the pushed
-// ref, with a database, via `yarn test:isolated`'s own database rather than a
-// hand-assembled LEAGUE_DB_* invocation: pointing at a database that does not
-// exist hangs indefinitely and prints nothing, which cost 20 minutes here.
+// Nine total, all now blessed -- the corpus reads 287 of 287 byte-identical. The
+// two were invisible to the run that blessed the other seven, which is what
+// turned this header's last paragraph from a caveat into a measured fact.
+//
+// One trap on the way, worth the line because CLAUDE.md already names it and it
+// still cost 20 minutes: a hand-assembled LEAGUE_DB_* invocation pointing at a
+// database that does not exist HANGS indefinitely and prints nothing. Prove the
+// database is there before running against it, or use yarn test:isolated.
 //
 // DELIBERATELY NOT A GATE. It is not in `yarn check:cluster` and not in CI. A
 // red master defers every session's push to this repo fleet-wide until it
