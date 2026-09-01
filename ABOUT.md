@@ -696,12 +696,16 @@ observations:
   - >-
     [pattern] A market is keyed by (game, side), a data-view cell by (subject, year, week); every
     betting-column defect is a mismatch on one axis — time, subject, multiplicity, line.
+  - >-
+    [lesson] A Caesars date built with hyphens against a slash-formatted nfl_games.date made
+    event-to-game matching unsatisfiable for thirteen months while every run reported success,
+    because the importer had a zero-row oracle on the fetch and none on the match rate.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-01T22:50:41.425Z'
+updated_at: '2026-09-01T23:48:27.345Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
