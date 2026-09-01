@@ -2,6 +2,8 @@
 import * as chai from 'chai'
 
 import { get_data_view_results_query } from '#libs-server'
+import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
+import validate_line_axis_columns from '#libs-server/data-views/validate-line-axis-columns.mjs'
 
 import { identity_for } from '#libs-server/data-views/row-grain-registry.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
@@ -298,6 +300,82 @@ describe('data views line row axis', function () {
         (match) => match[1]
       )
       expect(new Set(cte_names).size).to.equal(1)
+    })
+  })
+  // The same-quantity rule. Two books on one market type share a rung and
+  // compare like with like; two market types share only a numeral.
+  describe('same-quantity rule', function () {
+    const defs = {
+      player_game_prop_line_from_betting_markets: { is_player_game_prop: true }
+    }
+    const column = (market_type, source_id = 'FANDUEL') => ({
+      column_id: 'player_game_prop_line_from_betting_markets',
+      params: { market_type: [market_type], source_id: [source_id] }
+    })
+
+    it('admits two books on one market type', () => {
+      const errors = validate_line_axis_columns({
+        row_axes: ['year', 'week', 'line'],
+        columns: [
+          column('GAME_ALT_PASSING_YARDS', 'FANDUEL'),
+          column('GAME_ALT_PASSING_YARDS', 'DRAFTKINGS')
+        ],
+        defs
+      })
+      expect(errors).to.eql([])
+    })
+
+    it('refuses two market types and names both columns', () => {
+      const errors = validate_line_axis_columns({
+        row_axes: ['year', 'week', 'line'],
+        columns: [
+          column('GAME_ALT_PASSING_YARDS'),
+          column('GAME_ALT_RUSHING_YARDS')
+        ],
+        defs
+      })
+      expect(errors).to.have.length(1)
+      expect(errors[0]).to.include('GAME_ALT_PASSING_YARDS')
+      expect(errors[0]).to.include('GAME_ALT_RUSHING_YARDS')
+      expect(errors[0]).to.include('player_game_prop_line_from_betting_markets')
+    })
+
+    // The rule is scoped to the axis: the same pair of columns without it is an
+    // ordinary two-column request and must stay legal.
+    it('says nothing without the axis', () => {
+      const errors = validate_line_axis_columns({
+        row_axes: ['year', 'week'],
+        columns: [
+          column('GAME_ALT_PASSING_YARDS'),
+          column('GAME_ALT_RUSHING_YARDS')
+        ],
+        defs
+      })
+      expect(errors).to.eql([])
+    })
+  })
+
+  // The route layer needs no change -- `line` rides inside row_axes, which
+  // /search and the export route already forward whole. What that leaves worth
+  // pinning is the CACHE key: the row_grain omission that put two grains on one
+  // key is the precedent, and a shared key here would feed rung rows back as
+  // flat ones.
+  describe('cache key separation', function () {
+    it('hashes a line-axis request differently', () => {
+      const base = {
+        columns: ['player_name'],
+        row_grain: ['player'],
+        user_id: null
+      }
+      const without_axis = get_data_view_hash({
+        ...base,
+        row_axes: ['year', 'week']
+      })
+      const with_axis = get_data_view_hash({
+        ...base,
+        row_axes: ['year', 'week', 'line']
+      })
+      expect(with_axis).to.not.equal(without_axis)
     })
   })
 })
