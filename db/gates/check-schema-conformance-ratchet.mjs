@@ -381,13 +381,41 @@ function main() {
     console.error(
       `schema conformance ratchet -- ${new_violations.length} violation(s) not in the baseline:\n`
     )
+    // The audit's own findings carry WHICH tokens offended and a replacement
+    // hint; sorted_violations drops both, because the baseline is keyed on
+    // table/column/rule alone and must not churn when a hint is reworded. So
+    // re-join against the raw findings here rather than widening the key: the
+    // reader needs the token, and the baseline does not.
+    //
+    // Reporting only `[shorthand] users.data_view_export_max_rows` is what cost
+    // a day on 2026-09-01. The name is five tokens; the two at fault were
+    // `export` and `rows`, both ordinary English simply absent from the
+    // vocabulary. Without them named, the line reads as a verdict on the whole
+    // NAME, and the session that picked it up concluded a shipped column needed
+    // renaming across the DDL, the schema export and every consumer -- and
+    // recorded that in a handoff, so nobody touched a two-line fix while the
+    // deploy sat blocked.
+    const finding_by_key = new Map(findings.map((f) => [key_of(f), f]))
     for (const f of new_violations) {
       const loc = f.column ? `${f.table}.${f.column}` : `${f.table} (table)`
-      console.error(`  [${f.rule}] ${loc}`)
+      const detail = finding_by_key.get(key_of(f))
+      const tokens = detail?.token
+        ? `  offending token(s): ${detail.token}`
+        : ''
+      const hint = detail?.hint ? `  hint: ${detail.hint}` : ''
+      console.error(`  [${f.rule}] ${loc}${tokens}${hint}`)
     }
     console.error(
-      '\nIf this is new debt (a feature added a non-conforming column/table): fix ' +
-        'the name before merging -- see user:guideline/nfl/league/database-schema-standards.md.\n' +
+      '\nRead the offending TOKEN above before deciding which of these you have.\n\n' +
+        'If the token is genuine shorthand (a feature added a non-conforming ' +
+        'column/table): fix the name before merging -- see ' +
+        'user:guideline/nfl/league/database-schema-standards.md.\n' +
+        'If the token is an ordinary English word the vocabulary simply does not ' +
+        'carry yet: add it as one reviewed line to ' +
+        'db/tools/schema-token-vocabulary.mjs. That is the ratchet property working ' +
+        'as designed, not a defect -- the vocabulary is a POSITIVE list, so every ' +
+        'genuinely new word costs one line. Do NOT rename a real word to appease ' +
+        'the list, and do NOT --rebaseline.\n' +
         'If this is a deliberate audit widening (a new/broadened rule that legitimately ' +
         'surfaces existing debt): run ' +
         '`node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` and commit the ' +

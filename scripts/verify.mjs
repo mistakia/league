@@ -72,6 +72,38 @@ const checks = [
     cmd: ['node', 'db/gates/check-destructive-db-guard.mjs']
   },
   {
+    name: 'schema conformance ratchet',
+    // Fails when db/schema.postgres.sql carries a naming violation the checked-in
+    // baseline does not know about. Hermetic despite living next to the postgres
+    // steps in CI: the audit PARSES the tracked schema file and never opens a
+    // connection.
+    //
+    // It was a separate CI step and not in this set until 2026-09-01, and the
+    // gap is what that day cost. docs/guides/gates.md already had to tell every
+    // author to "run it before pushing any commit that adds a table or column"
+    // precisely because nothing in the suite exercises it -- a standing
+    // instruction to remember a command is the shape this file exists to
+    // replace. users.data_view_export_max_rows then reddened master for a day
+    // on two ordinary English words, and a red master defers EVERY session's
+    // push to mistakia/league. 0.15s here would have refused that push.
+    cmd: ['node', 'db/gates/check-schema-conformance-ratchet.mjs']
+  },
+  {
+    name: 'dev fixture scrub',
+    // Fails when a column in the committed schema carries no disposition in
+    // scripts/dev-fixture-projection.json, or when a required scrub has been
+    // relaxed. Reads the schema file and the projection; no database.
+    //
+    // Landed here in the same change and for a sharper reason than its
+    // neighbour: it was the step immediately AFTER the ratchet in CI, so when
+    // the ratchet failed this never ran, and the run summary reported one
+    // broken gate when the same column had broken two. A fail-fast pipeline
+    // reports the first failure, never the set -- which reads as a complete
+    // diagnosis and is not one. Ordering both before the suite means the author
+    // sees both at once.
+    cmd: ['node', 'db/gates/check-dev-fixture-scrub.mjs']
+  },
+  {
     name: 'z-index scale guard',
     // Fails when a floating surface sets a global-layer z-index as a bare number
     // instead of taking it from the scale in app/styles/variables.styl.
