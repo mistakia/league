@@ -31,11 +31,22 @@
   position relative
   display flex
   flex-direction column
-  // The panel is sized by its content up to a readable cap, rather than being
-  // given a width. Every dialog here is a sentence and two buttons; a fixed
-  // width would set the short ones adrift in their own whitespace.
+  // The panel is sized by its CONTENT between a floor and a cap, rather than
+  // being given a width. Every dialog here is a sentence and two buttons, so a
+  // fixed width would set the short ones adrift in their own whitespace.
+  //
+  // The cap is what stops a long sentence — several of these interpolate a
+  // player's full name and position into a paragraph — from running the panel
+  // out to the width of the screen and putting the text at a measure nobody can
+  // read. 480px holds a $field_width control plus the panel's 24px of padding
+  // with room either side, and it is a MAX-WIDTH rather than a width so the
+  // short confirmations still shrink to their sentence.
+  //
+  // A caller that needs a wider panel must raise max-width, not just set width:
+  // max-width beats width in the cascade, so a bare `width: 600px` override
+  // would be clamped back to this number. contribution-dialog sets both.
   min-width 300px
-  max-width 100%
+  max-width 480px
   max-height 100%
   overflow-y auto
   background $prose_paper

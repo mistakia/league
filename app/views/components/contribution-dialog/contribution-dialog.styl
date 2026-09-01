@@ -10,9 +10,15 @@
 // rather than behind it.
 .contribution-dialog
   // What MUI's `maxWidth='sm' fullWidth` was: 600px, or the viewport if it is
-  // narrower. The modal's own `max-width: 100%` supplies the second half.
+  // narrower. This is the one dialog in the app with a FORM in it rather than a
+  // sentence, which is why it is wider than the shared cap.
+  //
+  // max-width is set alongside width and is not redundant: the modal caps every
+  // panel at 480px, and max-width beats width in the cascade, so width alone
+  // would be clamped to 480 and this rule would look like it had no effect.
   .modal__panel
     width 600px
+    max-width 600px
 
   &__kind
     margin-bottom 8px
