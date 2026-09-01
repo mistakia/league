@@ -1,15 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Chip from '@mui/material/Chip'
 
+import Modal from '@components/modal'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
@@ -156,50 +152,51 @@ export default class PoachConfirmation extends React.Component {
     })
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>
-          {status.waiver.poach ? 'Poaching Waiver Claim' : 'Poaching Claim'}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {`Poach ${player_map.get('name')} (${player_map.get('primary_position')}). If your claim is successful, he will be added to your active roster with a salary of $${
-              rosterInfo.player_salary + 2
-            } and will not be eligible for the practice squad. The player's current manager can choose to process the claim at any time.`}
-          </DialogContentText>
-          <DialogContentText>
-            {status.waiver.poach
-              ? "This is a waiver claim and can be cancelled anytime before it's processed."
-              : 'This is a poaching claim and can not be cancelled once submitted.'}
-          </DialogContentText>
-          {this.state.error && (
-            <DialogContentText>
-              There is not enough roster or salary space on your active roster.
-              Please select a player to release. They will only be released if
-              your claim is successful.
-            </DialogContentText>
-          )}
-          <Autocomplete
-            multiple
-            options={options}
-            getOptionLabel={(x) => x.label}
-            getOptionSelected={getOptionSelected}
-            renderOption={renderOption}
-            filterSelectedOptions
-            value={releasePlayers}
-            onChange={this.handleRelease}
-            renderTags={renderTags}
-            renderInput={renderInput}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title={status.waiver.poach ? 'Poaching Waiver Claim' : 'Poaching Claim'}
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {`Poach ${player_map.get('name')} (${player_map.get('primary_position')}). If your claim is successful, he will be added to your active roster with a salary of $${
+            rosterInfo.player_salary + 2
+          } and will not be eligible for the practice squad. The player's current manager can choose to process the claim at any time.`}
+        </p>
+        <p>
+          {status.waiver.poach
+            ? "This is a waiver claim and can be cancelled anytime before it's processed."
+            : 'This is a poaching claim and can not be cancelled once submitted.'}
+        </p>
+        {this.state.error && (
+          <p>
+            There is not enough roster or salary space on your active roster.
+            Please select a player to release. They will only be released if
+            your claim is successful.
+          </p>
+        )}
+        <Autocomplete
+          multiple
+          options={options}
+          getOptionLabel={(x) => x.label}
+          getOptionSelected={getOptionSelected}
+          renderOption={renderOption}
+          filterSelectedOptions
+          value={releasePlayers}
+          onChange={this.handleRelease}
+          renderTags={renderTags}
+          renderInput={renderInput}
+        />
+      </Modal>
     )
   }
 }

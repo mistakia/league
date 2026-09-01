@@ -1,12 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import ReserveConfirmation from '@components/reserve-confirmation'
 import ReserveLongTermConfirmation from '@components/reserve-long-term-confirmation'
 import ActivateConfirmation from '@components/activate-confirmation'
@@ -23,7 +19,6 @@ import RemoveTagConfirmation from '@components/remove-tag-confirmation'
 
 import Button from '@components/button'
 
-import './confirmation.styl'
 
 export default class Confirmation extends React.Component {
   handleClick = (args) => {
@@ -79,20 +74,23 @@ export default class Confirmation extends React.Component {
     }
 
     return (
-      <Dialog open={Boolean(this.props.info.title)} onClose={this.handleClose}>
-        <DialogTitle>{this.props.info.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{this.props.info.description}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.handleClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleClick} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open={Boolean(this.props.info.title)}
+        onClose={this.handleClose}
+        title={this.props.info.title}
+        actions={
+          <>
+            <Button onClick={this.handleClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleClick} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>{this.props.info.description}</p>
+      </Modal>
     )
   }
 }

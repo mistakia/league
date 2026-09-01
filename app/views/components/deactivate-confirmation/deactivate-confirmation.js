@@ -6,12 +6,8 @@ import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { current_season, transaction_types } from '#constants'
 
@@ -69,46 +65,47 @@ export default function DeactivateConfirmation({
   }
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>Deactivate Player</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`}
-        </DialogContentText>
-      </DialogContent>
-      <DialogContent>
+    <Modal
+      open
+      onClose={onClose}
+      title='Deactivate Player'
+      actions={
+        <>
+          <Button onClick={onClose} text>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} text>
+            Confirm
+          </Button>
+        </>
+      }
+    >
+      <p>
+        {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`}
+      </p>
+      {!hasPracticeSquadSpace && (
+        <p>
+          No practice squad space available, make room by releasing a signed
+          practice squad player
+        </p>
+      )}
+      <div className='confirmation__inputs'>
         {!hasPracticeSquadSpace && (
-          <DialogContentText>
-            No practice squad space available, make room by releasing a signed
-            practice squad player
-          </DialogContentText>
+          <FormControl size='small' variant='outlined'>
+            <InputLabel id='release-label'>Release</InputLabel>
+            <Select
+              labelId='release-label'
+              error={!release_pid}
+              value={release_pid}
+              onChange={handleSelectRelease}
+              label='Release'
+            >
+              {releaseItems}
+            </Select>
+          </FormControl>
         )}
-        <div className='confirmation__inputs'>
-          {!hasPracticeSquadSpace && (
-            <FormControl size='small' variant='outlined'>
-              <InputLabel id='release-label'>Release</InputLabel>
-              <Select
-                labelId='release-label'
-                error={!release_pid}
-                value={release_pid}
-                onChange={handleSelectRelease}
-                label='Release'
-              >
-                {releaseItems}
-              </Select>
-            </FormControl>
-          )}
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} text>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} text>
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   )
 }
 

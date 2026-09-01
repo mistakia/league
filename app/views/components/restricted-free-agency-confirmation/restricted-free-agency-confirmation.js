@@ -5,11 +5,6 @@ import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 import InputAdornment from '@mui/material/InputAdornment'
 import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -17,6 +12,7 @@ import Chip from '@mui/material/Chip'
 
 import { isSlotActive } from '#libs-shared'
 
+import Modal from '@components/modal'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
@@ -318,80 +314,83 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     }
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Restricted Free Agent Tag</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {`Place Restricted Free Agent bid on ${player_map.get('name')} (${player_map.get('primary_position')})`}
-          </DialogContentText>
-          <div className='restricted-free-agency__bid-inputs'>
-            <TextField
-              label='Bid'
-              helperText={`Max bid $${max_bid} — ${max_bid_parts.join(' + ')}`}
-              error={this.state.error}
-              value={this.state.bid}
-              onChange={this.handleBid}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>$</InputAdornment>
-                )
-              }}
-              size='small'
-              variant='outlined'
-            />
-            {bid_exceeds_max && (
-              <div className='restricted-free-agency__bid-warning'>
-                <strong>Over the cap:</strong> ${numeric_bid} is more than the $
-                {max_bid} you can commit to this player, so this bid will fail
-                when it is processed. Free up room by adding conditional
-                releases below, using the cutlist, or lowering another bid.
-              </div>
-            )}
-            {bid_below_min && (
-              <div className='restricted-free-agency__bid-warning'>
-                <strong>Below the market salary floor:</strong> a bid on your
-                own player may not be more than $10 under their market salary of
-                ${market_salary}. The lowest bid this league accepts for them is
-                ${min_bid}.
-              </div>
-            )}
-            {!this._isEligible && (
-              <FormControl size='small' variant='outlined'>
-                <InputLabel id='untag-label'>Remove Tag</InputLabel>
-                <Select
-                  labelId='untag-label'
-                  error={this.state.missing_untag}
-                  value={this.state.untag}
-                  onChange={this.handleUntag}
-                  label='Remove Tag'
-                >
-                  {menu_items}
-                </Select>
-              </FormControl>
-            )}
-            <Autocomplete
-              multiple
-              options={options}
-              getOptionLabel={(x) => x.label}
-              isOptionEqualToValue={is_option_equal_to_value}
-              renderOption={render_option}
-              filterSelectedOptions
-              value={release_players}
-              onChange={this.handleRelease}
-              renderTags={render_tags}
-              renderInput={render_input}
-            />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Restricted Free Agent Tag'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {`Place Restricted Free Agent bid on ${player_map.get('name')} (${player_map.get('primary_position')})`}
+        </p>
+        <div className='restricted-free-agency__bid-inputs'>
+          <TextField
+            label='Bid'
+            helperText={`Max bid $${max_bid} — ${max_bid_parts.join(' + ')}`}
+            error={this.state.error}
+            value={this.state.bid}
+            onChange={this.handleBid}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>$</InputAdornment>
+              )
+            }}
+            size='small'
+            variant='outlined'
+          />
+          {bid_exceeds_max && (
+            <div className='restricted-free-agency__bid-warning'>
+              <strong>Over the cap:</strong> ${numeric_bid} is more than the $
+              {max_bid} you can commit to this player, so this bid will fail
+              when it is processed. Free up room by adding conditional releases
+              below, using the cutlist, or lowering another bid.
+            </div>
+          )}
+          {bid_below_min && (
+            <div className='restricted-free-agency__bid-warning'>
+              <strong>Below the market salary floor:</strong> a bid on your own
+              player may not be more than $10 under their market salary of $
+              {market_salary}. The lowest bid this league accepts for them is $
+              {min_bid}.
+            </div>
+          )}
+          {!this._isEligible && (
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='untag-label'>Remove Tag</InputLabel>
+              <Select
+                labelId='untag-label'
+                error={this.state.missing_untag}
+                value={this.state.untag}
+                onChange={this.handleUntag}
+                label='Remove Tag'
+              >
+                {menu_items}
+              </Select>
+            </FormControl>
+          )}
+          <Autocomplete
+            multiple
+            options={options}
+            getOptionLabel={(x) => x.label}
+            isOptionEqualToValue={is_option_equal_to_value}
+            renderOption={render_option}
+            filterSelectedOptions
+            value={release_players}
+            onChange={this.handleRelease}
+            renderTags={render_tags}
+            renderInput={render_input}
+          />
+        </div>
+      </Modal>
     )
   }
 }

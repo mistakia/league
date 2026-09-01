@@ -1,13 +1,18 @@
-// The z-index comes from the named scale in app/styles/variables.styl, which
-// stylus-loader injects into every stylesheet (no import needed). A bare
-// numeric literal here is a defect that `yarn check:z-index-scale` fails in CI.
+// THE LAYER IS THE MODAL'S, not this component's. `.contribution-dialog` is a
+// className handed to @components/modal, so it lands on the same element as
+// `.modal` — which already takes $z_dialog from the named scale in
+// app/styles/variables.styl. Restating it here would be a second place to
+// change if the scale ever moves.
 //
-// $z_dialog is the correct EXISTING layer and no new one is needed: it already
-// sits above $z_selected_player (1400) and the react-table band (1451-1456), and
-// $z_snackbar (1550) is above it, so the submit toast renders over the open
-// dialog rather than behind it.
+// The reasoning that put it on the scale still holds and is worth keeping:
+// $z_dialog already sits above $z_selected_player and the react-table band, and
+// $z_snackbar is above it, so the submit toast renders over the open dialog
+// rather than behind it.
 .contribution-dialog
-  z-index $z_dialog
+  // What MUI's `maxWidth='sm' fullWidth` was: 600px, or the viewport if it is
+  // narrower. The modal's own `max-width: 100%` supplies the second half.
+  .modal__panel
+    width 600px
 
   &__kind
     margin-bottom 8px

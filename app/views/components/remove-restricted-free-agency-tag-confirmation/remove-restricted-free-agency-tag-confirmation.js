@@ -1,12 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 
 export default class RemoveRestrictedFreeAgencyTagConfirmation
@@ -23,24 +19,27 @@ export default class RemoveRestrictedFreeAgencyTagConfirmation
     const { player_map } = this.props
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Remove Restricted Free Agency Bid</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {`Remove Restricted Free Agency Bid on ${player_map.get(
-              'name'
-            )} (${player_map.get('primary_position')})`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Remove Restricted Free Agency Bid'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {`Remove Restricted Free Agency Bid on ${player_map.get(
+            'name'
+          )} (${player_map.get('primary_position')})`}
+        </p>
+      </Modal>
     )
   }
 }

@@ -5,12 +5,8 @@ import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { player_tag_types } from '#constants'
 
@@ -74,38 +70,41 @@ export default class RookieConfirmation extends React.Component {
     }
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Rookie Tag</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {`Apply Rookie Tag to ${player_map.get('name')} (${player_map.get('primary_position')})`}
-          </DialogContentText>
-          <div className='confirmation__inputs'>
-            {!this._isEligible && (
-              <FormControl size='small' variant='outlined'>
-                <InputLabel id='untag-label'>Remove Tag</InputLabel>
-                <Select
-                  labelId='untag-label'
-                  error={this.state.missingUntag}
-                  value={this.state.untag}
-                  onChange={this.handleUntag}
-                  label='Remove Tag'
-                >
-                  {menuItems}
-                </Select>
-              </FormControl>
-            )}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Rookie Tag'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {`Apply Rookie Tag to ${player_map.get('name')} (${player_map.get('primary_position')})`}
+        </p>
+        <div className='confirmation__inputs'>
+          {!this._isEligible && (
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='untag-label'>Remove Tag</InputLabel>
+              <Select
+                labelId='untag-label'
+                error={this.state.missingUntag}
+                value={this.state.untag}
+                onChange={this.handleUntag}
+                label='Remove Tag'
+              >
+                {menuItems}
+              </Select>
+            </FormControl>
+          )}
+        </div>
+      </Modal>
     )
   }
 }

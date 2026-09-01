@@ -5,12 +5,8 @@ import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { practice_squad_unprotected_slots, roster_slot_types } from '#constants'
 
@@ -68,55 +64,58 @@ export default function ReserveConfirmation({
   }
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>
-        {is_practice_squad_activation
+    <Modal
+      open
+      onClose={onClose}
+      title={
+        is_practice_squad_activation
           ? 'Activate & Designate Reserve'
-          : 'Designate Reserve'}
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
-        </DialogContentText>
-        {is_practice_squad_activation && (
-          <DialogContentText>
-            This activates him off the practice squad. He will no longer be
-            practice squad eligible and can not be returned to the practice
-            squad. No active roster space is required.
-          </DialogContentText>
-        )}
+          : 'Designate Reserve'
+      }
+      actions={
+        <>
+          <Button onClick={onClose} text>
+            Cancel
+          </Button>
+          <Button onClick={handle_submit} text>
+            Confirm
+          </Button>
+        </>
+      }
+    >
+      <p>
+        {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
+      </p>
+      {is_practice_squad_activation && (
+        <p>
+          This activates him off the practice squad. He will no longer be
+          practice squad eligible and can not be returned to the practice squad.
+          No active roster space is required.
+        </p>
+      )}
+      {!has_reserve_space && (
+        <p>
+          No reserve space available, make room by activating a player from
+          reserve.
+        </p>
+      )}
+      <div className='confirmation__inputs'>
         {!has_reserve_space && (
-          <DialogContentText>
-            No reserve space available, make room by activating a player from
-            reserve.
-          </DialogContentText>
+          <FormControl size='small' variant='outlined'>
+            <InputLabel id='activate-label'>Activate</InputLabel>
+            <Select
+              labelId='activate-label'
+              error={missing_activate}
+              value={activate_pid}
+              onChange={handle_select_activate}
+              label='Activate'
+            >
+              {menuItems}
+            </Select>
+          </FormControl>
         )}
-        <div className='confirmation__inputs'>
-          {!has_reserve_space && (
-            <FormControl size='small' variant='outlined'>
-              <InputLabel id='activate-label'>Activate</InputLabel>
-              <Select
-                labelId='activate-label'
-                error={missing_activate}
-                value={activate_pid}
-                onChange={handle_select_activate}
-                label='Activate'
-              >
-                {menuItems}
-              </Select>
-            </FormControl>
-          )}
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} text>
-          Cancel
-        </Button>
-        <Button onClick={handle_submit} text>
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   )
 }
 

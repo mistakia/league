@@ -5,12 +5,8 @@ import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { isReserveEligible } from '#libs-shared'
 import { current_season, roster_slot_types } from '#constants'
@@ -154,76 +150,77 @@ export default class ActivateConfirmation extends React.Component {
         ' or moving any reserve eligible players to reserve.'
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Activate Player</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
-          </DialogContentText>
-          {!this._hasBenchSpace && (
-            <DialogContentText>{noBenchSpaceMessage}</DialogContentText>
-          )}
-          {this._isFromPracticeSquad && Boolean(deactivateItems.length) && (
-            <div className='confirmation__inputs'>
-              <FormControl size='small' variant='outlined'>
-                <InputLabel id='deactivate-label'>Deactivate</InputLabel>
-                <Select
-                  labelId='deactivate-label'
-                  value={this.state.deactivate_pid}
-                  onChange={this.handleSelectDeactivate}
-                  label='Deactivate'
-                >
-                  <MenuItem value=''>None</MenuItem>
-                  {deactivateItems}
-                </Select>
-              </FormControl>
-            </div>
-          )}
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Activate Player'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
+        </p>
+        {!this._hasBenchSpace && <p>{noBenchSpaceMessage}</p>}
+        {this._isFromPracticeSquad && Boolean(deactivateItems.length) && (
           <div className='confirmation__inputs'>
-            {isReservePlayer &&
-              !this._hasBenchSpace &&
-              !this.state.deactivate_pid &&
-              Boolean(reserveItems.length) && (
-                <FormControl size='small' variant='outlined'>
-                  <InputLabel id='reserve-label'>Reserve</InputLabel>
-                  <Select
-                    labelId='reserve-label'
-                    error={this.state.missing}
-                    value={this.state.reserve_pid}
-                    onChange={this.handleSelectReserve}
-                    label='Reserve'
-                  >
-                    {reserveItems}
-                  </Select>
-                </FormControl>
-              )}
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='deactivate-label'>Deactivate</InputLabel>
+              <Select
+                labelId='deactivate-label'
+                value={this.state.deactivate_pid}
+                onChange={this.handleSelectDeactivate}
+                label='Deactivate'
+              >
+                <MenuItem value=''>None</MenuItem>
+                {deactivateItems}
+              </Select>
+            </FormControl>
           </div>
-          <div className='confirmation__inputs'>
-            {!this._hasBenchSpace && !this.state.deactivate_pid && (
+        )}
+        <div className='confirmation__inputs'>
+          {isReservePlayer &&
+            !this._hasBenchSpace &&
+            !this.state.deactivate_pid &&
+            Boolean(reserveItems.length) && (
               <FormControl size='small' variant='outlined'>
-                <InputLabel id='release-label'>Release</InputLabel>
+                <InputLabel id='reserve-label'>Reserve</InputLabel>
                 <Select
-                  labelId='release-label'
+                  labelId='reserve-label'
                   error={this.state.missing}
-                  value={this.state.release_pid}
-                  onChange={this.handleSelectRelease}
-                  label='Release'
+                  value={this.state.reserve_pid}
+                  onChange={this.handleSelectReserve}
+                  label='Reserve'
                 >
-                  {releaseItems}
+                  {reserveItems}
                 </Select>
               </FormControl>
             )}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </div>
+        <div className='confirmation__inputs'>
+          {!this._hasBenchSpace && !this.state.deactivate_pid && (
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='release-label'>Release</InputLabel>
+              <Select
+                labelId='release-label'
+                error={this.state.missing}
+                value={this.state.release_pid}
+                onChange={this.handleSelectRelease}
+                label='Release'
+              >
+                {releaseItems}
+              </Select>
+            </FormControl>
+          )}
+        </div>
+      </Modal>
     )
   }
 }

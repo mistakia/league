@@ -5,12 +5,8 @@ import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { Roster } from '#libs-shared'
 import { roster_slot_types } from '#constants'
@@ -94,36 +90,39 @@ export default class AddFreeAgentDialog extends React.Component {
     else text += 'active roster.'
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Sign Free Agent</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{text}</DialogContentText>
-          <div className='confirmation__inputs'>
-            {!this._isPlayerEligible && (
-              <FormControl size='small' variant='outlined'>
-                <InputLabel id='release-label'>Release</InputLabel>
-                <Select
-                  labelId='release-label'
-                  value={this.state.release}
-                  onChange={this.handleRelease}
-                  error={this.state.error}
-                  label='Release'
-                >
-                  {menuItems}
-                </Select>
-              </FormControl>
-            )}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Sign Free Agent'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>{text}</p>
+        <div className='confirmation__inputs'>
+          {!this._isPlayerEligible && (
+            <FormControl size='small' variant='outlined'>
+              <InputLabel id='release-label'>Release</InputLabel>
+              <Select
+                labelId='release-label'
+                value={this.state.release}
+                onChange={this.handleRelease}
+                error={this.state.error}
+                label='Release'
+              >
+                {menuItems}
+              </Select>
+            </FormControl>
+          )}
+        </div>
+      </Modal>
     )
   }
 }

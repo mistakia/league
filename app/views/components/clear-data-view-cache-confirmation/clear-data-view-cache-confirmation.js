@@ -1,11 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 
 export default function ClearDataViewCacheConfirmation({
@@ -18,25 +14,28 @@ export default function ClearDataViewCacheConfirmation({
   }
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>Clear local view cache</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          This wipes all locally-cached snapshot history for every data view in
-          this browser, including unsaved local edits that have not been pushed
-          to the server. Server-stored views are not affected and will reload on
-          the next request.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} text>
-          Cancel
-        </Button>
-        <Button onClick={handle_confirm} text>
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Modal
+      open
+      onClose={onClose}
+      title='Clear local view cache'
+      actions={
+        <>
+          <Button onClick={onClose} text>
+            Cancel
+          </Button>
+          <Button onClick={handle_confirm} text>
+            Confirm
+          </Button>
+        </>
+      }
+    >
+      <p>
+        This wipes all locally-cached snapshot history for every data view in
+        this browser, including unsaved local edits that have not been pushed to
+        the server. Server-stored views are not affected and will reload on the
+        next request.
+      </p>
+    </Modal>
   )
 }
 

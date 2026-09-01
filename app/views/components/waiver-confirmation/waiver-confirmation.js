@@ -7,14 +7,10 @@ import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import InputAdornment from '@mui/material/InputAdornment'
 import TextField from '@mui/material/TextField'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
 
+import Modal from '@components/modal'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
@@ -253,67 +249,70 @@ export default function WaiverConfirmation({
   )
 
   return (
-    <Dialog open onClose={onClose}>
-      <DialogTitle>Waiver Claim</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          {`Add ${player_map.get('name')} (${player_map.get('primary_position')})`}
-        </DialogContentText>
-        <div className='confirmation__inputs'>
-          {waiver_type === waiver_types.FREE_AGENCY && (
-            <TextField
-              label='Bid'
-              helperText={`Max Bid: ${waiver_max_bid}`}
-              error={waiver_error}
-              value={waiver_bid}
-              onChange={handleBid}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>$</InputAdornment>
-                )
-              }}
-              size='small'
-              variant='outlined'
-            />
-          )}
-          <FormControl size='small' variant='outlined'>
-            <InputLabel id='type-label'>Type</InputLabel>
-            <Select
-              labelId='type-label'
-              error={missing_type}
-              value={waiver_type}
-              disabled={Boolean(waiver)}
-              onChange={handleType}
-              label='Type'
-            >
-              {typeItems}
-            </Select>
-          </FormControl>
-          {waiver_type && (
-            <Autocomplete
-              multiple
-              options={options}
-              getOptionLabel={(x) => x.label}
-              getOptionSelected={getOptionSelected}
-              renderOption={renderOption}
-              filterSelectedOptions
-              value={releasePlayers}
-              onChange={handleRelease}
-              renderTags={renderTags}
-              renderInput={renderInput}
-            />
-          )}
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} text>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} text>
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Modal
+      open
+      onClose={onClose}
+      title='Waiver Claim'
+      actions={
+        <>
+          <Button onClick={onClose} text>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} text>
+            Confirm
+          </Button>
+        </>
+      }
+    >
+      <p>
+        {`Add ${player_map.get('name')} (${player_map.get('primary_position')})`}
+      </p>
+      <div className='confirmation__inputs'>
+        {waiver_type === waiver_types.FREE_AGENCY && (
+          <TextField
+            label='Bid'
+            helperText={`Max Bid: ${waiver_max_bid}`}
+            error={waiver_error}
+            value={waiver_bid}
+            onChange={handleBid}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>$</InputAdornment>
+              )
+            }}
+            size='small'
+            variant='outlined'
+          />
+        )}
+        <FormControl size='small' variant='outlined'>
+          <InputLabel id='type-label'>Type</InputLabel>
+          <Select
+            labelId='type-label'
+            error={missing_type}
+            value={waiver_type}
+            disabled={Boolean(waiver)}
+            onChange={handleType}
+            label='Type'
+          >
+            {typeItems}
+          </Select>
+        </FormControl>
+        {waiver_type && (
+          <Autocomplete
+            multiple
+            options={options}
+            getOptionLabel={(x) => x.label}
+            getOptionSelected={getOptionSelected}
+            renderOption={renderOption}
+            filterSelectedOptions
+            value={releasePlayers}
+            onChange={handleRelease}
+            renderTags={renderTags}
+            renderInput={renderInput}
+          />
+        )}
+      </div>
+    </Modal>
   )
 }
 

@@ -6,12 +6,9 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import TextField from '@mui/material/TextField'
-import DialogContent from '@mui/material/DialogContent'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogTitle from '@mui/material/DialogTitle'
 
 import { Roster } from '#libs-shared'
+import Modal from '@components/modal'
 import Button from '@components/button'
 
 import './add-player-dialog.styl'
@@ -80,46 +77,49 @@ export default class AddPlayerDialog extends React.Component {
     }
 
     return (
-      <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Add Player To Roster</DialogTitle>
-        <DialogContent>
-          <div className='add__player-dialog'>
-            <FormControl size='small' variant='outlined'>
-              <InputLabel id='player'>Player</InputLabel>
-              <Select
-                native
-                value={this.state.pid}
-                onChange={this.handleChangePlayer}
-                label='Player'
-              >
-                {menuItems}
-              </Select>
-            </FormControl>
-            <TextField
-              label='Value'
-              helperText={`Max: ${this.getAvailableCap()}`}
-              error={this.state.error}
-              value={this.state.value}
-              onChange={this.handleChangeValue}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>$</InputAdornment>
-                )
-              }}
-              size='small'
-              variant='outlined'
-            />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.onClose} text>
-            Cancel
-          </Button>
-          <Button onClick={this.handleSubmit} text>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal
+        open
+        onClose={this.props.onClose}
+        title='Add Player To Roster'
+        actions={
+          <>
+            <Button onClick={this.props.onClose} text>
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} text>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <div className='add__player-dialog'>
+          <FormControl size='small' variant='outlined'>
+            <InputLabel id='player'>Player</InputLabel>
+            <Select
+              native
+              value={this.state.pid}
+              onChange={this.handleChangePlayer}
+              label='Player'
+            >
+              {menuItems}
+            </Select>
+          </FormControl>
+          <TextField
+            label='Value'
+            helperText={`Max: ${this.getAvailableCap()}`}
+            error={this.state.error}
+            value={this.state.value}
+            onChange={this.handleChangeValue}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>$</InputAdornment>
+              )
+            }}
+            size='small'
+            variant='outlined'
+          />
+        </div>
+      </Modal>
     )
   }
 }

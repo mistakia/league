@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
@@ -16,6 +12,7 @@ import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 
+import Modal from '@components/modal'
 import Button from '@components/button'
 import { capture_contribution_context } from '@core/contribution-context'
 
@@ -185,149 +182,145 @@ export default function ContributionDialog({
       : '/contributions'
 
     return (
-      <Dialog
+      <Modal
         open
         onClose={handle_receipt_close}
         className='contribution-dialog'
-        maxWidth='sm'
-        fullWidth
+        title='Report received'
+        actions={
+          <>
+            <Button onClick={handle_receipt_close}>Done</Button>
+          </>
+        }
       >
-        <DialogTitle>Report received</DialogTitle>
-        <DialogContent>
-          <p className='contribution-dialog__receipt-lead'>
-            Thank you. Your report is queued for triage.
+        <p className='contribution-dialog__receipt-lead'>
+          Thank you. Your report is queued for triage.
+        </p>
+        {claim_token ? (
+          <>
+            <Alert severity='warning'>
+              Save this link now. It is the only way back to your report, it is
+              shown once, and it cannot be sent to you again.
+            </Alert>
+            <div className='contribution-dialog__claim'>
+              <code>{`${window.location.origin}${status_path}#${claim_token}`}</code>
+            </div>
+          </>
+        ) : (
+          <p>
+            You can follow it on your{' '}
+            <a href='/contributions'>contributions page</a>.
           </p>
-          {claim_token ? (
-            <>
-              <Alert severity='warning'>
-                Save this link now. It is the only way back to your report, it
-                is shown once, and it cannot be sent to you again.
-              </Alert>
-              <div className='contribution-dialog__claim'>
-                <code>{`${window.location.origin}${status_path}#${claim_token}`}</code>
-              </div>
-            </>
-          ) : (
-            <p>
-              You can follow it on your{' '}
-              <a href='/contributions'>contributions page</a>.
-            </p>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handle_receipt_close}>Done</Button>
-        </DialogActions>
-      </Dialog>
+        )}
+      </Modal>
     )
   }
 
   if (!is_open) return null
 
   return (
-    <Dialog
+    <Modal
       open
       onClose={handle_close}
       className='contribution-dialog'
-      maxWidth='sm'
-      fullWidth
+      title='Report a problem'
+      actions={
+        <>
+          <Button onClick={handle_close}>Cancel</Button>
+          <Button disabled={!is_submittable} onClick={handle_submit}>
+            {is_submitting ? 'Sending…' : 'Send report'}
+          </Button>
+        </>
+      }
     >
-      <DialogTitle>Report a problem</DialogTitle>
-      <DialogContent>
-        <ToggleButtonGroup
-          exclusive
-          size='small'
-          value={submission_kind}
-          onChange={(event, value) => value && set_submission_kind(value)}
-          className='contribution-dialog__kind'
-        >
-          <ToggleButton value='bug_report'>Something is broken</ToggleButton>
-          <ToggleButton value='feature_idea'>I have an idea</ToggleButton>
-        </ToggleButtonGroup>
+      <ToggleButtonGroup
+        exclusive
+        size='small'
+        value={submission_kind}
+        onChange={(event, value) => value && set_submission_kind(value)}
+        className='contribution-dialog__kind'
+      >
+        <ToggleButton value='bug_report'>Something is broken</ToggleButton>
+        <ToggleButton value='feature_idea'>I have an idea</ToggleButton>
+      </ToggleButtonGroup>
 
-        <TextField
-          label='Summary'
-          fullWidth
-          margin='normal'
-          value={submission_title}
-          error={Boolean(title_error)}
-          helperText={title_error}
-          slotProps={{ htmlInput: { maxLength: MAXIMUM_TITLE_LENGTH } }}
-          onChange={(event) => set_submission_title(event.target.value)}
-        />
+      <TextField
+        label='Summary'
+        fullWidth
+        margin='normal'
+        value={submission_title}
+        error={Boolean(title_error)}
+        helperText={title_error}
+        slotProps={{ htmlInput: { maxLength: MAXIMUM_TITLE_LENGTH } }}
+        onChange={(event) => set_submission_title(event.target.value)}
+      />
 
-        <TextField
-          label={
-            submission_kind === 'bug_report'
-              ? 'What happened, and what did you expect instead?'
-              : 'What would you like to be able to do?'
-          }
-          fullWidth
-          multiline
-          minRows={5}
-          margin='normal'
-          value={submission_body}
-          error={Boolean(body_error)}
-          helperText={body_error}
-          slotProps={{ htmlInput: { maxLength: MAXIMUM_BODY_LENGTH } }}
-          onChange={(event) => set_submission_body(event.target.value)}
-        />
+      <TextField
+        label={
+          submission_kind === 'bug_report'
+            ? 'What happened, and what did you expect instead?'
+            : 'What would you like to be able to do?'
+        }
+        fullWidth
+        multiline
+        minRows={5}
+        margin='normal'
+        value={submission_body}
+        error={Boolean(body_error)}
+        helperText={body_error}
+        slotProps={{ htmlInput: { maxLength: MAXIMUM_BODY_LENGTH } }}
+        onChange={(event) => set_submission_body(event.target.value)}
+      />
 
-        {/* THE SCREENSHOT IS SHOWN, not merely described. It is a picture of
-            whatever was on screen, so a checkbox saying "attach a screenshot"
-            with nothing to look at asks the submitter to consent to something
-            they cannot see. Rendering it is what makes declining meaningful. */}
-        {screenshot && (
-          <div className='contribution-dialog__screenshot'>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={include_screenshot}
-                  onChange={(event) =>
-                    set_include_screenshot(event.target.checked)
-                  }
-                />
-              }
-              label='Attach this screenshot'
-            />
-            {include_screenshot && (
-              <img
-                src={screenshot}
-                alt='Screenshot of the page as it appeared when you opened this form'
-                className='contribution-dialog__screenshot-preview'
+      {/* THE SCREENSHOT IS SHOWN, not merely described. It is a picture of
+          whatever was on screen, so a checkbox saying "attach a screenshot"
+          with nothing to look at asks the submitter to consent to something
+          they cannot see. Rendering it is what makes declining meaningful. */}
+      {screenshot && (
+        <div className='contribution-dialog__screenshot'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={include_screenshot}
+                onChange={(event) =>
+                  set_include_screenshot(event.target.checked)
+                }
               />
-            )}
-          </div>
-        )}
+            }
+            label='Attach this screenshot'
+          />
+          {include_screenshot && (
+            <img
+              src={screenshot}
+              alt='Screenshot of the page as it appeared when you opened this form'
+              className='contribution-dialog__screenshot-preview'
+            />
+          )}
+        </div>
+      )}
 
-        {/* The submitter sees exactly what is being sent before they send it.
-            Every field here is allowlisted at capture -- see
-            app/core/contribution-context.js. */}
-        <Accordion className='contribution-dialog__context' disableGutters>
-          <AccordionSummary>
-            {is_capturing
-              ? 'Collecting page details…'
-              : 'What gets sent with this report'}
-          </AccordionSummary>
-          <AccordionDetails>
-            {is_capturing ? (
-              <CircularProgress size={20} />
-            ) : (
-              <pre className='contribution-dialog__context-preview'>
-                {JSON.stringify(captured_context, null, 2)}
-              </pre>
-            )}
-          </AccordionDetails>
-        </Accordion>
+      {/* The submitter sees exactly what is being sent before they send it.
+          Every field here is allowlisted at capture -- see
+          app/core/contribution-context.js. */}
+      <Accordion className='contribution-dialog__context' disableGutters>
+        <AccordionSummary>
+          {is_capturing
+            ? 'Collecting page details…'
+            : 'What gets sent with this report'}
+        </AccordionSummary>
+        <AccordionDetails>
+          {is_capturing ? (
+            <CircularProgress size={20} />
+          ) : (
+            <pre className='contribution-dialog__context-preview'>
+              {JSON.stringify(captured_context, null, 2)}
+            </pre>
+          )}
+        </AccordionDetails>
+      </Accordion>
 
-        {submit_error && <Alert severity='error'>{submit_error}</Alert>}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handle_close}>Cancel</Button>
-        <Button disabled={!is_submittable} onClick={handle_submit}>
-          {is_submitting ? 'Sending…' : 'Send report'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {submit_error && <Alert severity='error'>{submit_error}</Alert>}
+    </Modal>
   )
 }
 
