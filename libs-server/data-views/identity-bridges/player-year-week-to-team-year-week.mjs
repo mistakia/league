@@ -1,5 +1,6 @@
 import db from '#db'
 import { current_season } from '#constants'
+import { physical_year_projection } from '#libs-server/data-views/physical-season-columns.mjs'
 
 export const from = 'player_year_week'
 export const to = 'team_year_week'
@@ -76,7 +77,7 @@ export const add_cte = ({ query_context, params = {} }) => {
 
   const cte_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
-    .select('nfl_games.season_year as year')
+    .select(physical_year_projection('nfl_games'))
     .select('nfl_games.week as week')
     .select('nfl_games.esbid as esbid')
     .select('player_gamelogs.nfl_team as nfl_team')
