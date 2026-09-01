@@ -26,7 +26,7 @@ chai.should()
 // that repo is converted too. A green run here is not evidence that MUI has
 // left the bundle.
 const import_budget = {
-  '@mui/material': 216,
+  '@mui/material': 215,
   '@mui/base': 7,
   '@mui/lab': 1,
   '@mui/icons-material': 0,

@@ -51,7 +51,15 @@
     outline 2px solid $prose_action
     outline-offset -2px
 
+// display:flex is load-bearing, not decoration. This is a <span>, so without it
+// the summary's children are block boxes in an inline parent and they STACK —
+// settings-section passes a title and a description meant to sit side by side,
+// and the title's own `flex-basis: 33.33%` is inert without a flex parent.
+// MUI's .MuiAccordionSummary-content carried display:flex and that is what the
+// call sites were written against.
 .accordion__summary-content
+  display flex
+  align-items center
   flex 1
   min-width 0
 

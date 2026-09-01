@@ -7,7 +7,6 @@ import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
 import List from 'react-virtualized-compat/dist/es/List'
-import Tooltip from '@mui/material/Tooltip'
 
 import IconButton from '@components/icon-button'
 import NFLTeamBye from '@components/nfl-team-bye'
@@ -73,9 +72,12 @@ export default function AuctionTargets({
         <div className={classNames.join(' ')}>
           {isNominating && isNominatable && (
             <div className='auction__player-nominate'>
-              <Tooltip title='Nominate'>
-                <IconButton icon='add' small onClick={() => select(pid)} />
-              </Tooltip>
+              <IconButton
+                icon='add'
+                small
+                label='Nominate'
+                onClick={() => select(pid)}
+              />
             </div>
           )}
           <PlayerName pid={pid} hidePosition />

@@ -132,6 +132,7 @@
     color $prose_muted
     background transparent
     border-color transparent
+
     @media (pointer: fine)
       &:hover:not(:disabled)
       &:hover:not([disabled])
@@ -139,6 +140,21 @@
         background transparent
         border-color transparent
         box-shadow none
+
+    // THE FOCUS RING HAS TO BE RESTATED HERE, AND LAST. `border-color:
+    // transparent` above sits at the SAME specificity as the `:focus-visible`
+    // rule further up the file and comes after it, so it won — every text and
+    // icon button had no visible focus indicator at all, with `outline: none`
+    // already suppressing the UA ring and only a 1.18:1 box-shadow left. Seven
+    // icon buttons carried MUI's focus treatment until they were converted, so
+    // this is the ring they are owed rather than a new affordance.
+    //
+    // `:not(:disabled)` and the position after the hover block are both load
+    // bearing: the hover rule above also clears border-color and sits a step
+    // higher, so a plain `&:focus-visible` would go dark again the moment the
+    // pointer crossed a button the keyboard had already reached.
+    &:focus-visible:not(:disabled)
+      border-color $prose_ink
 
   &.active
   &.button__active
