@@ -1,0 +1,15 @@
+{
+  "note": "Per-site verdicts for db/gates/check-knex-column-resolution.mjs. Matching is (file, table, column) with a required reason -- never per NAME, because a stoplist of common column names is what hid the defect from the gate built to catch it. An entry that suppresses nothing is itself reported as stale, so a repaired site forces its entry out rather than leaving a standing exemption. Negative control: delete an entry, confirm its site reappears, put it back.",
+  "verdict_meanings": {
+    "tracked-defect": "a real unresolvable column reference, confirmed against the schema, whose repair is owned elsewhere and is not this gate's to make. The gate fails on anything NEW; this entry keeps a standing repair from blocking every session's push while it waits."
+  },
+  "adjudications": [
+    {
+      "file": "scripts/import-nflverse-injuries.mjs",
+      "table": "practice",
+      "column": "inj",
+      "verdict": "tracked-defect",
+      "reason": "REAL and unrepaired. `practice.inj` was renamed to `injury_type` by 72346e579, the same 204-column conform that renamed player_gamelogs.pos and broke import-nflverse-weekly-rosters; this is a second writer the same sweep missed, and 21d9a3247 -- the commit that repaired the rosters importer -- edited this file without catching it. The payload reaches db('practice').insert(batch) through batch_insert with no delete in between, so the write raises 42703 whenever it runs. It has not surfaced as a signal because the branch is gated on --write_practice, which defaults false and is not passed by the league-imports crontab entry, so the scheduled run never reaches it. Latent rather than firing, which is why it is tracked here rather than repaired inside the change that added this pass -- the repair is a one-token edit (`inj:` -> `injury_type:`) and wants its own commit and its own verification that the practice branch writes what the table expects. Remove this entry as the LAST step of that repair."
+    }
+  ]
+}

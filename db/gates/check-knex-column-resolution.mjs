@@ -62,6 +62,24 @@
 // recurring defect, since payload keys, conflict target and merge list are three
 // separate column references and a rename fix touching one need not touch them.
 //
+// A FOURTH SHAPE, added later, is the only one whose columns are not in the
+// statement at all: an INSERT or UPDATE payload passed by NAME.
+//
+//   INDIRECT    .insert(inserts)  -> resolve `inserts` back to the object
+//                                    literals that built it, in this file, and
+//                                    read their keys against the bound table
+//
+// It is here because the three above cover the MINORITY of this tree's writes:
+// `.insert({ ... })` inline appears 61 times and `.insert(<identifier>)` 206.
+// A payload accumulated into an array and handed to `batch_insert` carries no
+// column literal any of the passes above can see, which is how `72346e579`
+// renamed `player_gamelogs.pos` to `player_position` across 204 columns, missed
+// `scripts/import-nflverse-weekly-rosters.mjs`, and left this gate printing
+// GATE OK over an importer that died on 42703 every run for weeks. The
+// resolution itself, the two shapes it must DECLINE, and why, are in
+// `insert-payload-resolution.mjs`; controls 12-15 drive it as two
+// report/decline pairs.
+//
 // An OUTPUT ALIAS the statement declares for itself is excluded, because a bare
 // reference to one is correct SQL: `.count('* as count')` then `.orderBy('count')`
 // resolves against the projection, not the table. Same concept as the shadowed
@@ -151,6 +169,7 @@ import {
   unwrap_array_argument,
   walk_files as walk_files_in
 } from './knex-statement-machinery.mjs'
+import { resolve_insert_payload } from './insert-payload-resolution.mjs'
 import {
   format_corpus,
   resolve_corpus,
@@ -349,6 +368,11 @@ const BARE_FIRST_ARGUMENT_METHODS = new Set([
 
 const BARE_COLUMN_LIST_METHODS = new Set(['groupBy', 'onConflict', 'merge'])
 
+// The methods whose argument may be an IDENTIFIER naming a payload object built
+// elsewhere. `insert` and `update` only: every other method taking a bare
+// identifier takes a VALUE, and reading one as a column list would resolve data.
+const PAYLOAD_METHODS = new Set(['insert', 'update'])
+
 // The methods that DECLARE an output alias. A bare reference to one is legal
 // SQL -- Postgres resolves `.orderBy('count')` against the `.count('* as
 // count')` projection, not against the table -- so those references must be
@@ -466,8 +490,11 @@ const scan_source = ({ source, relative_path, tables, stats }) => {
     }
     if (RAW_CALL_RE.test(statement.text)) stats.statements_with_raw += 1
 
-    const report = (column, table, shape, offset) => {
-      const line = line_of(statement.offset + offset)
+    // A file offset, so a reference that lives OUTSIDE the statement -- an insert
+    // payload built elsewhere and passed by name -- is reported at the literal it
+    // was actually written on rather than at the statement that consumes it.
+    const report_at = (column, table, shape, file_offset) => {
+      const line = line_of(file_offset)
       if (is_comment_line(lines[line - 1] || '')) return
       findings.push({
         table,
@@ -478,6 +505,9 @@ const scan_source = ({ source, relative_path, tables, stats }) => {
         text: (lines[line - 1] || '').trim().slice(0, 140)
       })
     }
+
+    const report = (column, table, shape, offset) =>
+      report_at(column, table, shape, statement.offset + offset)
 
     // QUALIFIED -- 'prefix.column', prefix resolved through the environment.
     QUALIFIED_REFERENCE_RE.lastIndex = 0
@@ -525,6 +555,34 @@ const scan_source = ({ source, relative_path, tables, stats }) => {
       if (tables.get(only_table).has(reference.column)) continue
       report(reference.column, only_table, 'bare', reference.offset)
     }
+
+    // INDIRECT PAYLOAD -- `.insert(inserts)` / `.update(payload)`, where the keys
+    // live in an object literal built elsewhere in the file. The dominant write
+    // shape here and the one every other pass is structurally blind to, since the
+    // statement text contains no column at all.
+    for (const call of each_call(statement.text, PAYLOAD_METHODS)) {
+      const identifier = call.body.match(/^\s*([a-z_][a-z_0-9]*)\s*$/i)
+      if (!identifier) continue
+      const payload = resolve_insert_payload({
+        source,
+        identifier: identifier[1],
+        statement_offset: statement.offset
+      })
+      if (payload.status !== 'resolved') {
+        stats.unchecked_payload += 1
+        stats.payload_decline_reasons.push(
+          `${relative_path}:${line_of(statement.offset)} ${payload.reason}`
+        )
+        continue
+      }
+      stats.payloads_resolved += 1
+      if (payload.partial) stats.payloads_partial += 1
+      for (const key of payload.keys) {
+        stats.resolved += 1
+        if (tables.get(only_table).has(key.column)) continue
+        report_at(key.column, only_table, 'indirect-payload', key.offset)
+      }
+    }
   }
   return findings
 }
@@ -540,6 +598,13 @@ const run_scan = (tables, { source_override } = {}) => {
     unchecked_unbound_prefix: 0,
     unchecked_ambiguous: 0,
     unchecked_output_alias: 0,
+    unchecked_payload: 0,
+    payloads_resolved: 0,
+    payloads_partial: 0,
+    // Kept as text rather than a count: a payload this cannot read is the
+    // denominator question, and a bare number does not tell you whether the
+    // resolver lost a shape it used to see.
+    payload_decline_reasons: [],
     // Per root, so the coverage verdict can name WHICH root went dark rather than
     // reporting a total that moves with every ordinary commit.
     by_root: {}
@@ -1103,6 +1168,99 @@ const run_negative_controls = (tables) => {
     })
   }
 
+  // 12-15. THE INDIRECT PAYLOAD PASS, as two report/decline PAIRS over the SAME
+  //    corpus site. A pair is what makes each half mean something: the
+  //    must-report halves show the pass can see a stale column in a payload built
+  //    outside the statement, and the must-not-report halves show it declines the
+  //    two shapes a naive version reports on real, correct code. Run singly,
+  //    "reported" and "did not report" are each consistent with a scanner that is
+  //    simply broken in one direction.
+  const payload_target = pick(({ statement, environment, source }) => {
+    if (environment.tables_in_scope.size !== 1) return null
+    const [table] = environment.tables_in_scope
+    for (const call of each_call(statement.text, PAYLOAD_METHODS)) {
+      const identifier = call.body.match(/^\s*([a-z_][a-z_0-9]*)\s*$/i)
+      if (!identifier) continue
+      const payload = resolve_insert_payload({
+        source,
+        identifier: identifier[1],
+        statement_offset: statement.offset
+      })
+      if (payload.status !== 'resolved') continue
+      // A key whose spelling appears ONCE in the file, so rewriting it cannot
+      // collide with an unrelated occurrence and mutate something else.
+      const key = payload.keys.find(
+        (candidate) =>
+          tables.get(table).has(candidate.column) &&
+          source.split(candidate.column).length === 2
+      )
+      if (key) return { table, identifier: identifier[1], key }
+    }
+    return null
+  })
+
+  const bogus = 'zzz_no_such_column'
+  const rewrite_key = (target) =>
+    target.source.slice(0, target.hit.key.offset) +
+    bogus +
+    target.source.slice(target.hit.key.offset + target.hit.key.column.length)
+  const names_bogus = (finding) =>
+    finding.column === bogus && finding.shape === 'indirect-payload'
+
+  run({
+    name: 'a stale column in a payload built OUTSIDE the statement is reported',
+    direction: 'must-report',
+    target: payload_target,
+    mutate: rewrite_key,
+    expectation: names_bogus
+  })
+
+  // The DECOY for the delete-before-write shape. Both seasonlog generators carry
+  // a scratch key on the row object for an intermediate ranking pass and delete
+  // it before the insert; a resolver that reads the literal alone reports every
+  // one of them, on code that is correct. Same mutation as control 12 plus the
+  // delete that makes it legitimate, and it must go the other way.
+  run({
+    name: 'a payload key DELETED before the write is not reported (decoy)',
+    direction: 'must-not-report',
+    target: payload_target,
+    mutate: (target) =>
+      `${rewrite_key(target)}\ndelete ${target.hit.identifier}.${bogus}\n`,
+    expectation: names_bogus
+  })
+
+  // The DECOY for same-name accumulators in different scopes. This module reads
+  // text and has no scope model, so a second binding of the payload name must
+  // make the site UNRESOLVED rather than letting one function's literal be read
+  // against another function's table -- the shape that reported five findings on
+  // correct code in `scripts/process-projections.mjs` before it was guarded.
+  run({
+    name: 'a payload name bound a second time is declined, not guessed (decoy)',
+    direction: 'must-not-report',
+    target: payload_target,
+    mutate: (target) =>
+      `const { ${target.hit.identifier} } = build_something()\n${rewrite_key(target)}`,
+    expectation: names_bogus
+  })
+
+  // A comment between two keys must not swallow the key after it. Prose contains
+  // commas, the segment split is comma-driven, and the key pattern anchors at the
+  // segment start -- so without blanking, a commented key is dropped SILENTLY and
+  // the gate reports a confident green. That is the exact shape of the
+  // `player_gamelogs.player_position` site this pass was built for, whose key
+  // carries a three-line comment about that very column.
+  run({
+    name: 'a key preceded by a comment containing commas is still read',
+    direction: 'must-report',
+    target: payload_target,
+    mutate: (target) => {
+      const mutated = rewrite_key(target)
+      const at = mutated.lastIndexOf('\n', target.hit.key.offset) + 1
+      return `${mutated.slice(0, at)}// one, two, three: a comment, with commas\n${mutated.slice(at)}`
+    },
+    expectation: names_bogus
+  })
+
   return controls
 }
 
@@ -1194,6 +1352,11 @@ const main = () => {
     )
     console.log(
       `  ${stats.statements_with_raw} statement(s) contain a .raw() body, which is not parsed`
+    )
+    console.log(
+      `  indirect insert/update payloads: ${stats.payloads_resolved} resolved ` +
+        `(${stats.payloads_partial} partial -- a spread or an opaque push leaves ` +
+        `keys this cannot enumerate), ${stats.unchecked_payload} declined`
     )
     // Printed per root because that is what the coverage assertion reads. A total
     // cannot show a single root having gone dark.
