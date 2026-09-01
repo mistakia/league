@@ -296,11 +296,27 @@ router.get('/?', async (req, res) => {
       sources
     })
 
-    await db('users')
-      .where({ id: req.auth.userId })
-      .update({ last_visit_at: new Date() })
+    // Bookkeeping, deliberately after the response so it never delays it -- and
+    // therefore with its own catch. A throw here used to fall into the handler's
+    // catch below, which would call res.send() on an already-sent response; that
+    // raises ERR_HTTP_HEADERS_SENT, and because this sits after an `await` with
+    // nothing to catch it, the rejection is unhandled and TAKES THE WHOLE API
+    // PROCESS DOWN. On the one endpoint every client calls on load.
+    //
+    // Any transient failure on this write reaches it -- a lock timeout, a
+    // dropped connection, a read-only session. `yarn dev:smoke` hits it every
+    // time by construction, since it opens the production database with
+    // default_transaction_read_only=on.
+    try {
+      await db('users')
+        .where({ id: req.auth.userId })
+        .update({ last_visit_at: new Date() })
+    } catch (error) {
+      logger(error)
+    }
   } catch (error) {
     logger(error)
+    if (res.headersSent) return
     res.status(500).send({ error: error.toString() })
   }
 })
