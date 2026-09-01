@@ -81,6 +81,7 @@ waivers
 placed_wagers
 urls
 user_data_views
+user_api_keys
 league_user_careerlogs
 league_team_careerlogs
 invite_codes

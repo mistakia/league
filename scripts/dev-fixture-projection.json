@@ -438,6 +438,16 @@
       "invite_code": "NULL",
       "data_view_export_max_rows": "keep"
     },
+    "user_api_keys": {
+      "api_key_id": "keep",
+      "user_id": "keep",
+      "key_hash": "md5(api_key_id::text) || md5('devfixture' || api_key_id::text)",
+      "key_prefix": "'devfixture'",
+      "name": "keep",
+      "created_at": "keep",
+      "last_used_at": "keep",
+      "revoked_at": "keep"
+    },
     "users_sources": {
       "user_id": "keep",
       "source_id": "keep",

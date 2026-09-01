@@ -60,13 +60,44 @@ const required_scrubs = [
   // config.config_value carries third-party vendor credentials (a vendor
   // account email/password pair, OAuth client secrets and refresh tokens, an
   // api_key, session cookies, proxy credentials and an alerts webhook).
-  ['config', 'config_value']
+  ['config', 'config_value'],
+  // Per-user API keys. Both entries are load-bearing because the name heuristic
+  // below CANNOT reach either: it matches the column name only, and the secret
+  // is signposted by the TABLE name (`user_api_keys`) while the columns read as
+  // `key_hash` and `key_prefix` -- neither matches `api_?key`, `secret`,
+  // `token` or `credential`. A table whose name announces the secret and whose
+  // columns do not is exactly the shape the heuristic is blind to.
+  ['user_api_keys', 'key_hash'],
+  ['user_api_keys', 'key_prefix']
 ]
 
 // A future column nobody remembers to list above. Matched against the column
 // NAME only, so it costs nothing and catches the common shapes.
 const secret_name_pattern =
   /(password|passwd|secret|token|api_?key|webhook|cookie|credential|private_key|access_key|auth)/i
+
+// Columns the heuristic names that are NOT secrets, keyed on `table.column` so
+// the exemption cannot widen past the one column it was reasoned about.
+//
+// `user_api_keys` produced a clean inversion of the heuristic on 2026-09-01 and
+// it is worth stating, because it is a property of matching NAMES rather than
+// anything about this table. The heuristic fired on `api_key_id` -- a bigint
+// identity primary key that is not secret and cannot be scrubbed, since it is
+// the foreign-key target and the key_hash scrub derives from it -- while
+// staying silent on `key_hash`, the actual 64-character secret, because
+// `key_hash` matches none of `api_?key`, `secret`, `token` or `credential`.
+// A false positive on the harmless column and a false negative on the dangerous
+// one, from a single table.
+//
+// The general shape: the heuristic reads the COLUMN name, so it is blind
+// wherever the TABLE name is what signposts the secret. Both real secrets here
+// are covered by explicit `required_scrubs` entries instead, which is the
+// mechanism that does not depend on a name being self-describing. Renaming the
+// column is not the fix -- `api_key_id` is exactly what the surrogate-key rule
+// asks for (`<entity>_id`), and spelling it differently to appease a regex
+// would be the same mistake as renaming a real word to appease the token
+// vocabulary.
+const heuristic_exemptions = new Set(['user_api_keys.api_key_id'])
 
 /**
  * Parse column names per table out of the committed schema. CI has no
@@ -166,6 +197,7 @@ const run = async () => {
     const missed = []
     for (const [table, columns] of Object.entries(spec)) {
       for (const [column, disposition] of Object.entries(columns)) {
+        if (heuristic_exemptions.has(`${table}.${column}`)) continue
         if (disposition === 'keep' && secret_name_pattern.test(column)) {
           missed.push(`${table}.${column} looks secret-bearing but is "keep"`)
         }
@@ -183,6 +215,20 @@ const run = async () => {
     'name heuristic detects a secret-shaped column',
     check_heuristic(heuristic_control).some((m) =>
       m.includes('synthetic_api_key_column')
+    )
+  ])
+
+  // Control: the exemption is keyed on `table.column`, so the SAME column name
+  // on another table must still fire. An exemption that widened to the bare
+  // name would silently stop the heuristic reporting `api_key_id` anywhere --
+  // an exclusion list quietly disabling the assertion it qualifies is the
+  // failure this repo has already paid for once in check-knex-column-resolution.
+  const exemption_scope_control = clone(projection)
+  exemption_scope_control.users.api_key_id = 'keep'
+  controls.push([
+    'the heuristic exemption does not widen to the same column on another table',
+    check_heuristic(exemption_scope_control).some((m) =>
+      m.includes('users.api_key_id')
     )
   ])
 
