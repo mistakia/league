@@ -1,3 +1,33 @@
+// Was an `sx` object on MUI's IconButton. A style prop is invisible to every
+// sweep of this repo's stylesheets — including the z-index guard, which is why
+// the 10 below sat there unreviewed — so it lands here as a rule with a name.
+//
+// The 10 stays a bare literal deliberately: the guard ignores anything under
+// 100 because that band orders siblings inside one component, and this only has
+// to clear the drawer's own scrolling body.
+//
+// THE GROUND IS ON A WRAPPER RATHER THAN ON THE BUTTON, and that is not a
+// stylistic preference. `.button__icon { background: transparent }` in
+// button.styl sits behind the four-:not() MUI guard chain, which puts it at
+// 0,6,0 — a rule here under a single class would be 0,1,0 and would lose to it
+// SILENTLY, painting nothing and reading as a styling mistake in this file. A
+// wrapper takes the fill out of that cascade entirely instead of trying to
+// out-specify it.
+.draft-pick-sheet__close
+  position absolute
+  top 16px
+  right 16px
+  z-index 10
+  display inline-flex
+  border-radius $button_border_radius
+  // The button sits over the sheet's scrolling content and needs a ground of
+  // its own to stay legible against it.
+  background rgba(255, 255, 255, 0.9)
+
+  @media (pointer: fine)
+    &:hover
+      background rgba(255, 255, 255, 1)
+
 .draft-pick-sheet-body
   padding 60px 20px 20px 20px
   display flex

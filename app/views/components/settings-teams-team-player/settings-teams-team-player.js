@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import IconButton from '@mui/material/IconButton'
 
-import Icon from '@components/icon'
+import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'
 
 import './settings-teams-team-player.styl'
@@ -30,9 +29,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
         </div>
         <PlayerName pid={this.props.pid} />
         <div>
-          <IconButton onClick={this.handleRemove}>
-            <Icon name='delete' small />
-          </IconButton>
+          <IconButton icon='delete' small onClick={this.handleRemove} />
         </div>
       </div>
     )

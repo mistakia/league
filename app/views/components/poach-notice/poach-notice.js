@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Alert from '@mui/material/Alert'
-import Button from '@mui/material/Button'
 
+import Button from '@components/button'
 import TeamName from '@components/team-name'
 import { getPoachProcessingTime } from '#libs-shared'
 
@@ -52,18 +52,8 @@ export default function PoachNotice({
       </div>
       {poach.get('player_tid') === teamId && (
         <div className='poach-notice-section poach-notice-actions'>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={() => handle_activate(poach)}
-          >
-            Activate
-          </Button>
-          <Button
-            variant='outlined'
-            color='primary'
-            onClick={() => handle_process_poach(poach)}
-          >
+          <Button onClick={() => handle_activate(poach)}>Activate</Button>
+          <Button onClick={() => handle_process_poach(poach)}>
             Process Poach
           </Button>
         </div>

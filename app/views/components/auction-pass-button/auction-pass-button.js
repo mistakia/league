@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Button from '@mui/material/Button'
+import Button from '@components/button'
 
 export default function AuctionPassButton({
   pass_nomination,
@@ -22,13 +22,7 @@ export default function AuctionPassButton({
   // Show passed state if team has passed
   if (user_has_passed_current_auction_nomination) {
     return (
-      <Button
-        className='auction-pass-button'
-        variant='contained'
-        color='primary'
-        size='small'
-        disabled
-      >
+      <Button className='auction-pass-button' small disabled>
         Passed
       </Button>
     )
@@ -36,13 +30,7 @@ export default function AuctionPassButton({
 
   // Show pass button for eligible teams
   return (
-    <Button
-      className='auction-pass-button'
-      variant='contained'
-      color='primary'
-      size='small'
-      onClick={handle_pass_click}
-    >
+    <Button className='auction-pass-button' small onClick={handle_pass_click}>
       Pass
     </Button>
   )

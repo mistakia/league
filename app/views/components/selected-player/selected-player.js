@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Button from '@mui/material/Button'
 import { Tabs } from '@mui/base/Tabs'
 import { Tab } from '@mui/base/Tab'
 import { TabPanel } from '@mui/base/TabPanel'
 import { TabsList } from '@mui/base/TabsList'
 import Drawer from '@mui/material/Drawer'
-import IconButton from '@mui/material/IconButton'
 import { Map, List } from 'immutable'
-import ButtonGroup from '@mui/material/ButtonGroup'
 
-import Icon from '@components/icon'
+import Button from '@components/button'
+import ButtonGroup from '@components/button-group'
+import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'
 import { nth } from '#libs-shared'
 import TeamName from '@components/team-name'
@@ -157,7 +156,7 @@ export default function SelectedPlayer({
       )
     }
     external_button_items.push(
-      <Button size='small' onClick={open_pfr_link}>
+      <Button small onClick={open_pfr_link}>
         PFR
       </Button>
     )
@@ -172,7 +171,7 @@ export default function SelectedPlayer({
       )
     }
     external_button_items.push(
-      <Button size='small' onClick={open_rotowire_link}>
+      <Button small onClick={open_rotowire_link}>
         Rotowire
       </Button>
     )
@@ -189,7 +188,7 @@ export default function SelectedPlayer({
       )
     }
     external_button_items.push(
-      <Button size='small' onClick={open_fantasy_data_link}>
+      <Button small onClick={open_fantasy_data_link}>
         FantasyData
       </Button>
     )
@@ -204,7 +203,7 @@ export default function SelectedPlayer({
       )
     }
     external_button_items.push(
-      <Button size='small' onClick={open_espn_link}>
+      <Button small onClick={open_espn_link}>
         ESPN
       </Button>
     )
@@ -219,7 +218,7 @@ export default function SelectedPlayer({
       )
     }
     external_button_items.push(
-      <Button size='small' onClick={open_yahoo_link}>
+      <Button small onClick={open_yahoo_link}>
         Yahoo
       </Button>
     )
@@ -399,13 +398,10 @@ export default function SelectedPlayer({
             )}
 
             {show_collapse && (
-              <IconButton onClick={handleToggleExpand}>
-                {collapsed ? (
-                  <Icon name='arrow-down' />
-                ) : (
-                  <Icon name='arrow-up' />
-                )}
-              </IconButton>
+              <IconButton
+                icon={collapsed ? 'arrow-down' : 'arrow-up'}
+                onClick={handleToggleExpand}
+              />
             )}
           </div>
         </div>
@@ -478,15 +474,11 @@ export default function SelectedPlayer({
             <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
           )}
           {external_button_items.length > 0 && (
-            <ButtonGroup variant='contained'>
-              {external_button_items}
-            </ButtonGroup>
+            <ButtonGroup>{external_button_items}</ButtonGroup>
           )}
         </div>
         <div className='selected__player-actions-close'>
-          <Button variant='contained' onClick={handleClose}>
-            <Icon name='clear' />
-          </Button>
+          <IconButton icon='clear' onClick={handleClose} />
         </div>
       </div>
     </Drawer>

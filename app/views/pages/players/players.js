@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import InfiniteScroll from 'react-infinite-scroller'
-import Button from '@mui/material/Button'
 import dayjs from 'dayjs'
 
+import Button from '@components/button'
 import Icon from '@components/icon'
 import SearchFilter from '@components/search-filter'
 import StatusFilter from '@components/status-filter'
@@ -218,7 +218,6 @@ export default function PlayersPage({
           {show_week_filter && <WeekFilter />}
           {show_time_period_filter && <PlayersTimePeriodFilter />}
           <Button
-            variant='outlined'
             onClick={handleExport}
             disabled={isPending}
             className='players__view-export'
@@ -226,20 +225,14 @@ export default function PlayersPage({
             Export CSV
           </Button>
           {is_player_filter_options_changed && (
-            <Button
-              variant='text'
-              startIcon={<Icon name='clear' />}
-              onClick={reset_player_filter_options}
-            >
+            <Button text onClick={reset_player_filter_options}>
+              <Icon name='clear' />
               Reset Filters
             </Button>
           )}
-          <Button
-            endIcon={<Icon name='arrow-down' />}
-            onClick={handleClick}
-            className='players__head-expand'
-          >
+          <Button onClick={handleClick} className='players__head-expand'>
             {expanded ? 'Hide' : 'Filters'}
+            <Icon name='arrow-down' flipped={expanded} />
           </Button>
         </div>
         {expanded && (

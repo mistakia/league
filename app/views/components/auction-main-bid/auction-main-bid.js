@@ -3,9 +3,9 @@ import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 import TeamName from '@components/team-name'
-import Button from '@mui/material/Button'
 import LoadingButton from '@mui/lab/LoadingButton'
-import ButtonGroup from '@mui/material/ButtonGroup'
+import Button from '@components/button'
+import ButtonGroup from '@components/button-group'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
 import AuctionSlowModeStatus from '@components/auction-slow-mode-status'
@@ -140,7 +140,7 @@ export default class AuctionMainBid extends React.Component {
     } else if (isLocked) {
       disabled = true
       action = (
-        <Button disabled variant='contained'>
+        <Button small disabled>
           Locked
         </Button>
       )
@@ -148,31 +148,37 @@ export default class AuctionMainBid extends React.Component {
       if (isWinningBid) {
         disabled = true
         classNames.push('winning')
-        action = <Button disabled>Winning Bid</Button>
+        action = (
+          <Button small disabled>
+            Winning Bid
+          </Button>
+        )
       } else if (isAboveCap) {
         disabled = true
         action = (
-          <Button disabled variant='contained'>
+          <Button small disabled>
             Exceeded CAP
           </Button>
         )
       } else if (!isEligible) {
         disabled = true
         action = (
-          <Button disabled variant='contained'>
+          <Button small disabled>
             Ineligible
           </Button>
         )
       } else {
         action = (
-          <Button onClick={this.handleClickBid}>Bid ${this.state.value}</Button>
+          <Button small onClick={this.handleClickBid}>
+            Bid ${this.state.value}
+          </Button>
         )
       }
     } else if (isNominating || isCommish) {
       disabled = !selected_pid
       action = (
         <Button
-          variant='contained'
+          small
           disabled={!selected_pid}
           onClick={this.handleClickNominate}
         >
@@ -231,20 +237,26 @@ export default class AuctionMainBid extends React.Component {
                 </div>
               )}
               <div className='auction__main-action'>
-                <ButtonGroup
-                  className={classNames.join(' ')}
-                  variant='contained'
-                  disabled={disabled}
-                  size='small'
-                >
+                {/* `small` and `disabled` are on each button rather than on
+                    the group. The group propagates nothing — see
+                    button-group.js. */}
+                <ButtonGroup className={classNames.join(' ')}>
                   {(!nominated_pid || !isWinningBid) && (
-                    <Button onClick={this.handleDownClick}>
+                    <Button
+                      small
+                      disabled={disabled}
+                      onClick={this.handleDownClick}
+                    >
                       <Icon name='remove' />
                     </Button>
                   )}
                   {action}
                   {(!nominated_pid || !isWinningBid) && (
-                    <Button onClick={this.handleUpClick}>
+                    <Button
+                      small
+                      disabled={disabled}
+                      onClick={this.handleUpClick}
+                    >
                       <Icon name='add' />
                     </Button>
                   )}

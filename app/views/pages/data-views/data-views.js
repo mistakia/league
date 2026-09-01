@@ -5,9 +5,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 import * as table_constants from 'react-table/src/constants.mjs'
-import Button from '@mui/material/Button'
 
 import PageLayout from '@layouts/page'
+import Button from '@components/button'
 import Loading from '@components/loading'
 import ClearDataViewCacheConfirmation from '@components/clear-data-view-cache-confirmation'
 import { Team } from '@core/teams'
@@ -362,7 +362,7 @@ export default function DataViewsPage({
               ? 'No response from the server.'
               : 'Error occured while processing request'}
           </span>
-          <Button size='small' onClick={() => reset_data_view_cache()}>
+          <Button small onClick={() => reset_data_view_cache()}>
             Retry
           </Button>
         </div>

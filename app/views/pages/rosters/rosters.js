@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Button from '@mui/material/Button'
 
+import Button from '@components/button'
 import Icon from '@components/icon'
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import PageLayout from '@layouts/page'
@@ -239,7 +239,8 @@ export default function RostersPage({
         <div className='rosters__picks'>{pickItems}</div>
       </div>
       <div className='rosters__footer'>
-        <Button startIcon={<Icon name='download' />} onClick={export_rosters}>
+        <Button onClick={export_rosters}>
+          <Icon name='download' />
           Export CSV
         </Button>
       </div>

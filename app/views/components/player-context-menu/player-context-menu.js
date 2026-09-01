@@ -3,8 +3,9 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
-import Button from '@mui/material/Button'
-import ButtonGroup from '@mui/material/ButtonGroup'
+
+import Button from '@components/button'
+import ButtonGroup from '@components/button-group'
 
 import { current_season, roster_slot_types } from '#constants'
 
@@ -234,7 +235,7 @@ export default function PlayerContextMenu({
     if (disabled && hideDisabled) return
     if (buttonGroup) {
       items.push(
-        <Button size='small' {...{ disabled, ...params }}>
+        <Button small {...{ disabled, ...params }}>
           {label}
         </Button>
       )
@@ -467,7 +468,7 @@ export default function PlayerContextMenu({
   }
 
   return buttonGroup ? (
-    <ButtonGroup variant='contained'>{items}</ButtonGroup>
+    <ButtonGroup>{items}</ButtonGroup>
   ) : (
     <MenuList>{items}</MenuList>
   )

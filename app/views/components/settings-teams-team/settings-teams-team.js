@@ -1,10 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import IconButton from '@mui/material/IconButton'
-
 import Accordion from '@components/accordion'
-import Icon from '@components/icon'
+import IconButton from '@components/icon-button'
 import EditableSettingField from '@components/editable-setting-field'
 import SettingsTeamsTeamPlayer from '@components/settings-teams-team-player'
 
@@ -89,9 +87,7 @@ export default class SettingsTeamsTeam extends React.Component {
         />
         <div className='heading__section-title'>
           Players
-          <IconButton onClick={this.handleAdd}>
-            <Icon name='add-circle-outline' />
-          </IconButton>
+          <IconButton icon='add-circle-outline' onClick={this.handleAdd} />
         </div>
         <div className='settings__teams-team-roster empty'>{rosterItems}</div>
       </Accordion>

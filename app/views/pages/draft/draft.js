@@ -8,10 +8,10 @@ import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
 import List from 'react-virtualized-compat/dist/es/List'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
-import IconButton from '@mui/material/IconButton'
 
 import Icon from '@components/icon'
 import Button from '@components/button'
+import IconButton from '@components/icon-button'
 import PageLayout from '@layouts/page'
 import DraftPlayer from '@components/draft-player'
 import PlayerAge from '@components/player-age'
@@ -258,12 +258,11 @@ export default function DraftPage({
           endAdornment: player_filter ? (
             <InputAdornment position='end'>
               <IconButton
-                size='small'
-                aria-label='Clear player filter'
+                icon='clear'
+                small
+                label='Clear player filter'
                 onClick={() => set_player_filter('')}
-              >
-                <Icon name='clear' small />
-              </IconButton>
+              />
             </InputAdornment>
           ) : null
         }}

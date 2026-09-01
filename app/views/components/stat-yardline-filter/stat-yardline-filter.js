@@ -3,8 +3,8 @@ import PropTypes from 'prop-types'
 import Slider from '@mui/material/Slider'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 
+import Button from '@components/button'
 import StatFilter from '@components/stat-filter'
 
 export default function StatYardlineFilter({
@@ -52,7 +52,7 @@ export default function StatYardlineFilter({
         marks={marks}
       />
       {isChanged && (
-        <Button variant='contained' size='small' onClick={handleApply}>
+        <Button small onClick={handleApply}>
           Apply
         </Button>
       )}

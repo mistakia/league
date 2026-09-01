@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMediaQuery, useTheme } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
-import IconButton from '@mui/material/IconButton'
 
 import { draft_actions } from '@core/draft'
 import Icon from '@components/icon'
+import IconButton from '@components/icon-button'
 import TeamName from '@components/team-name'
 import DraftPickItem from '@components/draft-pick-item'
 
@@ -227,22 +227,9 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
       }}
       variant='temporary'
     >
-      <IconButton
-        onClick={onClose}
-        size='small'
-        sx={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-          zIndex: 10,
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 1)'
-          }
-        }}
-      >
-        <Icon name='clear' />
-      </IconButton>
+      <div className='draft-pick-sheet__close'>
+        <IconButton icon='clear' small label='Close' onClick={onClose} />
+      </div>
 
       <div className='draft-pick-sheet-body'>
         <div className='draft-pick-sheet-section'>

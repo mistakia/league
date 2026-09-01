@@ -36,6 +36,12 @@
   display inline-flex
   align-items center
   justify-content center
+  // The space between a glyph and its label. MUI's startIcon and endIcon each
+  // carried their own 8px margin; the call sites that used them now pass the
+  // Icon as an ordinary child, so the gap belongs to the button. `gap` applies
+  // only BETWEEN flex children, so this is inert on the icon buttons (one
+  // child) and on `.count`, which is out of flow.
+  gap 8px
   // $control_height, and box-sizing with it, so this lines up EXACTLY with a
   // text input beside it. The border is inside the box, which is what lets the
   // border go from transparent to visible on hover without the button growing.
@@ -143,3 +149,36 @@
     height 26px
     padding 0 10px
     font-size 12px
+
+    // THE GLYPH TRACKS THE BUTTON. A 24px icon in a 26px control leaves one
+    // pixel either side, which is why every MUI call site that set
+    // `size='small'` also had to remember `<Icon small />` — two props for one
+    // decision, and three sites got the pair wrong in one direction or the
+    // other. Sizing from the button's own class makes the coupling structural,
+    // so `small` is now the whole statement.
+    .icon
+      width 18px
+      height 18px
+
+// A GROUP'S CHILD RULES LIVE HERE, NOT IN button-group.styl, and the reason is
+// specificity rather than taste. The base selector above carries a four-:not()
+// guard chain, so it lands at 0,5,0 — an override written in button-group.styl
+// under its own class would sit at 0,3,0 and lose to it SILENTLY, which is this
+// repo's characteristic CSS failure. Written here, `&` expands to the whole
+// chain and the override cannot be quietly outranked. These are also the rules
+// that undo `+ .button { margin-left: 8px }` a few lines up, so keeping them
+// next to it is what makes the pair readable.
+.button-group > .button:not(.MuiButton-root):not(.MuiIconButton-root):not(.MuiFab-root):not(.MuiButtonBase-root)
+  // Segments share an edge: the pair spacing is undone and the 1px borders
+  // overlap, so two adjacent buttons draw one rule between them rather than two.
+  + .button
+    margin-left -1px
+    border-left-color $prose_rule_strong
+
+  &:not(:first-child)
+    border-top-left-radius 0
+    border-bottom-left-radius 0
+
+  &:not(:last-child)
+    border-top-right-radius 0
+    border-bottom-right-radius 0
