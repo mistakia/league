@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
 
@@ -12,12 +12,9 @@ export default function SettingsSection({
   body,
   defaultOpen = false
 }) {
-  const [open, set_open] = useState(defaultOpen)
-
   return (
     <Accordion
-      expanded={open}
-      on_toggle={set_open}
+      default_expanded={defaultOpen}
       summary={
         <>
           <div className='settings__section-title'>{title}</div>

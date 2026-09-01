@@ -12,11 +12,13 @@ import './accordion.styl'
 // `aria-controls` and the region's `aria-labelledby` itself; a compound API
 // cannot do that without threading ids through every caller.
 //
-// CONTROLLED OR NOT, decided by whether `expanded` was passed at all. Two call
-// sites hold the open state themselves because something else on the page reads
-// it; the other eleven do not care and should not have to declare a useState to
-// open a panel. `undefined` is the discriminator rather than a separate prop,
-// so the two modes cannot both be half-configured.
+// IT OWNS ITS OWN OPEN STATE, and there is no controlled mode. An earlier
+// version had one, on the assumption that the two call sites holding the state
+// in a parent needed to read it there. Neither does — `open` in
+// settings-section and `this.state.open` in settings-teams-team were each read
+// at exactly one place, the accordion itself — so the controlled path was an
+// API axis with no consumer, which is the same mistake as the three button
+// variants button.styl records deleting rather than repairing.
 //
 // THE SUMMARY IS A REAL <button>, WHICH IS WHY `action` EXISTS. MUI's
 // AccordionSummary is a ButtonBase and so was also a <button>, and
@@ -35,25 +37,16 @@ export default function Accordion({
   summary,
   action,
   children,
-  expanded,
   default_expanded = false,
-  on_toggle,
   icon_name = 'arrow-down',
   unmount_on_collapse = false,
   className
 }) {
-  const [internal_expanded, set_internal_expanded] = useState(default_expanded)
+  const [is_expanded, set_is_expanded] = useState(default_expanded)
   const summary_id = useId()
   const details_id = useId()
 
-  const is_controlled = expanded !== undefined
-  const is_expanded = is_controlled ? expanded : internal_expanded
-
-  const handle_toggle = () => {
-    const next = !is_expanded
-    if (!is_controlled) set_internal_expanded(next)
-    if (on_toggle) on_toggle(next)
-  }
+  const handle_toggle = () => set_is_expanded(!is_expanded)
 
   // `accordion--expanded` is the open state on the ROOT. `aria-expanded` already
   // carries it, but that lives on the summary button, so a caller wanting to
@@ -109,9 +102,7 @@ Accordion.propTypes = {
   summary: PropTypes.node,
   action: PropTypes.node,
   children: PropTypes.node,
-  expanded: PropTypes.bool,
   default_expanded: PropTypes.bool,
-  on_toggle: PropTypes.func,
   icon_name: PropTypes.string,
   unmount_on_collapse: PropTypes.bool,
   className: PropTypes.string

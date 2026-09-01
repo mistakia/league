@@ -11,14 +11,6 @@ import Button from '@components/button'
 import './settings-teams-team.styl'
 
 export default class SettingsTeamsTeam extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      open: false
-    }
-  }
-
   handleAdd = () => {
     const { team } = this.props
     this.props.showConfirmation({
@@ -27,10 +19,6 @@ export default class SettingsTeamsTeam extends React.Component {
         team
       }
     })
-  }
-
-  handleChange = () => {
-    this.setState({ open: !this.state.open })
   }
 
   onChange = (value) => {
@@ -67,8 +55,6 @@ export default class SettingsTeamsTeam extends React.Component {
     // also toggled the panel open.
     return (
       <Accordion
-        expanded={this.state.open}
-        on_toggle={this.handleChange}
         summary={<div className='settings__section-title'>{team.name}</div>}
         action={
           team.team_id !== teamId && (
