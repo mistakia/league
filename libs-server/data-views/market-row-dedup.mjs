@@ -31,11 +31,32 @@
 // cost player_dfs_salary a 212x plan regression: the planner treats its
 // perfectly-correlated keys as independent and collapses the row estimate to 1.
 //
-// The winner is the newest observation, ties broken on source_market_id so the
-// choice is deterministic rather than plan-dependent. Which of two published
-// lines is CORRECT is not a question a data-view column can answer -- that
-// belongs to the odds importer or a market dedup policy. This helper only
-// guarantees that a cell renders one of them rather than both.
+// The winner is the newest observation, then the lowest source_market_id, then
+// the lowest line. Which of two published lines is CORRECT is not a question a
+// data-view column can answer -- that belongs to the odds importer or a market
+// dedup policy. This helper only guarantees that a cell renders one of them
+// rather than both, and that the one it renders does not move between replans.
+//
+// THE LINE TIEBREAKER IS NOT DECORATION, AND THE LADDER CASE IS A KNOWN
+// LIMITATION. On a SINGLE-LINE market the first two tiebreakers already settle
+// it: measured over DRAFTKINGS CLOSE OVER GAME_TOTAL in 2025, 95 of 285
+// player-game groups hold more than one row and NONE of them ties on both, so
+// the newest observation is a real winner.
+//
+// An ALT market is a different population that this same key silently swallows.
+// An alt ladder is N legitimate rungs published as N selections under ONE
+// source_market_id at ONE observed_at, so both of those tiebreakers tie on every
+// row: GAME_ALT_TOTAL over the same slice averages 28.95 rows per group against
+// a maximum of 50, and 240 of 285 groups tie on both. Without the line in the
+// ORDER BY the surviving rung is whatever the plan happened to emit, and it
+// moves; with it, the lowest rung wins every time.
+//
+// Stable is not the same as correct. Collapsing a ladder to one rung is still
+// the wrong shape for an alt column -- a cell holds one value and a ladder is
+// many -- and no ordering fixes that. The fix is a row axis on the line, so the
+// rungs get somewhere to go; this helper only stops the choice from drifting
+// until that lands. Do not "fix" the alt column by removing the dedup: that
+// restores the duplicate-market fanout on every single-line market.
 
 /**
  * Reduce a market CTE to one row per (selection, game).
@@ -49,14 +70,17 @@
  * @param {string} [args.selection_column] - the side, NULL for a game-level market
  * @param {string} [args.game_column]
  * @param {string} [args.observed_at_column] - newest wins
- * @param {string} [args.source_market_id_column] - deterministic tiebreak
+ * @param {string} [args.source_market_id_column] - first tiebreak
+ * @param {string} [args.selection_metric_line_column] - last tiebreak; the only
+ *   one an alt ladder does not tie on
  */
 export const apply_market_row_dedup = ({
   qb,
   selection_column = 'pms.selection_pid',
   game_column = 'm.esbid',
   observed_at_column = 'pms.observed_at',
-  source_market_id_column = 'm.source_market_id'
+  source_market_id_column = 'm.source_market_id',
+  selection_metric_line_column = 'pms.selection_metric_line'
 }) => {
   // Postgres requires the DISTINCT ON expressions to be the leading ORDER BY
   // expressions, so the two lists are written together and cannot drift.
@@ -64,6 +88,7 @@ export const apply_market_row_dedup = ({
     { column: selection_column },
     { column: game_column },
     { column: observed_at_column, order: 'desc' },
-    { column: source_market_id_column }
+    { column: source_market_id_column },
+    { column: selection_metric_line_column }
   ])
 }
