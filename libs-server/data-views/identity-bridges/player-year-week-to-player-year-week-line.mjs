@@ -1,4 +1,5 @@
 import db from '#db'
+import { physical_year_projection } from '#libs-server/data-views/physical-season-columns.mjs'
 
 export const from = 'player_year_week'
 export const to = 'player_year_week_line'
@@ -44,16 +45,20 @@ export const add_cte = ({ query_context }) => {
   const year_range = query_context.year_range || []
   const week_range = query_context.week_range || []
 
+  // nfl_games is joined UNALIASED so the year projection can be derived:
+  // physical_year_projection maps a registered TABLE name to its physical
+  // column, and an alias is not in that map, so aliasing it here would silently
+  // emit `<alias>.year` -- a column that does not exist.
   const cte_query = db('prop_markets_index as m')
     .distinct(
       'pms.selection_pid as pid',
-      'g.season_year as year',
-      'g.week as week',
+      physical_year_projection('nfl_games'),
+      'nfl_games.week as week',
       'pms.selection_metric_line as selection_metric_line'
     )
-    .innerJoin('nfl_games as g', function () {
-      this.on('g.esbid', '=', 'm.esbid').andOn(
-        'g.season_year',
+    .innerJoin('nfl_games', function () {
+      this.on('nfl_games.esbid', '=', 'm.esbid').andOn(
+        'nfl_games.season_year',
         '=',
         'm.season_year'
       )
@@ -68,11 +73,11 @@ export const add_cte = ({ query_context }) => {
   // Both sides carry the year so the partitioned scans prune; see the Year
   // Pushdown Contract in this directory's ABOUT.
   if (year_range.length) {
-    cte_query.whereIn('g.season_year', year_range)
+    cte_query.whereIn('nfl_games.season_year', year_range)
     cte_query.whereIn('m.season_year', year_range)
   }
   if (week_range.length) {
-    cte_query.whereIn('g.week', week_range)
+    cte_query.whereIn('nfl_games.week', week_range)
   }
 
   // One OR arm per distinct market selector. Two arms are two different books
