@@ -122,6 +122,7 @@ export default function UserSettingsApiKeys({
 
       {generated_key && (
         <div className='api-keys__generated' role='status'>
+          <div className='api-keys__generated-eyebrow'>New API key</div>
           <div className='api-keys__generated-message'>
             Copy this key now — it is shown once and cannot be retrieved again.
           </div>

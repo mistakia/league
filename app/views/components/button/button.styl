@@ -1,75 +1,109 @@
+// THE SHARED BUTTON, flat. It was a copy of MUI's stock outlined button —
+// uppercase, a 0.0892857143em tracking nobody chose, a near-black 87% border,
+// and a box-shadow in the transition list — which is the look the rest of the
+// site has been moving off. The paint now comes from the prose-form tokens
+// (app/styles/prose-form.styl, injected into every stylesheet), so a button
+// sits in the same ink and the same rules as every control around it.
+//
+// FLAT MEANS NO SHADOW AND NO RAISE, in the resting, hover and active states
+// alike. A pressed button answers with a fill, not with a drop shadow and not
+// with a transform — the two things that put a control back on a fake z-axis.
+//
+// Every hook the Button component can actually produce is preserved: __small,
+// __text, __active and the .count badge.
+//
+// FOUR VARIANTS WERE DROPPED, and one of them is why the others were suspect.
+// `__failure` painted its ground with `$failureColor`, which is defined in no
+// stylesheet in this repo — stylus emits an undefined variable as a bare ident,
+// so `background-color: failureColor` was invalid CSS the browser discarded and
+// the variant had never once rendered a red button. Nothing in `app/` sets that
+// class, or `__success`, or `__outline`. `__icon` is set only by
+// `icon-button.js`, which does not also set `.button`, so the descendant rule
+// here could never match it either. All four were removed rather than repaired:
+// a token invented for a variant with no call site is a guess about a design
+// decision nobody has made.
+//
+// The :not() chain keeps this off MUI's own buttons, which carry .button at
+// several call sites and bring their own paint.
 .button:not(.MuiButton-root):not(.MuiIconButton-root):not(.MuiFab-root):not(.MuiButtonBase-root)
-  outline none
-  transform translate(0, 0)
   position relative
-  border 1px solid rgba(0, 0, 0, 0.87)
-  border-radius 0.15em
-  padding 0 15px
-  height 36px
   display inline-flex
   align-items center
   justify-content center
-  background transparent
-  background-image none
+  height 36px
   min-width 30px
+  padding 0 16px
   vertical-align middle
   text-align center
-  color rgba(0, 0, 0, 0.87)
-  transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
-  border-radius 4px
-  font-family 'Inter', sans-serif
-  font-size .875rem
+  font-family $prose_sans
+  font-size 0.875rem
   font-weight 500
-  letter-spacing .0892857143em
-  text-transform uppercase
+  // No tracking and no uppercase. Both were MUI's, and both are what made a
+  // button read as a different typeface from the label beside it.
+  letter-spacing 0
+  color $prose_ink
+  background transparent
+  background-image none
+  border 1px solid $prose_rule_strong
+  border-radius $button_border_radius
+  outline none
+  cursor pointer
+  transition background-color 120ms ease, border-color 120ms ease, color 120ms ease
+
   &:hover:not(:disabled)
   &:hover:not([disabled])
-    background-color rgba(0, 0, 0, 0.08)
+    background-color rgba(23, 24, 26, 0.05)
+    border-color $prose_muted
+
+  // The press is a deeper fill, not a lift.
+  &:active:not(:disabled)
+  &:active:not([disabled])
+    background-color rgba(23, 24, 26, 0.1)
+
+  // The ring is the focus indicator rather than a colour swap alone: a border
+  // that only changes hue is invisible to anyone who cannot separate the two.
+  &:focus-visible
+    border-color $prose_ink
+    box-shadow 0 0 0 3px rgba(23, 24, 26, 0.08)
+
   &:disabled
   &[disabled]
-    opacity .4
+    opacity 0.45
+    cursor default
     user-select none
 
   + .button
-    margin-left 5px
+    margin-left 8px
 
   .count
     position absolute
     top 3px
     right 5px
-    font-size 8px
-    border-radius 99em
-    padding 3px
-    line-height 5px
     margin 0
-    font-family monospace
-    border-left 1px solid rgba(0, 0, 0, 0.23)
-    background rgba(255,255,255,0.6)
+    padding 3px
+    font-family $prose_mono
+    font-size 8px
+    line-height 5px
     border 0
-
-  &.button__outline
-    border 1px solid rgba(0, 0, 0, 0.87)
+    border-radius 99em
+    background rgba(255, 255, 255, 0.6)
 
   &.button__text
-    border 0
-
-  &.button__success:not(.button__icon)
-    color white
-    border-color $successColor
-    background-color $successColor
-
-  &.button__success.button__icon
-    fill $successColor
-
-  &.button__failure
-    border-color $failureColor
-    background-color $failureColor
+    border-color transparent
+    // A text button is the quiet one in a pair, so its ink is quiet too until
+    // it is pointed at.
+    color $prose_muted
+    &:hover:not(:disabled)
+    &:hover:not([disabled])
+      color $prose_ink
+      border-color transparent
 
   &.active
   &.button__active
     color $accentColor
+    border-color $accentColor
 
   &.button__small
-    padding 0 8px
-    height 24px
+    height 26px
+    padding 0 10px
     font-size 12px

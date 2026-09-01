@@ -1,9 +1,10 @@
 // The controls here are native elements calling the shared prose-form mixins
 // rather than MUI components. See the header comment in the component.
 
+// Section spacing is the page's, not this component's — `.setting-section +
+// .setting-section` in user-settings.styl owns the gap so it cannot differ
+// between the two sections on the page.
 .api-keys
-  margin-top 16px
-
   &__description
     color $prose_muted
     font-size 14px
@@ -21,34 +22,64 @@
     font-size 14px
     padding 8px 10px
 
-  // The generated key is the one thing on the page that must be read before it
-  // is navigated away from, so it takes prose_message's set-apart bar rather
-  // than a coloured box — the value below it is what carries the weight.
+  // THE GENERATED KEY IS THE ONE THING ON THIS PAGE THAT CANNOT BE READ TWICE,
+  // so it is the one thing that gets to shout. It was prose_message's set-apart
+  // left bar, which is the right weight for a standing note and far too quiet
+  // for a value that is gone the moment the page is left.
+  //
+  // The bar is replaced by an inverted block: near-black ground, paper ink, no
+  // border on any edge. Inversion is what makes it register at a glance — it is
+  // the only dark surface on a page of white cards — and it stays flat, since
+  // the contrast is doing the work a shadow would otherwise be asked to do.
   &__generated
-    prose_message()
     position relative
-    margin-bottom 16px
-    padding-right 34px
+    margin-bottom 20px
+    padding 16px 40px 16px 16px
+    color $prose_paper
+    background $prose_ink
+    border-radius 3px
 
+  &__generated-eyebrow
+    margin-bottom 6px
+    font-family $prose_mono
+    font-weight 500
+    font-size 11px
+    letter-spacing 0.16em
+    text-transform uppercase
+    // The one muted thing inside the block: it names what this is, and the
+    // sentence under it is what has to be read.
+    color rgba(255, 255, 255, 0.55)
+
+  &__generated-message
+    font-size 14px
+    line-height 1.5
+
+  // The key sits on its own inset panel rather than loose on the ground. It is
+  // the thing being copied, so it gets a selectable edge to aim at.
   &__generated-value
+    margin-top 12px
+    padding 10px 12px
     font-family $prose_mono
     font-size 14px
+    line-height 1.5
     word-break break-all
-    margin-top 8px
+    user-select all
+    background rgba(255, 255, 255, 0.1)
+    border-radius 3px
 
   &__generated-dismiss
     position absolute
-    top 6px
-    right 8px
+    top 10px
+    right 10px
     padding 0 4px
     font-size 18px
     line-height 1
-    color $prose_muted
+    color rgba(255, 255, 255, 0.55)
     background transparent
     border none
     cursor pointer
     &:hover
-      color $prose_ink
+      color $prose_paper
 
   &__empty
     color $prose_muted

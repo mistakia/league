@@ -1,5 +1,26 @@
+// FLAT, NOT RAISED. This carried MUI's three-layer elevation shadow — the
+// stacked rgba(0,0,0,.2)/.14/.12 triple that paints a card as a sheet of paper
+// lifted off the page — plus a 6px 6px 0 0 radius that rounded only its top
+// corners, so two sections in a column met at a seam that read as one torn
+// card rather than as two.
+//
+// A section is now a plain white field separated by a hairline rule, which is
+// how the rest of this surface's controls are drawn. Nothing here sits on a
+// z-axis: the boundary is the border, and there is no shadow at any depth.
 .setting-section
-  border-radius 6px 6px 0 0
-  background white
-  padding 16px
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px
+  background $prose_paper
+  border 1px solid $prose_rule
+  border-radius 3px
+  padding 20px
+
+  + .setting-section
+    margin-top 16px
+
+  h2
+    margin 0 0 4px
+    font-family $prose_mono
+    font-weight $prose_bold
+    font-size 13px
+    letter-spacing 0.14em
+    text-transform uppercase
+    color $prose_muted
