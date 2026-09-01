@@ -55,6 +55,22 @@ const PARTITIONED_TABLES = [
     parent_table: 'nfl_snaps',
     partition_prefix: 'nfl_snaps_year_',
     partition_column: 'season_year'
+  },
+  {
+    // Partitioned 2009-2025 by the backfill that created it, but never added
+    // here, so no season rollover has ever extended it. Unlike
+    // projections_history above there is NO default partition to drain first:
+    // a row for an uncovered year fails outright with "no partition of
+    // relation found", so nothing has silently accumulated in the wrong place
+    // and a bare CREATE is sufficient.
+    //
+    // The gap is invisible until the regular season starts. This index rebuilds
+    // from a spine of REG gamelogs, so the current season yields zero rows --
+    // and therefore no insert -- until Week 1, which is exactly when the
+    // missing partition would first be written to.
+    parent_table: 'historical_injury_index',
+    partition_prefix: 'historical_injury_index_',
+    partition_column: 'season_year'
   }
 ]
 
