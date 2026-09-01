@@ -1,0 +1,25 @@
+-- STATUS: APPLIED 2026-09-01 against league_production
+--
+-- Drop the slow-mode flag. The pass mechanic it gated no longer exists.
+--
+-- Slow mode settled a nomination once every eligible team had passed. That model
+-- is kept and generalised -- election mode settles on completeness in exactly
+-- the same way -- but the pass itself is gone, replaced by an election, which is
+-- a standing maximum bid or a decline recorded in `auction_elections`. Retiring
+-- the concept retires all three of its implementation defects by deletion
+-- rather than repair:
+--
+--   - passes were wiped on every bid, multiplying required human actions by the
+--     bid-round count
+--   - no un-pass existed anywhere in the codebase, so a misclick could only be
+--     undone by another team bidding
+--   - record_team_pass was a non-atomic read-modify-write on a JSON array with
+--     no MULTI/WATCH, so two simultaneous passes could silently drop one and,
+--     with no timer running, the nomination then hung indefinitely
+--
+-- Rollout control moves to is_auction_election_mode_enabled, added earlier
+-- today. This runs after the code reading the old flag is gone: the socket now
+-- reads the new column, the Redis module and its management script are deleted,
+-- and the pass UI and its socket message type are gone with them.
+
+ALTER TABLE public.seasons DROP COLUMN is_free_agency_auction_slow_mode;
