@@ -13,6 +13,7 @@ import {
   report_job
 } from '#libs-server'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
+import grade_prizepicks_import_run from '#libs-server/grade-prizepicks-import-run.mjs'
 import { touchdown_market_types } from '#libs-server/prizepicks.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -244,14 +245,17 @@ const import_prizepicks_odds = async ({
   dry_run = false,
   write_file = false
 } = {}) => {
-  // do not pull in reports outside of the NFL season
+  // Do not pull in reports outside of the NFL season. Reported as a SKIP rather
+  // than returning bare: an early return here is indistinguishable in the runs
+  // ledger from an import that ran and wrote nothing, which is how ~40 no-op
+  // runs were recorded as successes through August 2026.
   if (
     !current_season.now.isBetween(
       current_season.regular_season_start,
       current_season.end
     )
   ) {
-    return
+    return { in_season: false }
   }
 
   console.time('import-prizepicks-odds')
@@ -279,6 +283,15 @@ const import_prizepicks_odds = async ({
     'season_year',
     [current_season.year, current_season.year - 1]
   )
+
+  // Which PATH resolved each esbid, counted here rather than read back off the
+  // table: the crosswalk is the authority and the team-based match is the
+  // fallback that produced the drift, so the split between them is the signal.
+  // The caller already knows which one applied -- it passes the crosswalk hit
+  // in -- so this needs no change to format_market's return.
+  let markets_resolved_by_crosswalk = 0
+  let markets_resolved_by_fallback = 0
+  let pages_fetched = 0
 
   let page = 1
   let data
@@ -337,11 +350,13 @@ const import_prizepicks_odds = async ({
         continue
       }
 
+      const crosswalk_nfl_game = crosswalk.get(item.attributes?.game_id) || null
+
       const market = await format_market({
         prizepicks_market: item,
         prizepicks_player,
         observed_at,
-        crosswalk_nfl_game: crosswalk.get(item.attributes?.game_id) || null,
+        crosswalk_nfl_game,
         nfl_games
       })
 
@@ -349,9 +364,18 @@ const import_prizepicks_odds = async ({
         missing_market_types.add(item.attributes?.stat_type)
       }
 
+      if (market.esbid) {
+        if (crosswalk_nfl_game) {
+          markets_resolved_by_crosswalk += 1
+        } else {
+          markets_resolved_by_fallback += 1
+        }
+      }
+
       formatted_markets.push(market)
     }
 
+    pages_fetched += 1
     page += 1
   } while (!data || data.meta.current_page < data.meta.total_pages)
 
@@ -367,10 +391,23 @@ const import_prizepicks_odds = async ({
     missing_market_types.forEach((stat_type) => log(stat_type))
   }
 
+  const run_stats = {
+    in_season: true,
+    dry_run,
+    markets_fetched: all_markets.length,
+    markets_formatted: formatted_markets.length,
+    markets_with_esbid: formatted_markets.filter((market) => market.esbid)
+      .length,
+    markets_resolved_by_crosswalk,
+    markets_resolved_by_fallback,
+    missing_market_types: missing_market_types.size,
+    pages_fetched
+  }
+
   if (dry_run) {
     log(formatted_markets[0])
     console.timeEnd('import-prizepicks-odds')
-    return
+    return run_stats
   }
 
   if (formatted_markets.length) {
@@ -379,16 +416,28 @@ const import_prizepicks_odds = async ({
   }
 
   console.timeEnd('import-prizepicks-odds')
+
+  return run_stats
 }
 
 export const job = async () => {
   const argv = initialize_cli()
   let error
   try {
-    await import_prizepicks_odds({
+    const run_stats = await import_prizepicks_odds({
       dry_run: argv.dry,
       write_file: argv.write
     })
+
+    // Graded here rather than in main() so every caller is graded, and graded
+    // BEFORE report_job so the ledger records the oracle's verdict rather than
+    // "did not throw". A run that fetched nothing in season now writes a
+    // failure where it used to write a success.
+    const grade = grade_prizepicks_import_run(run_stats)
+    console.log(grade.summary)
+    if (!grade.passed) {
+      throw new Error(grade.summary)
+    }
   } catch (err) {
     error = err
     log(error)
