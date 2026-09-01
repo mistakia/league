@@ -227,6 +227,11 @@ export default class Auction {
     if (this._locked) return
     this._locked = true
 
+    // Same staleness as `nominate`: a bid is validated against
+    // `_transactions[0]`, which a REST settlement moves without telling this
+    // instance.
+    await this._load_transactions()
+
     try {
       const current = this._transactions[0]
 
@@ -263,6 +268,13 @@ export default class Auction {
   async nominate(message = {}, { user_id, tid }) {
     if (await this._refresh_league_pause()) return
     if (this._refuse_while_paused('nomination', message.user_id)) return
+
+    // ELECTIONS SETTLE OVER REST, so this instance's transaction cache can be
+    // stale by a whole player. `nominating_team_id` reads that cache, and a
+    // stale one still shows the settled player's AUCTION_BID on top -- so the
+    // turn never advances and the next nomination is validated against the
+    // wrong team. Refresh before reading the rotation.
+    await this._load_transactions()
 
     const nominating_team_id = this.nominating_team_id
     // The socket-authenticated `user_id` above and the one the CLIENT sends in
@@ -948,6 +960,9 @@ export default class Auction {
   }
 
   async _send_auction_init(user_id) {
+    // A client joining mid-auction must not be handed a board that a REST
+    // settlement has already moved past.
+    await this._load_transactions()
     const nominating_team_id = this.nominating_team_id
     const outstanding_election_tids = this._election_mode
       ? await this._get_outstanding_election_tids()

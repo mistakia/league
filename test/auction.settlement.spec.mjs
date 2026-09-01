@@ -561,6 +561,44 @@ describe('auction settlement against postgres', function () {
     })
   })
 
+  describe('the socket after a settlement it did not perform', function () {
+    it('advances the nomination turn when a REST election settles the player', async function () {
+      // THE MAINLINE, not an edge. In election mode managers nominate over the
+      // socket and elect over REST, so every settlement happens somewhere the
+      // socket instance never hears about. Its `_transactions` cache then still
+      // shows the sold player's AUCTION_BID on top, and `nominating_team_id`
+      // reads that cache -- so the turn never advances and the next nomination
+      // is validated against the wrong team.
+      const Auction = (await import('#api/sockets/auction.mjs')).default
+      const auction = new Auction({
+        wss: { clients: new Set() },
+        lid: league_id
+      })
+      await auction.setup()
+
+      const pid = await free_agent()
+      await nominate({ pid, tid: 1, value: 0 })
+      await auction._load_transactions()
+      expect(auction.nominating_team_id).to.equal(1)
+
+      // Settle it entirely over the REST path.
+      const team_ids = await all_team_ids()
+      for (const tid of team_ids.filter((tid) => tid !== 1)) {
+        await submit_auction_election({
+          lid: league_id,
+          tid,
+          pid,
+          user_id: 1,
+          maximum_bid: null
+        })
+      }
+
+      // The socket has been told nothing. Reading the turn must still be right.
+      await auction._send_auction_init(1)
+      expect(auction.nominating_team_id).to.not.equal(1)
+    })
+  })
+
   describe('the active nomination', function () {
     it('is null once the open player has been processed', async function () {
       const pid = await free_agent()

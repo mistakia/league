@@ -194,6 +194,21 @@ router.post('/?', async (req, res) => {
       // this, so it carries only the fact that a team has acted.
       payload: { pid, tid: teamId }
     })
+
+    // An election can COMPLETE the eligible set and settle the player in the
+    // same request. Nothing on the socket path knows that happened, so without
+    // this every connected client sits on a board showing a player that has
+    // already sold.
+    if (result.settlement) {
+      broadcast(Number(leagueId), {
+        type: 'AUCTION_PROCESSED',
+        payload: {
+          pid: result.settlement.pid,
+          tid: result.settlement.winner_tid,
+          player_salary: result.settlement.price
+        }
+      })
+    }
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
