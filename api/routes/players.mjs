@@ -862,9 +862,9 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                                 selection_result:
  *                                   type: string
  *                                   nullable: true
- *                                   enum: ["WIN", "LOSE", "PUSH", null]
+ *                                   enum: ["OPEN", "WON", "LOST", "PUSH", "CANCELLED", "CASHED_OUT", null]
  *                                   description: Selection result (if market is settled)
- *                                   example: "WIN"
+ *                                   example: "WON"
  *                                 timestamp:
  *                                   type: string
  *                                   format: date-time
@@ -996,7 +996,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                         odds_american: -115
  *                         current_season_hit_rate_hard: 0.714
  *                         current_season_edge_hard: 0.055
- *                         result: "WIN"
+ *                         result: "WON"
  *                         timestamp: "2024-01-07T16:30:00Z"
  *                         time_type: "CLOSE"
  *                       - source_selection_id: "sel_44444"
@@ -1007,7 +1007,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                         odds_american: -105
  *                         current_season_hit_rate_hard: 0.286
  *                         current_season_edge_hard: -0.055
- *                         result: "LOSE"
+ *                         result: "LOST"
  *                         timestamp: "2024-01-07T16:30:00Z"
  *                         time_type: "CLOSE"
  *       404:
