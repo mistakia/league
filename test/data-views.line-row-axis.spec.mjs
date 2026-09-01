@@ -355,6 +355,99 @@ describe('data views line row axis', function () {
     })
   })
 
+  // The four refusals, asserted through the REAL request pipeline rather than
+  // by calling each rule directly.
+  //
+  // WHY BOTH. The blocks above call identity_for and
+  // validate_line_axis_columns in isolation, so they prove each rule computes
+  // the right answer -- and stay green if a rule is never reached. A validator
+  // that exists and is never called is the failure mode these cover, and it is
+  // not hypothetical for this feature: validate_line_axis_columns is invoked
+  // from exactly one line of get-data-view-results, and nothing above would
+  // notice that line being dropped.
+  //
+  // These cannot live in test/data-view-queries/ instead. Neither fixture
+  // runner has any notion of an expected error -- a fixture whose request
+  // throws is a red test, not a passing refusal -- so a refusal is only
+  // expressible as a spec.
+  describe('refusals through the request pipeline', function () {
+    const ladder_column = (market_type) => ({
+      column_id: 'player_game_prop_line_from_betting_markets',
+      params: {
+        market_type: [market_type],
+        source_id: ['FANDUEL'],
+        time_type: ['CLOSE'],
+        selection_type: ['OVER'],
+        single_nfl_week_id: ['2023_REG_WEEK_1']
+      }
+    })
+
+    const rejects = async (request, pattern) => {
+      let error = null
+      try {
+        await get_data_view_results_query(request)
+      } catch (err) {
+        error = err
+      }
+      expect(error, 'expected the request to be refused').to.not.equal(null)
+      expect(error.message).to.match(pattern)
+    }
+
+    // A line is posted for one game, so a year-only view would stack every
+    // week's ladders onto one rung value.
+    it('refuses a line axis without a week axis', async () => {
+      await rejects(
+        {
+          columns: [ladder_column('GAME_ALT_PASSING_YARDS')],
+          row_axes: ['year', 'line'],
+          row_grain: ['player']
+        },
+        /requires 'week'/
+      )
+    })
+
+    // Anchored on a team-grain column, because a player-grain column at team
+    // grain is refused first by ColumnRowGrainMismatch and would pass this
+    // assertion without the axis rule ever running.
+    it('refuses a line axis at team grain', async () => {
+      await rejects(
+        {
+          columns: ['team_name'],
+          row_axes: ['year', 'week', 'line'],
+          row_grain: ['team']
+        },
+        /not supported for row_grain 'team'/
+      )
+    })
+
+    it('refuses two ladder columns on different market types', async () => {
+      await rejects(
+        {
+          columns: [
+            ladder_column('GAME_ALT_PASSING_YARDS'),
+            ladder_column('GAME_ALT_RUSHING_YARDS')
+          ],
+          row_axes: ['year', 'week', 'line'],
+          row_grain: ['player']
+        },
+        /LineAxisQuantityMismatch/
+      )
+    })
+
+    // An empty rung domain would render an empty view, which reads as "this
+    // player had no data" rather than as "this request cannot be answered".
+    it('refuses a line axis no column defines rungs for', async () => {
+      await rejects(
+        {
+          columns: ['player_name'],
+          row_axes: ['year', 'week', 'line'],
+          row_grain: ['player']
+        },
+        /nothing defines the rungs/
+      )
+    })
+  })
+
   // The route layer needs no change -- `line` rides inside row_axes, which
   // /search and the export route already forward whole. What that leaves worth
   // pinning is the CACHE key: the row_grain omission that put two grains on one
