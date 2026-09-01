@@ -259,27 +259,32 @@ export const game_prop_column_resolution_rows = async ({
 // line. That was the shape of the live report the week-scope migration fixed
 // (fc4a84ca0): every player's 2024 prop line identical across weeks 1 and 2.
 //
-// The oracle is the DIFFERENTIAL, one unit per adjacent week pair (week, week+1)
-// inside a season. A player in both weeks with an unambiguous base line in each
-// is COMPARED: the column must agree with the base on whether the two lines
-// differ. numerator/denominator is the agreement ratio over compared players,
-// min_rate 1.0, so a broadcast reads 0/1 per pair. The one-sided reading of the
-// task ("lines differ where the base tables say they differ") is symmetric here:
-// a player the base says is equal but the column renders different is as much a
-// value bug as the broadcast, and agreement catches both because it requires
-// column-diff to equal ref-diff.
+// The oracle is direct LINE EQUALITY, one unit per (season_year, season_type,
+// week). A player with an unambiguous base line for the week that the column
+// also resolved is COMPARED: the rendered line must equal the base line.
+// numerator/denominator is the agreement ratio over compared players, min_rate
+// 1.0.
+//
+// This replaced a DIFFERENTIAL over adjacent week pairs, which asked only
+// whether the column agreed with the base about which weeks CHANGED. That is
+// strictly weaker and it fails in the direction that looks like health: a column
+// rendering every line one point high, or the right ladder rung from the wrong
+// market, moves in step with the base and the differential grades it 1.0000.
+// Equality subsumes it -- a broadcast still reads 0/N, because a broadcast line
+// cannot equal the base in more than one week -- and it needs no pairing, so a
+// season's first week is gradeable instead of waiting for a second.
 //
 // Cells where the base tables disagree with THEMSELVES are excluded rather than
 // guessed: a (pid, week) with duplicate markets carrying different lines — the
 // player path collapses them with a DISTINCT ON whose winner is storage order —
-// has no reference line, so it joins the differential scan only once a week has
-// exactly one distinct line. The DISTINCT ON dedup is the player-path half the
+// has no reference line, so it joins the scan only once a week has exactly one
+// distinct line. The DISTINCT ON dedup is the player-path half the
 // item-4 note flagged as unported to the team path; for the player path the
 // column is designed around it, and this exclusion is what keeps the reference
 // honest about what "the line" means.
 //
 // WHY CI CANNOT ASK THIS. CI's throwaway Postgres holds no betting markets at
-// all, so a differential over real markets has nothing to compare in CI; only a
+// all, so a comparison against real markets has nothing to read in CI; only a
 // weekly production run — where each season's markets ARE the population — can
 // grade it. The spec drives the same function against a seeded two-week universe
 // to prove the oracle red-capable.
@@ -389,22 +394,32 @@ const column_lines_for_weeks = async ({ season_year, season_type, weeks }) => {
       Number(row.game_prop_line_betting_market_0)
     )
   }
-  return lines
+
+  // A read that came back exactly at the limit was CUT, and the rows past the
+  // cut are unknown rather than absent. Grading a prefix would report the
+  // agreement rate of the alphabetical head of the season as though it were the
+  // season -- a clean 1.0000 over whatever fraction survived the limit, which is
+  // the failure shape this whole check family exists to refuse. The caller turns
+  // this into a refusal to grade rather than trying to compensate for it.
+  return { lines, truncated: data_view_results.length >= SEASON_RESULT_LIMIT }
 }
 
 /**
- * Line-differential rows for the NEW check betting-market-game-prop-line-
- * differential: one row per adjacent week pair per (season_year, season_type),
- * graded on agreement.
+ * Line-value rows for the check betting-market-game-prop-line-value: one row
+ * per (season_year, season_type, week), graded on whether the column renders
+ * the line the base tables hold.
  *
  * @param {object} [args]
  * @param {{year: number, seas_type: string, week: number}} [args.live_week]
  * @param {number} [args.seasons_of_history]
+ * @param {Function} [args.read_column_lines] Seam for the spec. Same contract
+ *   as column_lines_for_weeks: returns { lines, truncated }.
  * @returns {Promise<Array<Record<string, any>>>}
  */
-export const game_prop_line_differential_rows = async ({
+export const game_prop_line_value_rows = async ({
   live_week = current_nfl_week_params(),
-  seasons_of_history = 1
+  seasons_of_history = 1,
+  read_column_lines = column_lines_for_weeks
 } = {}) => {
   const reference = await reference_lines({
     from_season_year: live_week.year - seasons_of_history
@@ -427,69 +442,50 @@ export const game_prop_line_differential_rows = async ({
     const [season_year, season_type] = season_key.split('|')
     const year = Number(season_year)
 
-    // Adjacent pairs — (week, week+1) within one season and season type. The
-    // postseason restarts at week 1, but within a single season_type the
-    // sequence is contiguous.
-    const pairs = []
-    for (let i = 0; i < weeks.length - 1; i++) {
-      if (weeks[i + 1].week === weeks[i].week + 1) {
-        pairs.push([weeks[i], weeks[i + 1]])
-      }
-    }
-
-    if (!pairs.length) {
-      // A season in the scan with no adjacent pair yet exists to report as
-      // NOT EXERCISED, never as a pass: the differential cannot answer when the
-      // season has not produced two adjacent weeks.
-      rows.push({
-        season_year: year,
-        season_type,
-        week_b: null,
-        numerator: 0,
-        denominator: 0
-      })
-      continue
-    }
-
-    const column_lines = await column_lines_for_weeks({
+    const { lines: column_lines, truncated } = await read_column_lines({
       season_year: year,
       season_type,
       weeks: weeks.map(({ week }) => week)
     })
 
-    for (const [
-      { week: week_a, lines: lines_a },
-      { week: week_b, lines: lines_b }
-    ] of pairs) {
-      // COMPARED is a player with an unambiguous base line in BOTH weeks that
-      // the shipped column actually resolved in both weeks. A player the column
-      // dropped from a week belongs to the resolution check, not this one; it
-      // has no rendered line to compare, and grading absence here would
-      // double-report the same defect from two angles.
-      const compared = [...lines_a.keys()].filter(
-        (pid) =>
-          lines_b.has(pid) &&
-          column_lines.has(`${pid}|${week_a}`) &&
-          column_lines.has(`${pid}|${week_b}`)
+    for (const { week, lines: reference_week } of weeks) {
+      // A truncated read makes every week of that season un-answerable, not
+      // merely the weeks past the cut: the limit is applied to the season-wide
+      // result, so which week lost rows is unknown. Report the whole season as
+      // NOT EXERCISED rather than grading the part that survived.
+      if (truncated) {
+        rows.push({
+          season_year: year,
+          season_type,
+          week,
+          numerator: 0,
+          denominator: 0,
+          compared_players: 0,
+          truncated_read: true
+        })
+        continue
+      }
+
+      // COMPARED is a player with an unambiguous base line for the week that the
+      // shipped column also resolved. A player the column dropped belongs to the
+      // resolution check: it has no rendered line to compare, and grading its
+      // absence here would double-report one defect from two angles.
+      const compared = [...reference_week.keys()].filter((pid) =>
+        column_lines.has(`${pid}|${week}`)
       )
 
-      const disagrees = compared.filter((pid) => {
-        const ref_diff = lines_a.get(pid) !== lines_b.get(pid)
-        const col_diff =
-          column_lines.get(`${pid}|${week_a}`) !==
-          column_lines.get(`${pid}|${week_b}`)
-        return ref_diff !== col_diff
-      })
+      const wrong = compared.filter(
+        (pid) => column_lines.get(`${pid}|${week}`) !== reference_week.get(pid)
+      )
 
       rows.push({
         season_year: year,
         season_type,
-        week_a,
-        week_b,
-        numerator: compared.length - disagrees.length,
+        week,
+        numerator: compared.length - wrong.length,
         denominator: compared.length,
         compared_players: compared.length,
-        disagrees_players: disagrees.length
+        wrong_players: wrong.length
       })
     }
   }
