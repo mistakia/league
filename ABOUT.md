@@ -693,12 +693,15 @@ observations:
     market key being FINER than the cell key -- the fourth axis in the key-mismatch family, and the
     only one no correlation can fix: the cell has to gain a dimension. Tell is count(distinct
     selection_metric_line) per (selection_pid, esbid) exceeding 1.
+  - >-
+    [pattern] A market is keyed by (game, side), a data-view cell by (subject, year, week); every
+    betting-column defect is a mismatch on one axis — time, subject, multiplicity, line.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-01T22:47:09.188Z'
+updated_at: '2026-09-01T22:50:41.425Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
