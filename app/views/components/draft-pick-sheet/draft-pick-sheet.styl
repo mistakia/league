@@ -108,7 +108,9 @@
   .timeline-item:first-child &
     top 0
 
-.timeline-marker-icon.MuiSvgIcon-root
+// `<Icon className='timeline-marker-icon'>` renders `class="icon
+// timeline-marker-icon"`, so both classes are on the one element.
+.icon.timeline-marker-icon
   width 18px
   height 18px
   color $borderColor

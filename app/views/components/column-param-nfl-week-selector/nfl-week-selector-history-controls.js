@@ -11,8 +11,20 @@ export default function NflWeekSelectorHistoryControls({
 }) {
   return (
     <div className='nfl-week-selector-history-controls'>
-      <IconButton icon='undo' small disabled={!can_undo} onClick={on_undo} />
-      <IconButton icon='redo' small disabled={!can_redo} onClick={on_redo} />
+      <IconButton
+        icon='undo'
+        small
+        label='Undo'
+        disabled={!can_undo}
+        onClick={on_undo}
+      />
+      <IconButton
+        icon='redo'
+        small
+        label='Redo'
+        disabled={!can_redo}
+        onClick={on_redo}
+      />
     </div>
   )
 }

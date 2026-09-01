@@ -29,7 +29,12 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
         </div>
         <PlayerName pid={this.props.pid} />
         <div>
-          <IconButton icon='delete' small onClick={this.handleRemove} />
+          <IconButton
+            icon='delete'
+            small
+            label='Remove player'
+            onClick={this.handleRemove}
+          />
         </div>
       </div>
     )

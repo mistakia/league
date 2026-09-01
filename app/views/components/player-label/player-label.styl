@@ -8,8 +8,12 @@
   font-weight 600
   color black
 
-  .MuiSvgIcon-root
-    font-size 11px
+  // A label can carry a glyph rather than a word. font-size did the sizing on
+  // an MUI SvgIcon; ours sizes by width/height, so a font-size here would be
+  // inert and the glyph would render at its 24px default inside a 16px row.
+  .icon
+    width 11px
+    height 11px
 
   + .player__label
     margin-left 4px

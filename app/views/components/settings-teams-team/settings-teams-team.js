@@ -73,7 +73,11 @@ export default class SettingsTeamsTeam extends React.Component {
         />
         <div className='heading__section-title'>
           Players
-          <IconButton icon='add-circle-outline' onClick={this.handleAdd} />
+          <IconButton
+            icon='add-circle-outline'
+            label='Add player'
+            onClick={this.handleAdd}
+          />
         </div>
         <div className='settings__teams-team-roster empty'>{rosterItems}</div>
       </Accordion>

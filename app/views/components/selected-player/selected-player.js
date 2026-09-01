@@ -400,6 +400,11 @@ export default function SelectedPlayer({
             {show_collapse && (
               <IconButton
                 icon={collapsed ? 'arrow-down' : 'arrow-up'}
+                label={
+                  collapsed
+                    ? 'Expand player details'
+                    : 'Collapse player details'
+                }
                 onClick={handleToggleExpand}
               />
             )}
@@ -478,7 +483,7 @@ export default function SelectedPlayer({
           )}
         </div>
         <div className='selected__player-actions-close'>
-          <IconButton icon='clear' onClick={handleClose} />
+          <IconButton icon='clear' label='Close player' onClick={handleClose} />
         </div>
       </div>
     </Drawer>
