@@ -2249,6 +2249,35 @@ export const get_data_view_results_query = async ({
       data_view_options
     })
 
+    const sort_direction =
+      sort_clause.desc === true || sort_clause.desc === 'true' ? 'DESC' : 'ASC'
+
+    // A column that declares the EXPRESSION to order by is ordered by it
+    // directly, bypassing the select-ordinal lookup below.
+    //
+    // That lookup can only find a projection carrying a resolvable
+    // `<name>_<column_index>` alias, and when it finds nothing it leaves
+    // select_position at 0 and the sort is dropped in silence -- the query then
+    // falls back to the trailing pid tiebreaker, which for a name column looks
+    // enough like alphabetical order to hide the fact that nothing sorted. Two
+    // columns were unsortable that way: player_name, whose main_select returns
+    // two bare identifiers, and player_league_roster_status, whose alias
+    // carries no column_index suffix.
+    if (column_definition.sort_expressions) {
+      const sort_expressions = column_definition.sort_expressions({
+        params: column_params,
+        column_index: sort_clause.column_index || 0,
+        table_name,
+        data_view_options
+      })
+      for (const sort_expression of sort_expressions) {
+        players_query.orderByRaw(
+          `${sort_expression} ${sort_direction} NULLS LAST`
+        )
+      }
+      continue
+    }
+
     // Find column name for sorting through various methods
     let column_name = null
     let select_position = 0

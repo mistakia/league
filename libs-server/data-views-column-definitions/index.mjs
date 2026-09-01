@@ -222,6 +222,10 @@ export default {
     is_viewer_scoped: true,
     source: { grain: 'player' },
     main_where: () => player_league_roster_status_select,
+    // The status alias carries no column_index suffix, so the select-ordinal
+    // sort lookup cannot find it and the sort would be dropped in silence.
+    // Order by the same CASE the projection and the filter use.
+    sort_expressions: () => [player_league_roster_status_select],
     main_select: ({ params, data_view_options }) => [
       `${player_league_roster_status_select} AS player_league_roster_status`,
       'rosters_players.slot',

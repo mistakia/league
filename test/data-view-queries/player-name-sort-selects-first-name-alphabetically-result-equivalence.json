@@ -1,0 +1,39 @@
+{
+  "name": "a sort on player_name orders the result rather than being dropped (executed-result parity)",
+  "description": "player_name has no select_as, no column_name and a main_select returning bare strings, so every sort-resolution method in get-data-view-results returns null, select_position stays 0 and the sort is discarded in silence -- the query falls back to the trailing pid tiebreaker. Because a pid's letter prefix is built from the player's own name, pid order looks alphabetical and hides this. Seeded so the two orders disagree: pid ascending gives Zed Alpha, name ascending gives Aaron Zulu. Asserted through limit 1, since the harness sorts rows and cannot see order directly -- which row survives the limit is the observable consequence, and it is also what a paged view actually depends on. player_league_roster_status is unsortable for the same reason.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": ["player_position"],
+    "sort": [
+      {
+        "column_id": "player_name",
+        "desc": false,
+        "column_index": 0
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ],
+    "limit": 1
+  },
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"player\".\"primary_position\" AS \"primary_position_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"primary_position\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by player.first_name || ' ' || player.last_name ASC NULLS LAST, \"player\".\"pid\" asc limit 1",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-SORT-990001', 'Zed', 'Alpha', 'Z.Alpha', 'Zed Alpha', 'MLB', 'MLB', '2000-01-01', 2020, 'ZSA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-SORT-990002', 'Aaron', 'Zulu', 'A.Zulu', 'Aaron Zulu', 'MLB', 'MLB', '2001-01-01', 2021, 'ZSA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-SORT-990003', 'Mike', 'Middle', 'M.Middle', 'Mike Middle', 'MLB', 'MLB', '2002-01-01', 2022, 'ZSA')"
+    ],
+    "expected_rows": [
+      {
+        "first_name": "Aaron",
+        "last_name": "Zulu"
+      }
+    ],
+    "compare_columns": ["first_name", "last_name"]
+  },
+  "tags": ["sorting", "player", "result-equivalence"]
+}

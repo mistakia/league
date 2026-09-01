@@ -1,0 +1,46 @@
+{
+  "name": "player game prop line with no week row axis stays pinned to one week (executed-result parity)",
+  "description": "Guard on the half of the week-scoped fix that must NOT change. A flat player row carries no week, so a multi-week markets CTE would fan one player into one row per week; the cell has no week to correlate on. With no week axis the column keeps collapsing the requested week list to its first entry and joining on pid alone. Seed weeks 1 and 2 with different lines and request both with no row axes: exactly one row, carrying week 1's line.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_game_prop_line_from_betting_markets",
+        "params": {
+          "source_id": ["FANDUEL"],
+          "selection_type": ["OVER"],
+          "time_type": ["CLOSE"],
+          "market_type": ["GAME_PASSING_YARDS"],
+          "single_nfl_week_id": ["2023_REG_WEEK_1", "2023_REG_WEEK_2"]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "expected_query": "with \"t82b774e664d2d9bb7d54fbd433586eb9_markets\" as (select \"source_id\", \"source_market_id\", \"time_type\", \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\" as \"week\" from \"prop_markets_index\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"prop_markets_index\".\"esbid\" and \"nfl_games\".\"season_year\" = \"prop_markets_index\".\"season_year\" and nfl_games.nfl_week_id in ('2023_REG_WEEK_1') where \"market_type\" = 'GAME_PASSING_YARDS' and \"time_type\" = 'CLOSE' and \"prop_markets_index\".\"season_year\" in (2023) and \"source_id\" = 'FANDUEL'), \"t82b774e664d2d9bb7d54fbd433586eb9\" as (select distinct on (\"pms\".\"selection_pid\", \"m\".\"year\", \"m\".\"week\") pms.selection_pid, pms.selection_metric_line, \"m\".\"year\", \"m\".\"week\" from \"t82b774e664d2d9bb7d54fbd433586eb9_markets\" as \"m\" inner join \"prop_market_selections_index\" as \"pms\" on \"pms\".\"source_id\" = \"m\".\"source_id\" and \"pms\".\"source_market_id\" = \"m\".\"source_market_id\" and \"pms\".\"time_type\" = \"m\".\"time_type\" where \"pms\".\"selection_type\" in ('OVER') order by \"pms\".\"selection_pid\" asc, \"m\".\"year\" asc, \"m\".\"week\" asc, \"pms\".\"observed_at\" desc, \"m\".\"source_market_id\" asc) select \"player\".\"pid\", player.first_name, player.last_name, \"t82b774e664d2d9bb7d54fbd433586eb9\".\"selection_metric_line\" AS \"game_prop_line_betting_market_0\", \"player\".\"primary_position\" from \"player\" left join \"t82b774e664d2d9bb7d54fbd433586eb9\" on \"t82b774e664d2d9bb7d54fbd433586eb9\".\"selection_pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t82b774e664d2d9bb7d54fbd433586eb9\".\"selection_metric_line\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-PROP-990301', 'Test', 'Propflat', 'T.Propflat', 'Test Propflat', 'MLB', 'MLB', '2000-01-01', 2020, 'ZPA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (972201, 2023, 1, 'REG', 'ZPA', 'ZPX', '2023-09-10')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (972202, 2023, 2, 'REG', 'ZPA', 'ZPY', '2023-09-17')",
+      "REFRESH MATERIALIZED VIEW nfl_year_week_timestamp",
+      "INSERT INTO prop_markets_index (market_type, source_id, source_market_id, esbid, selection_count, time_type, observed_at, season_year) VALUES ('GAME_PASSING_YARDS', 'FANDUEL', 'TEST-FLAT-W1', 972201, 2, 'CLOSE', '2023-09-10T16:00:00Z', 2023)",
+      "INSERT INTO prop_markets_index (market_type, source_id, source_market_id, esbid, selection_count, time_type, observed_at, season_year) VALUES ('GAME_PASSING_YARDS', 'FANDUEL', 'TEST-FLAT-W2', 972202, 2, 'CLOSE', '2023-09-17T16:00:00Z', 2023)",
+      "INSERT INTO prop_market_selections_index (source_id, source_market_id, source_selection_id, selection_pid, selection_metric_line, odds_american, odds_decimal, observed_at, time_type, selection_type) VALUES ('FANDUEL', 'TEST-FLAT-W1', 'TEST-SEL-F1', 'TEST-PROP-990301', 235.5, -110, 1.909, '2023-09-10T16:00:00Z', 'CLOSE', 'OVER')",
+      "INSERT INTO prop_market_selections_index (source_id, source_market_id, source_selection_id, selection_pid, selection_metric_line, odds_american, odds_decimal, observed_at, time_type, selection_type) VALUES ('FANDUEL', 'TEST-FLAT-W2', 'TEST-SEL-F2', 'TEST-PROP-990301', 226.5, -110, 1.909, '2023-09-17T16:00:00Z', 'CLOSE', 'OVER')"
+    ],
+    "expected_rows": [
+      {
+        "game_prop_line_betting_market_0": "235.5"
+      }
+    ],
+    "compare_columns": ["game_prop_line_betting_market_0"]
+  },
+  "tags": ["betting_markets", "parameters", "result-equivalence"]
+}

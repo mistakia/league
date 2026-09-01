@@ -8,6 +8,11 @@ import {
   current_nfl_week_params
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import {
+  resolve_week_scope,
+  week_scope_alias_key,
+  correlate_week_scoped_cte
+} from '#libs-server/data-views/week-scoped-cte.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // The column's GRAIN, derived rather than passed.
@@ -195,6 +200,7 @@ const betting_markets_table_alias = ({
   const {
     year,
     week,
+    market_grain,
     seas_type,
     market_type,
     time_type,
@@ -208,8 +214,18 @@ const betting_markets_table_alias = ({
     is_team_game_prop
   })
 
+  // A game-grain alias hashes the FULL requested week list, not the single week
+  // a pinned CTE ends up holding. Hashing the collapsed week is what lets two
+  // columns naming different week lists share one join group and render one
+  // another's data; see week-scoped-cte.mjs for why the finer key is the safe
+  // direction. A season market has no week and keeps the shape it had.
+  const week_key =
+    market_grain === 'game'
+      ? `weeks_${week_scope_alias_key({ params })}`
+      : `seas_type_${seas_type}_week_${week}`
+
   return get_table_hash(
-    `${base_table_alias}_${year}_seas_type_${seas_type}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}_selection_type_${selection_type.join('_')}`
+    `${base_table_alias}_${year}_${week_key}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}_selection_type_${selection_type.join('_')}`
   )
 }
 
@@ -221,7 +237,8 @@ const player_betting_market_with = ({
   where_clauses,
   row_axes,
   select_strings = [],
-  is_player_game_prop = false
+  is_player_game_prop = false,
+  data_view_options
 }) => {
   const {
     year,
@@ -239,6 +256,37 @@ const player_betting_market_with = ({
     is_player_game_prop
   })
 
+  // The weeks this CTE spans. Resolved through the same helper the join reads,
+  // so a CTE cannot hold weeks the join has no predicate to select between --
+  // which fans a week cell into one row per week.
+  const { nfl_week_ids } = resolve_week_scope({
+    params,
+    data_view_options
+  })
+
+  // Season markets carry no week at all, so the week scope is not theirs to
+  // read: resolve_week_scope falls back to the current week when a request
+  // names none, which would narrow a season market to a game.
+  const is_week_scoped = market_grain === 'game'
+
+  // Filter the games by nfl_week_id rather than by a (season_year, season_type,
+  // week) triple. The triple cannot express a list at all, and its two failure
+  // modes are both live: POST week 1 and REG week 1 share a (year, week) key --
+  // production holds 2024 playoff markets sitting on week 1 beside the
+  // September ones -- and a week list spanning two seasons has no single year
+  // to pin. The identifier carries all three components, so one IN-list is
+  // exact.
+  const market_season_years = is_week_scoped
+    ? [
+        ...new Set(
+          nfl_week_ids
+            .map((identifier) => parse_nfl_week_identifier({ identifier }))
+            .filter(Boolean)
+            .map((parsed) => parsed.year)
+        )
+      ]
+    : []
+
   const markets_cte = `${with_table_name}_markets`
 
   query.with(markets_cte, (qb) => {
@@ -246,8 +294,19 @@ const player_betting_market_with = ({
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
-      .andWhere('prop_markets_index.season_year', year)
-      .andWhere('source_id', source_id)
+
+    // A week list can name several seasons, which a scalar year cannot hold.
+    if (is_week_scoped && market_season_years.length) {
+      qb.whereIn('prop_markets_index.season_year', market_season_years)
+    } else {
+      qb.andWhere('prop_markets_index.season_year', year)
+    }
+
+    qb.andWhere('source_id', source_id)
+
+    if (is_week_scoped) {
+      qb.select('nfl_games.season_year as year', 'nfl_games.week as week')
+    }
 
     // The career_game join below correlates on m.esbid, so the CTE has to
     // carry it.
@@ -268,9 +327,18 @@ const player_betting_market_with = ({
           '=',
           'prop_markets_index.season_year'
         )
-        this.andOn('nfl_games.season_type', '=', db.raw('?', [seas_type]))
-        if (week) {
-          this.andOn('nfl_games.week', '=', db.raw('?', [week]))
+        if (is_week_scoped) {
+          this.andOn(
+            db.raw(
+              `nfl_games.nfl_week_id in (${nfl_week_ids.map(() => '?').join(', ')})`,
+              nfl_week_ids
+            )
+          )
+        } else {
+          this.andOn('nfl_games.season_type', '=', db.raw('?', [seas_type]))
+          if (week) {
+            this.andOn('nfl_games.week', '=', db.raw('?', [week]))
+          }
         }
       })
 
@@ -302,6 +370,30 @@ const player_betting_market_with = ({
 
     for (const select_string of unique_select_strings) {
       qb.select(db.raw(select_string))
+    }
+
+    if (is_week_scoped) {
+      qb.select('m.year', 'm.week')
+
+      // One row per player per week, or the LEFT JOIN multiplies the cell. A
+      // book listing the same player twice for one game is not hypothetical:
+      // 49 (pid, nfl_week_id, market_type) groups since 2023 carry two FanDuel
+      // CLOSE OVER selections, and a pinned single-week CTE has always fanned
+      // those cells out too. Newest observation wins, ties broken on
+      // source_market_id so the choice is deterministic rather than
+      // plan-dependent.
+      //
+      // DISTINCT ON rather than a grouped self-join deliberately: the self-join
+      // shape is what cost player_dfs_salary a 212x plan regression, because
+      // the planner treats its perfectly-correlated keys as independent and
+      // collapses the row estimate to 1.
+      qb.distinctOn('pms.selection_pid', 'm.year', 'm.week').orderBy([
+        { column: 'pms.selection_pid' },
+        { column: 'm.year' },
+        { column: 'm.week' },
+        { column: 'pms.observed_at', order: 'desc' },
+        { column: 'm.source_market_id' }
+      ])
     }
 
     if (career_year.length) {
@@ -353,11 +445,19 @@ const player_betting_market_join = ({
 }) => {
   const join_func = get_join_func(join_type)
 
-  query[join_func](
-    table_name,
-    `${table_name}.selection_pid`,
-    data_view_options.pid_reference
-  )
+  query[join_func](table_name, function () {
+    this.on(`${table_name}.selection_pid`, '=', data_view_options.pid_reference)
+
+    // Under a week axis the CTE holds every requested week, so the cell's own
+    // year and week are what select the row. Without this the join was on the
+    // player alone and one week's line rendered on every week row.
+    correlate_week_scoped_cte({
+      builder: this,
+      db,
+      cte_name: table_name,
+      data_view_options
+    })
+  })
 }
 
 const team_betting_market_join = ({

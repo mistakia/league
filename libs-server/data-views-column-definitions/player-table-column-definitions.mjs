@@ -15,6 +15,11 @@ export default {
     },
     main_select: () => ['player.first_name', 'player.last_name'],
     main_group_by: () => ['player.first_name', 'player.last_name'],
+    // The same expression the filter uses, so sorting and filtering agree on
+    // what a name is. Nothing else can order this column: it projects two bare
+    // identifiers under no alias, which the select-ordinal sort lookup cannot
+    // find.
+    sort_expressions: () => [`player.first_name || ' ' || player.last_name`],
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
