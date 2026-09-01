@@ -1,0 +1,44 @@
+-- STATUS: APPLIED 2026-09-01 against league_production
+--
+-- Restore is_auction_election_mode_enabled.
+--
+-- Third dated file for one column today, which is what an append-only audit
+-- trail looks like when a decision reverses: added in
+-- 2026-09-01-add-seasons-auction-election-configuration.sql, dropped in
+-- 2026-09-01-drop-seasons-auction-election-mode-flag.sql, restored here. Neither
+-- earlier file is edited.
+--
+-- The drop rested on the premise that `false` selects an auction that no longer
+-- exists. It does not. Deleting slow mode left the timer-driven open-outcry
+-- socket auction fully intact -- that is the path a live block runs on -- so
+-- `false` is reachable and does something. The dry-run justification did go
+-- away, but the conclusion did not follow from it.
+--
+-- What the column buys is that THE DEPLOY IS NOT THE CUTOVER. The bundle can
+-- land days early and sit inert, because every auction surface gates on
+-- free_agency_period_start; turning election mode on is then a second,
+-- reversible act rather than a consequence of shipping.
+--
+-- WHAT `false` ACTUALLY GIVES, since "the unchanged live path" oversells it and
+-- an operator may reach for this at three in the morning:
+--
+--   - The auction starts PAUSED. `_paused` defaults true in the Auction
+--     constructor and only election mode force-clears it, so under false the
+--     auction is inert until the commissioner sends AUCTION_RESUME. The client
+--     renders "Auction is paused" and no bid controls at all.
+--   - Once resumed it is a five-day open-outcry auction on a 14-second bid
+--     clock, opening at the period start rather than a scheduled instant, since
+--     free_agency_live_auction_start is deleted.
+--   - Nothing auto-nominates. The nomination timer only unlocks a commissioner
+--     override, so the board sits still until somebody nominates -- and then
+--     that player sells in about fourteen seconds to whoever happens to be
+--     watching.
+--
+-- So it is a genuine rollback lever, safer than it sounds while paused and worse
+-- than it sounds once resumed. It is not a steady state.
+--
+-- Default false: the column is added ahead of the cutover and flipped
+-- deliberately.
+
+ALTER TABLE public.seasons
+    ADD COLUMN is_auction_election_mode_enabled boolean DEFAULT false NOT NULL;

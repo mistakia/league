@@ -27463,6 +27463,7 @@ CREATE TABLE public.seasons (
     auction_block_notice_minutes smallint DEFAULT 60 NOT NULL,
     auction_final_block_pace_minutes smallint DEFAULT 2 NOT NULL,
     auction_final_block_buffer_hours smallint DEFAULT 12 NOT NULL,
+    is_auction_election_mode_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT auction_block_notice_within_a_day CHECK (((auction_block_notice_minutes > 0) AND (auction_block_notice_minutes <= 1440))),
     CONSTRAINT auction_final_block_buffer_positive CHECK (((auction_final_block_buffer_hours > 0) AND (auction_final_block_buffer_hours <= 72))),
     CONSTRAINT auction_final_block_pace_positive CHECK (((auction_final_block_pace_minutes > 0) AND (auction_final_block_pace_minutes <= 60))),

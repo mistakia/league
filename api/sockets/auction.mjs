@@ -997,24 +997,30 @@ export default class Auction {
   async _load_league() {
     this._league = await getLeague({ lid: this._lid })
 
-    // ELECTION MODE IS NOT CONFIGURED, IT IS DERIVED.
+    // THE CUTOVER IS NOT THE DEPLOY. The bundle can land days before the free
+    // agency period opens and sit inert -- every auction surface gates on
+    // `free_agency_period_start` -- and turning election mode on is then a
+    // second, reversible act rather than a consequence of shipping.
     //
-    // The auction runs election mode from the opening nomination and leaves it
-    // only for a live block, so the mode is a function of the block schedule
-    // and the instant -- not a league setting somebody flips. There are no
-    // blocks yet, so this is unconditionally true; when `auction-modes.mjs`
-    // lands it becomes a query against the finalized block set for `now`.
+    // `false` selects the timer-driven open-outcry auction, which is a REAL
+    // path and not a phantom: deleting slow mode left it fully intact, because
+    // it is what a live block runs on. Under `false` the auction additionally
+    // stays PAUSED -- `_paused` defaults true in the constructor and only
+    // election mode clears it -- so a rollback is inert until the commissioner
+    // sends AUCTION_RESUME rather than immediately live on a 14-second clock.
     //
-    // The live open-outcry path below is NOT dead and must not be deleted: it
-    // is what a block runs on. What has gone away is any reason to select it
-    // for the whole period, which is the only thing a league-level flag could
-    // have expressed.
-    this._election_mode = true
-
-    // Election mode has no clock to pause. The auction advances on elections
-    // arriving over REST, so a socket-level pause would stop nothing and would
-    // only hide the board from whoever is connected.
-    this._paused = false
+    // When live blocks land, this stops being a league setting and becomes a
+    // query against the finalized block set for `now`, per auction-modes.mjs.
+    // The flag then chooses whether the schedule is consulted at all.
+    this._election_mode =
+      this._league?.is_auction_election_mode_enabled || false
+    if (this._election_mode) {
+      // Election mode has no clock to pause. The auction advances on elections
+      // arriving over REST, so a socket-level pause would stop nothing and
+      // would only hide the board from whoever is connected.
+      this._paused = false
+    }
+    this.logger(`election mode enabled: ${this._election_mode}`)
 
     await this._refresh_league_pause()
   }

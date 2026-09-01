@@ -21333,6 +21333,7 @@ export interface SeasonsRow {
   auction_block_notice_minutes: number
   auction_final_block_pace_minutes: number
   auction_final_block_buffer_hours: number
+  is_auction_election_mode_enabled: boolean
 }
 
 export interface SelectionCombinationDefinitionsRow {
