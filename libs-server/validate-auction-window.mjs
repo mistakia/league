@@ -1,13 +1,14 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { Roster, get_free_agent_period } from '#libs-shared'
+import { get_free_agent_period } from '#libs-shared'
 import {
   current_season,
   AUCTION_MINIMUM_ELECTION_WINDOW_HOURS
 } from '#constants'
-import getRoster from './get-roster.mjs'
-import getLeague from './get-league.mjs'
+import { get_auction_spots_remaining } from './auction-completion.mjs'
+
+export { get_auction_spots_remaining }
 
 /**
  * Does the free agency period leave enough room for the auction to terminate?
@@ -92,34 +93,6 @@ export const describe_auction_window = (result) => {
     `notice ${round(terms.notice_hours)}h, buffer ${terms.buffer_hours}h, ` +
     `election window ${terms.minimum_election_window_hours}h)`
   )
-}
-
-/**
- * The league's unfilled active roster spots.
- *
- * This is what `spots_remaining` means, and it is NOT the count of unnominated
- * players. Rosters are fixed for the period, so unfilled spots is exactly the
- * number of players the auction still has to place, and it falls to zero when
- * the auction ends. Counting players instead would size the reservation against
- * the several hundred free agents carrying a projection rather than the ~69
- * signings, and pull the final block absurdly early.
- */
-export const get_auction_spots_remaining = async ({
-  lid,
-  season_year = current_season.year
-}) => {
-  const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, season_year })
-
-  let spots = 0
-  for (const team of teams) {
-    const roster = new Roster({
-      roster: await getRoster({ tid: team.team_id }),
-      league
-    })
-    spots += Math.max(roster.availableSpace, 0)
-  }
-  return spots
 }
 
 /**

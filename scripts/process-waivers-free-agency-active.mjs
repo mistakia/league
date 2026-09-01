@@ -1,7 +1,9 @@
 import debug from 'debug'
 
+import { may_process_free_agency_waivers } from '#libs-server/auction-completion.mjs'
+
 import db from '#db'
-import { Errors, get_free_agent_period } from '#libs-shared'
+import { Errors } from '#libs-shared'
 import { current_season, waiver_types } from '#constants'
 import {
   submitAcquisition,
@@ -9,7 +11,6 @@ import {
   getTopFreeAgencyWaiver,
   get_waiver_by_id,
   is_main,
-  getLeague,
   report_job,
   throw_if_shortfall
 } from '#libs-server'
@@ -260,24 +261,8 @@ const get_leagues_with_pending_active_waivers = async () => {
   return results.map((w) => w.lid)
 }
 
-const should_skip_league_in_offseason = async (lid) => {
-  const league = await getLeague({ lid })
-
-  if (league.free_agency_period_start) {
-    const fa_period = get_free_agent_period(league)
-    if (current_season.now.isBefore(fa_period.start)) {
-      // skip leagues during the offseason before the free agency period opens.
-      // The auction runs the whole period, so the period start is the instant
-      // the auction begins.
-      return true
-    }
-  } else {
-    // skip leagues during offseason with no scheduled free agency period
-    return true
-  }
-
-  return false
-}
+const should_skip_league_in_offseason = async (lid) =>
+  !(await may_process_free_agency_waivers({ lid }))
 
 const process_league_active_waivers = async (lid, timestamp) => {
   let waiver = await getTopFreeAgencyWaiver(lid)

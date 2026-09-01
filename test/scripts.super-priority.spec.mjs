@@ -261,12 +261,21 @@ describe('SCRIPTS - Super Priority Processing', function () {
       const current_time = regular_season_start.subtract('1', 'month') // After auction regular_season_start, before season
       MockDate.set(current_time.toISOString())
 
-      // Set up league for free agency period to allow active roster waiver processing
+      // Set up league so active roster waivers may process. Free agency
+      // waivers now open when the AUCTION COMPLETES rather than when the period
+      // opens -- the period start is the auction start under the collapsed
+      // timestamps, so processing during the period would award roster spots
+      // mid-auction. This test is about waiver PRIORITY, not auction timing, so
+      // the period is placed wholly in the past and completion follows from the
+      // period-end backstop.
       await knex('seasons')
         .where({ lid: 1, season_year: current_season.year })
         .update({
           free_agency_period_start:
             free_agency_auction_regular_season_start.toDate(),
+          free_agency_period_end: free_agency_auction_regular_season_start
+            .add('2', 'weeks')
+            .toDate(),
           // Draft completed before FA. The hard end has to move with the
           // start: it is a stated column now rather than a projection off the
           // cadence, so relocating the draft without it leaves the rookie

@@ -3,6 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { Errors, get_free_agent_period } from '#libs-shared'
+import { is_auction_complete } from '#libs-server/auction-completion.mjs'
 import { current_season, waiver_types } from '#constants'
 import {
   submitPoach,
@@ -70,14 +71,25 @@ const run = async ({ daily = false } = {}) => {
     }
 
     const free_agency_period = get_free_agent_period(league)
-    if (
+    const is_within_free_agency_period =
       !current_season.is_regular_season &&
-      current_season.now.isAfter(free_agency_period.start) &&
-      !daily
-    ) {
+      free_agency_period.start &&
+      current_season.now.isAfter(free_agency_period.start)
+
+    if (is_within_free_agency_period && !daily) {
       log(
         `outside of daily waivers run during free agency period, skipping league ${lid}`
       )
+      continue
+    }
+
+    // A POACH FILLS AN ACTIVE ROSTER SPOT, so awarding one mid-auction moves a
+    // team out of an eligible set without passing through settlement -- and
+    // eligibility monotonicity is what second-price settlement rests on.
+    // Article XII Section 7 processes poaching waivers the day AFTER the
+    // auction, which under the collapsed timestamps means once it completes.
+    if (is_within_free_agency_period && !(await is_auction_complete({ lid }))) {
+      log(`auction still running, holding poaching waivers for league ${lid}`)
       continue
     }
 
