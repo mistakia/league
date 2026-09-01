@@ -14,6 +14,7 @@ import {
   correlate_week_scoped_cte
 } from '#libs-server/data-views/week-scoped-cte.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
+import { apply_market_row_dedup } from '#libs-server/data-views/market-row-dedup.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // The column's GRAIN, derived rather than passed.
@@ -335,7 +336,15 @@ const player_betting_market_with = ({
   const markets_cte = `${with_table_name}_markets`
 
   query.with(markets_cte, (qb) => {
-    qb.select('source_id', 'source_market_id', 'time_type')
+    // esbid rides out so the selections CTE can dedup on the GAME, which is
+    // what a market is attached to. The career_game join below already reads
+    // m.esbid and had no column to read.
+    qb.select(
+      'source_id',
+      'source_market_id',
+      'time_type',
+      'prop_markets_index.esbid'
+    )
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
@@ -420,25 +429,11 @@ const player_betting_market_with = ({
     if (is_week_scoped) {
       qb.select('m.year', 'm.week')
 
-      // One row per player per week, or the LEFT JOIN multiplies the cell. A
-      // book listing the same player twice for one game is not hypothetical:
-      // 49 (pid, nfl_week_id, market_type) groups since 2023 carry two FanDuel
-      // CLOSE OVER selections, and a pinned single-week CTE has always fanned
-      // those cells out too. Newest observation wins, ties broken on
-      // source_market_id so the choice is deterministic rather than
-      // plan-dependent.
-      //
-      // DISTINCT ON rather than a grouped self-join deliberately: the self-join
-      // shape is what cost player_dfs_salary a 212x plan regression, because
-      // the planner treats its perfectly-correlated keys as independent and
-      // collapses the row estimate to 1.
-      qb.distinctOn('pms.selection_pid', 'm.year', 'm.week').orderBy([
-        { column: 'pms.selection_pid' },
-        { column: 'm.year' },
-        { column: 'm.week' },
-        { column: 'pms.observed_at', order: 'desc' },
-        { column: 'm.source_market_id' }
-      ])
+      // One row per player per game, or the LEFT JOIN multiplies the cell.
+      // Keyed on the game rather than on (year, week) because the game is what
+      // the market attaches to and it fixes the week as a consequence; see
+      // market-row-dedup.mjs for why the coarser key is the unsafe direction.
+      apply_market_row_dedup({ qb })
     }
 
     if (career_year.length) {
