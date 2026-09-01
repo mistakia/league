@@ -214,6 +214,44 @@ const options = {
           },
           required: ['error']
         },
+        // The row a user is allowed to see about their own API key. The hash is
+        // deliberately absent -- it is the verifier. Defined once, here, and
+        // $ref'd from every api-keys operation: a second definition in a route's
+        // JSDoc would be merged silently by swagger-jsdoc.
+        ApiKey: {
+          type: 'object',
+          properties: {
+            api_key_id: {
+              type: 'integer',
+              description: 'API key ID'
+            },
+            key_prefix: {
+              type: 'string',
+              description: 'The leading characters of the key, shown as a label'
+            },
+            name: {
+              type: 'string',
+              nullable: true,
+              description: "The user's own label for what the key is for"
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true
+            },
+            last_used_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true
+            },
+            revoked_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true
+            }
+          },
+          required: ['api_key_id', 'key_prefix']
+        },
         User: {
           type: 'object',
           properties: {

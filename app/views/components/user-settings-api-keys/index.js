@@ -17,6 +17,7 @@ const map_state_to_props = createSelector(get_api_keys_state, (api_keys) => ({
 const map_dispatch_to_props = {
   load: api_key_actions.load,
   create: api_key_actions.create,
+  rename: api_key_actions.rename,
   revoke: api_key_actions.revoke,
   dismiss_generated_key: api_key_actions.dismiss_generated_key
 }

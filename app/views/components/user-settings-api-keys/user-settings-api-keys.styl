@@ -1,8 +1,11 @@
+// The controls here are native elements calling the shared prose-form mixins
+// rather than MUI components. See the header comment in the component.
+
 .api-keys
   margin-top 16px
 
   &__description
-    color rgba(0, 0, 0, 0.6)
+    color $prose_muted
     font-size 14px
     margin 0 0 16px
 
@@ -12,18 +15,89 @@
     gap 12px
     margin-bottom 16px
 
+  &__create-input
+    prose_input()
+    flex 0 1 280px
+    font-size 14px
+    padding 8px 10px
+
+  // The generated key is the one thing on the page that must be read before it
+  // is navigated away from, so it takes prose_message's set-apart bar rather
+  // than a coloured box — the value below it is what carries the weight.
   &__generated
+    prose_message()
+    position relative
     margin-bottom 16px
+    padding-right 34px
 
   &__generated-value
-    font-family monospace
+    font-family $prose_mono
+    font-size 14px
     word-break break-all
     margin-top 8px
 
+  &__generated-dismiss
+    position absolute
+    top 6px
+    right 8px
+    padding 0 4px
+    font-size 18px
+    line-height 1
+    color $prose_muted
+    background transparent
+    border none
+    cursor pointer
+    &:hover
+      color $prose_ink
+
   &__empty
-    color rgba(0, 0, 0, 0.6)
+    color $prose_muted
     font-size 14px
 
   &__revoked
-    color rgba(0, 0, 0, 0.4)
+    color $prose_muted
     font-size 13px
+
+  // The name field sits inside a table cell, so it reads as text until it is
+  // touched: no border at rest, the shared input's border and ring on focus.
+  &__name-input
+    prose_input()
+    width 100%
+    padding 4px 6px
+    font-size 14px
+    background transparent
+    border-color transparent
+    &:hover
+      border-color $prose_rule_strong
+
+  &__name-static
+    font-size 14px
+    color $prose_muted
+
+  // A four-column settings table, not the app's dense metric grid, so the head
+  // drops to a single row height and the cells size to their content.
+  .table__head
+    height 32px
+
+  .table__cell
+    font-size 14px
+
+  &__cell-name
+    flex 1 1 200px
+    width auto
+    min-width 160px
+
+  &__cell-prefix
+    flex 0 0 120px
+    width 120px
+    font-family $prose_mono
+    font-size 13px
+
+  &__cell-date
+    flex 0 0 180px
+    width 180px
+
+  &__cell-action
+    flex 0 0 100px
+    width 100px
+    justify-content flex-end

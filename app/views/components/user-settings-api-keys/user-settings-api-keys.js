@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Alert from '@mui/material/Alert'
+
+import Button from '@components/button'
 
 import './user-settings-api-keys.styl'
+
+// NO MUI ON THIS SURFACE. The section was a stock `Table`/`TextField`/`Alert`
+// stack, which brought three type scales and a focus colour none of the app's
+// own controls share. It is now the shared language the rest of the site is
+// written in: `@components/button`, the `table__*` classes from
+// app/styles/table.styl, and the form mixins from app/styles/prose-form.styl —
+// the same combination the auth page moved to for the same reason.
 
 const format_timestamp = (value) =>
   value ? new Date(value).toLocaleString() : '—'
@@ -20,6 +21,65 @@ const describe_ceiling = (max_rows) =>
     ? 'unlimited'
     : `${Number(max_rows).toLocaleString()} rows per request`
 
+const MAX_NAME_LENGTH = 60
+
+// The name cell is the rename control rather than a label with an edit button
+// beside it: it is the only mutable field on the row, and the interaction the
+// app already uses for an editable setting is a field that commits on blur.
+//
+// The committed name is `saved_name`, not local state — a rename that the API
+// rejects leaves the store holding the old value, and reading from it is what
+// puts the input back rather than leaving what was typed sitting there looking
+// saved. Escape restores it without a request.
+function ApiKeyNameField({ saved_name, is_editable, rename }) {
+  const [value, set_value] = useState(saved_name)
+
+  // A rename that lands (or one the server normalized) arrives as a new
+  // `saved_name`, and a field the user is not editing has to follow it.
+  useEffect(() => {
+    set_value(saved_name)
+  }, [saved_name])
+
+  if (!is_editable) {
+    return <span className='api-keys__name-static'>{saved_name || '—'}</span>
+  }
+
+  const commit = () => {
+    const next = value.trim()
+    if (next === saved_name) return
+    if (!next) return set_value(saved_name)
+    rename({ name: next })
+  }
+
+  const handle_key_down = (event) => {
+    if (event.key === 'Enter') return event.target.blur()
+    if (event.key === 'Escape') {
+      set_value(saved_name)
+      event.target.blur()
+    }
+  }
+
+  return (
+    <input
+      className='api-keys__name-input'
+      type='text'
+      value={value}
+      aria-label='API key name'
+      placeholder='unnamed'
+      maxLength={MAX_NAME_LENGTH}
+      onChange={(event) => set_value(event.target.value)}
+      onBlur={commit}
+      onKeyDown={handle_key_down}
+    />
+  )
+}
+
+ApiKeyNameField.propTypes = {
+  saved_name: PropTypes.string,
+  is_editable: PropTypes.bool,
+  rename: PropTypes.func
+}
+
 export default function UserSettingsApiKeys({
   api_keys,
   data_view_export_max_rows,
@@ -27,6 +87,7 @@ export default function UserSettingsApiKeys({
   is_pending,
   load,
   create,
+  rename,
   revoke,
   dismiss_generated_key
 }) {
@@ -37,7 +98,7 @@ export default function UserSettingsApiKeys({
   }, [load])
 
   const handle_create = () => {
-    create({ name })
+    create({ name: name.trim() })
     set_name('')
   }
 
@@ -54,30 +115,33 @@ export default function UserSettingsApiKeys({
       </p>
 
       {generated_key && (
-        <Alert
-          severity='success'
-          onClose={dismiss_generated_key}
-          className='api-keys__generated'
-        >
-          Copy this key now — it is shown once and cannot be retrieved again.
+        <div className='api-keys__generated' role='status'>
+          <div className='api-keys__generated-message'>
+            Copy this key now — it is shown once and cannot be retrieved again.
+          </div>
           <div className='api-keys__generated-value'>{generated_key}</div>
-        </Alert>
+          <button
+            type='button'
+            className='api-keys__generated-dismiss'
+            aria-label='Dismiss key'
+            onClick={dismiss_generated_key}
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <div className='api-keys__create'>
-        <TextField
-          label='Name'
-          size='small'
+        <input
+          className='api-keys__create-input'
+          type='text'
           value={name}
+          aria-label='Name'
           placeholder='what this key is for'
-          inputProps={{ maxLength: 60 }}
+          maxLength={MAX_NAME_LENGTH}
           onChange={(event) => set_name(event.target.value)}
         />
-        <Button
-          variant='contained'
-          disabled={is_pending}
-          onClick={handle_create}
-        >
+        <Button disabled={is_pending} onClick={handle_create}>
           Generate key
         </Button>
       </div>
@@ -87,48 +151,55 @@ export default function UserSettingsApiKeys({
       )}
 
       {api_keys.size > 0 && (
-        <Table size='small'>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Key</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell>Last used</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
-          <TableBody>
+        <div className='table__container'>
+          <div className='table__row table__head'>
+            <div className='table__cell api-keys__cell-name'>Name</div>
+            <div className='table__cell api-keys__cell-prefix'>Key</div>
+            <div className='table__cell api-keys__cell-date'>Created</div>
+            <div className='table__cell api-keys__cell-date'>Last used</div>
+            <div className='table__cell api-keys__cell-action' />
+          </div>
+          <div className='table__body'>
             {api_keys.map((api_key) => {
               const api_key_id = api_key.get('api_key_id')
               const revoked_at = api_key.get('revoked_at')
               return (
-                <TableRow key={api_key_id}>
-                  <TableCell>{api_key.get('name') || '—'}</TableCell>
-                  <TableCell>{api_key.get('key_prefix')}…</TableCell>
-                  <TableCell>
+                <div className='table__row' key={api_key_id}>
+                  <div className='table__cell api-keys__cell-name'>
+                    <ApiKeyNameField
+                      saved_name={api_key.get('name') || ''}
+                      is_editable={!revoked_at}
+                      rename={({ name }) => rename({ api_key_id, name })}
+                    />
+                  </div>
+                  <div className='table__cell api-keys__cell-prefix'>
+                    {api_key.get('key_prefix')}…
+                  </div>
+                  <div className='table__cell api-keys__cell-date'>
                     {format_timestamp(api_key.get('created_at'))}
-                  </TableCell>
-                  <TableCell>
+                  </div>
+                  <div className='table__cell api-keys__cell-date'>
                     {format_timestamp(api_key.get('last_used_at'))}
-                  </TableCell>
-                  <TableCell>
+                  </div>
+                  <div className='table__cell api-keys__cell-action'>
                     {revoked_at ? (
                       <span className='api-keys__revoked'>revoked</span>
                     ) : (
                       <Button
-                        size='small'
+                        small
+                        text
                         disabled={is_pending}
                         onClick={() => revoke({ api_key_id })}
                       >
                         Revoke
                       </Button>
                     )}
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               )
             })}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -141,6 +212,7 @@ UserSettingsApiKeys.propTypes = {
   is_pending: PropTypes.bool,
   load: PropTypes.func,
   create: PropTypes.func,
+  rename: PropTypes.func,
   revoke: PropTypes.func,
   dismiss_generated_key: PropTypes.func
 }

@@ -95,6 +95,7 @@ import { put_setting_actions } from '@core/settings/actions'
 import {
   get_api_keys_actions,
   post_api_key_actions,
+  put_api_key_actions,
   delete_api_key_actions
 } from '@core/api-keys/actions'
 import {
@@ -441,6 +442,11 @@ export const api_post_api_key = fetch.bind(
   null,
   api.post_api_key,
   post_api_key_actions
+)
+export const api_put_api_key = fetch.bind(
+  null,
+  api.put_api_key,
+  put_api_key_actions
 )
 export const api_delete_api_key = fetch.bind(
   null,

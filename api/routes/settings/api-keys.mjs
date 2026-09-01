@@ -41,6 +41,25 @@ const public_key_columns = [
  *     responses:
  *       '200':
  *         description: API keys for the authenticated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 api_keys:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ApiKey'
+ *                 data_view_export_max_rows:
+ *                   type: integer
+ *                   nullable: true
+ *                   description: Export row ceiling; null means no ceiling
+ *       '500':
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req, res) => {
   const { logger, db } = req.app.locals
@@ -86,6 +105,28 @@ router.get('/', async (req, res) => {
  *     responses:
  *       '200':
  *         description: The generated key, in plaintext, for the only time
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiKey'
+ *                 - type: object
+ *                   properties:
+ *                     key:
+ *                       type: string
+ *                       description: The plaintext key, returned only here
+ *       '400':
+ *         description: Invalid name, or the active-key ceiling is reached
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       '500':
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', async (req, res) => {
   const { logger, db } = req.app.locals
@@ -127,6 +168,81 @@ router.post('/', async (req, res) => {
 /**
  * @swagger
  * /settings/api-keys/{api_key_id}:
+ *   put:
+ *     tags:
+ *       - Settings
+ *     summary: Rename an API key
+ *     description: |
+ *       Changes the label on one of the caller's active keys. The name is a
+ *       reminder of what the key is for and carries no authorization meaning,
+ *       so renaming never touches the hash, the prefix or the export ceiling.
+ *       A revoked key cannot be renamed — its row is the audit record of a key
+ *       that was retired, and that record does not change after the fact.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: The renamed key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiKey'
+ *       '400':
+ *         description: Invalid api_key_id or name
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       '404':
+ *         description: No such active key belongs to the caller
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       '500':
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/:api_key_id', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const user_id = req.auth.userId
+    const api_key_id = Number(req.params.api_key_id)
+    const { name } = req.body || {}
+
+    if (!Number.isInteger(api_key_id) || api_key_id < 1) {
+      return res.status(400).send({ error: 'invalid api_key_id' })
+    }
+
+    if (typeof name !== 'string' || name.length > MAX_KEY_NAME_LENGTH) {
+      return res.status(400).send({ error: 'invalid name' })
+    }
+
+    // Same ownership predicate as the revoke route: the user_id in the WHERE is
+    // the check, not the auth guard, which only proves who the caller is.
+    const [row] = await db('user_api_keys')
+      .where({ api_key_id, user_id })
+      .whereNull('revoked_at')
+      .update({ name })
+      .returning(public_key_columns)
+
+    if (!row) {
+      return res.status(404).send({ error: 'invalid api_key_id' })
+    }
+
+    res.send(row)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+/**
+ * @swagger
+ * /settings/api-keys/{api_key_id}:
  *   delete:
  *     tags:
  *       - Settings
@@ -140,8 +256,33 @@ router.post('/', async (req, res) => {
  *     responses:
  *       '200':
  *         description: Key revoked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 api_key_id:
+ *                   type: integer
+ *       '400':
+ *         description: Invalid api_key_id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       '404':
  *         description: No such key belongs to the caller
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       '500':
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:api_key_id', async (req, res) => {
   const { logger, db } = req.app.locals

@@ -29,6 +29,7 @@ export {
   api_put_setting,
   api_get_api_keys,
   api_post_api_key,
+  api_put_api_key,
   api_delete_api_key,
   api_get_plays,
   api_get_play_stats,

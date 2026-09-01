@@ -18,11 +18,13 @@ export function api_keys_reducer(state = initial_state, { payload, type }) {
   switch (type) {
     case api_key_actions.GET_API_KEYS_PENDING:
     case api_key_actions.POST_API_KEY_PENDING:
+    case api_key_actions.PUT_API_KEY_PENDING:
     case api_key_actions.DELETE_API_KEY_PENDING:
       return state.set('is_pending', true)
 
     case api_key_actions.GET_API_KEYS_FAILED:
     case api_key_actions.POST_API_KEY_FAILED:
+    case api_key_actions.PUT_API_KEY_FAILED:
     case api_key_actions.DELETE_API_KEY_FAILED:
       return state.set('is_pending', false)
 
@@ -42,6 +44,21 @@ export function api_keys_reducer(state = initial_state, { payload, type }) {
         is_pending: false
       })
     }
+
+    // The response is the whole row, so the rename lands from the server's copy
+    // rather than from what was typed — a name the API trimmed or rejected can
+    // never sit in the table looking saved.
+    case api_key_actions.PUT_API_KEY_FULFILLED:
+      return state.merge({
+        keys: state
+          .get('keys')
+          .map((api_key) =>
+            api_key.get('api_key_id') === payload.data.api_key_id
+              ? fromJS(payload.data)
+              : api_key
+          ),
+        is_pending: false
+      })
 
     case api_key_actions.DELETE_API_KEY_FULFILLED:
       return state.merge({

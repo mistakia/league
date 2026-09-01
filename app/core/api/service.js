@@ -246,6 +246,10 @@ export const api = {
     const url = `${API_URL}/settings/api-keys`
     return { url, ...POST({ name }) }
   },
+  put_api_key({ api_key_id, name }) {
+    const url = `${API_URL}/settings/api-keys/${api_key_id}`
+    return { url, ...PUT({ name }) }
+  },
   delete_api_key({ api_key_id }) {
     const url = `${API_URL}/settings/api-keys/${api_key_id}`
     return { url, method: 'DELETE' }
