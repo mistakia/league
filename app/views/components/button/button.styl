@@ -12,16 +12,22 @@
 // Every hook the Button component can actually produce is preserved: __small,
 // __text, __active and the .count badge.
 //
-// FOUR VARIANTS WERE DROPPED, and one of them is why the others were suspect.
+// THREE VARIANTS WERE DROPPED, and one of them is why the others were suspect.
 // `__failure` painted its ground with `$failureColor`, which is defined in no
 // stylesheet in this repo — stylus emits an undefined variable as a bare ident,
 // so `background-color: failureColor` was invalid CSS the browser discarded and
 // the variant had never once rendered a red button. Nothing in `app/` sets that
-// class, or `__success`, or `__outline`. `__icon` is set only by
-// `icon-button.js`, which does not also set `.button`, so the descendant rule
-// here could never match it either. All four were removed rather than repaired:
-// a token invented for a variant with no call site is a guess about a design
-// decision nobody has made.
+// class, or `__success`, or `__outline`. All three were removed rather than
+// repaired: a token invented for a variant with no call site is a guess about a
+// design decision nobody has made.
+//
+// `__icon` STAYS, and the reason is worth stating because it is the opposite of
+// what it looks like. `icon-button.js` renders OUR `Button` with
+// `className='button__icon …'`, and Button prepends `button` to whatever
+// className it is handed — so an icon button carries BOTH classes and every
+// rule in this file lands on it. Thirteen call sites sit in player rows, the
+// roster, the draft board and the auction, so the light fill and the hover lift
+// below would have put a grey block and a drop shadow behind each of them.
 //
 // The :not() chain keeps this off MUI's own buttons, which carry .button at
 // several call sites and bring their own paint.
@@ -112,7 +118,11 @@
   // waited. It sits inside table rows, where a hard offset shadow under a
   // one-word action reads as the row itself moving. The ink is the whole
   // response, so both the base fill and the base lift are undone here.
+  // An icon button is the same argument as a text button with a glyph in place
+  // of the word, so it takes the same treatment: no fill, no lift, and the ink
+  // is the whole response.
   &.button__text
+  &.button__icon
     color $prose_muted
     background transparent
     border-color transparent
