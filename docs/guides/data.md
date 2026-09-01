@@ -155,6 +155,26 @@ This inverts advice that stood here until 2026-08-28, which said a clock-derived
 
 **Regenerating goldens cannot fix a fixture's `setup` SQL — those are hand-edited.** Result-equivalence fixtures carry raw statements like `INSERT INTO nfl_games (esbid, season_year, week, season_type, v, h) VALUES (...)` in their setup block. `update-data-view-snapshots.mjs` only rewrites `expected_query`, so a rename sweep that regenerates every affected golden still leaves the setup SQL on old column names, and the fixture then fails at seed time rather than at compare time. The 2026-07-29 `nfl_games` conform hit exactly this in 9 fixtures. After any rename, `grep -rn "INSERT INTO <table>" test/data-view-queries/` as a separate step.
 
+**`--update` re-serialises the WHOLE fixture, so the real change arrives buried in a whole-file reformat.** `scripts/data-view-test-cli.mjs <fixture> --update` rewrites the file through `JSON.stringify`, which expands every short inline array (`"prefix_columns": ["player_name"]` becomes four lines) even when only `expected_query` actually moved. The diff then runs to hundreds of lines per fixture and the one value you changed is unreviewable, which defeats the point of regenerating deliberately. Capture the regenerated value, restore the original file, and splice only that value back:
+
+```bash
+p=test/data-view-queries/<fixture>.json
+cp "$p" /tmp/orig.json
+LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 NODE_ENV=test \
+  node scripts/data-view-test-cli.mjs "$p" --update
+python3 - "$p" /tmp/orig.json <<'EOF'
+import json,sys
+new_p, orig_p = sys.argv[1], sys.argv[2]
+new_q = json.load(open(new_p))['expected_query']
+orig_text = open(orig_p).read()
+old_q = json.loads(orig_text)['expected_query']
+open(new_p,'w').write(orig_text if old_q == new_q else
+                     orig_text.replace(json.dumps(old_q), json.dumps(new_q), 1))
+EOF
+```
+
+Each regenerated golden should then show a ONE-line diff, which is the review surface you want and the check that nothing else moved. For a brand-new fixture there is no original to restore, so let `--update` reformat it and run `npx prettier --write` on it instead — prettier collapses the short arrays back and produces the house shape. Note the CLI needs `NODE_ENV` set or it dies looking for `config/config-undefined.json`.
+
 **Grep the goldens for the BARE quoted projection, not just the table-qualified form.** The emitters produce both shapes, and a sweep keyed to one silently misses the other. The documented pattern `nfl_games\".\"<old>` finds table-qualified references, but CTE builders like `rate-type-per-game.mjs` project `"h" as "team"` with no table prefix — so 7 affected goldens looked clean under the table-qualified grep and were caught only when the suite failed on them. Sweep both: `\\"<old>\\" as \\"` as well as `<table>\\".\\"<old>`.
 
 **Do not re-verify a golden at another clock — that is what the pin removed, and a golden that varies with one is a defect now.** Before 2026-08-28, 46 of 278 goldens were measured going red on a date change alone: 16 of them at REG week 1, which was a scheduled master-red about two weeks out with no code involved, one more at POST, and 30 more at the season-year rollover. The recipe that used to live here — run the golden spec under several `LEAGUE_MOCK_DATE` instants — could not have found any of them, because the spec ran `MockDate.reset()` in its `before` and unpinned the clock `test/global.mjs` had just set. It compared every golden against the real date whatever instant was asked for: a green that could not go red. What replaced both is `test/data-views.golden-clock-invariance.spec.mjs`, which emits the whole corpus under two very different ambient clocks and asserts the pinned output is identical, with a control asserting the corpus is genuinely clock-sensitive without the pin so the invariance claim cannot go vacuous.
