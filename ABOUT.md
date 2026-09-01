@@ -681,12 +681,19 @@ observations:
     returned 404 and the sole ruleset "protect main" (id 831141) was enforcement:disabled and
     targeted the branch name main while the default branch is master, so a failing check blocked no
     merge.
+  - >-
+    [constraint] 2026-09-01 react-table is a git dependency built from source and carries its own
+    @mui imports across ~30 files (material, icons-material, base, x-date-pickers), so cleaning app/
+    does NOT let the @mui packages leave league package.json, and the .button :not(.Mui...) chain
+    plus the doubled-selector z-index pins in app/styles/general.styl must stay until react-table is
+    converted too. The app-side @mui/x-date-pickers dependency and its webpack alias exist only to
+    dedupe react-tables copy.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-22T21:19:30.226Z'
+updated_at: '2026-09-01T04:47:01.832Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
