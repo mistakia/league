@@ -69,18 +69,26 @@ const resolve_market_week_scope = ({
   return { nfl_week_ids, market_season_years }
 }
 
-// The player cell maps to a market selection through the TEAM the player was on
-// that year, not through player.current_nfl_team -- the current roster
-// misattributes every past-season row (a 2024 line would render for the team he
-// plays for in 2026, or nothing once the week correlation forces the right year
-// and the current team has no market in it). Register the player_year_teams
-// bridge the way game_opponent does: it materializes (pid, year, team) from the
-// REG gamelogs, and the team joins below reference player_year_teams.team.
+// The player cell maps to a market through the GAME he was in that week.
 //
-// The bridge's year is anchored to the season(s) the resolved week scope names,
-// so a view-level nfl_week list (no params.year) does not fall back to
-// current_season.year. Registration is a no-op once applied (applied_bridges),
-// so the first team column in a query wins and the rest reuse the join.
+// A team-game market is attached to a game, so the exact question is "which
+// game was this player in", and player_gamelogs answers it directly: one row
+// per (pid, year, week) carrying the esbid and the team he played for. The
+// joins below match the market on that esbid.
+//
+// Two weaker answers were used before, and each is an approximation of this
+// one. player.current_nfl_team drops the year, so every past-season row
+// rendered the team he plays for today. player_year_teams drops the WEEK -- it
+// picks the team he played the most games for and applies it to all 17 -- so a
+// mid-season trade rendered the wrong team for the rest of the season: 15.5% /
+// 12.0% / 5.9% of 2023 / 2024 / 2025 player-seasons are multi-team.
+//
+// A player with no game that week gets no bridge row and his cell renders
+// empty. That is correct rather than a gap: there is no game he was in, so
+// there is no line that is his.
+//
+// Registration is a no-op once applied (applied_bridges), so the first team
+// column in a query wins and the rest reuse the join.
 const register_team_attribution_bridge = ({
   data_view_options,
   params,
@@ -90,8 +98,8 @@ const register_team_attribution_bridge = ({
   if (!query_context) return
   apply_bridge({
     query_context,
-    from: 'player_year',
-    to: 'team_year',
+    from: 'player_year_week',
+    to: 'team_year_week',
     mode: 'default',
     params: { ...params, year: market_season_years },
     source: null
@@ -515,38 +523,25 @@ const team_betting_market_join = ({
   })
 
   query[join_func](table_name, function () {
-    // The player's team for the cell's year, not player.current_nfl_team: a
-    // team-game market selection is keyed by the team that played in the game,
-    // and the current roster is the wrong team for any past-season row. The
-    // bridge (player_year_teams) is registered by the with builder.
-    const team_reference = 'player_year_teams.team'
+    // The GAME the player was in that week, supplied by the player_week_teams
+    // bridge the with builder registers.
+    //
+    // esbid identifies the game, and the game fixes the season and the week as
+    // a consequence -- so this one predicate does the work that previously took
+    // a home/away team-code OR plus a correlated year and week. Matching a
+    // market on team codes was always a re-derivation of "did this team play in
+    // this game", which the esbid states outright.
+    this.on(`${table_name}.esbid`, '=', 'player_week_teams.esbid')
 
     if (
       market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD ||
       market_type === bookmaker_constants.team_game_market_types.GAME_ALT_SPREAD
     ) {
-      this.on(`${table_name}.selection_pid`, '=', team_reference)
-    } else {
-      // Parenthesised, or the week predicate below would bind to the OR's
-      // right arm alone and the away-team branch would match every week.
-      this.on(function () {
-        this.on(`${table_name}.home_nfl_team`, '=', team_reference).orOn(
-          `${table_name}.away_nfl_team`,
-          '=',
-          team_reference
-        )
-      })
+      // A spread has a side, so the game alone does not select a row: take the
+      // one for the team the player was on in that game. A game-level market
+      // (a total) has no side and needs no team predicate at all.
+      this.on(`${table_name}.selection_pid`, '=', 'player_week_teams.nfl_team')
     }
-
-    // Under a week axis the CTE holds every requested week, so the cell's own
-    // year and week are what select the row. Without this the join was on the
-    // team alone and one week's line rendered on every week row.
-    correlate_week_scoped_cte({
-      builder: this,
-      db,
-      cte_name: table_name,
-      data_view_options
-    })
   })
 }
 
@@ -596,8 +591,6 @@ const team_betting_market_with = ({
       'source_market_id',
       'time_type',
       'prop_markets_index.esbid',
-      'nfl_games.home_nfl_team',
-      'nfl_games.away_nfl_team',
       'nfl_games.season_year as year',
       'nfl_games.week as week'
     )
@@ -613,9 +606,10 @@ const team_betting_market_with = ({
       qb.andWhere('prop_markets_index.season_year', year)
     }
 
-    // home_nfl_team/away_nfl_team are projected unconditionally above (and read
-    // as m.home_nfl_team/m.away_nfl_team downstream), so nfl_games must always
-    // be joined; only the week narrowing is conditional.
+    // nfl_games is joined unconditionally: the year and week projected above
+    // come from it, and so does the nfl_week_id narrowing. Only the narrowing
+    // itself is conditional. The home/away team codes it used to project are
+    // gone -- the join matches on esbid now, so nothing re-derives from them.
     qb.join('nfl_games', function () {
       this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
       this.andOn(`nfl_games.season_year`, '=', `prop_markets_index.season_year`)
@@ -638,13 +632,7 @@ const team_betting_market_with = ({
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select(
-      'pms.selection_pid',
-      'm.home_nfl_team',
-      'm.away_nfl_team',
-      'm.year',
-      'm.week'
-    )
+    qb.select('pms.selection_pid', 'm.esbid', 'm.year', 'm.week')
       .from(`${markets_cte} as m`)
       .join('prop_market_selections_index as pms', function () {
         this.on('pms.source_id', '=', 'm.source_id')
@@ -834,20 +822,11 @@ const team_game_implied_team_total_join = ({
   const join_func = get_join_func(join_type)
 
   query[join_func](table_name, function () {
-    // Same attribution rule as team_betting_market_join: the team for the
-    // cell's year, supplied by the player_year_teams bridge registered in the
-    // with builder above.
-    this.on(`${table_name}.selection_pid`, '=', 'player_year_teams.team')
-
-    // Under a week axis the CTE holds every requested week, so the cell's own
-    // year and week are what select the row. Without this the join was on the
-    // team alone and one week's implied total rendered on every week row.
-    correlate_week_scoped_cte({
-      builder: this,
-      db,
-      cte_name: table_name,
-      data_view_options
-    })
+    // Same rule as team_betting_market_join: the game the player was in that
+    // week, then the side within it. An implied team total is derived from the
+    // spread, so it carries a side and needs the team predicate.
+    this.on(`${table_name}.esbid`, '=', 'player_week_teams.esbid')
+    this.on(`${table_name}.selection_pid`, '=', 'player_week_teams.nfl_team')
   })
 }
 

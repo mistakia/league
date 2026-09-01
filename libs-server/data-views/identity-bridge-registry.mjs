@@ -2,6 +2,7 @@ import debug from 'debug'
 import player_to_player_year from './identity-bridges/player-to-player-year.mjs'
 import player_year_to_player_year_week from './identity-bridges/player-year-to-player-year-week.mjs'
 import player_year_to_team_year from './identity-bridges/player-year-to-team-year.mjs'
+import player_year_week_to_team_year_week from './identity-bridges/player-year-week-to-team-year-week.mjs'
 import team_to_team_year from './identity-bridges/team-to-team-year.mjs'
 import team_year_to_team_year_week from './identity-bridges/team-year-to-team-year-week.mjs'
 
@@ -14,6 +15,7 @@ const bridge_modules = [
   player_to_player_year,
   player_year_to_player_year_week,
   player_year_to_team_year,
+  player_year_week_to_team_year_week,
   team_to_team_year,
   team_year_to_team_year_week
 ]
