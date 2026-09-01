@@ -7,6 +7,7 @@ import {
   format_sql,
   redis_cache
 } from '#libs-server'
+import betting_market_column_definitions from '#libs-server/data-views-column-definitions/player-betting-market-column-definitions.mjs'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import { execute_data_view_request } from '#libs-server/data-views/execute-data-view-request.mjs'
 import get_param_option_counts, {
@@ -58,6 +59,30 @@ const read_total_count = (data_view_metadata) =>
     ? data_view_metadata.total_count
     : null
 
+// The result aliases of every betting-market column.
+//
+// A null in one of these means the bookmaker posted NO market for that player
+// and week, which is a different claim from "the market settled at zero" -- so
+// the week-grain participation marker must not turn it into a 0. The
+// participation signal reports whether the PLAYER took the field, and that says
+// nothing about whether a book put up a line. FanDuel has never posted
+// GAME_RUSHING_TOUCHDOWNS at all, and an export of that column read as a
+// column of zeroes rather than as absent.
+//
+// Derived from the betting-market module's own exports rather than a
+// hand-maintained list, so a column added there is covered without touching
+// this file, and derived at MODULE level because it cannot change at runtime.
+const NO_SOURCE_NULL_ALIASES = new Set(
+  Object.values(betting_market_column_definitions)
+    .filter((definition) => typeof definition?.select_as === 'function')
+    .map((definition) => definition.select_as())
+)
+
+// `select-string.mjs` emits `<select_as>_<column_index>`, so stripping the
+// trailing index recovers the alias.
+const is_no_source_null_field = (field) =>
+  NO_SOURCE_NULL_ALIASES.has(field.replace(/_\d+$/, ''))
+
 // Apply the hidden week-grain participation signal to an export, then drop it.
 // For week-grain views the query injects one `participation_status` per row; a
 // null numeric stat cell should export as 0 (active-but-zero) / BYE / blank
@@ -93,7 +118,10 @@ function apply_participation_to_export(data_view_results) {
     for (const [field, value] of Object.entries(row)) {
       if (field === PARTICIPATION_STATUS_KEY) continue
       next[field] =
-        has_participation && value == null && numeric_fields.has(field)
+        has_participation &&
+        value == null &&
+        numeric_fields.has(field) &&
+        !is_no_source_null_field(field)
           ? render_participation_null({ participation_status })
           : value
     }

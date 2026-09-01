@@ -441,6 +441,16 @@ export default function DataViewsPage({
         continue
       }
 
+      // A column whose null means "the source had no row" is left alone: the
+      // participation signal answers whether the PLAYER took the field, which
+      // says nothing about whether a bookmaker posted a market. Rendering 0
+      // there invents a value — see `null_means_no_source` on the betting
+      // market fields.
+      if (column.null_means_no_source) {
+        augmented[key] = column
+        continue
+      }
+
       augmented[key] = {
         ...column,
         // table-cell passes the TanStack row -> read row.original

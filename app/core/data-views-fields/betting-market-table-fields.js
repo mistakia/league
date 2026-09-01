@@ -10,8 +10,21 @@ const { career_year, career_game, single_year, single_nfl_week_id } =
 const from_betting_market = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   size: 70,
+  // A null here means the bookmaker posted NO market for this player and week,
+  // which is not the same claim as "the market settled at zero". The week-grain
+  // participation renderer turns a null into 0 for an active player, because
+  // for a counting STAT that reads correctly (played, recorded none) — applied
+  // to a market it manufactures a line nobody ever offered. FanDuel has never
+  // posted GAME_RUSHING_TOUCHDOWNS at all, and that column rendered 0.0 on
+  // every row of every week rather than showing as absent.
+  null_means_no_source: true,
   ...field
 })
+
+// market_type is a `single` SELECT, so it is stored as a one-element list;
+// read it as a scalar wherever a sibling param branches on it.
+const get_market_type_value = (params) =>
+  Array.isArray(params.market_type) ? params.market_type[0] : params.market_type
 
 const create_base_column_params = () => ({
   source_id: {
@@ -31,16 +44,23 @@ const create_base_column_params = () => ({
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     values: ['OVER', 'UNDER', 'YES', 'NO'],
     default_value: 'OVER',
+    // Which selections EXIST depends on the market. A yes/no market
+    // (ANYTIME_TOUCHDOWN and its four siblings) stores its selections as
+    // YES/NO and holds no OVER row at all, so an OVER selection there is not a
+    // narrower filter — it is a combination the database can never answer, and
+    // the column comes back null on every row. Declaring the admissible set
+    // keeps the control from OFFERING the impossible value, and the editor's
+    // re-resolution repairs a column whose market_type changed under a
+    // selection_type that was correct for the old one.
+    get_values: (params) =>
+      bookmaker_constants.yes_no_market_types.has(get_market_type_value(params))
+        ? ['YES', 'NO']
+        : ['OVER', 'UNDER'],
     // Dynamic default based on market_type - YES/NO markets use YES, stat markets use OVER
-    get_default_value: (params) => {
-      const market_type = Array.isArray(params.market_type)
-        ? params.market_type[0]
-        : params.market_type
-      if (bookmaker_constants.yes_no_market_types.has(market_type)) {
-        return 'YES'
-      }
-      return 'OVER'
-    }
+    get_default_value: (params) =>
+      bookmaker_constants.yes_no_market_types.has(get_market_type_value(params))
+        ? 'YES'
+        : 'OVER'
   },
   time_type: {
     label: 'Time Type',
