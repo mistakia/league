@@ -8,8 +8,9 @@
 //   2. matchup_opponent_type='next_week_opponent_total'    -> opponent CTE
 //   3. team_reference set (team-subject query)             -> team_reference
 //   4. team_attribution='current'                          -> player.current_nfl_team
-//   5. player_year_teams CTE registered (year split)       -> per-season team
-//   6. default                                             -> player.current_nfl_team
+//   5. player_week_teams CTE registered (week split)       -> per-week team
+//   6. player_year_teams CTE registered (year split)       -> per-season team
+//   7. default                                             -> player.current_nfl_team
 //
 // The team_attribution='current' branch is placed BEFORE the player_year_teams
 // CTE shortcut so a 'current' column is not dragged onto player_year_teams.team
@@ -40,6 +41,24 @@ export const resolve_team_join_target = ({ query_context, params = {} }) => {
 
   if (get_team_attribution(params) === 'current')
     return 'player.current_nfl_team'
+
+  // Week grain before year grain: when the week bridge is registered the cell
+  // knows which week it is, so the season-long majority approximation has
+  // nothing left to offer. The two are never both registered for one column --
+  // the source-attach rule requires exactly one, chosen by cell identity -- but
+  // a sibling column in the same view can register the other, so the order here
+  // decides who wins and the finer grain must.
+  //
+  // nfl_team_most_recent, not nfl_team. This branch serves TEAM stats, whose
+  // cell is a fact about the team over a span; the player's own participation is
+  // deliberately not the criterion, which is what the player_team_* family is
+  // for. The exact column would render nothing for a bye or an injured-reserve
+  // week and quietly shrink a season total to the weeks he happened to dress.
+  // See the bridge module for the two columns and why they differ.
+  const { player_week_teams_cte_name } = query_context
+  if (player_week_teams_cte_name) {
+    return `${player_week_teams_cte_name}.nfl_team_most_recent`
+  }
 
   const { player_year_teams_cte_name } = query_context
   if (player_year_teams_cte_name) {

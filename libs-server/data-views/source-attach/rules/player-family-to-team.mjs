@@ -50,10 +50,31 @@ register({
   emit_predicate: no_emit
 })
 
+// A player_year_week CELL asks its question one week at a time, so it takes the
+// WEEK bridge rather than the year one. The year bridge answers "which team did
+// he play the most games for this season" and applies that one answer to all 18
+// weeks, which is wrong for every week a traded player spent on the other team
+// -- and wrong with a plausible NUMBER rather than an empty cell, because the
+// majority team usually played that week too. Measured on the REG corpus:
+// 1,012 / 888 / 540 player-weeks in 2023 / 2024 / 2025 are attributed to a team
+// the player was not on that week.
+//
+// Nothing here needs a row_axes check. cell_identity IS the row grain, so
+// reaching this registration already means a week axis is active; the year-grain
+// registration above keeps the year bridge and is untouched.
+const team_year_week_bridge = {
+  from: 'player_year_week',
+  to: 'team_year_week',
+  mode: 'default'
+}
+
+const required_team_year_week_bridge = (params) =>
+  get_team_attribution(params) === 'current' ? [] : [team_year_week_bridge]
+
 register({
   cell_identity: 'player_year_week',
   source_grain: 'team',
   mode: 'default',
-  required_identity_bridges: required_team_year_bridge,
+  required_identity_bridges: required_team_year_week_bridge,
   emit_predicate: no_emit
 })
