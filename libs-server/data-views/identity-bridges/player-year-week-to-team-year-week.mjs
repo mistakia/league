@@ -7,6 +7,7 @@ export const to = 'team_year_week'
 export const mode = 'default'
 
 const CTE_NAME = 'player_week_teams'
+const APPEARANCES_CTE_NAME = 'player_week_appearances'
 
 // The team a player was on in a GIVEN WEEK, and the game he was in that week.
 //
@@ -32,12 +33,47 @@ const CTE_NAME = 'player_week_teams'
 // was actually in is exact, where matching through a team code plus a week
 // predicate re-derives the same thing less directly.
 //
-// NO CARRY-FORWARD. A player with no gamelog row that week -- bye, injured
-// reserve, practice squad, not yet signed -- gets no row here, so his cell
-// renders empty. That is 19.3-20.0% of player-year-week slots, and filling them
-// by carrying his previous team forward was considered and rejected: it is an
-// inference ("probably still there"), and it would attach a game he had nothing
-// to do with to his row. An empty cell says what the data says.
+// TWO TEAM COLUMNS, WITH DELIBERATELY DIFFERENT ABSENCE RULES. 19.3-20.0% of
+// player-year-week slots have no gamelog row at all -- bye, injured reserve,
+// practice squad, not yet signed -- and the right answer for that population
+// depends on what the asking column means by "team". The bridge refuses to pick
+// one, and projects both:
+//
+//   nfl_team              the team whose GAME he was in that week. NULL when he
+//                         was in none. Consumed by the betting-market columns,
+//                         where the cell is a fact about a specific game: no
+//                         game, no fact, and carrying a team forward would
+//                         attach a game he had nothing to do with to his row.
+//
+//   nfl_team_most_recent  the team of his most recent appearance AS OF this
+//                         week, carried forward across the gap. Consumed by the
+//                         team-stat columns under their default scope, where the
+//                         cell is a fact about the TEAM over a span and the
+//                         player's own participation is explicitly not the
+//                         criterion -- that is what the player_team_* family is
+//                         for. Dropping the team's week-6 game because he was on
+//                         injured reserve would contradict the scope's own
+//                         definition, and it is not a rare correction: single-
+//                         team player-seasons average 14.6 weeks with a gamelog
+//                         row out of 17, so the exact column alone would render
+//                         a season total at ~86% of the team's actual with
+//                         nothing on screen saying it was truncated.
+//
+// Naming the second column for its DERIVATION rather than for what a caller
+// wishes it meant is deliberate. It is an inference -- "he was still there" --
+// and a name like nfl_team_at_week would hide that behind a claim of fact.
+//
+// Carry-forward is FORWARD ONLY. Weeks before a player's first appearance in the
+// season stay NULL in both columns: he was on no NFL team at the time, so there
+// is nothing to carry. The one irreducible gap is a player traded while injured
+// who never appears for the new team, which is unknowable from this source and
+// renders his old team.
+//
+// THE SPINE IS WHY THE CARRY IS POSSIBLE. This CTE emits one row per
+// (pid, year, week) for every week in scope, not one row per appearance, so an
+// absent week is a row carrying NULLs rather than a missing row. Betting
+// behaviour is unchanged by that: those columns match on esbid, and a spine row
+// for a week he did not play carries a NULL esbid that no market can equal.
 const resolve_season_type = (params = {}) => {
   if (Array.isArray(params.seas_type) && params.seas_type.length) {
     return params.seas_type
@@ -75,22 +111,88 @@ export const add_cte = ({ query_context, params = {} }) => {
   const year_range = resolve_year_range({ query_context, params })
   const week_range = query_context.week_range || []
 
-  const cte_query = db('player_gamelogs')
+  const season_types = resolve_season_type(params)
+
+  // The appearances are NOT week-filtered, and that is load-bearing rather than
+  // an omission. Carrying a team forward into week 10 requires knowing where the
+  // player last appeared, which may be week 3; filtering the appearances to the
+  // requested week range would leave every carried value in a narrow view NULL.
+  // The week filter belongs on the spine below, which is what the CTE emits.
+  const appearances = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .select(physical_year_projection('nfl_games'))
     .select('nfl_games.week as week')
     .select('nfl_games.esbid as esbid')
     .select('player_gamelogs.nfl_team as nfl_team')
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.season_type', resolve_season_type(params))
+    .whereIn('nfl_games.season_type', season_types)
     // Both sides carry the year so the partitioned player_gamelogs scan prunes;
     // see the Year Pushdown Contract in this directory's ABOUT.
     .whereIn('nfl_games.season_year', year_range)
     .whereIn('player_gamelogs.season_year', year_range)
 
+  // The weeks that exist, read from the schedule rather than counted from a
+  // constant: a season's week count is data, and 2021 added one.
+  const scheduled_weeks = db('nfl_games')
+    .distinct(physical_year_projection('nfl_games'), 'nfl_games.week as week')
+    .whereIn('nfl_games.season_type', season_types)
+    .whereIn('nfl_games.season_year', year_range)
+
   if (week_range.length) {
-    cte_query.whereIn('nfl_games.week', week_range)
+    scheduled_weeks.whereIn('nfl_games.week', week_range)
   }
+
+  // The appearances go in as their OWN CTE, referenced three times below, and
+  // that is a performance decision with a measured number behind it. Inlined as
+  // a subquery at each reference, the planner re-derived the gamelogs-to-games
+  // join per spine row and the spine join became a nested loop: 655,792 index
+  // scans, 2.1M buffers, 1,380ms for a single season. Postgres materializes a
+  // plain CTE at more than one reference, so naming it once collapses that to a
+  // single scan feeding hash joins.
+  players_query.with(APPEARANCES_CTE_NAME, appearances)
+  query_context.registered_ctes.add(APPEARANCES_CTE_NAME)
+
+  // A player enters the spine for a season if he appeared in it at all. Players
+  // with no appearance in the year range get no rows, which keeps the spine
+  // proportional to the population actually under view rather than to every pid
+  // in the table.
+  const spine_players = db.distinct('pid', 'year').from(APPEARANCES_CTE_NAME)
+
+  // appearance_group counts the appearances at or before this week, so every
+  // week between one appearance and the next carries the same number. Grouping
+  // on it turns carry-forward into a partitioned max: within a group there is
+  // exactly one non-NULL team -- the appearance that opened it -- and max()
+  // ignores the NULLs after it. Postgres has no IGNORE NULLS on window
+  // functions, which is what rules out the direct last_value() spelling.
+  const carried = db
+    .select('spine_players.pid')
+    .select('spine.year')
+    .select('spine.week')
+    .select('week_appearance.esbid')
+    .select('week_appearance.nfl_team')
+    .select(
+      db.raw(
+        'count(week_appearance.nfl_team) over (partition by spine_players.pid, spine.year order by spine.week rows between unbounded preceding and current row) as appearance_group'
+      )
+    )
+    .from(spine_players.as('spine_players'))
+    .innerJoin(scheduled_weeks.as('spine'), function () {
+      this.on('spine.year', '=', 'spine_players.year')
+    })
+    .leftJoin(`${APPEARANCES_CTE_NAME} as week_appearance`, function () {
+      this.on('week_appearance.pid', '=', 'spine_players.pid')
+      this.andOn('week_appearance.year', '=', 'spine.year')
+      this.andOn('week_appearance.week', '=', 'spine.week')
+    })
+
+  const cte_query = db
+    .select('pid', 'year', 'week', 'esbid', 'nfl_team')
+    .select(
+      db.raw(
+        'max(nfl_team) over (partition by pid, year, appearance_group) as nfl_team_most_recent'
+      )
+    )
+    .from(carried.as('player_week_team_spine'))
 
   // Plain `with`, not `withMaterialized`, for the reason the year bridge
   // records: the fence is an optimizer barrier that makes the planner estimate
