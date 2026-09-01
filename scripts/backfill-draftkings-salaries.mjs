@@ -111,8 +111,19 @@ const resolve_scan_range = ({ known, window, max_span }) => {
   const before = known.filter((row) => row.date.isBefore(window.start))
   const after = known.filter((row) => row.date.isAfter(window.end))
 
-  const lower = before.length ? before[before.length - 1] : null
-  const upper = after.length ? after[0] : null
+  // Pick each bracket by DATE PROXIMITY, not by position in the id-sorted list.
+  // Monotonicity between id and date is a strong tendency, not a guarantee, and
+  // taking the positional edge of an id-sorted array silently selects an
+  // outlier: draft group 134062 covers 2025 week 8 but sits in the week-3 id
+  // range, so it was chosen as the upper bracket for week 6 and produced the
+  // INVERTED range 134765-134082 — a loop that runs zero times and reports "0
+  // slates in window", indistinguishable from a week DraftKings never had.
+  const lower = before.length
+    ? before.reduce((a, b) => (b.date.isAfter(a.date) ? b : a))
+    : null
+  const upper = after.length
+    ? after.reduce((a, b) => (b.date.isBefore(a.date) ? b : a))
+    : null
 
   if (!lower && !upper) return null
 
@@ -120,8 +131,18 @@ const resolve_scan_range = ({ known, window, max_span }) => {
 
   if (lower && upper) {
     const span = upper.id - lower.id
-    if (span <= max_span) {
+    // An inverted or degenerate span means the same monotonicity violation
+    // reached the chosen pair. Fall through to the one-sided form rather than
+    // emitting a range that cannot be scanned.
+    if (span > 0 && span <= max_span) {
       return { lo: lower.id - PAD, hi: upper.id + PAD, basis: 'bracketed' }
+    }
+    if (span <= 0) {
+      return {
+        lo: lower.id - PAD,
+        hi: lower.id + max_span,
+        basis: 'clamped above lower bracket (id/date order inverted)'
+      }
     }
     // Too wide. Measure each neighbour's distance to the target in DAYS, not in
     // ids, and scan outward from the closer one.
@@ -179,6 +200,16 @@ const discover_draft_group_ids = async ({
         'seed one with --draft_group_id'
     )
     return []
+  }
+
+  // A scan loop whose bounds are inverted runs zero times and returns cleanly,
+  // which reads downstream as "this week has no slates" rather than as the bug
+  // it is. Refuse loudly instead of scanning nothing quietly.
+  if (range.hi < range.lo) {
+    throw new Error(
+      `scan range ${range.lo}-${range.hi} is inverted (${range.basis}) — ` +
+        'refusing to report an unscanned week as empty'
+    )
   }
 
   out(
