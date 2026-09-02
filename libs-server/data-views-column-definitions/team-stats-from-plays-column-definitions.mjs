@@ -251,11 +251,37 @@ const team_stat_from_plays = ({
             params
           })
 
+      // Anchor the window to the ROW's own year whenever the row carries one.
+      // Correlating on the subject key alone pools the entire offset-expanded
+      // window into every cell, so under a year split all rows render the same
+      // number -- row 2023 with offset [1,2] must read 2024+2025 and row 2024
+      // must read 2025+2026, and without this they both read 2024+2025+2026.
+      // This is the same predicate the generic offset-range branches in
+      // select-string.mjs already emit; only this override was missing it.
+      //
+      // year_reference is set exactly when the identity carries a year grain
+      // (identities.mjs resolves it from identity.year_column), so its absence
+      // means there is no per-row year to anchor to. That case is a single
+      // season-grain cell whose whole job IS to reduce the window, and the CTE
+      // is already restricted to the offset-expanded years upstream -- so
+      // emitting nothing there is correct, not a gap. The CTE projects `year`
+      // under a year axis (source.supports_row_axes), which is the same
+      // condition, so the column is always present when the predicate is.
+      const year_reference =
+        data_view_options.year_reference ?? query_context?.year_reference
+      const year_offset = Array.isArray(params.year_offset)
+        ? params.year_offset
+        : []
+      const year_predicate =
+        year_reference && year_offset.length
+          ? ` AND ${table_name}.year BETWEEN ${year_reference} + ${Math.min(...year_offset)} AND ${year_reference} + ${Math.max(...year_offset)}`
+          : ''
+
       if (is_combined) {
-        return `(SELECT ${derived.recombine({ table_name })} FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
+        return `(SELECT ${derived.recombine({ table_name })} FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
       }
 
-      return `(SELECT SUM(${table_name}.${stat_name}) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
+      return `(SELECT SUM(${table_name}.${stat_name}) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
     },
     with_where: ({ table_name }) =>
       is_combined
