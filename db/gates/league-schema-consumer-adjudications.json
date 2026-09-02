@@ -653,6 +653,13 @@
       "column": "postgres",
       "kind": "not_a_column",
       "reason": "This app's runtime config object, not the league `config` table -- `db/index.mjs` folds the LEAGUE_DB_* overrides into config.postgres.connection at import, which is the mechanism the sandbox-isolation paragraph is explaining. Third config.* entry for this file, beside email and url."
+    },
+    {
+      "gate": 2,
+      "path": "nfl/home-dynasty-league/price-check-a-player.md",
+      "statement_contains": "FROM feed_items",
+      "kind": "not_a_league_statement",
+      "reason": "content-feed database, not league. feed_items is a content-feed table and all seven columns this statement selects exist there. Gate 2 has no transport to bind a fenced block, so it judges every ```sql fence under a --root against the league schema; this workflow queries league in step 3 and content-feed in step 4, and the step now says so in prose."
     }
   ]
 }
