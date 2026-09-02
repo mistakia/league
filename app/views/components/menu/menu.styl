@@ -155,38 +155,51 @@
   justify-content center
   padding 16px 8px
 
-// The switcher replaces the title in place, so it inherits the title's box and
-// only the control itself is styled here. A native `select` keeps its platform
-// arrow and needs no appearance reset -- normalize.css strips `input`, not
-// `select` -- and it opens its own popup outside the document flow, so it takes
-// no layer on the z-index scale.
-.league__title--switcher
-  padding 8px
-
+// The league title, as a disclosure. The summary carries the SAME typography as
+// the static .league__title above, so a manager in one league and a manager in
+// three see the same heading — one of them just has a chevron on it. Only the
+// accordion's own 14px prose-sans defaults are overridden.
+//
+// The name WRAPS here, which is the whole reason this is not a select: nothing
+// in the chain reports an intrinsic width, so a long league name costs lines
+// rather than pushing the drawer wider.
 .league__switcher
-  font-family 'IBM Plex Mono'
-  font-size 21px
-  width 100%
-  // min-width 0 IS THE LOAD-BEARING LINE, and `max-width 100%` in its place
-  // does nothing. A `select` reports a min-content width driven by its WIDEST
-  // OPTION, and every flex item up the chain — .menu__sections, .menu__section —
-  // takes `min-width: auto`, so that intrinsic width propagates all the way up
-  // and sizes the whole sidebar. "GENESIS LEAGUE (auction mirror)" pushed
-  // .menu__sections from 240px to 509px inside a 240px drawer whose `overflow:
-  // hidden` then clipped every section card. A percentage max-width cannot fix
-  // it because the percentage resolves against a container the same content is
-  // busy widening. Measured: 509px as authored, 240px with this line, 240px
-  // with the select removed entirely.
-  min-width 0
-  border 1px solid transparent
-  border-radius 4px
-  background-color transparent
-  padding 4px 8px
-  cursor pointer
+  .accordion__summary
+    font-family 'IBM Plex Mono', monospace
+    font-size 21px
+    font-weight 400
+    line-height 1.2
+    padding 16px 8px
+    gap 8px
+    // The accordion centres its row because its own summaries are one line.
+    // A league name here takes up to four in a 176px card, and a chevron
+    // parked halfway down that block reads as unattached to anything. Both
+    // children go to the top so the chevron sits on the first line, where the
+    // affordance belongs.
+    align-items flex-start
 
-  &:hover
-  &:focus
-    border-color rgba(0, 0, 0, 0.23)
+  .accordion__summary-content
+    align-items flex-start
+
+  // The chevron's own box is taller than one line of 21px, so it needs nudging
+  // back onto the cap height rather than sitting above it.
+  .accordion__chevron
+    margin-top 2px
+
+  .accordion__details
+    padding 0 0 8px
+
+// EVERY ANCHOR HERE IS A FLEX BOX, inherited from .menu__links, and a flex item
+// takes `min-width: auto` — so a league name with no space to break at would
+// report its whole width as a minimum and widen the drawer past its 240px, the
+// exact defect this switcher already shipped once with a select. `min-width 0`
+// removes that floor and `overflow-wrap anywhere` gives the text somewhere to
+// break when there is no space to break at.
+.league__switcher-list
+  margin-top 0
+  a
+    min-width 0
+    overflow-wrap anywhere
 
 .menu__collapse
   position absolute

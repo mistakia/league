@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 import { DISCORD_URL } from '@core/constants'
 import { league_url } from '@pages/landing/landing-content'
+import Accordion from '@components/accordion'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
@@ -49,7 +50,6 @@ export default function AppMenu({
   open_contribution_dialog
 }) {
   const isMobile = window.innerWidth < 800
-  const navigate = useNavigate()
   // Requires the CONNECTED league to be one of them, not just that there are
   // two. A manager can browse into a league they do not belong to, and a
   // switcher whose value matches no option renders showing its first one --
@@ -108,42 +108,55 @@ export default function AppMenu({
             <div className='menu__section'>
               {league.league_id ? (
                 show_league_switcher ? (
-                  // A native `select`, not MUI. It is the one form control
-                  // `normalize.css`'s global `input { -webkit-appearance: none }`
-                  // does not strip (that rule names `input` only), it needs no
-                  // portal and so takes no layer on the z-index scale, and it
-                  // is keyboard- and screen-reader-operable without any of that
-                  // being written here.
+                  // THE APP'S ACCORDION, NOT A SELECT, AND THE REASON IS THE
+                  // TITLE ITSELF. A `select` renders its chosen option on ONE
+                  // line and truncates what does not fit -- it cannot wrap --
+                  // and at 21px IBM Plex Mono in a 176px card that clips even
+                  // "GENESIS LEAGUE", never mind "GENESIS LEAGUE (auction
+                  // mirror)". It also reports a min-content width driven by its
+                  // widest OPTION, which is what widened the whole drawer the
+                  // first time this shipped. A disclosure has neither problem:
+                  // the summary is an ordinary flex box, so the league name
+                  // wraps and reads in full exactly as the static title does,
+                  // and no option list contributes to layout at all.
                   //
-                  // NAVIGATES rather than dispatching select_league. The route
-                  // is what drives app.leagueId -- app.js selects the matched
-                  // route's league on every change -- so dispatching directly
-                  // would move the store while leaving the URL naming the old
-                  // league, which is the disagreement between an in-app
-                  // navigation and a page load that SELECT_LEAGUE exists to
-                  // close.
+                  // Also no floating surface, so no layer on the z-index scale
+                  // and no portal -- the panel is in flow, and `.main__menu`
+                  // already scrolls.
                   //
-                  // Lands on the league home rather than the current sub-page.
-                  // Half the league routes carry an id that belongs to the
-                  // league being left -- /teams/:tid, /matchups/:matchupId --
-                  // so carrying the path across would produce a valid URL
-                  // naming a team in another league.
-                  <div className='league__title league__title--switcher'>
-                    <select
-                      className='league__switcher'
-                      aria-label='Switch league'
-                      value={leagueId}
-                      onChange={(event) =>
-                        navigate(`/leagues/${event.target.value}`)
-                      }
+                  // LINKS, not a change handler. The route is what drives
+                  // app.leagueId -- app.js selects the matched route's league on
+                  // every change -- so a real anchor keeps the URL and the store
+                  // in agreement, and middle-click and open-in-new-tab work for
+                  // free. Each one lands on the league home rather than the
+                  // current sub-page: half the league routes carry an id
+                  // belonging to the league being left (/teams/:tid,
+                  // /matchups/:matchupId), so carrying the path across would
+                  // produce a valid URL naming a team in another league.
+                  <Accordion className='league__switcher' summary={league.name}>
+                    <div
+                      className='menu__links league__switcher-list'
+                      onClick={() => isMobile && set_menu_open(false)}
                     >
                       {user_leagues.map(({ league_id, name }) => (
-                        <option key={league_id} value={league_id}>
+                        <Link
+                          key={league_id}
+                          to={`/leagues/${league_id}`}
+                          className={
+                            league_id === leagueId ? 'active' : undefined
+                          }
+                          // The connected league, not the matched route. A
+                          // NavLink would mark this from the URL, which reads
+                          // the wrong answer on every sub-page.
+                          aria-current={
+                            league_id === leagueId ? 'true' : undefined
+                          }
+                        >
                           {name}
-                        </option>
+                        </Link>
                       ))}
-                    </select>
-                  </div>
+                    </div>
+                  </Accordion>
                 ) : (
                   <div className='league__title'>{league.name}</div>
                 )
