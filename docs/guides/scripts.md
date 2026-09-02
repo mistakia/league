@@ -138,6 +138,8 @@ Go through the tunnel instead, which `db/index.mjs` already supports via env ove
 LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 NODE_ENV=production node scripts/<script>.mjs
 ```
 
+**A script invoked over `ssh` finishes and then hangs, and the hang is the pool rather than the work.** `ssh league 'node scripts/<x>.mjs' | tail` prints nothing and sits until your timeout kills it, which reads as a script too slow to use — the run itself may have taken under a second. This is the non-exit trap under "Script exit and lifecycle" below, seen through a pipe that buffers everything until the process dies. Redirect to a file on the host and read it separately (`ssh league 'node ... > /tmp/x.log 2>&1'`, then `ssh league 'tail /tmp/x.log'`), and reap what you leaked — an abandoned invocation holds a Postgres backend indefinitely.
+
 Two things about that tunnel. It is **shared and long-lived** — an `ssh -N -L 15432:localhost:5432` owned by PID 1, not by any session — so check whether it is already up (`nc -z 127.0.0.1 15432`) rather than opening your own, and never kill it because your own forward failed to bind. And an `ssh -f -N -L` against a port already in use **exits without binding and without an obvious error**, so a session can believe it opened a tunnel it did not, and then attribute someone else's tunnel to itself. Confirm you are where you think you are before writing: `select current_database()` costs nothing and names the target.
 
 ## Script exit and lifecycle
