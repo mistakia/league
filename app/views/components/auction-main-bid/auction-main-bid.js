@@ -203,26 +203,39 @@ export default function AuctionMainBid({
     )
   }
 
+  const is_running = isStarted && !isComplete && !isPaused
+
   return (
     <div className='auction__bar'>
       <div className='auction__bar-body'>
         <div className='auction__bid-info'>
+          {/* WHICH live block this is, because the two are not the same thing
+              to a manager: an opt-in block they agreed to attend, or the
+              mandatory final block that ends the auction.
+
+              IT SITS WITH THE STATUS, NOT ON THE CLOCK. It was a nowrap line
+              inside `.auction__main-timer`, a 60px fixed-basis box laid out as
+              a row -- so `Live block until 4:15 PM` and the countdown were
+              side by side in sixty pixels, each spilling over the other. It is
+              a statement about which session you are in, which is what this
+              slot holds; the countdown beside it is a different question. The
+              two never co-occur with the settlement status either, since that
+              is election mode and this is live. */}
+          {is_running && !is_election_mode && (
+            <div className='auction__block-label'>
+              {is_final_block ? 'Final block' : 'Live block'}
+              {block_end_at
+                ? ` until ${dayjs.unix(block_end_at).format('h:mm A')}`
+                : ''}
+            </div>
+          )}
           <AuctionSettlementStatus />
           {main}
         </div>
-        {isStarted && !isComplete && !isPaused && (
+        {is_running && (
           <div className='auction__bid-actions'>
             {!is_election_mode && (
               <div className='auction__main-timer'>
-                {/* WHICH live block this is, because the two are not the same
-                    thing to a manager: an opt-in block they agreed to attend,
-                    or the mandatory final block that ends the auction. */}
-                <div className='auction__block-label'>
-                  {is_final_block ? 'Final block' : 'Live block'}
-                  {block_end_at
-                    ? ` until ${dayjs.unix(block_end_at).format('h:mm A')}`
-                    : ''}
-                </div>
                 <Timer
                   expiration={timer}
                   alert={isNominating || Boolean(nominated_pid)}

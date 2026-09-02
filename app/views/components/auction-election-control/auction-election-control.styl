@@ -121,7 +121,9 @@
 // clock. The state line stays -- whether you already hold a ceiling on the open
 // player is exactly what a manager checks before bidding.
 .auction-election-control.compact
+  flex 0 0 auto
   padding 0 8px
+  gap 8px
   border none
   background transparent
   align-items center
@@ -139,3 +141,9 @@
 
   .auction-election-control__state-value
     font-size 14px
+
+  // The compact form is one button, so wrapping can only ever produce a second
+  // row inside a fixed-height strip -- there is nothing for it to wrap TO.
+  .auction-election-control__form
+    flex-wrap nowrap
+    white-space nowrap

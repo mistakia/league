@@ -62,7 +62,7 @@ const PASSING_EFFICIENCY = [
   'pass_yards_per_attempt',
   'pass_completion_percentage',
   'expected_pass_completion',
-  'cpoe',
+  'completion_percentage_over_expected',
   'pass_epa_per_dropback'
 ]
 
@@ -174,7 +174,7 @@ const PERCENTAGE_FIELDS = [
   'catch_rate_over_expected',
   'pass_completion_percentage',
   'expected_pass_completion',
-  'cpoe',
+  'completion_percentage_over_expected',
   'pressure_rate_against',
   'blitz_rate',
   'drop_rate',
@@ -196,7 +196,7 @@ const FIELD_FIXED_VALUES = {
   pass_epa_per_dropback: 2,
   pass_rating: 1,
   pass_yards_per_attempt: 1,
-  cpoe: 1,
+  completion_percentage_over_expected: 1,
   average_time_to_throw: 2,
   average_time_to_pressure: 2,
   average_time_to_sack: 2,

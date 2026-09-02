@@ -47,10 +47,10 @@ export default function AuctionBlockCalendar({
   auction_block_notice_minutes,
   teamId,
   set_auction_block_opt_in,
-  leagueId,
-  is_collapsible = false
+  leagueId
 }) {
   const [selected_hour, set_selected_hour] = useState(null)
+  const [show_legend, set_show_legend] = useState(false)
   // The grid only changes on a slot boundary, so it is rebuilt by the minute
   // while nothing else re-renders it.
   const now = useClockSeconds(1000)
@@ -133,8 +133,8 @@ export default function AuctionBlockCalendar({
 
   const selected_slots = selected_hour ? slots_for_hour(selected_hour) : []
 
-  // The header doubles as the collapsed summary, so a manager who has shut the
-  // grid on a phone still sees the one fact they cannot act without: when the
+  // The header doubles as the collapsed summary, so a manager who has not
+  // opened the grid still sees the one fact they cannot act without: when the
   // final block lands.
   const header = (
     <div className='auction__block-calendar-header'>
@@ -159,11 +159,26 @@ export default function AuctionBlockCalendar({
 
   const body = (
     <>
-      <div className='auction__block-calendar-legend'>
-        A block convenes when all {denominator} teams with an open roster spot
-        opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
-        hour to see its four 15-minute slots.
-      </div>
+      {/* THE RULES ARE READ ONCE AND THE GRID IS READ EVERY VISIT, so the two
+          do not deserve the same standing permanent room in the side rail.
+          This is three lines of prose above a 168-cell grid in a narrow
+          column, and after the first read it is pure vertical cost between the
+          header and the thing a manager actually came for. */}
+      <button
+        type='button'
+        className='auction__block-calendar-legend-toggle'
+        aria-expanded={show_legend}
+        onClick={() => set_show_legend(!show_legend)}
+      >
+        {show_legend ? 'Hide how blocks convene' : 'How blocks convene'}
+      </button>
+      {show_legend && (
+        <div className='auction__block-calendar-legend'>
+          A block convenes when all {denominator} teams with an open roster spot
+          opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
+          hour to see its four 15-minute slots.
+        </div>
+      )}
 
       <div className='auction__block-calendar-grid'>
         <div className='auction__block-calendar-row auction__block-calendar-axis'>
@@ -293,19 +308,27 @@ export default function AuctionBlockCalendar({
                 <div className='auction__block-calendar-slot-time'>
                   {dayjs.unix(slot.at).format('h:mm A')}
                 </div>
+                {/* `nobody yet` is an INVITATION, not an attendance count: it
+                    means no team has opted in and yours could be the first. A
+                    convened slot has nothing left to opt into, so pairing the
+                    two rendered `Convened nobody yet` -- which reads as a block
+                    that convened nobody. The final block is the case that hits
+                    it every time: it is convened by rule on unfilled roster
+                    spots and carries no opt-in rows at all, so the one slot a
+                    manager most needs to trust described itself as empty. */}
                 <div className='auction__block-calendar-slot-teams'>
                   {slot.is_finalized && (
                     <span className='auction__block-calendar-convened'>
                       Convened
                     </span>
                   )}
-                  {tids && tids.size ? (
-                    tids.map((tid) => <TeamName key={tid} tid={tid} abbrv />)
-                  ) : (
-                    <span className='auction__block-calendar-empty'>
-                      nobody yet
-                    </span>
-                  )}
+                  {tids && tids.size
+                    ? tids.map((tid) => <TeamName key={tid} tid={tid} abbrv />)
+                    : !slot.is_finalized && (
+                        <span className='auction__block-calendar-empty'>
+                          nobody yet
+                        </span>
+                      )}
                 </div>
                 <div className='auction__block-calendar-slot-action'>
                   {is_inside_notice ? (
@@ -326,23 +349,21 @@ export default function AuctionBlockCalendar({
     </>
   )
 
-  // Collapsed by default where it is collapsible, which is the phone. A
-  // 168-cell grid plus a legend plus a key is the tallest thing in the side
-  // rail, and stacked under the board it buried the settlement status -- the
-  // one surface in election mode that is a forcing function.
-  if (is_collapsible) {
-    return (
-      <Accordion className='auction__block-calendar' summary={header}>
-        {body}
-      </Accordion>
-    )
-  }
-
+  // ON REQUEST EVERYWHERE, not just on the phone. A 168-cell grid plus a
+  // legend plus a key is the tallest thing in the side rail on any viewport,
+  // and opting into a slot is an occasional act while reading the board is
+  // continuous -- so the grid costs its full height every visit to serve a
+  // decision made once or twice in a period. The header is the summary and
+  // carries the final block, which is the one fact that must survive the
+  // collapse, so nothing is hidden that a manager cannot act without.
   return (
-    <div className='auction__block-calendar'>
-      {header}
+    <Accordion
+      className='auction__block-calendar'
+      summary={header}
+      unmount_on_collapse
+    >
       {body}
-    </div>
+    </Accordion>
   )
 }
 
@@ -356,6 +377,5 @@ AuctionBlockCalendar.propTypes = {
   auction_block_notice_minutes: PropTypes.number,
   teamId: PropTypes.number,
   set_auction_block_opt_in: PropTypes.func,
-  leagueId: PropTypes.number,
-  is_collapsible: PropTypes.bool
+  leagueId: PropTypes.number
 }
