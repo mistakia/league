@@ -3,7 +3,6 @@ import debug from 'debug'
 import db from '#db'
 import * as cache from './cache.mjs'
 import { bookmaker_constants } from '#libs-shared'
-import { current_season } from '#constants'
 import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('pinnacle')
@@ -213,13 +212,27 @@ export const get_market_type = ({
   }
 }
 
+// The matchups endpoint takes no season coordinate, so neither does the key. It
+// previously carried year/week, which the URL ignores — and `current_season.week`
+// reads 0 from the Super Bowl until the regular season opens, so the key was
+// constant across the offseason AND preseason while appearing to rotate. Nothing
+// is stale today only because import-live-odds-worker.mjs passes
+// `ignore_cache: true` and so rewrites the entry every cycle; that makes
+// freshness a property of one caller's flag rather than of this function. The
+// TTL below makes it a property of the design, so an ad-hoc caller that omits the
+// flag cannot be served a frozen matchup list.
+const NFL_MATCHUPS_MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
+
 export const get_nfl_matchups = async ({
   ignore_cache = false,
   signal
 } = {}) => {
-  const cache_key = `/pinnacle/nfl_matchups/${current_season.year}/${current_season.week}.json`
+  const cache_key = '/pinnacle/nfl_matchups.json'
   if (!ignore_cache) {
-    const cache_value = await cache.get({ key: cache_key })
+    const cache_value = await cache.get({
+      key: cache_key,
+      max_age_ms: NFL_MATCHUPS_MAX_AGE_MS
+    })
     if (cache_value) {
       log('cache hit for nfl matchups')
       return cache_value

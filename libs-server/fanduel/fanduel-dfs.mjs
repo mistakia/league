@@ -1,17 +1,30 @@
 import { fetch as fetch_http2 } from 'fetch-h2'
 import debug from 'debug'
 
-import { current_season } from '#constants'
 import * as cache from '#libs-server/cache.mjs'
 import { get_fanduel_dfs_config } from './fanduel-config.mjs'
 import { wait } from '#libs-server/wait.mjs'
 
 const log = debug('fanduel:dfs')
 
+// The fixture-lists endpoint takes no season coordinate, so neither does the key.
+// It previously carried year/nfl_seas_type/nfl_seas_week, which the URL ignores —
+// a key that appears to rotate while naming one response. `nfl_seas_week` reads 0
+// from the Super Bowl until mid-August, so the key was constant for those ~7
+// months, and cache.set writes no expiry (freshness exists only as max_age_ms at
+// read). A 2026-03-21 run therefore stored FanDuel's March slate list — 41
+// fixture lists, all PGA and EPL, no NFL — under a key every later offseason call
+// resolved to. Naming what was actually requested makes the TTL below the sole
+// freshness control rather than a second, illusory one.
+const FIXTURES_MAX_AGE_MS = 60 * 60 * 1000 // 1 hour
+
 export const get_dfs_fixtures = async ({ ignore_cache = false } = {}) => {
-  const cache_key = `/fanduel/dfs/slates/${current_season.year}/${current_season.nfl_seas_type}/${current_season.nfl_seas_week}.json`
+  const cache_key = '/fanduel/dfs/fixture-lists.json'
   if (!ignore_cache) {
-    const cache_value = await cache.get({ key: cache_key })
+    const cache_value = await cache.get({
+      key: cache_key,
+      max_age_ms: FIXTURES_MAX_AGE_MS
+    })
     if (cache_value) {
       log('cache hit for fanduel dfs fixtures')
       return cache_value
