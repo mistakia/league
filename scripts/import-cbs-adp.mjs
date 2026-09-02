@@ -1,5 +1,3 @@
-import { fetch as fetch_http2 } from 'fetch-h2'
-import * as cheerio from 'cheerio'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -16,6 +14,8 @@ import {
   summarize_adp_feed
 } from '#libs-server'
 import { current_season } from '#constants'
+import fetch_cheerio from '#libs-server/fetch-cheerio.mjs'
+import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -33,15 +33,17 @@ const BATCH_SIZE = 500
 const fetch_cbs_data = async (url) => {
   log(`fetching ${url}`)
 
-  const response = await fetch_http2(url, {
+  // Was a bare fetch-h2 call that read .text() straight into cheerio without
+  // looking at the status, so a rate-limit or a WAF challenge parsed to zero
+  // rows and this importer wrote nothing and exited 0. fetch_cheerio carries
+  // the `status !== 200` check; the shared helper returns the identical 216
+  // rows over plain fetch, so the second transport bought nothing.
+  const $ = await fetch_cheerio(url, {
     method: 'GET',
     headers: {
       Accept: 'text/html'
     }
   })
-
-  const draft_page = await response.text()
-  const $ = cheerio.load(draft_page)
 
   const players = $('#TableBase > div > div > table')
     .find('tr')
@@ -81,6 +83,16 @@ const fetch_cbs_data = async (url) => {
       }
     })
     .get()
+
+  // This importer had no shortfall guard at all, so a page that parsed to
+  // nothing wrote nothing and exited 0 — the silent zero-row failure the
+  // projections importers were given guards against. CBS answers a slice that
+  // does not exist with 200 and a real page carrying no table (measured against
+  // an invalid ADP slice: 200, 472KB, zero rows), so the status check alone
+  // cannot see this and there is no vendor sentinel to excuse it either.
+  throw_if_shortfall(
+    players.length === 0 ? `cbs adp: parsed 0 rows (${url})` : null
+  )
 
   return players
 }
