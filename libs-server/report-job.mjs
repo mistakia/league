@@ -6,6 +6,7 @@ import db from '#db'
 
 import report_error from './report-error.mjs'
 import { resolve_base_cli } from './resolve-base-cli.mjs'
+import { should_report_run_to_ledger } from './should-report-run-to-ledger.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const exec_file = promisify(execFile)
@@ -214,11 +215,24 @@ export default async function report_job({
     )
   } catch (err) {
     console.error(
-      `report_job: jobs-table audit insert failed after retries; the import outcome is still reported to the runs primitive below: ${err.message}`
+      `report_job: jobs-table audit insert failed after retries; this does not affect where the import outcome is reported below: ${err.message}`
     )
   }
 
   const job_id = job_type_to_id[job_type]
+
+  // Ahead of BOTH escalation channels: an ad-hoc run must not open a
+  // pipeline_failure and must not fall through to the log_error twin either.
+  // The jobs-table row above is local audit and still records the run, which is
+  // what a hand-run invocation should leave behind. The operator who typed the
+  // command is reading its stderr, so the error already has a reader.
+  if (!should_report_run_to_ledger({ node_env: process.env.NODE_ENV })) {
+    console.error(
+      `report_job: NODE_ENV=${process.env.NODE_ENV || '(unset)'} is not production, so this run is not a declared pipeline execution; skipping the runs-ledger report for ${job_id || `job_type ${job_type}`}. Run under NODE_ENV=production if this was meant to be a real pipeline run.`
+    )
+    return
+  }
+
   const base_cli = resolve_base_cli()
 
   if (should_emit_log_error({ job_success, job_id, base_cli })) {

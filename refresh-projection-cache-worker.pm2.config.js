@@ -5,10 +5,18 @@
 // server.pm2.config.js -- a relative path lets a `pm2 start` from the wrong cwd
 // silently re-root the app at a stale tree.
 //
-// BASE_API_URL is deliberately NOT set here. `report_run_outcome` no-ops
-// without it, so the worker still rebuilds correctly and only loses its ledger
-// rows; it inherits the variable from the environment pm2 was started with,
-// exactly as `server` does.
+// BASE_API_URL is deliberately NOT set here; it is inherited from the
+// environment pm2 was started with, exactly as `server` does. Note this does
+// NOT decide whether the worker reports: `report_run_outcome` gates on a
+// runnable base CLI and on NODE_ENV=production, never on BASE_API_URL, because
+// on a writer host base's job-wrapper strips that variable so `base run report`
+// writes over the local UDS instead. Reading its absence as "unreportable" is
+// the mistake that made every league job on base-storage report nowhere for
+// eleven days.
+//
+// NODE_ENV=production below is therefore load-bearing for the ledger rows, not
+// just for config selection -- this worker must be started with
+// `--env production` or it rebuilds correctly while reporting nothing.
 module.exports = {
   apps: [
     {

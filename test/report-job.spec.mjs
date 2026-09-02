@@ -8,6 +8,7 @@ import {
   with_connection_retry,
   resolve_log_forensic_link
 } from '#libs-server/report-job.mjs'
+import { should_report_run_to_ledger } from '#libs-server/should-report-run-to-ledger.mjs'
 
 const expect = chai.expect
 
@@ -87,6 +88,50 @@ describe('LIBS-SERVER report_job should_emit_log_error', function () {
         base_cli: null
       })
     ).to.equal(true)
+  })
+})
+
+describe('LIBS-SERVER report_job should_report_run_to_ledger', function () {
+  it('reports a production run, which is what every declared executor is', () => {
+    // The live shape for all 106 node crontab lines (which set
+    // NODE_ENV=production inline) and for the pm2 workers (reloaded with
+    // --env production, which is what applies their env_production block).
+    expect(should_report_run_to_ledger({ node_env: 'production' })).to.equal(
+      true
+    )
+  })
+
+  it('does NOT report a development run, the signal-127954 shape', () => {
+    // The incident: an ad-hoc laptop run loaded config-development.json, whose
+    // committed placeholder names a `league_development` role existing on no
+    // host, and reported its config-load failure to the PRODUCTION ledger under
+    // the same service: key the league host's crontab uses. That opened a real
+    // pipeline_failure carrying a run_host with no executor.
+    expect(should_report_run_to_ledger({ node_env: 'development' })).to.equal(
+      false
+    )
+  })
+
+  it('does NOT report a test run', () => {
+    expect(should_report_run_to_ledger({ node_env: 'test' })).to.equal(false)
+  })
+
+  it('does NOT report when NODE_ENV is unset', () => {
+    // A bare `node scripts/<name>.mjs` with no environment at all. This is the
+    // easiest way to reach report_job by hand and must stay the safe direction:
+    // absent means "not a declared pipeline", never "assume production".
+    expect(should_report_run_to_ledger({ node_env: undefined })).to.equal(false)
+  })
+
+  it('does NOT report a value that merely CONTAINS production', () => {
+    // Guards the predicate against being loosened to a substring or prefix
+    // test, which would let `not-production` through.
+    expect(
+      should_report_run_to_ledger({ node_env: 'not-production' })
+    ).to.equal(false)
+    expect(
+      should_report_run_to_ledger({ node_env: 'production-mirror' })
+    ).to.equal(false)
   })
 })
 
