@@ -1082,10 +1082,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing efficiency matchup',
       column_header: 'CPOE',
       csv_header: 'Opponent completion percentage over expectation',
-      // The column was renamed to completion_percentage_over_expected while the
-      // 20 percentiles rows still key on 'cpoe', so these two differ until those
-      // rows are migrated.
-      percentile_field: 'cpoe',
+      percentile_field: 'completion_percentage_over_expected',
       ...opponent_field('completion_percentage_over_expected')
     },
     opponent_pass_epa_per_dropback: {
