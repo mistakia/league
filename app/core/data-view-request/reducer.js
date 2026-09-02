@@ -125,6 +125,11 @@ export function data_view_request_reducer(
       return state.merge({
         status: 'error',
         error: payload.error,
+        // Whether `error` may be SHOWN. The server classifies it; the client
+        // must not try to re-derive it from the message text, which is exactly
+        // the judgement it cannot make. Absent on the client watchdog path,
+        // which has no server message at all.
+        is_invalid_request: Boolean(payload.is_invalid_request),
         // Distinguishes a server-reported failure from the client watchdog
         // giving up on a server that never answered. The two need different
         // wording -- only one of them is something the server knows about.

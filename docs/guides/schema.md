@@ -277,7 +277,20 @@ A doc that a script MAINTAINS decays worse than plain prose, because the rename 
 
 **`db/gates/check-league-schema-consumers.mjs` is the gate for that sweep, and it is the only one here whose corpus reaches OUTSIDE this checkout.** Its subject is **every statement bound to the LEAGUE database, from any transport, inside or outside this checkout** — documented `table.column` pairs, fenced SQL, executable SQL lifted out of shell scripts and `/api/db/league/query` calls, and standalone `.sql` files bound by their root, all feeding one EXPLAIN oracle, one adjudication file and one scratch database. It makes the 2026-08-05 hand repair a ratchet instead of a one-time act. Run it per cluster, giving it the user-base roots explicitly — they are arguments rather than a hardcoded path, because this gate is about the league SCHEMA and the corpus is a parameter of the run:
 
-`yarn check:cluster` supplies those three roots and skips the gate loudly when the `:5433` container is down.
+```bash
+node db/gates/check-league-schema-consumers.mjs \
+  --root ../../../guideline/nfl \
+  --root ../../../text/league \
+  --root ../../../workflow/nfl \
+  --root ../../../text/nfl \
+  --root ../../../text/nfl-betting \
+  --root ../../../text/home-dynasty-league \
+  --executable-root ../../../cli
+```
+
+`yarn check:cluster` supplies those roots and skips the gate loudly when the `:5433` container is down. `scripts/check-cluster-gates.mjs` holds the authoritative list; the block above is a copy and the runner is what to trust if they disagree.
+
+**Passing a SUBSET of the roots is worse than passing none, because it manufactures stale adjudications.** An adjudication is keyed on `(path, table, column)`, and a path outside the roots you passed is a path whose site the run never reached — so every adjudication keyed on the trees you left out reports as stale, mixed in with real findings and reading exactly like standing debt. Measured 2026-09-02: the three prose roots alone read 956 files and reported 10 findings, 6 of them that artifact, against 1676 files and 4 real findings for the full set. Copy the whole invocation, and if a run shows stale adjudications clustered in one tree, suspect the root list before you touch the file. The tell is that the reasons all argue the site is a legitimate non-defect — a genuinely stale adjudication follows a repair, so its reason describes something that used to be broken.
 
 **GATE 3 covers user-base EXECUTABLE SQL, which was in no gate's corpus at all until 2026-08-07.** `cli/monitoring/check-league-lineage-consistency.sh` had been exiting 1 nightly since the season_grain conform, querying `year` on `transactions` and `rosters_players` from a bash variable shipped over ssh to psql (fixed in user-base `87066b585`). Gate 1 could not see it — the script writes unqualified references and two-letter aliases (`rp.year`) — and gate 2 reads fenced blocks, which a bash variable is not. The oracle that works is the one gate 2 already owns: **EXPLAIN resolves `rp.year` through the statement's own FROM clause and resolves unqualified references, both for free**, which is exactly what neither regex derivation can do. So gate 3 is a third EXTRACTION feeding the same oracle, adjudication file and scratch database — not a second gate answering the same question with its own. It reads four shapes: a quoted bash assignment whose body opens on a SQL keyword, a heredoc, an inline `psql -c`, and the `sql` argument of an `/api/db/<database>/query` call. Proven red at user-base `87066b585~1` with `column "year" does not exist [42703]` and green after.
 

@@ -36,6 +36,7 @@ export default function AuctionElectionControl({
   teamId,
   available_cap,
   is_election_window_open,
+  select_player,
   compact = false
 }) {
   const has_election = Boolean(election)
@@ -81,15 +82,22 @@ export default function AuctionElectionControl({
   // a surface a manager reads in seconds. The state line stays -- knowing
   // whether you already hold a ceiling on the open player is the reason to look.
   //
-  // COMPACT IS THE STATE LINE PLUS ONE BUTTON, and that bound is a layout
-  // constraint rather than a preference. The bar body is capped at 1000px and
-  // its content already fills it, so the full form's 573px did not shrink
-  // anything -- it pushed `Undo decline` clean off the viewport and squeezed
+  // COMPACT IS THE STATE LINE PLUS TWO BUTTONS -- decline, and a route to the
+  // drawer -- and the bound is a layout constraint rather than a preference.
+  // The bar body is capped at 1000px, so the full form's 573px did not shrink
+  // anything: it pushed `Undo decline` clean off the viewport and squeezed
   // auction-settlement-status into a 71px column 188px tall, hanging 118px
-  // below a 70px bar and over the player board. Setting a NUMBER stays in the
-  // drawer, which the bar's own player name opens in one click and which is
-  // the only place that can explain the availableCap capping term anyway. A
-  // second number field 100px from `Enter Bid` was its own defect regardless.
+  // below a 70px bar and over the player board.
+  //
+  // Setting a NUMBER still stays in the drawer, which is the only place that
+  // can explain the availableCap capping term, and a second number field 100px
+  // from `Enter Bid` would be its own defect. What changed on 2026-09-02 is
+  // that the bar had no route to it at all -- a manager looking at the open
+  // nomination could decline, and could not set a ceiling without knowing to
+  // click the player name. `Set maximum` dispatches select_player and opens
+  // that drawer; it writes nothing itself. The room for it came from
+  // auction-settlement-status leaving the bar for the side rail on the same
+  // day, which returned the ~260px basis it had been holding.
   if (compact) class_names.push('compact')
   if (is_settled) class_names.push('settled')
   else if (is_decline) class_names.push('declined')
@@ -172,6 +180,20 @@ export default function AuctionElectionControl({
                 Decline
               </Button>
             )}
+            {/* The bar's route to a maximum. It opens the drawer rather than
+                setting a number here, which is the same split the chip on the
+                board uses and the one the comment at the top of this file
+                argues for: the amount field belongs where there is room to
+                explain the availableCap capping term, and a second number
+                input a hundred pixels from `Enter Bid` is its own defect.
+
+                This is an affordance, not a write -- it dispatches
+                select_player and nothing else. */}
+            {compact && (
+              <Button small onClick={() => select_player(pid)}>
+                {has_election && !is_decline ? 'Change maximum' : 'Set maximum'}
+              </Button>
+            )}
             {!compact && has_election && !is_decline && (
               <Button small onClick={withdraw}>
                 Withdraw
@@ -196,5 +218,6 @@ AuctionElectionControl.propTypes = {
   teamId: PropTypes.number,
   available_cap: PropTypes.number,
   is_election_window_open: PropTypes.bool,
+  select_player: PropTypes.func,
   compact: PropTypes.bool
 }

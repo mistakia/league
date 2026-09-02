@@ -466,6 +466,16 @@ describe('data views line row axis', function () {
       }
       expect(error, 'expected the request to be refused').to.not.equal(null)
       expect(error.message).to.match(pattern)
+      // A refusal is a BAD REQUEST, and the flag is what makes it one. Without
+      // it the routes fall through to 500 and the websocket withholds the
+      // message, so the page renders a generic banner and the user never sees
+      // which two columns to split -- which is exactly what happened to both
+      // of the saved views that carried a line axis. Asserted here rather than
+      // per-case because it must hold for every refusal, not just this one.
+      expect(
+        error.is_invalid_request,
+        'refusal must be classified as a bad request'
+      ).to.equal(true)
     }
 
     // A line is posted for one game, so a year-only view would stack every

@@ -98,12 +98,19 @@ describe('auction election broadcasts', function () {
       socket.on('open', () => resolve({ socket, received }))
     })
 
-  const await_message = async (received, type, timeout_ms = 5000) => {
-    const deadline = Date.now() + timeout_ms
-    while (Date.now() < deadline) {
+  // COUNTED ATTEMPTS, NOT A `Date.now()` DEADLINE. `MockDate` freezes the clock
+  // for this whole describe block, so a `Date.now() + 5000` bound never expires:
+  // a message that never arrives spins here until mocha's own timeout fires,
+  // which reports a HANG rather than the missing broadcast and takes a minute to
+  // say it. Harmless while every message arrives, and exactly wrong on the day
+  // one stops -- the failure mode the assertions exist to name. The bound has to
+  // survive a stopped clock.
+  const POLL_INTERVAL_MS = 25
+  const await_message = async (received, type, attempts = 200) => {
+    for (let attempt = 0; attempt < attempts; attempt++) {
       const message = received.find((entry) => entry.type === type)
       if (message) return message
-      await new Promise((resolve) => setTimeout(resolve, 25))
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
     }
     return null
   }

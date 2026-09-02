@@ -412,7 +412,7 @@
       "table": "prop_market_selections_index",
       "column": "esbid",
       "kind": "history",
-      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+      "reason": "Cites a defect this gate's own EXPLAIN half found \u2014 a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
     },
     {
       "gate": 1,
@@ -637,6 +637,29 @@
       "column": "player_position",
       "kind": "history",
       "reason": "The paragraph's own parenthetical retires the column it names: 'a later conform renamed them to player_position, and 1ac03580e then dropped player_seasonlogs.player_position outright because nothing read it. Only player_gamelogs.player_position still exists.' The pair is cited to carry the uncontrolled-vocabulary incident, which spanned BOTH position columns at the time, so naming the dropped one is the record rather than an instruction. Confirmed against the dump: player_gamelogs.player_position is present and player_seasonlogs.player_position is absent. One entry covers both mentions on the line, since gate 1 keys on (path, table, column) and not on the occurrence."
+    },
+    {
+      "gate": 1,
+      "path": "cli/monitoring/check-extension-tests.sh",
+      "table": "config",
+      "column": "user_base_directory",
+      "kind": "not_a_column",
+      "reason": "user-base config namespace, not the league `config` table. A shell comment recording why 13 extension tests failed on base-storage: under NODE_ENV=test the user_base_directory key of user-base's own config object points at a tmpdir, so get_current_machine_id() returned null. The script issues no league SQL."
+    },
+    {
+      "gate": 1,
+      "path": "docs/guides/test.md",
+      "table": "config",
+      "column": "postgres",
+      "kind": "not_a_column",
+      "reason": "This app's runtime config object, not the league `config` table -- `db/index.mjs` folds the LEAGUE_DB_* overrides into config.postgres.connection at import, which is the mechanism the sandbox-isolation paragraph is explaining. Third config.* entry for this file, beside email and url."
+    },
+    {
+      "gate": 2,
+      "path": "nfl/home-dynasty-league/price-check-a-player.md",
+      "statement_contains": "FROM feed_items",
+      "kind": "not_a_league_statement",
+      "reason": "content-feed database, not league. feed_items is a content-feed table and all seven columns this statement selects exist there. Gate 2 has no transport to bind a fenced block, so it judges every ```sql fence under a --root against the league schema; this workflow queries league in step 3 and content-feed in step 4, and the step now says so in prose."
     }
   ]
 }

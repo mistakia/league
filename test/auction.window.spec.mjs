@@ -21,7 +21,11 @@ import {
 
 const expect = chai.expect
 
-// The defaults the seasons columns carry.
+// The tunables the 2026 window was ORIGINALLY validated against, kept because
+// the shortfall cases below are that history. The buffer is no longer a legal
+// stored value -- `auction_final_block_buffer_within_bounds` caps it at 3 -- but
+// `calculate_auction_window` is pure arithmetic and must answer for any input.
+// Anything asserting against stored configuration reads the column instead.
 const defaults = {
   auction_block_notice_minutes: 60,
   auction_final_block_pace_minutes: 2,

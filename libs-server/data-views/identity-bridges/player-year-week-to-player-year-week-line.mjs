@@ -1,6 +1,7 @@
 import db from '#db'
 import { physical_year_projection } from '#libs-server/data-views/physical-season-columns.mjs'
 import { apply_pregame_market_filter } from '#libs-server/data-views/market-pregame-filter.mjs'
+import { invalid_data_view_request } from '#libs-server/data-views/invalid-data-view-request.mjs'
 
 export const from = 'player_year_week'
 export const to = 'player_year_week_line'
@@ -38,7 +39,7 @@ export const add_cte = ({ query_context }) => {
   if (query_context.registered_ctes.has(CTE_NAME)) return
 
   if (!line_axis_sources.length) {
-    throw new Error(
+    throw invalid_data_view_request(
       'line row axis is active but no betting column named an explicit market_type: nothing defines the rungs'
     )
   }

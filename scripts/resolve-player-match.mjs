@@ -13,7 +13,9 @@ import {
   mergePlayer,
   find_player_row,
   ensure_player_alias,
-  player_name_utils
+  player_name_utils,
+  resolve_canonical_player,
+  describe_resolution
 } from '#libs-server'
 import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
 import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
@@ -204,6 +206,39 @@ const action_create_player = async (argv) => {
   // Add all external IDs provided
   const external_ids = get_all_external_ids_from_argv(argv)
   Object.assign(player_data, external_ids)
+
+  /*
+    This is the one create path that WARNS instead of refusing, and the
+    asymmetry is deliberate.
+
+    Every automated importer is guarded by resolve_canonical_player because a
+    duplicate there is minted silently, by a loop nobody is watching, and the
+    class recurs by construction. Here an operator typed the subcommand: a
+    deliberate create is the entire point of the tool, and the operator is the
+    adjudicator this resolver defers to everywhere else. Refusing would break
+    the legitimate case -- minting the second of two genuine namesakes, which is
+    exactly the `unknown` verdict -- and leave no way through.
+
+    So the resolver's job here is to inform rather than to decide, which is the
+    same warn-don't-block stance the missing-DOB warning above takes, for the
+    same reason. Candidate pids are printed so the operator can look before
+    committing.
+  */
+  const resolution = await resolve_canonical_player({
+    name: `${first_name} ${last_name}`,
+    date_of_birth,
+    external_ids
+  })
+
+  if (resolution.status !== 'new') {
+    log(
+      `WARNING: this person may already exist -- ${describe_resolution({
+        name: `${first_name} ${last_name}`,
+        date_of_birth,
+        resolution
+      })}. Creating anyway because you asked for it; check the candidate pids above and use update-external-id instead if one of them is this person.`
+    )
+  }
 
   log(`Creating player: ${first_name} ${last_name}`)
   log(player_data)

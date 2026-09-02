@@ -50,6 +50,7 @@ import {
 } from '#libs-server/data-views/year-offset-range.mjs'
 import validate_row_grain_compatibility from '#libs-server/data-views/validate-row-grain-compatibility.mjs'
 import validate_line_axis_columns from '#libs-server/data-views/validate-line-axis-columns.mjs'
+import { invalid_data_view_request } from '#libs-server/data-views/invalid-data-view-request.mjs'
 import validate_week_requirement from '#libs-server/data-views/validate-week-requirement.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
@@ -1690,7 +1691,12 @@ export const get_data_view_results_query = async ({
     ...line_errors
   ]
   if (all_errors.length) {
-    throw new Error(all_errors.join('\n'))
+    // Every message in here is authored prose about the caller's own request --
+    // the schema validator's, and the row-grain, week and line refusals. They
+    // are the four places that already know exactly what to change, so they are
+    // raised as a bad request and allowed to reach the caller rather than being
+    // flattened into the generic banner with the rest of the 500s.
+    throw invalid_data_view_request(all_errors.join('\n'))
   }
 
   // filter where and remove any where clauses that have a value of null, undefined, empty string, or empty array

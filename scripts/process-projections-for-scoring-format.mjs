@@ -59,19 +59,21 @@ export const process_scoring_format_year = async ({
     season_year: year,
     source_id: external_data_sources.AVERAGE
   })
-  const ros_projections = await db('rest_of_season_projections').where({
+  const rest_of_season_projections = await db(
+    'rest_of_season_projections'
+  ).where({
     season_year: year,
     source_id: external_data_sources.AVERAGE
   })
 
   const projections_by_pid = groupBy(projections, 'pid')
   const season_by_pid = groupBy(season_projections, 'pid')
-  const ros_by_pid = groupBy(ros_projections, 'pid')
+  const rest_of_season_by_pid = groupBy(rest_of_season_projections, 'pid')
   const pids = Array.from(
     new Set([
       ...Object.keys(projections_by_pid),
       ...Object.keys(season_by_pid),
-      ...Object.keys(ros_by_pid)
+      ...Object.keys(rest_of_season_by_pid)
     ])
   )
 
@@ -130,7 +132,7 @@ export const process_scoring_format_year = async ({
       })
     }
 
-    const rest_of_season_row = (ros_by_pid[pid] || [])[0]
+    const rest_of_season_row = (rest_of_season_by_pid[pid] || [])[0]
     if (rest_of_season_row) {
       rest_of_season_points_inserts.push({
         pid,

@@ -34,16 +34,24 @@ export default function AuctionSettlementStatus({
     )
   }
 
+  // ABBREVIATIONS, not full names. This sentence names every team still to
+  // answer, so its length grows with the league and has no natural bound --
+  // twelve full team names is several hundred characters in a slot that is one
+  // line in the side rail and a clamped box in the 70px bid bar, where it was
+  // simply cut off. The abbreviation is what the rest of the auction surface
+  // identifies a team by (the roster strip along the bottom, TeamName abbrv),
+  // so it is also the form a manager is already scanning for.
   const names = outstanding_election_tids
     .map((tid) => {
       const team = teams_by_id.get(tid)
-      return team ? team.name : `Team ${tid}`
+      if (!team) return `Team ${tid}`
+      return team.abbreviation || team.name || `Team ${tid}`
     })
     .join(', ')
 
   return (
     <div className='auction-settlement-status'>
-      Waiting on {names} to set a maximum or decline.
+      Waiting on {names} to make an election.
     </div>
   )
 }

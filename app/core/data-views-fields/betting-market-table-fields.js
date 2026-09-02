@@ -155,8 +155,31 @@ const game_prop_row_axes = (params) =>
     ? [...GAME_GRAIN_ROW_AXES, 'line']
     : GAME_GRAIN_ROW_AXES
 
+// What THIS column's line-axis rows are values OF, so the picker can tell that
+// two columns both offering `line` mean different things by it. The axis keys
+// each row on the raw line value, so a row labelled 49.5 would put "49.5
+// receiving yards" beside "49.5 receptions" as though they were one bet at one
+// price. The server refuses that outright (validate-line-axis-columns.mjs);
+// declaring the domain is what stops the picker OFFERING it in the first place,
+// which is where the two views that shipped this way were composed.
+//
+// Ladder markets only, and the omission is load-bearing rather than a gap: a
+// single-line market posts one selection per player-game, contributes no rungs,
+// and is a legitimate neighbour of a ladder. Naming a domain for it would make
+// it count as a second quantity and refuse views that work. Same rule, same
+// reason, as the server's line-axis-sources.mjs.
+const game_prop_row_axis_domain = (params) =>
+  bookmaker_constants.ladder_market_types.has(get_market_type_value(params))
+    ? { line: get_market_type_value(params) }
+    : {}
+
 const create_field =
-  (column_groups, column_params, row_axes = GAME_GRAIN_ROW_AXES) =>
+  (
+    column_groups,
+    column_params,
+    row_axes = GAME_GRAIN_ROW_AXES,
+    row_axis_domain
+  ) =>
   ({ column_title, header_label, player_value_path }) =>
     from_betting_market({
       column_title,
@@ -164,19 +187,22 @@ const create_field =
       player_value_path,
       column_groups,
       column_params,
-      row_axes
+      row_axes,
+      row_axis_domain
     })
 
 const create_game_prop_field = create_field(
   [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
   create_game_prop_column_params(),
-  game_prop_row_axes
+  game_prop_row_axes,
+  game_prop_row_axis_domain
 )
 
 const create_historical_prop_field = create_field(
   [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
   create_historical_game_prop_column_params(),
-  game_prop_row_axes
+  game_prop_row_axes,
+  game_prop_row_axis_domain
 )
 
 const create_team_game_prop_field = create_field(

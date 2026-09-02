@@ -11,7 +11,9 @@ import {
   createPlayer,
   ensure_player_alias,
   report_job,
-  throw_if_shortfall
+  throw_if_shortfall,
+  resolve_canonical_player,
+  describe_resolution
 } from '#libs-server'
 import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -34,6 +36,8 @@ const importPlayersNFL = async ({
   log(`loading players for season: ${year}`)
 
   const pids = []
+  const skipped = { exists: 0, unknown: 0 }
+  const skipped_members = []
   // NFL Pro per-team rosters replace the decommissioned NFL FDL v3 shield
   // players query. They carry roster status (including non-active players) and
   // every player's footballName -- the clean common first name -- so newly
@@ -155,6 +159,58 @@ const importPlayersNFL = async ({
       pos &&
       dob
     ) {
+      /*
+        Four narrow matchers ran above (gsisid, esbid, name+dob, name+draft
+        year) and all missed. That is a statement about those matchers, not
+        about the person, and treating it as the latter is what mints a
+        duplicate -- so ask the existence question before the mint.
+
+        `dob` is guarded as truthy by the branch condition, but truthy does NOT
+        mean real: `0000-00-00` is a non-empty string and passes that test. The
+        resolver is the thing that knows the difference, and it returns
+        `unknown` rather than `new` when the incoming date is the sentinel and a
+        name candidate exists.
+
+        The external ids handed over are the SAME values the insert below
+        attempts, which is what makes the unique-constraint pre-check exact
+        rather than approximate.
+
+        THE NAME IS BUILT FROM THE PAYLOAD'S OWN FIELDS, not from `name`.
+        `name` is `player.displayName`, the legal-name form, while the insert
+        writes `first_name: player.footballName || player.firstName` -- and
+        createPlayer derives `formatted_name` from first_name + last_name
+        (create-player.mjs), which is the exact column the resolver's name rung
+        matches on. Asking about one spelling and writing the other defeats the
+        guard on precisely the players whose two spellings differ: an existing
+        row `Shaq Thompson` is invisible to a query for "sha'quille thompson",
+        so the resolver answers `new` and the insert lands a second
+        `shaq thompson`. The alias write below records displayName afterwards,
+        which helps the NEXT run and not this one.
+      */
+      const resolver_name = `${first_name} ${last_name}`
+      const resolution = await resolve_canonical_player({
+        name: resolver_name,
+        date_of_birth: dob,
+        external_ids: {
+          gsis_player_id: gsisid,
+          esb_player_id: esbid,
+          gsis_it_player_id: gsis_it_id,
+          smart_player_id: smart_id
+        }
+      })
+
+      if (resolution.status !== 'new') {
+        skipped[resolution.status === 'exists' ? 'exists' : 'unknown'] += 1
+        skipped_members.push(
+          describe_resolution({
+            name: resolver_name,
+            date_of_birth: dob,
+            resolution
+          })
+        )
+        continue
+      }
+
       const created = await createPlayer({
         first_name,
         last_name,
@@ -197,6 +253,15 @@ const importPlayersNFL = async ({
       log('unable to handle player')
       log(player)
     }
+  }
+
+  // The resolver logs nothing itself; an unreported refusal is an invisible
+  // skip, so every one is named here with its candidate pids.
+  log(
+    `refused to mint ${skipped.exists + skipped.unknown} (exists ${skipped.exists}, unknown ${skipped.unknown})`
+  )
+  for (const member of skipped_members) {
+    log(`SKIP ${member}`)
   }
 
   return pids

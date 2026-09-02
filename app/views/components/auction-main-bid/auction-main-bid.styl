@@ -13,25 +13,16 @@
 // the BAR rather than compression of this panel. With the election control in
 // the strip the bar body ran 1445px inside a 1000px cap, putting the last
 // button past the right edge of the viewport.
+// The settlement status is NOT here. It names every team still to answer, so
+// its length grows with the league and has no natural upper bound -- inside a
+// 70px bar that made it either the thing setting the bar's width or, once
+// bounded and clamped, a box with its own sentence cut off. It lives in
+// `.auction__side` alone, where it is a paragraph that may take the height it
+// needs. Nothing about it belongs in the bar's stylesheet.
 .auction__bid-info
   flex 1
   min-width 0
   display flex
-
-  // The outstanding-teams sentence names every team still to answer, so it has
-  // no natural upper length and must not set the bar's width. Bounding it is
-  // not enough on its own: allowed to shrink freely it collapsed to a 16px
-  // sliver with the text clipped away, which loses the one surface that IS the
-  // forcing function in election mode. A basis it may shrink from, a floor it
-  // may not cross, and a three-line clamp inside the 70px bar.
-  .auction-settlement-status
-    flex 0 1 260px
-    min-width 170px
-    align-self center
-    display -webkit-box
-    -webkit-line-clamp 3
-    -webkit-box-orient vertical
-    overflow hidden
 
 .auction__bid-actions
   flex 0 0 auto
@@ -102,12 +93,27 @@
     height 100%
     background white
 
-@media (min-width 1100px)
+// 1120px rather than 1000px, and the breakpoint moves with it so the cap is
+// never wider than the viewport that opts into it.
+//
+// The cap is what decides whether the nominated player fits. `.auction__bid-actions`
+// is fixed-content (timer, stepper, election control, bid input) and took 593px
+// measured, so the bar's cap minus that is all `.auction__bid-info` ever gets.
+// At 1000px that was 407px for 468px of content -- a 264px name beside a 204px
+// details group -- and since both are flex items that had run out of room to
+// shrink, the surplus became overlap: "MARKET $0" printed on top of "PICKETT".
+// Giving the bar the extra 120px is the one fix here that costs no content;
+// every alternative was dropping a detail column or clipping the player's name
+// on the surface whose subject IS that player.
+@media (min-width 1160px)
   .auction__bar-body
-    max-width 1000px
+    max-width 1120px
     margin 0 auto
 
-@media (max-width 1099px)
+// Paired with the cap above: below the width where the bar is centred and
+// bounded, it runs edge to edge and the text needs its own gutter. The two
+// boundaries move together or a band opens up that is full-bleed AND unpadded.
+@media (max-width 1159px)
   .auction__text
     padding 0 16px
 

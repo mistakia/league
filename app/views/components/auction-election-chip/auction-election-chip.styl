@@ -1,9 +1,23 @@
 // Sized to sit inside a 30px virtualized board row alongside the bye and
-// salary columns, so it takes a fixed basis rather than growing: the salary
-// column to its right is the number a manager reads down, and a chip that
-// widened with its amount would ragged that column out of alignment.
+// salary columns, and sized to its CONTENT, because the row's every-pixel
+// competitor is the player name beside it.
+//
+// This carried a fixed 46px basis until 2026-09-02, justified by a claim that a
+// content-sized chip "would ragged the salary column out of alignment". That
+// claim is false and was never measured. The bye (20px) and salary (45px)
+// columns both have fixed bases and sit at the row's end, so the NAME absorbs
+// every change in the chip's width and the salary column does not move:
+// measured on the rendered board, its left edge held at 431px across chip
+// widths of 28, 35, 39 and 58px. The fixed basis was buying nothing and
+// charging the name 46px on every row, including the `$7` chip that needs 28.
+//
+// It cost the name visibly. On the 188-row board a fixed-46px chip took the
+// rows whose name is clipped from 1 to 23, worst case 23px of a name cut off
+// with no ellipsis -- `.player__name` is `overflow: hidden` with no
+// `text-overflow`, so a clipped name is indistinguishable from a short one.
 .auction-election-chip
-  flex 0 0 46px
+  flex 0 0 auto
+  padding 0 6px
   display flex
   align-items center
   justify-content center

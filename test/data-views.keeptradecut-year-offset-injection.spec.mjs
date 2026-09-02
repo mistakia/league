@@ -66,9 +66,9 @@ describe('Data Views - keeptradecut year_offset injection', function () {
 
         expect(thrown, `expected ${JSON.stringify(payload)} to throw`).to.not.be
           .null
-        // The four data-view routes map is_invalid_param to 400 rather than
+        // The four data-view routes map is_invalid_request to 400 rather than
         // 500, and the offending value is deliberately not echoed back.
-        expect(thrown.is_invalid_param).to.equal(true)
+        expect(thrown.is_invalid_request).to.equal(true)
         expect(thrown.message).to.not.include('SELECT')
       })
     }

@@ -122,7 +122,7 @@ describe('data view params cannot reach SQL', function () {
           })
         } catch (error) {
           threw = true
-          expect(error.is_invalid_param, 'marked as a bad request').to.equal(
+          expect(error.is_invalid_request, 'marked as a bad request').to.equal(
             true
           )
         }

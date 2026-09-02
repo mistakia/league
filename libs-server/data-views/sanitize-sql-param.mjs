@@ -14,12 +14,13 @@
 // the boundary lives here instead, at the point of use, and each splice site
 // declares the shape it actually needs.
 
+import { invalid_data_view_request } from '#libs-server/data-views/invalid-data-view-request.mjs'
+
 export const invalid_param = ({ param_name }) => {
-  const error = new Error(`invalid data view param: ${param_name}`)
-  // Routes map this to 400 rather than 500 -- it is a bad request, not a
-  // server fault. The offending value is deliberately not echoed back.
-  error.is_invalid_param = true
-  throw error
+  // Routes map this to 400 rather than 500 and the websocket lets the message
+  // reach the browser -- it is a bad request, not a server fault. The offending
+  // value is deliberately not echoed back, which is what keeps it showable.
+  throw invalid_data_view_request(`invalid data view param: ${param_name}`)
 }
 
 // Postgres identifiers as these columns build them: lowercase word characters
