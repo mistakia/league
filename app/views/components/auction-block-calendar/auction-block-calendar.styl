@@ -1,14 +1,35 @@
+// EVERY COLOUR IN THIS FILE WAS INERT UNTIL 2026-09-02. The grid was written
+// against `var(--table-border)`, `var(--table-row-alt)`, `var(--primary)` and
+// `var(--text)` -- four custom properties declared nowhere in this repo, so
+// each var() was invalid at computed-value time and the whole declaration was
+// dropped. Measured on the running page: a cell's computed backgroundColor was
+// `rgba(0, 0, 0, 0)`, both borders were absent, and the convened, mine and
+// selected states were indistinguishable from an empty cell. The calendar
+// rendered as 168 invisible boxes against white, which is what "the schedule
+// does not show the selectable days and blocks" was. Use the stylus tokens in
+// app/styles/variables.styl, which are injected into every stylesheet by
+// stylus-loader; a custom property here has to be DECLARED somewhere before it
+// means anything.
+// lighten() on these tokens is the trap this file just came out of: $borderColor
+// is already at 82% lightness and $accentColor at 50%, so lighten(x, 55%) and
+// lighten(x, 60%) both clamp to pure WHITE -- invisible against the panel, the
+// exact symptom being fixed. mix() against white is the form that keeps a tint.
+$grid_open_fill = #e6e6e6
+
 .auction__block-calendar
   display flex
   flex-direction column
   padding 8px
-  border-bottom 1px solid var(--table-border)
+  border-bottom 1px solid $borderColor
 
 .auction__block-calendar-header
   display flex
   justify-content space-between
   align-items baseline
   gap 8px
+  flex 1
+  min-width 0
+  flex-wrap wrap
 
 .auction__block-calendar-title
   font-weight 600
@@ -25,7 +46,8 @@
 
 .auction__block-calendar-legend
   font-size 11px
-  opacity 0.6
+  line-height 1.4
+  color rgba(0, 0, 0, 0.6)
   padding 4px 0 8px
 
 .auction__block-calendar-grid
@@ -39,40 +61,129 @@
   align-items center
 
 .auction__block-calendar-day
-  width 52px
+  width 46px
   flex none
   font-size 11px
-  opacity 0.7
+  font-weight 600
+  color $textColor
+
+// The hour axis, so a column can be read without hovering it.
+.auction__block-calendar-axis
+  padding-bottom 2px
+
+.auction__block-calendar-hour-label
+  flex 1 1 0
+  min-width 8px
+  font-size 8px
+  line-height 1
+  color rgba(0, 0, 0, 0.45)
+  text-align left
+  white-space nowrap
+  overflow visible
 
 .auction__block-calendar-cell
   flex 1 1 0
   min-width 8px
-  height 18px
+  height 20px
   display flex
   align-items center
   justify-content center
   font-size 9px
-  cursor pointer
-  background var(--table-row-alt)
+  font-weight 700
+  cursor default
+  background transparent
+  box-sizing border-box
+
+  // A six-hour rule, matching the axis labels, so the unlabelled columns
+  // between them are still countable from a labelled one.
+  &:nth-child(6n + 2)
+    border-left 1px solid $borderColor
+
+  // Inside the period and outside the notice threshold: this is what a manager
+  // can actually act on, so it is the only state that reads as a control.
+  &.selectable
+    background $grid_open_fill
+    cursor pointer
+
+    &:hover
+      background mix($accentColor, white, 12%)
+
+  // In the period but already inside the notice window. It cannot convene, so
+  // it must not look like an open hour.
+  &.too-soon
+    background repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 2px, #e4e4e4 2px, #e4e4e4 4px)
 
   &.outside
-    opacity 0.15
-    cursor default
+    background transparent
+    opacity 0.25
+
+  // Somebody wants this hour. The number in the cell is how many.
+  &.has-opt-ins
+    background mix($accentColor, white, 25%)
+    color darken($accentColor, 20%)
 
   &.mine
-    outline 1px solid var(--primary)
+    box-shadow inset 0 0 0 2px $accentColor
 
   &.finalized
-    background var(--primary)
-    color #fff
+    background $successColor
+    color white
 
   &.final-block
     background #c0392b
-    color #fff
+    color white
+
+  &.now
+    border-top 2px solid $textColorDark
+
+  &.selected
+    box-shadow inset 0 0 0 2px $textColorDark
+
+// The key. The grid is six states in ten-pixel cells, which no amount of
+// colour choice makes self-evident.
+.auction__block-calendar-key
+  display flex
+  flex-wrap wrap
+  gap 4px 10px
+  padding 8px 0 0
+  font-size 10px
+  color rgba(0, 0, 0, 0.6)
+
+  span
+    display flex
+    align-items center
+    gap 4px
+
+.auction__block-calendar-swatch
+  width 10px
+  height 10px
+  flex none
+  display inline-block
+  border 1px solid $borderColor
+  box-sizing border-box
+
+  &.selectable
+    background $grid_open_fill
+
+  &.has-opt-ins
+    background mix($accentColor, white, 25%)
+
+  &.mine
+    background $grid_open_fill
+    box-shadow inset 0 0 0 2px $accentColor
+
+  &.finalized
+    background $successColor
+
+  &.final-block
+    background #c0392b
+
+  &.too-soon
+    background repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 2px, #e4e4e4 2px, #e4e4e4 4px)
 
 .auction__block-calendar-detail
   padding 8px 0 0
-  border-top 1px solid var(--table-border)
+  border-top 1px solid $borderColor
   margin-top 8px
 
 .auction__block-calendar-detail-head
@@ -107,9 +218,21 @@
   font-size 11px
 
 .auction__block-calendar-convened
-  color var(--primary)
+  color $successColor
   font-weight 600
   font-size 11px
 
-.auction__block-calendar-cell.selected
-  outline 2px solid var(--text)
+// A phone gets a taller cell, because the target is a finger rather than a
+// cursor and the rail is the full page width there rather than 320px.
+@media (max-width 800px)
+  .auction__block-calendar-cell
+    height 26px
+
+// Same as the standing-elections panel: when collapsible the root is the
+// Accordion and its summary button owns the padding.
+.accordion.auction__block-calendar
+  padding 0
+  border-bottom 1px solid $borderColor
+
+  .auction__block-calendar-legend
+    padding-top 0

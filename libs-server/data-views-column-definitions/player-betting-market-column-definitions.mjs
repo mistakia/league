@@ -425,7 +425,24 @@ const player_betting_market_with = ({
     }
   })
 
-  query.with(with_table_name, (qb) => {
+  // MATERIALIZED ONLY UNDER THE LINE AXIS, and it is the dedup's absence that
+  // makes it necessary rather than anything about the axis itself. Postgres
+  // inlines a non-recursive CTE referenced once, so this CTE and the markets CTE
+  // feeding it collapse into the join and get re-probed per outer row. Without
+  // the axis the DISTINCT ON below keeps that from mattering; suppress it and
+  // the collapse is unfenced, so each betting column re-probes
+  // prop_markets_index once per candidate cell -- measured at 203,456 loops per
+  // column on a single-week view, four columns deep, which is the whole of its
+  // runtime. Over 18 weeks the same view exceeded the 40s statement timeout and
+  // rendered nothing.
+  //
+  // Gated rather than unconditional because a view with no line axis does not
+  // need it: measured at 1.3s either way on the same 18-week request, so
+  // materializing there would buy nothing and take on the planner risk for free.
+  // Do NOT read this as "materialize the rung CTE too" -- that one is plain
+  // `with` for the opposite and measured reason, recorded in its own bridge.
+  const with_cte = line_split ? 'withMaterialized' : 'with'
+  query[with_cte](with_table_name, (qb) => {
     qb.from(`${markets_cte} as m`).join(
       'prop_market_selections_index as pms',
       function () {

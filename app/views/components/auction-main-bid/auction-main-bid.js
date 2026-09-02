@@ -249,7 +249,7 @@ export default function AuctionMainBid({
               {/* Where the pass button used to sit. A decline is the same
                   action the pass was, and a maximum is the one it never had. */}
               {is_election_mode && nominated_pid && (
-                <AuctionElectionControl pid={nominated_pid} />
+                <AuctionElectionControl pid={nominated_pid} compact />
               )}
             </div>
             <div className='auction__main-input'>

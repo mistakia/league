@@ -1,0 +1,141 @@
+// The election control had NO stylesheet at all until 2026-09-02. It rendered
+// as a bare label, a bare number input and two buttons inline in the
+// selected-player header's flex row, top-aligned against the player headshot
+// and competing with the stat items for the same axis. This gives it a band of
+// its own so the layout does not have to be argued for at each of its two call
+// sites.
+.auction-election-control
+  flex 0 0 auto
+  display flex
+  align-items stretch
+  gap 12px
+  padding 10px 16px
+  border-top 1px solid $borderColor
+  border-bottom 1px solid $borderColor
+  background $backgroundColor
+
+  label
+    font-size 9px
+    font-family "Inter", "Helvetica", "Arial", sans-serif
+    font-weight 300
+    text-transform uppercase
+    letter-spacing 0.5px
+    display block
+    padding-bottom 2px
+    color rgba(0, 0, 0, 0.6)
+
+// The current election, stated before anything offers to change it. A fixed
+// basis rather than content width so the form beside it does not shift
+// horizontally when the state goes from "None set" to "$12".
+.auction-election-control__state
+  flex 0 0 132px
+  display flex
+  flex-direction column
+  justify-content center
+  border-right 1px solid $borderColor
+  padding-right 12px
+
+.auction-election-control__state-value
+  font-size 20px
+  font-weight 700
+  line-height 1.1
+  white-space nowrap
+
+// A decline is not a $0 maximum, and the two must not read alike at a glance --
+// the same distinction auction-election-chip carries on the board. The amount
+// is the loud one because it is a live claim; a decline is an answer already
+// given, so it recedes without disappearing.
+.auction-election-control
+  &.maximum .auction-election-control__state-value
+    color $accentColor
+
+  &.declined .auction-election-control__state-value
+    color lighten(black, 45%)
+    font-weight 400
+
+  &.settled
+    opacity 0.7
+
+    .auction-election-control__state-value
+      font-size 15px
+
+.auction-election-control__body
+  flex 1 1 auto
+  display flex
+  flex-direction column
+  justify-content center
+  gap 6px
+  min-width 0
+
+.auction-election-control__form
+  display flex
+  align-items center
+  flex-wrap wrap
+  gap 8px
+
+  label
+    padding-bottom 0
+
+  input
+    box-sizing border-box
+    width 96px
+    height $control_height
+    padding 0 8px
+    font-size 16px
+    font-weight 700
+    border 1px solid $borderColor
+    border-radius $button_border_radius
+    background white
+
+    &:focus
+      outline none
+      border-color $accentColor
+
+.auction-election-control__note
+  font-size 11px
+  line-height 1.4
+  color rgba(0, 0, 0, 0.6)
+
+// On a phone the drawer header already wraps to several rows, so the state and
+// the form stack rather than sharing a line, and the divider becomes horizontal.
+@media (max-width 700px)
+  .auction-election-control
+    flex-direction column
+    gap 8px
+    padding 10px 12px
+
+  .auction-election-control__state
+    flex 0 0 auto
+    flex-direction row
+    align-items baseline
+    gap 8px
+    border-right none
+    border-bottom 1px solid $borderColor
+    padding 0 0 6px
+
+    label
+      padding-bottom 0
+
+// The live bid bar. A strip rather than a page band: no rules, no ground and no
+// note, because the bar around it already carries the player, the price and the
+// clock. The state line stays -- whether you already hold a ceiling on the open
+// player is exactly what a manager checks before bidding.
+.auction-election-control.compact
+  padding 0 8px
+  border none
+  background transparent
+  align-items center
+
+  .auction-election-control__state
+    flex 0 0 auto
+    flex-direction row
+    align-items baseline
+    gap 6px
+    border-right none
+    padding-right 8px
+
+    label
+      padding-bottom 0
+
+  .auction-election-control__state-value
+    font-size 14px

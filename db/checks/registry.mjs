@@ -66,6 +66,7 @@ import {
   game_prop_line_value_rows
 } from '#libs-server/game-prop-column-resolution.mjs'
 import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
+import { percentile_field_vocabulary } from '#scripts/generate-nfl-team-seasonlogs.mjs'
 import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-team-attribution.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 import {
@@ -1906,6 +1907,48 @@ const registry = [
     min_denominator: 3000,
     repair_command:
       'Regenerate the failing format for the failing season, then re-grade: NODE_ENV=production node scripts/generate-scoring-format-player-gamelogs.mjs --scoring_format_id <id> --year <year>. Drop --year for every season. A rate of exactly 0 against a full denominator means the format was never generated at all rather than gone stale — check it exists in league_scoring_formats and is referenced by a league_format before generating 25 seasons of data for it. The derived seasonlogs and careerlogs read FROM this table, so any repair here must be followed by generate-scoring-format-player-seasonlogs.mjs and generate-scoring-format-player-careerlogs.mjs for the same format.'
+  },
+
+  {
+    check_id: 'percentile-field-resolution',
+    invariant:
+      'Every distinct percentiles.field value either names a live column in the public schema or is a member of the vocabulary the sole writer emits. percentiles.field is a varchar holding a physical column name / stat key as DATA, so a rename reaches the column and not the stored value: no ALTER touches it, no schema diff shows it, and every consumer gate resolves NAMES rather than values. The stranded row keeps correct numbers under a spelling nothing asks for any more, and the consumer read that misses it renders a BLANK CELL rather than raising — which is why 53 values sat stranded across four rename clusters, and why CLAUDE.md naming this exact column did not carry the rule. The oracle is a UNION because field is not by contract a column-name namespace: the writer derives it from stat-key objects, so a key it emits is legitimate whether or not a column of that name exists.',
+    grain: ['field'],
+    rows: async () => {
+      const { rows: stored } = await db.raw(
+        'select field, count(*)::int as n from percentiles group by field'
+      )
+      const { rows: columns } = await db.raw(
+        "select distinct column_name from information_schema.columns where table_schema = 'public'"
+      )
+
+      // The vocabulary is IMPORTED from the writer that emits it, never
+      // restated here. A second copy of a rename-sensitive list is the defect
+      // this check exists to catch, so owning one would make it the next
+      // instance.
+      const resolvable = new Set([
+        ...columns.map(
+          (/** @type {Record<string, any>} */ row) => row.column_name
+        ),
+        ...percentile_field_vocabulary
+      ])
+
+      return stored.map((/** @type {Record<string, any>} */ row) => ({
+        field: row.field,
+        numerator: resolvable.has(row.field) ? Number(row.n) : 0,
+        denominator: Number(row.n)
+      }))
+    },
+    min_rate: 1.0,
+    calibration:
+      'EXACT, not a tolerance, and there is no band to sit in: a value resolves or it does not, so every field reads either 1.0000 or 0.0000 and a fractional reading is impossible by construction. Measured 2026-09-02 against production immediately after db/adhoc/2026-08-19-conform-percentiles-field-values.sql and db/adhoc/2026-09-02-delete-orphan-snp-percentile-rows.sql: 116 distinct fields over 11,468 rows, per-field row counts 20 to 126, and exactly ONE field reading 0.0000 — cpoe, whose 20 rows are data+code coupled because app/core/player-fields.js still pins the literal, and which is deliberately NOT parked so that its own unit closes it. The pre-repair reading is the calibration that matters: 63 of the 84 percentile_field values the consumer requested resolved to zero rows, 53 of them stranded by a rename with correct values under the old spelling. MEASURED CAVEAT ON THE SECOND HALF: every one of the writer vocabulary keys is ALSO a physical public column today, so the information_schema half is currently doing all of the work and the union is inert. It is kept because the writer contract, not a coincidence of naming, is what makes a value legitimate — a future stat key with no column behind it would be a false finding under the narrow oracle. Anyone tempted to drop the union should re-measure that overlap first rather than infer it from this run, and re-read the negative control below, which is what would go quiet.',
+    // 116 distinct fields today and the vocabulary only grows with the writer's
+    // stat arrays. 90 sits well under the corpus and far above a scan that has
+    // stopped reaching percentiles -- an emptied table returns no rows at all
+    // and throws here rather than reporting a clean sweep.
+    min_gradeable_units: 90,
+    repair_command:
+      'Establish which half of the oracle the value fails before touching data. If it is a stranded rename, the target is DERIVED rather than guessed: grep db/adhoc/*.sql for `RENAME COLUMN <old> TO`, disambiguate a multi-candidate old name against the writer vocabulary in scripts/generate-nfl-team-seasonlogs.mjs, and rewrite the values in the shape of db/adhoc/2026-08-19-conform-percentiles-field-values.sql — a value rewrite, not a recompute, since renames moved names and never numbers. If no rename exists anywhere and no writer emits the key, the rows are residue of a dropped column and the repair is a delete, in the shape of db/adhoc/2026-09-02-delete-orphan-snp-percentile-rows.sql; confirm every row is empty of measurement first. If a CONSUMER pins the old literal, as app/core/player-fields.js does for cpoe, the data migration alone BREAKS a read that works today: it ships with the repoint and a frontend deploy as one unit. Either repair needs the serialized production-DDL apply slot.'
   }
 ]
 

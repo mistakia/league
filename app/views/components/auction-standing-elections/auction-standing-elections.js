@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerName from '@components/player-name'
+import Accordion from '@components/accordion'
 import { auction_election_outcome_display_names } from '#constants'
 
 import './auction-standing-elections.styl'
@@ -20,7 +21,8 @@ import './auction-standing-elections.styl'
 export default function AuctionStandingElections({
   standing_elections,
   availableCap,
-  availableSpace
+  availableSpace,
+  is_collapsible = false
 }) {
   const live = standing_elections.filter(
     (election) => !election.get('settled_at')
@@ -62,16 +64,24 @@ export default function AuctionStandingElections({
     )
   }
 
-  return (
-    <div className='auction-standing-elections'>
-      <div className='auction-standing-elections__header'>
-        <h3>Your elections</h3>
-        <div>
-          {availableSpace} open {availableSpace === 1 ? 'spot' : 'spots'}, $
-          {availableCap} cap
-        </div>
+  // The header doubles as the collapsed summary, so the two cannot drift: what
+  // a manager reads with the panel shut is the same line they read with it
+  // open. A <div> rather than an <h3> because the summary is a real <button>
+  // and a heading inside one is not phrasing content.
+  const header = (
+    <div className='auction-standing-elections__header'>
+      <div className='auction-standing-elections__title'>
+        Your elections{live.size ? ` (${live.size})` : ''}
       </div>
+      <div>
+        {availableSpace} open {availableSpace === 1 ? 'spot' : 'spots'}, $
+        {availableCap} cap
+      </div>
+    </div>
+  )
 
+  const body = (
+    <>
       {!live.size && !settled.size && (
         <div className='auction-standing-elections__empty'>
           No elections yet. Open any free agent and set a maximum bid, or
@@ -100,6 +110,25 @@ export default function AuctionStandingElections({
           {settled.toIndexedSeq().map(render_row)}
         </div>
       )}
+    </>
+  )
+
+  // Collapsed by default where it is collapsible, which is the phone. Stacked
+  // under the board, an unbounded list of every ceiling a manager holds pushed
+  // the block calendar and the settlement status off the bottom of a phone
+  // screen with no way to shorten it.
+  if (is_collapsible) {
+    return (
+      <Accordion className='auction-standing-elections' summary={header}>
+        {body}
+      </Accordion>
+    )
+  }
+
+  return (
+    <div className='auction-standing-elections'>
+      {header}
+      {body}
     </div>
   )
 }
@@ -107,5 +136,6 @@ export default function AuctionStandingElections({
 AuctionStandingElections.propTypes = {
   standing_elections: ImmutablePropTypes.map,
   availableCap: PropTypes.number,
-  availableSpace: PropTypes.number
+  availableSpace: PropTypes.number,
+  is_collapsible: PropTypes.bool
 }

@@ -121,6 +121,19 @@ export const identities = {
     id: 'player_year_week_line',
     row_grain: 'player',
     row_axes: ['year', 'week', 'line'],
+    // A REFINEMENT of player_year_week, declared so the source-attach registry
+    // can say so. Every reference column below is byte-identical to
+    // player_year_week's, so a source with no rung of its own correlates the
+    // same way under either cell and repeats its value down the ladder -- which
+    // is what a ladder view wants from a name, a position or a projection.
+    //
+    // Declared rather than enumerated because the alternative is registering
+    // this identity by hand in all six source-attach rule files, and the axis
+    // shipped without any of them: every non-betting column in a line-axis view
+    // threw `No source-attach rule for (cell=player_year_week_line, ...)`
+    // rather than rendering. A refinement chain the registry walks means the
+    // next axis of this shape cannot repeat it. See source-attach-registry.mjs.
+    refines: 'player_year_week',
     key_columns: ['pid', 'year', 'week', 'selection_metric_line'],
     pid_column: 'player.pid',
     team_column: null,

@@ -240,9 +240,16 @@ export function* withdraw_auction_election({ payload }) {
   yield call(api_delete_auction_election, payload)
 }
 
-export function* reload_auction_elections() {
-  const { leagueId } = yield select(get_current_league)
-  const { teamId } = yield select(get_app)
+// The pair comes from the OPTS OF THE WRITE THAT JUST SUCCEEDED, not from a
+// selector. Reading it from the league record is what broke this: `League` is an
+// Immutable Record declaring `league_id`, so `leagueId` off it was always
+// undefined and the guard below returned before the refetch on every write --
+// which is why setting or withdrawing a maximum left the board chip, the
+// standing-elections panel and the drawer control all frozen at their last
+// loaded value. Refetching the exact pair that was written is also the only
+// source that cannot disagree with the request.
+export function* reload_auction_elections({ payload }) {
+  const { leagueId, teamId } = payload.opts || {}
   if (!leagueId || !teamId) return
   yield call(api_get_auction_elections, { leagueId, teamId })
 }
@@ -258,8 +265,11 @@ export function* set_auction_block_opt_in({ payload }) {
 // The schedule is loaded when the auction page mounts rather than on the socket
 // join, because opting into a block happens days before any block runs and the
 // socket join is gated on the live window.
+// `app.leagueId`, not a field on the league record: `League` declares
+// `league_id`, so destructuring `leagueId` off it yields undefined and the guard
+// swallows every refetch. Same defect as reload_auction_elections had.
 export function* load_auction_blocks_for_current_league() {
-  const { leagueId } = yield select(get_current_league)
+  const { leagueId } = yield select(get_app)
   if (!leagueId) return
   yield call(api_get_auction_blocks, { leagueId })
 }

@@ -6,7 +6,16 @@ import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import validate_line_axis_columns from '#libs-server/data-views/validate-line-axis-columns.mjs'
 
 import { identity_for } from '#libs-server/data-views/row-grain-registry.mjs'
-import { get_identity } from '#libs-server/data-views/identities.mjs'
+import {
+  get_identity,
+  identities
+} from '#libs-server/data-views/identities.mjs'
+// The rule modules self-register on import; the registry alone is empty.
+import '#libs-server/data-views/source-attach/rules/index.mjs'
+import {
+  rules,
+  resolve as resolve_source_attach
+} from '#libs-server/data-views/source-attach/source-attach-registry.mjs'
 import {
   has_bridge,
   resolve as resolve_bridge
@@ -346,10 +355,26 @@ describe('data views line row axis', function () {
     // selection. Rows multiplying is exactly the change that could break that,
     // which is why it is asserted here rather than assumed.
     it('keeps line and odds on one shared CTE', () => {
-      const cte_names = [...with_axis.matchAll(/"(t[0-9a-f]{32})" as \(/g)].map(
-        (match) => match[1]
-      )
+      const cte_names = [
+        ...with_axis.matchAll(/"(t[0-9a-f]{32})" as (?:materialized )?\(/g)
+      ].map((match) => match[1])
       expect(new Set(cte_names).size).to.equal(1)
+    })
+
+    // Suppressing the dedup also removed the optimization fence it incidentally
+    // provided, and Postgres then inlined this CTE into the join and re-probed
+    // prop_markets_index once per candidate cell -- 203,456 loops per column on
+    // a single week, which took the saved 18-week view past the 40s statement
+    // timeout. The fence has to be asked for explicitly once the dedup is gone.
+    it('materializes the market CTE under the axis', () => {
+      expect(with_axis).to.match(/"t[0-9a-f]{32}" as materialized \(/)
+    })
+
+    // Gated, not unconditional: without the axis the dedup is back and the same
+    // 18-week request measured the same either way, so materializing there
+    // would take on planner risk for nothing.
+    it('leaves the market CTE un-materialized without the axis', () => {
+      expect(without_axis).to.not.match(/"t[0-9a-f]{32}" as materialized \(/)
     })
   })
   // The same-quantity rule. Two books on one market type share a rung and
@@ -519,6 +544,127 @@ describe('data views line row axis', function () {
         row_axes: ['year', 'week', 'line']
       })
       expect(with_axis).to.not.equal(without_axis)
+    })
+  })
+
+  // The axis shipped with an identity, a row grain and a bridge, but with no
+  // source-attach rule naming the identity it introduced -- so every column
+  // routed through attach_source threw `No source-attach rule for
+  // (cell=player_year_week_line, ...)` the moment the axis went live, and the
+  // saved view /u/4f45c2424b9601a740045d428b97e44d rendered an error instead of
+  // a ladder. The betting columns were the ones that worked, which is why the
+  // rest of this file never saw it: they carry their own `with`/`join` and
+  // never reach the dispatcher, and `player_name` reads straight off the FROM
+  // table. A column with a joined SOURCE is the case that was missing.
+  describe('non-betting columns under the axis', function () {
+    const projection_params = {
+      nfl_week_id: ['2024_REG_WEEK_1', '2024_REG_WEEK_2'],
+      sourceid: [18]
+    }
+
+    let with_axis
+
+    before(async function () {
+      const { query } = await get_data_view_results_query({
+        columns: [
+          {
+            column_id: 'player_game_prop_line_from_betting_markets',
+            params: {
+              source_id: ['FANDUEL'],
+              selection_type: ['OVER'],
+              time_type: ['CLOSE'],
+              single_nfl_week_id: ['2024_REG_WEEK_1', '2024_REG_WEEK_2'],
+              market_type: ['GAME_ALT_RECEIVING_YARDS']
+            }
+          },
+          {
+            column_id: 'player_week_projected_rec_yds',
+            params: projection_params
+          }
+        ],
+        prefix_columns: ['player_name'],
+        row_axes: ['year', 'week', 'line'],
+        row_grain: ['player']
+      })
+      with_axis = String(query)
+    })
+
+    it('attaches a source-joined column rather than refusing it', () => {
+      expect(with_axis).to.include('projections_index')
+    })
+
+    // The rung is a dimension the projection has no column for, so it repeats
+    // down the ladder. Correlating it on pid, year and week and NOT on the rung
+    // is what produces that, and is the whole reason the parent identity's rule
+    // is the right one to reuse.
+    it('correlates it on pid, year and week without a rung predicate', () => {
+      // Anchored on the RELATION, not on a bare alias shape: every join in a
+      // data-view query carries a get_table_hash alias, so a pattern matching
+      // the alias alone is satisfied by any of the twenty-odd joins here.
+      const projection_join = with_axis.match(
+        /(?:inner|left) join "projections_index" as "(t[0-9a-f]{32})" on (.*?)(?= (?:inner|left) join | where | group by |$)/
+      )
+      expect(projection_join, 'projection join not emitted').to.not.equal(null)
+
+      const [, alias, join_predicate] = projection_join
+      expect(join_predicate).to.include(`"${alias}"."pid" = "player"."pid"`)
+      expect(join_predicate).to.include(
+        `${alias}.season_year = player_years_weeks.year`
+      )
+      expect(join_predicate).to.include(
+        `${alias}.week = player_years_weeks.week`
+      )
+      expect(join_predicate).to.not.include('selection_metric_line')
+    })
+  })
+
+  // The registration gap above was a whole CLASS, not one pair: six rule files
+  // each enumerate the cell identities they serve, and the axis added a seventh
+  // identity to none of them. Rather than enumerate it seven more times, the
+  // identity declares what it refines and the registry walks that -- so what is
+  // worth pinning is the walk, on the population the identity table defines
+  // rather than on the pairs this incident happened to surface.
+  describe('refined cell identities reach their parent rules', function () {
+    it('declares the line identity as a refinement of the week identity', () => {
+      expect(get_identity('player_year_week_line').refines).to.equal(
+        'player_year_week'
+      )
+    })
+
+    it('resolves every parent rule from every refining identity', () => {
+      const refining_identity_ids = Object.values(identities)
+        .filter((identity) => identity.refines)
+        .map((identity) => identity.id)
+
+      // A vacuous pass if the filter ever finds nothing; the assertion below
+      // reads green on an empty population by construction.
+      expect(refining_identity_ids).to.not.be.empty
+
+      const unreachable = []
+      for (const identity_id of refining_identity_ids) {
+        const { refines } = get_identity(identity_id)
+        for (const rule of rules.values()) {
+          if (rule.cell_identity !== refines) continue
+          if (
+            resolve_source_attach(identity_id, rule.source_grain, rule.mode)
+          ) {
+            continue
+          }
+          unreachable.push(
+            `${identity_id} cannot reach ${refines}|${rule.source_grain}|${rule.mode}`
+          )
+        }
+      }
+
+      expect(unreachable).to.deep.equal([])
+    })
+
+    // The walk must not manufacture a rule the parent does not have either --
+    // a fallback that answers everything is indistinguishable from no registry.
+    it('still refuses a pair neither the identity nor its parent registers', () => {
+      expect(
+        resolve_source_attach('player_year_week_line', 'nonexistent_grain')
+      ).to.equal(null)
     })
   })
 })

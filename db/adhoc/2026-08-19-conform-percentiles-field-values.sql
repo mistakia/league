@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-09-02 against league_production
 --
 -- Conform percentiles.field VALUES to the column and stat-key names the
 -- current writer emits.
