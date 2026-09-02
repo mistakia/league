@@ -72,8 +72,7 @@ const MARKET_INDEX_MERGE_COLUMNS = [
   'source_event_name',
   'is_open',
   'is_live',
-  'selection_count',
-  'observed_at'
+  'selection_count'
 ]
 
 // And the two it may not, once the market is settled.
@@ -104,6 +103,29 @@ const build_market_index_merge = () => {
   for (const column of MARKET_INDEX_MERGE_COLUMNS) {
     merge[column] = db.raw('excluded.??', [column])
   }
+
+  // observed_at means opposite things on the two rows, so it cannot share the
+  // free-rewrite rule above.
+  //
+  // The CLOSE row tracks the market's latest state and wants last-write-wins.
+  // The OPEN row is written once, when the market is first seen, and its
+  // observed_at is the only record in this table of WHEN it opened. Rewriting
+  // it to excluded.observed_at redefined the column as "when this market last
+  // changed esbid or season_year" -- and because a market first inserted with
+  // an unresolved esbid gets that stamp filled in on a later observation, the
+  // OPEN row's timestamp moved to whenever the resolver caught up. Read as an
+  // opening time, the 2025 REG game lines then said Caesars opened its lines a
+  // median 1.29 days AFTER kickoff, 87.6 percent of them post-game, against a
+  // true 5.5 days BEFORE kickoff and 0.4 percent from prop_markets_history.
+  // Pinnacle carried the same artifact.
+  //
+  // First-write-wins on OPEN restores the reading its name promises. The value
+  // is preserved rather than recomputed, so this is the same shape as the
+  // settled-stamp rule below: the decision reads the row being written in the
+  // statement that writes it.
+  merge.observed_at = db.raw(
+    "case when prop_markets_index.time_type = 'OPEN' then prop_markets_index.observed_at else excluded.observed_at end"
+  )
 
   for (const column of MARKET_INDEX_STAMP_COLUMNS) {
     merge[column] = db.raw(
