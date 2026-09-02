@@ -123,6 +123,18 @@ const create_historical_game_prop_column_params = () => ({
   }
 })
 
+// The axis picker offers the UNION of row_axes over the selected columns and
+// hides itself entirely when no column declares any, so a props-only view had
+// no Splits control at all -- not even week, which every game-grain betting
+// column has supported and been fixture-covered for on the server all along.
+// A weekly props view was reachable only by hand-writing row_axes into the URL.
+//
+// Game grain only. The season prop below declares year alone: its line is one
+// value for the whole season, so week is not a split it can offer. It still
+// renders correctly if a game-grain column in the same view brings week in --
+// the season line simply repeats down the weeks.
+const GAME_GRAIN_ROW_AXES = ['year', 'week']
+
 const create_field =
   (column_groups, column_params) =>
   ({ column_title, header_label, player_value_path }) =>
@@ -131,7 +143,8 @@ const create_field =
       header_label,
       player_value_path,
       column_groups,
-      column_params
+      column_params,
+      row_axes: GAME_GRAIN_ROW_AXES
     })
 
 const create_game_prop_field = create_field(
@@ -160,6 +173,7 @@ export default {
     header_label: 'LINE',
     player_value_path: 'season_prop_line_betting_market',
     column_groups: [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.SEASON_PROPS],
+    row_axes: ['year'],
     column_params: {
       market_type: {
         label: 'Market',
