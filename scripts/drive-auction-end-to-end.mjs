@@ -28,11 +28,19 @@
  * a run as well as at the end, and `--teardown-only` recovers a league from a
  * run that was killed before it could clean up after itself.
  *
+ * TWO FLAGS OPT OUT OF THAT, and both say so when they finish. `--keep` skips
+ * the closing teardown; `--park-nomination` does not run a scenario at all and
+ * leaves an OPEN nomination on purpose, because every bid-bar component renders
+ * only when `nominated_pid` is set and a league sitting on "Waiting for a
+ * nomination" cannot be measured. Either way the league is left dirty and
+ * `--teardown-only` is what clears it.
+ *
  * usage:
  *   node scripts/drive-auction-end-to-end.mjs --lid 119
  *   node scripts/drive-auction-end-to-end.mjs --lid 119 --only elections,blocks
  *   node scripts/drive-auction-end-to-end.mjs --lid 119 --keep     # skip teardown
  *   node scripts/drive-auction-end-to-end.mjs --lid 119 --teardown-only
+ *   node scripts/drive-auction-end-to-end.mjs --lid 119 --park-nomination
  *
  * It needs no stack running and no ports guessed: it boots the working-tree API
  * in this process on an ephemeral port with an ephemeral JWT secret, and reaches
@@ -83,6 +91,7 @@ const parse_args = (argv) => {
     else if (arg === '--ssh-host') args.ssh_host = argv[++i]
     else if (arg === '--keep') args.keep = true
     else if (arg === '--teardown-only') args.teardown_only = true
+    else if (arg === '--park-nomination') args.park_nomination = true
     else if (arg === '--only') args.only = argv[++i].split(',')
     else throw new Error(`unknown argument: ${arg}`)
   }
@@ -1475,6 +1484,70 @@ const drive_proxy_bidding = async (pids) => {
 // MAIN
 // ============================================================================
 
+/**
+ * Leave the league sitting on an OPEN nomination, and stop.
+ *
+ * Deliberately does NOT tear down first. The board's standing elections are
+ * what render the per-row chips, and a session measuring the bid bar usually
+ * wants both surfaces at once; wiping them to get a tidy starting state is the
+ * opposite of the point. This only adds.
+ */
+const park_nomination = async () => {
+  const [pid] = await pick_free_agents({ count: 1 })
+  const nominator = await get_auction_nominating_team_id({ lid, season_year })
+  const client = await open_client({ tid: team_ids[0] })
+
+  try {
+    // Deliberately NOT `await_init`, which records a check through `must` and so
+    // needs an active scenario. Parking is not a scenario, and reaching for the
+    // assertion helper here threw inside the reporter -- which then unwound into
+    // main's error path and ran a teardown, wiping the board state parking
+    // exists to preserve. A utility that can destroy what it was asked to set up
+    // is worse than one that does nothing.
+    const init = await client.await_message('AUCTION_INIT', {
+      timeout_ms: 120_000
+    })
+    if (!init) throw new Error('no AUCTION_INIT within 120s')
+
+    // A ceiling from the team the VIEWING user owns, so the compact election
+    // control in the bar renders a real amount rather than "None set" -- which
+    // is the state most likely to be mistaken for the control failing to render.
+    const viewing_team = team_ids[0]
+    const elected = await elect(viewing_team, pid, 5)
+    process.stdout.write(
+      `election for team ${viewing_team} on ${pid}: ${elected.status}\n`
+    )
+
+    const before = client.mark()
+    client.send({
+      type: 'AUCTION_SUBMIT_NOMINATION',
+      payload: {
+        pid,
+        value: 0,
+        tid: nominator,
+        user_id: league_row.commissioner_user_id
+      }
+    })
+
+    const opening = await client.await_message('AUCTION_BID', {
+      from: before,
+      where: (message) => message.payload.pid === pid
+    })
+    if (!opening) {
+      throw new Error(
+        `nomination did not open the player -- ${explain_silence(client, before)}`
+      )
+    }
+
+    process.stdout.write(
+      `\nparked: ${pid} nominated by team ${nominator} at $${opening.payload.value}\n` +
+        'the league is now DIRTY on purpose. clear it with --teardown-only.\n'
+    )
+  } finally {
+    client.socket.close()
+  }
+}
+
 const main = async () => {
   await assert_target_is_safe()
 
@@ -1489,6 +1562,19 @@ const main = async () => {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
   base_url = `http://127.0.0.1:${server.address().port}`
   process.stdout.write(`working-tree API on ${base_url}\n`)
+
+  // PARKING IS NOT A SCENARIO, and it deliberately leaves the league dirty.
+  // Every bid-bar component -- the nominated player, its details row, the
+  // settlement status, the compact election control -- renders only when
+  // `nominated_pid` is set, so a league sitting on "Waiting for a nomination"
+  // can be looked at but not MEASURED. This parks an open nomination and stops,
+  // for a browser to be pointed at. Nothing settles it: election mode ends a
+  // player only on a complete outstanding set, and a ten-team league where two
+  // teams are enrolled cannot reach one.
+  if (args.park_nomination) {
+    await park_nomination()
+    return true
+  }
 
   await teardown()
   await assert_board_is_clean()
@@ -1552,7 +1638,14 @@ try {
   process.stderr.write(`\n${error.stack}\n`)
   // The teardown runs even on an unexpected throw. Rows left on the mirror put
   // a league ten managers hold a team in into live mode on a wall clock.
-  if (!args.keep) {
+  //
+  // `--park-nomination` is excluded alongside `--keep` because its whole purpose
+  // is to ADD to an existing board without disturbing it. A failed park once
+  // unwound into here and removed fifteen standing elections that another
+  // session was mid-measurement against — the recovery cost more than the park
+  // was worth, and cleanup that fires on a mode which never wrote anything is
+  // not a safety net.
+  if (!args.keep && !args.park_nomination) {
     try {
       await teardown()
     } catch (teardown_error) {
