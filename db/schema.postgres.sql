@@ -25702,7 +25702,7 @@ CREATE TABLE public.projections_history (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25728,7 +25728,9 @@ CREATE TABLE public.projections_history (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 )
 PARTITION BY RANGE (season_year);
 
@@ -25755,7 +25757,7 @@ CREATE TABLE public.projections_history_default (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25781,7 +25783,9 @@ CREATE TABLE public.projections_history_default (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -25807,7 +25811,7 @@ CREATE TABLE public.projections_history_y2020 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25833,7 +25837,9 @@ CREATE TABLE public.projections_history_y2020 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -25859,7 +25865,7 @@ CREATE TABLE public.projections_history_y2021 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25885,7 +25891,9 @@ CREATE TABLE public.projections_history_y2021 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -25911,7 +25919,7 @@ CREATE TABLE public.projections_history_y2022 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25937,7 +25945,9 @@ CREATE TABLE public.projections_history_y2022 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -25963,7 +25973,7 @@ CREATE TABLE public.projections_history_y2023 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -25989,7 +25999,9 @@ CREATE TABLE public.projections_history_y2023 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -26015,7 +26027,7 @@ CREATE TABLE public.projections_history_y2024 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -26041,7 +26053,9 @@ CREATE TABLE public.projections_history_y2024 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -26067,7 +26081,7 @@ CREATE TABLE public.projections_history_y2025 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -26093,7 +26107,9 @@ CREATE TABLE public.projections_history_y2025 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 
@@ -26119,7 +26135,7 @@ CREATE TABLE public.projections_history_y2026 (
     receiving_touchdowns numeric(3,1),
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
-    week smallint,
+    week smallint NOT NULL,
     season_year smallint,
     generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
@@ -26145,7 +26161,9 @@ CREATE TABLE public.projections_history_y2026 (
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT projections_history_week_is_a_real_week CHECK ((week >= 1)),
+    CONSTRAINT projections_history_week_not_null CHECK ((week IS NOT NULL))
 );
 
 

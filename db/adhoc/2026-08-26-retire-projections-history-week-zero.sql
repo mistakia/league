@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-09-02 against league_production
 -- Retire the week = 0 sentinel from projections_history.
 --
 -- DESTRUCTIVE HALF. The companion additive file
@@ -216,8 +216,24 @@ BEGIN
     SELECT DISTINCT passing_attempts, passing_completions, passing_yards, passing_interceptions, passing_touchdowns, rushing_attempts, rushing_yards, rushing_touchdowns, targets, receptions, receiving_yards, receiving_touchdowns, fumbles_lost, two_point_conversions, field_goals_made, field_goal_yards, field_goals_made_0_19_yards, field_goals_made_20_29_yards, field_goals_made_30_39_yards, field_goals_made_40_49_yards, field_goals_made_50_plus_yards, extra_points_made, defensive_sacks, defensive_interceptions, defensive_forced_fumbles, defensive_recovered_fumbles, defensive_three_and_outs, defensive_fourth_down_stops, defensive_points_against, defensive_yards_against, defensive_blocked_kicks, defensive_safeties, defensive_two_point_returns, defensive_touchdowns, kickoff_return_touchdowns, punt_return_touchdowns FROM public.season_projections_history
   ) x;
 
+  -- SCOPED TO THE SOURCE DOMAIN, deliberately, and this is not a weakening.
+  -- The writer repoint deployed 2026-08-26 18:15 UTC, so since then
+  -- season_projections_history has been the LIVE table and projections_history
+  -- week 0 has been a frozen snapshot. The two are SUPPOSED to diverge: an
+  -- unscoped EXCEPT reports 5,118 "fabricated" states that are simply forecast
+  -- movements recorded after the source stopped being written, and asserting
+  -- they do not exist would report a healthy cutover as corruption. Measured
+  -- 2026-09-02: 13,438 extract rows postdate the last week-0 instant, and
+  -- restricted to generated_at <= that instant the count is 0.
+  --
+  -- The direction that matters is UNSCOPED and stays that way: missing_states
+  -- asserts every source state survives, which is the claim that justifies the
+  -- delete. board_mismatches and unmatched_rows are likewise unscoped and are
+  -- structurally unaffected -- every source row predates every post-deploy
+  -- extract row, so the lateral can never select one.
   SELECT count(*) INTO fabricated_states FROM (
     SELECT DISTINCT passing_attempts, passing_completions, passing_yards, passing_interceptions, passing_touchdowns, rushing_attempts, rushing_yards, rushing_touchdowns, targets, receptions, receiving_yards, receiving_touchdowns, fumbles_lost, two_point_conversions, field_goals_made, field_goal_yards, field_goals_made_0_19_yards, field_goals_made_20_29_yards, field_goals_made_30_39_yards, field_goals_made_40_49_yards, field_goals_made_50_plus_yards, extra_points_made, defensive_sacks, defensive_interceptions, defensive_forced_fumbles, defensive_recovered_fumbles, defensive_three_and_outs, defensive_fourth_down_stops, defensive_points_against, defensive_yards_against, defensive_blocked_kicks, defensive_safeties, defensive_two_point_returns, defensive_touchdowns, kickoff_return_touchdowns, punt_return_touchdowns FROM public.season_projections_history
+    WHERE generated_at <= (SELECT max(generated_at) FROM public.projections_history WHERE week = 0 AND user_id = 0)
     EXCEPT
     SELECT DISTINCT passing_attempts, passing_completions, passing_yards, passing_interceptions, passing_touchdowns, rushing_attempts, rushing_yards, rushing_touchdowns, targets, receptions, receiving_yards, receiving_touchdowns, fumbles_lost, two_point_conversions, field_goals_made, field_goal_yards, field_goals_made_0_19_yards, field_goals_made_20_29_yards, field_goals_made_30_39_yards, field_goals_made_40_49_yards, field_goals_made_50_plus_yards, extra_points_made, defensive_sacks, defensive_interceptions, defensive_forced_fumbles, defensive_recovered_fumbles, defensive_three_and_outs, defensive_fourth_down_stops, defensive_points_against, defensive_yards_against, defensive_blocked_kicks, defensive_safeties, defensive_two_point_returns, defensive_touchdowns, kickoff_return_touchdowns, punt_return_touchdowns FROM public.projections_history WHERE week = 0 AND user_id = 0
   ) x;
@@ -289,6 +305,32 @@ DELETE FROM public.projections_history WHERE week = 0 AND user_id <> 0;
 --
 
 DELETE FROM public.projections_history WHERE week = 0;
+
+--
+-- (4b) MEASURE THE CHECK PREDICATE AGAINST THE SURVIVING ROWS.
+--
+-- A scratch-database rehearsal proves DDL VALIDITY and never data: an empty
+-- table satisfies every constraint vacuously. This counts, against real
+-- league_production rows and AFTER the delete, exactly what VALIDATE is about
+-- to reject. VALIDATE reports pass/fail; this reports the number.
+--
+
+DO $measure$
+DECLARE
+  violate_ge_1 bigint;
+  violate_not_null bigint;
+  surviving bigint;
+BEGIN
+  SELECT count(*) FILTER (WHERE week IS NOT NULL AND NOT (week >= 1)),
+         count(*) FILTER (WHERE week IS NULL),
+         count(*)
+    INTO violate_ge_1, violate_not_null, surviving
+    FROM public.projections_history;
+
+  RAISE NOTICE 'check predicate over % surviving rows: % violate (week >= 1), % violate (week IS NOT NULL)',
+    surviving, violate_ge_1, violate_not_null;
+END
+$measure$;
 
 --
 -- (5) Constrain the column so the sentinel cannot return.

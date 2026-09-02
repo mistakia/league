@@ -19998,7 +19998,7 @@ export interface ProjectionsHistoryRow {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20045,7 +20045,7 @@ export interface ProjectionsHistoryDefaultRow {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20092,7 +20092,7 @@ export interface ProjectionsHistoryY2020Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20139,7 +20139,7 @@ export interface ProjectionsHistoryY2021Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20186,7 +20186,7 @@ export interface ProjectionsHistoryY2022Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20233,7 +20233,7 @@ export interface ProjectionsHistoryY2023Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20280,7 +20280,7 @@ export interface ProjectionsHistoryY2024Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20327,7 +20327,7 @@ export interface ProjectionsHistoryY2025Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
@@ -20374,7 +20374,7 @@ export interface ProjectionsHistoryY2026Row {
   receiving_touchdowns: number | null
   fumbles_lost: number | null
   two_point_conversions: number | null
-  week: number | null
+  week: number
   season_year: number | null
   generated_at: Date
   field_goals_made: number | null
