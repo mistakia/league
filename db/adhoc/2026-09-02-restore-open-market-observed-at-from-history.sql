@@ -1,4 +1,4 @@
--- STATUS: NOT APPLIED
+-- STATUS: APPLIED 2026-09-02 against league_production
 --
 -- Restore prop_markets_index OPEN rows to their true first-observation
 -- timestamp, taken from prop_markets_history.
