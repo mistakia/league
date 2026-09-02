@@ -43,6 +43,11 @@ const positions = {
   40: 'TE'
 }
 
+// fftoday's own statement that the requested season/week does not exist. It
+// serves this on a 200 with no table at all, which is what makes "not published
+// yet" separable from "the markup changed".
+const NO_PLAYERS_SENTINEL = 'No Player Found!'
+
 // Parsing functions for different projection types
 const parse_regular_season_data = (pos, $, el) => {
   const data = {}
@@ -169,13 +174,40 @@ const run = async ({
       const $ = await fetch_cheerio(url)
       count = $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').length
 
-      // Zero rows on the FIRST page means the page moved or changed shape; on a
-      // later page it is just the end of the pagination.
-      throw_if_shortfall(
-        page === 0 && count === 0
-          ? `fftoday projections: parsed 0 rows for position ${position} (${url})`
-          : null
-      )
+      // Zero rows on the FIRST page has two causes that must not be conflated;
+      // on a later page it is just the end of the pagination.
+      if (page === 0 && count === 0) {
+        // fftoday answers a season/week it has not published yet with a 200
+        // carrying an explicit sentinel instead of an empty table, so the two
+        // cases are distinguishable at the source. Matching a vendor's literal
+        // string is normally a trap, but it fails SAFE here: a reworded
+        // sentinel stops matching, falls through, and throws.
+        const upstream_reports_no_players =
+          $.html().includes(NO_PLAYERS_SENTINEL)
+
+        // A weekly slice is legitimately absent in the offseason -- fftoday
+        // publishes week N shortly before week N's games. This is the same
+        // judgment check_projections_index_floor already makes, on the same
+        // predicate, and deliberately stops excusing the absence once
+        // is_offseason turns false (the Tuesday before the week 1 opener), so a
+        // genuine fftoday outage is still caught before week 1 is played.
+        if (
+          upstream_reports_no_players &&
+          !is_regular_season_projection &&
+          current_season.is_offseason
+        ) {
+          console.log(
+            `fftoday has not published ${year} week ${week} weekly projections yet; skipping (offseason)`
+          )
+          return { skipped: true }
+        }
+
+        throw_if_shortfall(
+          upstream_reports_no_players
+            ? `fftoday projections: upstream reports no players for season ${year} week ${week} position ${position} (${url})`
+            : `fftoday projections: parsed 0 rows for position ${position} (${url})`
+        )
+      }
 
       $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').each(
         (i, el) => {
