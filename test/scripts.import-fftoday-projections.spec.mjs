@@ -22,13 +22,16 @@ const changed_markup_page =
 const during_offseason = '2026-09-02T12:00:00Z'
 const during_regular_season = '2026-10-15T12:00:00Z'
 
-const serve = (body) => {
-  global.fetch = async () => new Response(body, { status: 200 })
+// fftoday rate-limits with a 403 after roughly a dozen rapid requests, and the
+// body it serves with that status parses to zero rows exactly like a redesign.
+// The status is the only thing separating them, so the stub carries it.
+const serve = (body, status = 200) => {
+  global.fetch = async () => new Response(body, { status })
 }
 
-const attempt = async ({ body, now, season = false }) => {
+const attempt = async ({ body, now, season = false, status = 200 }) => {
   MockDate.set(now)
-  serve(body)
+  serve(body, status)
   try {
     const result = await run({
       dry: true,
@@ -76,6 +79,53 @@ describe('SCRIPTS /import-fftoday-projections', function () {
       })
       expect(threw).to.equal(false)
       expect(result).to.deep.equal({ skipped: true, unpublished: true })
+    })
+  })
+
+  // The third case the zero-row parse used to swallow. fftoday rate-limits with
+  // a 403, whose body carries neither the sentinel nor a table, so before the
+  // helper looked at the status this arrived at throw_if_shortfall wearing the
+  // "parsed 0 rows" message -- reporting a redesign when the truth was that we
+  // were refused. It must fail, but it must NOT claim the markup moved.
+  describe('upstream refused the request', function () {
+    it('reports the status rather than a markup change on a 403', async () => {
+      const { threw, err } = await attempt({
+        body: changed_markup_page,
+        now: during_regular_season,
+        status: 403
+      })
+      expect(threw).to.equal(true)
+      expect(err.http_status).to.equal(403)
+      expect(err.message).to.match(/403/)
+      expect(err.message).to.not.match(/parsed 0 rows/)
+      expect(err.row_count_shortfall).to.not.equal(true)
+    })
+
+    // A 5xx is the same class and must read the same way.
+    it('reports the status rather than a markup change on a 503', async () => {
+      const { threw, err } = await attempt({
+        body: changed_markup_page,
+        now: during_regular_season,
+        status: 503
+      })
+      expect(threw).to.equal(true)
+      expect(err.http_status).to.equal(503)
+      expect(err.row_count_shortfall).to.not.equal(true)
+    })
+
+    // The case `response.ok` cannot catch, and the reason this check is
+    // `status !== 200` rather than `!response.ok`: a WAF challenge answers 202,
+    // which is inside the 2xx range, with an empty body dressed as success.
+    // Even served with the sentinel it must fail rather than skip -- a
+    // challenge is not fftoday telling us the board is unpublished.
+    it('fails a 202 challenge even when the body carries the sentinel', async () => {
+      const { threw, err } = await attempt({
+        body: sentinel_page,
+        now: during_regular_season,
+        status: 202
+      })
+      expect(threw).to.equal(true)
+      expect(err.http_status).to.equal(202)
     })
   })
 

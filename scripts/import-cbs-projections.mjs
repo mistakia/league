@@ -31,10 +31,36 @@ const getUrl = (pos, type) =>
 
 const positions = ['QB', 'RB', 'WR', 'TE']
 
+// CBS states the board's own season in the page heading -- "2026 Projections
+// Fantasy Football Quarterback Stats" -- and that heading is the ONLY part of
+// the response that reflects which slice was actually served. Measured
+// 2026-09-02: the year and week segments of the URL are both decorative. QB
+// 2027, 2030, week 25 and week 99 all answer 200 with the identical 69-row 2026
+// season-long board, so a request for a slice CBS has not opened is not an
+// empty table -- it is last season's numbers wearing this season's label.
+const board_season_year = ($) => {
+  const heading = $('h1').first().text().trim()
+  const match = heading.match(/\b(20\d{2})\b/)
+  return match ? Number(match[1]) : null
+}
+
 const run = async ({ season = false, dry = false } = {}) => {
   const period = season ? projection_periods.SEASON : projection_periods.WEEK
   const week = current_season.active_fantasy_week
   const type = season ? 'season' : week
+
+  // CBS publishes no weekly projection board at all. The week segment of the
+  // URL is decorative -- week 1, week 25 and week 99 return the same
+  // season-long table -- and unlike the year, the page carries no week marker,
+  // so there is nothing to verify a weekly slice against. Running this path
+  // does not fail; it writes full-season totals into week-N weekly rows, which
+  // is why it must refuse rather than proceed. The weekly cron line is already
+  // commented out in server/crontab-main/league-imports.cron.
+  if (!season) {
+    throw new Error(
+      'cbs projections: CBS publishes no weekly board -- the week segment of the URL is ignored and the page returns season-long totals, so a weekly run would write season numbers as week projections. Use --season.'
+    )
+  }
   // do not pull in any projections after the season has ended
   if (
     type !== 'season' &&
@@ -53,6 +79,43 @@ const run = async ({ season = false, dry = false } = {}) => {
     const url = getUrl(position, type)
     log(url)
     const $ = await fetch_cheerio(url)
+
+    // Which season CBS actually served, which is not necessarily the one asked
+    // for. Reading a vendor's heading is normally a trap, but it fails SAFE in
+    // both directions here: a redesign that drops or rewords the heading yields
+    // null and throws below, and a heading that still parses but reports the
+    // wrong year is precisely the case worth catching.
+    const served_year = board_season_year($)
+
+    if (served_year === null) {
+      throw_if_shortfall(
+        `cbs projections: could not read the board season from the page heading for ${position} (${url})`
+      )
+    }
+
+    // CBS has not opened the requested season yet, so it is still serving the
+    // previous board. Not a failure, and not something this importer can
+    // predict -- CBS gives no notice of when it rolls over, so no date or
+    // season phase can be put on it. Skipping is what keeps last season's
+    // numbers from being written under this season's label; the season cron
+    // runs every day in months 5-8, so the next run takes it as soon as the
+    // board turns over.
+    if (served_year < year) {
+      console.log(
+        `cbs has not published ${year} projections yet (still serving ${served_year}); nothing to import, skipping`
+      )
+      return { skipped: true, unpublished: true }
+    }
+
+    // A board AHEAD of the requested season is not a slice CBS declined to
+    // publish -- it is this importer asking for the wrong year, and importing
+    // it would file next season's numbers under this one.
+    if (served_year > year) {
+      throw_if_shortfall(
+        `cbs projections: requested ${year} but CBS served the ${served_year} board for ${position} (${url})`
+      )
+    }
+
     const row_count_before = items.length
     // CBS renders one table per stat page; it sat inside <main> until a 2025
     // redesign moved it out, which silently zeroed this import for a year.
@@ -124,9 +187,12 @@ const run = async ({ season = false, dry = false } = {}) => {
     })
 
     // A parse that yields nothing is always a failure — the page either moved
-    // or changed shape. check_projections_index_floor cannot catch it here,
-    // because it short-circuits on current_season.is_offseason and the only live CBS cron is
-    // the offseason season-projection run.
+    // or changed shape. There is deliberately no "upstream published nothing"
+    // arm here, because CBS has no such state: it answers every slice, valid or
+    // not, with a full board. An unopened season is caught above by the heading
+    // year instead, so the only way to reach a zero row count with a heading
+    // that parses and matches is a markup change. Adding a skip arm would mean
+    // inventing a signal the vendor does not send.
     throw_if_shortfall(
       items.length === row_count_before
         ? `cbs projections: parsed 0 rows for ${position} (${url})`
