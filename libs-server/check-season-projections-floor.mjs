@@ -13,16 +13,22 @@ import throw_if_shortfall from './throw-if-shortfall.mjs'
 // publish ONLY a season projection, so for those it was their only one.
 //
 // THE OFFSEASON IS NOT SKIPPED HERE, and that is the difference that matters.
-// The weekly check short-circuits on `current_season.is_offseason` because a
-// weekly row is legitimately absent then. A SEASON row is the opposite: the
-// offseason is exactly when these importers run and exactly when the row must
-// exist. Inheriting that skip would have produced a check that is blind for the
-// entire window it exists to watch.
+// A SEASON row must exist in the offseason -- that is exactly when these
+// importers run. Borrowing an offseason skip would have produced a check blind
+// for the entire window it exists to watch.
 //
 // What is legitimately absent is a season projection before the sources publish
 // one, which happens when camps open rather than at any fantasy-calendar
 // boundary. That is stated as its own condition below rather than borrowed from
 // the offseason flag.
+//
+// The weekly counterpart now has the same SHAPE with a different anchor: it,
+// too, names its own publication window rather than borrowing a flag. It used
+// to short-circuit on `current_season.is_offseason`, which reads as the mirror
+// image of this decision but is not -- `is_offseason` stays true through the
+// run-up week in which the sources publish week 1, so the weekly check was
+// asleep across the season's first weekly imports. Its window opens at
+// `regular_season_start`; see the comment there.
 const SOURCES_PUBLISH_FROM_MONTH = 6 // July, zero-indexed
 
 export const sources_publish_season_projections = ({ now = new Date() } = {}) =>

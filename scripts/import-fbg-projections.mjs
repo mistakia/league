@@ -22,7 +22,6 @@ const initialize_cli = () => {
 
 const log = debug('import:projections')
 enable_debug_namespaces('import:projections,get-player,fetch')
-const week = current_season.active_fantasy_week
 
 const format_projection = (stats) => ({
   passing_yards: stats.pyd,
@@ -50,10 +49,20 @@ const run = async ({ dry_run = false } = {}) => {
     return { skipped: true }
   }
 
-  if (!current_season.week) {
-    log('No projections available for current week')
-    return { skipped: true }
-  }
+  // The week this run targets, read off the getter at the point of use. It was
+  // a module-level const, which freezes a clock-dependent getter at import and
+  // never moves again.
+  //
+  // `active_fantasy_week`, not `week`. The two differ for the whole run-up to
+  // week 1 -- `week` is the raw counter and is 0 there -- and this script used
+  // BOTH: it wrote `active_fantasy_week` while fetching `week`, and bailed
+  // early on `!current_season.week`. That bail is what produced a successful
+  // job with zero rows on 2026-09-02, and it masked the fetch/write mismatch
+  // behind it, so removing it alone would have started fetching
+  // `WeeklyProjections-2026-0.json` for a week the run intended to write as 1.
+  // One value now feeds the URL and the write coordinate, so the two cannot
+  // disagree.
+  const week = current_season.active_fantasy_week
 
   const config_row = await db('config').where({ key: 'fbg_config' }).first()
   const fbg_config = config_row.config_value
@@ -71,7 +80,7 @@ const run = async ({ dry_run = false } = {}) => {
     response_type: 'json'
   })
 
-  const projections_url = `${fbg_config.data_url}/WeeklyProjections-${current_season.year}-${current_season.week}.json`
+  const projections_url = `${fbg_config.data_url}/WeeklyProjections-${current_season.year}-${week}.json`
   log(`fetching projections from ${projections_url}`)
   const data = await fetch_with_retry({
     url: projections_url,

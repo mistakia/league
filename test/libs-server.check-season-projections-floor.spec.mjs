@@ -220,7 +220,13 @@ describe('libs-server check_season_projections_floor', function () {
     )
 
     // The control: the weekly check, given a source with zero rows under the
-    // same clock, returns silently because it short-circuits on is_offseason.
+    // same clock, returns silently. Both checks now gate on their OWN
+    // publication window rather than on the offseason flag, and this clock
+    // sits inside the season window and before the weekly one -- which is
+    // exactly why the two disagree here. Do not re-read this silence as an
+    // offseason short-circuit; the weekly check no longer has one, and
+    // libs-server.check-projections-index-floor.spec.mjs pins a clock where it
+    // fires with is_offseason still true.
     await expect_resolves(
       check_projections_index_floor({
         season_year: SEASON_YEAR,
