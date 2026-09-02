@@ -6,8 +6,10 @@ import {
   submit_auction_election,
   withdraw_auction_election,
   get_team_auction_elections,
-  get_auction_settlement_status
+  get_auction_settlement_status,
+  broadcast_auction_settlement_status
 } from '#libs-server/auction-elections.mjs'
+import { broadcast_auction_settlement } from '#libs-server/auction-settlement.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -134,6 +136,32 @@ router.get('/status', async (req, res) => {
  *     responses:
  *       200:
  *         description: Election recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                 tid:
+ *                   type: integer
+ *                 maximum_bid:
+ *                   type: integer
+ *                   nullable: true
+ *                   description: null is a decline
+ *                 settlement:
+ *                   type: object
+ *                   nullable: true
+ *                   description: >-
+ *                     Present only when this election completed the eligible set
+ *                     and the player settled in the same request.
+ *                   properties:
+ *                     pid:
+ *                       type: string
+ *                     winner_tid:
+ *                       type: integer
+ *                     price:
+ *                       type: integer
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
@@ -188,25 +216,24 @@ router.post('/?', async (req, res) => {
 
     res.send({ pid, tid: teamId, maximum_bid, settlement: result.settlement })
 
-    broadcast(Number(leagueId), {
-      type: 'AUCTION_ELECTION_RECORDED',
-      // The AMOUNT is deliberately absent. Every client in the league receives
-      // this, so it carries only the fact that a team has acted.
-      payload: { pid, tid: teamId }
-    })
-
     // An election can COMPLETE the eligible set and settle the player in the
     // same request. Nothing on the socket path knows that happened, so without
     // this every connected client sits on a board showing a player that has
-    // already sold.
+    // already sold and on the previous team's nomination turn.
+    //
+    // The AMOUNT never appears in either branch. Every client in the league
+    // receives these, and a maximum is a sealed bid.
     if (result.settlement) {
-      broadcast(Number(leagueId), {
-        type: 'AUCTION_PROCESSED',
-        payload: {
-          pid: result.settlement.pid,
-          tid: result.settlement.winner_tid,
-          player_salary: result.settlement.price
-        }
+      await broadcast_auction_settlement({
+        broadcast,
+        lid: leagueId,
+        settlement: result.settlement,
+        logger
+      })
+    } else {
+      await broadcast_auction_settlement_status({
+        broadcast,
+        lid: leagueId
       })
     }
   } catch (error) {
@@ -235,6 +262,25 @@ router.post('/?', async (req, res) => {
  *     responses:
  *       200:
  *         description: Election withdrawn
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                 tid:
+ *                   type: integer
+ *                 settlement:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     pid:
+ *                       type: string
+ *                     winner_tid:
+ *                       type: integer
+ *                     price:
+ *                       type: integer
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
@@ -281,10 +327,22 @@ router.delete('/?', async (req, res) => {
 
     res.send({ pid, tid: teamId, settlement: result.settlement })
 
-    broadcast(Number(leagueId), {
-      type: 'AUCTION_ELECTION_WITHDRAWN',
-      payload: { pid, tid: teamId }
-    })
+    // Withdrawing a DECLINE puts the team back into the outstanding set, so the
+    // recomputed status is the only honest thing to send -- the list can grow
+    // here as well as shrink.
+    if (result.settlement) {
+      await broadcast_auction_settlement({
+        broadcast,
+        lid: leagueId,
+        settlement: result.settlement,
+        logger
+      })
+    } else {
+      await broadcast_auction_settlement_status({
+        broadcast,
+        lid: leagueId
+      })
+    }
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

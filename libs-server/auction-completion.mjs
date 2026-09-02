@@ -1,6 +1,6 @@
 import db from '#db'
 import { Roster, get_free_agent_period } from '#libs-shared'
-import { current_season } from '#constants'
+import { current_season, transaction_types } from '#constants'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 
@@ -105,8 +105,108 @@ export const may_process_free_agency_waivers = async ({
   return is_auction_complete({ lid, season_year })
 }
 
+/**
+ * Whose nomination turn is it, from the auction's transaction log.
+ *
+ * PURE, and the ONE implementation of the rotation rule. The socket used to own
+ * this outright, reading its own cached `_transactions` and `_teams`, which made
+ * the rule unreachable from the REST paths that settle a player in election
+ * mode -- so a settlement advanced the turn on the server and left every
+ * connected client showing the previous team on the clock. The nominate button
+ * is gated on that value, so the team whose turn it now was had no control to
+ * act with until they reloaded.
+ *
+ * The rule itself: find the nomination that opened the newest player -- the
+ * `AUCTION_BID` row whose next-older neighbour is absent or is an
+ * `AUCTION_PROCESSED`. If a player is still open the nominator holds the clock;
+ * otherwise the turn walks the draft order from the last nominator and stops at
+ * the first team with an open active spot. `null` means every team is full,
+ * which IS the auction-complete condition rather than an error.
+ *
+ * @param {object} params
+ * @param {object[]} params.transactions AUCTION_BID and AUCTION_PROCESSED rows,
+ *   newest first by `occurred_at` then `transaction_id`.
+ * @param {Array<number>} params.tids team ids in `draft_order`.
+ * @param {object[]} params.teams team rows carrying `team_id` and `availableSpace`.
+ * @returns {number|null}
+ */
+export const resolve_nominating_team_id = ({ transactions, tids, teams }) => {
+  const latest = transactions[0]
+  if (!latest) return tids[0]
+
+  const last_nomination = transactions.find((transaction, index) => {
+    const older = transactions[index + 1]
+    return (
+      transaction.type === transaction_types.AUCTION_BID &&
+      (!older || older.type === transaction_types.AUCTION_PROCESSED)
+    )
+  })
+
+  // A log carrying AUCTION_PROCESSED rows with no opening bid behind them is
+  // not a state this auction reaches on its own, but a cloned board can arrive
+  // that way. Fall back to the head of the rotation rather than throwing on an
+  // undefined row, which is what the socket's own copy of this did.
+  if (!last_nomination) return tids[0]
+
+  if (latest.type === transaction_types.AUCTION_BID) {
+    return last_nomination.tid
+  }
+
+  const index = tids.indexOf(last_nomination.tid)
+  const rotation = tids.slice(index + 1).concat(tids.slice(0, index + 1))
+
+  for (const tid of rotation) {
+    const team = teams.find((candidate) => candidate.team_id === tid)
+    if (team && team.availableSpace) return tid
+  }
+
+  return null
+}
+
+/**
+ * Whose nomination turn is it, read from the database rather than from a cache.
+ *
+ * IN ELECTION MODE THE SOCKET IS NOT THE WRITER, so a REST settlement has to be
+ * able to answer this without a socket instance -- and reading the database
+ * rather than a cache is also the correct side of the staleness invariant this
+ * subsystem keeps tripping over.
+ */
+export const get_auction_nominating_team_id = async ({
+  lid,
+  season_year = current_season.year
+}) => {
+  const league = await getLeague({ lid })
+  const teams = (await db('teams').where({ lid, season_year })).sort(
+    (a, b) => a.draft_order - b.draft_order
+  )
+  const tids = teams.map((team) => team.team_id)
+  if (!tids.length) return null
+
+  for (const team of teams) {
+    const roster = new Roster({
+      roster: await getRoster({ tid: team.team_id }),
+      league
+    })
+    team.availableSpace = roster.availableSpace
+  }
+
+  const transactions = await db('transactions')
+    .whereIn('tid', tids)
+    .where('season_year', season_year)
+    .whereIn('type', [
+      transaction_types.AUCTION_BID,
+      transaction_types.AUCTION_PROCESSED
+    ])
+    .orderBy('occurred_at', 'desc')
+    .orderBy('transaction_id', 'desc')
+
+  return resolve_nominating_team_id({ transactions, tids, teams })
+}
+
 export default {
   get_auction_spots_remaining,
   is_auction_complete,
-  may_process_free_agency_waivers
+  may_process_free_agency_waivers,
+  resolve_nominating_team_id,
+  get_auction_nominating_team_id
 }

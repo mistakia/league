@@ -104,6 +104,10 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         bid: null,
         transactions: state.transactions.unshift(payload),
         nominated_pid: null,
+        // The outstanding set belongs to the player that just sold. Carrying it
+        // into the next nomination would name teams against a player they have
+        // not been asked about yet.
+        outstanding_election_tids: new List(),
         timer: Math.round((Date.now() + state.nominationTimer) / 1000)
       })
 

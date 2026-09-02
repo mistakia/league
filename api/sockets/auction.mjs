@@ -9,16 +9,15 @@ import {
 } from '#constants'
 import { getRoster, getLeague, sendNotifications } from '#libs-server'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
-import {
-  format_nomination_message,
-  format_nomination_complete_message
-} from '#libs-server/format-auction-discord-message.mjs'
+import { format_nomination_message } from '#libs-server/format-auction-discord-message.mjs'
 import {
   settle_auction_player_if_complete,
   get_active_auction_nomination,
   get_auction_team_capacities,
-  get_outstanding_team_ids
+  get_outstanding_team_ids,
+  broadcast_auction_settlement
 } from '#libs-server/auction-settlement.mjs'
+import { resolve_nominating_team_id } from '#libs-server/auction-completion.mjs'
 import debug from 'debug'
 
 // The real timers, and the default injection.
@@ -744,25 +743,17 @@ export default class Auction {
       }
 
       await this._reload_after_settlement()
-      await this._send_completion_notification(settlement)
 
-      this.broadcast({
-        type: 'AUCTION_PROCESSED',
-        payload: {
-          pid: settlement.pid,
-          tid: settlement.winner_tid,
-          player_salary: settlement.price
-        }
-      })
-
-      const nominating_team_id = this.nominating_team_id
-      if (!nominating_team_id) {
-        return this.broadcast({ type: 'AUCTION_COMPLETE' })
-      }
-
-      return this.broadcast({
-        type: 'AUCTION_NOMINATION_INFO',
-        payload: { nominating_team_id }
+      // The same fan-out the REST paths use: notification, the sale, and the
+      // advanced turn. Announcing a settlement is one act with four effects and
+      // the socket owning its own copy is what let the REST path ship with two
+      // of them missing.
+      return broadcast_auction_settlement({
+        broadcast: (lid, message) => this.broadcast(message),
+        lid: this._lid,
+        settlement,
+        league: this._league,
+        logger: this.logger
       })
     } catch (error) {
       this.logger('error settling election', error)
@@ -853,33 +844,6 @@ export default class Auction {
       this.logger(
         `Discord notification error for auction nomination: ${error.message}`
       )
-      return false
-    }
-  }
-
-  async _send_completion_notification({ pid, winner_tid, price }) {
-    // Takes the settlement itself rather than reading `_transactions[0]`. The
-    // settled row is written inside the settlement transaction, so the socket's
-    // cached transaction list has not necessarily caught up when this runs --
-    // reading the cache here announced the wrong price for one bid clock.
-    try {
-      const format_message = await format_nomination_complete_message({
-        player_id: pid,
-        winning_bid_amount: price,
-        winning_team_id: winner_tid
-      })
-
-      if (format_message) {
-        this.logger(format_message)
-        await sendNotifications({
-          league: this._league,
-          message: format_message,
-          notifyLeague: true
-        })
-      }
-      return true
-    } catch (error) {
-      this.logger('error sending Discord notification for completion', error)
       return false
     }
   }
@@ -1159,39 +1123,17 @@ export default class Auction {
   // GETTERS
   // ============================================================================
 
+  // Delegates rather than deciding. The rotation rule also has to be answerable
+  // from the REST paths that settle a player in election mode, where there is no
+  // socket instance to ask, so it lives in `auction-completion.mjs` and this is
+  // the cached-input caller. A second copy here is the shape of the defect this
+  // subsystem has now produced twice -- three disagreeing budget comparisons,
+  // and three salary-in-force rules of which one was repaired.
   get nominating_team_id() {
-    const last_tran = this._transactions[0]
-    if (!last_tran) {
-      return this._tids[0]
-    }
-
-    const last_nomination = this._transactions.find((tran, index) => {
-      const prev = this._transactions[index + 1]
-      return (
-        tran.type === transaction_types.AUCTION_BID &&
-        (!prev || prev.type === transaction_types.AUCTION_PROCESSED)
-      )
+    return resolve_nominating_team_id({
+      transactions: this._transactions,
+      tids: this._tids,
+      teams: this._teams
     })
-
-    this.logger(`last nominating team_id: ${last_nomination.tid}`)
-
-    if (last_tran.type === transaction_types.AUCTION_BID) {
-      return last_nomination.tid
-    } else {
-      // starting with the tid of the last nomination
-      const idx = this._tids.indexOf(last_nomination.tid)
-      const list = this._tids
-        .slice(idx + 1)
-        .concat(this._tids.slice(0, idx + 1))
-
-      for (const tid of list) {
-        const team = this._teams.find((t) => t.team_id === tid)
-        if (team.availableSpace) {
-          return team.team_id
-        }
-      }
-    }
-
-    return null
   }
 }

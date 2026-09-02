@@ -9,6 +9,9 @@ import {
 import { resolve_auction_player } from './resolve-auction-player.mjs'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
+import sendNotifications from './send-notifications.mjs'
+import { format_nomination_complete_message } from './format-auction-discord-message.mjs'
+import { get_auction_nominating_team_id } from './auction-completion.mjs'
 import debug from 'debug'
 
 const log = debug('auction-settlement')
@@ -544,7 +547,7 @@ export const sweep_unnominated_auction_elections = async ({
 }
 
 /**
- * Broadcast a settlement to every client in the league.
+ * Announce a settlement: Discord, then every client in the league.
  *
  * IN ELECTION MODE THE SOCKET IS NOT THE WRITER. Managers elect over REST and
  * settlement fires from the write path, so a settlement happens somewhere the
@@ -553,11 +556,54 @@ export const sweep_unnominated_auction_elections = async ({
  * that has already sold, and the socket's own view of whose nomination turn it
  * is never advances.
  *
- * One function so the payload shape cannot drift between the three places a
- * REST settlement can originate: an election, a trade, and a commissioner
- * override release.
+ * ALL FOUR EFFECTS BELONG TOGETHER, and splitting them is what went wrong. This
+ * used to broadcast `AUCTION_PROCESSED` alone while the socket's own settle path
+ * did four things, so an election-mode settlement -- which is EVERY settlement
+ * in 2026 -- left two of them undone:
+ *
+ * - The turn never advanced on the client. `auction-targets` gates the nominate
+ *   button on `nominating_team_id === app.teamId`, so the team whose turn it now
+ *   was had no control to nominate with until they reloaded the page. Nomination
+ *   is the design's identified bottleneck and it is manual in election mode, so
+ *   this stalled the auction after every single sale.
+ * - No Discord message went out. With no clock in election mode, being told a
+ *   player has sold and the turn has moved is a manager's only prompt to act.
+ *
+ * One function so none of that can drift between the three places a REST
+ * settlement can originate -- an election, a trade, and a commissioner override
+ * release -- or between those and the socket.
  */
-export const broadcast_auction_settlement = ({ broadcast, lid, settlement }) =>
+export const broadcast_auction_settlement = async ({
+  broadcast,
+  lid,
+  settlement,
+  season_year = current_season.year,
+  league,
+  logger
+}) => {
+  try {
+    const resolved_league = league || (await getLeague({ lid }))
+    const message = await format_nomination_complete_message({
+      player_id: settlement.pid,
+      winning_bid_amount: settlement.price,
+      winning_team_id: settlement.winner_tid
+    })
+
+    if (message) {
+      await sendNotifications({
+        league: resolved_league,
+        message,
+        notifyLeague: true
+      })
+    }
+  } catch (error) {
+    // A notification failure must never take the settlement broadcast down with
+    // it. The sale has already committed; a silent Discord is a degraded
+    // auction, a client left on a sold player is a stalled one.
+    log(`settlement notification failed for league ${lid}`)
+    if (logger) logger(error)
+  }
+
   broadcast(Number(lid), {
     type: 'AUCTION_PROCESSED',
     payload: {
@@ -566,6 +612,21 @@ export const broadcast_auction_settlement = ({ broadcast, lid, settlement }) =>
       player_salary: settlement.price
     }
   })
+
+  const nominating_team_id = await get_auction_nominating_team_id({
+    lid,
+    season_year
+  })
+
+  if (!nominating_team_id) {
+    return broadcast(Number(lid), { type: 'AUCTION_COMPLETE' })
+  }
+
+  return broadcast(Number(lid), {
+    type: 'AUCTION_NOMINATION_INFO',
+    payload: { nominating_team_id }
+  })
+}
 
 /**
  * Re-evaluate the active nomination after a roster change the auction did not
@@ -617,7 +678,13 @@ export const reevaluate_auction_after_roster_change = async ({
     )
 
     if (broadcast) {
-      broadcast_auction_settlement({ broadcast, lid, settlement })
+      await broadcast_auction_settlement({
+        broadcast,
+        lid,
+        settlement,
+        season_year,
+        logger
+      })
     }
 
     return settlement

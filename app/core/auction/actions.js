@@ -37,9 +37,6 @@ export const auction_actions = {
     payload: { leagueId: Number(leagueId), teamId: Number(teamId), pid }
   }),
 
-  AUCTION_ELECTION_RECORDED: 'AUCTION_ELECTION_RECORDED',
-  AUCTION_ELECTION_WITHDRAWN: 'AUCTION_ELECTION_WITHDRAWN',
-
   AUCTION_JOIN: 'AUCTION_JOIN',
 
   AUCTION_ERROR: 'AUCTION_ERROR',

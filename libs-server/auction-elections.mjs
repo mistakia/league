@@ -324,10 +324,42 @@ export const get_auction_settlement_status = async ({
   }
 }
 
+/**
+ * Broadcast who the auction is now waiting on.
+ *
+ * THE OUTSTANDING SET IS DERIVED FROM STATE REST MOVES, so it has to be
+ * re-broadcast from the write path. The socket recomputed it only on its own
+ * events -- a nomination or a bid -- and in election mode neither of those is
+ * how a team elects. So every client sat on the outstanding list as it stood at
+ * nomination and watched it never shrink, for the entire time nine managers
+ * were electing one at a time. The settlement status display IS the design's
+ * only forcing function, and it was frozen on the one path the auction takes.
+ *
+ * Recomputed server-side rather than patched on the client. The eligible-set
+ * predicate is the single thing that advances the auction, and a client-side
+ * "drop this tid from the list" would be a second implementation of it -- the
+ * exact shape of the three-disagreeing-comparisons defect this redesign
+ * removed. It also gets withdrawal right for free: withdrawing a decline puts a
+ * team BACK into the outstanding set, which no subtractive client rule could
+ * express.
+ */
+export const broadcast_auction_settlement_status = async ({
+  broadcast,
+  lid,
+  season_year = current_season.year
+}) => {
+  const status = await get_auction_settlement_status({ lid, season_year })
+  return broadcast(Number(lid), {
+    type: 'AUCTION_SETTLEMENT_STATUS',
+    payload: { outstanding_election_tids: status.outstanding_election_tids }
+  })
+}
+
 export default {
   submit_auction_election,
   withdraw_auction_election,
   get_team_auction_elections,
   get_auction_settlement_status,
+  broadcast_auction_settlement_status,
   auction_election_error
 }
