@@ -763,16 +763,23 @@ export async function fetch_with_retry({
         const proxy_info = current_proxy
           ? ` (proxy: ${proxy_display_label(current_proxy.key)}, pool: ${current_proxy.pool_name})`
           : ' (direct)'
-        const http_error = new Error(
-          `HTTP ${response.status}: ${response.statusText}${proxy_info}`
-        )
         // The status as DATA, so a caller that must tell "upstream has not
         // published this slice" from "upstream is broken" can branch on it
         // without parsing this message. Without it the only options were
         // matching the message text or dropping to fetch_via_proxy_raw, which
         // returns the raw response but gives up the retry and the per-attempt
         // timeout to get it.
-        http_error.http_status = response.status
+        //
+        // Object.assign rather than a property assignment on the next line:
+        // `Error` declares no `http_status`, so assigning one is a TS2339 under
+        // the `//@ts-check` tier even though it runs fine. The assign carries
+        // the property into the inferred type instead.
+        const http_error = Object.assign(
+          new Error(
+            `HTTP ${response.status}: ${response.statusText}${proxy_info}`
+          ),
+          { http_status: response.status }
+        )
         throw http_error
       }
 
