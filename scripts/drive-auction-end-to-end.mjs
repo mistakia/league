@@ -299,6 +299,26 @@ const open_client = ({ tid }) =>
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
+ * Say what DID arrive when an expected broadcast did not.
+ *
+ * A refused write is silent on the broadcast and speaks only on AUCTION_ERROR,
+ * so "no opening bid" and "the engine never fired" are the same observation
+ * from the assertion's side. This file already says so in a comment at the
+ * proxy-bidding funding check -- and then still reported the bare absence,
+ * which cost a session a full re-run to learn that the server had answered all
+ * along. An absence is only evidence once you have looked at the alternative.
+ */
+const explain_silence = (client, from) => {
+  const after = client.received.slice(from)
+  if (!after.length) return 'nothing arrived on the socket at all'
+  const error = after.find((entry) => entry.type === 'AUCTION_ERROR')
+  const types = [...new Set(after.map((entry) => entry.type))].join(', ')
+  return error
+    ? `AUCTION_ERROR: ${JSON.stringify(error.payload)} (also saw: ${types})`
+    : `no AUCTION_ERROR either; saw: ${types}`
+}
+
+/**
  * Wait for the auction's opening payload, and say how long it took.
  *
  * GENEROUSLY, and the timing is the point. `Auction.setup` walks every roster in
@@ -1354,7 +1374,11 @@ const drive_proxy_bidding = async (pids) => {
       where: (message) =>
         message.payload.pid === pid && message.payload.tid === nominator
     })
-    must('the nomination opens the player', Boolean(opening), 'no opening bid')
+    must(
+      'the nomination opens the player',
+      Boolean(opening),
+      `no opening bid -- ${explain_silence(client, before)}`
+    )
 
     // Every standing maximum is a live proxy the moment the player opens, so the
     // price jumps to the equilibrium without waiting for a human to move.
