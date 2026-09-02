@@ -70,6 +70,7 @@ Stated once here because it applies to every undertaking, and it is the single m
 - **Prefer executing the behavior over reading the source.** "The fix is in the source" and "the deployed artifact no longer has the defect" are different claims.
 - **An input that cannot distinguish the old rule from the new one makes the check vacuous**, however real the data is. Run it as a pair against a control and require the two to differ.
 - **Enumerate an affected class from the code that defines it, not from the names of its first symptoms.** A defect in shared machinery reaches everything routed through that machinery, and the cases you noticed first share a naming convention rather than a cause. Scoping by name finds whatever fraction happens to be named alike, reports a confident total, and leaves the rest in place.
+- **Sample anything time-dependent at more than one instant.** A value read once cannot be distinguished from one that recedes, drifts or resets on every read — at any single instant both produce exactly the answer you expect, so the assertion passes and keeps passing. Walk the input that moves it and assert on the trajectory.
 
 ## Development Commands
 
