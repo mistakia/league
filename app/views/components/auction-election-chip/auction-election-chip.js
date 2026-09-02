@@ -55,7 +55,13 @@ export default function AuctionElectionChip({ election, select_player, pid }) {
       onClick={() => select_player(pid)}
       title={build_title()}
     >
-      {is_declined ? 'declined' : `$${maximum_bid}`}
+      {/* "pass", not "declined". The label is the chip's whole width, and the
+          chip competes with the player name for a 264px row: "declined" needs
+          58px against 35px for "$25", which made the decline chip the widest
+          thing on the board and clipped its row's name by 62px. The hover title
+          below still says "declined" in full, so the short label costs nothing
+          a manager cannot recover. */}
+      {is_declined ? 'pass' : `$${maximum_bid}`}
     </div>
   )
 }

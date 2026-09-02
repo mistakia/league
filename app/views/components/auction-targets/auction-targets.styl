@@ -20,17 +20,23 @@
   overflow-x scroll
 
 // The board is seven position columns in a horizontally scrolling body, so it
-// already overflows any laptop viewport (7 x 236 = 1652 at the old width) and
-// widening a column costs scroll distance rather than a layout that used to
-// fit. The name is what the extra width buys: at 236px the election chip beside
-// it clipped 23 of 188 rows.
+// already overflows any laptop viewport at any of these widths and widening a
+// column costs scroll distance rather than a layout that used to fit.
+//
+// 304px is measured, not chosen. The name truncates on `.player__name-top`
+// (`text-overflow: ellipsis`), and at 264px the worst row on the board --
+// a long name carrying an election chip -- overflowed by 40px, while eleven
+// chip-free rows overflowed by 5 to 14px on name length alone. 264 + 40 clears
+// both. Note the overflow is invisible to a check on `.player__name-main`,
+// which never overflows because the ellipsis child shrinks instead; measure the
+// descendant or the reading is a confident zero.
 .auction__targets-column
-  flex 1 1 264px
+  flex 1 1 304px
   height 100%
   display flex
   flex-direction column
   background white
-  min-width 264px
+  min-width 304px
   &:first-child
     padding-left 16px
   + .auction__targets-column
