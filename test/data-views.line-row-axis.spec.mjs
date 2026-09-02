@@ -13,8 +13,10 @@ import {
 } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
   is_line_axis_active,
+  is_ladder_market_type,
   resolve_line_axis_sources
 } from '#libs-server/data-views/line-axis-sources.mjs'
+import { bookmaker_constants } from '#libs-shared'
 
 const expect = chai.expect
 
@@ -217,6 +219,54 @@ describe('data views line row axis', function () {
         data_views_column_definitions
       })
       expect(sources).to.have.length(2)
+    })
+
+    // The ladder predicate itself. A standard market posts one selection per
+    // player-game and defines no rungs, so admitting it both polluted the
+    // domain with its own line and made the same-quantity rule count it as a
+    // second quantity -- which refused the reported view outright.
+    it('separates a ladder market from a single-line one', () => {
+      expect(is_ladder_market_type('GAME_ALT_PASSING_YARDS')).to.equal(true)
+      expect(
+        is_ladder_market_type('GAME_FIRST_QUARTER_ALT_RUSHING_YARDS')
+      ).to.equal(true)
+      expect(is_ladder_market_type('GAME_PASSING_YARDS')).to.equal(false)
+      expect(is_ladder_market_type('GAME_RECEIVING_YARDS')).to.equal(false)
+      expect(is_ladder_market_type(undefined)).to.equal(false)
+    })
+
+    // The predicate reads the constant groups, not the substring ALT. The two
+    // agree today across the whole Market control, and that agreement is the
+    // reason the string match was never worth writing -- pinned so a future
+    // ladder that is not named ALT fails here rather than silently collapsing.
+    it('agrees with the constant groups across every offered market', () => {
+      const offered = Object.values(bookmaker_constants.player_game_prop_types)
+      const by_predicate = offered.filter(is_ladder_market_type)
+      const by_substring = offered.filter((market_type) =>
+        market_type.includes('ALT')
+      )
+      expect(by_predicate).to.eql(by_substring)
+      expect(by_predicate.length).to.be.greaterThan(0)
+      expect(by_predicate.length).to.be.lessThan(offered.length)
+    })
+
+    // The shape the UI actually produces: market_type is a SELECT carrying a
+    // default_value, so a column built through the Market control always names
+    // one explicitly. An explicit single-line market must contribute no rungs.
+    it('skips a betting column on an explicit single-line market', () => {
+      const sources = resolve_line_axis_sources({
+        columns: [
+          {
+            column_id: 'player_game_prop_line_from_betting_markets',
+            params: {
+              market_type: ['GAME_PASSING_YARDS'],
+              source_id: ['FANDUEL']
+            }
+          }
+        ],
+        data_views_column_definitions
+      })
+      expect(sources).to.eql([])
     })
 
     // A betting column naming no market_type takes a single-line default and

@@ -1,4 +1,7 @@
-import { resolve_line_axis_sources } from '#libs-server/data-views/line-axis-sources.mjs'
+import {
+  resolve_line_axis_sources,
+  is_ladder_market_type
+} from '#libs-server/data-views/line-axis-sources.mjs'
 
 // Runtime check, run beside validate_row_grain_compatibility and
 // validate_week_requirement: under a line row axis, every ladder column must
@@ -67,9 +70,13 @@ export default function validate_line_axis_columns({
     .filter((item) => defs[item.column_id]?.is_player_game_prop)
     .filter((item) => {
       const market_type = item.params?.market_type
-      return Array.isArray(market_type)
-        ? market_type.length
-        : Boolean(market_type)
+      const market_types = Array.isArray(market_type)
+        ? market_type
+        : [market_type].filter(Boolean)
+      // Only the ladder columns are party to the mismatch, so only they get
+      // named. A standard column sitting beside two quarrelling ladders is
+      // innocent, and naming it sends the caller to remove the wrong column.
+      return market_types.some(is_ladder_market_type)
     })
     .map((item) => item.column_id)
 

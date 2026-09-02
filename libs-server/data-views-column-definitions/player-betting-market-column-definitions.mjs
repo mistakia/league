@@ -15,7 +15,10 @@ import {
 } from '#libs-server/data-views/week-scoped-cte.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import { apply_market_row_dedup } from '#libs-server/data-views/market-row-dedup.mjs'
-import { resolve_line_scope } from '#libs-server/data-views/line-axis-sources.mjs'
+import {
+  resolve_line_scope,
+  is_ladder_market_type
+} from '#libs-server/data-views/line-axis-sources.mjs'
 import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // The column's GRAIN, derived rather than passed.
@@ -549,10 +552,24 @@ const player_betting_market_join = ({
     // dedup that would have collapsed it is suppressed. Without this predicate
     // the cell matches every rung and fans out -- the same failure the week
     // correlation above exists to prevent, one axis further down.
+    //
+    // LADDER COLUMNS ONLY, and this is a second question from the grain one
+    // above rather than a refinement of it: is_player_game_prop is true for a
+    // standard game market too, and a standard market posts one line. Applying
+    // the rung predicate to it asked the cell to match a rung its own ladder
+    // never defined, so it rendered NULL on every row except where its single
+    // line happened to equal one -- a coincidence-of-numerals join, which is
+    // the exact mistake the different-quantity refusal exists to prevent. The
+    // correct render is the one line repeated down every rung, which is what
+    // skipping the predicate gives.
+    const { market_type: own_market_type } = get_default_params({
+      params,
+      is_player_game_prop
+    })
     const { line_split, line_reference } = resolve_line_scope({
       data_view_options
     })
-    if (line_split) {
+    if (line_split && is_ladder_market_type(own_market_type)) {
       this.andOn(
         `${table_name}.selection_metric_line`,
         '=',

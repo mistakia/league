@@ -15,6 +15,36 @@
 // module never has to restate the defaults that live in get_default_params.
 // Restating them is the drift this avoids.
 
+import { bookmaker_constants } from '#libs-shared'
+
+// WHICH MARKETS POST A LADDER, from the constant groups rather than from a
+// `market_type like 'GAME_ALT_%'` string match. The groups are the existing
+// answer to this exact question -- fanduel-formatters.mjs already derives its
+// alt market list from player_game_alt_prop_types -- and they cover the whole
+// dropdown: measured against the 97 market types the Market control offers,
+// they select the same 42 a /ALT/ match would, so the string match buys nothing
+// and silently misses any future ladder that is not named ALT.
+const ladder_market_types = new Set([
+  ...Object.values(bookmaker_constants.player_game_alt_prop_types),
+  ...Object.values(bookmaker_constants.player_quarter_alt_prop_types),
+  ...Object.values(bookmaker_constants.player_first_half_alt_prop_types)
+])
+
+/**
+ * Does this market post many selections per player-game?
+ *
+ * The question the line axis turns on, and deliberately NOT the same question
+ * as is_player_game_prop, which is true for a standard game market too. A
+ * standard market posts exactly one selection per player-game -- measured at
+ * 1.0 for GAME_PASSING_YARDS across 2024 -- so it defines no rungs and must not
+ * be correlated on one.
+ *
+ * @param {string} market_type
+ * @returns {boolean}
+ */
+export const is_ladder_market_type = (market_type) =>
+  ladder_market_types.has(market_type)
+
 /**
  * Is the line row axis active for this request?
  *
@@ -83,7 +113,14 @@ export const resolve_line_axis_sources = ({
     if (!definition?.is_player_game_prop) continue
 
     const params = item.params || {}
-    const market_type = as_array(params.market_type)
+    // LADDER MARKETS ONLY. A column naming an explicit but single-line market
+    // is a legitimate neighbour of a ladder -- the reported view carries four
+    // of them -- and it contributes no rungs, so admitting it here both
+    // polluted the domain with its own line and made the same-quantity rule
+    // count it as a second quantity, refusing the view outright.
+    const market_type = as_array(params.market_type).filter(
+      is_ladder_market_type
+    )
     if (!market_type.length) continue
 
     const source = {
