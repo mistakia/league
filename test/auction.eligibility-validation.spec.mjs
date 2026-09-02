@@ -186,14 +186,39 @@ describe('auction eligibility validation', function () {
     // log is empty -- `resolve_nominating_team_id` returns `tids[0]` without
     // consulting capacity -- which is what lets a cap-exhausted or roster-full
     // team be put on the clock at all.
+    //
+    // EVERY NOMINATION HERE IS DRIVEN AS A MANAGER, NOT AS THE COMMISSIONER,
+    // and that is the point rather than an incidental choice.
+    // `_validate_nomination` returns true immediately -- skipping the cap,
+    // position and roster-space guards entirely -- when the caller is the
+    // commissioner and the nomination timer has expired. An earlier version of
+    // this block used the commissioner throughout, which meant the guards were
+    // reached only because one unrelated flag happened to be false: removing
+    // the `_nomination_timer_expired` conjunct from that bypass left all three
+    // rejection specs green while no nomination was validated at all.
+    //
+    // So the ordinary path is the one under test, and the bypass is asserted
+    // inactive rather than assumed so.
+    const expect_guards_are_reachable = (auction) => {
+      expect(
+        auction._nomination_timer_expired,
+        'the commissioner bypass in _validate_nomination is inactive, so ' +
+          'these specs exercise the guards rather than skipping them'
+      ).to.equal(false)
+      expect(
+        MANAGER_USER_ID,
+        'nominations here are driven as a non-commissioner'
+      ).to.not.equal(auction._league.commissioner_user_id)
+    }
     it('rejects a nomination whose value exceeds the team cap', async function () {
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       await seed_cap_exhausted_roster({
         team_id,
-        user_id: COMMISSIONER_USER_ID
+        user_id: MANAGER_USER_ID
       })
 
       const roster = await roster_for(team_id)
@@ -213,14 +238,14 @@ describe('auction eligibility validation', function () {
         {
           pid: target.pid,
           value: CAP_REMAINING_AFTER_SEED + 1,
-          user_id: COMMISSIONER_USER_ID
+          user_id: MANAGER_USER_ID
         },
-        { user_id: COMMISSIONER_USER_ID, tid: team_id }
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
-        { user_id: COMMISSIONER_USER_ID, error: 'exceeds salary limit' }
+        { user_id: MANAGER_USER_ID, error: 'exceeds salary limit' }
       ])
     })
 
@@ -229,12 +254,13 @@ describe('auction eligibility validation', function () {
       // less asked for. Without this the assertion above passes on a handler
       // that refuses every nomination for an unrelated reason.
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       await seed_cap_exhausted_roster({
         team_id,
-        user_id: COMMISSIONER_USER_ID
+        user_id: MANAGER_USER_ID
       })
 
       const roster = await roster_for(team_id)
@@ -253,18 +279,19 @@ describe('auction eligibility validation', function () {
         {
           pid: target.pid,
           value: CAP_REMAINING_AFTER_SEED,
-          user_id: COMMISSIONER_USER_ID
+          user_id: MANAGER_USER_ID
         },
-        { user_id: COMMISSIONER_USER_ID, tid: team_id }
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'no rejection at the cap boundary').to.deep.equal([])
 
-      // The amount matters, not just the acceptance. Asserting only that a
-      // transaction appeared cannot tell "opened at the last affordable
-      // dollar" from "opened at $0 because the clamp fired", and those are
-      // different auctions.
+      // The recorded amount is pinned too, because acceptance alone cannot
+      // tell the cap check passing from the cap check never running. A manager
+      // nomination opens at $0 whatever it asked for -- so $0 here is the
+      // clamp having fired on a nomination the cap check ALREADY cleared at
+      // the full $5, and the commissioner block pins the un-clamped side.
       const [nomination] = await knex('transactions')
         .where({
           lid: league_id,
@@ -276,13 +303,14 @@ describe('auction eligibility validation', function () {
         .limit(1)
       expect(
         nomination.player_salary,
-        'the nomination opened at the cap boundary'
-      ).to.equal(CAP_REMAINING_AFTER_SEED)
+        'a manager nomination opens at $0 once the cap check has cleared it'
+      ).to.equal(0)
     })
 
     it('rejects a nomination that would exceed the position limit', async function () {
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       // Kicker is one of the two positions the fixture actually caps
@@ -295,7 +323,7 @@ describe('auction eligibility validation', function () {
 
       const { spare } = await seed_position_capped_roster({
         team_id,
-        user_id: COMMISSIONER_USER_ID,
+        user_id: MANAGER_USER_ID,
         count: kicker_limit
       })
 
@@ -319,13 +347,13 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: spare.pid, value: 0, user_id: COMMISSIONER_USER_ID },
-        { user_id: COMMISSIONER_USER_ID, tid: team_id }
+        { pid: spare.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
-        { user_id: 1, error: 'exceeds roster limits' }
+        { user_id: MANAGER_USER_ID, error: 'exceeds roster limits' }
       ])
     })
 
@@ -334,12 +362,13 @@ describe('auction eligibility validation', function () {
       // three-kicker roster takes a running back without complaint, so the
       // refusal above is the kicker cap and not the roster generally.
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       await seed_position_capped_roster({
         team_id,
-        user_id: COMMISSIONER_USER_ID
+        user_id: MANAGER_USER_ID
       })
 
       const target = await selectPlayer({
@@ -350,8 +379,8 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
-        { user_id: COMMISSIONER_USER_ID, tid: team_id }
+        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
@@ -360,7 +389,8 @@ describe('auction eligibility validation', function () {
 
     it('rejects a nomination from a team with no roster space', async function () {
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       // `fillRoster` signs at $0, so the cap is untouched and roster fullness
@@ -381,13 +411,13 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
-        { user_id: 1, error: 'exceeds roster limits' }
+        { user_id: MANAGER_USER_ID, error: 'exceeds roster limits' }
       ])
     })
 
@@ -397,7 +427,8 @@ describe('auction eligibility validation', function () {
       // tracks the last open spot rather than anything about a heavily
       // populated roster.
       this.timeout(60 * 1000)
-      const { auction, errors } = await build_live_auction({ user_ids: [1] })
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
       const team_id = auction._tids[0]
 
       await fillRoster({ leagueId: league_id, teamId: team_id, userId: 1 })
@@ -421,8 +452,8 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
@@ -850,8 +881,6 @@ describe('auction eligibility validation', function () {
       this.timeout(60 * 1000)
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
       const team_id = auction._tids[0]
-      const commissioner_user_id = auction._league.commissioner_user_id
-      const manager_user_id = commissioner_user_id === 2 ? 3 : 2
 
       const target = await selectPlayer({
         pos: 'RB',
@@ -860,8 +889,8 @@ describe('auction eligibility validation', function () {
       })
 
       await auction.nominate(
-        { pid: target.pid, value: 25, user_id: manager_user_id },
-        { user_id: manager_user_id, tid: team_id }
+        { pid: target.pid, value: 25, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
       const [nomination] = await knex('transactions')
