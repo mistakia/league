@@ -212,8 +212,9 @@ const scenario = async (name, fn) => {
 
 let base_url = null
 
-const commissioner_token = () =>
-  jwt.sign({ userId: league_row.commissioner_user_id }, config.jwt.secret)
+const token_for = (user_id) => jwt.sign({ userId: user_id }, config.jwt.secret)
+
+const commissioner_token = () => token_for(league_row.commissioner_user_id)
 
 const api = async (method, url_path, body) => {
   const response = await fetch(`${base_url}${url_path}`, {
@@ -261,9 +262,19 @@ const read_schedule = () => api('GET', blocks_path)
  * "an already-loaded page updated" -- and the second is the claim that has
  * shipped broken here, twice.
  */
-const open_client = ({ tid }) =>
+/**
+ * @param {object} params
+ * @param {number} [params.user_id] - WHO the socket acts as, and the only thing
+ *   that decides it. `join()` resolves the acting team from the authenticated
+ *   user and ignores the `tid` on the AUCTION_JOIN payload entirely, so this
+ *   used to take a `tid` that changed nothing: every client was the
+ *   commissioner's team however it was called. A scenario that needs to act as
+ *   a second manager passes that manager's user id here, and `find_second_manager`
+ *   says which team the server will charge.
+ */
+const open_client = ({ user_id = league_row.commissioner_user_id } = {}) =>
   new Promise((resolve, reject) => {
-    const token = commissioner_token()
+    const token = token_for(user_id)
     const socket = new WebSocket(
       `${base_url.replace('http', 'ws')}/?league_id=${lid}&token=${token}`
     )
@@ -276,7 +287,6 @@ const open_client = ({ tid }) =>
           type: 'AUCTION_JOIN',
           payload: {
             lid,
-            tid,
             clientId: `drive-${randomBytes(4).toString('hex')}`
           }
         })
@@ -361,6 +371,83 @@ let league_row = null
 let team_ids = []
 let own_team = null
 const signed_pids = new Set()
+
+/**
+ * A manager other than the commissioner, enrolled on a team in this league.
+ *
+ * The `tid` it returns is the team the socket will ACT as for that user, because
+ * it is the same `users_teams` row `join()` resolves against. Every socket action
+ * is charged to that team and to no other: `nominate` and `bid` read the
+ * authenticated tid and ignore the `tid` on the message payload.
+ *
+ * The commissioner can ELECT for any team over REST -- `verifyUserTeam` admits
+ * them for every team in a league they run -- but they cannot BID as one, because
+ * `bid()` charges the authenticated team. So a contested block needs a genuinely
+ * second identity, and there is no payload field that fakes one.
+ */
+const find_second_manager = async () => {
+  const row = await db('users_teams')
+    .whereIn('tid', team_ids)
+    .where({ season_year })
+    .whereNot('user_id', league_row.commissioner_user_id)
+    .first()
+  return row ? { user_id: row.user_id, tid: row.tid } : null
+}
+
+/**
+ * Put `target_tid` on the nomination clock, and return how to put it back.
+ *
+ * THE ROTATION CANNOT BE CHASED, only arranged. `resolve_nominating_team_id`
+ * orders teams by `draft_order` and walks forward from the last nomination, so
+ * which team is on the clock is a property of the league, not something a client
+ * chooses -- and only two teams in the mirror have a user at all. Acting as the
+ * team the clock happens to sit on therefore worked about one run in ten, and
+ * the greens it produced were luck rather than coverage.
+ *
+ * Swapping `draft_order` between the target and whoever holds the clock lands the
+ * target exactly where the clock already points, in two updates, on a league this
+ * script is allowed to write to. The nomination is then IN TURN and needs no
+ * commissioner override -- which matters, because the override does not exist on
+ * this path: in live mode it is gated on an expired nomination timer, and the
+ * timer is deliberately set to ten minutes here so nothing auto-nominates
+ * underneath the run.
+ */
+const arrange_nomination_turn = async (target_tid) => {
+  const holder = await get_auction_nominating_team_id({ lid, season_year })
+  if (holder === target_tid) return async () => {}
+
+  must(
+    'a team holds the nomination clock',
+    Boolean(holder),
+    'the rotation is exhausted, so no team can nominate at all'
+  )
+
+  const rows = await db('teams')
+    .whereIn('team_id', [target_tid, holder])
+    .where({ season_year })
+  const target_order = rows.find(
+    (row) => row.team_id === target_tid
+  ).draft_order
+  const holder_order = rows.find((row) => row.team_id === holder).draft_order
+
+  const set_order = async (team_id, draft_order) =>
+    db('teams').where({ team_id, season_year }).update({ draft_order })
+
+  await set_order(target_tid, holder_order)
+  await set_order(holder, target_order)
+
+  const moved = await get_auction_nominating_team_id({ lid, season_year })
+  must(
+    'the nomination clock can be arranged onto a team we hold an identity for',
+    moved === target_tid,
+    `swapped draft_order ${target_order} <-> ${holder_order}, clock is on ${moved}`
+  )
+
+  return async () => {
+    await set_order(target_tid, target_order)
+    await set_order(holder, holder_order)
+  }
+}
 
 /** A team's remaining budget, through the same rule the auction prices against. */
 const available_cap = async (tid) => {
@@ -721,7 +808,7 @@ const EXPECTED_PRICE = SECOND_CEILING + 1
 
 const drive_settlement = async (pids) => {
   const pid = pids[1]
-  const client = await open_client({ tid: team_ids[0] })
+  const client = await open_client()
 
   try {
     const init = await await_init(client)
@@ -982,7 +1069,7 @@ const drive_settlement = async (pids) => {
  * inside the notice threshold.
  */
 const drive_blocks = async () => {
-  const client = await open_client({ tid: team_ids[0] })
+  const client = await open_client()
 
   try {
     await await_init(client)
@@ -1322,9 +1409,22 @@ const drive_proxy_bidding = async (pids) => {
     'the slot was already finalized'
   )
 
-  const client = await open_client({ tid: team_ids[0] })
+  // THE IDENTITIES ARE SETTLED BEFORE ANY SOCKET OPENS, because the socket caches
+  // the team list and its draft order at setup and the clock has to be arranged
+  // behind that read rather than under it.
+  const second = await find_second_manager()
+  must(
+    'a second manager is enrolled to bid against the nominator',
+    Boolean(second),
+    `only the commissioner holds a team in league ${lid}; enrol another user on one`
+  )
+  const restore_rotation = await arrange_nomination_turn(own_team)
+
+  const client = await open_client()
+  const second_client = await open_client({ user_id: second.user_id })
   try {
     const init = await await_init(client)
+    await await_init(second_client)
 
     // A socket booting INSIDE a block starts with `_election_mode` false, which
     // is a real mode rather than "unknown" -- so the first resolve has to
@@ -1341,25 +1441,48 @@ const drive_proxy_bidding = async (pids) => {
       `${init.payload.block_end_at} != ${end_at.unix()}`
     )
 
-    const nominator = await get_auction_nominating_team_id({ lid, season_year })
+    // THE THREE ROLES ARE FIXED BY WHO CAN ACT, not by team id. Only the two
+    // enrolled managers can drive the socket at all, so the nominator is the
+    // commissioner's team -- the clock was arranged onto it above -- and the
+    // human bidder is the second manager's. The ceiling holder is the one role
+    // that needs no identity: a standing election goes in over REST, and
+    // `verifyUserTeam` admits the commissioner for every team in their league.
+    const nominator = own_team
+    const human = second.tid
 
-    // BOTH SIDES HAVE TO BE ABLE TO AFFORD THEIR PART, and neither is chosen by
-    // team id. `_validate_bid` refuses a bid above the team's cached cap and
-    // replies AUCTION_ERROR rather than broadcasting anything, so an unfunded
-    // bidder produces exactly the same silence as a proxy engine that never
-    // fired -- which is how this first read as a missing engine answer when it
-    // was a $0 team being correctly refused.
+    const nominating = await get_auction_nominating_team_id({
+      lid,
+      season_year
+    })
+    must(
+      'the nomination clock is on the team the socket can act as',
+      nominating === nominator,
+      `clock is on ${nominating}, acting as ${nominator}`
+    )
+
+    // BOTH SIDES HAVE TO BE ABLE TO AFFORD THEIR PART. `_validate_bid` refuses a
+    // bid above the team's cached cap and replies AUCTION_ERROR rather than
+    // broadcasting anything, so an unfunded bidder produces exactly the same
+    // silence as a proxy engine that never fired -- which is how this first read
+    // as a missing engine answer when it was a $0 team being correctly refused.
+    const human_cap = await available_cap(human)
+    must(
+      'the second manager can fund the human bid',
+      human_cap >= HUMAN_BID,
+      `team ${human} holds $${human_cap}, needs $${HUMAN_BID}`
+    )
+
     const solvent = []
     for (const tid of team_ids) {
-      if (tid === nominator) continue
+      if (tid === nominator || tid === human) continue
       if ((await available_cap(tid)) >= PROXY_CEILING) solvent.push(tid)
     }
     must(
-      'two teams can fund a contested block bid',
-      solvent.length >= 2,
-      `only ${solvent.length} team(s) hold $${PROXY_CEILING} of cap`
+      'a third team can fund the standing ceiling',
+      solvent.length >= 1,
+      `no team outside the two managers holds $${PROXY_CEILING} of cap`
     )
-    const [ceiling_holder, human] = solvent
+    const [ceiling_holder] = solvent
 
     must(
       'a standing ceiling is accepted before the nomination',
@@ -1367,15 +1490,16 @@ const drive_proxy_bidding = async (pids) => {
       `elect ${PROXY_CEILING}`
     )
 
+    // IN TURN, and not through any override. The commissioner bypass in
+    // `_validate_nomination` is gated on election mode or an expired nomination
+    // timer, and neither holds here -- this is live mode with a ten-minute timer
+    // -- so the server answers `invalid nomination` to anyone but the team the
+    // rotation has on the clock. That refusal is what this scenario used to hit
+    // nine runs in ten.
     const before = client.mark()
     client.send({
       type: 'AUCTION_SUBMIT_NOMINATION',
-      payload: {
-        pid,
-        value: 0,
-        tid: nominator,
-        user_id: league_row.commissioner_user_id
-      }
+      payload: { pid, value: 0 }
     })
 
     const opening = await client.await_message('AUCTION_BID', {
@@ -1407,26 +1531,32 @@ const drive_proxy_bidding = async (pids) => {
       opening_proxy ? String(opening_proxy.payload.player_salary) : 'absent'
     )
 
+    // THE BID COMES OFF THE SECOND MANAGER'S SOCKET, because `bid()` charges the
+    // AUTHENTICATED team and reads nothing from the payload. Sent from the
+    // commissioner's socket it would be a bid by the commissioner's team, which
+    // is the nominator -- so the contest this scenario claims to drive never
+    // happened, whatever the payload said.
     const before_human = client.mark()
-    client.send({
+    const before_human_own = second_client.mark()
+    second_client.send({
       type: 'AUCTION_BID',
-      payload: {
-        pid,
-        value: HUMAN_BID,
-        tid: human,
-        user_id: league_row.commissioner_user_id
-      }
+      payload: { pid, value: HUMAN_BID }
     })
 
+    // Witnessed on the COMMISSIONER's already-connected socket: the claim is that
+    // a loaded page moves, and a client reading back its own action cannot make
+    // it.
     const human_bid = await client.await_message('AUCTION_BID', {
       from: before_human,
       where: (message) =>
         message.payload.pid === pid && message.payload.tid === human
     })
     // A REFUSED BID IS SILENT ON THE BROADCAST and speaks only on AUCTION_ERROR,
-    // so the refusal has to be read before concluding anything about the engine.
-    const refusal = await client.await_message('AUCTION_ERROR', {
-      from: before_human,
+    // so the refusal has to be read before concluding anything about the engine
+    // -- and `reply()` addresses the user who acted, so it lands on the bidder's
+    // socket and on no other.
+    const refusal = await second_client.await_message('AUCTION_ERROR', {
+      from: before_human_own,
       timeout_ms: 3000
     })
     must(
@@ -1477,6 +1607,12 @@ const drive_proxy_bidding = async (pids) => {
     )
   } finally {
     client.socket.close()
+    second_client.socket.close()
+    // `draft_order` IS the nomination rotation, so a swap left behind changes
+    // who nominates next for every later run and for anyone looking at the
+    // mirror. Restored here rather than in `teardown()` because only this
+    // scenario knows what the order was.
+    await restore_rotation()
   }
 }
 
@@ -1495,7 +1631,7 @@ const drive_proxy_bidding = async (pids) => {
 const park_nomination = async () => {
   const [pid] = await pick_free_agents({ count: 1 })
   const nominator = await get_auction_nominating_team_id({ lid, season_year })
-  const client = await open_client({ tid: team_ids[0] })
+  const client = await open_client()
 
   try {
     // Deliberately NOT `await_init`, which records a check through `must` and so
@@ -1509,10 +1645,28 @@ const park_nomination = async () => {
     })
     if (!init) throw new Error('no AUCTION_INIT within 120s')
 
-    // A ceiling from the team the VIEWING user owns, so the compact election
-    // control in the bar renders a real amount rather than "None set" -- which
-    // is the state most likely to be mistaken for the control failing to render.
-    const viewing_team = team_ids[0]
+    // The COMMISSIONER's team, resolved the same way the socket resolves an
+    // acting team, because `standing_elections` holds only the viewing team's
+    // rows -- an election placed on any other team renders nothing in the
+    // browser. `team_ids[0]` is merely the lowest team id and was wrong here.
+    const [membership] = await db('users_teams as ut')
+      .join('teams as t', function () {
+        this.on('t.team_id', '=', 'ut.tid').andOn(
+          't.season_year',
+          '=',
+          db.raw('?', [season_year])
+        )
+      })
+      .where({
+        't.lid': lid,
+        'ut.user_id': league_row.commissioner_user_id,
+        'ut.season_year': season_year
+      })
+      .select('ut.tid')
+    if (!membership) {
+      throw new Error('the commissioner holds no team in this league')
+    }
+    const viewing_team = membership.tid
     const elected = await elect(viewing_team, pid, 5)
     process.stdout.write(
       `election for team ${viewing_team} on ${pid}: ${elected.status}\n`
@@ -1540,7 +1694,8 @@ const park_nomination = async () => {
     }
 
     process.stdout.write(
-      `\nparked: ${pid} nominated by team ${nominator} at $${opening.payload.value}\n` +
+      `\nparked: ${pid} nominated by team ${nominator} at ` +
+        `$${opening.payload.player_salary}, with a $5 ceiling from team ${viewing_team}\n` +
         'the league is now DIRTY on purpose. clear it with --teardown-only.\n'
     )
   } finally {
