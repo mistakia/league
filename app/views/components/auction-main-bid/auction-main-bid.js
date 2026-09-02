@@ -9,7 +9,6 @@ import Button from '@components/button'
 import ButtonGroup from '@components/button-group'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
-import AuctionSettlementStatus from '@components/auction-settlement-status'
 import AuctionElectionControl from '@components/auction-election-control'
 
 import './auction-main-bid.styl'
@@ -229,7 +228,6 @@ export default function AuctionMainBid({
                 : ''}
             </div>
           )}
-          <AuctionSettlementStatus />
           {main}
         </div>
         {is_running && (

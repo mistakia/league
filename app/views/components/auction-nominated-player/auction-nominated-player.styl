@@ -1,6 +1,25 @@
+// `min-width 0` on every link in this chain, not just the leaf. A flex item
+// defaults to `min-width auto`, which refuses to shrink below its content, so a
+// shortfall becomes OVERFLOW of the ancestor rather than compression here. The
+// leaf already carried it and that was not enough: measured in the 70px bar,
+// `.auction__bid-info` ran 487px of content in a 407px box and the details
+// group's right edge sat 79px past where `.auction__bid-actions` begins, so
+// `BYE` and `AGE` rendered underneath the bid controls. The two intermediate
+// boxes were the ones refusing to shrink; the leaf could not compress while its
+// parents would not.
+// `overflow hidden` as well as `min-width 0`, because the two answer different
+// halves. `min-width 0` lets the BOX shrink; without `overflow hidden` the
+// TEXT inside it still paints at full width over whatever follows, and the
+// symptom is identical to not having shrunk at all -- measured at a 1280px
+// viewport, this box was 224px wide holding 264px of name, printing "PICKETT"
+// straight through "MARKET $0". A box-overlap check cannot see it either: the
+// boxes tile perfectly while the ink does not. Clipped, the name truncates on
+// `.player__name-top`, which already carries `text-overflow: ellipsis`.
 .nominated__player
   display flex
   flex 1
+  min-width 0
+  overflow hidden
 
   .player__headshot
     border-radius 0
@@ -8,6 +27,7 @@
 .auction__nominated-player
   flex 1
   display flex
+  min-width 0
   .selected__player-header-item
     min-width 0
     flex 1 1 0
@@ -15,6 +35,7 @@
 .nominated__player-details
   flex 1
   display flex
+  min-width 0
   padding-top 8px
   font-size 12px
   label

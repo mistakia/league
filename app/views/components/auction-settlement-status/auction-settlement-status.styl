@@ -1,10 +1,14 @@
-// TYPOGRAPHY ONLY. This component renders at two call sites with opposite
-// layout needs -- a column in the auction side rail, where it is a paragraph
-// that may take the height it needs, and a row inside the 70px bid bar, where
-// it must be bounded on both axes. A flex shorthand here resolves against
-// whichever axis the PARENT happens to run, so the one basis that bounded the
-// bar's width made the rail's copy a 240px-tall block for a single sentence.
-// The bar's constraints live in auction-main-bid.styl, scoped to the bar.
+// TYPOGRAPHY ONLY, and now a single call site: the auction side rail, where it
+// is a paragraph that may take the height it needs.
+//
+// It rendered in the 70px bid bar too until 2026-09-02, and the pair is worth
+// remembering if anyone proposes putting it back. The sentence names every team
+// still to answer, so it has no natural upper length; in the bar it therefore
+// had to be bounded on both axes, and a flex shorthand written HERE resolves
+// against whichever axis the PARENT happens to run -- the one basis that
+// bounded the bar's width made the rail's copy a 240px-tall block for a single
+// sentence. Bounded and clamped instead, the bar copy was simply cut off, which
+// is what retired that call site.
 .auction-settlement-status
   margin-right 10px
   padding 4px 8px

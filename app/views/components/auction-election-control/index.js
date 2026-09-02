@@ -8,6 +8,7 @@ import {
   is_free_agent_period
 } from '@core/selectors'
 import { auction_actions } from '@core/auction'
+import { player_actions } from '@core/players'
 
 import AuctionElectionControl from './auction-election-control'
 
@@ -47,9 +48,15 @@ const map_state_to_props = createSelector(
   })
 )
 
+// Each name here is resolved against its actions module rather than trusted:
+// bindActionCreators copies only values that are functions, so a name that does
+// not exist is dropped from the props object with no connect-time warning, no
+// lint error and no build failure -- the symptom is a TypeError the first time
+// someone clicks. `select_player` is app/core/players/actions.js:59.
 const map_dispatch_to_props = {
   submit_auction_election: auction_actions.submit_auction_election,
-  withdraw_auction_election: auction_actions.withdraw_auction_election
+  withdraw_auction_election: auction_actions.withdraw_auction_election,
+  select_player: player_actions.select_player
 }
 
 export default connect(
