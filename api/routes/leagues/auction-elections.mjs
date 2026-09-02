@@ -43,6 +43,28 @@ const router = express.Router({ mergeParams: true })
  *     responses:
  *       200:
  *         description: The team's live elections
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   election_id:
+ *                     type: integer
+ *                   pid:
+ *                     type: string
+ *                   tid:
+ *                     type: integer
+ *                   maximum_bid:
+ *                     type: integer
+ *                     nullable: true
+ *                     description: null is a decline
+ *                   effective_maximum:
+ *                     type: integer
+ *                     nullable: true
+ *                   is_capped:
+ *                     type: boolean
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
@@ -57,12 +79,26 @@ router.get('/?', async (req, res) => {
     }
 
     try {
-      await verifyUserTeam({
+      const team = await verifyUserTeam({
         userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
       })
+
+      // OWNERSHIP, NOT AUTHORIZATION, decides who reads a team's ceilings.
+      //
+      // `verifyUserTeam` also passes a league's COMMISSIONER for every team in
+      // it, which is right for the roster, lineup and trade routes it was
+      // written for -- acting on a team's behalf is an ordinary administrative
+      // act there. It is wrong here. A standing maximum is a sealed bid and the
+      // commissioner is a competing manager, so this route is deliberately
+      // narrower than the helper it calls: without this line the commissioner
+      // could read every ceiling in the league one `teamId` at a time, from the
+      // one surface the design says must never widen.
+      if (team.user_id !== req.auth.userId) {
+        return res.status(400).send({ error: 'invalid teamId' })
+      }
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -97,6 +133,31 @@ router.get('/?', async (req, res) => {
  *     responses:
  *       200:
  *         description: The active nomination and its outstanding teams
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nomination:
+ *                   type: object
+ *                   nullable: true
+ *                   description: null when no player is open
+ *                   properties:
+ *                     pid:
+ *                       type: string
+ *                     current_price:
+ *                       type: integer
+ *                     opening_bid:
+ *                       type: integer
+ *                     nominating_team_id:
+ *                       type: integer
+ *                 outstanding_election_tids:
+ *                   type: array
+ *                   description: >-
+ *                     Team ids only. Who the auction is waiting on is public;
+ *                     what they intend never is.
+ *                   items:
+ *                     type: integer
  */
 router.get('/status', async (req, res) => {
   const { logger } = req.app.locals

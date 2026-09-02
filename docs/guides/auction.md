@@ -55,6 +55,24 @@ The final block is the opposite: computed on demand, no row, because every term 
 
 `config-test.json` carries `nominationTimer` and `bidTimer`. It did not until 2026-09-02, and without them every timer in the test environment was scheduled at `NaN`.
 
+## Sealed bids are scoped by OWNERSHIP, not by authorization
+
+`verifyUserTeam` passes a league's commissioner for every team in it. That is right for the roster, lineup and trade routes it was written for and wrong for the standing-elections read, because in this league the commissioner is a competing manager and a maximum is a sealed bid — so `GET /auction-elections` additionally requires the caller to own the team, and is deliberately narrower than the helper it calls.
+
+The write verbs still take the commissioner branch. A commissioner placing a rival's binding maximum is a live hole, and closing it is a change to commissioner powers the whole platform shares rather than a bug fix. It needs an operator decision.
+
 ## Driving the real thing
 
-The auction page needs 15 to 25 seconds before the block calendar renders, because the board and the player set load first. Two readings during the increment-two build called it broken on a four-second wait when it was merely slow. Wait, then assert.
+`scripts/drive-auction-end-to-end.mjs` drives the whole subsystem against a real hosted league — elections, second-price settlement, the four-effect broadcast fan-out on a connected socket, block convening and merging, mode resolution, and proxy bidding inside a block. Run it after any change here:
+
+```
+node scripts/drive-auction-end-to-end.mjs --lid 119
+```
+
+It boots the working-tree API in-process against the production database, refuses league 1 and any league carrying a Discord webhook, and tears down everything it wrote at both ends of the run — `--teardown-only` recovers a league from a run that was killed. Budget about 20 minutes; the block scenario alone is 30 opt-in round trips.
+
+**Pick teams by their BUDGET, not by their team id.** A cloned board carries real rosters and real caps, and league 119 has a team with $0. An unfundable ceiling caps to $0 and settles for reasons that have nothing to do with the rule under test; an unfundable bid is refused on `AUCTION_ERROR` and broadcasts nothing, which looks exactly like a proxy engine that never fired. Both cost this script a debugging pass.
+
+**Match a broadcast on its CONTENT, not on its arrival order.** Every settlement-status broadcast is sent after its response returns, so "the next one after this request" is routinely the previous one still in flight — which reads as a list that never shrinks.
+
+The auction page needs 15 to 25 seconds before the block calendar renders, because the board and the player set load first. `AUCTION_INIT` alone measures 25 seconds against a ten-team board: `Auction.setup` walks every roster for capacities and `_refresh_mode` walks them twice more, for the block-eligible set and for the final block's spots remaining. Two readings during the increment-two build called the page broken on a four-second wait when it was merely slow. Wait, then assert.
