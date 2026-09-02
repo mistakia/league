@@ -46,6 +46,9 @@ describe('SCRIPTS /import-fftoday-projections', function () {
     delete global.fetch
   })
 
+  // fftoday gives no notice of when it opens a board, so there is no season
+  // phase in which an unpublished slice is unexpected. Every one of these is a
+  // graceful skip rather than a failure.
   describe('upstream has not published the slice', function () {
     it('skips a weekly import in the offseason', async () => {
       const { threw, result } = await attempt({
@@ -53,28 +56,26 @@ describe('SCRIPTS /import-fftoday-projections', function () {
         now: during_offseason
       })
       expect(threw).to.equal(false)
-      expect(result).to.deep.equal({ skipped: true })
+      expect(result).to.deep.equal({ skipped: true, unpublished: true })
     })
 
-    it('throws once the offseason is over', async () => {
-      const { threw, err } = await attempt({
+    it('skips a weekly import during the regular season too', async () => {
+      const { threw, result } = await attempt({
         body: sentinel_page,
         now: during_regular_season
       })
-      expect(threw).to.equal(true)
-      expect(err.row_count_shortfall).to.equal(true)
-      expect(err.message).to.match(/upstream reports no players/)
+      expect(threw).to.equal(false)
+      expect(result).to.deep.equal({ skipped: true, unpublished: true })
     })
 
-    it('throws on the season-long path, which is never excused', async () => {
-      const { threw, err } = await attempt({
+    it('skips the season-long path on the same rule', async () => {
+      const { threw, result } = await attempt({
         body: sentinel_page,
         now: during_offseason,
         season: true
       })
-      expect(threw).to.equal(true)
-      expect(err.row_count_shortfall).to.equal(true)
-      expect(err.message).to.match(/upstream reports no players/)
+      expect(threw).to.equal(false)
+      expect(result).to.deep.equal({ skipped: true, unpublished: true })
     })
   })
 

@@ -177,35 +177,29 @@ const run = async ({
       // Zero rows on the FIRST page has two causes that must not be conflated;
       // on a later page it is just the end of the pagination.
       if (page === 0 && count === 0) {
-        // fftoday answers a season/week it has not published yet with a 200
-        // carrying an explicit sentinel instead of an empty table, so the two
-        // cases are distinguishable at the source. Matching a vendor's literal
-        // string is normally a trap, but it fails SAFE here: a reworded
-        // sentinel stops matching, falls through, and throws.
-        const upstream_reports_no_players =
-          $.html().includes(NO_PLAYERS_SENTINEL)
-
-        // A weekly slice is legitimately absent in the offseason -- fftoday
-        // publishes week N shortly before week N's games. This is the same
-        // judgment check_projections_index_floor already makes, on the same
-        // predicate, and deliberately stops excusing the absence once
-        // is_offseason turns false (the Tuesday before the week 1 opener), so a
-        // genuine fftoday outage is still caught before week 1 is played.
-        if (
-          upstream_reports_no_players &&
-          !is_regular_season_projection &&
-          current_season.is_offseason
-        ) {
+        // fftoday answers a season/week it has not published with a 200
+        // carrying an explicit sentinel instead of an empty table, so an
+        // unpublished slice is distinguishable from a markup change at the
+        // source. Matching a vendor's literal string is normally a trap, but it
+        // fails SAFE here: a reworded sentinel stops matching, falls through,
+        // and throws as a markup change.
+        if ($.html().includes(NO_PLAYERS_SENTINEL)) {
+          // Not a failure, and not something this importer can predict. fftoday
+          // gives no notice of when it opens a board: 2026 weekly was still
+          // unpublished a week before the opener while the 2026 season-long
+          // board was already up, so there is no date or season phase that
+          // would make the absence expected. Skip and let the next run take it.
+          const slice = is_regular_season_projection
+            ? `${year} season-long`
+            : `${year} week ${week}`
           console.log(
-            `fftoday has not published ${year} week ${week} weekly projections yet; skipping (offseason)`
+            `fftoday has not published ${slice} projections; nothing to import, skipping`
           )
-          return { skipped: true }
+          return { skipped: true, unpublished: true }
         }
 
         throw_if_shortfall(
-          upstream_reports_no_players
-            ? `fftoday projections: upstream reports no players for season ${year} week ${week} position ${position} (${url})`
-            : `fftoday projections: parsed 0 rows for position ${position} (${url})`
+          `fftoday projections: parsed 0 rows for position ${position} (${url})`
         )
       }
 
