@@ -713,12 +713,23 @@ observations:
   - >-
     [gotcha] League serves assets under /dist/ and answers any other path with the SPA index.html at
     200, so a deploy check on a guessed asset URL misreads the size mismatch as a stale rsync.
+  - >-
+    [design] The four-layer model reaches the NFL-data half of the schema only; roughly three
+    quarters of the tables — league, roster, trade, waiver, auction, governance and derived-value
+    families — sit OUTSIDE it, where the naming standards bind but the layer rules do not, so those
+    need no changelog and an in-place importer overwrite is normal rather than a violation. The
+    layer-to-table map is user:text/league/database-architecture.md.
+  - >-
+    [gotcha] Three time-series pairs do not follow the _history/_index naming and read as unpaired
+    histories: props with props_index, and the two league_format_player projection-value families
+    whose snapshot half carries no suffix at all. The test that settles an ambiguous name is whether
+    the snapshot half unique key is the history key minus the observation instant.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-02T15:17:04.826Z'
+updated_at: '2026-09-02T18:48:56.147Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
@@ -746,6 +757,7 @@ Two domains of documentation cooperate:
 - [[user:text/league/league-system-architecture.md]] — overall topology and service layout
 - [[user:text/league/league-server.md]] — main server configuration
 - [[user:text/league/data-sources.md]] — external data integrations
+- [[user:text/league/database-architecture.md]] — which of the four layers a table is in, and what may depend on it
 - [[user:text/league/data-model-reference.md]] — database schema reference
 - [[user:text/league/data-view-storage-architecture.md]] — custom data view persistence
 - [[user:text/league/league-backup-system.md]] — backup posture
