@@ -71,6 +71,11 @@ import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-te
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 import { prop_market_selection_coverage_rows } from '#libs-server/prop-market-selection-coverage.mjs'
 import {
+  index_parity_rows,
+  season_floor_rows,
+  identity_resolution_rows
+} from '#libs-server/population-levels.mjs'
+import {
   null_pid_counts_sql,
   null_pid_rows_sql,
   metric_recompute_counts_sql,
@@ -80,6 +85,56 @@ import {
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
 // rows a sibling repair found.
+/**
+ * Tables carrying a `season_year` that the per-season row floor does NOT judge,
+ * each with the reason. Membership is the DENOMINATOR of that check, so it sits
+ * here in the registry rather than inside the query module: a table quietly
+ * dropped from the population is the failure the check exists to prevent, and
+ * this is the surface a reviewer reads.
+ *
+ * The placement rule is the four-layer model in
+ * user:text/league/database-architecture.md, not a name prefix. Everything here
+ * is either outside that model (application state, derived values) or is a
+ * shape a games-anchored floor cannot judge.
+ */
+const FLOOR_EXCLUDED_TABLES = {
+  admission_votes: 'Application and transactional state, outside the model.',
+  bid_changelog: 'Audit trail for settlements, not an ingested feed.',
+  dfs_contests: 'Wagering structure, application state.',
+  external_league_trades: 'External-league import, application state.',
+  external_leagues: 'External-league import, application state.',
+  keeptradecut_pick:
+    'A draft-pick valuation dimension keyed on the pick, not a per-season ingest whose volume scales with games played.',
+  league_format_player_projection_values: 'Derived and computed values.',
+  league_format_player_projection_values_history:
+    'Derived and computed values.',
+  league_format_player_rest_of_season_projection_values:
+    'Derived and computed values.',
+  league_format_player_rest_of_season_projection_values_history:
+    'Derived and computed values.',
+  league_format_player_season_projection_values: 'Derived and computed values.',
+  league_format_player_seasonlogs: 'Derived and computed values.',
+  nfl_plays_current_week:
+    'A rolling single-week working table, not a per-season population.',
+  pff_player_seasonlogs_changelog:
+    'Audit trail for curated values, not an ingested feed.',
+  pff_unresolved_players:
+    "The source layer's resolution BACKLOG. Its volume is a defect measure, so a floor on it would demand the backlog stay large.",
+  player_game_outcome_correlations: 'Derived and computed values.',
+  player_pair_correlations: 'Derived and computed values.',
+  player_variance: 'Derived and computed values.',
+  position_game_outcome_defaults: 'Derived and computed values.',
+  prop_pairings: 'Wagering structure, application state.',
+  restricted_free_agency_nominations: 'Roster operations, application state.',
+  scoring_format_player_projection_points: 'Derived and computed values.',
+  scoring_format_player_rest_of_season_projection_points:
+    'Derived and computed values.',
+  scoring_format_player_season_projection_points:
+    'Derived and computed values.',
+  scoring_format_player_seasonlogs: 'Derived and computed values.',
+  users_teams: 'League membership, application state.'
+}
+
 const GAMELOG_CHILD_TABLES = [
   'player_receiving_gamelogs',
   'player_rushing_gamelogs',
@@ -1978,6 +2033,65 @@ const registry = [
     min_denominator: 5000,
     repair_command:
       "Decide first whether the book went SILENT or is losing markets scattered — the two have different owners. Silent looks like a rate near zero across a whole season: run `select date_trunc('month', observed_at)::date, count(*) from prop_market_selections_index where source_id = '<BOOK>' group by 1 order by 1` and look for months missing entirely while prop_markets_index has rows for them, which is how PRIZEPICKS lost October 2025 through August 2026. That is an importer outage and the fix is in that book's importer (scripts/import-<book>-odds.mjs, or private/scripts/ for FanDuel). Scattered loss looks like a rate in the 0.6-0.95 band spread across market types and games, and points at the per-market formatting path dropping selections while still emitting the header — check whether the importer gates its market push on `selections.length > 0` as the FanDuel path does. Do NOT plan a backfill without checking recoverability first: closing prices for a settled game are not served by any book, and prop_market_selections_history holds almost none of the lost rows, so a past season is usually permanent and belongs parked as baselined debt."
+  },
+
+  {
+    check_id: 'population-index-rebuild-parity',
+    invariant:
+      "Every row in a time-series feed's `_index` snapshot has a counterpart in that feed's own `_history`, within the period history covers. No other oracle here sees this: the cluster gates all compare NAMES, and each of them is satisfied by a snapshot rebuilt from nothing. Equality is claimed in ONE direction only -- a history grain the snapshot has rotated out is normal and is not a violation.",
+    grain: ['feed'],
+    rows: index_parity_rows,
+    max_count: 0,
+    calibration:
+      'Measured 2026-09-02 against production, over 14 derived pairs. EIGHT are exact within coverage: dvoa_team_seasonlogs (197 index rows scanned), dvoa_team_unit_seasonlogs (394), espn_team_win_rates (256), espn_player_win_rates (361), ngs_prospect_scores (8,326), player_adp (51,951), prop_markets (3,075,676) and selection_combination_odds (171). SIX carry standing divergence and REPORT AS FINDINGS on the first run, unparked: projections 130,825 of 569,778, player_rankings 109,103 of 166,968, league_format_player_projection_values 11,556 of 247,176, season_projections 6,801 of 50,118, league_format_player_rest_of_season_projection_values 642 of 15,988, and prop_market_selections 435 of 9,839,757. THEY ARE DELIBERATELY NOT PARKED. Baselining is for debt whose repair cannot land, and a diverged snapshot can be rebuilt from the history it diverged from, so parking these would assert an unrecoverability nobody has established; adjudicating them would assert a correctness nobody has validated. Six unexplained findings riding a self-closing signal is the truthful report, and it costs nothing but a signal, because a finding here does not fail the run or defer anyone push. Each needs a per-feed diagnosis to reach either disposition. Both figures were measured twice, twenty minutes apart, and reproduced exactly. FOUR pairs are un-gradeable every run and say so rather than passing: nfl_draft_rankings (its _index carries no unique key, so the grain is underivable), props (source_id is an enum on one side and an integer on the other, which raises 42883 rather than answering), and the two declared unpaired halves espn_receiving_metrics_history and historical_injury_index. WHAT THIS CANNOT SEE: the comparison is over the row SET, so a snapshot holding a STALE value at a correct grain key passes; and coverage is scoped to the (season_year, week, season_type) tuples present in history, so a feed whose history began mid-life is judged only inside its own window -- an unscoped check reports a false failure on exactly that shape.',
+    // 14 pairs today, derived from information_schema rather than listed, so a
+    // new feed raises this on its own. 10 sits under today's count and far
+    // above the reading it exists to catch, which is the derivation returning
+    // nothing and reporting a clean run over zero feeds.
+    min_gradeable_units: 10,
+    // The row count is one per pair and cannot fall when a feed EMPTIES, so
+    // the denominator is the only number that moves. 100 sits under
+    // selection_combination_odds at 171, today's smallest scanned population,
+    // and far above a collapsed scan.
+    min_denominator: 100,
+    repair_command:
+      'Establish first whether the INDEX gained rows or the HISTORY lost them; they have opposite owners and the count alone cannot tell you. Compare the feed\'s writer against its history writer -- a snapshot written by a path that does not also append history produces exactly this, and so does a history retention job. Do NOT "repair" by deleting index rows: for a feed whose history began mid-life the index is the older and more complete side. Re-measure with node -e "import(\'#libs-server/population-levels.mjs\').then(m => m.index_parity_rows().then(console.log))" under NODE_ENV=production.'
+  },
+
+  {
+    check_id: 'population-season-row-floor',
+    invariant:
+      "Each season of an ingested table holds a row count in proportion to the number of completed NFL games that season, judged against the same table's OTHER seasons. This is the only oracle here that can see a single-season pass-through masquerading as a full load -- a migration that runs clean, exports clean, passes every shape gate and populates a fraction of what it claimed.",
+    grain: ['table_name', 'season_year'],
+    rows: () => season_floor_rows({ excluded_tables: FLOOR_EXCLUDED_TABLES }),
+    min_rate: 0.5,
+    calibration:
+      "THE DENOMINATOR IS THE PEER-DERIVED EXPECTATION, not a raw scanned count, and that is deliberate: a floor read off the table it is checking passes by construction, and a floor typed into a file is the stale magic number this repo has rejected twice. Each season is graded rows/expected where expected is the MEDIAN rows-per-completed-game over that table's OTHER seasons, times that season's completed games from nfl_games. Detector health therefore rides on min_gradeable_units over the judged-season count rather than on the denominator. Measured 2026-09-02, and again twenty minutes later with every figure reproduced exactly: 53 tables, 479 seasons judged, 34 below 0.5. The slack is wide on purpose -- ingest volume moves season to season for real reasons (roster churn, a source adding coverage, a shortened season already absorbed by the games anchor) and the defect being hunted is a season holding a FRACTION of its siblings, not one holding 90 percent. THE 34 REPORT AS FINDINGS and are deliberately NOT parked. They are dominated by feeds that began mid-life (pff_player_gamelogs 2002-2004 at 67-73 rows against a 12,829 expectation, player_contracts 2002-2011 ramping from 116 to 1,082, player_rankings_history 2011-2015) and each of those is most likely correct-not-a-defect -- but a likelihood is exactly what an adjudication may not be built on, and baselining would assert a repair cannot land when nobody has asked the vendor. They ride a self-closing signal until someone establishes, per feed, whether the season is unrecoverable (baseline it, naming the owner) or was never covered (adjudicate it, with the evidence). WHAT THIS CANNOT SEE: a season with no completed games in nfl_games carries no anchor and is outside the population entirely, which is always true of the in-progress season and of every season before nfl_games carries FINAL statuses; and a table with fewer than three anchored seasons has no peer set and is likewise outside it.",
+    // 479 seasons judged today across 53 tables. 400 sits under that and
+    // enormously above the reading this exists to catch, which is the table
+    // discovery or the supply anchor returning nothing.
+    min_gradeable_units: 400,
+    repair_command:
+      'Read the season against its own feed before acting: run `select season_year, count(*) from <table> group by 1 order by 1` and decide whether the season is SHORT or the feed simply did not cover it. A feed that began mid-life is not a defect and belongs parked as baselined debt naming what owns it; a season that USED to be full and is now short is an importer or a deletion, and the changelog for that table is where to look next. Never widen min_rate to quiet one season -- that is the stoplist this registry refuses.'
+  },
+
+  {
+    check_id: 'population-identity-resolution',
+    invariant:
+      'The NFL identity spine resolves for the population that must be resolvable: players with a gamelog in the last completed season carry their external identifiers, and the canonical facts keyed on a vendor id join back to a player row. A feed whose identifiers stop resolving keeps writing rows and passes every shape gate while the rows it writes reach nobody.',
+    grain: ['probe'],
+    rows: identity_resolution_rows,
+    min_rate: 0.97,
+    calibration:
+      "Measured 2026-09-02 against season 2025, derived from nfl_games rather than hardcoded. Five probes: gsis_player_id on players with a gamelog 2,875/2,924 = 0.98324; esb_player_id on the same population 2,865/2,924 = 0.97982; player_gamelogs rows whose pid resolves 41,833/41,833 = 1.0; nfl_snaps rows whose gsis_it_player_id resolves 1,140,905/1,164,377 = 0.97984; nfl_games rows carrying an esbid 334/334 = 1.0. The band between normal and defective is wide: the two ID-coverage probes sit just under 0.98 because a tail of practice-squad and late-signing players genuinely never receive an external id, while the failure this catches -- a resolver that stops matching -- moves a probe by tens of percent, as the rename-broken importer did when it counted every lookup failure as unmatched. 0.97 sits below the lowest healthy reading and far above any real defect. ONE PROBE IS DECLINED rather than measured: nfl_plays_player holds 268,438 rows across 2023 and 2024 only, so anchoring it on the last completed season reads 0/0 forever, and re-anchoring it on the table's own latest season would hide the feed stopping, which is the failure this check exists for. It is a charting surface owned by the sibling PFF/charting ingest task.",
+    // Five probes, and the row count is fixed by construction, so it cannot
+    // fall when a population empties.
+    min_gradeable_units: 5,
+    // 334 is today's smallest population (nfl_games for one season). 300 sits
+    // just under it and far above a collapsed scan.
+    min_denominator: 300,
+    repair_command:
+      'Identify which SIDE moved before repairing anything. A drop in an ID-coverage probe means the player import stopped populating that column -- check scripts/import-players-nflverse.mjs and the field-override veto path. A drop in a join probe means the vendor is shipping identifiers we cannot match, and the resolution backlog (pff_unresolved_players for PFF, otherwise the importer log) names the unmatched values. Do NOT mint players to close the gap: see docs/player-management.md, and the mint guard exists because that repair created the conflated rows another check in this registry now watches for.'
   }
 ]
 
