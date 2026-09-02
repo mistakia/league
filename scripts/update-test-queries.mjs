@@ -110,5 +110,8 @@ const parse_arguments = () => {
 
 if (is_main(import.meta.url)) {
   enable_debug_namespaces('update-test-queries')
-  main().catch(console.error)
+  main().catch((err) => {
+    console.error(err)
+    process.exitCode = 1
+  })
 }

@@ -180,7 +180,9 @@ const main = async () => {
     error: error instanceof Errors.EmptyPoachingWaivers ? null : error
   })
 
-  process.exit()
+  // EmptyPoachingWaivers is a successful no-op run, and is already excluded
+  // from what report_job is told, so exclude it from the exit code too.
+  process.exit(error && !(error instanceof Errors.EmptyPoachingWaivers) ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

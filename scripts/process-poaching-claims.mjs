@@ -186,7 +186,9 @@ const main = async () => {
     job_success
   })
 
-  process.exit()
+  // An EmptyPoachingClaims error is a successful no-op run, not a failure, so
+  // the exit code follows job_success rather than the presence of `error`.
+  process.exit(job_success ? 0 : 1)
 }
 
 if (is_main(import.meta.url)) {

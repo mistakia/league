@@ -71,7 +71,7 @@ const main = async () => {
     log('Error:', error)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

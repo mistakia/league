@@ -218,6 +218,7 @@ export async function validate_charting_import({
 }
 
 const main = async () => {
+  let error
   try {
     const argv = yargs(hideBin(process.argv)).option('year', {
       type: 'number',
@@ -228,11 +229,12 @@ const main = async () => {
     enable_debug_namespaces('validate-charting-import')
 
     await validate_charting_import({ year: argv.year })
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    error = err
+    console.error(err)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

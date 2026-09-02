@@ -1429,7 +1429,7 @@ const main = async () => {
   if (error) {
     process.exit(1)
   }
-  process.exit(0)
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

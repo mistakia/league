@@ -1129,7 +1129,7 @@ const main = async () => {
     })
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

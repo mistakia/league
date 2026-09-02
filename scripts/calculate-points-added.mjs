@@ -227,6 +227,7 @@ const calculate_points_added = async ({
 }
 
 const main = async () => {
+  let error
   try {
     const argv = initialize_cli()
     const season_year = argv.year
@@ -291,10 +292,11 @@ const main = async () => {
       log(`${position} baseline per week: ${avg.toFixed(2)}`)
     }
   } catch (e) {
+    error = e
     log(e)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

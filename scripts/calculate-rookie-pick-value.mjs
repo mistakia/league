@@ -63,6 +63,7 @@ const calculateRookiePickValue = async ({ season_year }) => {
 if (is_main(import.meta.url)) {
   enable_debug_namespaces('script:calculate-points-added')
   const main = async () => {
+    let error
     try {
       const argv = initialize_cli()
       const season_year = argv.year
@@ -104,10 +105,11 @@ if (is_main(import.meta.url)) {
       )
       p.printTable()
     } catch (e) {
+      error = e
       console.log(e)
     }
 
-    process.exit()
+    process.exit(error ? 1 : 0)
   }
 
   main()

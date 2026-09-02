@@ -230,14 +230,16 @@ const analyze_market_type_coverage = async () => {
 }
 
 const main = async () => {
+  let error
   try {
     await analyze_market_type_coverage()
-  } catch (error) {
+  } catch (err) {
+    error = err
     log(`Error: ${error.message}`)
     console.error(error)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

@@ -271,13 +271,15 @@ const main = async () => {
     process.exit(1)
   }
 
+  let error
   try {
     await backfill_play_stats_gsisid({ season_year, dry_run })
   } catch (err) {
+    error = err
     console.error(err)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

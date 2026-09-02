@@ -221,6 +221,7 @@ const calculate_points = async ({
 }
 
 const main = async () => {
+  let error
   try {
     const argv = initialize_cli()
     const result = await calculate_points({
@@ -270,10 +271,11 @@ const main = async () => {
     )
     table.printTable()
   } catch (e) {
+    error = e
     log(e)
   }
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 // If this script is run directly, execute the main function

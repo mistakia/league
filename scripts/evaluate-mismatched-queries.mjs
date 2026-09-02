@@ -1125,5 +1125,8 @@ const list_available_tests = (test_cases) => {
 
 if (is_main(import.meta.url)) {
   enable_debug_namespaces('evaluate-mismatched-queries')
-  main().catch(console.error)
+  main().catch((err) => {
+    console.error(err)
+    process.exitCode = 1
+  })
 }
