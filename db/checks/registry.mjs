@@ -66,6 +66,7 @@ import {
   game_prop_line_value_rows
 } from '#libs-server/game-prop-column-resolution.mjs'
 import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
+import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-team-attribution.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
@@ -1485,6 +1486,32 @@ const registry = [
     min_gradeable_units: 180,
     repair_command:
       'Re-run the aggregation for the week: node scripts/generate-player-snaps.mjs --year <year> --week <week> --season_type <type>. It upserts on (esbid, pid, season_year) and merges, so re-running a healthy week is safe. If the rate comes back 0.0000 again, check that nfl_plays holds ENRICHED rows for those games first — the generator left-joins nfl_plays and filters `whereNot play_type NOPL`, which under three-valued logic drops every snap whose play row is missing or unenriched, so an enrichment gap presents here as a snap gap. play-type-enrichment-coverage owns that upstream condition.'
+  },
+
+  {
+    check_id: 'gamelog-week-team-attribution',
+    invariant:
+      "Every player_gamelogs row names the team the player actually played for that week. The wrong value here is not a null and not an out-of-range franchise -- it is the OTHER SIDE OF THE SAME GAME, because `opponent_nfl_team` is derived from `nfl_team` at every write site rather than sourced independently. The pair therefore stays internally consistent while naming the wrong sides of a real matchup, so no null check, no foreign key and no cross-column predicate can see it, and a consumer that picks a side of a spread by matching the player's week team renders the OPPOSING side in silence. Nothing converges it either: the snap-only branch of scripts/generate-player-gamelogs.mjs resolves a team as `existing gamelog team || play_stats team || resolver`, so a regeneration reads the bad row back as its first-priority evidence and rewrites it unchanged. Re-running the writer is not a repair, which is what makes a detector the only way this class is ever seen.",
+    grain: ['season_year', 'season_type', 'week'],
+    rows: async () => gamelog_week_team_attribution_rows(),
+    // REG only, over a population of at least 500 admissible rows. PRE and POST
+    // are emitted and reported UN-GRADEABLE rather than graded loosely: both
+    // carry real roster churn against thin snap counts and read 0.93 on this
+    // same population even in the clean 2025 season, so a floor that tolerated
+    // them could not see the REG defect at all.
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      row.season_type === 'REG' && Number(row.denominator) >= 500,
+    min_rate: 1.0,
+    calibration:
+      'EXACT agreement, not a tolerance, and the population is what earns that. Only rows where BOTH of the resolver sources spoke and named the SAME team are graded, with continuity resting on three or more other weeks — see the module header for why. Measured 2026-09-01 against production across 175 REG week-units, 2016-2025: 2025 reads 1.00000 on all 18 weeks over 19,443 admissible rows, ZERO disagreements. Every season before it reads 43 to 90 disagreements — 2016:53, 2017:50, 2018:43, 2019:47, 2020:71, 2021:65, 2022:73, 2023:90, 2024:55 — with 25 of 175 weeks clean and worst-week readings of 0.9919 to 0.9948. The floor is exact because the gap is categorical rather than numeric: two independent sources agreeing with each other and disagreeing with the stored row happens 0 times in a clean season and never fewer than 43 in a dirty one, so there is no band to sit between them. Grading the SAME rows on every resolver verdict rather than only the agreeing ones was measured first and is the reading to avoid: it reports about 2.3% disagreement in every season including 2025, a rate set by the weaker source own error, and is blind to the defect entirely. The 2025 column is also the green demonstration this check owes — a season known clean, graded by the shipped expression, reading exactly 1.0. WHY 2025 IS CLEAN AND EARLIER SEASONS ARE NOT: private/scripts/import-gameday-rosters.mjs landed 2025-10-30 and went on cron 2025-11-26, asserting each dressed player team from a per-team roster feed BEFORE the generator runs, so the inferring branch stopped having to guess. That is feed COVERAGE, not a code fix, and it does not reach backwards.',
+    // 175 REG week-units measured over 2016-2025, so 150 sits under the
+    // observed corpus and far above a scan that has stopped reaching
+    // nfl_snaps — which is the collapse that would otherwise read as a clean
+    // sweep, since a week with no admissible rows carries a denominator of
+    // zero and drops out of the graded set rather than failing.
+    min_gradeable_units: 150,
+    repair_command:
+      'A finding is a CANDIDATE, not an instruction, and the direction is the part to establish first. Reproduce it with the shipped resolver — libs-server/resolve-snap-gamelog-team.mjs over the failing week — and read which source spoke: a finding here means roster continuity and scrimmage possession agreed with each other against the stored row, which is evidence the stored nfl_team is wrong and that opponent_nfl_team, being derived from it, is holding the correct team. DO NOT re-run scripts/generate-player-gamelogs.mjs as the repair. Its snap-only branch reads the existing row as first-priority evidence and rewrites the bad value unchanged, so a regeneration reports success and changes nothing. A repair has to overwrite nfl_team from the resolver and recompute opponent_nfl_team from it, in the shape of db/adhoc/2026-08-04-repair-snap-gamelog-nfl-team.mjs, and it touches every table derived from the week team — scripts/generate-player-snaps.mjs sides its offense/defense split on this column. As of 2026-09-01 that repair is UNRUN and the standing debt is roughly 1,254 REG player-weeks across 2016-2024; the operator owns the decision to repair or to live with it, so these findings are expected until it is made.'
   },
 
   {
