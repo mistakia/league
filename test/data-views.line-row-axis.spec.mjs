@@ -355,10 +355,26 @@ describe('data views line row axis', function () {
     // selection. Rows multiplying is exactly the change that could break that,
     // which is why it is asserted here rather than assumed.
     it('keeps line and odds on one shared CTE', () => {
-      const cte_names = [...with_axis.matchAll(/"(t[0-9a-f]{32})" as \(/g)].map(
-        (match) => match[1]
-      )
+      const cte_names = [
+        ...with_axis.matchAll(/"(t[0-9a-f]{32})" as (?:materialized )?\(/g)
+      ].map((match) => match[1])
       expect(new Set(cte_names).size).to.equal(1)
+    })
+
+    // Suppressing the dedup also removed the optimization fence it incidentally
+    // provided, and Postgres then inlined this CTE into the join and re-probed
+    // prop_markets_index once per candidate cell -- 203,456 loops per column on
+    // a single week, which took the saved 18-week view past the 40s statement
+    // timeout. The fence has to be asked for explicitly once the dedup is gone.
+    it('materializes the market CTE under the axis', () => {
+      expect(with_axis).to.match(/"t[0-9a-f]{32}" as materialized \(/)
+    })
+
+    // Gated, not unconditional: without the axis the dedup is back and the same
+    // 18-week request measured the same either way, so materializing there
+    // would take on planner risk for nothing.
+    it('leaves the market CTE un-materialized without the axis', () => {
+      expect(without_axis).to.not.match(/"t[0-9a-f]{32}" as materialized \(/)
     })
   })
   // The same-quantity rule. Two books on one market type share a rung and
