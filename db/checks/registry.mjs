@@ -70,6 +70,7 @@ import { percentile_field_vocabulary } from '#scripts/generate-nfl-team-seasonlo
 import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-team-attribution.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
 import { prop_market_selection_coverage_rows } from '#libs-server/prop-market-selection-coverage.mjs'
+import { projection_source_week_coverage_rows } from '#libs-server/projection-source-week-coverage.mjs'
 import {
   index_parity_rows,
   season_floor_rows,
@@ -2092,6 +2093,28 @@ const registry = [
     min_denominator: 300,
     repair_command:
       'Identify which SIDE moved before repairing anything. A drop in an ID-coverage probe means the player import stopped populating that column -- check scripts/import-players-nflverse.mjs and the field-override veto path. A drop in a join probe means the vendor is shipping identifiers we cannot match, and the resolution backlog (pff_unresolved_players for PFF, otherwise the importer log) names the unmatched values. Do NOT mint players to close the gap: see docs/player-management.md, and the mint guard exists because that repair created the conflated rows another check in this registry now watches for.'
+  },
+
+  {
+    check_id: 'projection-source-week-coverage',
+    invariant:
+      'Every source we run a weekly projection importer for wrote a real slice for every fantasy week that has finished. No other oracle sees a source going permanently quiet. check-projections-index-floor.mjs speaks only for a run that REACHED it, and an importer that finds upstream has published nothing returns { skipped: true } before its caller ever calls it -- deliberately, because no date can be put on when a vendor opens a board. The cost of that decision is that a dead source produces a graceful skip on every run forever: the runs ledger reads green, the log reads "nothing to import", and the first symptom is a column going blank downstream months later. This is the judgment made from outside the run, against what the table holds.',
+    grain: ['season_year', 'week', 'source_label'],
+    rows: projection_source_week_coverage_rows,
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: a source we schedule a weekly importer for either wrote a slice for a finished week or it did not. Measured 2026-09-02 over 2025 weeks 11-18, which is eight consecutive healthy weeks across all six sources. The smallest healthy per-source week is FFTODAY at 209 rows and the largest is FBG at 1,469; per-week totals across every source run 4,508 to 5,064. The defective reading is exactly 0, observed the same day at 2026 week 1 where FFTODAY, 4FOR4 and FBG each wrote nothing while ESPN wrote 553, PFF 508 and Fantasy Sharks 494. The 100-row threshold sits at half the smallest healthy reading and two orders of magnitude above the defective one, so a vendor trimming its board cannot trip it and a vendor going quiet cannot clear it. Note 2026 week 1 is NOT gradeable by this check on the day it was measured -- the week had not finished -- which is the point: grading an unfinished week would report the three legitimately-unpublished sources as defects every week of the season.',
+    // Six sources times four weeks. The row count is fixed by construction and
+    // cannot fall when a week empties, so the denominator floor below is the
+    // half of the detector health that can actually move.
+    min_gradeable_units: 24,
+    // Per-week totals across all sources ran 4,508 to 5,064 over the calibration
+    // window. 1,000 sits well under the smallest of those and far above the
+    // reading it exists to catch, which is the group-by breaking and returning a
+    // near-empty week.
+    min_denominator: 1000,
+    repair_command:
+      'Establish which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line -- and for PFF, which is on no crontab, check `base schedule list` for league/import-pff-projections.md. If it ran and skipped, its log carries the reason: an importer that reports upstream has published nothing is working as designed and the finding belongs upstream, so confirm against the vendor before treating it as ours. If it ran and wrote a short slice, check_projections_index_floor should have failed the run -- read /var/log/league/import-<source>.log. Do NOT lower MINIMUM_WEEKLY_ROWS_PER_SOURCE to clear a finding; the gap between 209 and 0 is what makes this check readable at all. A week a vendor genuinely never published and cannot backfill is baselined debt, not an adjudication.'
   }
 ]
 
