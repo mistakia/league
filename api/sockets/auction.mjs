@@ -15,10 +15,23 @@ import {
   get_active_auction_nomination,
   get_auction_team_capacities,
   get_outstanding_team_ids,
-  broadcast_auction_settlement
+  broadcast_auction_settlement,
+  build_auction_claims
 } from '#libs-server/auction-settlement.mjs'
 import { resolve_nominating_team_id } from '#libs-server/auction-completion.mjs'
+import { resolve_auction_player } from '#libs-server/resolve-auction-player.mjs'
+import { get_auction_mode, AUCTION_MODES } from '#libs-server/auction-modes.mjs'
+import { get_auction_nomination_order } from '#libs-server/auction-nomination-order.mjs'
 import debug from 'debug'
+
+// How often the socket asks whether a block has opened or closed.
+//
+// A block boundary is a wall-clock event with no write behind it -- nobody
+// sends a message when 15:00 arrives -- so the only way the auction learns it
+// is now live is to look. Fifteen seconds against a 15-minute granularity means
+// a block is never more than a rounding error late, and the query is a read of
+// a handful of finalized rows.
+const AUCTION_MODE_POLL_MS = 15_000
 
 // The real timers, and the default injection.
 //
@@ -53,6 +66,34 @@ export default class Auction {
     // mode is the open-outcry path on the bid clock. This flag says which is in
     // force; the timers below are suspended entirely in election mode.
     this._election_mode = false
+    // Which auction SYSTEM this league-season runs: this design, or the
+    // 2021-2025 timer-driven open outcry it rolls back to. Distinct from
+    // `_election_mode`, which is which MODE is in force right now inside this
+    // design and is a function of the block schedule and the clock. Collapsing
+    // the two would make a season boolean a second source of truth for mode, and
+    // the two would disagree the moment a block convened.
+    this._system_election_mode = false
+    // A block ending while a player is open lets that nomination FINISH under
+    // live clocks and reverts afterward: reverting mid-player would strand a
+    // half-resolved open outcry with no clock to conclude it.
+    this._pending_election_mode = false
+    // `_election_mode` starts false, which is a real mode rather than "unknown",
+    // so the first resolve must transition even when it agrees with the default.
+    // Without this a socket that BOOTS inside a block sits in live mode with
+    // neither clock armed: nothing auto-nominates and the block does nothing at
+    // all until a manager acts, which is the block failing exactly when it is
+    // supposed to be carrying the auction.
+    this._mode_resolved = false
+    this._block_end_at = null
+    this._is_final_block = false
+    // Per-player, cleared on every nomination. A manual bid SUPERSEDES that
+    // team's standing maximum for the rest of the player, so the engine stops
+    // proxying for them at their ceiling and treats the amount they typed as
+    // their claim. It is socket state rather than a transactions column because
+    // an engine bid and a human bid are indistinguishable on the wire by
+    // design -- proxy provenance is deliberately not recorded -- and this is the
+    // one place that has to tell them apart.
+    this._manual_bids = new Map()
     this._timers = timers
 
     this.logger = debug(`auction:league:${lid}`)
@@ -121,6 +162,7 @@ export default class Auction {
     await this._load_transactions()
     await this._load_league()
     await this._calculate_team_capacities()
+    this._schedule_mode_poll()
   }
 
   start() {
@@ -191,6 +233,15 @@ export default class Auction {
       // Record transaction
       await this._record_auction_transaction(bid)
 
+      this._manual_bids.clear()
+
+      // The player that held the block open is placed, so a revert deferred at
+      // the block boundary can happen now. Checked BEFORE the rotation broadcast
+      // so the next nomination is validated in the mode it will actually run in.
+      if (this._pending_election_mode) {
+        await this._leave_live_mode()
+      }
+
       const nominating_team_id = this.nominating_team_id
       if (!nominating_team_id) {
         // An exhausted nomination rotation IS the auction-complete condition:
@@ -250,9 +301,16 @@ export default class Auction {
       // team's claim to what it actually bid.
       if (this._election_mode) {
         await this._settle_if_complete()
-      } else {
-        this._start_bid_timer()
+        return true
       }
+
+      // A HUMAN BID RESETS THE CLOCK; the engine's answer to it does not. That
+      // asymmetry is the standard proxy-auction contract and it is what gives a
+      // present manager a full bid clock to respond to being outbid by a ceiling
+      // they cannot see.
+      this._manual_bids.set(message.tid, message.value)
+      this._start_bid_timer()
+      await this._apply_proxy_bids()
       return true
     } catch (error) {
       this.logger('error in bid()', error)
@@ -274,6 +332,16 @@ export default class Auction {
     // turn never advances and the next nomination is validated against the
     // wrong team. Refresh before reading the rotation.
     await this._load_transactions()
+
+    // THE CACHED CAPACITY IS REFRESHED PER PLAYER IN LIVE MODE. `_teams` is
+    // computed once at setup and then adjusted only for what the auction itself
+    // does, so a trade or a commissioner-override release during a block leaves
+    // the engine proxying for a team that can no longer roster anyone. Election
+    // mode reads capacity from the database at settlement and does not need
+    // this; live mode is the path that acts on the cache.
+    if (!this._election_mode) {
+      await this._calculate_team_capacities()
+    }
 
     const nominating_team_id = this.nominating_team_id
     // The socket-authenticated `user_id` above and the one the CLIENT sends in
@@ -314,6 +382,10 @@ export default class Auction {
 
     this.logger(`nominating ${pid}`)
 
+    // Supersession is per player: a manual bid binds a team's claim for the rest
+    // of THAT player and says nothing about the next one.
+    this._manual_bids.clear()
+
     // Create and record nomination bid
     const bid = await this._create_nomination_bid(
       message,
@@ -337,6 +409,13 @@ export default class Auction {
 
     this._locked = false
     this._start_bid_timer()
+
+    // Every standing maximum on this player is a live proxy the moment it opens,
+    // so the price jumps to the equilibrium immediately rather than waiting for
+    // a human to move first.
+    if (!this._election_mode) {
+      await this._apply_proxy_bids()
+    }
 
     return true
   }
@@ -761,6 +840,183 @@ export default class Auction {
     }
   }
 
+  // ============================================================================
+  // LIVE MODE -- PROXY BIDDING AND AUTO-NOMINATION
+  // ============================================================================
+
+  /**
+   * Restore the price equilibrium on the open player in ONE step.
+   *
+   * THIS IS THE SAME RULE THE SETTLEMENT ENGINE USES, run against the live board
+   * rather than at completeness: rank every claim, the price is the second
+   * highest plus one increment capped at the highest, and the highest claim
+   * leads. `resolve_auction_player` is that rule and it is called here rather
+   * than reimplemented, which is why proxy bidding costs an engine step rather
+   * than a second pricing model.
+   *
+   * A PROXY SPENDS ONLY WHAT IT TAKES TO LEAD. An absent team holding $30 beats a
+   * $10 human bid at $11 and wins there; its ceiling is never revealed and never
+   * charged unless a rival pushes the price to it. That property is what makes
+   * non-attendance costless, and therefore what makes the whole design
+   * acceptable to the league.
+   *
+   * ONE BID, NOT FORTY. Incrementing a dollar at a time would put dozens of rows
+   * on the wire in a second, exhaust both ceilings in a blur, and race the block
+   * past players the attending managers never saw.
+   *
+   * A PROXY STEP DOES NOT RESET THE BID CLOCK. Only a human bid does, which is
+   * what keeps a fully-proxied player settling one bid clock after nomination
+   * however many teams wanted them -- and what makes a 69-player final block
+   * tractable at the historical pace.
+   */
+  async _apply_proxy_bids() {
+    if (this._election_mode) return false
+
+    const nomination = await get_active_auction_nomination({ lid: this._lid })
+    if (!nomination) return false
+
+    const players = await db('player').where('pid', nomination.pid)
+    const player_row = players[0]
+    if (!player_row) return false
+
+    const capacities = await get_auction_team_capacities({
+      team_ids: this._tids,
+      league: this._league,
+      player_position: player_row.primary_position,
+      current_price: nomination.current_price
+    })
+
+    const elections = await db('auction_elections')
+      .where({
+        lid: this._lid,
+        season_year: current_season.year,
+        pid: nomination.pid
+      })
+      .whereNull('withdrawn_at')
+      .whereNull('settled_at')
+
+    const claims = build_auction_claims({
+      elections,
+      bids: nomination.bids,
+      opening_bid: nomination.opening_bid,
+      nominating_team_id: nomination.nominating_team_id
+    })
+
+    // SUPERSESSION, and it only binds DOWNWARD here. `build_auction_claims`
+    // raises a claim to a placed bid because a placed bid is binding; it cannot
+    // lower one, because from the transaction log alone an engine bid and a
+    // human bid are the same row. This instance knows which is which, so a team
+    // that typed $3 while holding a $30 ceiling is bound to $3 and the engine
+    // stops proxying for them -- bidding below your own ceiling means you meant
+    // that amount.
+    for (const claim of claims) {
+      if (!this._manual_bids.has(claim.tid)) continue
+      claim.maximum_bid = this._manual_bids.get(claim.tid)
+    }
+
+    const { winner_tid, price } = resolve_auction_player({
+      claims,
+      rosters: capacities,
+      nominating_team_id: nomination.nominating_team_id,
+      opening_bid: nomination.current_price
+    })
+
+    if (!winner_tid) return false
+
+    const is_equilibrium =
+      winner_tid === nomination.leading_team_id &&
+      price <= nomination.current_price
+    if (is_equilibrium) return false
+
+    const winning_claim = claims.find((claim) => claim.tid === winner_tid)
+
+    const bid = {
+      user_id: winning_claim.user_id || nomination.bids[0].user_id,
+      tid: winner_tid,
+      pid: nomination.pid,
+      lid: this._lid,
+      type: transaction_types.AUCTION_BID,
+      player_salary: price,
+      week: 0,
+      season_year: current_season.year,
+      occurred_at: new Date()
+    }
+
+    const insert_query = await db('transactions')
+      .insert(bid)
+      .returning('transaction_id')
+    const bid_with_uid = {
+      ...bid,
+      transaction_id: insert_query[0].transaction_id
+    }
+
+    this._transactions.unshift(bid_with_uid)
+    this.broadcast({ type: 'AUCTION_BID', payload: bid_with_uid })
+    this.logger(
+      `proxy bid: team ${winner_tid} to $${price} on ${nomination.pid}`
+    )
+
+    return true
+  }
+
+  /**
+   * Nominate the best available player when the nomination clock expires.
+   *
+   * LIVE MODE ONLY. Nomination is manual in election mode by design and nothing
+   * forces the turn there. Today the expired timer only unlocks a commissioner
+   * override and advances the auction not at all, which inside a block would
+   * stall it for the length of the block.
+   *
+   * The order is league-wide and comes from `auction-nomination-order.mjs`, but
+   * the first entry the team ON THE CLOCK can actually roster is what gets
+   * nominated: nominating a fourth defense for a team already at the position
+   * cap would be refused by the validator and the timer would expire into
+   * nothing all over again.
+   */
+  async _auto_nominate() {
+    if (this._election_mode) return false
+
+    await this._load_transactions()
+    const nominating_team_id = this.nominating_team_id
+    if (!nominating_team_id) {
+      this.broadcast({ type: 'AUCTION_COMPLETE' })
+      return false
+    }
+
+    const { tier, players } = await get_auction_nomination_order({
+      lid: this._lid,
+      league: this._league
+    })
+
+    const roster = new Roster({
+      roster: await getRoster({ tid: nominating_team_id }),
+      league: this._league
+    })
+
+    const next = players.find((player) =>
+      roster.has_bench_space_for_position(player.primary_position)
+    )
+
+    if (!next) {
+      this.logger(
+        `no nominatable player for team ${nominating_team_id} in the ${tier} order`
+      )
+      return false
+    }
+
+    const [owner] = await db('users_teams').where({ tid: nominating_team_id })
+    const user_id = owner ? owner.user_id : this._league.commissioner_user_id
+
+    this.logger(
+      `auto-nominating ${next.pid} for team ${nominating_team_id} from the ${tier} order`
+    )
+
+    return this.nominate(
+      { pid: next.pid, value: 0, user_id },
+      { user_id: this._league.commissioner_user_id, tid: nominating_team_id }
+    )
+  }
+
   async _reload_after_settlement() {
     await this._load_transactions()
     await this._calculate_team_capacities()
@@ -945,7 +1201,11 @@ export default class Auction {
         nominating_team_id,
         complete: !nominating_team_id,
         pause_on_team_disconnect: this._pause_on_team_disconnect,
-        auction_mode: this._election_mode ? 'election' : 'live',
+        auction_mode: this._election_mode
+          ? AUCTION_MODES.ELECTION
+          : AUCTION_MODES.LIVE,
+        block_end_at: this._block_end_at ? this._block_end_at.unix() : null,
+        is_final_block: this._is_final_block,
         // Team ids only. A standing maximum is a sealed bid and no client ever
         // receives another team's amount -- the commissioner's included, since
         // in this league the commissioner is a competing manager.
@@ -990,20 +1250,162 @@ export default class Auction {
     // election mode clears it -- so a rollback is inert until the commissioner
     // sends AUCTION_RESUME rather than immediately live on a 14-second clock.
     //
-    // When live blocks land, this stops being a league setting and becomes a
-    // query against the finalized block set for `now`, per auction-modes.mjs.
-    // The flag then chooses whether the schedule is consulted at all.
-    this._election_mode =
+    // The flag chooses whether the block schedule is consulted at all. Under
+    // `true` the mode is a query against the finalized blocks and the computed
+    // final block for `now`, which `auction-modes.mjs` owns; under `false` this
+    // is the pre-redesign auction and there is no election mode to be in.
+    this._system_election_mode =
       this._league?.is_auction_election_mode_enabled || false
-    if (this._election_mode) {
+
+    if (this._system_election_mode) {
       // Election mode has no clock to pause. The auction advances on elections
       // arriving over REST, so a socket-level pause would stop nothing and
       // would only hide the board from whoever is connected.
       this._paused = false
+      await this._refresh_mode()
+    } else {
+      this._election_mode = false
     }
-    this.logger(`election mode enabled: ${this._election_mode}`)
+    this.logger(
+      `election-mode system: ${this._system_election_mode}, mode now: ${this._election_mode ? 'election' : 'live'}`
+    )
 
     await this._refresh_league_pause()
+  }
+
+  // ============================================================================
+  // MODE TRANSITIONS
+  // ============================================================================
+
+  /**
+   * Ask the block schedule which mode is in force, and move if it has changed.
+   *
+   * THE SOCKET NEVER DECIDES THE MODE. `auction-modes.mjs` resolves it from the
+   * finalized sessions and the computed final block, and this applies the
+   * answer. A second derivation here is the shape of the defect this subsystem
+   * has already produced twice.
+   */
+  async _refresh_mode() {
+    if (!this._system_election_mode) return
+
+    let resolved
+    try {
+      resolved = await get_auction_mode({
+        lid: this._lid,
+        league: this._league
+      })
+    } catch (error) {
+      // A mode lookup that throws must not take the auction with it: staying in
+      // whichever mode is already in force is the degraded outcome, and the next
+      // poll retries.
+      this.logger('error resolving auction mode', error)
+      return
+    }
+
+    this._block_end_at = resolved.block_end_at
+    this._is_final_block = resolved.is_final_block
+
+    const should_be_election = resolved.auction_mode === AUCTION_MODES.ELECTION
+    const is_first_resolve = !this._mode_resolved
+    this._mode_resolved = true
+
+    if (!is_first_resolve && should_be_election === this._election_mode) return
+
+    if (!should_be_election) return this._enter_live_mode()
+
+    // The finish-under-live-clocks deferral belongs to a BOUNDARY CROSSING, not
+    // to a fresh instance. A socket booting in election mode with a player open
+    // never ran that player under a clock, so deferring here would leave it in
+    // live mode with a bid timer that settles a nomination the eligible set is
+    // supposed to decide.
+    if (is_first_resolve) {
+      this._election_mode = true
+      return
+    }
+
+    return this._leave_live_mode()
+  }
+
+  async _enter_live_mode() {
+    this.logger(
+      `entering live mode${this._is_final_block ? ' (final block)' : ''}`
+    )
+    this._election_mode = false
+    this._pending_election_mode = false
+
+    // A block is where the ENGINE starts acting on rosters it cached at setup,
+    // so the cached capacity has to be current before the first proxy step: a
+    // stale one proxies for a team that can no longer roster the player.
+    await this._calculate_team_capacities()
+
+    this._broadcast_mode()
+
+    await this._load_transactions()
+    const latest = this._transactions[0]
+    if (latest && latest.type === transaction_types.AUCTION_BID) {
+      // A player that sat unsettled through election mode is now contested on a
+      // clock, and every standing maximum on it becomes a live proxy.
+      await this._apply_proxy_bids()
+      this._start_bid_timer()
+    } else {
+      this._start_nomination_timer()
+    }
+  }
+
+  async _leave_live_mode() {
+    await this._load_transactions()
+    const latest = this._transactions[0]
+    if (latest && latest.type === transaction_types.AUCTION_BID) {
+      // THE OPEN PLAYER FINISHES UNDER LIVE CLOCKS. Reverting here would leave
+      // an open outcry with no clock to conclude it, which is the one way a
+      // block can strand a player rather than place one.
+      if (!this._pending_election_mode) {
+        this.logger(
+          'block ended with a player open -- finishing under live clocks'
+        )
+      }
+      this._pending_election_mode = true
+      return
+    }
+
+    this.logger('leaving live mode')
+    this._clear_timers()
+    this._election_mode = true
+    this._pending_election_mode = false
+    this._broadcast_mode()
+  }
+
+  _broadcast_mode() {
+    this.broadcast({
+      type: 'AUCTION_MODE',
+      payload: {
+        auction_mode: this._election_mode
+          ? AUCTION_MODES.ELECTION
+          : AUCTION_MODES.LIVE,
+        block_end_at: this._block_end_at ? this._block_end_at.unix() : null,
+        is_final_block: this._is_final_block
+      }
+    })
+  }
+
+  _schedule_mode_poll() {
+    if (!this._system_election_mode) return
+    this._mode_timer = this._timers.set_timeout(async () => {
+      await this._refresh_mode()
+      this._schedule_mode_poll()
+    }, AUCTION_MODE_POLL_MS)
+  }
+
+  /**
+   * Stop every timer this instance owns.
+   *
+   * The mode poll re-arms itself, so a spec that constructs an Auction and does
+   * not stop it leaves a timer running for the life of the process.
+   */
+  stop() {
+    this._clear_timers()
+    if (this._mode_timer) this._timers.clear_timeout(this._mode_timer)
+    this._mode_timer = null
   }
 
   /**
@@ -1088,8 +1490,19 @@ export default class Auction {
     this._nomination_timer_expired = false
     this._clear_nomination_timer()
 
-    this._nomination_timer = this._timers.set_timeout(() => {
+    this._nomination_timer = this._timers.set_timeout(async () => {
       this._nomination_timer_expired = true
+      // AUTO-NOMINATION IS THE WHOLE POINT OF THE EXPIRY IN LIVE MODE. Before
+      // this the expired timer only unlocked a commissioner override and
+      // advanced nothing, so a block with a quiet team on the clock stalled for
+      // the length of the block. The override survives -- the commissioner can
+      // still nominate out of turn once the timer has run -- and it is now the
+      // fallback rather than the mechanism.
+      try {
+        await this._auto_nominate()
+      } catch (error) {
+        this.logger('error auto-nominating', error)
+      }
     }, config.nominationTimer)
 
     return true

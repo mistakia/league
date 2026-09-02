@@ -171,7 +171,10 @@ export const get_auction_final_block = async ({
     })
   }
 
-  return result
+  // The period end travels with the result because every consumer needs both:
+  // mode resolution holds the auction live from the final block UNTIL the period
+  // ends, and the calendar draws the window the grid covers.
+  return { ...result, period_end: period.end }
 }
 
 export default {

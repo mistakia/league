@@ -61,6 +61,11 @@ export default async function reset_league_tables(knex) {
   // nomination's eligible set and settles it against another spec's maximum.
   await knex('auction_elections').del()
   await knex('auction_block_opt_ins').del()
+  // A finalized block is what puts the auction into LIVE mode at an instant, so
+  // a leftover row from an earlier spec silently runs the next spec's auction on
+  // the bid clock -- which is the one difference that changes every settlement
+  // path the suite exercises.
+  await knex('auction_blocks').del()
   await knex('poaches').del()
   await knex('poach_releases').del()
   await knex('draft').del()

@@ -1,5 +1,7 @@
 {
   "ssl": false,
+  "nominationTimer": 45000,
+  "bidTimer": 14000,
   "jwt": {
     "secret": "test-only-not-a-secret-jwt-signing-key",
     "algorithms": ["HS256"]

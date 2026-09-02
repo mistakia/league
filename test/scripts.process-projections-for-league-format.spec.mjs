@@ -2,7 +2,11 @@
 import * as chai from 'chai'
 
 import knex from '#db'
-import { default_points_added, external_data_sources } from '#constants'
+import {
+  current_season,
+  default_points_added,
+  external_data_sources
+} from '#constants'
 import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
 
 import league from '#db/fixtures/league.mjs'
@@ -42,8 +46,18 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     await knex.seed.run()
     await league(knex)
 
+    // THE FIXTURE LEAGUE'S OWN FORMAT, not an arbitrary row. This was an
+    // unordered `.first()` over the four formats the seed carries, so which one
+    // the whole fixture was built against changed with the heap -- and the
+    // spread assertion below went red at random depending on which spec files
+    // had written before it. The league this spec seeds a board for is the one
+    // whose format it should compute.
+    const season_row = await knex('seasons')
+      .where({ lid: 1, season_year: current_season.year })
+      .first()
     const format_row = await knex('league_formats')
       .select('id', 'scoring_format_id')
+      .where({ id: season_row.league_format_id })
       .first()
     league_format_id = format_row.id
     scoring_format_id = format_row.scoring_format_id

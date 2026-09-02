@@ -121,6 +121,16 @@ export interface AuctionBlockOptInsRow {
   withdrawn_at: Date | null
 }
 
+export interface AuctionBlocksRow {
+  block_id: number
+  lid: number
+  season_year: number
+  block_at: Date
+  end_at: Date
+  finalized_at: Date
+  eligible_team_count: number
+}
+
 export interface AuctionElectionsRow {
   election_id: number
   lid: number

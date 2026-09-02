@@ -499,6 +499,7 @@ DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
 DROP INDEX IF EXISTS public.auction_elections_one_live_per_team_player;
 DROP INDEX IF EXISTS public.auction_elections_league_season_team;
 DROP INDEX IF EXISTS public.auction_elections_league_season_player;
+DROP INDEX IF EXISTS public.auction_blocks_league_season_window;
 DROP INDEX IF EXISTS public.auction_block_opt_ins_league_season_block;
 DROP INDEX IF EXISTS public.adp_format_axis_unique;
 DROP INDEX IF EXISTS public.admission_votes_one_open_vote_per_league_season;
@@ -714,6 +715,8 @@ ALTER TABLE IF EXISTS ONLY public.composite_market_value_calibration DROP CONSTR
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_blend_weights DROP CONSTRAINT IF EXISTS composite_market_value_blend_weights_pkey;
 ALTER TABLE IF EXISTS ONLY public.bid_changelog DROP CONSTRAINT IF EXISTS bid_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.auction_elections DROP CONSTRAINT IF EXISTS auction_elections_pkey;
+ALTER TABLE IF EXISTS ONLY public.auction_blocks DROP CONSTRAINT IF EXISTS auction_blocks_pkey;
+ALTER TABLE IF EXISTS ONLY public.auction_blocks DROP CONSTRAINT IF EXISTS auction_blocks_one_per_slot;
 ALTER TABLE IF EXISTS ONLY public.auction_block_opt_ins DROP CONSTRAINT IF EXISTS auction_block_opt_ins_pkey;
 ALTER TABLE IF EXISTS ONLY public.auction_block_opt_ins DROP CONSTRAINT IF EXISTS auction_block_opt_ins_one_per_team_block;
 ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_pkey;
@@ -752,6 +755,7 @@ ALTER TABLE IF EXISTS public.draft ALTER COLUMN draft_pick_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.auction_elections ALTER COLUMN election_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.auction_blocks ALTER COLUMN block_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.auction_block_opt_ins ALTER COLUMN opt_in_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_waiver_id_seq;
@@ -1100,6 +1104,8 @@ DROP TABLE IF EXISTS public.composite_market_value_blend_weights;
 DROP TABLE IF EXISTS public.bid_changelog;
 DROP SEQUENCE IF EXISTS public.auction_elections_election_id_seq;
 DROP TABLE IF EXISTS public.auction_elections;
+DROP SEQUENCE IF EXISTS public.auction_blocks_block_id_seq;
+DROP TABLE IF EXISTS public.auction_blocks;
 DROP SEQUENCE IF EXISTS public.auction_block_opt_ins_opt_in_id_seq;
 DROP TABLE IF EXISTS public.auction_block_opt_ins;
 DROP TABLE IF EXISTS public.adp_format;
@@ -2169,6 +2175,42 @@ CREATE SEQUENCE public.auction_block_opt_ins_opt_in_id_seq
 --
 
 ALTER SEQUENCE public.auction_block_opt_ins_opt_in_id_seq OWNED BY public.auction_block_opt_ins.opt_in_id;
+
+
+--
+-- Name: auction_blocks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.auction_blocks (
+    block_id integer NOT NULL,
+    lid integer NOT NULL,
+    season_year smallint NOT NULL,
+    block_at timestamp with time zone NOT NULL,
+    end_at timestamp with time zone NOT NULL,
+    finalized_at timestamp with time zone NOT NULL,
+    eligible_team_count smallint NOT NULL,
+    CONSTRAINT auction_blocks_end_after_start CHECK ((end_at > block_at))
+);
+
+
+--
+-- Name: auction_blocks_block_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.auction_blocks_block_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: auction_blocks_block_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.auction_blocks_block_id_seq OWNED BY public.auction_blocks.block_id;
 
 
 --
@@ -29082,6 +29124,13 @@ ALTER TABLE ONLY public.auction_block_opt_ins ALTER COLUMN opt_in_id SET DEFAULT
 
 
 --
+-- Name: auction_blocks block_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_blocks ALTER COLUMN block_id SET DEFAULT nextval('public.auction_blocks_block_id_seq'::regclass);
+
+
+--
 -- Name: auction_elections election_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -29356,6 +29405,22 @@ ALTER TABLE ONLY public.auction_block_opt_ins
 
 ALTER TABLE ONLY public.auction_block_opt_ins
     ADD CONSTRAINT auction_block_opt_ins_pkey PRIMARY KEY (opt_in_id);
+
+
+--
+-- Name: auction_blocks auction_blocks_one_per_slot; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_blocks
+    ADD CONSTRAINT auction_blocks_one_per_slot UNIQUE (lid, season_year, block_at);
+
+
+--
+-- Name: auction_blocks auction_blocks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.auction_blocks
+    ADD CONSTRAINT auction_blocks_pkey PRIMARY KEY (block_id);
 
 
 --
@@ -31073,6 +31138,13 @@ CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (sco
 --
 
 CREATE INDEX auction_block_opt_ins_league_season_block ON public.auction_block_opt_ins USING btree (lid, season_year, block_at);
+
+
+--
+-- Name: auction_blocks_league_season_window; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX auction_blocks_league_season_window ON public.auction_blocks USING btree (lid, season_year, block_at, end_at);
 
 
 --
@@ -59265,6 +59337,21 @@ GRANT SELECT ON TABLE public.auction_block_opt_ins TO league_reader;
 --
 
 GRANT SELECT ON SEQUENCE public.auction_block_opt_ins_opt_in_id_seq TO league_reader;
+
+
+--
+-- Name: TABLE auction_blocks; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.auction_blocks TO league_reader;
+GRANT SELECT ON TABLE public.auction_blocks TO league_data_view_reader;
+
+
+--
+-- Name: SEQUENCE auction_blocks_block_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.auction_blocks_block_id_seq TO league_reader;
 
 
 --
