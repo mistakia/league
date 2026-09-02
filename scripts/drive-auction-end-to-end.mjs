@@ -1462,11 +1462,26 @@ const drive_proxy_bidding = async (pids) => {
         ? `${answered.payload.player_salary}, expected ${HUMAN_BID + 1}`
         : 'absent'
     )
-    partial(
+    // THE BID CLOCK IS ON THE WIRE NOW, so this stopped being a partial. The
+    // server broadcasts AUCTION_TIMER whenever the running clock CHANGES, and a
+    // proxy step is deliberately not a clock event -- so the human bid produces
+    // exactly one and the engine's answer to it produces none. Counting them is
+    // how a client can finally tell a reset clock from an unreset one.
+    const clock_events = client.received
+      .slice(before_human)
+      .filter((message) => message.type === 'AUCTION_TIMER')
+    ok(
+      'the human bid moves the bid clock exactly once',
+      clock_events.length === 1,
+      `${clock_events.length} AUCTION_TIMER since the human bid`
+    )
+    ok(
       'the engine step does not reset the bid clock',
-      'the bid clock is not on the wire -- no broadcast carries an expiry, so ' +
-        'it is unobservable from a client; test/auction.proxy-bidding.spec.mjs ' +
-        'holds it through the injected timer'
+      clock_events.length === 1 &&
+        typeof clock_events[0].payload.timer_expires_at === 'number',
+      clock_events.length
+        ? JSON.stringify(clock_events[0].payload)
+        : 'no clock event at all'
     )
   } finally {
     client.socket.close()

@@ -74,6 +74,12 @@ export const auction_actions = {
   AUCTION_NOMINATION_INFO: 'AUCTION_NOMINATION_INFO',
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
+  // The running clock's EXPIRY, owned by the server. A bid broadcast is not a
+  // clock event: a proxy step bids without resetting the bid clock, so a client
+  // rebuilding a countdown from a duration on every AUCTION_BID showed a fresh
+  // clock while the sale was seconds away.
+  AUCTION_TIMER: 'AUCTION_TIMER',
+
   AUCTION_SETTLEMENT_STATUS: 'AUCTION_SETTLEMENT_STATUS',
 
   // A block boundary is a wall-clock event with no message behind it, so the

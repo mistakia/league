@@ -30,7 +30,7 @@ A block boundary is a wall-clock event with no message behind it, so the socket 
 
 Two properties that look like details and are not:
 
-- **A proxy step does not reset the bid clock. Only a human bid does.** A fully-proxied player settles one bid clock after nomination however many teams wanted them, which is what makes a large final block tractable.
+- **A proxy step does not reset the bid clock. Only a human bid does.** A fully-proxied player settles one bid clock after nomination however many teams wanted them, which is what makes a large final block tractable. **The SERVER owns the countdown and announces it as `AUCTION_TIMER` whenever the running clock changes** — a bid broadcast is not a clock event. The client used to rebuild the countdown from a duration on every `AUCTION_BID`, so a proxy step put a fresh clock on screen while the sale was seconds away, and a reconnecting client got no countdown at all because `AUCTION_INIT` carried durations and no expiry.
 - **Supersession binds a claim DOWNWARD and is socket state**, in `_manual_bids`. From the transaction log an engine bid and a human bid are the same row by design, so only the live socket can tell them apart; `build_auction_claims` stays raise-only for the REST paths that cannot.
 
 ## Eligibility must stay monotone

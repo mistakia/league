@@ -150,16 +150,17 @@ export function auction_reducer(state = initialState(), { payload, type }) {
     case auction_actions.AUCTION_FILTER:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case auction_actions.AUCTION_START: {
-      const latest = state.transactions.first()
-      return state.merge({
-        isPaused: false,
-        timer:
-          latest && latest.type === transaction_types.AUCTION_BID
-            ? Math.round((Date.now() + state.bidTimer) / 1000)
-            : Math.round((Date.now() + state.nominationTimer) / 1000)
-      })
-    }
+    // THE SERVER OWNS THE CLOCK, and `AUCTION_TIMER` is the only message that
+    // moves it. Rebuilding it here from a duration was wrong in the two places
+    // it mattered: a PROXY step broadcasts a bid without resetting the bid
+    // clock, so a manager saw a fresh countdown while the sale was seconds away
+    // and let a player they wanted go; and a reconnecting client rebuilt nothing
+    // at all, because AUCTION_INIT carried durations and no expiry.
+    case auction_actions.AUCTION_TIMER:
+      return state.merge({ timer: payload.timer_expires_at })
+
+    case auction_actions.AUCTION_START:
+      return state.merge({ isPaused: false })
 
     case auction_actions.AUCTION_SELECT_PLAYER:
       return state.merge({
@@ -174,7 +175,6 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         transactions: state.transactions.unshift(payload),
         bid: payload.player_salary,
         nominated_pid: payload.pid,
-        timer: Math.round((Date.now() + state.bidTimer) / 1000),
         isLocked: true
       })
 
@@ -193,8 +193,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         // The outstanding set belongs to the player that just sold. Carrying it
         // into the next nomination would name teams against a player they have
         // not been asked about yet.
-        outstanding_election_tids: new List(),
-        timer: Math.round((Date.now() + state.nominationTimer) / 1000)
+        outstanding_election_tids: new List()
       })
 
     case auction_actions.AUCTION_PAUSED:
@@ -233,7 +232,8 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         is_final_block: Boolean(payload.is_final_block),
         outstanding_election_tids: new List(
           payload.outstanding_election_tids || []
-        )
+        ),
+        timer: payload.timer_expires_at || null
       })
     }
 

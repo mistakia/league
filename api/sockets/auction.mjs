@@ -109,6 +109,14 @@ export default class Auction {
     // design -- proxy provenance is deliberately not recorded -- and this is the
     // one place that has to tell them apart.
     this._manual_bids = new Map()
+    // WHEN THE RUNNING CLOCK EXPIRES, in epoch milliseconds, or null when no
+    // clock is armed. The SERVER owns this. The client used to rebuild it from a
+    // duration on every AUCTION_BID, which is wrong in the two places it matters
+    // most: a PROXY step does not reset the bid clock but does broadcast a bid,
+    // so a manager saw a fresh countdown while the sale was seconds away; and a
+    // reconnecting client got no countdown at all, because AUCTION_INIT carried
+    // durations and no expiry.
+    this._timer_expires_at = null
     this._timers = timers
 
     this.logger = debug(`auction:league:${lid}`)
@@ -1285,6 +1293,12 @@ export default class Auction {
         connected: Object.keys(this._connected).map((k) => parseInt(k, 10)),
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
+        // The instant the running clock expires, so a client joining or
+        // RECONNECTING mid-block gets the time actually remaining rather than a
+        // fresh duration -- or, as before, no countdown at all.
+        timer_expires_at: this._timer_expires_at
+          ? Math.round(this._timer_expires_at / 1000)
+          : null,
         nominating_team_id,
         complete: !nominating_team_id,
         pause_on_team_disconnect: this._pause_on_team_disconnect,
@@ -1570,6 +1584,23 @@ export default class Auction {
   _clear_timers() {
     this._clear_nomination_timer()
     this._clear_bid_timer()
+    this._timer_expires_at = null
+    this._broadcast_timer()
+  }
+
+  // Sent whenever the running clock CHANGES, and never inferred from anything
+  // else. A bid broadcast is not a clock event -- that conflation is what put a
+  // full countdown on screen after a proxy step -- so the two are separate
+  // messages and this is the only one the client reads a countdown from.
+  _broadcast_timer() {
+    this.broadcast({
+      type: 'AUCTION_TIMER',
+      payload: {
+        timer_expires_at: this._timer_expires_at
+          ? Math.round(this._timer_expires_at / 1000)
+          : null
+      }
+    })
   }
 
   async _start_nomination_timer() {
@@ -1580,6 +1611,9 @@ export default class Auction {
 
     this._nomination_timer_expired = false
     this._clear_nomination_timer()
+
+    this._timer_expires_at = Date.now() + config.nominationTimer
+    this._broadcast_timer()
 
     this._nomination_timer = this._timers.set_timeout(
       async () => {
@@ -1617,6 +1651,8 @@ export default class Auction {
 
     this._clear_bid_timer()
     // padded by one second for connection latency
+    this._timer_expires_at = Date.now() + config.bidTimer + 1000
+    this._broadcast_timer()
     this._bid_timer = this._timers.set_timeout(
       () => this.sold(),
       config.bidTimer + 1000,
