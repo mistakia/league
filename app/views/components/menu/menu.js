@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 
 import { DISCORD_URL } from '@core/constants'
 import { league_url } from '@pages/landing/landing-content'
@@ -44,10 +44,19 @@ export default function AppMenu({
   teamId,
   leagueId,
   league,
+  user_leagues = [],
   is_commish,
   open_contribution_dialog
 }) {
   const isMobile = window.innerWidth < 800
+  const navigate = useNavigate()
+  // Requires the CONNECTED league to be one of them, not just that there are
+  // two. A manager can browse into a league they do not belong to, and a
+  // switcher whose value matches no option renders showing its first one --
+  // so the sidebar would name a league other than the page below it.
+  const show_league_switcher =
+    user_leagues.length > 1 &&
+    user_leagues.some((entry) => entry.league_id === leagueId)
   const is_hosted = Boolean(league.is_hosted)
   // The home dynasty league is the one league_url points at, and its menu
   // section is visible exactly when the connected league is that one — the
@@ -98,7 +107,46 @@ export default function AppMenu({
           <div className='menu__sections'>
             <div className='menu__section'>
               {league.league_id ? (
-                <div className='league__title'>{league.name}</div>
+                show_league_switcher ? (
+                  // A native `select`, not MUI. It is the one form control
+                  // `normalize.css`'s global `input { -webkit-appearance: none }`
+                  // does not strip (that rule names `input` only), it needs no
+                  // portal and so takes no layer on the z-index scale, and it
+                  // is keyboard- and screen-reader-operable without any of that
+                  // being written here.
+                  //
+                  // NAVIGATES rather than dispatching select_league. The route
+                  // is what drives app.leagueId -- app.js selects the matched
+                  // route's league on every change -- so dispatching directly
+                  // would move the store while leaving the URL naming the old
+                  // league, which is the disagreement between an in-app
+                  // navigation and a page load that SELECT_LEAGUE exists to
+                  // close.
+                  //
+                  // Lands on the league home rather than the current sub-page.
+                  // Half the league routes carry an id that belongs to the
+                  // league being left -- /teams/:tid, /matchups/:matchupId --
+                  // so carrying the path across would produce a valid URL
+                  // naming a team in another league.
+                  <div className='league__title league__title--switcher'>
+                    <select
+                      className='league__switcher'
+                      aria-label='Switch league'
+                      value={leagueId}
+                      onChange={(event) =>
+                        navigate(`/leagues/${event.target.value}`)
+                      }
+                    >
+                      {user_leagues.map(({ league_id, name }) => (
+                        <option key={league_id} value={league_id}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className='league__title'>{league.name}</div>
+                )
               ) : (
                 // Only a signed-in user can connect a league, so the warning is
                 // actionable for them and reads as site breakage to everyone
@@ -307,6 +355,7 @@ AppMenu.propTypes = {
   leagueId: PropTypes.number,
   teamId: PropTypes.number,
   league: PropTypes.object,
+  user_leagues: PropTypes.array,
   logout: PropTypes.func,
   menu_open: PropTypes.bool,
   set_menu_open: PropTypes.func,

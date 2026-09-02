@@ -48,6 +48,7 @@ import {
   starter_slot_league_columns
 } from '#constants'
 import { League } from '@core/leagues'
+import { build_league_switcher_options } from '@core/leagues/league-switcher-options.mjs'
 import { fuzzy_search } from '@core/utils'
 import { create_matchup } from '@core/matchups'
 import { default_player_filter_options } from '@core/players/reducer'
@@ -130,6 +131,20 @@ export const get_current_league = createSelector(
     return leagues.get(leagueId, new League()).toJS()
   }
 )
+/**
+ * Every league the signed-in user is a manager in, for the league switcher.
+ *
+ * The rule lives in `@core/leagues/league-switcher-options` so it can be
+ * specced — this module is not importable from a spec. Note `leagueIds` seeds
+ * as a single-element List holding the DEFAULT league id, so its size alone
+ * does not mean membership; the menu gates on the session too.
+ */
+export const get_leagues_for_user = createSelector(
+  (state) => state.getIn(['app', 'leagueIds']),
+  (state) => state.get('leagues'),
+  (leagueIds, leagues) => build_league_switcher_options({ leagueIds, leagues })
+)
+
 export const get_current_league_team_ids = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.get('leagues'),
