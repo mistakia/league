@@ -3,7 +3,8 @@
 import execute_generated_sql from '#libs-server/data-views/generation/execute-generated-sql.mjs'
 import {
   run_agent_tool,
-  require_input
+  require_input,
+  require_database_credential
 } from '#libs-server/data-views/generation/agent-tool-runner.mjs'
 
 // run_sql -- the sandboxed SQL path, for the long tail the registry cannot
@@ -29,6 +30,10 @@ const AGENT_ROW_CAP = 50
 run_agent_tool({
   tool: 'run_sql',
   run: async (input) => {
+    // The other of the two tools that open a connection. See preview_view for
+    // why this is asserted here rather than at config import.
+    require_database_credential()
+
     const sql_text = require_input(input, 'sql_text')
     const limit = Math.max(
       1,

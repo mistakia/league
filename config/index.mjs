@@ -94,27 +94,55 @@ const load_plaintext_config = () =>
 // It applies ONLY under NODE_ENV=sandbox. Reading these variables in any other
 // environment would let an ambient variable silently re-point a production or
 // test process at a different database.
+//
+// THE CREDENTIAL IS REQUIRED LAZILY, NOT AT LOAD. This overlay threw when the
+// variables were absent until 2026-09-02, and the throw ran at config LOAD --
+// which is module import, which every tool script does. That gated all six
+// agent tools on a database credential when only two of them open a connection:
+// search_columns, describe_column, validate_table_state and emit are registry
+// and schema operations that never reach Postgres, and they died at import
+// under a message about Postgres. db/sandbox-pool.mjs already states the rule
+// this now follows -- an environment lacking a credential must fail when a
+// query is actually run, naming what is missing, rather than at start. The
+// named throw did not go away; it moved to the connection sites, which is where
+// the dependency is real. See assert_sandbox_credentials below.
 const overlay_sandbox_environment = (loaded) => {
   const host = process.env.LEAGUE_SANDBOX_PG_HOST
   const password = process.env.LEAGUE_SANDBOX_PG_PASSWORD
   const port = process.env.LEAGUE_SANDBOX_PG_PORT
 
-  // Fail LOUD and by name. A blank password reaches Postgres as an
-  // authentication failure whose message names neither this file nor the
-  // missing variable, and the debugger goes looking at pg_hba or the role.
-  if (!host || !password) {
-    throw new Error(
-      'NODE_ENV=sandbox requires LEAGUE_SANDBOX_PG_HOST and LEAGUE_SANDBOX_PG_PASSWORD; the sandbox config is committed credential-free because this repository is public'
-    )
-  }
-
   for (const key of ['postgres', 'postgres_data_view_sandbox']) {
-    loaded[key].connection.host = host
-    loaded[key].connection.password = password
+    if (host) loaded[key].connection.host = host
+    if (password) loaded[key].connection.password = password
     if (port) loaded[key].connection.port = Number(port)
   }
 
   return loaded
+}
+
+/**
+ * Refuse, by name, to open a sandbox database connection without a credential.
+ *
+ * Called from the places that actually build a pool or run a query, never at
+ * import. Fail LOUD and by name is the whole point: a blank password reaches
+ * Postgres as an authentication failure whose message names neither the config
+ * file nor the missing variable, and the debugger goes looking at pg_hba or at
+ * the role grants instead of at the environment.
+ *
+ * A no-op outside NODE_ENV=sandbox, so the ordinary environments are untouched.
+ */
+export const assert_sandbox_credentials = () => {
+  if (process.env.NODE_ENV !== 'sandbox') return
+
+  const missing = ['LEAGUE_SANDBOX_PG_HOST', 'LEAGUE_SANDBOX_PG_PASSWORD']
+    .filter((name) => !process.env[name])
+    .join(' and ')
+
+  if (missing) {
+    throw new Error(
+      `NODE_ENV=sandbox requires ${missing} to open a database connection; the sandbox config is committed credential-free because this repository is public`
+    )
+  }
 }
 
 // Production is the only environment on the sops/age scheme; dev, test and

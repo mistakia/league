@@ -30,11 +30,37 @@
 // failure as the tool crashing rather than as the tool refusing. The exit code
 // is the signal; the last stderr line is the reason.
 
+import { assert_sandbox_credentials } from '#config'
+
 export class AgentToolError extends Error {
   constructor(code, message) {
     super(message)
     this.name = 'AgentToolError'
     this.code = code
+  }
+}
+
+/**
+ * Refuse, through the tool contract, to run a tool that needs a database
+ * connection without the sandbox credential.
+ *
+ * TWO OF THE SIX TOOLS NEED THIS, AND FOUR DO NOT. search_columns,
+ * describe_column, validate_table_state and emit are registry and schema
+ * operations that never open a connection; preview_view and run_sql do. The
+ * credential requirement lived at config import until 2026-09-02, which gated
+ * all six on it and killed the four registry tools with a message about
+ * Postgres. Asserting it here keeps the fail-by-name property exactly where the
+ * dependency is real.
+ *
+ * The refusal goes through AgentToolError rather than the raw config throw so
+ * the agent reads one JSON object with a code, per this file's contract, rather
+ * than a stack trace it has to parse.
+ */
+export const require_database_credential = () => {
+  try {
+    assert_sandbox_credentials()
+  } catch (error) {
+    throw new AgentToolError('sandbox_credential_missing', error.message)
   }
 }
 

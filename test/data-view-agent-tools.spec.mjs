@@ -35,6 +35,22 @@ const run_tool = (script, input, { env = {} } = {}) =>
     child.stdin.end(typeof input === 'string' ? input : JSON.stringify(input))
   })
 
+// Evaluate one module-source string in a fresh Node process under a chosen
+// environment. Config is a singleton evaluated once at import, so anything
+// asserting on how the environment shapes it has to set that environment before
+// the module loads -- which an in-process test cannot do.
+const run_node_probe = (source, env = {}) =>
+  new Promise((resolve) => {
+    execFile(
+      process.execPath,
+      ['--input-type=module', '--eval', source],
+      { cwd: repo_root, env: { ...process.env, ...env } },
+      (error, stdout, stderr) => {
+        resolve({ code: error ? error.code || 1 : 0, stdout, stderr })
+      }
+    )
+  })
+
 const parse_or_fail = (raw, channel) => {
   try {
     return JSON.parse(raw)
@@ -360,13 +376,18 @@ describe('data view agent tools', function () {
       }
     })
 
-    it('fails LOUD and by name when the credential variables are absent', async function () {
+    it('fails LOUD and by name when a DATABASE tool runs without the credential', async function () {
       // A blank password reaches Postgres as an authentication failure naming
       // neither this config nor the missing variable, and the debugger goes
       // looking at pg_hba or the role instead.
+      //
+      // preview_view rather than search_columns: the requirement moved from
+      // config import to the connection sites on 2026-09-02, so the tool that
+      // must refuse is one that actually opens a connection. See the paired
+      // case below, which is what makes this a control rather than a tautology.
       const { code, stderr } = await run_tool(
-        'data-view-search-columns.mjs',
-        { query: 'anything' },
+        'data-view-preview-view.mjs',
+        { table_state: { columns: ['player_name'] } },
         {
           env: {
             NODE_ENV: 'sandbox',
@@ -376,28 +397,59 @@ describe('data view agent tools', function () {
         }
       )
       expect(code).to.not.equal(0)
-      expect(stderr).to.include('LEAGUE_SANDBOX_PG_HOST')
+      const refusal = read_refusal(stderr)
+      expect(refusal.code).to.equal('sandbox_credential_missing')
+      expect(refusal.error).to.include('LEAGUE_SANDBOX_PG_HOST')
     })
 
-    it('loads under NODE_ENV=sandbox once the variables are present', async function () {
-      // The positive control for the assertion above -- without it, "fails
-      // without the variables" is satisfied by an environment that never works.
-      // A tool needing no database proves the CONFIG loads; the database legs
-      // are asserted from inside the running container, not here.
+    it('runs a REGISTRY tool with no credential at all, because it opens no connection', async function () {
+      // The pair to the case above, and the reason the requirement moved. Four
+      // of the six tools -- search_columns, describe_column,
+      // validate_table_state and emit -- are registry and schema operations
+      // that never reach Postgres. Requiring the credential at config import
+      // gated all six on it and killed these four at import under a message
+      // about Postgres, which is a false report: nothing was missing that they
+      // needed. Run the two cases as a pair or "refuses without the
+      // credential" is satisfied by a tool that refuses always.
       const { code, stdout } = await run_tool(
         'data-view-search-columns.mjs',
         { query: 'receiving yards', limit: 3 },
         {
           env: {
             NODE_ENV: 'sandbox',
-            LEAGUE_SANDBOX_PG_HOST: '127.0.0.1',
-            LEAGUE_SANDBOX_PG_PASSWORD:
-              'not-a-real-credential-no-connection-is-opened'
+            LEAGUE_SANDBOX_PG_HOST: '',
+            LEAGUE_SANDBOX_PG_PASSWORD: ''
           }
         }
       )
       expect(code).to.equal(0)
       expect(parse_or_fail(stdout, 'stdout').columns).to.be.an('array')
+    })
+
+    it('overlays the environment credential onto BOTH connection blocks when present', async function () {
+      // What the lazy requirement does NOT excuse: the overlay still has to
+      // land the values. Asserting only that a tool exits 0 without the
+      // credential would pass just as happily against an overlay that dropped
+      // its input on the floor, and that failure would surface as an
+      // authentication error against whatever host the committed blank left
+      // behind. Run in a subprocess because config is a singleton evaluated
+      // once at import, so the environment must be set before the module loads.
+      const probe =
+        "import config from '#config';" +
+        "process.stdout.write(JSON.stringify(['postgres','postgres_data_view_sandbox']" +
+        '.map((key) => config[key].connection.host)))'
+
+      const { code, stdout } = await run_node_probe(probe, {
+        NODE_ENV: 'sandbox',
+        LEAGUE_SANDBOX_PG_HOST: 'sandbox.example.invalid',
+        LEAGUE_SANDBOX_PG_PASSWORD: 'overlay-probe-value'
+      })
+
+      expect(code).to.equal(0)
+      expect(parse_or_fail(stdout, 'stdout')).to.deep.equal([
+        'sandbox.example.invalid',
+        'sandbox.example.invalid'
+      ])
     })
 
     it('still throws under NODE_ENV=production, which cannot run in the container', async function () {

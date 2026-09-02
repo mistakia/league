@@ -1,6 +1,6 @@
 // @ts-check
 import Knex from 'knex'
-import config from '#config'
+import config, { assert_sandbox_credentials } from '#config'
 
 // The sandbox connection pools -- one per scoped read role, each held by a
 // login role that is not a member of pg_read_all_data, holds one explicit
@@ -48,6 +48,13 @@ const pools = new Map()
 export const get_sandbox_db = (pool_name) => {
   const existing = pools.get(pool_name)
   if (existing) return existing
+
+  // Under NODE_ENV=sandbox the credential arrives from the environment and the
+  // committed config is blank, so refuse by NAME here rather than handing a
+  // blank password to Postgres -- which comes back as an authentication failure
+  // naming neither the config nor the variable. This is the lazy half of what
+  // config/index.mjs used to do eagerly at import.
+  assert_sandbox_credentials()
 
   const config_key = SANDBOX_POOLS[pool_name]
   if (!config_key) {

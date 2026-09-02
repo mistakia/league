@@ -5,6 +5,7 @@ import { resolve_generated_table_state } from '#libs-server/data-views/generatio
 import {
   run_agent_tool,
   require_input,
+  require_database_credential,
   AgentToolError
 } from '#libs-server/data-views/generation/agent-tool-runner.mjs'
 
@@ -27,6 +28,13 @@ const PREVIEW_ROW_CAP = 25
 run_agent_tool({
   tool: 'preview_view',
   run: async (input) => {
+    // This tool opens a database connection, so it is one of the two that
+    // genuinely need the sandbox credential. Asserted here rather than at
+    // config import, which would gate the four registry-only tools on a
+    // credential they never use. Surfaced through the tool contract so the
+    // agent reads a named refusal rather than a pg authentication error.
+    require_database_credential()
+
     const table_state = require_input(input, 'table_state')
 
     // Validate FIRST. The resolver's named errors are far more useful to the
