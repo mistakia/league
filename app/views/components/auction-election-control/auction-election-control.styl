@@ -158,16 +158,20 @@ $election_control_content_max_width = 720px
   background transparent
   align-items center
 
+  // STACKED, like its drawer twin, rather than laid out as a row. This block
+  // read `YOUR ELECTION $5` on one line to save vertical room in a 70px bar,
+  // which put a 9px uppercase label and a 14px amount on one baseline and made
+  // the label look like a prefix to the number rather than its caption. Stacked
+  // it costs 27px of the bar's 70 and matches how every other captioned value
+  // in the bar is built -- MARKET, BYE and AGE are all label-over-value.
+  //
+  // No `flex-direction` here at all: the base block already says `column`, so
+  // stacking is the absence of the override rather than a second declaration
+  // restating it.
   .auction-election-control__state
     flex 0 0 auto
-    flex-direction row
-    align-items baseline
-    gap 6px
     border-right none
     padding-right 8px
-
-    label
-      padding-bottom 0
 
   .auction-election-control__state-value
     font-size 14px

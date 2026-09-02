@@ -9,6 +9,7 @@ import {
   debounce
 } from 'redux-saga/effects'
 import { Map } from 'immutable'
+import { transaction_types } from '#constants'
 
 import { app_actions } from '@core/app'
 import {
@@ -332,6 +333,48 @@ export function* load_missing_roster_players({ payload }) {
   }
 }
 
+// THE NOMINATED PLAYER FETCHES ITS OWN RECORD, because the board's does not
+// carry a birth date. `/api/players` -- the bulk endpoint every row on the
+// auction board comes from -- does not select `date_of_birth` for anybody, so
+// the bid bar rendered `AGE -` for the open nomination until something else
+// happened to load the full player, which in practice meant opening the drawer
+// and was therefore never true on first paint. `/api/players/:pid` is the only
+// endpoint that carries the field.
+//
+// GUARDED ON THE FIELD, NOT ON THE PID, which buys two things. It skips the
+// request outright when the drawer has already loaded that player, so a bidding
+// war on one nomination costs one fetch rather than one per bid. And it cannot
+// spin on a player whose birth date is genuinely unknown: that is stored as the
+// string `0000-00-00` rather than as null, so the key reads truthy once the
+// full record has landed and the guard closes either way.
+//
+// `first_name` is the fullness sentinel the roster hydration above uses, and it
+// is the wrong one here -- the bulk endpoint DOES send first_name, so a check
+// on it would pass for every board player and fetch nothing.
+const nominated_pid_from = (payload) => {
+  // AUCTION_BID carries the bid itself. AUCTION_INIT carries the transaction
+  // log, and its head is a nomination only when it is an AUCTION_BID -- the
+  // same test auction/reducer.js applies to set `nominated_pid`, kept identical
+  // deliberately so the fetch and the render cannot disagree about who is up.
+  if (payload.pid) return payload.pid
+  const latest = payload.transactions && payload.transactions[0]
+  return latest && latest.type === transaction_types.AUCTION_BID
+    ? latest.pid
+    : null
+}
+
+export function* load_nominated_player({ payload }) {
+  const pid = nominated_pid_from(payload)
+  if (!pid) return
+
+  const players_map = yield select((state) =>
+    state.getIn(['players', 'items'], new Map())
+  )
+  if (players_map.getIn([pid, 'date_of_birth'])) return
+
+  yield call(api_get_player, { pid })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -358,6 +401,19 @@ export function* watch_select_player() {
 
 export function* watch_auction_select_player() {
   yield takeLatest(auction_actions.AUCTION_SELECT_PLAYER, load_player)
+}
+
+// Both entry points, because they are the two ways a nomination reaches a
+// client and only one of them is the bug. AUCTION_INIT is the fresh load that
+// rendered `AGE -`; AUCTION_BID is the socket path, which was already correct
+// by the time anyone looked because the drawer had usually been opened. Missing
+// either one leaves the field blank on exactly one of the two routes in.
+export function* watch_auction_init_nominated_player() {
+  yield takeLatest(auction_actions.AUCTION_INIT, load_nominated_player)
+}
+
+export function* watch_auction_bid_nominated_player() {
+  yield takeLatest(auction_actions.AUCTION_BID, load_nominated_player)
 }
 
 export function* watch_set_league() {
@@ -505,6 +561,8 @@ export const player_sagas = [
   fork(watch_load_league_players),
   fork(watch_load_team_players),
   fork(watch_auction_select_player),
+  fork(watch_auction_init_nominated_player),
+  fork(watch_auction_bid_nominated_player),
   // fork(watchFetchAllPlayersFulfilled),
 
   fork(watch_get_rosters_fulfilled)
