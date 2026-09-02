@@ -166,7 +166,18 @@
 .league__switcher
   font-family 'IBM Plex Mono'
   font-size 21px
-  max-width 100%
+  width 100%
+  // min-width 0 IS THE LOAD-BEARING LINE, and `max-width 100%` in its place
+  // does nothing. A `select` reports a min-content width driven by its WIDEST
+  // OPTION, and every flex item up the chain — .menu__sections, .menu__section —
+  // takes `min-width: auto`, so that intrinsic width propagates all the way up
+  // and sizes the whole sidebar. "GENESIS LEAGUE (auction mirror)" pushed
+  // .menu__sections from 240px to 509px inside a 240px drawer whose `overflow:
+  // hidden` then clipped every section card. A percentage max-width cannot fix
+  // it because the percentage resolves against a container the same content is
+  // busy widening. Measured: 509px as authored, 240px with this line, 240px
+  // with the select removed entirely.
+  min-width 0
   border 1px solid transparent
   border-radius 4px
   background-color transparent
