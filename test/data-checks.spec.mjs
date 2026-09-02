@@ -1183,8 +1183,8 @@ describe('data check registry', function () {
     })
   })
 
-  it('holds twenty-eight checks with unique ids', () => {
-    expect(registry).to.have.lengthOf(28)
+  it('holds twenty-nine checks with unique ids', () => {
+    expect(registry).to.have.lengthOf(29)
     expect(checks_by_id.size).to.equal(registry.length)
   })
 

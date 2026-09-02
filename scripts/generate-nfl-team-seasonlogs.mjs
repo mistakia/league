@@ -253,6 +253,16 @@ const adj = (actual, average, props) => {
   return obj
 }
 
+// Every percentile object this script builds is keyed by `all_stats` --
+// calculatePercentiles is called with `stats: all_stats` at each site -- so this
+// list IS the vocabulary format_percentile_inserts can write into
+// percentiles.field, and nothing else can appear there from a healthy run.
+//
+// Exported for db/checks/registry.mjs, whose percentile-field-resolution check
+// asks whether every stored value is still one this writer would emit. That
+// check must read the vocabulary from its definition site rather than restate
+// it: a second copy is how percentiles.field stranded 53 values across four
+// rename clusters in the first place.
 const all_stats = [
   ...all_fantasy_stats,
   ...passing_stats,
@@ -703,3 +713,5 @@ if (is_main(import.meta.url)) {
 }
 
 export default generate_seasonlogs
+
+export const percentile_field_vocabulary = all_stats
