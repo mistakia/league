@@ -71,7 +71,11 @@ const run = async ({ dry_run = false } = {}) => {
     throw new Error('fbg_config not found')
   }
 
-  // fetch players
+  // Fetched FIRST, and that order is load-bearing rather than incidental. This
+  // is the control for the projections fetch below: it is a file FBG always
+  // serves, so a credential or host failure that would answer 403 for
+  // everything fails HERE, loudly, before the skip path below can read a 403
+  // as "this week is not published yet" and go quiet forever.
   const players_url = `${fbg_config.data_url}/NFLPlayers.json`
   log(`fetching players from ${players_url}`)
   const fbg_players = await fetch_with_retry({
@@ -80,13 +84,36 @@ const run = async ({ dry_run = false } = {}) => {
     response_type: 'json'
   })
 
+  // FBG serves one file per week and answers 403 -- not 404 -- for a week it
+  // has not posted. Status alone separates the two cases here, which is what
+  // makes this simpler than the fftoday and CBS equivalents: both of those
+  // answer 200 for an unpublished slice and need a body sentinel to tell it
+  // from a redesign.
+  //
+  // The skip matters because the cron asks for `active_fantasy_week` every day
+  // through the import months. FBG posts week N partway through the preceding
+  // week, so without this every earlier run in that week would fail loudly on a
+  // condition that is entirely normal. This is the same judgment the operator
+  // ruled on for fftoday: an unpublished slice is nothing to import, not a
+  // failure. Anything other than a 403 still throws.
   const projections_url = `${fbg_config.data_url}/WeeklyProjections-${current_season.year}-${week}.json`
   log(`fetching projections from ${projections_url}`)
-  const data = await fetch_with_retry({
-    url: projections_url,
-    use_proxy: true,
-    response_type: 'json'
-  })
+  let data
+  try {
+    data = await fetch_with_retry({
+      url: projections_url,
+      use_proxy: true,
+      response_type: 'json'
+    })
+  } catch (err) {
+    if (err.http_status === 403) {
+      log(
+        `FBG has not published ${current_season.year} week ${week} projections yet; nothing to import, skipping`
+      )
+      return { skipped: true, unpublished: true }
+    }
+    throw err
+  }
 
   // if no projections or 404 exit
   const projectors = {
