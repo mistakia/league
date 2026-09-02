@@ -459,6 +459,137 @@ describe('auction eligibility validation', function () {
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'one open spot is enough').to.deep.equal([])
     })
+
+    // THE TURN CHECK IS THE ONLY NOMINATION GUARD WITH A DISTINCT ERROR
+    // STRING -- 'invalid nomination' rather than the shared 'exceeds ...'
+    // pair -- so these are the one place in this file where the reply
+    // distinguishes the guard on its own. The rosters are deliberately left
+    // untouched: both teams can afford and hold the player, so the only thing
+    // separating the refusal from the acceptance below is which `tid` asked.
+    //
+    // `nominating_team_id` is `_tids[0]` while the transaction log is empty,
+    // which is what makes `_tids[1]` an out-of-turn nominator without any
+    // setup.
+    it('rejects a nomination from a team that is not on the clock', async function () {
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
+      const [on_the_clock, out_of_turn] = auction._tids
+      expect(
+        auction.nominating_team_id,
+        'the first team holds the clock on an empty log'
+      ).to.equal(on_the_clock)
+      expect(
+        out_of_turn,
+        'a second team exists to nominate out of turn'
+      ).to.not.equal(on_the_clock)
+
+      const target = await selectPlayer({
+        pos: 'RB',
+        random: false,
+        exclude_rostered_players: true
+      })
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: out_of_turn }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before)
+      expect(errors).to.deep.equal([
+        { user_id: MANAGER_USER_ID, error: 'invalid nomination' }
+      ])
+    })
+
+    it('accepts the same nomination from the team on the clock', async function () {
+      // The negative control for the turn check. Identical player, identical
+      // socket identity, identical untouched rosters -- only the `tid` moves
+      // to the team the rotation actually put on the clock. Without this the
+      // refusal above passes on a handler that refuses every nomination.
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      expect_guards_are_reachable(auction)
+      const on_the_clock = auction.nominating_team_id
+
+      const target = await selectPlayer({
+        pos: 'RB',
+        random: false,
+        exclude_rostered_players: true
+      })
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { user_id: MANAGER_USER_ID, tid: on_the_clock }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before + 1)
+      expect(errors, 'the team on the clock may nominate').to.deep.equal([])
+    })
+
+    it('lets the commissioner nominate past the turn check, and opens the player for the team on the clock', async function () {
+      // TWO RULES MEET HERE, and reading either one alone gets the outcome
+      // wrong.
+      //
+      // The turn check sits BELOW the commissioner early return, so the
+      // commissioner bypass covers it: the same out-of-turn `tid` the spec
+      // above is refused for goes through. That much is the bypass.
+      //
+      // But the request `tid` is ONLY an input to the turn check.
+      // `_create_nomination_bid` writes `tid: nominating_team_id`, so the
+      // nomination is recorded for whichever team the ROTATION has on the
+      // clock, never for the team named in the request. The commissioner
+      // therefore nominates ON BEHALF OF the team whose clock ran out -- they
+      // cannot hand a player to a team out of turn, which is what a reader who
+      // stopped at the bypass would expect.
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
+      const [on_the_clock, out_of_turn] = auction._tids
+      expect(auction.nominating_team_id).to.equal(on_the_clock)
+
+      auction._nomination_timer_expired = true
+
+      const target = await selectPlayer({
+        pos: 'RB',
+        random: false,
+        exclude_rostered_players: true
+      })
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: out_of_turn }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before + 1)
+      expect(
+        errors,
+        'the commissioner bypass covers the turn check'
+      ).to.deep.equal([])
+
+      // WHICH TEAM the nomination was recorded for, not merely that one
+      // appeared. Asserting only the count would leave this spec unable to
+      // tell the shipped rule from the one a reader assumes, and would keep
+      // passing if the request `tid` ever started reaching the bid.
+      const [nomination] = await knex('transactions')
+        .where({
+          lid: league_id,
+          season_year,
+          pid: target.pid,
+          type: transaction_types.AUCTION_BID
+        })
+        .orderBy('transaction_id', 'desc')
+        .limit(1)
+      expect(
+        nomination.tid,
+        'opened for the team on the clock, not the requested tid'
+      ).to.equal(on_the_clock)
+      expect(
+        nomination.tid,
+        'the requested tid did not reach the bid'
+      ).to.not.equal(out_of_turn)
+    })
   })
 
   describe('bid eligibility', function () {
