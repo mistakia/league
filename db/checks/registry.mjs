@@ -68,6 +68,12 @@ import {
 import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-format-gamelog-completeness.mjs'
 import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-team-attribution.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
+import {
+  null_pid_counts_sql,
+  null_pid_rows_sql,
+  metric_recompute_counts_sql,
+  metric_recompute_rows_sql
+} from '#libs-server/settlement-output-checks.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -1025,6 +1031,189 @@ const registry = [
     min_denominator: 100,
     repair_command:
       'A FINDING NAMES A ROW THAT CONTRADICTS ITSELF; IT DOES NOT SAY WHICH COLUMN MOVED. Do not rewrite selection_result to match the metric — that is the obvious repair and it was wrong for every row measured so far. Establish which side is wrong first, and expect at least two causes. Where the market’s OPEN and CLOSE rows name different games (the sibling prop-market-open-close-esbid-coherence check), the METRIC is the moved side: it was derived from the drifted esbid while the result was graded against the other game, so the repair is to correct the esbid and force a re-settle, never to flip the result. Note that prop_market_selections_index carries NO esbid, so repointing the market alone changes nothing beneath it — the esbid fix and the re-settle (missing_only false) ship together or the finding merely goes invisible. Where the market is esbid-coherent, look instead for two lines under one market: the measured FanDuel case had one line’s grade written onto the other line’s selections, which is a settlement-writer defect and needs a code fix rather than a data repair. The upstream causes are owned by user:task/league/stabilize-prop-market-esbid-stamping.md and user:task/league/adjudicate-drifted-prop-market-settlements.md.'
+  },
+
+  {
+    check_id: 'prop-market-graded-player-prop-missing-player',
+    invariant:
+      'A graded selection under a market type ABOUT ONE PLAYER carries that player. The 37 types are every market_type_mappings entry whose handler is NFL_PLAYS and which names a player_column, and for each of them a null selection_pid means settlement graded a market it could not attribute. The handler now refuses that case — libs-server/prop-market-settlement/worker/market-data-handlers.mjs raises rather than filtering by player, guarded in b29bb6774 on 2026-09-01 — but a guard in the settlement path is not a check over what is already stored, and the defect it closes ran for roughly three years and wrote 1,320 rows across four books and seasons 2023 through 2025. Before that guard a null pid skipped the player filter entirely, so the aggregation ran over the WHOLE GAME: a MAX market took the longest play by anyone and a period market took the period total across all players. Every one of those grades is plausible and none is about the named player. NO OTHER ORACLE SEES THIS. prop-market-selection-grade-consistency reads a row against its own two columns and a wrongly-attributed metric agrees with its own result perfectly; prop-market-open-close-esbid-coherence never reads a selection at all. THE SCOPE IS THE POINT AND IT MUST COME FROM THE MAPPING. A game-line or team selection legitimately carries a null pid — 156,688 graded rows do, measured 2026-09-02 — so a blanket zero over all market types is a false gate, and scoping by arm NAME instead under-counted this exact defect twice in one day, first as three longest-x arms and then as 354 rows.',
+    grain: [
+      'source_id',
+      'source_market_id',
+      'source_selection_id',
+      'time_type'
+    ],
+    rows: async () => {
+      const CLEAN_SENTINEL = '__clean__'
+
+      // Both queries are generated from ONE market-type list and ONE scan
+      // predicate in libs-server/settlement-output-checks.mjs, so the
+      // denominator cannot drift away from the population the violation arm
+      // searched -- the failure a neighbouring check hit by borrowing a
+      // sibling's count expression.
+      const { rows: per_source } = await db.raw(null_pid_counts_sql())
+      const { rows: violations } = await db.raw(null_pid_rows_sql())
+
+      /** @type {Map<string, Record<string, any>[]>} */
+      const violations_by_source = new Map()
+      for (const row of violations) {
+        const found = violations_by_source.get(row.source_id) || []
+        found.push(row)
+        violations_by_source.set(row.source_id, found)
+      }
+
+      // Per book rather than one global count. The defect lives in shared
+      // settlement code, so the split is not about where the bug is: it is what
+      // makes a COLLAPSE legible. A book that stops settling these markets
+      // drops out of the graded set and takes the row floor with it, where a
+      // single global denominator would hide it behind DraftKings' 230,438
+      // healthy rows.
+      return per_source.flatMap((/** @type {Record<string, any>} */ row) => {
+        const source_id = row.source_id
+        const scanned = Number(row.scanned)
+        const found = violations_by_source.get(source_id) || []
+
+        // A book with nothing settled under these types is UN-GRADEABLE, never
+        // clean: it scanned no population, so a zero is not a finding about
+        // anything.
+        if (!scanned) {
+          return []
+        }
+
+        return found.length
+          ? found.map((/** @type {Record<string, any>} */ violation) => ({
+              source_id,
+              source_market_id: violation.source_market_id,
+              source_selection_id: violation.source_selection_id,
+              time_type: violation.time_type,
+              numerator: 1,
+              denominator: scanned
+            }))
+          : [
+              {
+                source_id,
+                source_market_id: CLEAN_SENTINEL,
+                source_selection_id: CLEAN_SENTINEL,
+                time_type: CLEAN_SENTINEL,
+                numerator: 0,
+                denominator: scanned
+              }
+            ]
+      })
+    },
+    max_count: 0,
+    calibration:
+      'EXACT, and there is nothing here to tune: a market type declaring a player_column is about one player, so a graded row without one was graded against something else by definition. THE CALIBRATION IS A REAL PRE-REPAIR POPULATION RATHER THAN A SYNTHETIC CONTROL, which is the stronger evidence — 1,320 graded rows carried a null pid across four books and seasons 2023-2025 on the morning of 2026-09-01, and the repair plus the handler guard at b29bb6774 took it to 0. Measured on production 2026-09-02 by running the SHIPPED query: 378,522 graded rows across five books (DRAFTKINGS 230,438 / FANDUEL 136,590 / PRIZEPICKS 10,482 / PINNACLE 876 / CAESARS 136), of which 0 carry a null pid. Cost 2.4s. THE ZERO IS A CLEAN READING RATHER THAN A DEAD QUERY, demonstrated two ways over the same corpus. Inverting the predicate reports non-null pids of exactly 378,522, matching the scan in every book so the two arms sum to the population. And running the SAME null predicate with the market-type scope REMOVED reports 156,688 null-pid graded rows out of 1,959,058 — so the test matches abundantly when there is something to match, and that 156,688 is simultaneously the measurement showing why the scope must exist: those are game-line and team selections that MUST carry a null pid, and a blanket zero over all types would report every one of them as a defect. FIVE BOOKS SETTLE THESE MARKETS, which is why the row floor is 5. The smallest graded population is CAESARS at 136, genuinely small because that book settles little of this kind rather than because anything collapsed, so min_denominator sits below it at 100.',
+    // Five rows when fully clean, one per book that settles anything under
+    // these types, so the row floor is close to a tautology and the
+    // denominator carries the signal. A book that stops settling them
+    // entirely emits no arm at all and fires this.
+    min_gradeable_units: 5,
+    // REQUIRED: the graded row count is fixed by the number of settling books
+    // when clean and cannot fall with the corpus. Read against the smallest
+    // graded population, CAESARS at 136 measured 2026-09-02.
+    min_denominator: 100,
+    repair_command:
+      'A FINDING MEANS SETTLEMENT ATTRIBUTED A GRADE TO NOBODY, and the grade is wrong rather than merely unattributed — the pre-guard path aggregated over the whole game, so the stored metric is the game leader or the whole-game total and not the named player. Do NOT resolve this by deleting the pid requirement or by nulling the grade. The player is almost always recoverable: every unattributed market measured names a real player, in selection_name for FanDuel and inside source_market_name for the rest, and 306 of the rows measured could take a pid from a sibling selection on the same market that DID resolve. So the repair is attribution followed by a forced re-settle (missing_only false), which corrects the metric the old path wrote. A NEW finding after b29bb6774 is a REGRESSION in the settlement guard rather than legacy residue, since the handler now raises on a null pid and a market that raises writes no result at all — check first whether the row predates the guard. The wider null-pid population outside these 37 types is a different question owned by user:task/league/classify-null-selection-pids-in-prop-markets.md and is NOT a finding here.'
+  },
+
+  {
+    check_id: 'prop-market-graded-metric-recompute',
+    invariant:
+      "A graded selection's stored metric_result_value still equals what its own game and player produce from nfl_plays TODAY, recomputed per the market type's own mapping — its metric column, its aggregation shape and its period filter. READ WHAT THIS CHECK IS FOR BEFORE READING ITS ZERO. It is a STALENESS detector over settlement output, not a re-audit of settlement arithmetic: settlement derives the metric from these same rows, so agreement is the expected state and the check is green across the whole corpus the day it lands. It goes red when the two sides STOP agreeing after the fact, which has exactly two causes and both are live. First, a market repointed to a different game without a re-settle: prop_market_selections_index carries NO esbid, so correcting prop_markets_index.esbid leaves every selection beneath it holding a metric derived from the old game, and the sibling prop-market-selection-grade-consistency check cannot see it because such a row still agrees with its own two columns. This is precisely the repair path user:task/league/repair-drifted-prop-market-esbid-stamps.md is about to execute, and its own repair_command warns that fixing the rows without re-settling swaps a visible finding for an invisible one — THIS is the instrument that keeps it visible. Second, an nfl_plays re-import or enrichment backfill that changes history under an already-settled grade. NO OTHER ORACLE SEES EITHER. Every other settlement check reads a row against itself or reads settlement INPUTS; this one is the only one that re-derives the output from source and asks whether it still holds.",
+    grain: [
+      'source_id',
+      'source_market_id',
+      'source_selection_id',
+      'time_type'
+    ],
+    rows: async () => {
+      const UNGRADEABLE_SENTINEL = '__ungradeable__'
+      const CLEAN_SENTINEL = '__clean__'
+
+      // The naive formulation of this check -- one correlated subquery per
+      // market type inside a CASE over the selection rows -- TIMES OUT on
+      // production. The shipped shape pre-aggregates nfl_plays once per ROLE
+      // COLUMN (three passes, not the 22 the distinct arm shapes would
+      // suggest), restricted to the games the graded selections actually name,
+      // with one filtered aggregate per market type inside each pass.
+      const { rows: per_source } = await db.raw(metric_recompute_counts_sql())
+      const { rows: disagreeing } = await db.raw(metric_recompute_rows_sql())
+
+      /** @type {Map<string, Record<string, any>[]>} */
+      const disagreeing_by_source = new Map()
+      for (const row of disagreeing) {
+        const found = disagreeing_by_source.get(row.source_id) || []
+        found.push(row)
+        disagreeing_by_source.set(row.source_id, found)
+      }
+
+      return per_source.flatMap((/** @type {Record<string, any>} */ row) => {
+        const source_id = row.source_id
+        const gradeable = Number(row.gradeable)
+        const ungradeable = Number(row.ungradeable)
+        const found = disagreeing_by_source.get(source_id) || []
+
+        const graded = !gradeable
+          ? []
+          : found.length
+            ? found.map((/** @type {Record<string, any>} */ violation) => ({
+                source_id,
+                source_market_id: violation.source_market_id,
+                source_selection_id: violation.source_selection_id,
+                time_type: violation.time_type,
+                numerator: 1,
+                denominator: gradeable,
+                is_gradeable: true
+              }))
+            : [
+                {
+                  source_id,
+                  source_market_id: CLEAN_SENTINEL,
+                  source_selection_id: CLEAN_SENTINEL,
+                  time_type: CLEAN_SENTINEL,
+                  numerator: 0,
+                  denominator: gradeable,
+                  is_gradeable: true
+                }
+              ]
+
+        return [
+          ...graded,
+          // DECLARED, not discovered. A graded row with no game on its market
+          // row, no plays loaded for that game, or no stored metric has nothing
+          // to be recomputed against, and grading it would compare its value
+          // against a recomputation of nothing -- which returns 0 and reads as
+          // a disagreement on every such row. Without this arm those rows would
+          // leave the SCAN as well, so a settlement path writing results
+          // against games we do not hold would shrink the population and make
+          // the check report cleaner.
+          {
+            source_id,
+            source_market_id: UNGRADEABLE_SENTINEL,
+            source_selection_id: UNGRADEABLE_SENTINEL,
+            time_type: UNGRADEABLE_SENTINEL,
+            numerator: ungradeable,
+            denominator: gradeable + ungradeable,
+            is_gradeable: false
+          }
+        ]
+      })
+    },
+    precondition: (/** @type {Record<string, any>} */ row) => row.is_gradeable,
+    max_count: 0,
+    calibration:
+      "EXACT: the recomputation reproduces the settlement handler's own semantics, so any difference is a defect rather than tolerance. THIS CHECK IS GREEN THE DAY IT LANDS AND THAT IS THE CORRECT READING, not a broken detector — see the invariant for why agreement is the expected state. Measured on production 2026-09-02 by running the SHIPPED queries: 378,522 graded rows across five books, of which 377,839 are gradeable and 0 disagree. Cost 22.5s at a peak of about 92MB (a 92,211kB quicksort and a 74,944kB hash), read with EXPLAIN (ANALYZE, BUFFERS) rather than inferred, over 3-4 parallel workers on a host the runner shares. DEMONSTRATED RED IN TWO WAYS, because a check that has never been shown red is not a check. Inverting the comparison to `is not distinct from` over the same corpus reports exactly the gradeable count in every book — 230,372 / 135,973 / 10,482 / 876 / 136 — so the comparison and the numeric cast are both speaking and the 0 is a finding rather than a predicate that cannot match. More to the point, SIMULATING THE DEFECT THIS CHECK EXISTS FOR turns it red hard: over the drifted GAME_LONGEST_RECEPTION markets (those whose OPEN and CLOSE rows name different games), 1,054 graded selections agree with their own row's esbid 0 times out of 1,054, and disagree 980 times when recomputed against the sibling row's esbid. That is what a repoint without a re-settle looks like, and this check reports 93 percent of it. UN-GRADEABLE IS 683 ROWS AND WORTH WATCHING: 617 FANDUEL and 66 DRAFTKINGS graded rows whose market row carries no esbid or whose game has no plays loaded. A RISE there means settlement has begun writing metrics it cannot substantiate, which this check would otherwise read as a shrinking population and report cleaner. THE 52 DISAGREEMENTS AN EARLIER AD-HOC ORACLE REPORTED ON THIS ARM ARE NOT DEFECTS IN SETTLEMENT OUTPUT and must not be read as a threshold this check is failing to meet — that oracle recomputed the longest reception over `is_completion = true` instead of the handler's own play filter, and 48 of the 52 are the two 2025 conference-championship games (esbids 2025012600 and 2025012601), where is_completion is NULL on all 219 and 193 plays so the oracle saw no receptions at all. The remaining 4 are one real wrong grade with a cause in nfl_plays rather than in settlement, recorded on user:task/league/wire-settlement-output-data-checks.md.",
+    // Five graded rows when fully clean, one per book that settles anything
+    // under these types. The un-gradeable arms do not count toward this floor,
+    // so a book whose whole population becomes un-gradeable fires it.
+    min_gradeable_units: 5,
+    // REQUIRED for the same reason as the sibling above: the graded row count
+    // is fixed by the number of settling books when clean. Read against the
+    // smallest gradeable population, CAESARS at 136 measured 2026-09-02.
+    min_denominator: 100,
+    repair_command:
+      "A FINDING MEANS THE STORED METRIC NO LONGER MATCHES ITS OWN GAME, and the metric is the stale side by construction — the recomputation reads nfl_plays now, so a difference means the inputs moved after settlement wrote the grade. DO NOT EDIT metric_result_value BY HAND. Force a re-settle of the affected markets (missing_only false), which rewrites the metric and the result together from current data; writing one column alone is how a row acquires the divergent provenance the sibling prop-market-selection-grade-consistency check exists to catch. Establish WHICH input moved first, because it changes who owns the fix. If the market's esbid changed, this is a repoint that shipped without its re-settle and belongs to user:task/league/repair-drifted-prop-market-esbid-stamps.md, whose repair is the crosswalk plus the forced re-settle as one unit. If the esbid is unchanged, nfl_plays moved under a settled grade — a re-import or an enrichment backfill — and the re-settle is the whole repair, but check that the plays change was itself intended before propagating it into grades. A row appearing here that is ALSO reported by prop-market-selection-grade-consistency is one defect, not two: fix it once at the settlement layer."
   },
 
   {

@@ -28,6 +28,7 @@
     "libs-server/resolve-canonical-player.mjs",
     "libs-server/rotowire/index.mjs",
     "libs-server/sandboxed-read.mjs",
+    "libs-server/settlement-output-checks.mjs",
     "libs-server/simulation/index.mjs",
     "libs-server/simulation/load-actual-points.mjs",
     "libs-server/simulation/load-player-info.mjs",
