@@ -58,6 +58,39 @@ const project = (row, { compare_columns, ignore_columns }) => {
 const normalize_rows = (rows, opts) =>
   rows.map((r) => JSON.stringify(project(r, opts))).sort()
 
+// `project` builds its key list from `compare_columns` WITHOUT checking that the
+// row carries those keys, and `row[k]` for an absent key is `undefined`, which
+// the null-normalisation below turns into `null`. So a compare_column that
+// exists in NEITHER side compares null against null and the fixture passes while
+// asserting nothing -- the exact vacuous green this corpus exists to catch, since
+// its whole job is semantics that valid SQL gets wrong. A misspelled column id
+// and a column the query stopped emitting are the same shape.
+//
+// The guard is per-SIDE and requires presence in at least one row of a NON-EMPTY
+// row set. Presence in one executed row means presence in all of them (knex
+// returns a uniform key set); on a literal `expected_rows` oracle a fixture may
+// legitimately spell a null by omitting the key on some rows, so "at least one"
+// is the honest threshold there. An empty row set is not checked, because it
+// carries no keys to check against and its own vacuity is a different question
+// than the one this guard answers.
+const assert_compare_columns_present = ({
+  rows,
+  compare_columns,
+  side,
+  filename
+}) => {
+  if (!compare_columns || !compare_columns.length) return
+  if (!rows.length) return
+  const present = new Set()
+  for (const row of rows) for (const key of Object.keys(row)) present.add(key)
+  const missing = compare_columns.filter((c) => !present.has(c))
+  if (missing.length) {
+    throw new Error(
+      `${filename}: compare_column(s) [${missing.join(', ')}] are absent from the ${side} row set, so comparing them asserts nothing. Present columns: [${[...present].sort().join(', ')}]`
+    )
+  }
+}
+
 // Kept in sync with the `pos` / `primary_position` values in the
 // test/data-view-queries/*-result-equivalence.json seeds.
 const SEED_ISOLATION_POSITION = 'MLB'
@@ -113,6 +146,19 @@ describe('Data View', () => {
           } else {
             oracle_rows = re.expected_rows
           }
+
+          assert_compare_columns_present({
+            rows: actual_rows,
+            compare_columns: re.compare_columns,
+            side: 'executed',
+            filename: fixture.filename
+          })
+          assert_compare_columns_present({
+            rows: oracle_rows,
+            compare_columns: re.compare_columns,
+            side: has_reference ? 'reference_sql' : 'expected_rows',
+            filename: fixture.filename
+          })
 
           expect(normalize_rows(actual_rows, re)).to.deep.equal(
             normalize_rows(oracle_rows, re),

@@ -47,8 +47,10 @@ export const add_cte = ({ query_context }) => {
 
   // nfl_games is joined UNALIASED so the year projection can be derived:
   // physical_year_projection maps a registered TABLE name to its physical
-  // column, and an alias is not in that map, so aliasing it here would silently
-  // emit `<alias>.year` -- a column that does not exist.
+  // column, and an alias is not in that map, so aliasing it here would make the
+  // projection unresolvable. It now refuses rather than emitting `<alias>.year`
+  // -- a column that does not exist -- but the join must stay unaliased either
+  // way.
   const cte_query = db('prop_markets_index as m')
     .distinct(
       'pms.selection_pid as pid',

@@ -13,9 +13,11 @@
 // renamed table and the regenerated query-match goldens blessed it, because a
 // golden regenerated from buggy code agrees with the buggy code.
 //
-// Tables absent from the map fall back to the vocabulary names, which is correct
-// for CTE aliases (they alias back) and is why the map must list every physical
-// table an emitter can target. test/libs-server.physical-season-columns.spec.mjs
+// Tables absent from the map fall back to the vocabulary names in the COLUMN
+// resolvers, which is correct for CTE aliases (they alias back) and is why the
+// map must list every physical table an emitter can target. The PROJECTION
+// resolvers refuse an absent name instead -- see the note above them for why
+// the two halves differ. test/libs-server.physical-season-columns.spec.mjs
 // checks the map against db/schema.postgres.sql in both directions, so a table
 // conformed to season_year but left out of the map fails the suite.
 
@@ -107,17 +109,52 @@ export const physical_has_nfl_week_id = (table_name) =>
 // change the emitted SQL for no gain and this repo pins generated SQL in
 // query-match goldens. Pick the one matching the site rather than requalifying
 // it -- a golden churned for cosmetics is a golden nobody reads.
-export const physical_year_projection = (table_name) =>
-  `${table_name}.${physical_year_column(table_name)} as year`
+// The PREDICATE resolvers above fall back for an unregistered name and the
+// PROJECTION resolvers below refuse one, and the asymmetry is deliberate rather
+// than an oversight. apply_scope_to_query is handed the relation the predicate
+// must be QUALIFIED BY, which is routinely a CTE alias -- the cohort expansion
+// joins player_gamelogs as `pg`, and every from-plays source-attach passes a
+// hashed `tXXXX` -- so its fallback is exercised on every request and is what
+// makes an alias emit the vocabulary names the CTE aliased back. A projection
+// is the opposite: it exists to name the PHYSICAL column of a physical table,
+// so an unregistered name there is a caller error every time. There were no
+// alias callers when this refusal landed, and a CTE that genuinely wants to
+// re-project its own aliased-back column writes `<alias>.year as year`
+// directly -- the residue scan in the spec anchors on `season_year as year`
+// and does not flag it.
+//
+// The direction this closes: a misspelling or an alias silently produced
+// `<name>.year as year`, which satisfies the schema-conformance ratchet
+// (nothing about it is a conformed column name) and then throws 42703 at
+// runtime, or worse resolves against a real `year` column meaning something
+// else. Hit while routing a projection through this helper as advised.
+const assert_registered = (table_name, helper_name) => {
+  if (!Object.prototype.hasOwnProperty.call(PHYSICAL_YEAR_COLUMN, table_name)) {
+    throw new Error(
+      `${helper_name}: ${table_name} is not a registered physical table. Register it in physical-season-columns, or -- if this is a CTE alias that already aliases year back -- write the projection directly rather than deriving it here.`
+    )
+  }
+}
 
-export const physical_year_projection_unqualified = (table_name) =>
-  `${physical_year_column(table_name)} as year`
+export const physical_year_projection = (table_name) => {
+  assert_registered(table_name, 'physical_year_projection')
+  return `${table_name}.${physical_year_column(table_name)} as year`
+}
 
-export const physical_seas_type_projection_unqualified = (table_name) =>
-  `${physical_seas_type_column(table_name)} as seas_type`
+export const physical_year_projection_unqualified = (table_name) => {
+  assert_registered(table_name, 'physical_year_projection_unqualified')
+  return `${physical_year_column(table_name)} as year`
+}
 
-export const physical_year_group_by = (table_name) =>
-  `${table_name}.${physical_year_column(table_name)}`
+export const physical_seas_type_projection_unqualified = (table_name) => {
+  assert_registered(table_name, 'physical_seas_type_projection_unqualified')
+  return `${physical_seas_type_column(table_name)} as seas_type`
+}
+
+export const physical_year_group_by = (table_name) => {
+  assert_registered(table_name, 'physical_year_group_by')
+  return `${table_name}.${physical_year_column(table_name)}`
+}
 
 export const physical_table_names = () => Object.keys(PHYSICAL_YEAR_COLUMN)
 

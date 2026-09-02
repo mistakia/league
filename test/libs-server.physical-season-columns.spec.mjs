@@ -352,11 +352,46 @@ describe('physical season columns', () => {
       }
     })
 
-    it('projects the vocabulary name for an unregistered CTE alias', () => {
-      // A CTE alias already aliases year back, so the fallback must project
-      // `<alias>.year as year` rather than erroring or inventing season_year.
+    it('refuses to project an unregistered name', () => {
+      // The PREDICATE resolvers fall back for an unregistered name because
+      // apply_scope_to_query is routinely handed a CTE alias and the fallback
+      // is what makes an alias emit the vocabulary names. A PROJECTION exists
+      // to name the physical column of a physical table, so an unregistered
+      // name is a caller error: the old fallback emitted `<name>.year as year`,
+      // which satisfies the schema-conformance ratchet and then throws 42703 at
+      // runtime -- or resolves against a real `year` column meaning something
+      // else. A misspelling and a CTE alias are indistinguishable here, so the
+      // refusal covers both; a CTE that wants to re-project its aliased-back
+      // column writes the literal directly.
       const alias = 't22c9a76f62c8a62fec52ad076663a982'
-      expect(physical_year_projection(alias)).to.equal(`${alias}.year as year`)
+      expect(() => physical_year_projection(alias)).to.throw(
+        /not a registered physical table/
+      )
+      expect(() => physical_year_projection_unqualified(alias)).to.throw(
+        /not a registered physical table/
+      )
+      expect(() => physical_year_group_by(alias)).to.throw(
+        /not a registered physical table/
+      )
+      expect(() => physical_seas_type_projection_unqualified(alias)).to.throw(
+        /not a registered physical table/
+      )
+    })
+
+    it('refuses a MISSPELLING of a registered table', () => {
+      // The must-report control for the case that motivated the refusal. A
+      // near-miss of a real registered name is exactly what falls through a
+      // name-keyed map, and the old fallback answered it with a confident
+      // `nfl_playz.year as year`.
+      expect(() => physical_year_projection('nfl_playz')).to.throw(
+        /not a registered physical table/
+      )
+      // Paired decoy: the correctly spelled neighbour must still resolve, so
+      // the assertion above is detecting an unregistered NAME rather than a
+      // helper that now throws on everything.
+      expect(physical_year_projection('nfl_plays')).to.equal(
+        'nfl_plays.season_year as year'
+      )
     })
 
     // Direction 2 for projections, derived from source the same way the
