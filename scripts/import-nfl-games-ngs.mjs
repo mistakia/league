@@ -1,20 +1,17 @@
-import dayjs from 'dayjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import timezone from 'dayjs/plugin/timezone.js'
 
-import db from '#db'
-import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
-import { nfl_week_from_week_type } from '#libs-shared/nfl-postseason-week.mjs'
-
-dayjs.extend(timezone)
+import {
+  select_game_inserts,
+  upsert_game
+} from '#libs-server/nfl-games-ngs.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -22,56 +19,6 @@ const initialize_cli = () => {
 
 const log = debug('import-games-ngs')
 enable_debug_namespaces('import-games-ngs')
-
-const format = (item) => {
-  const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
-  const season_type = item.seasonType
-  const week_type = ['REG', 'PRE'].includes(season_type)
-    ? season_type
-    : item.weekNameAbbr
-  const time_eastern = item.gameTimeEastern
-  const week = nfl_week_from_week_type({ week: item.week, week_type })
-  const season_year = item.season
-  const score = item.score || {}
-  const day = date
-    ? getGameDayAbbreviation({ season_type, date, time_eastern, week_type })
-    : null
-
-  const datetime = dayjs(
-    `${item.gameDate} ${item.gameTimeEastern}`,
-    'DD/MM/YYYY HH:mm:ss'
-  ).tz(item.time, 'America/New_York')
-
-  return {
-    esbid: item.gameId,
-    gsis_game_id: item.gameKey,
-    shield_game_id: item.smartId,
-    ngs_game_id: item.gameId,
-
-    season_year,
-    week,
-    date,
-    time_eastern,
-    day,
-    kickoff_at: datetime.isValid() ? datetime.toDate() : null,
-
-    away_nfl_team: fixTeam(item.visitorTeamAbbr),
-    home_nfl_team: fixTeam(item.homeTeamAbbr),
-
-    season_type,
-    week_type,
-    is_overtime: (score.phase || '').includes('OVERTIME'),
-
-    home_score: (score.homeTeamScore || {}).pointTotal,
-    away_score: (score.visitorTeamScore || {}).pointTotal,
-
-    stadium_name: item.site.siteFullName,
-    ngs_stadium_id: item.site.siteId,
-
-    game_clock: score.time,
-    status: score.phase
-  }
-}
 
 const run = async ({
   season_year = current_season.year,
@@ -81,7 +28,9 @@ const run = async ({
 
   const result = {
     games_processed: 0,
-    games_updated: 0
+    games_updated: 0,
+    games_skipped_missing_esbid: 0,
+    games_failed: 0
   }
 
   const url = `${NGS_API_URL}/league/schedule?season=${season_year}`
@@ -103,32 +52,49 @@ const run = async ({
     throw error
   }
 
-  const inserts = []
-  for (const item of data) {
-    inserts.push(format(item))
+  // Rows RECEIVED from the feed. The floor below reads this rather than the
+  // number we go on to insert, because it exists to catch an empty or
+  // truncated payload -- a distinct failure from a row we decline to write.
+  result.games_processed = data.length
+
+  const { inserts, skipped_missing_esbid } = select_game_inserts(data)
+  result.games_skipped_missing_esbid = skipped_missing_esbid
+
+  /*
+    ROW BY ROW, deliberately, and not in chunks. A single multi-row insert
+    aborts whole on one bad row and loses the entire slate. Chunking is not
+    sufficient either: without a per-chunk catch the failing chunk still aborts
+    and every later chunk is skipped, and WITH one it converts a loud failure
+    into a silent partial import -- which the per-year floor cannot see, because
+    that floor reads the count of rows RECEIVED.
+  */
+  for (const insert of inserts) {
+    try {
+      await upsert_game(insert)
+      result.games_updated += 1
+    } catch (error) {
+      result.games_failed += 1
+      log(`failed to save game ${insert.esbid}: ${error.message}`)
+      if (collector) {
+        collector.add_error(error, {
+          season_year,
+          esbid: insert.esbid,
+          context: 'insert_game'
+        })
+      }
+    }
   }
 
-  result.games_processed = inserts.length
-
-  if (inserts.length) {
-    await db('nfl_games')
-      .insert(inserts)
-      .onConflict([
-        'away_nfl_team',
-        'home_nfl_team',
-        'week',
-        'season_year',
-        'season_type'
-      ])
-      .merge()
-    log(`saved data for ${inserts.length} games`)
-    result.games_updated = inserts.length
-  }
+  log(
+    `saved data for ${result.games_updated} games (${result.games_failed} failed, ${result.games_skipped_missing_esbid} skipped)`
+  )
 
   if (collector) {
     collector.set_stats({
       games_processed: result.games_processed,
-      games_updated: result.games_updated
+      games_updated: result.games_updated,
+      games_skipped_missing_esbid: result.games_skipped_missing_esbid,
+      games_failed: result.games_failed
     })
   }
 
@@ -146,12 +112,29 @@ const main = async () => {
     const argv = initialize_cli()
     const season_year = argv.year
     const result = await run({ season_year })
+    const season = season_year ?? current_season.year
 
-    throw_if_shortfall(
-      result.games_processed < NFL_GAMES_FLOOR_PER_YEAR
-        ? `nfl_games row-count shortfall for season_year ${season_year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
-        : null
-    )
+    /*
+      Three independent shortfalls, reported together rather than as a chain of
+      early returns, so one run surfaces every reason it fell short instead of
+      only the first.
+
+      The row-by-row insert above means a failed row no longer aborts the run,
+      so without a failure counter here a slate that mostly failed would exit 0
+      with a healthy `games_processed` -- the silent partial import the chunked
+      form was rejected for. `games_failed` and the skip counter are what make
+      the loop's tolerance of one bad row loud rather than free.
+    */
+    const shortfalls = [
+      result.games_processed < NFL_GAMES_FLOOR_PER_YEAR &&
+        `nfl_games row-count shortfall for season_year ${season}: ${result.games_processed} games received (floor=${NFL_GAMES_FLOOR_PER_YEAR})`,
+      result.games_failed > 0 &&
+        `nfl_games write failures for season_year ${season}: ${result.games_failed} of ${result.games_processed} rows failed to write`,
+      result.games_skipped_missing_esbid > 0 &&
+        `nfl_games feed items with no gameId for season_year ${season}: ${result.games_skipped_missing_esbid} skipped, so they carry no esbid to key on`
+    ].filter(Boolean)
+
+    throw_if_shortfall(shortfalls.length ? shortfalls.join('; ') : null)
   } catch (err) {
     error = err
     console.log(error)

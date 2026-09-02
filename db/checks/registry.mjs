@@ -82,6 +82,7 @@ import {
   metric_recompute_counts_sql,
   metric_recompute_rows_sql
 } from '#libs-server/settlement-output-checks.mjs'
+import { nfl_team_abbreviation_conformance_rows } from '#libs-server/nfl-team-abbreviation-conformance.mjs'
 
 // The four gamelog child tables. Generic over the parent-child edge rather than
 // receiving-specific, because a receiving-only detector missed the 30 defender
@@ -2115,6 +2116,28 @@ const registry = [
     min_denominator: 1000,
     repair_command:
       'Establish which of the three layers failed before touching data. If the importer never ran, check server/crontab-main/league-imports.cron for the source line -- and for PFF, which is on no crontab, check `base schedule list` for league/import-pff-projections.md. If it ran and skipped, its log carries the reason: an importer that reports upstream has published nothing is working as designed and the finding belongs upstream, so confirm against the vendor before treating it as ours. If it ran and wrote a short slice, check_projections_index_floor should have failed the run -- read /var/log/league/import-<source>.log. Do NOT lower MINIMUM_WEEKLY_ROWS_PER_SOURCE to clear a finding; the gap between 209 and 0 is what makes this check readable at all. A week a vendor genuinely never published and cannot backfill is baselined debt, not an adjudication.'
+  },
+
+  {
+    check_id: 'nfl-team-abbreviation-conformance',
+    invariant:
+      "Every stored NFL team abbreviation equals the CURRENT abbreviation of the franchise it named in that row's season. The operator ruled the current abbreviation canonical for every team column on 2026-09-02, and NOTHING enforces it: no CHECK constrains any of these columns, no foreign key references a team dimension, and fixTeam -- which 350 call sites route through -- is a pure function of the token with no season parameter, so it cannot express the rule even in principle. A TOKEN CENSUS CANNOT SERVE AS THIS ORACLE, which is the whole reason the check exists rather than a `distinct` query: `BAL` and `HOU` are era tokens of the Colts and Oilers AND canonical abbreviations of the Ravens and Texans, so a 1975 Colts row reads as already-clean to any check that looks only at the token. 633 slots in nfl_games alone have that shape. The predicate is therefore season-first, generated from libs-shared/nfl-team-franchise-eras.mjs so it cannot drift from the resolver the conform writes through.",
+    grain: ['table_name', 'column_name', 'season_year'],
+    rows: nfl_team_abbreviation_conformance_rows,
+    max_count: 0,
+    calibration:
+      "EXACT, not a tolerance: a token either is or is not the franchise's current abbreviation for its season, and the convention admits no drift. Measured 2026-09-02 against production: 472 gradeable rows over 13,315,998 slots, of which 232 rows carry 324,818 violations. By column -- nfl_play_stats.nfl_team 173,011, possession_nfl_team 47,869, yard_line_side 44,332, defense_nfl_team 27,008, offense_nfl_team 25,136, nfl_games away/home 1,343 and 1,324, score_team 3,730, touchdown_nfl_team 536, opponent_nfl_team 149, return_nfl_team 236, player_gamelogs.nfl_team 139, player.draft_team 5. penalty_team and timeout_team scan 84,850 and 51,384 slots at ZERO violations, which is the two-sided reading this check needs: it is not a detector that has only ever fired. THE 232 REPORT AS FINDINGS ON THE FIRST RUN AND ARE DELIBERATELY NOT PARKED. Baselining asserts a repair cannot land and adjudicating asserts the values are correct; neither is true here -- the repair is written and gated, not impossible -- so parking these would be debt laundered as a green run. They ride a self-closing signal and do not fail the run. THE PREDICATE WAS VALIDATED AGAINST AN INDEPENDENTLY DERIVED FIGURE rather than against itself: it returns 2,667 nfl_games slots, which is the count a separate session reached by hand census (SD 823, STL 682, RAI 211, RAM 209, PHO 95, BOS 14, plus BAL Colts 209 and HOU Oilers 424), and it reproduces that session's per-column nfl_plays figures exactly. THE GRAIN IS PER SEASON FOR A LOAD-BEARING REASON: the conform is split into two separately-gated halves covering disjoint season ranges -- 2000-onward is a matching fix, pre-2000 is a franchise-identity relabel -- so a column-grained check could not certify the first without the second, and would read red after a fully successful 2000-onward conform with no way to show it worked. WHAT THIS CANNOT GRADE: 85,332 nfl_play_stats rows hold a team abbreviation and no joinable nfl_games row, so nothing can date them; they are emitted as an explicit zero-denominator row and reported un-gradeable every run rather than dropped by the join -- and any conform driven by that same esbid join will not reach them either. nfl_plays.fumble_recovered_team holds zero non-null values, so it contributes no gradeable row at all; the plan that scoped this work recorded it as verified-clean, which is true only in the sense that an empty column cannot be dirty. Changelog tables are deliberately out of scope: they are audit history of what a value WAS and are CORRECT to hold era tokens. COST, quoted whole rather than from one arm: about 30 seconds against production, issued as one query per table (nfl_plays 15.2s, nfl_play_stats 8.7s, player_gamelogs 4.9s, nfl_games and player under 0.5s each). The union form measured about 35 seconds in one statement, over the client statement timeout, which is why the split is structural rather than stylistic.",
+    // 472 rows today, one per (table, column, season) and growing by about 14
+    // with each season played, so the count cannot fall except by a scan
+    // collapsing. 400 sits under today's figure and is breached by either large
+    // source vanishing -- nfl_plays contributes about 215 rows and nfl_games
+    // 114. It does NOT catch the three small sources dropping out (35 to 54
+    // rows each), which is the acknowledged limit of a single global floor over
+    // a five-source scan; the specs cover those by asserting each source
+    // appears.
+    min_gradeable_units: 400,
+    repair_command:
+      'Do NOT hand-edit tokens to clear a finding, and do NOT change libs-shared/fix-team.mjs -- it has 350 call sites across 71 files and cannot express a season-dependent rule anyway. Establish first WHICH half of the work a finding belongs to, because they have different gates. A season from 2000 onward is the conform in user:task/league/settle-nfl-games-team-abbreviation-matching.md increment D, which is operator-gated at execution time and must not run mid-slate (process_plays runs automatically at END_GAME). A season BEFORE 2000 is increment E, a separate franchise-identity ruling that relabels the 1975 Colts as IND and the 1980 Oilers as TEN -- approving the convention is NOT approving that relabel, and no live consumer joins pre-2000 rows. A finding in the CURRENT season is neither: it means an importer reintroduced an era token, which is the regression this check exists to catch, and the fix belongs in that importer rather than in the data.'
   }
 ]
 
