@@ -29,7 +29,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { current_season } from '#constants'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, emit_signal } from '#libs-server'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -100,22 +100,56 @@ const pricing_models_by_format_id = async (league_format_ids) => {
   )
 }
 
+// The years the writer can produce a board for at all.
+//
+// THE FILTER HERE MIRRORS THE WRITER'S OWN INPUT GATE and has to keep doing so:
+// AVERAGE source, REG season type, week >= 1. Any looser and this reads the
+// wrong population -- 2020 holds 70,744 `projections_index` rows at week >= 1
+// and ZERO of them are AVERAGE, so a check that asked only about week and year
+// would grade 2020 as producible and report a permanent gap nobody can close.
+//
+// DECLARED UN-GRADEABLE, NOT SKIPPED. 2020 is exactly that shape: 1,035
+// scoring-format SEASON point rows, no AVERAGE weekly source, and a backfill run
+// against it is a no-op that writes nothing. A check that quietly passed such a
+// pair would report a real future gap as fine; one that failed it would be
+// permanently red on a state nobody can fix. Naming it is the honest third
+// answer.
+const projection_source_years = async () => {
+  const rows = await db('projections_index')
+    .distinct('season_year')
+    .where({ source_id: external_data_sources.AVERAGE, season_type: 'REG' })
+    .where('week', '>=', 1)
+
+  return new Set(rows.map((row) => Number(row.season_year)))
+}
+
 export const verify_projection_period_coverage = async () => {
   const pairs = await find_formats_in_use()
   const pricing_models = await pricing_models_by_format_id([
     ...new Set(pairs.map((pair) => pair.league_format_id))
   ])
+  const source_years = await projection_source_years()
 
   const gaps = []
+  const ungradeable = []
 
   for (const { league_format_id, season_year, roster_player_rows } of pairs) {
+    const describe = `${league_format_id} ${season_year} (${roster_player_rows} roster player rows)`
+
+    if (!source_years.has(season_year)) {
+      ungradeable.push({
+        league_format_id,
+        season_year,
+        detail: `${describe}: no AVERAGE-source REG weekly projections, so no board is producible for this year`
+      })
+      continue
+    }
+
     const season = await measure_pair({
       table: SEASON_TABLE,
       league_format_id,
       season_year
     })
-
-    const describe = `${league_format_id} ${season_year} (${roster_player_rows} roster player rows)`
 
     if (!season.positive) {
       gaps.push({
@@ -168,12 +202,12 @@ export const verify_projection_period_coverage = async () => {
     }
   }
 
-  return { pairs, gaps }
+  return { pairs, gaps, ungradeable }
 }
 
 const main = async () => {
   let error
-  let result = { pairs: [], gaps: [] }
+  let result = { pairs: [], gaps: [], ungradeable: [] }
 
   try {
     result = await verify_projection_period_coverage()
@@ -193,11 +227,15 @@ const main = async () => {
       `${pair.league_format_id} ${pair.season_year}: ${pair.roster_player_rows} roster player rows`
     )
   }
+  for (const pair of result.ungradeable) {
+    log(`UNGRADEABLE ${pair.detail}`)
+  }
   for (const gap of result.gaps) {
     log(`GAP ${gap.table}: ${gap.detail}`)
   }
   log(
-    `${result.pairs.length} format-year pairs in use, ${result.gaps.length} gaps`
+    `${result.pairs.length} format-year pairs in use, ` +
+      `${result.ungradeable.length} un-gradeable, ${result.gaps.length} gaps`
   )
 
   const failed = Boolean(error) || no_pairs || result.gaps.length > 0
@@ -215,6 +253,7 @@ const main = async () => {
       payload: {
         error_message: error?.message,
         pairs_in_use: result.pairs.length,
+        ungradeable: result.ungradeable,
         gaps: result.gaps
       },
       dedup_key: `pipeline_failure:${SIGNAL_SOURCE}`
@@ -224,7 +263,9 @@ const main = async () => {
       source: SIGNAL_SOURCE,
       kind: 'pipeline_success',
       severity: 'low',
-      title: `verify-projection-period-coverage: ${result.pairs.length} format-year pairs covered`,
+      title:
+        `verify-projection-period-coverage: ${result.pairs.length - result.ungradeable.length} ` +
+        `of ${result.pairs.length} format-year pairs covered, ${result.ungradeable.length} un-gradeable`,
       dedup_key: `pipeline_success:${SIGNAL_SOURCE}`
     })
   }
