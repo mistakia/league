@@ -58,18 +58,20 @@ export default function WaiverConfirmation({
     return releases
   }
 
-  const ros = new Roster({ roster: roster.toJS(), league })
+  const roster_for_team = new Roster({ roster: roster.toJS(), league })
   const has_bench_space = (isActiveRoster) =>
     isActiveRoster
-      ? ros.has_bench_space_for_position(player_map.get('primary_position'))
-      : ros.has_practice_squad_space_for_position(
+      ? roster_for_team.has_bench_space_for_position(
+          player_map.get('primary_position')
+        )
+      : roster_for_team.has_practice_squad_space_for_position(
           player_map.get('primary_position')
         )
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
     current_season.is_regular_season
       ? team.free_agent_acquisition_budget_balance
-      : ros.availableCap
+      : roster_for_team.availableCap
   )
   const [isEligible, set_isEligible] = useState(
     waiver ? has_bench_space(waiver.type === waiver_types.FREE_AGENCY) : false
@@ -110,7 +112,8 @@ export default function WaiverConfirmation({
     set_waiver_type(value)
     set_waiver_release([])
     set_missing_type(false)
-    if (!current_season.is_regular_season) set_waiver_max_bid(ros.availableCap)
+    if (!current_season.is_regular_season)
+      set_waiver_max_bid(roster_for_team.availableCap)
     setType(value)
   }
 

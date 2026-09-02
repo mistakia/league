@@ -372,8 +372,8 @@ export const is_nominated_player_eligible = createSelector(
       return false
     }
 
-    const ros = new Roster({ roster: roster.toJS(), league })
-    return ros.has_bench_space_for_position(pos)
+    const roster_for_team = new Roster({ roster: roster.toJS(), league })
+    return roster_for_team.has_bench_space_for_position(pos)
   }
 )
 
@@ -1831,11 +1831,11 @@ export function getActivePlayersByRosterForCurrentLeague(state) {
   const rosters = get_rosters_for_current_league(state)
   const league = get_current_league(state)
   let result = new Map()
-  for (const ros of rosters.valueSeq()) {
-    if (!ros) continue
-    const r = new Roster({ roster: ros.toJS(), league })
+  for (const roster_row of rosters.valueSeq()) {
+    if (!roster_row) continue
+    const r = new Roster({ roster: roster_row.toJS(), league })
     const active = r.active.map(({ pid }) => getPlayerById(state, { pid }))
-    result = result.set(ros.get('tid'), new List(active))
+    result = result.set(roster_row.get('tid'), new List(active))
   }
 
   return result

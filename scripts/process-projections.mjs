@@ -191,9 +191,9 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
   const player_rows = await db('player').whereIn('pid', projection_pids)
 
-  const projectionInserts = []
-  const seasonProjectionInserts = []
-  const rosProjectionInserts = []
+  const weekly_projection_inserts = []
+  const season_projection_inserts = []
+  const rest_of_season_projection_inserts = []
 
   for (const player_row of player_rows) {
     const projections = projections_by_pid[player_row.pid] || []
@@ -210,7 +210,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       })
 
       player_row.projection[week] = projection
-      projectionInserts.push({
+      weekly_projection_inserts.push({
         pid: player_row.pid,
         source_id: external_data_sources.AVERAGE,
         season_type: seas_type,
@@ -230,7 +230,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
         projections: season_projections_by_pid[player_row.pid] || []
       })
       player_row.projection[season_aggregate_key] = season_projection
-      seasonProjectionInserts.push({
+      season_projection_inserts.push({
         pid: player_row.pid,
         source_id: external_data_sources.AVERAGE,
         season_year: current_season.year,
@@ -250,7 +250,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       })
 
       player_row.projection[week] = projection
-      projectionInserts.push({
+      weekly_projection_inserts.push({
         pid: player_row.pid,
         source_id: external_data_sources.AVERAGE,
         season_type: seas_type,
@@ -260,15 +260,14 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       })
     }
 
-    // Only calculate ROS projections for regular season
+    // Only calculate rest-of-season projections for regular season
     if (seas_type === 'REG') {
-      // calculate ros projection
-      const ros = create_empty_projected_fantasy_stats()
+      const rest_of_season = create_empty_projected_fantasy_stats()
       // A stat no source has an opinion on is null for every week, and summing
       // nulls into the zero-initialized accumulator would re-fabricate the
       // consensus weightProjections just stopped inventing. Track which stats
       // any week actually spoke to and null the rest back out.
-      const ros_has_opinion = {}
+      const rest_of_season_has_opinion = {}
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
         // `Number(week)` drops the named period keys -- 'season' here, and
@@ -279,32 +278,32 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
           proj_wks += 1
           for (const [key, value] of Object.entries(projection)) {
             if (value === null || value === undefined) continue
-            ros[key] += value
-            ros_has_opinion[key] = true
+            rest_of_season[key] += value
+            rest_of_season_has_opinion[key] = true
           }
         }
       }
-      for (const key of Object.keys(ros)) {
-        if (!ros_has_opinion[key]) ros[key] = null
+      for (const key of Object.keys(rest_of_season)) {
+        if (!rest_of_season_has_opinion[key]) rest_of_season[key] = null
       }
 
       player_row.proj_wks = proj_wks
-      player_row.projection.rest_of_season = ros
+      player_row.projection.rest_of_season = rest_of_season
 
-      rosProjectionInserts.push({
+      rest_of_season_projection_inserts.push({
         pid: player_row.pid,
         source_id: external_data_sources.AVERAGE,
         season_year: current_season.year,
-        ...ros
+        ...rest_of_season
       })
     }
   }
 
-  if (projectionInserts.length) {
-    log(`processing ${projectionInserts.length} projections`)
+  if (weekly_projection_inserts.length) {
+    log(`processing ${weekly_projection_inserts.length} projections`)
 
     await batch_insert({
-      items: projectionInserts,
+      items: weekly_projection_inserts,
       save: (items) =>
         db('projections_index')
           .insert(items)
@@ -318,14 +317,14 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
           .merge(),
       batch_size: 100
     })
-    log(`processed and saved ${projectionInserts.length} projections`)
+    log(`processed and saved ${weekly_projection_inserts.length} projections`)
   }
 
-  if (seasonProjectionInserts.length) {
-    log(`processing ${seasonProjectionInserts.length} season projections`)
+  if (season_projection_inserts.length) {
+    log(`processing ${season_projection_inserts.length} season projections`)
 
     await batch_insert({
-      items: seasonProjectionInserts,
+      items: season_projection_inserts,
       save: (items) =>
         db('season_projections_index')
           .insert(items)
@@ -334,15 +333,17 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       batch_size: 100
     })
     log(
-      `processed and saved ${seasonProjectionInserts.length} season projections`
+      `processed and saved ${season_projection_inserts.length} season projections`
     )
   }
 
-  if (rosProjectionInserts.length) {
-    log(`processing ${rosProjectionInserts.length} ros projections`)
+  if (rest_of_season_projection_inserts.length) {
+    log(
+      `processing ${rest_of_season_projection_inserts.length} rest of season projections`
+    )
 
     await batch_insert({
-      items: rosProjectionInserts,
+      items: rest_of_season_projection_inserts,
       save: (items) =>
         db('rest_of_season_projections')
           .insert(items)
@@ -350,7 +351,9 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
           .merge(),
       batch_size: 100
     })
-    log(`processed and saved ${rosProjectionInserts.length} ros projections`)
+    log(
+      `processed and saved ${rest_of_season_projection_inserts.length} rest of season projections`
+    )
   }
 
   return player_rows

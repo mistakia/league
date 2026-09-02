@@ -130,7 +130,10 @@ export default function SelectedPlayer({
   const draftYear = player_map.get('nfl_draft_year')
   const draftRound = player_map.get('draft_round')
   const playerValue = player_map.get('player_salary')
-  const rosPoints = player_map.getIn(['points', 'rest_of_season', 'total'], 0)
+  const rest_of_season_points = player_map.getIn(
+    ['points', 'rest_of_season', 'total'],
+    0
+  )
 
   // Both rest-of-season, so the pair is comparable: the positive variant floors
   // each remaining week at the baseline, the net one subtracts the weeks below
@@ -359,8 +362,8 @@ export default function SelectedPlayer({
                   )}
                 <div className='selected__player-header-item'>
                   <label>Proj/G</label>
-                  {rosPoints && projWks
-                    ? (rosPoints / projWks).toFixed(1)
+                  {rest_of_season_points && projWks
+                    ? (rest_of_season_points / projWks).toFixed(1)
                     : '-'}
                 </div>
                 <div className='selected__player-header-item'>
