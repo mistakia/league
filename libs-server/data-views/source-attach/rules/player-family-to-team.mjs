@@ -28,6 +28,21 @@ const team_year_bridge = {
 
 // required_identity_bridges is param-aware so the dispatcher can skip the
 // historical bridge for a 'current'-attributed column.
+//
+// Do NOT extend this skip to the season-grain WRAP without first decoupling
+// resolve_team_join_target, and the reason is not the wasted work. Under the
+// wrap (league 78f4b21a8) the CTE keys on pid and reads player_week_teams,
+// so player_year_teams is computed and outer-joined while nothing reads it --
+// measured at roughly 100ms on a three-season production query, and the
+// obvious repair is to make this function wrap-aware. The trap is that
+// resolve_team_join_target's precedence chain ends at
+// `player_year_teams_cte_name` and then falls THROUGH to
+// player.current_nfl_team. Registering the bridge here is what puts that name
+// on query_context, and a sibling column in the same view can be resolving
+// against it. Skip the bridge and such a column does not break -- it silently
+// attributes to the wrong team. A wrong number, not an error, for 100ms.
+// The precondition is making that resolution explicit rather than a
+// side-effect of whichever column happened to register first.
 const required_team_year_bridge = (params) =>
   get_team_attribution(params) === 'current' ? [] : [team_year_bridge]
 
