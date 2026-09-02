@@ -510,9 +510,18 @@ const player_betting_market_join = ({
   table_name,
   join_type = 'LEFT',
   params = {},
+  is_player_game_prop = false,
   data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
+
+  // The join has to know the column's own grain, exactly as the `with` builder
+  // does, because the two must agree about whether the CTE has a week at all.
+  // player_betting_market_with builds a week-scoped CTE only for a GAME market;
+  // a SEASON market is one line for the whole year and its CTE projects no year
+  // and no week.
+  const is_week_scoped_market = resolve_market_grain({ is_player_game_prop })
+  const is_game_grain = is_week_scoped_market === 'game'
 
   query[join_func](table_name, function () {
     this.on(`${table_name}.selection_pid`, '=', data_view_options.pid_reference)
@@ -520,12 +529,21 @@ const player_betting_market_join = ({
     // Under a week axis the CTE holds every requested week, so the cell's own
     // year and week are what select the row. Without this the join was on the
     // player alone and one week's line rendered on every week row.
-    correlate_week_scoped_cte({
-      builder: this,
-      db,
-      cte_name: table_name,
-      data_view_options
-    })
+    //
+    // GAME GRAIN ONLY. Correlating a SEASON market on week referenced columns
+    // its CTE never projected and killed the whole view with a 42703, not just
+    // the column. The correct rendering for a season prop under a week split is
+    // the season's single line repeated on every week row: that repetition is
+    // the defect this correlation exists to fix for a game prop, and the plain
+    // fact for a season one.
+    if (is_game_grain) {
+      correlate_week_scoped_cte({
+        builder: this,
+        db,
+        cte_name: table_name,
+        data_view_options
+      })
+    }
 
     // Under a line axis the CTE holds every rung of the ladder, because the
     // dedup that would have collapsed it is suppressed. Without this predicate
@@ -898,7 +916,7 @@ const create_player_betting_market_field = ({
     ]),
   table_alias: (args) =>
     betting_markets_table_alias({ ...args, is_player_game_prop }),
-  join: player_betting_market_join,
+  join: (args) => player_betting_market_join({ ...args, is_player_game_prop }),
   with: (args) => player_betting_market_with({ ...args, is_player_game_prop }),
   source: { grain: 'player' },
   get_cache_info: create_betting_cache_info({

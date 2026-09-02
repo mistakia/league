@@ -1,0 +1,38 @@
+{
+  "name": "season prop line under a week row axis does not correlate on a week it has no column for",
+  "description": "A SEASON prop is one line for the whole year, so its CTE carries no year or week column -- player_betting_market_with builds it with is_week_scoped = (market_grain === 'game'), which is false for a season market. player_betting_market_join nonetheless called correlate_week_scoped_cte for every player betting column, so this request emitted `t<hash>.year = ...` against a CTE that projects only selection_pid and selection_metric_line, and the whole view died on `42703: column t<hash>.year does not exist`. Not a wrong value -- a hard error that takes the entire view, whatever else is on it. It arrived with fc4a84ca0, which added the week correlation to the SHARED player join to fix the game-prop broadcast without gating it on the column's own grain. Nothing covered it: the only other season-prop fixture (create-a-query-with-fields-from-season-prop-betting-markets) carries no row_axes at all, so the corpus never emitted this shape and the SQL-validity gate was the only thing that could see it. The correct rendering is the season's single line repeated on every week row: that repetition is the DEFECT for a game prop and the FACT for a season prop, which is the distinction the shared join had lost.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_season_prop_line_from_betting_markets",
+        "params": {
+          "year": [2024],
+          "market_type": ["SEASON_PASSING_YARDS"],
+          "source_id": ["FANDUEL"],
+          "time_type": ["CLOSE"],
+          "selection_type": ["OVER"]
+        }
+      }
+    ],
+    "row_axes": ["year", "week"],
+    "sort": [
+      {
+        "column_id": "player_name",
+        "desc": false
+      }
+    ],
+    "limit": 10
+  },
+  "tags": [
+    "player",
+    "betting_markets",
+    "row_axes",
+    "year",
+    "week",
+    "joins",
+    "cte"
+  ],
+  "timeout_ms": 35000,
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2024), \"t7d903b237a8dc89d9b79d1cbe5f53cf6_markets\" as (select \"source_id\", \"source_market_id\", \"time_type\", \"prop_markets_index\".\"esbid\" from \"prop_markets_index\" where \"market_type\" = 'SEASON_PASSING_YARDS' and \"time_type\" = 'CLOSE' and \"prop_markets_index\".\"season_year\" = 2024 and \"source_id\" = 'FANDUEL'), \"t7d903b237a8dc89d9b79d1cbe5f53cf6\" as (select pms.selection_pid, pms.selection_metric_line from \"t7d903b237a8dc89d9b79d1cbe5f53cf6_markets\" as \"m\" inner join \"prop_market_selections_index\" as \"pms\" on \"pms\".\"source_id\" = \"m\".\"source_id\" and \"pms\".\"source_market_id\" = \"m\".\"source_market_id\" and \"pms\".\"time_type\" = \"m\".\"time_type\" where \"pms\".\"selection_type\" in ('OVER')), \"player_participation_weeks\" as (SELECT pid, year, week, bool_or(is_active) AS is_active\n          FROM (SELECT pgl.pid, 2024::int AS year, g.week, pgl.is_active\n       FROM player_gamelogs_year_2024 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2024) src\n          GROUP BY pid, year, week), \"player_years_teams\" as (SELECT pid, year, array_agg(DISTINCT team_code) AS teams\n          FROM (SELECT pgl.pid, 2024::int AS year, pgl.nfl_team AS team_code\n       FROM player_gamelogs_year_2024 pgl\n       INNER JOIN nfl_games g ON g.esbid = pgl.esbid\n       WHERE g.season_type = 'REG' AND g.season_year = 2024) src\n          GROUP BY pid, year), \"team_weeks_played\" as (select distinct \"team\", \"year\", \"week\" from ((select \"home_nfl_team\" as \"team\", \"season_year\" as \"year\", \"week\" from \"nfl_games\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024)) union all (select \"away_nfl_team\" as \"team\", \"season_year\" as \"year\", \"week\" from \"nfl_games\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2024))) as \"g\") select \"player\".\"pid\", player.first_name, player.last_name, \"t7d903b237a8dc89d9b79d1cbe5f53cf6\".\"selection_metric_line\" AS \"season_prop_line_betting_market_0\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", CASE\n     WHEN player_participation_weeks.is_active THEN 'active'\n     WHEN player_participation_weeks.pid IS NULL\n          AND player_years_teams.teams IS NOT NULL\n          AND NOT EXISTS (\n            SELECT 1 FROM team_weeks_played\n            WHERE team_weeks_played.year = player_years_weeks.year\n              AND team_weeks_played.week = player_years_weeks.week\n              AND team_weeks_played.team = ANY(player_years_teams.teams)\n          )\n       THEN 'bye'\n     ELSE NULL\n   END AS participation_status, \"player\".\"primary_position\" from \"player\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" left join \"t7d903b237a8dc89d9b79d1cbe5f53cf6\" on \"t7d903b237a8dc89d9b79d1cbe5f53cf6\".\"selection_pid\" = \"player\".\"pid\" left join \"player_participation_weeks\" on \"player_participation_weeks\".\"pid\" = \"player\".\"pid\" and \"player_participation_weeks\".\"year\" = \"player_years_weeks\".\"year\" and \"player_participation_weeks\".\"week\" = \"player_years_weeks\".\"week\" left join \"player_years_teams\" on \"player_years_teams\".\"pid\" = \"player\".\"pid\" and \"player_years_teams\".\"year\" = \"player_years_weeks\".\"year\" group by player.first_name, player.last_name, \"t7d903b237a8dc89d9b79d1cbe5f53cf6\".\"selection_metric_line\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", CASE\n     WHEN player_participation_weeks.is_active THEN 'active'\n     WHEN player_participation_weeks.pid IS NULL\n          AND player_years_teams.teams IS NOT NULL\n          AND NOT EXISTS (\n            SELECT 1 FROM team_weeks_played\n            WHERE team_weeks_played.year = player_years_weeks.year\n              AND team_weeks_played.week = player_years_weeks.week\n              AND team_weeks_played.team = ANY(player_years_teams.teams)\n          )\n       THEN 'bye'\n     ELSE NULL\n   END, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by player.first_name || ' ' || player.last_name ASC NULLS LAST, \"player\".\"pid\" asc limit 10"
+}
