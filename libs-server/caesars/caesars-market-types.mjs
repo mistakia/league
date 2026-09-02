@@ -298,6 +298,54 @@ export const caesars_market_type_by_template = {
     market_type: team_game_market_types.GAME_FIRST_QUARTER_TOTAL
   },
 
+  // Both teams' field goals combined. GAME grain despite the name reading like
+  // the team family above it -- the market name is a bare 'Total Field Goals'
+  // with no team prefix, and it is still being published.
+  '|Total Match Field Goals|': {
+    market_type: team_game_market_types.GAME_TOTAL_FIELD_GOALS_MADE
+  },
+
+  // Team statistic totals. One market per team from one template, bare
+  // over/under selections, the team carried only by a prefix on the market
+  // name -- so the importer must set selection_pid from that prefix or the two
+  // teams collapse onto one key. See
+  // libs-server/caesars/caesars-team-attribution.mjs.
+  //
+  // Caesars has not published this family since 2025-02-07, so these entries
+  // are what makes the stored history readable rather than a forward claim. The
+  // ' Live' variant of the rushing-touchdowns template is deliberately absent;
+  // the table is exact match, so it stays untyped.
+  '|Team Total Team Touchdowns|': {
+    market_type: team_game_market_types.GAME_TEAM_TOUCHDOWNS
+  },
+  '|Team Total Team Offense Touchdowns|': {
+    market_type: team_game_market_types.GAME_TEAM_OFFENSE_TOUCHDOWNS
+  },
+  '|Team Total Team Passing Yards|': {
+    market_type: team_game_market_types.GAME_TEAM_PASSING_YARDS
+  },
+  '|Team Total Team Passing Touchdowns|': {
+    market_type: team_game_market_types.GAME_TEAM_PASSING_TOUCHDOWNS
+  },
+  '|Team Total Team Rushing Yards|': {
+    market_type: team_game_market_types.GAME_TEAM_RUSHING_YARDS
+  },
+  '|Team Total Team Rushing Touchdowns|': {
+    market_type: team_game_market_types.GAME_TEAM_RUSHING_TOUCHDOWNS
+  },
+  '|Team Total Team Rushing Attempts|': {
+    market_type: team_game_market_types.GAME_TEAM_RUSHING_ATTEMPTS
+  },
+  '|Team Total Team Receiving Yards|': {
+    market_type: team_game_market_types.GAME_TEAM_RECEIVING_YARDS
+  },
+  '|Team Total Team Receiving Touchdowns|': {
+    market_type: team_game_market_types.GAME_TEAM_RECEIVING_TOUCHDOWNS
+  },
+  '|Team Total Team Receptions|': {
+    market_type: team_game_market_types.GAME_TEAM_RECEPTIONS
+  },
+
   // Deliberate no-maps. Present with a null type so a residue query reports
   // them as decided rather than as an unexamined gap.
   '|Team Total Team Defensive Tackles|': {

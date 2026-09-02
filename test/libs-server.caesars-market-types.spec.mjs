@@ -9,6 +9,7 @@ import {
 import {
   player_prop_types,
   team_game_market_types,
+  team_grain_market_types,
   game_props_types,
   team_props_types
 } from '#libs-shared/bookmaker-constants.mjs'
@@ -167,6 +168,83 @@ describe('libs-server caesars market types', function () {
       expect(
         get_market_type({ template_name: '|Player Total Receptions Live|' })
       ).to.equal(null)
+    })
+  })
+
+  describe('the team statistic totals', function () {
+    // Every one of these is one market per team from one template, with bare
+    // over/under selections and the team carried only by a market-name prefix.
+    // Typing them without also attributing the team collapses the two teams
+    // onto one key, so the grain of the constant is load-bearing, not cosmetic.
+    const team_grain_templates = [
+      '|Team Total Team Touchdowns|',
+      '|Team Total Team Offense Touchdowns|',
+      '|Team Total Team Passing Yards|',
+      '|Team Total Team Passing Touchdowns|',
+      '|Team Total Team Rushing Yards|',
+      '|Team Total Team Rushing Touchdowns|',
+      '|Team Total Team Rushing Attempts|',
+      '|Team Total Team Receiving Yards|',
+      '|Team Total Team Receiving Touchdowns|',
+      '|Team Total Team Receptions|'
+    ]
+
+    it('maps each one to a TEAM-grain type', function () {
+      for (const template_name of team_grain_templates) {
+        const market_type = get_market_type({ template_name })
+        expect(market_type, template_name).to.be.a('string')
+        expect(
+          team_grain_market_types.has(market_type),
+          template_name
+        ).to.equal(true)
+      }
+    })
+
+    it('gives the two touchdown templates DIFFERENT types', function () {
+      // They differ on whether defensive and special-teams scores count.
+      // Collapsing them would grade one against the other's total.
+      expect(
+        get_market_type({ template_name: '|Team Total Team Touchdowns|' })
+      ).to.not.equal(
+        get_market_type({
+          template_name: '|Team Total Team Offense Touchdowns|'
+        })
+      )
+    })
+
+    it('leaves the tackles template a no-map carrying its reason', function () {
+      const template_name = '|Team Total Team Defensive Tackles|'
+      expect(get_market_type({ template_name })).to.equal(null)
+      expect(caesars_market_type_by_template[template_name].reason).to.be.a(
+        'string'
+      )
+    })
+
+    it('does not type the live variant of a template it now knows', function () {
+      expect(
+        get_market_type({
+          template_name: '|Team Total Team Rushing Touchdowns Live|'
+        })
+      ).to.equal(null)
+      expect(
+        get_market_type({
+          template_name: '|Team Total Team Rushing Touchdowns|'
+        })
+      ).to.equal(team_game_market_types.GAME_TEAM_RUSHING_TOUCHDOWNS)
+    })
+
+    it('types Total Match Field Goals as GAME grain, not team grain', function () {
+      // It reads like the family above and was swept into its census by a
+      // regex, but its market name carries no team prefix and it covers both
+      // teams. A team-grain type here would make the importer look for a team
+      // that is not in the name.
+      const market_type = get_market_type({
+        template_name: '|Total Match Field Goals|'
+      })
+      expect(market_type).to.equal(
+        team_game_market_types.GAME_TOTAL_FIELD_GOALS_MADE
+      )
+      expect(team_grain_market_types.has(market_type)).to.equal(false)
     })
   })
 

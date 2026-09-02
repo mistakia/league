@@ -63,6 +63,12 @@ export const team_game_market_types = {
   GAME_ALT_SPREAD: 'GAME_ALT_SPREAD',
   GAME_ALT_TOTAL: 'GAME_ALT_TOTAL',
 
+  // Both teams' field goals combined, over/under -- the direct sibling of
+  // GAME_TOTAL, and GAME grain rather than team grain despite arriving
+  // alongside the team statistic totals. The player-side counterpart is
+  // GAME_FIELD_GOALS_MADE.
+  GAME_TOTAL_FIELD_GOALS_MADE: 'GAME_TOTAL_FIELD_GOALS_MADE',
+
   // Period-scoped game lines. These are GAME grain, both teams, so they carry
   // no TEAM token -- unlike the team yardage markets below, which do.
   //
@@ -90,9 +96,30 @@ export const team_game_market_types = {
   GAME_TEAM_TOTAL: 'GAME_TEAM_TOTAL',
   GAME_ALT_TEAM_TOTAL: 'GAME_ALT_TEAM_TOTAL',
 
+  // Team statistic totals, full game. Caesars publishes these as one market per
+  // team from one template, with bare over/under selections and the team
+  // carried only by a prefix on the market name -- so every one of them needs
+  // selection_pid set at import to stay distinguishable. See
+  // libs-server/caesars/caesars-team-attribution.mjs.
+  //
+  // TOUCHDOWNS and OFFENSE_TOUCHDOWNS are separate constants because Caesars
+  // publishes both and they differ on whether defensive and special-teams
+  // scores count. Collapsing them would grade one against the other's total.
+  //
+  // There is deliberately no tackles constant. The only player-side tackle
+  // constants are the combined GAME_TACKLES_ASSISTS and its alt, and Caesars
+  // does not say whether its team aggregate counts tackles plus assists or solo
+  // tackles, so the template stays a no-map row in the Caesars table.
+  GAME_TEAM_TOUCHDOWNS: 'GAME_TEAM_TOUCHDOWNS',
+  GAME_TEAM_OFFENSE_TOUCHDOWNS: 'GAME_TEAM_OFFENSE_TOUCHDOWNS',
+  GAME_TEAM_PASSING_YARDS: 'GAME_TEAM_PASSING_YARDS',
+  GAME_TEAM_PASSING_TOUCHDOWNS: 'GAME_TEAM_PASSING_TOUCHDOWNS',
+  GAME_TEAM_RUSHING_TOUCHDOWNS: 'GAME_TEAM_RUSHING_TOUCHDOWNS',
+  GAME_TEAM_RUSHING_ATTEMPTS: 'GAME_TEAM_RUSHING_ATTEMPTS',
+  GAME_TEAM_RECEIVING_TOUCHDOWNS: 'GAME_TEAM_RECEIVING_TOUCHDOWNS',
+  GAME_TEAM_RECEPTIONS: 'GAME_TEAM_RECEPTIONS',
+
   // Team yardage markets - full game
-  // Active: TOTAL_YARDS, ALT_TOTAL_YARDS, ALT_RUSHING_YARDS, ALT_RECEIVING_YARDS
-  // Reserved: RUSHING_YARDS, RECEIVING_YARDS (legacy playoff format only)
   GAME_TEAM_TOTAL_YARDS: 'GAME_TEAM_TOTAL_YARDS',
   GAME_TEAM_ALT_TOTAL_YARDS: 'GAME_TEAM_ALT_TOTAL_YARDS',
   GAME_TEAM_RUSHING_YARDS: 'GAME_TEAM_RUSHING_YARDS',
