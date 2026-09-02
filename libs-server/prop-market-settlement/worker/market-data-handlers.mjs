@@ -427,6 +427,14 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
     // first-touchdown path tests the scorer, and the team_aggregate branch
     // above returns no plays. A market that cannot be attributed must fail to
     // settle, because the alternative is a confident wrong grade.
+    //
+    // THIS REFUSAL IS A HOLDING STATE, NOT A VERDICT ON THE MARKET. These are
+    // unattributed markets, not markets about nobody: every one measured names
+    // a real player, in selection_name for FanDuel and inside
+    // source_market_name for the rest, and the pid merely failed to resolve at
+    // import. They become gradable the moment attribution lands -- for 306 of
+    // the rows measured, from a sibling selection on the same market that did
+    // resolve. Do not read a market erroring here as junk to be discarded.
     if (!market.selection_pid) {
       throw new Error(
         `Market ${market.source_market_id} is a player market (${mapping.player_column}) with no selection_pid and cannot be graded`
