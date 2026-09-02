@@ -23,6 +23,7 @@ import {
   get_data_view_organization_props_for_table_view_controller
 } from '@core/data-views/selectors'
 import { get_data_views_fields } from '@core/data-views-fields'
+import { apply_column_id_rename } from '#libs-shared/data-views-saved-view-migration.mjs'
 import { calculatePercentiles } from '#libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 
@@ -62,11 +63,46 @@ const get_players_percentiles = createSelector(
 
       if (!field) {
         console.log(`Field not found for column_id: ${column_id}`)
+        // This branch is the ONLY alarm for a rename that stranded a real
+        // user's saved view -- the 2026-08-17 counting-stat conform blanked
+        // SEASON_PROJECTIONS for every user this way (signals 125880/125881,
+        // then 127159/127160 for the persisted views). So it must keep
+        // reporting. What it could not previously say is WHICH of two very
+        // different conditions it caught, and both triage passes to date spent
+        // their effort re-deriving that by hand:
+        //
+        //   a rename we failed to declare -- `apply_column_id_rename` has no
+        //   record for the id, but the id was one WE emitted, and the repair
+        //   is a COLUMN_ID entry in the rename registry; or
+        //
+        //   an id the app never emitted at all, hand-supplied by someone
+        //   probing the API (signals 127510/127512-127514/127525-127527 came
+        //   from one client, in views named "TEST col id probe" and "PROBE
+        //   touches ids"), which is user input error and not our defect.
+        //
+        // Since dafd34743 the saved-view read path already applies
+        // migrate_table_state, so any id reaching here has ALREADY been
+        // through the registry. Reporting whether a rename record exists for
+        // it separates the two populations at the point of emission instead of
+        // leaving it to be measured per signal.
+        const renamed_to = apply_column_id_rename(column_id)
         report_error(new Error(`Field not found for column_id: ${column_id}`), {
           field_info: {
             column_id,
             index,
-            data_view: selected_data_view
+            // A rename record exists but the id still did not resolve: the
+            // registry entry points somewhere dead. Absent one, the id is not
+            // a name this app ever emitted.
+            has_rename_record: renamed_to !== column_id,
+            renamed_to: renamed_to !== column_id ? renamed_to : null,
+            // Identity only. The whole table_state was shipped here until
+            // 2026-09-01; on a wide saved view that is kilobytes of columns
+            // and params per occurrence, durable and full-text indexed in the
+            // signal queue, and triage has only ever needed the view to look
+            // up. Deliberately mirrors the payload restraint set_user applies.
+            view_id: selected_data_view?.view_id ?? null,
+            view_name: selected_data_view?.view_name ?? null,
+            column_count: table_state_columns.length
           }
         })
         continue
