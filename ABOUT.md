@@ -710,12 +710,15 @@ observations:
     [bug] player_gamelogs.nfl_team holds a wrong-but-plausible team on ~1,254 snap-only player-weeks
     (2016-2024); opponent_nfl_team is right, and the generator priority-1 readback preserves the
     error.
+  - >-
+    [gotcha] League serves assets under /dist/ and answers any other path with the SPA index.html at
+    200, so a deploy check on a guessed asset URL misreads the size mismatch as a stale rsync.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-02T02:08:50.169Z'
+updated_at: '2026-09-02T15:17:04.826Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
