@@ -60,6 +60,7 @@ const SIGNAL_SOURCE = 'auction-final-block'
  *   spots_remaining: number}}
  */
 export const calculate_final_block = ({
+  period_start,
   period_end,
   spots_remaining,
   auction_block_notice_minutes,
@@ -71,14 +72,41 @@ export const calculate_final_block = ({
     .subtract(spots_remaining * auction_final_block_pace_minutes, 'minute')
     .subtract(auction_final_block_buffer_hours, 'hour')
 
-  const notice_floor = dayjs(now).add(auction_block_notice_minutes, 'minute')
+  // NOTICE IS OWED FROM WHEN THE BLOCK BECOMES KNOWABLE, AND THAT IS THE PERIOD
+  // START -- not `now`. The final block carries no opt-in and no unanimity; it
+  // is published from the first read of the calendar and every term in it is
+  // configuration or rosters, so the league can see it coming for the whole
+  // period.
+  //
+  // Anchored to `now` this was a RECEDING HORIZON, and it is the reason the
+  // clock could never reach the block at all: every read moved it another hour
+  // out, so `now >= final_block_at` stayed false until `now + notice` passed the
+  // period end, at which point it collapsed to `now`. On the real 2026 shape
+  // that put the auction's ONLY termination guarantee 55 minutes before the
+  // period closed, against a computation that had reserved three and a half
+  // hours to place 47 players -- the pace reservation and the buffer were
+  // computed and then thrown away. It was invisible to a spec asserting at one
+  // instant, where `now + notice` is exactly what a correct floor would produce.
+  const notice_floor = dayjs(period_start).add(
+    auction_block_notice_minutes,
+    'minute'
+  )
 
-  const is_in_the_past = computed_at.isBefore(now)
+  // "IN THE PAST" MEANS THE WINDOW FAILED, NOT THAT THE BLOCK HAS STARTED. The
+  // predicate is against the period START, not against `now`: once the clock
+  // passes the computed time the final block is simply RUNNING, which is the
+  // normal state for the last hours of every auction. Compared against `now` it
+  // read as a failure on every read from that moment on and pushed the block
+  // another notice-width out each time -- the same receding horizon as the floor
+  // above, reached by the other branch.
+  const is_in_the_past = computed_at.isBefore(period_start)
   const is_held_off_by_notice =
     !is_in_the_past && computed_at.isBefore(notice_floor)
 
   let final_block_at = computed_at
   if (is_in_the_past || is_held_off_by_notice) {
+    // The league is owed its notice either way, measured from the period start,
+    // which is the earliest instant the block could have been known.
     final_block_at = notice_floor
   }
 
@@ -140,6 +168,7 @@ export const get_auction_final_block = async ({
   })
 
   const result = calculate_final_block({
+    period_start: period.start,
     period_end: period.end,
     spots_remaining,
     auction_block_notice_minutes: season.auction_block_notice_minutes,

@@ -42,6 +42,20 @@ const AUCTION_MODE_POLL_MS = 15_000
 // nomination-clock behavior was testable at all, which is exactly why slow
 // mode's timer suspension shipped unexercised. Taking them as an injected
 // interface is what makes the clock addressable from a spec.
+//
+// Every call site also NAMES its clock, and production ignores the name. A spec
+// cannot tell the three apart by DURATION: `config-test.json` puts bidTimer at
+// 14,000, the socket pads it by 1,000, and AUCTION_MODE_POLL_MS is 15,000 -- so
+// counting 15,000ms timers counts bid clocks and mode polls together, and the
+// mode poll re-arms itself on every tick. "A proxy step does not reset the bid
+// clock" is asserted as a COUNT, and it is the property that keeps a full final
+// block tractable, so it has to be countable unambiguously.
+export const AUCTION_TIMERS = {
+  BID: 'bid',
+  NOMINATION: 'nomination',
+  MODE_POLL: 'mode_poll'
+}
+
 export const real_auction_timers = {
   set_timeout: (fn, ms) => setTimeout(fn, ms),
   clear_timeout: (handle) => clearTimeout(handle)
@@ -1463,10 +1477,14 @@ export default class Auction {
 
   _schedule_mode_poll() {
     if (!this._system_election_mode) return
-    this._mode_timer = this._timers.set_timeout(async () => {
-      await this._refresh_mode()
-      this._schedule_mode_poll()
-    }, AUCTION_MODE_POLL_MS)
+    this._mode_timer = this._timers.set_timeout(
+      async () => {
+        await this._refresh_mode()
+        this._schedule_mode_poll()
+      },
+      AUCTION_MODE_POLL_MS,
+      AUCTION_TIMERS.MODE_POLL
+    )
   }
 
   /**
@@ -1563,20 +1581,24 @@ export default class Auction {
     this._nomination_timer_expired = false
     this._clear_nomination_timer()
 
-    this._nomination_timer = this._timers.set_timeout(async () => {
-      this._nomination_timer_expired = true
-      // AUTO-NOMINATION IS THE WHOLE POINT OF THE EXPIRY IN LIVE MODE. Before
-      // this the expired timer only unlocked a commissioner override and
-      // advanced nothing, so a block with a quiet team on the clock stalled for
-      // the length of the block. The override survives -- the commissioner can
-      // still nominate out of turn once the timer has run -- and it is now the
-      // fallback rather than the mechanism.
-      try {
-        await this._auto_nominate()
-      } catch (error) {
-        this.logger('error auto-nominating', error)
-      }
-    }, config.nominationTimer)
+    this._nomination_timer = this._timers.set_timeout(
+      async () => {
+        this._nomination_timer_expired = true
+        // AUTO-NOMINATION IS THE WHOLE POINT OF THE EXPIRY IN LIVE MODE. Before
+        // this the expired timer only unlocked a commissioner override and
+        // advanced nothing, so a block with a quiet team on the clock stalled for
+        // the length of the block. The override survives -- the commissioner can
+        // still nominate out of turn once the timer has run -- and it is now the
+        // fallback rather than the mechanism.
+        try {
+          await this._auto_nominate()
+        } catch (error) {
+          this.logger('error auto-nominating', error)
+        }
+      },
+      config.nominationTimer,
+      AUCTION_TIMERS.NOMINATION
+    )
 
     return true
   }
@@ -1597,7 +1619,8 @@ export default class Auction {
     // padded by one second for connection latency
     this._bid_timer = this._timers.set_timeout(
       () => this.sold(),
-      config.bidTimer + 1000
+      config.bidTimer + 1000,
+      AUCTION_TIMERS.BID
     )
   }
 

@@ -4,9 +4,8 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
-import config from '#config'
 import { current_season, transaction_types } from '#constants'
-import Auction from '#api/sockets/auction.mjs'
+import Auction, { AUCTION_TIMERS } from '#api/sockets/auction.mjs'
 import { submit_auction_election } from '#libs-server/auction-elections.mjs'
 import { selectPlayer } from './utils/index.mjs'
 
@@ -33,27 +32,28 @@ describe('auction proxy bidding and auto-nomination', function () {
   // Records every scheduled callback so a spec can fire the bid clock or the
   // nomination clock deliberately, and can COUNT how many times each was armed
   // -- which is how "a proxy step does not reset the bid clock" is asserted.
+  // Records every scheduled callback, TAGGED with which clock armed it. Counting
+  // by duration cannot work here: the padded bid clock and the mode poll are both
+  // 15,000ms in the test config, and the mode poll re-arms on every tick, so a
+  // count of 15,000ms timers is a count of two different things.
   const build_timers = () => {
     const scheduled = []
     return {
       scheduled,
-      set_timeout: (fn, ms) => {
-        const handle = { fn, ms, cleared: false }
+      set_timeout: (fn, ms, name) => {
+        const handle = { fn, ms, name, cleared: false }
         scheduled.push(handle)
         return handle
       },
       clear_timeout: (handle) => {
         if (handle) handle.cleared = true
       },
-      // The most recently armed timer of a given duration, which is the live one.
-      latest: (ms) =>
-        [...scheduled].reverse().find((handle) => handle.ms === ms),
-      count: (ms) => scheduled.filter((handle) => handle.ms === ms).length
+      // The most recently armed timer of a given kind, which is the live one.
+      latest: (name) =>
+        [...scheduled].reverse().find((handle) => handle.name === name),
+      count: (name) => scheduled.filter((handle) => handle.name === name).length
     }
   }
-
-  const BID_TIMER_MS = config.bidTimer + 1000
-  const NOMINATION_TIMER_MS = config.nominationTimer
 
   before(async function () {
     this.timeout(60 * 1000)
@@ -199,7 +199,7 @@ describe('auction proxy bidding and auto-nomination', function () {
       { user_id: 1, tid: nominator }
     )
 
-    const armed_after_nomination = timers.count(BID_TIMER_MS)
+    const armed_after_nomination = timers.count(AUCTION_TIMERS.BID)
     expect(
       armed_after_nomination,
       'the nomination arms the bid clock'
@@ -221,7 +221,9 @@ describe('auction proxy bidding and auto-nomination', function () {
     // not arm a second one, or a player contested purely between absent teams
     // would never settle -- which is the property that keeps a 69-player final
     // block tractable.
-    expect(timers.count(BID_TIMER_MS)).to.equal(armed_after_nomination + 1)
+    expect(timers.count(AUCTION_TIMERS.BID)).to.equal(
+      armed_after_nomination + 1
+    )
   })
 
   it('stops proxying for a team that names its own amount', async function () {
@@ -281,7 +283,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     })
     expect(before, 'nothing nominated yet').to.have.length(0)
 
-    const nomination_timer = timers.latest(NOMINATION_TIMER_MS)
+    const nomination_timer = timers.latest(AUCTION_TIMERS.NOMINATION)
     expect(nomination_timer, 'the nomination clock is armed in live mode').to
       .exist
 
@@ -308,7 +310,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     // nothing open, and neither clock is armed.
     await knex('auction_blocks').where({ lid: league_id }).del()
 
-    const armed_before = timers.count(BID_TIMER_MS)
+    const armed_before = timers.count(AUCTION_TIMERS.BID)
     await auction._refresh_mode()
 
     expect(auction._election_mode, 'reverted to election mode').to.equal(true)
@@ -321,7 +323,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     )
 
     expect(
-      timers.count(BID_TIMER_MS),
+      timers.count(AUCTION_TIMERS.BID),
       'the bid clock stays suspended in election mode'
     ).to.equal(armed_before)
 

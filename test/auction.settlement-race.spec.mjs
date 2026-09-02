@@ -38,19 +38,26 @@ describe('auction settlement against a firing bid clock', function () {
   let timers
   let league_record
 
+  // Records every scheduled callback, TAGGED with which clock armed it. Counting
+  // by duration cannot work here: the padded bid clock and the mode poll are both
+  // 15,000ms in the test config, and the mode poll re-arms on every tick, so a
+  // count of 15,000ms timers is a count of two different things.
   const build_timers = () => {
     const scheduled = []
     return {
       scheduled,
-      set_timeout: (fn, ms) => {
-        const handle = { fn, ms, cleared: false }
+      set_timeout: (fn, ms, name) => {
+        const handle = { fn, ms, name, cleared: false }
         scheduled.push(handle)
         return handle
       },
       clear_timeout: (handle) => {
         if (handle) handle.cleared = true
       },
-      latest: (ms) => [...scheduled].reverse().find((h) => h.ms === ms)
+      // The most recently armed timer of a given kind, which is the live one.
+      latest: (name) =>
+        [...scheduled].reverse().find((handle) => handle.name === name),
+      count: (name) => scheduled.filter((handle) => handle.name === name).length
     }
   }
 
