@@ -66,6 +66,36 @@ const MINIMUM_SCRIMMAGE_SNAPS = 3
 export const is_usable_nfl_team = (nfl_team) =>
   Boolean(nfl_team) && !UNUSABLE_TEAMS.has(nfl_team)
 
+// The resolver's own name for "both sources spoke and named the same team".
+const AGREEING_METHOD = 'continuity_and_scrimmage'
+
+// Continuity over one or two other weeks is a coin flip on a player who moved;
+// three is where it stops carrying the churn it is supposed to see through.
+const MINIMUM_CONTINUITY_SUPPORT = 3
+
+/**
+ * Whether a verdict is strong enough to act AGAINST a team already stored.
+ *
+ * Three callers need this rule and all three must apply the SAME one: the
+ * detector (libs-server/gamelog-week-team-attribution.mjs) grades only these
+ * verdicts, the repair (db/adhoc/2026-09-02-repair-gamelog-week-team.mjs)
+ * overwrites production only on these, and the snap-only branch of
+ * scripts/generate-player-gamelogs.mjs overrules the existing gamelog row only
+ * on these. Three copies of it would be three chances to drift, and a detector
+ * grading a rule the repair does not write on is the failure that costs the
+ * most to find.
+ *
+ * A verdict from ONE source is enough to write a team where none is stored --
+ * that is the ordinary precedence below -- and not enough to overwrite one.
+ *
+ * @param {{ method?: string|null, continuity_support?: number }} resolved
+ * @returns {boolean}
+ */
+export const is_agreeing_verdict = (resolved) =>
+  Boolean(resolved) &&
+  resolved.method === AGREEING_METHOD &&
+  Number(resolved.continuity_support) >= MINIMUM_CONTINUITY_SUPPORT
+
 const side_of_ball_for_position = (primary_position) => {
   let position_group
   try {
@@ -242,7 +272,7 @@ export const create_snap_gamelog_team_resolver = async ({
     ) {
       return {
         nfl_team: continuity_nfl_team,
-        method: 'continuity_and_scrimmage',
+        method: AGREEING_METHOD,
         continuity_support,
         scrimmage_snaps
       }

@@ -1,7 +1,10 @@
 import db from '#db'
 import { fixTeam } from '#libs-shared'
 
-import { create_snap_gamelog_team_resolver } from '#libs-server/resolve-snap-gamelog-team.mjs'
+import {
+  create_snap_gamelog_team_resolver,
+  is_agreeing_verdict
+} from '#libs-server/resolve-snap-gamelog-team.mjs'
 
 /*
   Grades `player_gamelogs.nfl_team` against the game the row belongs to.
@@ -82,13 +85,6 @@ import { create_snap_gamelog_team_resolver } from '#libs-server/resolve-snap-gam
 // is un-gradeable rather than clean.
 const FIRST_SNAP_SEASON = 2016
 
-// The resolver's own name for "both sources spoke and named the same team".
-const AGREEING_METHOD = 'continuity_and_scrimmage'
-
-// Continuity over one or two other weeks is a coin-flip on a player who moved;
-// three is where it stops carrying the churn it is supposed to see through.
-const MINIMUM_CONTINUITY_SUPPORT = 3
-
 /**
  * Per-week agreement between the stored week team and the shipped resolver,
  * over the rows where both of the resolver's sources agree with each other.
@@ -162,10 +158,10 @@ export const gamelog_week_team_attribution_rows = async () => {
 
       const resolved = resolve(candidate)
 
-      if (resolved.method !== AGREEING_METHOD) continue
-      if (Number(resolved.continuity_support) < MINIMUM_CONTINUITY_SUPPORT) {
-        continue
-      }
+      // The admissibility rule lives in the resolver, so this check, the repair
+      // and the writer's override cannot come to grade, write and act on three
+      // different rules.
+      if (!is_agreeing_verdict(resolved)) continue
 
       const unit = by_week.get(key)
       unit.denominator += 1

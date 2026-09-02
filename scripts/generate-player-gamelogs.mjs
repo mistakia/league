@@ -51,7 +51,10 @@ import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
 import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
 import { player_could_have_played } from '#libs-server/player-era.mjs'
-import { create_snap_gamelog_team_resolver } from '#libs-server/resolve-snap-gamelog-team.mjs'
+import {
+  create_snap_gamelog_team_resolver,
+  is_agreeing_verdict
+} from '#libs-server/resolve-snap-gamelog-team.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -516,7 +519,7 @@ const generate_rushing_gamelog = ({
  * Generate gamelogs for players who played snaps but didn't record any counting stats
  * This ensures all active players have gamelogs, even if they had 0 targets, 0 carries, etc.
  */
-const generate_snap_based_gamelogs = async ({
+export const generate_snap_based_gamelogs = async ({
   unique_esbids,
   season_year,
   player_gamelog_inserts
@@ -647,13 +650,32 @@ const generate_snap_based_gamelogs = async ({
       const play_stats_lookup_key = `${snap_player.smart_player_id}_${snap_player.esbid}`
       const existing_team = existing_gamelog_team_map[gamelog_lookup_key]
       const play_stats_team = play_stats_team_map[play_stats_lookup_key]
+      const resolved = resolve_snap_gamelog_team(snap_player)
 
       let team = existing_team || play_stats_team
       let resolution_method = existing_team ? 'existing_gamelog' : 'play_stats'
       if (!team) {
-        const resolved = resolve_snap_gamelog_team(snap_player)
         team = resolved.nfl_team
         resolution_method = resolved.method || `refused:${resolved.reason}`
+      } else if (
+        // Priority 1 LOSES to a verdict both resolver sources agree on. Without
+        // this the table cannot self-heal: priority 1 is this row's own
+        // previous value, so a regeneration reads a wrong team back as its
+        // first-priority evidence and rewrites it unchanged -- reporting
+        // success and changing nothing. That is what made the week-team
+        // inversion a self-perpetuating class rather than a one-time defect,
+        // and it is why the repair had to be an adhoc script.
+        //
+        // It does not overrule `play_stats`, which is the feed's OWN statement
+        // of the player's team and the independent oracle both resolver sources
+        // were scored against. Only the readback loses.
+        resolution_method === 'existing_gamelog' &&
+        !play_stats_team &&
+        is_agreeing_verdict(resolved) &&
+        fixTeam(resolved.nfl_team) !== fixTeam(existing_team)
+      ) {
+        team = resolved.nfl_team
+        resolution_method = 'resolver_over_existing_gamelog'
       }
 
       // A gamelog with no establishable team is not written. A wrong team
