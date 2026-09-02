@@ -2180,6 +2180,18 @@ export const get_data_view_results_query = async ({
       players_query.select(data_view_options.week_reference)
       players_query.groupBy(data_view_options.week_reference)
     }
+
+    // Aliased, where year and week are not, and the alias is load-bearing.
+    // The client renders every row axis as its own column whose id IS the axis
+    // name, and reads that cell as row[<axis>]. `year` and `week` happen to
+    // satisfy that because the underlying column is named for the axis; the
+    // rung's column is `selection_metric_line`, so without the alias the axis
+    // column is blank on every row while the rest of the table is correct --
+    // rows multiply properly and nothing says which line each row is.
+    if (row_axis === 'line') {
+      players_query.select({ line: data_view_options.line_reference })
+      players_query.groupBy(data_view_options.line_reference)
+    }
   }
 
   // Auto-inject the hidden participation_status signal at player week grain so
