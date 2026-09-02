@@ -5,6 +5,8 @@ import { Roster, get_free_agent_period } from '#libs-shared'
 import { current_season, AUCTION_BLOCK_GRANULARITY_MINUTES } from '#constants'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
+import sendNotifications from './send-notifications.mjs'
+import { format_block_convened_message } from './format-auction-discord-message.mjs'
 import debug from 'debug'
 
 const log = debug('auction-blocks')
@@ -195,7 +197,11 @@ export const evaluate_auction_block_finalization = async ({
   lid,
   season_year = current_season.year,
   now = current_season.now,
-  league: provided_league
+  league: provided_league,
+  // Injected for the same reason the socket's timer is: a one-line call at the
+  // end of a loop is exactly the shape that ships unexercised, and this
+  // subsystem has now lost a Discord message that way once already.
+  announce = announce_auction_block
 }) => {
   const league = provided_league || (await getLeague({ lid }))
   const period = get_free_agent_period(league)
@@ -260,6 +266,7 @@ export const evaluate_auction_block_finalization = async ({
 
     if (record) {
       newly_finalized.push(record)
+      await announce({ league, block: record })
       // Re-read so the next slot in this same pass sees the session it may be
       // adjacent to, including one this loop just extended.
       finalized.length = 0
@@ -270,6 +277,40 @@ export const evaluate_auction_block_finalization = async ({
   }
 
   return newly_finalized
+}
+
+/**
+ * Tell the league a block has convened.
+ *
+ * A BLOCK IS FINALIZED AND ANNOUNCED. Every other event in this design waits for
+ * a manager who happens to be looking; a block is the one that requires them to
+ * SHOW UP, at an instant the league agreed to but nobody individually chose. A
+ * manager who is not sitting on the auction page would otherwise learn about it
+ * only by opening the page, which is exactly the attendance the notice threshold
+ * exists to guarantee.
+ *
+ * It never fails its caller. The block has already finalized by the time this
+ * runs, and refusing a convened block because Discord was unreachable would be
+ * strictly worse than a quiet one -- the same rule the settlement fan-out keeps.
+ */
+export const announce_auction_block = async ({ league, block }) => {
+  try {
+    const message = await format_block_convened_message({
+      block_at: block.block_at,
+      end_at: block.end_at,
+      eligible_team_count: block.eligible_team_count,
+      // A merged slot EXTENDS a session rather than opening one. Announcing each
+      // consecutive slot as a fresh convening would tell the league three blocks
+      // are coming when one longer one is.
+      is_extension: Boolean(block.merged_slot_at)
+    })
+    await sendNotifications({ league, message, notifyLeague: true })
+    return message
+  } catch (error) {
+    log(`block announcement failed for league ${league.league_id}`)
+    log(error)
+    return null
+  }
 }
 
 /**

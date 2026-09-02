@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import db from '#db'
 import { getTeam } from '#libs-server'
 
@@ -145,7 +146,53 @@ export const format_nomination_complete_message = async ({
   return `${team_name}${team_abbrv ? ` (${team_abbrv})` : ''} has signed free agent ${player.first_name} ${player.last_name} (${player.primary_position}) for $${winning_bid_amount}.`
 }
 
+/**
+ * Format the announcement for a live block that has just convened.
+ *
+ * A BLOCK IS FINALIZED AND ANNOUNCED, and the announcement is not decoration.
+ * Every other event in this design waits for a manager who is paying attention;
+ * a block is the one that requires them to SHOW UP, at an instant the league
+ * agreed to but nobody chose. With no clock in election mode, being told is a
+ * manager's only prompt to act.
+ *
+ * It names the duration rather than the end instant, because a merged run of
+ * consecutive slots is what the league actually opted into and "45 minutes" is
+ * the fact a manager plans around.
+ */
+export const format_block_convened_message = async ({
+  block_at,
+  end_at,
+  eligible_team_count,
+  is_extension = false
+}) => {
+  // `toUTCString` rather than a dayjs format: this league's managers sit in
+  // London, Eastern and Pacific, so the instant has to carry its zone, and
+  // dayjs's `.utc()` needs a plugin nothing in this module loads -- calling it
+  // unextended is a TypeError inside a notification that must never take the
+  // block down with it.
+  const minutes = dayjs(end_at).diff(dayjs(block_at), 'minute')
+  const window = `${new Date(block_at).toUTCString()} for ${minutes} minutes`
+
+  // AN EXTENSION IS NOT A SECOND BLOCK. Consecutive unanimous slots run as one
+  // session, so announcing each one as a new convening would tell the league
+  // three blocks are coming when one longer one is.
+  if (is_extension) {
+    return (
+      `The live auction block has been EXTENDED and now runs ${window}. ` +
+      `Consecutive slots the league opted into run as one session.`
+    )
+  }
+
+  return (
+    `A LIVE AUCTION BLOCK has convened: ${window}, on unanimous opt-in among ` +
+    `the ${eligible_team_count} team(s) with an open roster spot. Bidding runs ` +
+    `on the clock for that window, and standing maximum bids bid for anyone ` +
+    `who cannot attend.`
+  )
+}
+
 export default {
   format_nomination_message,
-  format_nomination_complete_message
+  format_nomination_complete_message,
+  format_block_convened_message
 }

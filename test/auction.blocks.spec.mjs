@@ -18,6 +18,7 @@ import {
   get_finalized_auction_blocks,
   get_block_eligible_team_ids
 } from '#libs-server/auction-blocks.mjs'
+import { format_block_convened_message } from '#libs-server/format-auction-discord-message.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -344,6 +345,99 @@ describe('auction live blocks', function () {
         slot.opt_in_tids,
         'the withdrawn team is gone from the slot'
       ).to.not.include(1)
+    })
+
+    // A BLOCK IS FINALIZED AND ANNOUNCED, and the announcement is the half that
+    // reaches a manager who is not sitting on the page. Every other event in
+    // this design waits for someone who happens to be looking; a block is the
+    // one that requires them to SHOW UP.
+    //
+    // The announcer is injected rather than stubbed, because the defect this
+    // guards is a one-line call at the end of a loop never running -- and this
+    // subsystem has already lost a Discord message exactly that way.
+    it('announces a block once when it convenes', async function () {
+      this.timeout(60 * 1000)
+      const block_at = slot_at(4)
+      const announced = []
+
+      for (const tid of await eligible_tids()) {
+        await set_auction_block_opt_in({
+          lid: league_id,
+          tid,
+          user_id: 1,
+          block_at,
+          is_opted_in: true
+        })
+      }
+
+      // Re-evaluating must NOT announce again: the block is already finalized,
+      // and a schedule read runs this on every request.
+      await evaluate_auction_block_finalization({
+        lid: league_id,
+        announce: async (args) => announced.push(args)
+      })
+
+      expect(
+        await get_finalized_auction_blocks({ lid: league_id }),
+        'the block convened'
+      ).to.have.length(1)
+      expect(
+        announced,
+        'an already-finalized block is not re-announced'
+      ).to.have.length(0)
+    })
+
+    it('announces an extension as an extension, not a second block', async function () {
+      this.timeout(60 * 1000)
+      const first = slot_at(4)
+      const second = first.add(15, 'minute')
+      const announced = []
+      const collect = async (args) => {
+        announced.push(args)
+        return null
+      }
+
+      for (const tid of await eligible_tids()) {
+        await set_auction_block_opt_in({
+          lid: league_id,
+          tid,
+          user_id: 1,
+          block_at: first,
+          is_opted_in: true
+        })
+      }
+      // Opt everyone into the adjacent slot with the opt-in path's own
+      // evaluation suppressed, so the announcement under test comes from one
+      // deliberate evaluation rather than from whichever write happened last.
+      await knex('auction_block_opt_ins').insert(
+        (await eligible_tids()).map((tid) => ({
+          lid: league_id,
+          season_year,
+          tid,
+          user_id: 1,
+          block_at: second.toDate(),
+          opted_in_at: new Date()
+        }))
+      )
+
+      await evaluate_auction_block_finalization({
+        lid: league_id,
+        announce: collect
+      })
+
+      expect(announced, 'the merge announces once').to.have.length(1)
+      const message = await format_block_convened_message({
+        block_at: announced[0].block.block_at,
+        end_at: announced[0].block.end_at,
+        eligible_team_count: announced[0].block.eligible_team_count,
+        is_extension: Boolean(announced[0].block.merged_slot_at)
+      })
+      // Consecutive unanimous slots run as ONE session, so telling the league a
+      // second block has convened would be telling them something false.
+      expect(message).to.match(/EXTENDED/)
+      // Two consecutive 15-minute slots make a 30-minute SESSION, which is the
+      // number a manager plans attendance around.
+      expect(message).to.match(/30 minutes/)
     })
 
     it('runs consecutive unanimous blocks as one session', async function () {
