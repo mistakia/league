@@ -700,12 +700,18 @@ observations:
     [lesson] A Caesars date built with hyphens against a slash-formatted nfl_games.date made
     event-to-game matching unsatisfiable for thirteen months while every run reported success,
     because the importer had a zero-row oracle on the fetch and none on the match rate.
+  - >-
+    [pattern] When a backfill rule is expressible in SQL, a dated db/adhoc file beats a
+    scripts/backfill-*.mjs: it drops the deploy coupling (db:exec reaches production over ssh from
+    the local tree), replaces run-it-twice with a machine-owned re-run refusal, and needs no
+    delete-the-script step — the six undeleted backfill scripts are the evidence that step never
+    happens.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-01T23:48:27.345Z'
+updated_at: '2026-09-02T00:48:19.776Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
