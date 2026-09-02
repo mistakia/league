@@ -63,7 +63,29 @@ export const team_game_market_types = {
   GAME_ALT_SPREAD: 'GAME_ALT_SPREAD',
   GAME_ALT_TOTAL: 'GAME_ALT_TOTAL',
 
+  // Period-scoped game lines. These are GAME grain, both teams, so they carry
+  // no TEAM token -- unlike the team yardage markets below, which do.
+  //
+  // Coining these is also the safe path for a hazard recorded on the BetMGM
+  // import task: typing a first-half market as GAME_MONEYLINE or GAME_TOTAL
+  // grades it against the full-game result.
+  //
+  // Second-half lines include overtime by universal convention, and Caesars
+  // used to say so in the template name itself ('2nd Half Spread (Inc. OT)')
+  // before dropping the suffix. Both name forms mean this constant.
   GAME_FIRST_HALF_SPREAD: 'GAME_FIRST_HALF_SPREAD',
+  GAME_FIRST_HALF_MONEYLINE: 'GAME_FIRST_HALF_MONEYLINE',
+  GAME_FIRST_HALF_TOTAL: 'GAME_FIRST_HALF_TOTAL',
+  GAME_SECOND_HALF_SPREAD: 'GAME_SECOND_HALF_SPREAD',
+  GAME_SECOND_HALF_MONEYLINE: 'GAME_SECOND_HALF_MONEYLINE',
+  GAME_SECOND_HALF_TOTAL: 'GAME_SECOND_HALF_TOTAL',
+
+  // First quarter only, deliberately. Caesars publishes the second, third and
+  // fourth quarter lines too, but four stored rows each and nothing written
+  // since 2025-02-07 -- against roughly 900 rows each here, still arriving.
+  GAME_FIRST_QUARTER_SPREAD: 'GAME_FIRST_QUARTER_SPREAD',
+  GAME_FIRST_QUARTER_MONEYLINE: 'GAME_FIRST_QUARTER_MONEYLINE',
+  GAME_FIRST_QUARTER_TOTAL: 'GAME_FIRST_QUARTER_TOTAL',
 
   GAME_TEAM_TOTAL: 'GAME_TEAM_TOTAL',
   GAME_ALT_TEAM_TOTAL: 'GAME_ALT_TEAM_TOTAL',

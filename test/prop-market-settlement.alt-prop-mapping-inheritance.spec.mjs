@@ -105,4 +105,29 @@ describe('prop market settlement alt prop mapping inheritance', function () {
       }
     })
   })
+
+  // Coining a constant makes a market READABLE -- it reaches the data-view
+  // betting columns and historical hit rate -- without making it GRADED. These
+  // period-scoped lines have no settlement handler and must not acquire one by
+  // accident, because the failure mode is silent: grading a first-half line
+  // against the full-game result produces a plausible number.
+  describe('the period-scoped game lines are readable but not graded', function () {
+    it('resolves every one of them to UNSUPPORTED', function () {
+      for (const market_type of [
+        'GAME_FIRST_HALF_MONEYLINE',
+        'GAME_FIRST_HALF_TOTAL',
+        'GAME_SECOND_HALF_SPREAD',
+        'GAME_SECOND_HALF_MONEYLINE',
+        'GAME_SECOND_HALF_TOTAL',
+        'GAME_FIRST_QUARTER_SPREAD',
+        'GAME_FIRST_QUARTER_MONEYLINE',
+        'GAME_FIRST_QUARTER_TOTAL'
+      ]) {
+        expect(
+          get_handler_for_market_type(market_type),
+          `${market_type} has no half or quarter aware handler yet`
+        ).to.equal(HANDLER_TYPES.UNSUPPORTED)
+      }
+    })
+  })
 })

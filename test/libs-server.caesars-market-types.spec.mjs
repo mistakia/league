@@ -81,7 +81,68 @@ describe('libs-server caesars market types', function () {
       [
         '|Team Score First And Win|',
         team_props_types.GAME_TEAM_TO_SCORE_FIRST_AND_WIN
-      ]
+      ],
+
+      // The kicking family. '|Player Total Made Field Goals|' is the one that
+      // needed no new constant -- GAME_FIELD_GOALS_MADE already existed and
+      // was simply never wired to a template.
+      ['|Player Total Kicking Points|', player_prop_types.GAME_KICKING_POINTS],
+      [
+        '|Player Total Made Field Goals|',
+        player_prop_types.GAME_FIELD_GOALS_MADE
+      ],
+      [
+        '|Player Total Made Extra Points|',
+        player_prop_types.GAME_EXTRA_POINTS_MADE
+      ],
+      ['|Alt Kicking Points|', player_prop_types.GAME_ALT_KICKING_POINTS],
+      ['|Alt Made Field Goals|', player_prop_types.GAME_ALT_FIELD_GOALS_MADE],
+      ['|Alt Made Extra Points|', player_prop_types.GAME_ALT_EXTRA_POINTS_MADE],
+
+      // The period-scoped game lines. Caesars renamed its second-half markets
+      // between eras, so both name forms must reach the same type -- a pair
+      // that a per-name check would pass while typing only half the rows.
+      [
+        '|1st Half Money Line|',
+        team_game_market_types.GAME_FIRST_HALF_MONEYLINE
+      ],
+      ['|1st Half Total Points|', team_game_market_types.GAME_FIRST_HALF_TOTAL],
+      ['|2nd Half Spread|', team_game_market_types.GAME_SECOND_HALF_SPREAD],
+      [
+        '|2nd Half Spread (Inc. OT)|',
+        team_game_market_types.GAME_SECOND_HALF_SPREAD
+      ],
+      [
+        '|2nd Half Money Line|',
+        team_game_market_types.GAME_SECOND_HALF_MONEYLINE
+      ],
+      [
+        '|2nd Half Total Points|',
+        team_game_market_types.GAME_SECOND_HALF_TOTAL
+      ],
+      [
+        '|2nd Half Total Points (Inc. OT)|',
+        team_game_market_types.GAME_SECOND_HALF_TOTAL
+      ],
+      [
+        '|1st Quarter Money Line|',
+        team_game_market_types.GAME_FIRST_QUARTER_MONEYLINE
+      ],
+      [
+        '|1st Quarter Spread|',
+        team_game_market_types.GAME_FIRST_QUARTER_SPREAD
+      ],
+      [
+        '|1st Quarter Total Points|',
+        team_game_market_types.GAME_FIRST_QUARTER_TOTAL
+      ],
+
+      // Deliberately absent, and asserted so a later session does not add them
+      // on the symmetry argument alone: the second, third and fourth quarter
+      // lines hold four stored rows each and stopped arriving 2025-02-07.
+      ['|2nd Quarter Money Line|', null],
+      ['|3rd Quarter Spread|', null],
+      ['|4th Quarter Total Points|', null]
     ]
 
     for (const [template_name, expected] of cases) {

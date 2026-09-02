@@ -264,6 +264,40 @@ export const caesars_market_type_by_template = {
     market_type: player_prop_types.GAME_ALT_EXTRA_POINTS_MADE
   },
 
+  // Period-scoped game lines. Caesars renamed its second-half markets between
+  // eras -- the stored rows carry the explicit '(Inc. OT)' suffix and the live
+  // v4 feed carries the bare name -- so both forms are keyed to one type.
+  '|1st Half Money Line|': {
+    market_type: team_game_market_types.GAME_FIRST_HALF_MONEYLINE
+  },
+  '|1st Half Total Points|': {
+    market_type: team_game_market_types.GAME_FIRST_HALF_TOTAL
+  },
+  '|2nd Half Spread|': {
+    market_type: team_game_market_types.GAME_SECOND_HALF_SPREAD
+  },
+  '|2nd Half Spread (Inc. OT)|': {
+    market_type: team_game_market_types.GAME_SECOND_HALF_SPREAD
+  },
+  '|2nd Half Money Line|': {
+    market_type: team_game_market_types.GAME_SECOND_HALF_MONEYLINE
+  },
+  '|2nd Half Total Points|': {
+    market_type: team_game_market_types.GAME_SECOND_HALF_TOTAL
+  },
+  '|2nd Half Total Points (Inc. OT)|': {
+    market_type: team_game_market_types.GAME_SECOND_HALF_TOTAL
+  },
+  '|1st Quarter Money Line|': {
+    market_type: team_game_market_types.GAME_FIRST_QUARTER_MONEYLINE
+  },
+  '|1st Quarter Spread|': {
+    market_type: team_game_market_types.GAME_FIRST_QUARTER_SPREAD
+  },
+  '|1st Quarter Total Points|': {
+    market_type: team_game_market_types.GAME_FIRST_QUARTER_TOTAL
+  },
+
   // Deliberate no-maps. Present with a null type so a residue query reports
   // them as decided rather than as an unexamined gap.
   '|Team Total Team Defensive Tackles|': {
