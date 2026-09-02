@@ -1,0 +1,31 @@
+// Sized to sit inside a 30px virtualized board row alongside the bye and
+// salary columns, so it takes a fixed basis rather than growing: the salary
+// column to its right is the number a manager reads down, and a chip that
+// widened with its amount would ragged that column out of alignment.
+.auction-election-chip
+  flex 0 0 46px
+  display flex
+  align-items center
+  justify-content center
+  height 18px
+  align-self center
+  border-radius 9px
+  font-size 10px
+  font-weight 800
+  cursor pointer
+  background $accentColor
+  color white
+  overflow hidden
+
+  // A decline is not a $0 maximum, and the two must not read alike at a glance.
+  // The amount chip is the loud one because it is a live claim; a decline is an
+  // answer already given, so it recedes without disappearing.
+  &.declined
+    background transparent
+    color lighten(black, 50%)
+    border 1px solid $borderColor
+    font-weight 400
+
+  &.settled
+    opacity 0.45
+    cursor default

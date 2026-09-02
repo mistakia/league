@@ -12,6 +12,7 @@ import IconButton from '@components/icon-button'
 import NFLTeamBye from '@components/nfl-team-bye'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionTargetHeader from '@components/auction-target-header'
+import AuctionElectionChip from '@components/auction-election-chip'
 import PlayerName from '@components/player-name'
 import SearchFilter from '@components/search-filter'
 import AuctionLeagueStats from '@components/auction-league-stats'
@@ -82,6 +83,10 @@ export default function AuctionTargets({
           )}
           <PlayerName pid={pid} hidePosition />
           <PlayerWatchlistAction pid={pid} />
+          {/* Connects on pid itself and reads one Map entry, so only the row
+              whose election changed re-renders. Deliberately NOT fed from this
+              component's mapped props -- see auction-election-chip/index.js. */}
+          <AuctionElectionChip pid={pid} />
           <div className='auction__targets-player-bye'>
             <NFLTeamBye nfl_team={player_map.get('team')} />
           </div>
