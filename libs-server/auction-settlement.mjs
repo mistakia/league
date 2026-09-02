@@ -571,6 +571,50 @@ export const sweep_unnominated_auction_elections = async ({
 }
 
 /**
+ * Build and send the Discord message for one settled player.
+ *
+ * Split out of `broadcast_auction_settlement` so the call can be OBSERVED. The
+ * sibling block announcer is injected for exactly this reason, and its comment
+ * says why: a one-line call at the end of a handler is the shape that ships
+ * unexercised, and this subsystem has lost a Discord message that way once
+ * already. It then lost the settlement message the same way -- the fix that
+ * added this fan-out added no seam, so no spec could reach the call and the
+ * only thing asserting it was a comment.
+ *
+ * It resolves the league itself rather than taking a resolved one, unlike
+ * `announce_auction_block`. The REST settle paths pass no league and the lookup
+ * used to sit inside the guarded block, so hoisting it into the caller would
+ * turn a swallowed `getLeague` failure into one that takes the whole fan-out
+ * down. Behavior preservation beats symmetry here.
+ *
+ * It does NOT guard itself. `broadcast_auction_settlement` owns that guard, so
+ * the invariant holds for an injected announcer too rather than only for this
+ * one.
+ */
+export const announce_auction_settlement = async ({
+  lid,
+  league,
+  settlement
+}) => {
+  const resolved_league = league || (await getLeague({ lid }))
+  const message = await format_nomination_complete_message({
+    player_id: settlement.pid,
+    winning_bid_amount: settlement.price,
+    winning_team_id: settlement.winner_tid
+  })
+
+  if (!message) return null
+
+  await sendNotifications({
+    league: resolved_league,
+    message,
+    notifyLeague: true
+  })
+
+  return message
+}
+
+/**
  * Announce a settlement: Discord, then every client in the league.
  *
  * IN ELECTION MODE THE SOCKET IS NOT THE WRITER. Managers elect over REST and
@@ -603,23 +647,14 @@ export const broadcast_auction_settlement = async ({
   settlement,
   season_year = current_season.year,
   league,
-  logger
+  logger,
+  // Injected for the same reason the block announcer is: a spec cannot
+  // otherwise reach this call, and a deleted call site is invisible to a suite
+  // that only ever exercises the message builder.
+  announce = announce_auction_settlement
 }) => {
   try {
-    const resolved_league = league || (await getLeague({ lid }))
-    const message = await format_nomination_complete_message({
-      player_id: settlement.pid,
-      winning_bid_amount: settlement.price,
-      winning_team_id: settlement.winner_tid
-    })
-
-    if (message) {
-      await sendNotifications({
-        league: resolved_league,
-        message,
-        notifyLeague: true
-      })
-    }
+    await announce({ lid, league, settlement })
   } catch (error) {
     // A notification failure must never take the settlement broadcast down with
     // it. The sale has already committed; a silent Discord is a degraded
@@ -725,6 +760,7 @@ export default {
   get_outstanding_team_ids,
   build_auction_claims,
   settle_auction_player_if_complete,
+  announce_auction_settlement,
   broadcast_auction_settlement,
   reevaluate_auction_after_roster_change,
   sweep_unnominated_auction_elections
