@@ -1,6 +1,7 @@
 import db from '#db'
 import { current_season, player_tag_types } from '#constants'
 import { build_active_restricted_free_agency_bids_query } from './restricted-free-agency-bids-query.mjs'
+import { build_salary_in_force_transaction_id } from './roster-player-salary.mjs'
 
 export default async function ({
   lid,
@@ -53,13 +54,24 @@ export default async function ({
       'transactions.season_year'
     )
     .join('rosters', 'rosters_players.roster_id', '=', 'rosters.roster_id')
+    // The salary in force at each roster's own snapshot, per the one rule in
+    // roster-player-salary.mjs. This used to be a bare `max(transaction_id)`
+    // with no as-of bound and no `occurred_at` ordering -- the pre-fix rule that
+    // get-roster.mjs was repaired away from and this copy was not. It agrees
+    // with the repaired rule only while transaction ids happen to run
+    // chronologically, which is what hid the divergence: the board rendered one
+    // budget while the auction settled against another.
     .leftJoin('transactions', function () {
       this.on(
         'transactions.transaction_id',
         '=',
-        db.raw(
-          '(select max(transaction_id) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
-        )
+        build_salary_in_force_transaction_id({
+          db,
+          tid: 'rosters.tid',
+          pid: 'rosters_players.pid',
+          as_of_year: 'rosters.season_year',
+          as_of_week: 'rosters.week'
+        })
       )
     })
     .whereIn(

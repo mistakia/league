@@ -2,22 +2,21 @@ import { uniqBy } from '#libs-shared'
 import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
 import { build_active_restricted_free_agency_bids_query } from './restricted-free-agency-bids-query.mjs'
+import { build_salary_in_force_transaction_id } from './roster-player-salary.mjs'
 
 // A rostered player's salary is `transactions.player_salary` -- `rosters_players` carries no
 // value column -- so the transaction is the only source of the salary that `Roster`
 // sums into `availableCap`. That makes this an INNER join by design, not a degraded
 // LEFT join: admitting a player with no team transaction would hand `Roster` an
-// undefined value and turn the cap arithmetic into NaN.
+// undefined value and turn the cap arithmetic into NaN. The subselect yields NULL for
+// such a player and the inner join drops them, which preserves that exactly.
 //
-// A roster is a snapshot of one (year, week), so the salary in force at that snapshot
-// comes from the newest transaction dated at or before it. Without the `(year, week)`
-// bound the lookup reaches forward in time and a historical roster reports a salary
-// that had not been agreed yet -- an extension signed in a later season would be
-// backdated onto every earlier roster the player appears on.
-//
-// Both the team id and the as-of bound qualify which transactions may match rather
-// than filtering the result, so both belong in the ON clause. The ordering feeds the
-// `uniqBy` below, which keeps the newest surviving row per player.
+// WHICH transaction is the salary-in-force rule, and it lives in one place:
+// roster-player-salary.mjs. It used to be restated here as a join qualifier plus an
+// ordering feeding a `uniqBy`, which was correct but was one of three copies -- and
+// the other two were never repaired. Selecting the single qualifying transaction here
+// rather than every candidate also makes the `uniqBy` below a formality rather than
+// the thing that picks the winner.
 export const build_roster_players_query = ({
   db,
   roster_id,
@@ -27,14 +26,17 @@ export const build_roster_players_query = ({
 }) =>
   db('rosters_players')
     .join('transactions', function () {
-      this.on('rosters_players.pid', '=', 'transactions.pid')
-        .andOnVal('transactions.tid', '=', tid)
-        .andOn(
-          db.raw('(transactions.season_year, transactions.week) <= (?, ?)', [
-            year,
-            week
-          ])
-        )
+      this.on(
+        'transactions.transaction_id',
+        '=',
+        build_salary_in_force_transaction_id({
+          db,
+          tid,
+          pid: 'rosters_players.pid',
+          as_of_year: year,
+          as_of_week: week
+        })
+      )
     })
     .where('roster_id', roster_id)
     // See the note in get-league-rosters-from-database.mjs: `pos`/`rid` is the

@@ -6,6 +6,7 @@ import db from '#db'
 import { groupBy } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
+import { build_salary_in_force_transaction_id } from '#libs-server/roster-player-salary.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
@@ -42,13 +43,22 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
         'transactions.occurred_at',
         'transactions.season_year'
       )
+      // The salary in force at the week-0 roster of the PRIOR season, per the
+      // one rule in roster-player-salary.mjs. This was a bare
+      // `max(transaction_id)` with no as-of bound, so it could read a salary
+      // agreed after the roster it is averaging over -- and these averages set
+      // the franchise tag salaries, so a stale read here is a money number.
       .leftJoin('transactions', function () {
         this.on(
           'transactions.transaction_id',
           '=',
-          db.raw(
-            '(select max(transaction_id) from transactions where transactions.tid = rosters_players.tid and transactions.pid = rosters_players.pid)'
-          )
+          build_salary_in_force_transaction_id({
+            db,
+            tid: 'rosters_players.tid',
+            pid: 'rosters_players.pid',
+            as_of_year: 'rosters_players.season_year',
+            as_of_week: 'rosters_players.week'
+          })
         )
       })
       .where('rosters_players.lid', lid)
