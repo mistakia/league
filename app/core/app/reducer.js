@@ -59,16 +59,18 @@ export function app_reducer(state = initialState(), { payload, type }) {
 
     // Resolve the viewing team from the league actually on screen.
     //
-    // AUTH_FULFILLED can only adopt a teamId when the route's league is the
-    // user's FIRST one, so a manager in more than one league had no team in any
-    // other league and every team-scoped surface silently rendered as if they
-    // owned nothing. This is the payload that knows the answer: it carries the
-    // teams of the league in view, and `teamIds` carries the ones the user owns.
+    // AUTH_FULFILLED resolves this for the leagues the auth payload carries,
+    // which is the common case. This handler covers the rest: a league whose
+    // teams arrive later than auth, and a league change, where SELECT_LEAGUE
+    // has dropped the teamId and only this payload can name the new one. It
+    // carries the teams of the league in view, and `teamIds` carries the ones
+    // the user owns.
     //
-    // The auction page is where it bit first. Its elections fetch is gated on
-    // teamId, so the request was never issued at all and the standing-elections
-    // panel rendered "No elections yet" -- which, as this design keeps saying,
-    // is indistinguishable from a manager who chose not to elect.
+    // The auction page is where an unresolved teamId bit first. Its elections
+    // fetch is gated on teamId, so the request was never issued at all and the
+    // standing-elections panel rendered "No elections yet" -- which, as this
+    // design keeps saying, is indistinguishable from a manager who chose not to
+    // elect.
     case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
@@ -82,9 +84,8 @@ export function app_reducer(state = initialState(), { payload, type }) {
       })
 
     // teamId belongs to the league it was resolved in, so a league change must
-    // drop it rather than render another league's team. This matches what a
-    // full page load of the new league's URL does: AUTH_FULFILLED only adopts a
-    // teamId when the route's league is the user's first one.
+    // drop it rather than render another league's team. GET_TEAMS_FULFILLED
+    // names the new league's team once that league's teams land.
     case app_actions.SELECT_LEAGUE: {
       const leagueId = payload.leagueId
       if (leagueId === state.get('leagueId')) return state
@@ -99,24 +100,37 @@ export function app_reducer(state = initialState(), { payload, type }) {
         isPending: false
       })
 
+    // The league in view decides the team, and the team is looked up BY that
+    // league rather than paired to it by position.
+    //
+    // `leagues` and `teams` come off GET /me as two independent unordered
+    // queries, so `leagues[0]` and `teams[0]` are not the same league. In
+    // production, for a manager in leagues 1 and 119, the leagues query returns
+    // 119 first and the teams query returns team 1 — of league 1 — first.
+    // Pairing them by index therefore adopted a teamId from a DIFFERENT league
+    // than the route, and every team-scoped request then sent that mismatched
+    // pair and was rejected by verify-user-team with `invalid leagueId`.
     case app_actions.AUTH_FULFILLED:
       set_error_user(payload.data.user.id)
       return state.withMutations((state) => {
         const currentLeagueId = state.get('leagueId')
         const leagueNotSet = !currentLeagueId
 
-        const leagueId = payload.data.leagues.length
-          ? payload.data.leagues[0].league_id
-          : undefined
+        const leagueId = leagueNotSet
+          ? payload.data.leagues.length
+            ? payload.data.leagues[0].league_id
+            : undefined
+          : currentLeagueId
         if (leagueNotSet && leagueId) {
           state.set('leagueId', leagueId)
         }
 
-        const teamId = payload.data.teams.length
-          ? payload.data.teams[0].team_id
-          : undefined
-        if ((leagueNotSet || currentLeagueId === leagueId) && teamId) {
-          state.set('teamId', teamId)
+        // No team in the league on screen leaves teamId untouched rather than
+        // guessing: GET_TEAMS_FULFILLED resolves it against that league's own
+        // roster of teams once it lands.
+        const team = payload.data.teams.find((t) => t.lid === leagueId)
+        if (team) {
+          state.set('teamId', team.team_id)
         }
 
         state.merge({

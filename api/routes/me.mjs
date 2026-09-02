@@ -190,6 +190,7 @@ router.get('/?', async (req, res) => {
         this.on('users_teams.tid', '=', 'teams.team_id')
         this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
+      .orderBy('teams.team_id')
 
     const leagueIds = teams.map((t) => t.lid)
     const teamIds = teams.map((t) => t.team_id)
@@ -213,6 +214,10 @@ router.get('/?', async (req, res) => {
         'league_scoring_formats.id'
       )
       .whereIn('leagues.league_id', leagueIds)
+      // The SPA falls back to `leagues[0]` when the entry URL names no league,
+      // so an unordered result makes which league a manager lands on a property
+      // of the query plan.
+      .orderBy('leagues.league_id')
 
     // The SPA's league store is populated from this payload on auth, so a
     // league missing its pause state here renders no banner, freezes no clock,
