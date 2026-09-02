@@ -13,6 +13,14 @@ import { auction_actions } from './actions'
 import { app_actions } from '@core/app/actions'
 
 const initialState = new Record({
+  // Whether this client has sent AUCTION_JOIN. The server tracks a join per
+  // SOCKET, so a reconnect leaves the auction with no record of this manager:
+  // no message handlers on the new socket, so every bid and nomination they
+  // send is dropped without an error, and no AUCTION_INIT, so their board keeps
+  // whatever it had when the connection went. This flag is what lets the
+  // reconnect saga tell a manager who dropped out of a block from a visitor who
+  // never opened the page.
+  is_joined: false,
   isPaused: true,
   isLocked: false,
   isComplete: false,
@@ -124,6 +132,14 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       return state.merge({
         connected: new List(payload.connected)
       })
+
+    // THIS CLIENT ASKED TO JOIN, which is the only thing that entitles it to
+    // rejoin on a websocket reconnect. It is not read off AUCTION_INIT:
+    // `_send_auction_init` BROADCASTS, so every client in the league receives
+    // one whenever anybody joins, and keying on it would have the whole league
+    // rejoining an auction most of them never opened.
+    case auction_actions.AUCTION_JOIN:
+      return state.merge({ is_joined: true })
 
     case auction_actions.AUCTION_TOGGLE_MUTED:
       return state.merge({ muted: !state.muted })

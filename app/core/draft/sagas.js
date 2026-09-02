@@ -1,5 +1,11 @@
 import dayjs from 'dayjs'
-import isBetween from 'dayjs/plugin/isBetween'
+// The EXTENSION is load-bearing, and every other dayjs plugin import in this
+// repo carries it. Webpack resolves both spellings; Node's ESM loader does not
+// hand back the plugin function for the extensionless one, so `dayjs.extend`
+// throws "t is not a function" at module scope -- which aborts any spec whose
+// import graph reaches this file, reported as a load failure with no test names
+// in it.
+import isBetween from 'dayjs/plugin/isBetween.js'
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { app_actions } from '@core/app'

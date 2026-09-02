@@ -12,6 +12,7 @@ import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { format_nomination_message } from '#libs-server/format-auction-discord-message.mjs'
 import {
   settle_auction_player_if_complete,
+  lock_auction_for_league,
   get_active_auction_nomination,
   get_auction_team_capacities,
   get_outstanding_team_ids,
@@ -202,36 +203,93 @@ export default class Auction {
   // AUCTION LOGIC METHODS
   // ============================================================================
 
+  /**
+   * Close the open player at the price on the board, when the bid clock expires.
+   *
+   * THE BID CLOCK IS NOT THE ONLY WRITER ON THE OPEN PLAYER. Inside a live block
+   * a manager can still complete the eligible set over REST, and a trade or a
+   * commissioner-override release reaches `settle_auction_player_if_complete`
+   * through `reevaluate_auction_after_roster_change` -- so two writers race for
+   * one nomination. They resolve to DIFFERENT TEAMS when they disagree:
+   * supersession binds a claim downward in `_manual_bids`, which is socket state
+   * `build_auction_claims` is deliberately blind to, so the engine can read an
+   * un-superseded ceiling and name a winner the board does not show. Left
+   * unserialised that put one player on two rosters and charged both teams.
+   *
+   * So this takes the same per-league advisory lock every settlement path takes,
+   * and re-reads the nomination UNDER it. `_transactions` is a cache of state
+   * REST moves; signing from it after a settlement committed is exactly the
+   * staleness this subsystem has now produced three times.
+   */
   async sold() {
     this._locked = true
-    const bid = this._transactions[0]
-    const { tid, pid, player_salary: value } = bid
 
-    this.logger(`processing ${pid} bid`)
-
+    let result
     try {
-      // Validate player
-      const player_info = await this._validate_player(pid)
-      if (!player_info) return
+      result = await db.transaction(async (trx) => {
+        await lock_auction_for_league({ trx, lid: this._lid })
 
-      // Validate team can acquire player
-      const roster = await getRoster({ tid })
-      const roster_obj = new Roster({ roster, league: this._league })
+        const nomination = await get_active_auction_nomination({
+          lid: this._lid,
+          db_client: trx
+        })
+        // An AUCTION_PROCESSED on top means the player this clock was running
+        // for is already signed. Not an error and not a refusal -- the auction
+        // advanced, just not here.
+        if (!nomination) return { settled_elsewhere: true }
 
-      if (
-        !this._validate_team_can_acquire_player(roster_obj, player_info, value)
-      ) {
-        return
+        const bid = nomination.bids[nomination.bids.length - 1]
+        const { tid, pid, player_salary: value } = bid
+
+        this.logger(`processing ${pid} bid`)
+
+        const player_info = await this._validate_player(bid, trx)
+        if (!player_info) return { refused: true }
+
+        const roster = await getRoster({ tid })
+        const roster_obj = new Roster({ roster, league: this._league })
+
+        if (
+          !this._validate_team_can_acquire_player(
+            roster_obj,
+            player_info,
+            value,
+            bid
+          )
+        ) {
+          return { refused: true }
+        }
+
+        await this._add_player_to_roster(roster_obj, player_info, tid, bid, trx)
+        await this._update_team_capacity(tid, value, trx)
+
+        return {
+          transaction: await this._record_auction_transaction(bid, trx)
+        }
+      })
+
+      if (result.refused) return
+
+      if (result.settled_elsewhere) {
+        // Catch the socket up to the settlement it lost to, or the rotation
+        // stays parked on a player that is gone and nothing can be nominated.
+        await this._reload_after_settlement()
+        const nominating_team_id = this.nominating_team_id
+        if (!nominating_team_id) {
+          this.broadcast({ type: 'AUCTION_COMPLETE' })
+          return false
+        }
+        this.broadcast({
+          type: 'AUCTION_NOMINATION_INFO',
+          payload: { nominating_team_id }
+        })
+        this._start_nomination_timer()
+        return false
       }
 
-      // Add player to roster
-      await this._add_player_to_roster(roster_obj, player_info, tid, value)
-
-      // Update team capacity
-      await this._update_team_capacity(tid, value)
-
-      // Record transaction
-      await this._record_auction_transaction(bid)
+      // Broadcast AFTER the commit. Announcing a sale from inside its own
+      // transaction tells every client about a row that can still roll back.
+      this._announce_auction_transaction(result.transaction)
 
       this._manual_bids.clear()
 
@@ -264,7 +322,10 @@ export default class Auction {
     } catch (error) {
       this.logger('error in sold()', error)
       this._start_bid_timer()
-      this.reply(bid.user_id, 'processing error')
+      // The acting user is read off the cache rather than the transaction that
+      // just rolled back, and it is only ever used to address an error reply.
+      const latest = this._transactions[0]
+      if (latest) this.reply(latest.user_id, 'processing error')
       return false
     } finally {
       this._locked = false
@@ -588,28 +649,31 @@ export default class Auction {
     return true
   }
 
-  async _validate_player(pid) {
-    const players = await db('player').where('pid', pid)
+  // `bid` is passed rather than read off `_transactions[0]`: `sold` re-reads the
+  // nomination under the advisory lock, so the cache and the row being settled
+  // can legitimately differ and the reply has to address the right manager.
+  async _validate_player(bid, db_client = db) {
+    const players = await db_client('player').where('pid', bid.pid)
     const player_info = players[0]
 
     if (!player_info) {
-      this.reply(this._transactions[0].user_id, 'invalid player')
-      this.logger(`can not process invalid player ${pid}`)
+      this.reply(bid.user_id, 'invalid player')
+      this.logger(`can not process invalid player ${bid.pid}`)
       return null
     }
 
     return player_info
   }
 
-  _validate_team_can_acquire_player(roster_obj, player_info, value) {
+  _validate_team_can_acquire_player(roster_obj, player_info, value, bid) {
     // Check roster space
     if (
       !roster_obj.has_bench_space_for_position(player_info.primary_position)
     ) {
       this.logger(
-        `no open slots available for ${player_info.pid} on team_id ${this._transactions[0].tid}`
+        `no open slots available for ${player_info.pid} on team_id ${bid.tid}`
       )
-      this.reply(this._transactions[0].user_id, 'exceeds roster limits')
+      this.reply(bid.user_id, 'exceeds roster limits')
       return false
     }
 
@@ -689,9 +753,9 @@ export default class Auction {
     return bid_with_uid
   }
 
-  async _add_player_to_roster(roster_obj, player_info, tid, value) {
+  async _add_player_to_roster(roster_obj, player_info, tid, bid, db_client) {
     try {
-      await db('rosters_players').insert({
+      await db_client('rosters_players').insert({
         roster_id: roster_obj.roster_id,
         slot: roster_slot_types.BENCH,
         player_position: player_info.primary_position,
@@ -707,20 +771,22 @@ export default class Auction {
       this.logger(
         `unable to add player ${player_info.pid} to roster of team_id ${tid}`
       )
-      this.reply(this._transactions[0].user_id, err.message)
+      this.reply(bid.user_id, err.message)
       throw err
     }
   }
 
-  async _update_team_capacity(tid, value) {
+  // The DATABASE write only. The cached `_teams` entry is adjusted in
+  // `_announce_auction_transaction`, after the commit -- a cache decremented
+  // inside a transaction that then rolls back leaves the engine proxying against
+  // capacity the league does not have, and nothing reads it back to notice.
+  async _update_team_capacity(tid, value, db_client) {
     const team = this._teams.find((t) => t.team_id === tid)
-    team.availableSpace = team.availableSpace - 1
-    const new_cap = (team.cap = team.cap - value)
 
     try {
-      await db('teams')
+      await db_client('teams')
         .where({ team_id: tid, season_year: current_season.year })
-        .update('salary_cap', new_cap)
+        .update('salary_cap', team.cap - value)
     } catch (err) {
       this.logger(err)
       this.logger('unable to update cap space')
@@ -728,7 +794,7 @@ export default class Auction {
     }
   }
 
-  async _record_auction_transaction(bid) {
+  async _record_auction_transaction(bid, db_client) {
     const transaction = {
       user_id: bid.user_id,
       tid: bid.tid,
@@ -741,18 +807,25 @@ export default class Auction {
       occurred_at: new Date()
     }
 
-    const insert_query = await db('transactions')
+    const insert_query = await db_client('transactions')
       .insert(transaction)
       .returning('transaction_id')
 
+    return { ...transaction, transaction_id: insert_query[0].transaction_id }
+  }
+
+  // Everything a sale does OUTSIDE its transaction: tell the league, and move
+  // the two caches the auction reads between database round trips.
+  _announce_auction_transaction(transaction) {
+    const team = this._teams.find((t) => t.team_id === transaction.tid)
+    if (team) {
+      team.availableSpace = team.availableSpace - 1
+      team.cap = team.cap - transaction.player_salary
+    }
+
     this.broadcast({
       type: 'AUCTION_PROCESSED',
-      payload: {
-        rid: bid.rid || 0, // This might need to be passed from the roster object
-        pos: bid.pos || '', // This might need to be passed from player_info
-        transaction_id: insert_query[0].transaction_id,
-        ...transaction
-      }
+      payload: { rid: 0, pos: '', ...transaction }
     })
 
     this._transactions.unshift(transaction)

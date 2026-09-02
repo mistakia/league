@@ -18,7 +18,7 @@ import {
   api_get_auction_blocks,
   api_post_auction_block_opt_in
 } from '@core/api'
-import { send } from '@core/ws'
+import { send, wsActions } from '@core/ws'
 import { get_eligible_slots } from '#libs-shared'
 import {
   fantasy_positions,
@@ -144,6 +144,26 @@ export function* join_auction({ type }) {
   send(message)
 }
 
+/**
+ * Re-join the auction after the websocket comes back.
+ *
+ * A JOIN IS PER SOCKET, AND A RECONNECT IS A NEW SOCKET. The server keys its
+ * message handlers, its connected-team list and its AUCTION_INIT off the socket
+ * that sent AUCTION_JOIN, so without this a manager who drops mid-block returns
+ * to a page that still LOOKS live -- broadcasts keep arriving, because those are
+ * filtered on the league id the query string carries -- while every bid and
+ * nomination they send is dropped with no error, their team reads as
+ * disconnected, and with pause_on_team_disconnect on the auction stays paused
+ * for the whole league. The board also never catches up on what it missed while
+ * the socket was down.
+ */
+export function* rejoin_auction() {
+  const { is_joined } = yield select(get_auction_state)
+  if (!is_joined) return
+
+  yield call(join_auction, { type: auction_actions.AUCTION_JOIN })
+}
+
 export function* release_lock() {
   yield delay(1500)
   yield put(auction_actions.release())
@@ -250,6 +270,10 @@ export function* load_auction_blocks_for_current_league() {
 
 export function* watch_auction_join() {
   yield takeLatest(auction_actions.AUCTION_JOIN, join_auction)
+}
+
+export function* watch_websocket_reconnected() {
+  yield takeLatest(wsActions.WEBSOCKET_RECONNECTED, rejoin_auction)
 }
 
 export function* watch_auction_submit_bid() {
@@ -369,9 +393,9 @@ export function* watch_auction_toggle_pause_on_team_disconnect() {
 //  ROOT
 // -------------------------------------
 
-// TODO - auto rejoin auction on websocket reconnection
 export const auction_sagas = [
   fork(watch_auction_join),
+  fork(watch_websocket_reconnected),
   fork(watch_auction_submit_bid),
   fork(watch_auction_submit_nomination),
   fork(watch_auction_bid),
