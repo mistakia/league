@@ -22,6 +22,11 @@ import {
 } from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import {
+  is_nfl_postseason_round,
+  nfl_postseason_week_by_round
+} from '#libs-shared/nfl-postseason-week.mjs'
+import { resolve_canonical_nfl_team } from '#libs-shared/nfl-team-franchise-eras.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -203,6 +208,208 @@ const format_game = (game, { ambiguous_espn_game_ids }) => ({
 
 export { format_game }
 
+/*
+  The feed and nfl_games encode the postseason differently, and the difference
+  is not cosmetic: the feed carries game_type WC/DIV/CON/SB against weeks 18-22
+  while nfl_games stores season_type POST against weeks 1-4. A match keyed on
+  the feed's own season_type and week therefore cannot match a postseason row at
+  ALL -- every one of them reached this table only through the esbid-only
+  fallback below, which is why that fallback is load-bearing and stays.
+
+  The round-to-week table is shared with the NGS importer rather than restated
+  here; see libs-shared/nfl-postseason-week.mjs for why the feed's week is not
+  usable as an input.
+*/
+export const translate_nflverse_game_params = (item) => {
+  const is_postseason = is_nfl_postseason_round(item.game_type)
+
+  if (!is_postseason && item.game_type !== 'REG' && item.game_type !== 'PRE') {
+    log(
+      `unrecognised game_type ${item.game_type} on ${item.game_id} — passing it through untranslated`
+    )
+  }
+
+  return {
+    season_year: Number(item.season),
+    season_type: is_postseason ? 'POST' : item.game_type,
+    week: is_postseason
+      ? nfl_postseason_week_by_round[item.game_type]
+      : Number(item.week)
+  }
+}
+
+export const translate_nflverse_game_teams = (item) => {
+  const season_year = Number(item.season)
+
+  // fixTeam normalises the feed's spelling; resolve_canonical_nfl_team then
+  // answers the season-aware question fixTeam cannot. For the feed's window
+  // (1999 onward) the second step is the identity on every token, but running
+  // it here means both sides of the team comparison below are canonical by
+  // construction rather than by coincidence.
+  return {
+    away_nfl_team: resolve_canonical_nfl_team({
+      era_nfl_team: fixTeam(item.away_team),
+      season_year
+    }),
+    home_nfl_team: resolve_canonical_nfl_team({
+      era_nfl_team: fixTeam(item.home_team),
+      season_year
+    })
+  }
+}
+
+/*
+  Compare the stored team pair against the feed's, in canonical terms on both
+  sides. A raw token comparison is wrong for the 575 pre-relocation Rams and
+  Chargers games: nfl_games stores SD and STL for those seasons while the feed
+  normalises to LAC and LA, so the pair reads as a mismatch when it is the same
+  two franchises. Each side is resolved against the season its own row belongs
+  to, which is what makes the comparison total rather than token-shaped.
+*/
+const nfl_game_teams_match = ({ db_game, item }) => {
+  const { away_nfl_team, home_nfl_team } = translate_nflverse_game_teams(item)
+
+  return (
+    resolve_canonical_nfl_team({
+      era_nfl_team: db_game.away_nfl_team,
+      season_year: db_game.season_year
+    }) === away_nfl_team &&
+    resolve_canonical_nfl_team({
+      era_nfl_team: db_game.home_nfl_team,
+      season_year: db_game.season_year
+    }) === home_nfl_team
+  )
+}
+
+/*
+  Three tiers, in this order:
+
+    1. nflverse_game_id, which is exact and covers every already-stamped row --
+       including the 575 pre-relocation Rams and Chargers games that no
+       team-column match can reach while nfl_games still stores era tokens;
+    2. the translated (season_year, season_type, week, away, home) tuple, which
+       is the unique index idx_24707_game and so returns at most one row;
+    3. esbid alone, guarded by the team pair.
+
+  Tier 1 is the one tier with no implicit team check, so it re-asserts the pair
+  explicitly before returning -- an upstream id swap would otherwise write one
+  game's lines onto another, which is the same hazard tier 3's guard was added
+  for. On a mismatch it falls through rather than returning: the later tiers
+  have their own guards and may legitimately find the right row.
+*/
+export const find_nfl_game_for_nflverse_item = async ({
+  item,
+  collector = null
+}) => {
+  const nflverse_game_id = item.game_id?.trim() || null
+
+  if (nflverse_game_id) {
+    const id_match = await db('nfl_games').where({ nflverse_game_id }).first()
+
+    if (id_match) {
+      if (nfl_game_teams_match({ db_game: id_match, item })) {
+        return id_match
+      }
+
+      log(
+        `nflverse_game_id tier team mismatch for ${nflverse_game_id}: nflverse=${item.away_team}@${item.home_team} db=${id_match.away_nfl_team}@${id_match.home_nfl_team} — falling through`
+      )
+      if (collector) {
+        collector.add_warning(
+          `Game team mismatch on nflverse_game_id: ${nflverse_game_id}`,
+          {
+            old_game_id: item.old_game_id,
+            game_id: item.game_id,
+            nflverse_teams: `${item.away_team}@${item.home_team}`,
+            db_teams: `${id_match.away_nfl_team}@${id_match.home_nfl_team}`
+          }
+        )
+      }
+    }
+  }
+
+  const params_match = await db('nfl_games')
+    .where({
+      ...translate_nflverse_game_params(item),
+      ...translate_nflverse_game_teams(item)
+    })
+    .first()
+
+  if (params_match) {
+    return params_match
+  }
+
+  if (item.old_game_id) {
+    const esbid_match = await db('nfl_games')
+      .where({ esbid: item.old_game_id })
+      .first()
+
+    if (esbid_match) {
+      if (nfl_game_teams_match({ db_game: esbid_match, item })) {
+        return esbid_match
+      }
+
+      log(
+        `esbid-only fallback team mismatch for ${item.old_game_id}: nflverse=${item.away_team}@${item.home_team} db=${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team} — skipping update`
+      )
+      if (collector) {
+        collector.add_warning(
+          `Game team mismatch on esbid fallback: ${item.old_game_id}`,
+          {
+            old_game_id: item.old_game_id,
+            game_id: item.game_id,
+            nflverse_teams: `${item.away_team}@${item.home_team}`,
+            db_teams: `${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team}`
+          }
+        )
+      }
+    }
+  }
+
+  return null
+}
+
+/*
+  games_not_matched on its own cannot be a zero-tolerance oracle: the feed
+  publishes rows for games nfl_games has not been seeded with yet, and an
+  unbounded run legitimately reports those as unmatched.
+
+  The exclusion is computed on the TRANSLATED tuple and per season_type,
+  never on the feed's raw week. Regular-season weeks run 1-18 and postseason
+  weeks 1-4, so a single "maximum seeded week" per season mixes two scales and
+  would exempt every postseason row from 2021 onward -- exactly the rows the
+  translation above exists to fix.
+
+  A (season_year, season_type) with no row at all is EXCLUDED rather than
+  compared against a null maximum. Season 2026 currently carries 272 REG rows
+  and zero POST rows; absent is not zero.
+*/
+export const count_unmatched_within_seeded_weeks = async ({
+  unmatched_game_params
+}) => {
+  const seeded = await db('nfl_games')
+    .select('season_year', 'season_type')
+    .max('week as max_week')
+    .groupBy('season_year', 'season_type')
+
+  const max_seeded_week = new Map(
+    seeded.map((row) => [
+      `${row.season_year}_${row.season_type}`,
+      Number(row.max_week)
+    ])
+  )
+
+  return unmatched_game_params.filter(({ season_year, season_type, week }) => {
+    const ceiling = max_seeded_week.get(`${season_year}_${season_type}`)
+
+    if (ceiling === undefined) {
+      return false
+    }
+
+    return week <= ceiling
+  }).length
+}
+
 const import_nfl_games_nflverse_nfldata = async ({
   season_year = null,
   season_type = null,
@@ -215,7 +422,8 @@ const import_nfl_games_nflverse_nfldata = async ({
   const result = {
     games_processed: 0,
     games_updated: 0,
-    games_not_matched: 0
+    games_not_matched: 0,
+    games_not_matched_within_seeded_weeks: 0
   }
 
   log('Preloading player cache for QB lookups...')
@@ -320,59 +528,7 @@ const import_nfl_games_nflverse_nfldata = async ({
 
     result.games_processed++
 
-    const game_params = {
-      season_year: item.season,
-      week: item.week,
-      season_type: item.game_type,
-      away_nfl_team: fixTeam(item.away_team),
-      home_nfl_team: fixTeam(item.home_team)
-    }
-
-    let db_game
-
-    if (item.old_game_id) {
-      db_game = await db('nfl_games')
-        .where({
-          ...game_params,
-          esbid: item.old_game_id
-        })
-        .first()
-    }
-
-    if (!db_game) {
-      db_game = await db('nfl_games').where(game_params).first()
-    }
-
-    if (!db_game && item.old_game_id) {
-      const esbid_match = await db('nfl_games')
-        .where({ esbid: item.old_game_id })
-        .first()
-      if (esbid_match) {
-        const nflverse_away = fixTeam(item.away_team)
-        const nflverse_home = fixTeam(item.home_team)
-        if (
-          esbid_match.away_nfl_team === nflverse_away &&
-          esbid_match.home_nfl_team === nflverse_home
-        ) {
-          db_game = esbid_match
-        } else {
-          log(
-            `esbid-only fallback team mismatch for ${item.old_game_id}: nflverse=${nflverse_away}@${nflverse_home} db=${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team} — skipping update`
-          )
-          if (collector) {
-            collector.add_warning(
-              `Game team mismatch on esbid fallback: ${item.old_game_id}`,
-              {
-                old_game_id: item.old_game_id,
-                game_id: item.game_id,
-                nflverse_teams: `${nflverse_away}@${nflverse_home}`,
-                db_teams: `${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team}`
-              }
-            )
-          }
-        }
-      }
-    }
+    const db_game = await find_nfl_game_for_nflverse_item({ item, collector })
 
     if (db_game) {
       const game = format_game(item, { ambiguous_espn_game_ids })
@@ -450,7 +606,15 @@ const import_nfl_games_nflverse_nfldata = async ({
   }
 
   result.games_not_matched = game_not_matched.length
-  log(`${game_not_matched.length} games not matched`)
+  result.games_not_matched_within_seeded_weeks =
+    await count_unmatched_within_seeded_weeks({
+      unmatched_game_params: game_not_matched.map(
+        translate_nflverse_game_params
+      )
+    })
+  log(
+    `${game_not_matched.length} games not matched, ${result.games_not_matched_within_seeded_weeks} of them within a seeded week`
+  )
 
   if (collector) {
     collector.set_stats({
@@ -471,6 +635,14 @@ const import_nfl_games_nflverse_nfldata = async ({
 // the floor is only applied to the cron's unbounded run.
 const NFLVERSE_GAMES_FLOOR_UNBOUNDED = 1000
 
+// Zero by construction, not a tolerance. Every feed row whose translated
+// (season_year, season_type) is seeded at all, and whose translated week is
+// within that group's seeded maximum, describes a game nfl_games already holds
+// -- so it must match by one of the three tiers. Rows past the ceiling are the
+// feed publishing ahead of the schedule import and are excluded upstream by
+// count_unmatched_within_seeded_weeks, which is where the reasoning lives.
+const NFLVERSE_GAMES_NOT_MATCHED_CEILING_UNBOUNDED = 0
+
 const main = async () => {
   let error
   try {
@@ -485,9 +657,20 @@ const main = async () => {
     console.log(
       `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', season_year: argv.year || 'all', ...result })}`
     )
-    throw_if_shortfall(
+    const shortfalls = [
       !argv.year && result.games_processed < NFLVERSE_GAMES_FLOOR_UNBOUNDED
-        ? `import-nfl-games-nflverse-nfldata shortfall: ${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
+        ? `${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
+        : null,
+      !argv.year &&
+      result.games_not_matched_within_seeded_weeks >
+        NFLVERSE_GAMES_NOT_MATCHED_CEILING_UNBOUNDED
+        ? `${result.games_not_matched_within_seeded_weeks} feed games within a seeded week did not match any stored game (ceiling=${NFLVERSE_GAMES_NOT_MATCHED_CEILING_UNBOUNDED} for unbounded run)`
+        : null
+    ].filter(Boolean)
+
+    throw_if_shortfall(
+      shortfalls.length
+        ? `import-nfl-games-nflverse-nfldata shortfall: ${shortfalls.join('; ')}`
         : null
     )
   } catch (err) {

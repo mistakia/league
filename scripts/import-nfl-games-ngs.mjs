@@ -12,6 +12,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import { nfl_week_from_week_type } from '#libs-shared/nfl-postseason-week.mjs'
 
 dayjs.extend(timezone)
 
@@ -22,34 +23,6 @@ const initialize_cli = () => {
 const log = debug('import-games-ngs')
 enable_debug_namespaces('import-games-ngs')
 
-const getWeek = (week, week_type) => {
-  switch (week_type) {
-    case 'PRE':
-    case 'REG':
-    case 'HOF':
-      return week
-
-    case 'WC':
-      return 1
-
-    case 'DIV':
-      return 2
-
-    case 'CON':
-    case 'CONF':
-      return 3
-
-    case 'SB':
-      return 4
-
-    case 'PRO':
-      return week
-
-    default:
-      throw new Error(`invalid week_type: ${week_type}`)
-  }
-}
-
 const format = (item) => {
   const date = item.gameDate ? dayjs(item.gameDate).format('YYYY/MM/DD') : null
   const season_type = item.seasonType
@@ -57,7 +30,7 @@ const format = (item) => {
     ? season_type
     : item.weekNameAbbr
   const time_eastern = item.gameTimeEastern
-  const week = getWeek(item.week, week_type)
+  const week = nfl_week_from_week_type({ week: item.week, week_type })
   const season_year = item.season
   const score = item.score || {}
   const day = date

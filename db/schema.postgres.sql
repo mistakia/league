@@ -33693,7 +33693,7 @@ CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (nfl_t
 -- Name: nfl_games_nflverse_game_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_games_nflverse_game_id ON public.nfl_games USING btree (nflverse_game_id);
+CREATE UNIQUE INDEX nfl_games_nflverse_game_id ON public.nfl_games USING btree (nflverse_game_id);
 
 
 --

@@ -31,6 +31,14 @@ export { default as create_default_league } from './create-default-league.mjs'
 export { default as getOptimizerPositionConstraints } from './get-optimizer-position-constraints.mjs'
 export { default as isOnReleaseWaivers } from './is-on-release-waivers.mjs'
 export { default as fixTeam } from './fix-team.mjs'
+export {
+  nfl_team_franchise_eras,
+  canonical_nfl_teams,
+  non_franchise_nfl_teams,
+  is_canonical_nfl_team,
+  is_non_franchise_nfl_team,
+  resolve_canonical_nfl_team
+} from './nfl-team-franchise-eras.mjs'
 export { default as calculatePercentiles } from './calculate-percentiles.mjs'
 export { default as getExtensionAmount } from './get-extension-amount.mjs'
 export { default as is_before_extension_deadline } from './is-before-extension-deadline.mjs'
