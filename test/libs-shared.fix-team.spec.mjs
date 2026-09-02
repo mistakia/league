@@ -96,4 +96,50 @@ describe('LIBS-SHARED fixTeam', function () {
   it('throws on an unknown team', () => {
     expect(() => fixTeam('XYZ')).to.throw('Invalid team: XYZ')
   })
+
+  it('resolves every Caesars team abbreviation', () => {
+    // enumerated from the distinct team prefixes Caesars writes into the team-grain
+    // market names, not from the aliases that happened to be noticed first
+    const caesars_prefixes = [
+      'ARI',
+      'ATL',
+      'BAL',
+      'BUF',
+      'CAR',
+      'CHI',
+      'CIN',
+      'CLE',
+      'DAL',
+      'DEN',
+      'DET',
+      'GB',
+      'HOU',
+      'IND',
+      'JAX',
+      'KC',
+      'LA',
+      'LAC',
+      'LVR',
+      'MIA',
+      'MIN',
+      'NE',
+      'NOR',
+      'NYG',
+      'NYJ',
+      'PHI',
+      'PIT',
+      'SEA',
+      'SF',
+      'TB',
+      'TEN',
+      'WSC'
+    ]
+    expect(caesars_prefixes.length).to.equal(32)
+    for (const prefix of caesars_prefixes) {
+      expect(() => fixTeam(prefix), prefix).to.not.throw()
+    }
+    expect(fixTeam('WSC')).to.equal('WAS')
+    expect(fixTeam('LVR')).to.equal('LV')
+    expect(fixTeam('NOR')).to.equal('NO')
+  })
 })

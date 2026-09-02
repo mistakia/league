@@ -248,6 +248,7 @@ export default function (team) {
     case 'COMMANDERS':
     case 'REDSKINS':
     case 'WSH':
+    case 'WSC':
     case 'WAS':
     case 'WAS COMMANDERS':
       return 'WAS'

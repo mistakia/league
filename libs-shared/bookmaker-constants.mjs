@@ -126,6 +126,26 @@ export const team_game_market_types = {
     'GAME_TEAM_FIRST_QUARTER_ALT_RECEIVING_YARDS'
 }
 
+// The TEAM-grain half of team_game_market_types, derived from the group rather
+// than hand-listed so a constant added above cannot silently miss it.
+//
+// The split this encodes: a GAME-grain market covers both teams and settles
+// once for the game (GAME_SPREAD, GAME_TOTAL, the period-scoped lines). A
+// TEAM-grain market covers ONE team, so a book publishes one market per team
+// per game and the two are distinguishable only by whose statistic they name.
+// Where the selections are a bare over/under, that distinction survives solely
+// in selection_pid -- leave it null and the two teams' lines collapse onto one
+// key for anything joining on (esbid, market_type, selection_name).
+//
+// The TEAM token in the constant name is what marks the grain, which is why
+// this reads tokens rather than a prefix: GAME_ALT_TEAM_TOTAL is team grain and
+// does not start with GAME_TEAM_.
+export const team_grain_market_types = new Set(
+  Object.values(team_game_market_types).filter((market_type) =>
+    market_type.split('_').includes('TEAM')
+  )
+)
+
 export const player_season_prop_types = {
   SEASON_PASSING_YARDS: 'SEASON_PASSING_YARDS',
   SEASON_PASSING_TOUCHDOWNS: 'SEASON_PASSING_TOUCHDOWNS',
