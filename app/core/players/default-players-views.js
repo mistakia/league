@@ -185,7 +185,7 @@ const views = {
       'stats.receiving_yards',
       'stats.receiving_touchdowns',
       'stats.drops',
-      'stats.dryprecy',
+      'stats.drprecy',
       'stats.targets',
       'stats.dptrg_pct',
       'stats._ayptrg',
