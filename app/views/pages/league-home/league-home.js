@@ -117,7 +117,7 @@ export default function LeagueHomePage({
           </AlertTitle>
           The player pool will lock in preparation for the auction. You will not
           be able to release any players once the FA period begins. Any players
-          left on Reserve at the start of the FA period will be ineligble to
+          left on Reserve at the start of the FA period will be ineligible to
           enter a starting lineup for the first six weeks of the season.
           <br />
           <br />
