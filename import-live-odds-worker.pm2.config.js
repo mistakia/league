@@ -31,6 +31,32 @@ module.exports = {
         // a namespace nothing had ever enabled.
         DEBUG:
           'import-live-odds-worker,draftkings,draftkings-tracking,pinnacle,prizepicks,insert-prop-markets,insert-prop-market-selections',
+        // Declares the cadence of the three book arms to the runs ledger.
+        // report_job forwards JOB_SCHEDULE/JOB_SCHEDULE_TYPE to
+        // `base run report --schedule`, which is how every league CRONTAB job
+        // gets its cadence -- the preamble sets them per line. A pm2 service has
+        // no crontab line, so without these the three sources
+        // (service:league-draftkings-odds, service:league-import-pinnacle-odds,
+        // service:league-prizepicks-projections) reported no cadence at all and
+        // check-stale-runs fell back to its flat 3-day window. A 4-hour arm that
+        // stops is then invisible for three days, and the only other ledger
+        // signal this worker emits is a 60s `alive` tick that stays green while
+        // an individual arm is dead. That is why a PrizePicks arm that had not
+        // cycled since a deploy had to be found by a hand-written probe.
+        //
+        // `every` rather than a cron expression because BOOKMAKER_CONFIG
+        // throttles on an interval measured from the last run, not a wall clock.
+        // An interval cadence is zone-independent by construction, so it
+        // deliberately carries no timezone -- see the is_interval_cadence branch
+        // in user-base cli/monitoring/check-stale-runs.mjs, where marking one
+        // untimezoned would additionally force the flat 3-day window back on.
+        //
+        // One value covers all three arms because all three share this process
+        // AND share the same 4-hour interval_ms. If a book's interval ever
+        // diverges, this env var can no longer express it and the cadence has to
+        // move to a per-source entry in user-base config/runs-source-cadence.json.
+        JOB_SCHEDULE: '4h',
+        JOB_SCHEDULE_TYPE: 'every',
         BASE_MACHINE_SLUG: 'digitalocean-0',
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         USER_BASE_DIRECTORY:
