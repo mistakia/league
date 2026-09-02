@@ -521,6 +521,30 @@ const persist_auction_settlement = async ({
       `auction settlement did not add exactly one roster row to team ${winner_tid}: ${roster_rows_before} -> ${roster_rows_after}`
     )
   }
+
+  // AND THE BUDGET ONLY FALLS. The other half of monotonicity, and the half a
+  // roster count cannot see: a team whose remaining cap ROSE across a settlement
+  // re-enters eligible sets it had left, and completeness once reached would
+  // stop staying reached. Read through `trx` for the same reason the count is --
+  // a check that reads outside the transaction it guards reports the state
+  // before the write.
+  const [team_after] = await trx('teams')
+    .where({ team_id: winner_tid, season_year })
+    .select('salary_cap')
+  const cap_after = new Roster({
+    roster: await getRoster({ tid: winner_tid }),
+    league
+  }).availableCap
+  if (cap_after > cap_before) {
+    throw new Error(
+      `auction settlement raised team ${winner_tid}'s available cap: $${cap_before} -> $${cap_after}`
+    )
+  }
+  if (team_after && team_after.salary_cap > cap_before) {
+    throw new Error(
+      `auction settlement raised team ${winner_tid}'s salary cap: $${cap_before} -> $${team_after.salary_cap}`
+    )
+  }
 }
 
 /**
