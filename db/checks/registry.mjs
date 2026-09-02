@@ -873,6 +873,133 @@ const registry = [
   },
 
   {
+    check_id: 'prop-market-event-listing-duplication',
+    invariant:
+      'A book publishes one NFL game under ONE of its own event ids, so a (source_id, esbid) pair carries a single source_event_id. Nothing watches it. The sibling prop-market-open-close-esbid-coherence asks the opposite question — whether one market’s two time_type rows name the same GAME — and is structurally blind to this one: each duplicate listing is internally coherent, every row naming the same esbid, so the coherence predicate passes on all of them. Both are needed because the two failures point in opposite directions across the same edge (one game to many events here, one event to many games there), and neither predicate can be reached from the other. THE CONSEQUENCE IS STORED REDUNDANCY, NOT A WRONG NUMBER: no production consumer aggregates graded selections across listings (enumerated 2026-09-02 in user:task/league/resolve-duplicate-book-event-listings.md), so this is a storage and API-correctness condition. api/routes/players.mjs keys markets by (source_id, source_market_id) and therefore returns a republished market twice for one book and one game. The class was found BY HAND while repairing Caesars team attribution and would regrow silently after any import fix, which is the whole reason it is registered rather than repaired and forgotten.',
+    grain: ['source_id', 'esbid'],
+    rows: async () => {
+      // Distinct from the CLEAN sentinel a book emits when it has no duplicated
+      // esbid. The two mean opposite things and a shared null grain key would
+      // make them indistinguishable in the report.
+      const UNGRADEABLE_SENTINEL = '__ungradeable__'
+
+      // ONE aggregate at the (source_id, esbid) grain feeding BOTH arms, so the
+      // denominator cannot drift away from the scan predicate.
+      //
+      // A group is gradeable only where at least one row carries a
+      // source_event_id. count(distinct) IGNORES nulls, so an all-null group
+      // scores 1 distinct event and reads CLEAN however many listings it really
+      // holds — the vacuous direction, and the reason the null count is carried
+      // separately rather than left to the distinct count.
+      const esbid_grain = `
+        select
+          source_id,
+          esbid,
+          count(source_event_id) as event_id_rows,
+          count(distinct source_event_id) as distinct_events
+        from prop_markets_index
+        where esbid is not null
+        group by 1, 2
+      `
+
+      const { rows: per_source } = await db.raw(
+        `
+        with esbid_grain as (${esbid_grain})
+        select
+          source_id::text as source_id,
+          count(*) filter (where event_id_rows > 0) as gradeable_esbids,
+          count(*) filter (where event_id_rows = 0) as ungradeable_esbids
+        from esbid_grain
+        group by 1
+        `
+      )
+
+      const { rows: duplicated } = await db.raw(
+        `
+        with esbid_grain as (${esbid_grain})
+        select source_id::text as source_id, esbid::text as esbid
+        from esbid_grain
+        where event_id_rows > 0
+          and distinct_events > 1
+        `
+      )
+
+      /** @type {Map<string, string[]>} */
+      const duplicated_by_source = new Map()
+      for (const row of duplicated) {
+        const found = duplicated_by_source.get(row.source_id) || []
+        found.push(row.esbid)
+        duplicated_by_source.set(row.source_id, found)
+      }
+
+      // Per book rather than one global pair, for the same reason as the
+      // sibling coherence check: the population is concentrated — PrizePicks
+      // and Pinnacle hold 96% of it and three books hold none — so a global
+      // denominator would let the two failing books collapse to nothing and
+      // hide behind DraftKings' 813 healthy esbids.
+      return per_source.flatMap((/** @type {Record<string, any>} */ row) => {
+        const source_id = row.source_id
+        const gradeable_esbids = Number(row.gradeable_esbids)
+        const ungradeable_esbids = Number(row.ungradeable_esbids)
+        const found = duplicated_by_source.get(source_id) || []
+
+        const graded = found.length
+          ? found.map((/** @type {string} */ esbid) => ({
+              source_id,
+              esbid,
+              numerator: 1,
+              denominator: gradeable_esbids,
+              is_gradeable: true
+            }))
+          : [
+              {
+                source_id,
+                esbid: null,
+                numerator: 0,
+                denominator: gradeable_esbids,
+                is_gradeable: true
+              }
+            ]
+
+        return [
+          ...graded,
+          // Emitted UNCONDITIONALLY, including at the zero it reads today. A
+          // book whose event ids stopped arriving would otherwise leave the
+          // scan silently, and silence here reads as "no problems found" when
+          // the honest answer is "I found nothing to check".
+          {
+            source_id,
+            esbid: UNGRADEABLE_SENTINEL,
+            numerator: ungradeable_esbids,
+            denominator: gradeable_esbids + ungradeable_esbids,
+            is_gradeable: false
+          }
+        ]
+      })
+    },
+    precondition: (/** @type {Record<string, any>} */ row) => row.is_gradeable,
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: a book either names one event for a game or it names several, and there is no benign class — so max_count 0 is the only honest threshold and there is nothing here to tune. THIS CHECK IS RED THE DAY IT LANDS, which is a correct reading of a known defect rather than a broken detector, and it is also the demonstration that the predicate can speak. Measured on production 2026-09-02: 509 duplicated esbids against 3,682 gradeable esbids across eight books — PRIZEPICKS 399 of 722, PINNACLE 93 of 511, CAESARS 16 of 553, FANDUEL 1 of 715, and exactly ZERO from DRAFTKINGS (813), BETRIVERS (171), BETMGM (152) and FANATICS (45). That concentration is why the denominator is per book. THE THREE CAUSES ARE DIFFERENT AND ONLY ONE IS OURS. Pinnacle is an importer defect: scripts/import-pinnacle-odds.mjs sets source_event_id to the matchup id and never filters sibling matchups, so /leagues/889/matchups returns one game as several containers and each becomes a listing — verified on esbid 2025121413, whose three listings agree on market type, market count and line suffix, differing only in the event-id prefix of source_market_id. Caesars pairs a full 67-market-type listing with a thin republication carrying 2 to 4 types and 4 to 6 markets, all of them lines the full listing already holds. PrizePicks is overwhelmingly a RE-LISTING rather than a duplicate — 361 of its 399 are cleanly superseded, the older listing’s last observation preceding the newer one’s first — while Pinnacle (20 of 93) and Caesars (2 of 16) run CONCURRENTLY and have no abandoned listing to drop. THE REDUNDANT-STORAGE COST IS ALMOST ENTIRELY PINNACLE’S, re-derived 2026-09-02 at the settled-selection grain keyed on (esbid, market_type, selection_pid, selection_name, selection_metric_line, selection_type, time_type): 15,633 graded selection rows are redundant copies spanning two listings — PINNACLE 14,736, FANDUEL 797, PRIZEPICKS 100, CAESARS 0. So the book with the most duplicated esbids carries 0.6% of the redundancy and the Pinnacle import fix removes 94% of it. Two earlier readings of that table were wrong in the same way and both are recorded here so the mistake is not made a third time: prop_market_selections_index is keyed by time_type as well as source_market_id, so a join on (source_id, source_market_id) alone fans every selection out across the OPEN and CLOSE market rows and DOUBLES the graded count. NULL source_event_id IS MEASURED, NOT REASONED ABOUT: zero groups are all-null today, so the un-gradeable arm reads 0 for every book; 52 gradeable groups carry a null event row alongside a real one (312 rows in total, all PrizePicks), and 43 of those already report as findings, leaving 9 groups where a null could in principle mask a second listing. COST, measured with explain analyze 2026-09-02: 401ms for the shared aggregate, a parallel sequential scan over prop_markets_index hash-aggregating at 465kB per worker — trivial memory, and the seconds are the number to watch rather than the plan. WHAT IT DELIBERATELY DOES NOT REPORT: the 1,160,953 rows of 3,075,248 carrying no esbid at all, overwhelmingly futures, which have no game to be duplicated under. READ A RISE, NOT A FALL — a falling count is the Pinnacle import fix landing, and a rise after it deploys is a regression in that importer.',
+    // Eight rows when fully clean, one per book, so the row-count floor is very
+    // nearly a tautology and the denominator carries the signal. 6 sits under
+    // today's eight and still catches two books dropping out of the scan.
+    min_gradeable_units: 6,
+    // REQUIRED here for the reason above: the graded row count is fixed by the
+    // number of books when clean and cannot fall with the corpus, so only the
+    // denominator moves. Read against the SMALLEST graded population, which is
+    // FANATICS at 45 esbids measured 2026-09-02 -- a genuinely small book, not
+    // a degraded one. Nothing prunes prop_markets_index (the importers upsert),
+    // so every book's population only grows, and 20 leaves better than half its
+    // headroom against the reading this exists to catch: a book whose esbid
+    // resolution broke wholesale, which would otherwise emit a clean sentinel
+    // over a scan of nothing.
+    min_denominator: 20,
+    repair_command:
+      'DO NOT DELETE A LISTING TO MAKE THE COUNT GO DOWN. A finding names a game carrying two of a book’s event ids; it does not say which listing is redundant, and for Pinnacle and Caesars the listings run concurrently so there is no later-supersedes-earlier rule to apply. Fix the cause per book. PINNACLE is the only one with a known local fix and holds 94% of the redundant rows: filter sibling matchups in scripts/import-pinnacle-odds.mjs so one game yields one source_event_id, owned by user:task/league/resolve-duplicate-book-event-listings.md. CAESARS has no established cause — the thin listing is characterised but nothing explains how one import-caesars-odds-v4.mjs run yields two event ids — and it carries zero graded rows, so it is the lowest-value repair here. PRIZEPICKS is a re-listing and is deliberately left alone; its duplicates are cleanly superseded, the read paths already collapse them, and it contributes 100 redundant graded rows. A repair that repoints or removes rows must also re-settle the selections beneath them, since prop_market_selections_index holds results graded under the old market id.'
+  },
+
+  {
     check_id: 'prop-market-selection-grade-consistency',
     invariant:
       'A settled OVER/UNDER selection’s result is the grade its OWN stored numbers produce: selection_result is a total function of metric_result_value against selection_metric_line, with over-the-line WON for OVER and LOST for UNDER, under-the-line the reverse, and equal a PUSH. Both operands sit on the row being graded, so this needs no reference and no join — the check reads one table and asks whether a row agrees with itself. Nothing enforces it. libs-server/prop-market-settlement/selection-result-writer.mjs writes both columns in one UPDATE today, but they are two independent CASE expressions over an updates array rather than one derivation, so a row can carry a metric from one game and a result from another and no constraint objects. Before 15c18bae8 the two columns were written by SEPARATE statements against DIFFERENT tables at DIFFERENT grains — selection_result at selection grain on prop_market_selections_index, metric_result_value at market grain on prop_markets_index, and the latter only where the metric was non-null — which is the concrete path by which a row acquires divergent provenance. THE SIBLING CHECK CANNOT SEE THIS. prop-market-open-close-esbid-coherence grades whether a market’s two rows name the same game and never reads a result value at all; a market can be perfectly coherent on esbid and still carry a selection graded against the wrong line, and it can be drifted while every selection beneath it agrees with itself. This is also the only oracle in the registry that reads settlement OUTPUT rather than its inputs, so a settlement defect that writes a wrong answer into a well-formed row is invisible everywhere else.',
@@ -1203,7 +1330,7 @@ const registry = [
     precondition: (/** @type {Record<string, any>} */ row) => row.is_gradeable,
     max_count: 0,
     calibration:
-      "EXACT: the recomputation reproduces the settlement handler's own semantics, so any difference is a defect rather than tolerance. THIS CHECK IS GREEN THE DAY IT LANDS AND THAT IS THE CORRECT READING, not a broken detector — see the invariant for why agreement is the expected state. Measured on production 2026-09-02 by running the SHIPPED queries: 378,522 graded rows across five books, of which 377,839 are gradeable and 0 disagree. Cost 22.5s at a peak of about 92MB (a 92,211kB quicksort and a 74,944kB hash), read with EXPLAIN (ANALYZE, BUFFERS) rather than inferred, over 3-4 parallel workers on a host the runner shares. DEMONSTRATED RED IN TWO WAYS, because a check that has never been shown red is not a check. Inverting the comparison to `is not distinct from` over the same corpus reports exactly the gradeable count in every book — 230,372 / 135,973 / 10,482 / 876 / 136 — so the comparison and the numeric cast are both speaking and the 0 is a finding rather than a predicate that cannot match. More to the point, SIMULATING THE DEFECT THIS CHECK EXISTS FOR turns it red hard: over the drifted GAME_LONGEST_RECEPTION markets (those whose OPEN and CLOSE rows name different games), 1,054 graded selections agree with their own row's esbid 0 times out of 1,054, and disagree 980 times when recomputed against the sibling row's esbid. That is what a repoint without a re-settle looks like, and this check reports 93 percent of it. UN-GRADEABLE IS 683 ROWS AND WORTH WATCHING: 617 FANDUEL and 66 DRAFTKINGS graded rows whose market row carries no esbid or whose game has no plays loaded. A RISE there means settlement has begun writing metrics it cannot substantiate, which this check would otherwise read as a shrinking population and report cleaner. THE 52 DISAGREEMENTS AN EARLIER AD-HOC ORACLE REPORTED ON THIS ARM ARE NOT DEFECTS IN SETTLEMENT OUTPUT and must not be read as a threshold this check is failing to meet — that oracle recomputed the longest reception over `is_completion = true` instead of the handler's own play filter, and 48 of the 52 are the two 2025 conference-championship games (esbids 2025012600 and 2025012601), where is_completion is NULL on all 219 and 193 plays so the oracle saw no receptions at all. The remaining 4 are one real wrong grade with a cause in nfl_plays rather than in settlement, recorded on user:task/league/wire-settlement-output-data-checks.md.",
+      "EXACT: the recomputation reproduces the settlement handler's own semantics, so any difference is a defect rather than tolerance. THIS CHECK IS GREEN THE DAY IT LANDS AND THAT IS THE CORRECT READING, not a broken detector — see the invariant for why agreement is the expected state. Measured on production 2026-09-02 by running the SHIPPED queries: 378,522 graded rows across five books, of which 377,839 are gradeable and 0 disagree. Cost 22.5s at a peak of about 92MB (a 92,211kB quicksort and a 74,944kB hash), read with EXPLAIN (ANALYZE, BUFFERS) rather than inferred, over 3-4 parallel workers on a host the runner shares. DEMONSTRATED RED THREE WAYS, because a check that has never been shown red is not a check, and the third of them is the only one that is not a simulation. Inverting the comparison to `is not distinct from` over the same corpus reports exactly the gradeable count in every book — 230,372 / 135,973 / 10,482 / 876 / 136 — so the comparison and the numeric cast are both speaking and the 0 is a finding rather than a predicate that cannot match. More to the point, SIMULATING THE DEFECT THIS CHECK EXISTS FOR turns it red hard: over the drifted GAME_LONGEST_RECEPTION markets (those whose OPEN and CLOSE rows name different games), 1,054 graded selections agree with their own row's esbid 0 times out of 1,054, and disagree 980 times when recomputed against the sibling row's esbid. That is what a repoint without a re-settle looks like, and this check reports 93 percent of it. UN-GRADEABLE IS 683 ROWS AND WORTH WATCHING: 617 FANDUEL and 66 DRAFTKINGS graded rows whose market row carries no esbid or whose game has no plays loaded. A RISE there means settlement has begun writing metrics it cannot substantiate, which this check would otherwise read as a shrinking population and report cleaner. THE 52 DISAGREEMENTS AN EARLIER AD-HOC ORACLE REPORTED ON THIS ARM ARE NOT DEFECTS IN SETTLEMENT OUTPUT and must not be read as a threshold this check is failing to meet — that oracle recomputed the longest reception over `is_completion = true` instead of the handler's own play filter, and 48 of the 52 are the two 2025 conference-championship games (esbids 2025012600 and 2025012601), where is_completion is NULL on all 219 and 193 plays so the oracle saw no receptions at all. The remaining 4 were a real wrong grade, and chasing them is what produced this check's strongest evidence. THE THIRD DEMONSTRATION IS ON PRODUCTION DATA, NOT IN SIMULATION. Their cause was 16 nfl_plays rows recording an INCOMPLETE pass while carrying yardage for it, cleared by db/adhoc/2026-09-02-clear-phantom-receiving-yards-on-incompletions.sql. This check read 0 before that repair, went RED on exactly the 8 selections the repair stranded — Cade Otton's longest reception 16.0 against a true 6.0, and Aidan O'Connell's longest completion 48.0 against a true 24.0, each OPEN and CLOSE, each two selections — and returned to 0 once those two markets were re-settled. Both had flipped a winner at their line, so 4 of the 8 were recorded WON and were not. That whole sequence is the staleness shape the invariant describes, walked end to end against the live corpus: green, red on a real defect, green again after the repair.",
     // Five graded rows when fully clean, one per book that settles anything
     // under these types. The un-gradeable arms do not count toward this floor,
     // so a book whose whole population becomes un-gradeable fires it.
