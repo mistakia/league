@@ -86,6 +86,9 @@ const main = async () => {
     `league-scoped tables from the fixture reset list: ${LEAGUE_SCOPED_TABLES.length}`
   )
   console.log(`board tables copied: ${CLONED_BOARD_TABLES.join(', ')}`)
+  console.log(
+    "  narrowed -- users_teams: only the target league's commissioner is enrolled; every other team is left unowned"
+  )
   for (const [table, reason] of Object.entries(NOT_CLONED_REASONS)) {
     console.log(`  not copied -- ${table}: ${reason}`)
   }

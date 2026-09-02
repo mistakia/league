@@ -454,7 +454,25 @@ describe('clone-league', function () {
       expect(history).to.have.length(3)
     })
 
-    it('lets the same users reach the copy', async function () {
+    it('enrolls the commissioner and nobody else', async function () {
+      // The source has twelve owners, one per team, and only user 1 is its
+      // commissioner. Asserting BOTH halves is what makes this a real check: a
+      // clone that copied every row would satisfy "user 1 can reach it" on its
+      // own, so the eleven who must NOT be there are the discriminating case.
+      // Membership is not cosmetic -- a users_teams row puts the clone in that
+      // manager's league list and lets them write to it.
+      const source_owners = await knex('users_teams')
+        .whereIn(
+          'tid',
+          (await knex('teams').where({ lid: source_lid, season_year })).map(
+            (team) => team.team_id
+          )
+        )
+        .where({ season_year })
+      expect(
+        source_owners.map((row) => row.user_id).sort((a, b) => a - b)
+      ).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
       const { lid } = await knex.transaction((trx) =>
         clone_league({ trx, from_lid: source_lid, season_year })
       )
@@ -465,20 +483,49 @@ describe('clone-league', function () {
       const owners = await knex('users_teams')
         .whereIn('tid', cloned_tids)
         .where({ season_year })
-      expect(owners.map((row) => row.user_id).sort()).to.deep.equal(
-        (
-          await knex('users_teams')
-            .whereIn(
-              'tid',
-              (await knex('teams').where({ lid: source_lid, season_year })).map(
-                (team) => team.team_id
-              )
-            )
-            .where({ season_year })
+      expect(owners.map((row) => row.user_id)).to.deep.equal([1])
+
+      // The commissioner is enrolled on the team they owned in the source, not
+      // on an arbitrary one -- a clone that mapped the tid wrong would still
+      // report one row.
+      const source_team = await knex('users_teams')
+        .where({ user_id: 1, season_year })
+        .whereIn(
+          'tid',
+          (await knex('teams').where({ lid: source_lid, season_year })).map(
+            (team) => team.team_id
+          )
         )
-          .map((row) => row.user_id)
-          .sort()
+        .first()
+      const cloned_team = await knex('teams')
+        .where({ lid, season_year, team_id: owners[0].tid })
+        .first()
+      const source_team_row = await knex('teams')
+        .where({ lid: source_lid, season_year, team_id: source_team.tid })
+        .first()
+      expect(cloned_team.abbreviation).to.equal(source_team_row.abbreviation)
+    })
+
+    it('leaves the other teams unowned rather than reassigning them', async function () {
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
       )
+
+      const cloned_teams = await knex('teams').where({ lid, season_year })
+      const owned_tids = (
+        await knex('users_teams')
+          .whereIn(
+            'tid',
+            cloned_teams.map((team) => team.team_id)
+          )
+          .where({ season_year })
+      ).map((row) => row.tid)
+
+      // Twelve teams on the board, one of them owned. The clone must not hand
+      // the operator every team: that would put them on both sides of every
+      // matchup.
+      expect(cloned_teams).to.have.length(12)
+      expect(owned_tids).to.have.length(1)
     })
 
     it('leaves the source unwritten across a full run', async function () {
@@ -1043,7 +1090,7 @@ describe('clone-league', function () {
       const { lid } = await knex.transaction((trx) =>
         clone_league({ trx, from_lid: source_lid, season_year })
       )
-      expect(copied.users_teams).to.equal(12)
+      expect(copied.users_teams).to.equal(1)
 
       expect(
         await knex('users_teams').whereIn(

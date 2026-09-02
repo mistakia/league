@@ -216,6 +216,10 @@ export const diff_counts = (before, after) =>
  * INNER JOINs it to source each rostered player's salary, because
  * `rosters_players` carries no value column. Omit it and every rostered player
  * silently disappears from the cloned roster and the cap arithmetic is wrong.
+ *
+ * `users_teams` is copied but NOT copied WHOLE -- it is narrowed to the target
+ * league's commissioner, so a clone enrolls nobody who did not create it. See
+ * clone_league_board.
  */
 export const CLONED_BOARD_TABLES = [
   'teams',
@@ -546,10 +550,27 @@ export const clone_league_board = async ({
     return mapped
   }
 
-  const users_teams = await trx('users_teams').whereIn(
-    'tid',
-    Array.from(team_id_map.keys())
-  )
+  // ONLY THE COMMISSIONER IS ENROLLED. `users_teams` is league MEMBERSHIP: a
+  // row here puts the league in that user's league list, lets them open it and
+  // write to it, and makes them a notification recipient. Copying the source's
+  // rows enrolled all fifteen of league 1's managers into the auction mirror --
+  // a league none of them joined, running a test auction, where a click writes
+  // real rows. Nobody but the operator should be able to reach a clone.
+  //
+  // Scoped to the target's own `commissioner_user_id` rather than to a passed
+  // id, so it is the same answer on --create (copied from the source) and on
+  // --sync (the target's preserved configuration), and so there is no argument
+  // that can widen it back out.
+  //
+  // The other teams are left UNOWNED, not reassigned. A clone exists to walk
+  // one manager's surfaces, and handing the operator ten teams would put them
+  // in every matchup on both sides.
+  const { commissioner_user_id } = await trx('leagues')
+    .where({ league_id: to_lid })
+    .first()
+  const users_teams = await trx('users_teams')
+    .whereIn('tid', Array.from(team_id_map.keys()))
+    .where({ user_id: commissioner_user_id })
   copied.users_teams = await insert_in_batches({
     trx,
     table: 'users_teams',
