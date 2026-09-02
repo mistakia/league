@@ -1,7 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { get_auction_state, get_app, get_current_league } from '@core/selectors'
+import {
+  get_auction_state,
+  get_app,
+  get_current_league,
+  get_teams_for_current_league
+} from '@core/selectors'
 import { player_actions } from '@core/players'
 import { league_actions } from '@core/leagues'
 import { roster_actions } from '@core/rosters'
@@ -13,9 +18,15 @@ const map_state_to_props = createSelector(
   get_auction_state,
   get_app,
   get_current_league,
-  (auction, app, league) => ({
+  get_teams_for_current_league,
+  (auction, app, league, teams) => ({
     transactions: auction.transactions,
     teamId: app.teamId,
+    // Whether `teamId` is a team of the league ON SCREEN. It is not always:
+    // AUTH_FULFILLED adopts the user's FIRST league's team, and for a manager
+    // whose first league is not this one there is a window where the two
+    // disagree.
+    is_team_in_league: Boolean(app.teamId && teams.has(app.teamId)),
     is_hosted_league: Boolean(league.is_hosted)
   })
 )

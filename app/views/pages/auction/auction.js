@@ -19,6 +19,7 @@ export default function AuctionPage({
   load_auction_elections,
   load_auction_blocks,
   teamId,
+  is_team_in_league,
   is_hosted_league
 }) {
   const { lid } = useParams()
@@ -33,10 +34,21 @@ export default function AuctionPage({
   // accepted for the whole free agency period rather than only while a player
   // is open. The socket join is a separate, narrower thing that belongs to live
   // blocks.
+  // THE PAIR HAS TO BE CONSISTENT, and briefly it is not. `leagueId` comes from
+  // the ROUTE while `teamId` comes from app state, and AUTH_FULFILLED adopts
+  // the user's FIRST league's team -- so for a manager whose first league is not
+  // the one on screen, this fired once with another league's team against this
+  // league's id. `verifyUserTeam` answers 400 `invalid leagueId` and the api
+  // saga turns every 400 into a red error toast, so the auction page greeted
+  // those managers with a failure notice on every load.
+  //
+  // Waiting for `teamId` to be a team OF THIS LEAGUE is the condition that
+  // actually holds: comparing app.leagueId to the route does not, because the
+  // league moves to the one on screen before the team does.
   useEffect(() => {
-    if (!teamId) return
+    if (!teamId || !is_team_in_league) return
     load_auction_elections({ leagueId: lid, teamId })
-  }, [load_auction_elections, lid, teamId])
+  }, [load_auction_elections, lid, teamId, is_team_in_league])
 
   // The block schedule is NOT gated on teamId: opt-ins are public and the
   // convened blocks and the computed final block are facts about the auction
@@ -81,5 +93,6 @@ AuctionPage.propTypes = {
   load_auction_elections: PropTypes.func,
   load_auction_blocks: PropTypes.func,
   teamId: PropTypes.number,
+  is_team_in_league: PropTypes.bool,
   is_hosted_league: PropTypes.bool
 }
