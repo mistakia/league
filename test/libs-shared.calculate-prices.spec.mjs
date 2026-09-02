@@ -183,6 +183,48 @@ describe('LIBS-SHARED calculate-prices', function () {
       expect(players[2].market_salary).to.equal(undefined)
     })
 
+    // The rows these run on come from get-players, which is the WRITER'S loader
+    // as well as the payload builder, so market_salary arrives pre-populated
+    // with whatever the previous run stored. Skipping such a player rather than
+    // clearing him leaves the stale value for the writer to store straight back
+    // -- a loop that never converges. Measured on the live 2026 rest-of-season
+    // board: 1,680 rows with points-added correctly NULL and both salary columns
+    // still holding the 0.00 from the sentinel era.
+    it('clears a stale salary loaded from a previous run', function () {
+      const players = [
+        { pid: 'a', pts_added: { ros: 30 }, market_salary: { ros: 11 } },
+        // No value on the aggregate, but carrying last run's price.
+        {
+          pid: 'absent',
+          pts_added: {},
+          market_salary: { ros: 0 },
+          projected_points_added_positive_including_cap_savings: { ros: 0 }
+        }
+      ]
+
+      calculatePrices({ league_format, players, aggregate_key: 'ros' })
+
+      expect(players[0].market_salary.ros).to.be.greaterThan(0)
+      expect(players[1].market_salary).to.not.have.property('ros')
+      expect(
+        players[1].projected_points_added_positive_including_cap_savings
+      ).to.not.have.property('ros')
+    })
+
+    // A key the aggregate does not name must survive, or clearing one period
+    // would blank the sibling period stored beside it on the same map.
+    it('leaves other aggregates on the map alone', function () {
+      const players = [
+        { pid: 'a', pts_added: { ros: 30 } },
+        { pid: 'absent', pts_added: {}, market_salary: { ros: 0, season: 25 } }
+      ]
+
+      calculatePrices({ league_format, players, aggregate_key: 'ros' })
+
+      expect(players[1].market_salary).to.not.have.property('ros')
+      expect(players[1].market_salary.season).to.equal(25)
+    })
+
     // Two variants of the same board are genuinely different quantities, not a
     // rescale: a player can carry a positive positive-only aggregate and a
     // negative net one, so he belongs in the first denominator and not the

@@ -116,7 +116,24 @@ const calculatePrices = ({ league_format, players, aggregate_key }) => {
     //
     // The weekly aggregate keys are unaffected: they carry the `-999` sentinel,
     // which is finite, prices negative and floors to 0 exactly as before.
+    //
+    // DELETE, DO NOT MERELY SKIP. The rows this runs on come from
+    // libs-server/get-players.mjs, which is the writer's loader as well as the
+    // API payload builder -- so `market_salary[aggregate_key]` arrives already
+    // populated with whatever the PREVIOUS run stored. Skipping leaves that
+    // stale value untouched and the writer stores it straight back, which is a
+    // loop that never converges: measured on the live 2026 rest-of-season board,
+    // 1,680 rows came out with the points-added correctly NULL and both salary
+    // columns still holding the 0.00 the sentinel era had priced them at.
     if (!Number.isFinite(player.pts_added?.[aggregate_key])) {
+      if (player.market_salary) {
+        delete player.market_salary[aggregate_key]
+      }
+      if (player.projected_points_added_positive_including_cap_savings) {
+        delete player.projected_points_added_positive_including_cap_savings[
+          aggregate_key
+        ]
+      }
       continue
     }
 
