@@ -26,12 +26,16 @@ import {
   sides of a real matchup. A consumer picking a side of a spread by matching the
   player's week team therefore renders the OPPOSING side, silently.
 
-  And the wrong value is SELF-PERPETUATING. The snap-only branch of the
-  generator resolves a team as `existing gamelog team || play_stats team ||
-  resolver`, so a regeneration reads the bad row back as its first-priority
-  evidence and rewrites it unchanged. Re-running the writer is not a repair,
-  which means nothing drains this class on its own and a detector is the only
-  way it is ever seen.
+  And the wrong value WAS SELF-PERPETUATING. The snap-only branch of the
+  generator resolved a team as `existing gamelog team || play_stats team ||
+  resolver`, so a regeneration read the bad row back as its first-priority
+  evidence and rewrote it unchanged -- which is why re-running the writer was
+  never a repair, and why db/adhoc/2026-09-02-repair-gamelog-week-team.mjs had
+  to overwrite the 547 admissible rows directly. Since 2026-09-02 that readback
+  loses to a verdict both resolver sources agree on (`is_agreeing_verdict`), so
+  the branch can no longer re-mint the class. It still cannot DRAIN one: it
+  writes only where the two sources agree, and every other stored team survives
+  untouched, so this detector remains the only way the class is seen.
 
   ## The oracle, and why it is two sources rather than one
 
