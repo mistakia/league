@@ -13,7 +13,10 @@ import {
   announce_auction_settlement,
   broadcast_auction_settlement
 } from '#libs-server/auction-settlement.mjs'
-import { format_nomination_complete_message } from '#libs-server/format-auction-discord-message.mjs'
+import {
+  format_nomination_complete_message,
+  format_nomination_message
+} from '#libs-server/format-auction-discord-message.mjs'
 import { user2 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -358,5 +361,114 @@ describe('auction settlement announcement', function () {
     } finally {
       socket.close()
     }
+  })
+
+  // THE SAME HOLE, ONE MESSAGE OVER.
+  //
+  // `format_nomination_message` is the announcement at the OTHER end of a
+  // player -- it opens the nomination and names whom the auction is waiting on,
+  // where `format_nomination_complete_message` closes it. It sits behind the
+  // same election-mode gate, is reached from the same swallow-everything
+  // `try/catch`, and until now no spec anywhere referenced it either.
+  //
+  // WHAT THIS COVERS AND WHAT IT DOES NOT. These are builder cases -- the
+  // equivalent of case 1 above, and they carry its limitation: content
+  // assertions cannot tell a called builder from an uncalled one. The
+  // corresponding case 2, that `_send_nomination_notification` actually calls
+  // it, has no seam to hang on. `announce_auction_settlement` is injectable
+  // because e817d65cc made it so; the nomination path has no such parameter,
+  // and adding one is a runtime change on a live auction. Left explicitly
+  // uncovered rather than papered over with a content assertion dressed up as
+  // an invocation one.
+  describe('the nomination announcement', function () {
+    it('names the team, the player and the amount it opened at', async function () {
+      this.timeout(60 * 1000)
+
+      const tids = await team_ids()
+      const pid = await nominate_free_agent({ tid: 1 })
+      const outstanding = tids.filter((tid) => tid !== 1)
+
+      const message = await format_nomination_message({
+        team_id: 1,
+        player_id: pid,
+        bid_amount: 0,
+        eligible_teams: outstanding,
+        is_nomination: true
+      })
+
+      const player = await knex('player').where({ pid }).first()
+      const team = await knex('teams')
+        .where({ team_id: 1, season_year })
+        .first()
+
+      expect(message, 'a message is produced').to.be.a('string')
+      expect(message, 'names the nominating team').to.include(team.name)
+      expect(message, 'names the player').to.include(player.first_name)
+      expect(message, 'names the player').to.include(player.last_name)
+      expect(message, 'names the position').to.include(player.primary_position)
+      // $0 is the mainline opening bid and the value a template that reaches
+      // for a falsy check drops silently, so it is the amount worth pinning.
+      expect(message, 'names the opening amount').to.include('$0')
+      expect(message, 'says it was a nomination').to.include('nominated')
+    })
+
+    // WHOM THE AUCTION IS WAITING ON IS THE ACTIONABLE CONTENT of this message
+    // -- it is the only place a manager learns the player is waiting on THEM.
+    // `format_team_list` drops any team it cannot resolve with a silent
+    // `.filter(team !== null)`, so a partial list reads exactly like a complete
+    // one. Assert every outstanding team by name rather than that the list is
+    // non-empty.
+    it('names every team the auction is still waiting on', async function () {
+      this.timeout(60 * 1000)
+
+      const tids = await team_ids()
+      const pid = await nominate_free_agent({ tid: 1 })
+      const outstanding = tids.filter((tid) => tid !== 1)
+      expect(outstanding.length, 'more than one team is waiting').to.be.above(1)
+
+      const message = await format_nomination_message({
+        team_id: 1,
+        player_id: pid,
+        bid_amount: 0,
+        eligible_teams: outstanding,
+        is_nomination: true
+      })
+
+      const teams = await knex('teams')
+        .whereIn('team_id', outstanding)
+        .where({ season_year })
+      expect(teams.length, 'every outstanding team resolves').to.equal(
+        outstanding.length
+      )
+      for (const team of teams) {
+        expect(message, `names waiting team ${team.team_id}`).to.include(
+          team.name
+        )
+      }
+    })
+
+    // A NAME IT CANNOT RESOLVE MUST STOP THE MESSAGE, not garnish it. The
+    // caller wraps this in a catch that logs and returns false, so a throw
+    // costs the announcement; a malformed string would instead announce a
+    // nomination naming the wrong player to the whole league.
+    it('refuses to build a message for a player it cannot find', async function () {
+      this.timeout(60 * 1000)
+
+      let error = null
+      try {
+        await format_nomination_message({
+          team_id: 1,
+          player_id: 'NOSU-CHPL-999999',
+          bid_amount: 0,
+          eligible_teams: await team_ids(),
+          is_nomination: true
+        })
+      } catch (caught) {
+        error = caught
+      }
+
+      expect(error, 'an unknown player throws').to.be.an('error')
+      expect(error.message).to.include('NOSU-CHPL-999999')
+    })
   })
 })
