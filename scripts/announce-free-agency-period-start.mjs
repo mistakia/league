@@ -156,7 +156,7 @@ const get_eligible_leagues_for_free_agency_period_notifications = async ({
  * @param {dayjs.Dayjs} params.period_start_time - When the free agency period will start
  * @returns {string} Formatted notification message
  */
-const format_free_agency_period_advance_message = ({
+export const format_free_agency_period_advance_message = ({
   league_name,
   period_start_time
 }) => {
@@ -174,7 +174,7 @@ const format_free_agency_period_advance_message = ({
  * @param {dayjs.Dayjs} params.period_start_time - When the free agency period started
  * @returns {string} Formatted notification message
  */
-const format_free_agency_period_start_message = ({
+export const format_free_agency_period_start_message = ({
   league_name,
   period_start_time
 }) => {
