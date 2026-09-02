@@ -4,6 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PageLayout from '@layouts/page'
+import { useMediaQuery } from '@core/utils'
 import AuctionTargets from '@components/auction-targets'
 import AuctionStandingElections from '@components/auction-standing-elections'
 import AuctionSettlementStatus from '@components/auction-settlement-status'
@@ -23,6 +24,12 @@ export default function AuctionPage({
   is_hosted_league
 }) {
   const { lid } = useParams()
+  // Matches the 800px breakpoint auction.styl stacks the side rail at. The two
+  // tall panels collapse there and stay open on a desktop rail, and the flag is
+  // a KEY on each so the Accordion -- which owns its open state and reads
+  // `default_expanded` once -- remounts rather than keeping a desktop-open
+  // panel open after a rotation into the phone layout.
+  const is_narrow = useMediaQuery('(max-width: 800px)')
 
   useEffect(() => {
     load_league()
@@ -73,9 +80,18 @@ export default function AuctionPage({
         </div>
         {is_hosted_league && (
           <div className='auction__side'>
+            {/* Never collapsible. It is one line, and in election mode it is
+                the auction's only forcing function -- a manager has to see who
+                the board is waiting on without opening anything. */}
             <AuctionSettlementStatus />
-            <AuctionBlockCalendar />
-            <AuctionStandingElections />
+            <AuctionBlockCalendar
+              key={`block-calendar-${is_narrow}`}
+              is_collapsible={is_narrow}
+            />
+            <AuctionStandingElections
+              key={`standing-elections-${is_narrow}`}
+              is_collapsible={is_narrow}
+            />
           </div>
         )}
       </div>

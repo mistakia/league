@@ -243,13 +243,6 @@ export default function SelectedPlayer({
           player_map={player_map}
         />
         <PlayerWatchlistAction pid={pid} />
-        {/* Set, raise, withdraw or decline a maximum bid on this player,
-            whether or not anyone has nominated them. This is where a manager
-            states every bid they intend to make before the auction opens --
-            the behavior the whole design rests on. */}
-        {is_logged_in && is_hosted_league && can_elect_on_player && (
-          <AuctionElectionControl pid={pid} />
-        )}
         <div className='selected__player-header-secondary'>
           <div className='selected__player-header-section'>
             {/* Always visible: Status */}
@@ -420,6 +413,21 @@ export default function SelectedPlayer({
           </div>
         </div>
       </div>
+      {/* Set, raise, withdraw or decline a maximum bid on this player, whether
+          or not anyone has nominated them. This is where a manager states every
+          bid they intend to make before the auction opens -- the behavior the
+          whole design rests on.
+
+          A BAND OF ITS OWN, not a member of the header's flex row. It sat
+          between the watchlist star and the stat items until 2026-09-02, where
+          `align-items: stretch` pinned it to the top of a 146px-tall header
+          beside a headshot, so the label rode above the drawer's rounded top
+          edge and the input, Set and Decline floated in the gap the stat items
+          left. The drawer paper is a flex column, so a fourth child here costs
+          nothing and gives the control a full-width row on every viewport. */}
+      {is_logged_in && is_hosted_league && can_elect_on_player && (
+        <AuctionElectionControl pid={pid} />
+      )}
       <div className='selected__player-main'>
         <Tabs
           orientation='horizontal'

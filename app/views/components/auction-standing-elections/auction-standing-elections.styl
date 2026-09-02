@@ -8,10 +8,16 @@
     display flex
     justify-content space-between
     align-items baseline
+    gap 8px
+    flex 1
+    min-width 0
+    font-size 11px
+    color rgba(0, 0, 0, 0.6)
 
-    h3
-      margin 0
-      font-size 14px
+  &__title
+    font-size 14px
+    font-weight 700
+    color $textColor
 
   &__group
     display flex
@@ -42,3 +48,13 @@
   &__empty
     font-size 13px
     opacity 0.7
+
+// Collapsible on a phone, where the root IS the Accordion and its summary
+// button already owns the row's padding. Keeping the panel's own padding here
+// would double it and push the chevron off the line.
+.accordion.auction-standing-elections
+  padding 0
+  gap 0
+
+  .auction-standing-elections__group
+    padding-top 8px

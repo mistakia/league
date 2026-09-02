@@ -1,7 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { get_auction_state, get_app, get_current_league } from '@core/selectors'
+import {
+  get_auction_state,
+  get_app,
+  get_current_league,
+  getCurrentTeamRoster
+} from '@core/selectors'
 import { auction_actions } from '@core/auction'
 
 import AuctionElectionControl from './auction-election-control'
@@ -14,10 +19,16 @@ const map_state_to_props = createSelector(
   get_auction_state,
   get_app,
   get_current_league,
+  getCurrentTeamRoster,
   (state) => state.getIn(['app', 'leagueId']),
   (state, props) => props.pid,
-  (auction, app, league, leagueId, pid) => ({
+  (auction, app, league, roster, leagueId, pid) => ({
     election: auction.standing_elections.get(pid),
+    // The capping term, named on the control rather than only in the
+    // standing-elections panel: a manager deciding a ceiling here has no other
+    // reason to have the panel open, and min(stated, availableCap) is what
+    // actually gets bid.
+    available_cap: roster.availableCap,
     // `app.leagueId` rather than a field on the league record: `uid` is the
     // retired identifier and test/app.retired-uid-identifier.spec.mjs fails any
     // read of it in app/.

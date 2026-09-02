@@ -4,6 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 import Button from '@components/button'
 import TeamName from '@components/team-name'
+import Accordion from '@components/accordion'
 import { useClockSeconds } from '@core/utils'
 import { AUCTION_BLOCK_GRANULARITY_MINUTES } from '#constants'
 
@@ -11,19 +12,30 @@ import './auction-block-calendar.styl'
 
 const SLOT_SECONDS = AUCTION_BLOCK_GRANULARITY_MINUTES * 60
 const SLOTS_PER_HOUR = 60 / AUCTION_BLOCK_GRANULARITY_MINUTES
+const HOUR_LABELS = ['12a', '6a', '12p', '6p']
 
 /**
  * The free agency period at 15-minute resolution.
  *
  * ONE CELL PER HOUR, NOT ONE CONTROL PER SLOT. A 2026-length period is five days
- * and 480 slots; 120 hour cells each carrying a four-slot density mark is a grid
- * a manager can read at a glance, and the quarter-hours open in a popover.
+ * and 480 slots; a hundred-odd hour cells each carrying a density mark is a grid
+ * a manager can read at a glance, and the quarter-hours open in the detail panel
+ * below it.
  *
  * THE DENSITY MARK SUMMARISES NAMED DATA, it does not replace it. Opt-ins are
  * public by design -- an election is a sealed bid, an availability is not -- and
- * convening a block is a negotiation, so the popover names every opted-in team
- * rather than counting them. A manager cannot argue for a slot against a bare
- * count.
+ * convening a block is a negotiation, so the detail panel names every opted-in
+ * team rather than counting them. A manager cannot argue for a slot against a
+ * bare count.
+ *
+ * EVERY CELL STATE IS DRAWN, and none of them were until 2026-09-02. The
+ * stylesheet was written against four CSS custom properties this repo declares
+ * nowhere, so every background, border and outline in the grid was invalid at
+ * computed-value time and dropped: the calendar rendered as 168 invisible boxes
+ * against white with no axis, which is what "the schedule does not show the
+ * selectable days and blocks" was. An hour is now open, opted-into, mine,
+ * convened, the final block, too soon to convene, or outside the period, each
+ * distinct and each named in the key beneath the grid.
  */
 export default function AuctionBlockCalendar({
   live_blocks,
@@ -35,7 +47,8 @@ export default function AuctionBlockCalendar({
   auction_block_notice_minutes,
   teamId,
   set_auction_block_opt_in,
-  leagueId
+  leagueId,
+  is_collapsible = false
 }) {
   const [selected_hour, set_selected_hour] = useState(null)
   // The grid only changes on a slot boundary, so it is rebuilt by the minute
@@ -66,6 +79,23 @@ export default function AuctionBlockCalendar({
     }
     return days
   }, [free_agency_period_start, free_agency_period_end])
+
+  // The hour axis. Without it the grid was 24 unlabelled columns against a day
+  // label, so "which of these is Saturday evening" had no answer on screen and
+  // a manager could only find a slot by hovering cells one at a time. Labelled
+  // every six hours because a cell is about ten pixels wide in the side rail
+  // and 24 labels cannot fit; the six-hour boundaries also carry a rule in the
+  // stylesheet, so the unlabelled columns are still countable from one.
+  const hour_axis = []
+  for (let hour = 0; hour < 24; hour += 1) {
+    const classes = ['auction__block-calendar-hour-label']
+    if (hour % 6 === 0) classes.push('major')
+    hour_axis.push(
+      <div key={hour} className={classes.join(' ')}>
+        {hour % 6 === 0 ? HOUR_LABELS[hour / 6] : ''}
+      </div>
+    )
+  }
 
   const slots_for_hour = (hour_unix) => {
     const slots = []
@@ -103,33 +133,44 @@ export default function AuctionBlockCalendar({
 
   const selected_slots = selected_hour ? slots_for_hour(selected_hour) : []
 
-  return (
-    <div className='auction__block-calendar'>
-      <div className='auction__block-calendar-header'>
-        <div className='auction__block-calendar-title'>Live Blocks</div>
-        <div className='auction__block-calendar-final'>
-          {final_block_at ? (
-            <>
-              <span>Final block</span>
-              <strong>
-                {dayjs.unix(final_block_at).format('ddd MMM D, h:mm A')}
-              </strong>
-              {final_block_spots_remaining !== null && (
-                <span>{final_block_spots_remaining} spots remaining</span>
-              )}
-            </>
-          ) : (
-            <span>Final block not yet computed</span>
-          )}
-        </div>
+  // The header doubles as the collapsed summary, so a manager who has shut the
+  // grid on a phone still sees the one fact they cannot act without: when the
+  // final block lands.
+  const header = (
+    <div className='auction__block-calendar-header'>
+      <div className='auction__block-calendar-title'>Live Blocks</div>
+      <div className='auction__block-calendar-final'>
+        {final_block_at ? (
+          <>
+            <span>Final block</span>
+            <strong>
+              {dayjs.unix(final_block_at).format('ddd MMM D, h:mm A')}
+            </strong>
+            {final_block_spots_remaining !== null && (
+              <span>{final_block_spots_remaining} spots remaining</span>
+            )}
+          </>
+        ) : (
+          <span>Final block not yet computed</span>
+        )}
       </div>
+    </div>
+  )
 
+  const body = (
+    <>
       <div className='auction__block-calendar-legend'>
         A block convenes when all {denominator} teams with an open roster spot
-        opt in, at least {auction_block_notice_minutes} minutes ahead.
+        opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
+        hour to see its four 15-minute slots.
       </div>
 
       <div className='auction__block-calendar-grid'>
+        <div className='auction__block-calendar-row auction__block-calendar-axis'>
+          <div className='auction__block-calendar-day' />
+          {hour_axis}
+        </div>
+
         {grid.map((day) => (
           <div className='auction__block-calendar-row' key={day.at.unix()}>
             <div className='auction__block-calendar-day'>
@@ -138,12 +179,19 @@ export default function AuctionBlockCalendar({
             {day.hours.map((hour) => {
               const slots = slots_for_hour(hour.unix)
               const finalized = slots.filter((slot) => slot.is_finalized).length
-              // The density mark: how many of the hour's four slots anybody has
-              // opted into. It is a summary of the named data in the popover,
-              // never a replacement for it.
-              const opted = slots.filter(
-                (slot) => slot.opt_in_tids && slot.opt_in_tids.size
-              ).length
+              // The density mark: the MOST teams any one of the hour's four
+              // slots has drawn, against the unanimity denominator. It counted
+              // slots-with-anybody-in-them until 2026-09-02, which answered a
+              // question nobody asks -- "3" meant three quarter-hours had at
+              // least one team, so an hour one team had blanket-claimed
+              // outranked an hour eight teams agreed on. Both are summaries of
+              // the named data in the detail panel and neither replaces it, but
+              // only this one tells a manager where a block is close.
+              const opted = slots.reduce(
+                (most, slot) =>
+                  Math.max(most, slot.opt_in_tids ? slot.opt_in_tids.size : 0),
+                0
+              )
               const mine = slots.filter(
                 (slot) => slot.opt_in_tids && slot.opt_in_tids.includes(teamId)
               ).length
@@ -151,19 +199,38 @@ export default function AuctionBlockCalendar({
                 final_block_at &&
                 final_block_at >= hour.unix &&
                 final_block_at < hour.unix + 3600
+              // An hour whose LAST slot is already inside the notice threshold
+              // cannot convene however many teams opt in, so it is drawn as
+              // unavailable rather than left to be discovered one cell at a
+              // time in the detail panel.
+              const is_too_soon = hour.unix + 3600 - SLOT_SECONDS < notice_floor
+              const is_now =
+                now >= hour.unix && now < hour.unix + 3600 && hour.is_in_period
 
               const classes = ['auction__block-calendar-cell']
               if (!hour.is_in_period) classes.push('outside')
+              else if (is_too_soon) classes.push('too-soon')
+              else classes.push('selectable')
+              if (hour.is_in_period && opted) classes.push('has-opt-ins')
               if (finalized) classes.push('finalized')
               if (mine) classes.push('mine')
               if (is_final_block_hour) classes.push('final-block')
+              if (is_now) classes.push('now')
               if (selected_hour === hour.unix) classes.push('selected')
+
+              const describe = () => {
+                const when = hour.at.format('ddd MMM D, h:mm A')
+                if (!hour.is_in_period) return `${when} -- outside the period`
+                if (finalized) return `${when} -- a block is convened`
+                if (is_too_soon) return `${when} -- too soon to convene`
+                return `${when} -- ${opted} of ${denominator} opted in`
+              }
 
               return (
                 <div
                   key={hour.unix}
                   className={classes.join(' ')}
-                  title={hour.at.format('ddd MMM D, h:mm A')}
+                  title={describe()}
                   onClick={() => {
                     if (!hour.is_in_period) return
                     set_selected_hour(
@@ -177,6 +244,33 @@ export default function AuctionBlockCalendar({
             })}
           </div>
         ))}
+      </div>
+
+      <div className='auction__block-calendar-key'>
+        <span>
+          <i className='auction__block-calendar-swatch selectable' />
+          open
+        </span>
+        <span>
+          <i className='auction__block-calendar-swatch has-opt-ins' />
+          opted in
+        </span>
+        <span>
+          <i className='auction__block-calendar-swatch mine' />
+          yours
+        </span>
+        <span>
+          <i className='auction__block-calendar-swatch finalized' />
+          convened
+        </span>
+        <span>
+          <i className='auction__block-calendar-swatch final-block' />
+          final block
+        </span>
+        <span>
+          <i className='auction__block-calendar-swatch too-soon' />
+          too soon
+        </span>
       </div>
 
       {/* The quarter-hours for the selected cell, INLINE rather than in a
@@ -229,6 +323,25 @@ export default function AuctionBlockCalendar({
           })}
         </div>
       )}
+    </>
+  )
+
+  // Collapsed by default where it is collapsible, which is the phone. A
+  // 168-cell grid plus a legend plus a key is the tallest thing in the side
+  // rail, and stacked under the board it buried the settlement status -- the
+  // one surface in election mode that is a forcing function.
+  if (is_collapsible) {
+    return (
+      <Accordion className='auction__block-calendar' summary={header}>
+        {body}
+      </Accordion>
+    )
+  }
+
+  return (
+    <div className='auction__block-calendar'>
+      {header}
+      {body}
     </div>
   )
 }
@@ -243,5 +356,6 @@ AuctionBlockCalendar.propTypes = {
   auction_block_notice_minutes: PropTypes.number,
   teamId: PropTypes.number,
   set_auction_block_opt_in: PropTypes.func,
-  leagueId: PropTypes.number
+  leagueId: PropTypes.number,
+  is_collapsible: PropTypes.bool
 }
