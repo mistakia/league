@@ -67,6 +67,34 @@ p
   font-size 12px
   padding 12px 16px
 
+// THE 16px FLOOR ON ANYTHING THAT TAKES TYPED TEXT, ON TOUCH DEVICES.
+// iOS Safari zooms the viewport in whenever a text control whose COMPUTED
+// font-size is under 16px takes focus, and there is no matching zoom back out
+// on blur — the reader is left on a page scaled up and scrolled sideways, with
+// pinch-out as the only way back. There is no API to reset the zoom level, so
+// the only fix is to never give Safari the reason: 16px is the exact
+// threshold, not a rounded-up guess.
+//
+// The other way out is `maximum-scale=1` on the viewport meta, and
+// app/index.html explains at that tag why it is refused — it takes pinch zoom
+// away from every reader to spare a few controls two pixels. It is also not
+// even reliable; Safari has ignored it on user gesture since iOS 10.
+//
+// !important rather than the doubled-selector trick used above, because these
+// are ELEMENT selectors at (0,0,1) and lose to every class in the app as well
+// as to MUI's emotion classes. The floor has to hold against a component
+// stylesheet that has not thought about the phone, which is the whole point:
+// a control authored at 14px later stays harmless without a second edit.
+//
+// Only controls that raise a keyboard are listed. A native select opens a
+// picker wheel and never zooms, and the excluded input types render as boxes
+// and buttons whose size is set elsewhere.
+@media (pointer: coarse)
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):not([type='button']):not([type='submit']):not([type='reset'])
+  textarea
+  [contenteditable]
+    font-size 16px !important
+
 .text-green
   color $green
   font-weight 600
