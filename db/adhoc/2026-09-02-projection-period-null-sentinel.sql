@@ -1,4 +1,28 @@
 -- STATUS: APPLIED 2026-09-02 against league_production
+--
+-- APPLIED IN HALVES, AND THE CURRENT-YEAR HALF WAS DELIBERATELY UNDONE. Read
+-- this before re-running.
+--
+-- The historical half LANDED and stands: zero sentinels across 2020-2025 on the
+-- season table, and the rest-of-season table is 2026-only. Nothing scheduled
+-- writes a completed year, so that is the durable end state.
+--
+-- The CURRENT-YEAR half was applied too early -- before the writer deploy, which
+-- this header itself says not to do -- and was reverted by hand the same hour.
+-- The consequence was real rather than theoretical: the DEPLOYED get-players
+-- assigns the column straight onto the payload, so 1,894 rows turning NULL made
+-- the old API emit `pts_added.season = null`, which is the exact spelling that
+-- coerces to 0 in the SPA's sorts and lands an unprojected player mid-board.
+-- The hourly cron restored 874 of them on its next run and left 1,020 on
+-- sfb15_mfl and sfb15_sleeper, which it does not rewrite; those were restored to
+-- -999 directly, as were 188 nets. genesis_10_team -- the live league's format,
+-- with an auction armed the same evening -- was clean throughout, because the
+-- cron rewrites it.
+--
+-- SO: statements (1) and (2) still have 2026 work to do, and it is safe only
+-- once league 4a7db3f6e is on both hosts. Re-run with --reapply then. Statement
+-- (3) is complete and will match nothing.
+--
 -- Retire the -999 sentinel from the two league-format PERIOD tables, and drop
 -- the rest-of-season rows that belong to completed seasons.
 --
