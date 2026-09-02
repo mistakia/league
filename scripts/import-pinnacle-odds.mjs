@@ -476,6 +476,72 @@ const format_market = async ({
 }
 
 /**
+ * Drops the sibling game containers Pinnacle republishes alongside a game's
+ * primary matchup, so one game yields one source_event_id.
+ *
+ * /leagues/889/matchups returns a game as a small TREE, and this importer used
+ * to treat every node in it as its own event -- source_event_id is the matchup
+ * id (see format_matchup_market), so a game arriving as three nodes became
+ * three listings of the same markets. Measured on the cached week-15 2025
+ * payload: Rams at Seahawks arrives as 1620659044 carrying 8 markets plus
+ * 1621287983 and 1621287985 carrying zero, all three on the same rotation,
+ * participants and start time.
+ *
+ * THE ANCHOR IS THAT THE PARENT IS PRESENT IN THIS PAYLOAD, not that the child
+ * carries no markets, and both halves of that were measured rather than
+ * assumed.
+ *
+ * - `totalMarketCount === 0` is NOT the discriminator. Four of the five
+ *   parented game containers across the cached payloads carry zero markets and
+ *   the fifth carries ten, so keying on the count drops a real container.
+ * - That fifth one is the case the presence rule exists for. It is the LIVE
+ *   in-play container for Carolina at Tampa Bay (`isLive`, `liveMode:
+ *   live_delay`, `status: started`) and its pregame parent has already left the
+ *   feed, so nothing in the payload republishes it. This importer applies no
+ *   pregame filter and stores `is_live`, so that container is wanted; dropping
+ *   it would lose the game's live markets outright.
+ *
+ * The rule therefore fails SAFE. A child whose parent is absent is kept,
+ * because the alternative is losing a game entirely, and the cost of keeping
+ * one is a duplicate listing -- which is the condition
+ * prop-market-event-listing-duplication already watches.
+ *
+ * BE HONEST ABOUT WHAT THE DATA SETTLES. On every case the cached payloads
+ * contain, parent-presence and `totalMarketCount === 0` give the SAME answer,
+ * so the observed corpus does not choose between them -- rewiring this to the
+ * market count passed the whole spec until a fixture was written for the input
+ * that separates them (a marketless child whose parent is absent). The choice
+ * is the fail-safe direction rather than a measured distinction, and
+ * test/import-pinnacle-sibling-matchups.spec.mjs pins it so the rewiring goes
+ * red instead of quiet.
+ *
+ * Specials are never candidates: a player prop hangs off its game by parentId
+ * too, and it is a real distinct market. Only `type: 'matchup'` nodes republish
+ * a game's own lines.
+ *
+ * A genuine RESCHEDULE is unaffected by construction. Both listings are ROOTS
+ * carrying a null parentId, so neither is dropped and the game keeps emitting
+ * two -- which is correct, since the book really did list it twice.
+ *
+ * @param {object[]} matchups - Array of pinnacle matchups
+ * @returns {object[]} The matchups with republished sibling containers removed
+ */
+export const filter_sibling_game_matchups = (matchups) => {
+  const game_matchup_ids = new Set(
+    matchups.filter((matchup) => matchup.type === 'matchup').map(({ id }) => id)
+  )
+
+  return matchups.filter(
+    (matchup) =>
+      !(
+        matchup.type === 'matchup' &&
+        matchup.parentId != null &&
+        game_matchup_ids.has(matchup.parentId)
+      )
+  )
+}
+
+/**
  * Collects unique values from matchups for analysis
  * @param {object[]} matchups - Array of pinnacle matchups
  * @returns {object} Collection of unique values
@@ -860,6 +926,22 @@ const import_pinnacle_odds = async ({
       // the sustained-outage escalation.
       return { outcome: 'empty' }
     }
+
+    // Before anything counts or fetches them: a game arrives as a tree and
+    // every node used to become its own listing. Filtering here rather than at
+    // format_matchup_market also saves the per-matchup odds fetch each sibling
+    // would otherwise cost.
+    const deduplicated_matchups =
+      filter_sibling_game_matchups(pinnacle_matchups)
+    const sibling_count =
+      pinnacle_matchups.length - deduplicated_matchups.length
+    if (sibling_count) {
+      log(
+        `dropped ${sibling_count} republished sibling game container(s); ` +
+          `${deduplicated_matchups.length} matchups remain`
+      )
+    }
+    pinnacle_matchups = deduplicated_matchups
 
     // Collect unique values for analysis
     const unique_values = collect_unique_values(pinnacle_matchups)
