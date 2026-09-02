@@ -8,6 +8,7 @@ import {
   current_nfl_week_params
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { apply_pregame_market_filter } from '#libs-server/data-views/market-pregame-filter.mjs'
 import {
   resolve_week_scope,
   week_scope_alias_key,
@@ -364,6 +365,12 @@ const player_betting_market_with = ({
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
+
+    // A betting-market column names the PREGAME line. Without this an in-play
+    // row competes for the same cell and wins the newest-observation ordering
+    // in market-row-dedup.mjs. A NULL is pregame -- four of the six books never
+    // populate the column -- which is why this is a helper and not a clause.
+    apply_pregame_market_filter({ qb })
 
     // A week list can name several seasons, which a scalar year cannot hold.
     if (market_season_years.length) {

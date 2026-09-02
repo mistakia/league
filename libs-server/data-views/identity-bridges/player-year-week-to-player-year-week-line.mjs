@@ -1,5 +1,6 @@
 import db from '#db'
 import { physical_year_projection } from '#libs-server/data-views/physical-season-columns.mjs'
+import { apply_pregame_market_filter } from '#libs-server/data-views/market-pregame-filter.mjs'
 
 export const from = 'player_year_week'
 export const to = 'player_year_week_line'
@@ -71,6 +72,12 @@ export const add_cte = ({ query_context }) => {
         .andOn('pms.time_type', '=', 'm.time_type')
     })
     .whereNotNull('pms.selection_metric_line')
+
+  // The line axis manufactures one ROW per rung, so an in-play rung does not
+  // quietly outrank a pregame one -- it renders alongside it as an extra row
+  // the columns then have to fill. market-row-dedup.mjs is suppressed on this
+  // path, so its ordering cannot reach here and the filter has to.
+  apply_pregame_market_filter({ qb: cte_query, column: 'm.is_live' })
 
   // Both sides carry the year so the partitioned scans prune; see the Year
   // Pushdown Contract in this directory's ABOUT.
