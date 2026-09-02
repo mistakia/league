@@ -1,0 +1,30 @@
+{
+  "_comment": "The generation agent's environment. Read config/index.mjs for why every credential here is BLANK and where the real values come from: this repository is public, so a plaintext credential committed here would be a published credential. LEAGUE_SANDBOX_PG_* environment variables, delivered by the thread-config profile's secret mechanism, fill them in at load.",
+  "postgres": {
+    "client": "pg",
+    "connection": {
+      "host": "",
+      "user": "league_data_view_reader",
+      "database": "league_production",
+      "password": "",
+      "port": 5432,
+      "decimalNumbers": true,
+      "multipleStatements": false
+    }
+  },
+  "postgres_data_view_sandbox": {
+    "client": "pg",
+    "connection": {
+      "host": "",
+      "user": "league_data_view_reader",
+      "database": "league_production",
+      "password": "",
+      "port": 5432
+    },
+    "pool": {
+      "min": 0,
+      "max": 2
+    }
+  },
+  "url": "https://xo.football"
+}

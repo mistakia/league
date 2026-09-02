@@ -67,11 +67,68 @@ const load_plaintext_config = () =>
     )
   )
 
-// Production is the only environment on the sops/age scheme; dev and test
-// stay plaintext.
-const config =
-  process.env.NODE_ENV === 'production'
-    ? load_sops_json(join(config_dir, 'config-production.json'))
-    : load_plaintext_config()
+// The `sandbox` environment: the data-view generation agent's container.
+//
+// WHY IT EXISTS AT ALL. `NODE_ENV=production` cannot run there. The production
+// branch shells out to `sops` with an age identity and is fail-closed by
+// construction, and a tenant container holds neither the binary nor the key --
+// so the agent's tool scripts would throw at import. Handing the container that
+// key is not the fix: the decrypted production config carries league_writer's
+// credentials, which dissolves the league_data_view_reader sandbox role the
+// whole boundary rests on. Dev and test read plaintext but leave credentials
+// blank, so neither is reusable as is.
+//
+// WHY THE CREDENTIALS ARE BLANK IN THE FILE AND OVERLAID FROM THE ENVIRONMENT.
+// This repository is PUBLIC and every file in it is published, so a plaintext
+// credential committed in config-sandbox.json would be a published credential --
+// the same rule that keeps config-development.json and config-test.json to
+// placeholders. The plan this implements called for a plaintext config carrying
+// the reader credential; that is not available here, and an env overlay is the
+// nearest shape that keeps the property the plan actually wanted: the container
+// never holds the age identity or any write-capable credential.
+//
+// The values arrive through the thread-config profile's secret mechanism as
+// environment variables, never as a literal in a command -- tool calls are
+// recorded verbatim in a synced, indexed timeline.
+//
+// It applies ONLY under NODE_ENV=sandbox. Reading these variables in any other
+// environment would let an ambient variable silently re-point a production or
+// test process at a different database.
+const overlay_sandbox_environment = (loaded) => {
+  const host = process.env.LEAGUE_SANDBOX_PG_HOST
+  const password = process.env.LEAGUE_SANDBOX_PG_PASSWORD
+  const port = process.env.LEAGUE_SANDBOX_PG_PORT
+
+  // Fail LOUD and by name. A blank password reaches Postgres as an
+  // authentication failure whose message names neither this file nor the
+  // missing variable, and the debugger goes looking at pg_hba or the role.
+  if (!host || !password) {
+    throw new Error(
+      'NODE_ENV=sandbox requires LEAGUE_SANDBOX_PG_HOST and LEAGUE_SANDBOX_PG_PASSWORD; the sandbox config is committed credential-free because this repository is public'
+    )
+  }
+
+  for (const key of ['postgres', 'postgres_data_view_sandbox']) {
+    loaded[key].connection.host = host
+    loaded[key].connection.password = password
+    if (port) loaded[key].connection.port = Number(port)
+  }
+
+  return loaded
+}
+
+// Production is the only environment on the sops/age scheme; dev, test and
+// sandbox stay plaintext.
+const load_config = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return load_sops_json(join(config_dir, 'config-production.json'))
+  }
+  if (process.env.NODE_ENV === 'sandbox') {
+    return overlay_sandbox_environment(load_plaintext_config())
+  }
+  return load_plaintext_config()
+}
+
+const config = load_config()
 
 export default config
