@@ -37,24 +37,40 @@ export default function AuctionStandingElections({
     Boolean(election.get('settled_at'))
   )
 
-  const render_row = (election, index) => {
+  // `in_declined_group` suppresses the word `Declined` on the amount, because
+  // under a `Declined (N)` heading it repeats the heading on every row and
+  // crowds the name it sits beside. It is a parameter rather than a blanket
+  // removal: the same row renders under `Settled`, where a decline and a
+  // maximum sit together and the word is the only thing telling them apart.
+  const render_row = (election, index, { in_declined_group = false } = {}) => {
     const pid = election.get('pid')
     const maximum = election.get('maximum_bid')
     const is_capped = election.get('is_capped')
     const outcome = election.get('outcome')
+    const is_decline = maximum === null
+    const amount = is_decline
+      ? in_declined_group
+        ? null
+        : 'Declined'
+      : `$${maximum}`
 
     return (
       <div className='auction-standing-elections__row' key={`${pid}-${index}`}>
         <PlayerName pid={pid} />
-        <div className='auction-standing-elections__amount'>
-          {maximum === null ? 'Declined' : `$${maximum}`}
-          {is_capped && (
-            <span className='auction-standing-elections__capped'>
-              {' '}
-              capped to ${election.get('effective_maximum')}
-            </span>
-          )}
-        </div>
+        {/* Dropped entirely rather than left empty: an empty flex child still
+            takes its share of the row's gap, so a declined row would carry a
+            gap to nothing between the name and the outcome. */}
+        {amount !== null && (
+          <div className='auction-standing-elections__amount'>
+            {amount}
+            {is_capped && (
+              <span className='auction-standing-elections__capped'>
+                {' '}
+                capped to ${election.get('effective_maximum')}
+              </span>
+            )}
+          </div>
+        )}
         {outcome && (
           <div className='auction-standing-elections__outcome'>
             {auction_election_outcome_display_names[outcome] || outcome}
@@ -100,7 +116,11 @@ export default function AuctionStandingElections({
       {Boolean(declines.size) && (
         <div className='auction-standing-elections__group'>
           <label>Declined ({declines.size})</label>
-          {declines.toIndexedSeq().map(render_row)}
+          {declines
+            .toIndexedSeq()
+            .map((election, index) =>
+              render_row(election, index, { in_declined_group: true })
+            )}
         </div>
       )}
 

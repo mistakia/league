@@ -79,16 +79,43 @@
   .nominated__player-details label
     white-space nowrap
 
-// THE STATIC PRICE RECEDES AND THE LIVE ONE DOES NOT. The pair reads as one
-// number printed twice otherwise -- same size, same weight, same ink, two
-// one-word labels. Making `Market` the quiet one is a subtractive distinction:
-// it needs no second accent colour in a bar that already spends red on the
-// election amount a hundred pixels away, and it puts the emphasis on the number
-// that is actually a live claim about what the player is worth right now.
-.nominated__detail-market
-  color rgba(0, 0, 0, 0.55)
-
-.nominated__detail-live
+// THE LIVE PRICE IS THE ONE IN A BOX. The pair reads as one number printed
+// twice otherwise -- same size, same weight, same ground, two one-word labels --
+// and of the two it is the live one that earns the emphasis, because it is a
+// claim about what the player is worth at this moment rather than a preseason
+// figure that will not move again.
+//
+// White on a rule, against the bar's own $backgroundColor ground, so the
+// distinction survives without spending a colour: the bar already carries the
+// election amount in $accentColor a few inches to the right, and a second
+// accented number beside `Market` would read as though the two were related.
+//
+// `flex 0 0 auto` rather than the `flex 1 1 0` its three neighbours keep. The
+// padding and border have to come out of somewhere, and taking it from an equal
+// share would squeeze the two-word label into the box it just gained; sized to
+// content it takes what it needs and the other three divide the rest.
+// QUALIFIED BY THE PARENT ON PURPOSE, and it is not style. `padding` here
+// competes with `.selected__player-header-item` in selected-player.styl, which
+// sets `padding 4px 12px` and which this element also carries -- both selectors
+// rank 0,1,0, so which one wins is decided by chunk order rather than by intent.
+// It won: an earlier draft of this rule declared its own padding, emitted it,
+// and never applied it, which is this repo's characteristic CSS failure and is
+// invisible from the stylesheet. The parent qualifier lifts this to 0,2,0 so it
+// cannot be quietly outranked.
+//
+// `align-self center` rather than the default `stretch`. An item with no
+// visible box did not care that it was stretched; this one did -- boxed, it ran
+// the full height of the details group, leaving 6px above its rule and 20px
+// below. Centred it sits the way its three neighbours' contents already do,
+// which is what makes the four read as one row rather than three values and a
+// panel.
+.nominated__player-details .nominated__detail-live
+  flex 0 0 auto
+  align-self center
+  padding 4px 10px
+  background white
+  border 1px solid $borderColor
+  border-radius $button_border_radius
   font-weight 600
 
 @media (max-width 799px)

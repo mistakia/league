@@ -29,18 +29,45 @@
       text-transform uppercase
       opacity 0.6
 
+  // ONE LINE PER ELECTION, CLIPPED RATHER THAN WRAPPED. Nothing here wrapped as
+  // a FLEX line -- flex-wrap was already nowrap -- it was the text inside the
+  // children wrapping, so a long name beside a capped amount put `Jr.` on a
+  // second row and the list lost its one-row-per-election rhythm in a side rail
+  // whose width is fixed.
+  //
+  // The name is the only elastic child; the amount and the outcome are short,
+  // bounded and the reason the row exists, so they hold their size and the name
+  // gives way. `min-width 0` AND `overflow hidden` on every link, because the
+  // first alone lets the box shrink while its text keeps painting full width
+  // over whatever follows.
   &__row
     display flex
     justify-content space-between
     align-items center
     gap 8px
     font-size 13px
+    min-width 0
+    overflow hidden
+    white-space nowrap
+
+    .player__name
+      flex 1 1 auto
+      min-width 0
+      overflow hidden
+
+    .player__name-top
+      overflow hidden
+      text-overflow ellipsis
+
+  &__amount
+    flex 0 0 auto
 
   &__capped
     opacity 0.7
     font-style italic
 
   &__outcome
+    flex 0 0 auto
     font-size 11px
     text-transform uppercase
     opacity 0.7

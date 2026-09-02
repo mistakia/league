@@ -58,7 +58,7 @@ export default function AuctionNominatedPlayer({
             bar, so `Current bid` and `Live bid` were both rejected: they would
             have named a real quantity that this field does not hold. `Live
             value` says the one thing that distinguishes it from `Market`. */}
-        <div className='selected__player-header-item nominated__detail-market'>
+        <div className='selected__player-header-item'>
           <label>Market</label>$
           {player_map.getIn(['market_salary', 'season'], 0)}
         </div>
