@@ -304,13 +304,17 @@ const importPlaysForWeek = async ({
   // last_week_with_stats -- the HOF game could never be imported through the
   // week loop, and the pass was wasted re-importing another week instead.
   week = week ?? current_season.last_week_with_stats
-  const is_current_week =
+  // Log-only, and deliberately NOT named is_current_week: this measures
+  // `last_week_with_stats`, which is a different question from the one
+  // `is_current_nfl_week` answers, and it gates nothing. Under the old name two
+  // readers took it for the current-week predicate the other importers use.
+  const is_unforced_latest_week_with_stats =
     !force_update &&
     season_year === current_season.year &&
     week === current_season.last_week_with_stats
 
   log(
-    `importing plays for week ${week} ${season_year} ${season_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
+    `importing plays for week ${week} ${season_year} ${season_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_unforced_latest_week_with_stats: ${is_unforced_latest_week_with_stats}, dry_run: ${dry_run})`
   )
 
   const result = {
@@ -968,6 +972,11 @@ const main = async () => {
     console.log(
       `ERROR: ${err.severity || 'UNKNOWN'} [${err.code || 'N/A'}] ${err.message}`
     )
+    // `exitCode`, not `process.exit(1)`: the failure still has to fall through
+    // to report_job and db.destroy() below, which an immediate exit would skip.
+    // Assigning the code leaves exactly one exit path -- main returning -- and
+    // node applies it once the event loop drains.
+    process.exitCode = 1
   }
 
   await report_job({
@@ -976,9 +985,6 @@ const main = async () => {
   })
 
   await db.destroy()
-
-  // process.exit() is not working
-  process.kill(process.pid)
 }
 
 if (is_main(import.meta.url)) {
