@@ -43,14 +43,10 @@
  * construction.
  *
  * To reset the board between attempts, re-sync the mirror from league 1:
- *   NODE_ENV=production node scripts/clone-league.mjs --sync --from 1 --to 119 --execute
+ *   node scripts/clone-league.mjs --sync --from 1 --to 119 --execute
  */
 
 import { randomBytes } from 'node:crypto'
-import { spawnSync } from 'node:child_process'
-import net from 'node:net'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
@@ -64,7 +60,6 @@ import WebSocket from 'ws'
 // `#libs-server` included, is a dynamic import for that reason, and it is also
 // why this file does not use the `is_main` entry-point pattern: the barrel it
 // lives in pulls `#db`.
-const repo_root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 // PINNED, not inherited. The database target is stated explicitly below, so the
 // only things NODE_ENV still selects are the ones that must not vary: production
@@ -73,7 +68,7 @@ const repo_root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 // misfire here cannot reach a Discord channel even if a webhook appeared.
 process.env.NODE_ENV = 'development'
 
-const { default: config, load_sops_json } = await import('#config')
+const { default: config } = await import('#config')
 
 // ============================================================================
 // ARGUMENTS
@@ -108,53 +103,17 @@ const args = parse_args(process.argv.slice(2))
 // ENVIRONMENT: production database, ephemeral API
 // ============================================================================
 
-const is_port_open = (port) =>
-  new Promise((resolve) => {
-    const socket = net.connect({ host: '127.0.0.1', port })
-    socket.setTimeout(1500)
-    socket.on('connect', () => {
-      socket.destroy()
-      resolve(true)
-    })
-    socket.on('error', () => resolve(false))
-    socket.on('timeout', () => {
-      socket.destroy()
-      resolve(false)
-    })
-  })
-
-// The production connection is derived at runtime through the same fail-closed
-// sops shell-out the config loader uses, and passed to `#db` in-process. No
-// credential is ever an argument, an environment literal in a printed command,
-// or a file on disk.
-const production = load_sops_json(
-  path.join(repo_root, 'config', 'config-production.json')
-)
-
-if (!(await is_port_open(args.db_port))) {
-  process.stdout.write(
-    `opening ssh tunnel 127.0.0.1:${args.db_port} -> ${args.ssh_host}:5432\n`
-  )
-  const result = spawnSync('ssh', [
-    '-f',
-    '-N',
-    '-L',
-    `${args.db_port}:127.0.0.1:5432`,
-    args.ssh_host
-  ])
-  if (result.status !== 0) {
-    throw new Error(`could not open an ssh tunnel to ${args.ssh_host}`)
-  }
-  // Deliberately left open rather than torn down: an idle tunnel is harmless,
-  // concurrent sessions share this port, and killing by process pattern would
-  // take out a sibling's tunnel opened with the same spec.
-}
-
-process.env.LEAGUE_DB_HOST = '127.0.0.1'
-process.env.LEAGUE_DB_PORT = String(args.db_port)
-process.env.LEAGUE_DB_DATABASE = production.postgres.connection.database
-process.env.LEAGUE_DB_USER = production.postgres.connection.user
-process.env.LEAGUE_DB_PASSWORD = String(production.postgres.connection.password)
+// The tunnel and the LEAGUE_DB_* bootstrap live in
+// libs-server/production-db-tunnel.mjs, shared with scripts/clone-league.mjs so
+// the re-sync recipe below is runnable from the same machine as this script.
+// Dynamic, like everything else here: it reads `#config`, which binds to
+// NODE_ENV at load.
+const { open_production_db_tunnel } =
+  await import('#libs-server/production-db-tunnel.mjs')
+await open_production_db_tunnel({
+  db_port: args.db_port,
+  ssh_host: args.ssh_host
+})
 
 // The API this boots issues and verifies its own tokens, so the secret only has
 // to be internally consistent -- never production's. A fresh random one per run

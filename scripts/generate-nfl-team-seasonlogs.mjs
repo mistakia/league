@@ -253,16 +253,20 @@ const adj = (actual, average, props) => {
   return obj
 }
 
-// Every percentile object this script builds is keyed by `all_stats` --
-// calculatePercentiles is called with `stats: all_stats` at each site -- so this
-// list IS the vocabulary format_percentile_inserts can write into
-// percentiles.field, and nothing else can appear there from a healthy run.
-//
 // Exported for db/checks/registry.mjs, whose percentile-field-resolution check
-// asks whether every stored value is still one this writer would emit. That
-// check must read the vocabulary from its definition site rather than restate
-// it: a second copy is how percentiles.field stranded 53 values across four
-// rename clusters in the first place.
+// asks whether every stored value is still one this writer would emit, and for
+// test/app.percentile-field-consumer-resolution.spec.mjs, which asks the mirror
+// question of app/core/player-fields.js. Both must read the vocabulary from its
+// definition site rather than restate it: a second copy is how percentiles.field
+// stranded 53 values across four rename clusters in the first place.
+//
+// `all_stats` is what MOST calculatePercentiles sites here are keyed by, but it
+// is not the whole vocabulary -- the league seasonlog pass calls it with
+// `stats: ['points']`, so `points` reaches percentiles.field too. It was left
+// out of the export until 2026-09-02 and the omission was invisible, because
+// the check unions the vocabulary with information_schema and a `points` column
+// exists; the union covered for it. A stat key with no column behind it would
+// not have been covered, which is the case the export exists to serve.
 const all_stats = [
   ...all_fantasy_stats,
   ...passing_stats,
@@ -714,4 +718,4 @@ if (is_main(import.meta.url)) {
 
 export default generate_seasonlogs
 
-export const percentile_field_vocabulary = all_stats
+export const percentile_field_vocabulary = [...all_stats, 'points']

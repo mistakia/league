@@ -1183,8 +1183,8 @@ describe('data check registry', function () {
     })
   })
 
-  it('holds twenty-nine checks with unique ids', () => {
-    expect(registry).to.have.lengthOf(29)
+  it('holds thirty checks with unique ids', () => {
+    expect(registry).to.have.lengthOf(30)
     expect(checks_by_id.size).to.equal(registry.length)
   })
 
@@ -1254,17 +1254,37 @@ describe('data check registry', function () {
     // 2026-08-14 and ships as a regression detector over a clean population, so
     // a baselined entry there would suppress nothing and report stale forever.
     //
-    // adp-source-season-coverage is the one check that genuinely holds it. Its
-    // 2025 findings are unrecoverable by construction -- the ADP vendors serve
-    // the current season only -- so no repair command exists to clear them and
-    // adjudicating them would assert the missing data is correct.
+    // Two checks genuinely hold it, and both for the same reason: the missing
+    // data cannot be fetched again, so no repair command exists to clear the
+    // finding and adjudicating it would assert the absence is correct.
+    //
+    // adp-source-season-coverage -- the ADP vendors serve the current season
+    // only, so its 2025 findings are unrecoverable by construction.
+    //
+    // prop-market-selection-coverage -- no book serves closing prices for a
+    // settled game, and the lost selections are absent from
+    // prop_market_selections_history as well as from the index, so they cannot
+    // be replayed from anything we hold.
+    //
+    // Its two 2026 book-seasons were left unparked when the check landed and
+    // were adjudicated on 2026-09-02, so both are now parked with a cause
+    // rather than as unexplained debt. They are the two entries here that a
+    // reader should NOT expect to behave like the rest. PRIZEPICKS 2026 is a
+    // fixed numerator against a growing denominator and is expected to report
+    // STALE within days, which is its designed close rather than a defect in
+    // the entry. BETMGM 2026 is the only baselined entry on this check whose
+    // repair is a code change -- the header over-declares selection_count on
+    // placeholder markets, so no data was lost and the owning task clears it.
     const baselined = parked_entries.filter(
       (entry) => entry.disposition === 'baselined'
     )
 
-    expect([
-      ...new Set(baselined.map((entry) => entry.check_id))
-    ]).to.deep.equal(['adp-source-season-coverage'])
+    expect(
+      [...new Set(baselined.map((entry) => entry.check_id))].sort()
+    ).to.deep.equal([
+      'adp-source-season-coverage',
+      'prop-market-selection-coverage'
+    ])
 
     for (const entry of baselined) {
       expect(entry.owner, entry.check_id).to.be.a('string')

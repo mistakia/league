@@ -164,7 +164,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: nominator }
     )
 
@@ -195,7 +195,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: nominator }
     )
 
@@ -205,12 +205,10 @@ describe('auction proxy bidding and auto-nomination', function () {
       'the nomination arms the bid clock'
     ).to.be.at.least(1)
 
-    await auction.bid({
-      user_id: 1,
-      tid: tids[2],
-      pid: player.pid,
-      value: 10
-    })
+    await auction.bid(
+      { pid: player.pid, value: 10 },
+      { user_id: 1, tid: tids[2] }
+    )
 
     const bids = await bids_on(player.pid)
     const leading = bids[bids.length - 1]
@@ -251,7 +249,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: nominator }
     )
 
@@ -260,12 +258,10 @@ describe('auction proxy bidding and auto-nomination', function () {
     expect(bids[bids.length - 1].player_salary).to.equal(13)
     expect(bids[bids.length - 1].tid).to.equal(tids[1])
 
-    await auction.bid({
-      user_id: 1,
-      tid: tids[1],
-      pid: player.pid,
-      value: 14
-    })
+    await auction.bid(
+      { pid: player.pid, value: 14 },
+      { user_id: 1, tid: tids[1] }
+    )
 
     bids = await bids_on(player.pid)
     const leading = bids[bids.length - 1]
@@ -318,7 +314,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     const tids = await team_ids()
     const player = await free_agent()
     await auction.nominate(
-      { pid: player.pid, value: 3, user_id: 1 },
+      { pid: player.pid, value: 3 },
       { user_id: 1, tid: tids[0] }
     )
 
@@ -343,7 +339,7 @@ describe('auction proxy bidding and auto-nomination', function () {
     const player = await free_agent()
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: tids[0] }
     )
 

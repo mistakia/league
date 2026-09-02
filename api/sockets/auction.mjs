@@ -130,25 +130,61 @@ export default class Auction {
     return this._tids.includes(tid)
   }
 
-  async join({ ws, tid, user_id, onclose, client_id }) {
+  /**
+   * Join the auction as the team the authenticated user owns.
+   *
+   * THE ACTING TEAM IS RESOLVED HERE, ONCE, AND BOUND TO THE SOCKET. Everything
+   * downstream -- the bid, the nomination, the connected-team list -- reads it
+   * from that binding rather than from anything the client sends, so `tid`
+   * deliberately is NOT a parameter: the AUCTION_JOIN payload is client input
+   * and `api/sockets/index.mjs` has no more authority over the acting team than
+   * the message body does.
+   *
+   * OWNERSHIP, NOT `verify_user_team`. That helper passes a league's
+   * commissioner for every team in it, which is right for the roster and trade
+   * routes it was written for and wrong here: in this league the commissioner is
+   * a competing manager, so accepting a commissioner-supplied team would leave
+   * the one identity that matters most able to name any team on the board. The
+   * commissioner's designed power over other teams does not run through this
+   * value anyway -- `_validate_nomination` keys its bypass on the authenticated
+   * user id, and `_create_nomination_bid` writes the team the ROTATION has on
+   * the clock.
+   */
+  async join({ ws, user_id, onclose, client_id }) {
     // Prevent duplicate client connections
     if (this._connected_client_ids[client_id]) {
       this.logger(`client_id ${client_id} already connected`)
       return
     }
 
-    // Track user connections
-    if (this._connected[tid]) {
-      this._connected[tid].push(user_id)
-    } else {
-      this._connected[tid] = [user_id]
+    const tid = await this._resolve_acting_team_id(user_id)
+
+    // A commissioner who manages no team in this league still runs the auction
+    // -- pausing it, resuming it, and nominating for a team whose clock ran out
+    // -- so they join with no acting team rather than being refused. They can
+    // place no bid, because there is no team to charge.
+    if (!tid && user_id !== this._league.commissioner_user_id) {
+      this.logger(`user_id ${user_id} manages no team in league ${this._lid}`)
+      this.reply(user_id, 'invalid team')
+      return
+    }
+
+    // Track user connections. Keyed by team, so a commissioner with no team in
+    // the league is deliberately absent from it: `pause_on_team_disconnect`
+    // counts TEAMS present, and an entry under no team would hold the league.
+    if (tid) {
+      if (this._connected[tid]) {
+        this._connected[tid].push(user_id)
+      } else {
+        this._connected[tid] = [user_id]
+      }
     }
     this._connected_client_ids[client_id] = user_id
 
-    this.logger(`user_id ${user_id} joined`)
+    this.logger(`user_id ${user_id} joined as team_id ${tid}`)
 
     // Set up message handlers
-    this._setup_message_handlers(ws, user_id)
+    this._setup_message_handlers(ws, user_id, tid)
 
     // Set up connection close handler
     this._setup_close_handler(ws, tid, user_id, onclose, client_id)
@@ -354,9 +390,28 @@ export default class Auction {
     }
   }
 
-  async bid(message) {
+  /**
+   * @param {object} message - the ACTION only: which player, and how much
+   * @param {object} actor - the socket-authenticated identity and its team
+   * @param {number} actor.user_id
+   * @param {number|null} actor.tid
+   *
+   * THE ACTOR IS A SEPARATE ARGUMENT BECAUSE IT IS NOT CLIENT INPUT, which is
+   * the same reason `nominate` has taken one all along. A bid spends a team's
+   * cap and awards it the player when the clock expires, so the team doing the
+   * bidding is exactly the field a payload must not be able to name.
+   */
+  async bid(message, { user_id, tid }) {
     if (await this._refresh_league_pause()) return
-    if (this._refuse_while_paused('bid', message.user_id)) return
+    if (this._refuse_while_paused('bid', user_id)) return
+
+    // A commissioner who manages no team in this league has no cap to spend.
+    if (!tid) {
+      this.logger(`refusing a bid from user_id ${user_id} with no acting team`)
+      this.reply(user_id, 'invalid team')
+      return
+    }
+
     if (this._locked) return
     this._locked = true
 
@@ -369,12 +424,12 @@ export default class Auction {
       const current = this._transactions[0]
 
       // Validate bid
-      if (!this._validate_bid(message, current)) {
+      if (!this._validate_bid(message, current, { user_id, tid })) {
         return
       }
 
       // Create and record bid
-      const bid = await this._create_bid_record(message)
+      const bid = await this._create_bid_record(message, { user_id, tid })
       this._transactions.unshift(bid)
 
       // A manual bid SUPERSEDES that team's standing maximum: bidding below
@@ -391,23 +446,33 @@ export default class Auction {
       // asymmetry is the standard proxy-auction contract and it is what gives a
       // present manager a full bid clock to respond to being outbid by a ceiling
       // they cannot see.
-      this._manual_bids.set(message.tid, message.value)
+      this._manual_bids.set(tid, message.value)
       this._start_bid_timer()
       await this._apply_proxy_bids()
       return true
     } catch (error) {
       this.logger('error in bid()', error)
       this._start_bid_timer()
-      this.reply(message.user_id, 'bid error')
+      this.reply(user_id, 'bid error')
       return false
     } finally {
       this._locked = false
     }
   }
 
-  async nominate(message = {}, { user_id, tid }) {
+  /**
+   * @param {object} message - the ACTION only: which player, and for how much
+   * @param {object} actor
+   * @param {number} actor.user_id - the socket-authenticated user; every guard
+   *   and every refusal reply below uses this and nothing from the message
+   * @param {number|null} actor.tid - the team that user manages
+   * @param {number} [actor.attributed_user_id] - whom the recorded transaction
+   *   belongs to, when that differs from who authorized it. Only
+   *   `_auto_nominate` sets it; a socket message cannot.
+   */
+  async nominate(message = {}, { user_id, tid, attributed_user_id = user_id }) {
     if (await this._refresh_league_pause()) return
-    if (this._refuse_while_paused('nomination', message.user_id)) return
+    if (this._refuse_while_paused('nomination', user_id)) return
 
     // ELECTIONS SETTLE OVER REST, so this instance's transaction cache can be
     // stale by a whole player. `nominating_team_id` reads that cache, and a
@@ -427,15 +492,11 @@ export default class Auction {
     }
 
     const nominating_team_id = this.nominating_team_id
-    // The socket-authenticated `user_id` above and the one the CLIENT sends in
-    // the message are different identities, and this file has always printed
-    // both. Binding the message field as `user_id` would shadow the
-    // authenticated parameter, so it is aliased.
-    let { user_id: message_user_id, value = 0 } = message
+    let { value = 0 } = message
     const { pid } = message
 
     this.logger(
-      `received nomination for ${pid} for $${value} (team_id ${tid}, socket user_id ${user_id}, account user_id ${message_user_id})`
+      `received nomination for ${pid} for $${value} (team_id ${tid}, user_id ${user_id})`
     )
 
     // Validate nomination
@@ -473,7 +534,8 @@ export default class Auction {
     const bid = await this._create_nomination_bid(
       message,
       nominating_team_id,
-      value
+      value,
+      attributed_user_id
     )
     this._transactions.unshift(bid)
 
@@ -507,11 +569,21 @@ export default class Auction {
   // VALIDATION METHODS
   // ============================================================================
 
-  _validate_bid(message, current) {
-    const { user_id, tid, pid, value } = message
+  // `user_id` and `tid` are the AUTHENTICATED actor, not message fields. The
+  // message carries the action; every guard below is about the team being
+  // charged, so reading the team from the message would make each of these a
+  // check against a value the bidder chose.
+  _validate_bid(message, current, { user_id, tid }) {
+    const { pid, value } = message
 
     // Check team capacity
     const team = this._teams.find((t) => t.team_id === tid)
+    if (!team) {
+      this.logger(`bid rejected - team ${tid} is not in this auction`)
+      this.reply(user_id, 'invalid team')
+      return false
+    }
+
     if (team.cap - value < 0) {
       this.reply(user_id, 'exceeds salary limit')
       this._start_bid_timer()
@@ -552,13 +624,11 @@ export default class Auction {
     return true
   }
 
+  // `user_id` is the SOCKET-AUTHENTICATED identity: what the commissioner
+  // checks compare against, and where every refusal below is sent. The message
+  // carries no identity at all, so there is nothing here for a client to claim.
   async _validate_nomination(message, nominating_team_id, tid, user_id) {
-    // `user_id` is the SOCKET-AUTHENTICATED identity and is what the two
-    // commissioner checks below must compare against; the message field is only
-    // the address the client asked replies to go to. Binding the message field
-    // as `user_id` would shadow the parameter and let any client claim the
-    // commissioner's id to nominate out of turn, so it is aliased.
-    const { pid, user_id: message_user_id } = message
+    const { pid } = message
 
     if (!pid) {
       this.logger('no player to nominate')
@@ -582,7 +652,7 @@ export default class Auction {
     // Check if it's the team's turn to nominate
     if (nominating_team_id !== tid) {
       this.logger('received nomination from a team out of turn')
-      this.reply(message_user_id, 'invalid nomination')
+      this.reply(user_id, 'invalid nomination')
       return false
     }
 
@@ -590,7 +660,7 @@ export default class Auction {
     const players = await db('player').where('pid', pid)
     const player_info = players[0]
     if (!player_info) {
-      this.reply(message_user_id, 'invalid nomination')
+      this.reply(user_id, 'invalid nomination')
       this.logger(`can not nominate invalid player ${pid}`)
       return false
     }
@@ -601,7 +671,7 @@ export default class Auction {
       .where('season_year', current_season.year)
       .where('pid', pid)
     if (roster_rows.length) {
-      this.reply(message_user_id, 'invalid nomination')
+      this.reply(user_id, 'invalid nomination')
       this.logger(`can not nominate already rostered player ${pid}`)
       return false
     }
@@ -616,12 +686,12 @@ export default class Auction {
       this.logger(
         `no open slots available for ${pid} on team_id ${nominating_team_id}`
       )
-      this.reply(message_user_id, 'exceeds roster limits')
+      this.reply(user_id, 'exceeds roster limits')
       return false
     }
 
     if (message.value > roster_obj.availableCap) {
-      this.reply(message_user_id, 'exceeds salary limit')
+      this.reply(user_id, 'exceeds salary limit')
       return false
     }
 
@@ -713,8 +783,8 @@ export default class Auction {
   // DATABASE OPERATIONS
   // ============================================================================
 
-  async _create_bid_record(message) {
-    const { user_id, tid, pid, value } = message
+  async _create_bid_record(message, { user_id, tid }) {
+    const { pid, value } = message
 
     const bid = {
       user_id,
@@ -744,8 +814,8 @@ export default class Auction {
     return bid_with_uid
   }
 
-  async _create_nomination_bid(message, nominating_team_id, value) {
-    const { user_id, pid } = message
+  async _create_nomination_bid(message, nominating_team_id, value, user_id) {
+    const { pid } = message
 
     const bid = {
       user_id,
@@ -1106,9 +1176,19 @@ export default class Auction {
       `auto-nominating ${next.pid} for team ${nominating_team_id} from the ${tier} order`
     )
 
+    // TWO IDENTITIES, AND THEY ARE DIFFERENT ON PURPOSE. The auto-nomination
+    // acts under COMMISSIONER authority -- that is what carries it past the turn
+    // check for a team whose clock ran out -- but the row it writes is the
+    // team's own nomination and has always been attributed to that team's
+    // manager. Collapsing the two would either stall the rotation or rewrite
+    // whose nomination the transaction log says it was.
     return this.nominate(
-      { pid: next.pid, value: 0, user_id },
-      { user_id: this._league.commissioner_user_id, tid: nominating_team_id }
+      { pid: next.pid, value: 0 },
+      {
+        user_id: this._league.commissioner_user_id,
+        tid: nominating_team_id,
+        attributed_user_id: user_id
+      }
     )
   }
 
@@ -1203,7 +1283,17 @@ export default class Auction {
   // SETUP AND INITIALIZATION METHODS
   // ============================================================================
 
-  _setup_message_handlers(ws, user_id) {
+  /**
+   * @param {object} ws - the connected socket
+   * @param {number} user_id - the SOCKET-AUTHENTICATED user, from `request.auth`
+   * @param {number|null} tid - the team that user manages, resolved in `join`
+   *
+   * `user_id` and `tid` are the trust boundary. Every verb below takes both
+   * from this closure and none of them reads either from `message.payload`,
+   * which is why the payload destructuring here names only the fields that
+   * describe the ACTION -- the player, the amount -- and never the actor.
+   */
+  _setup_message_handlers(ws, user_id, tid) {
     ws.on('message', (msg) => {
       let message
       try {
@@ -1233,13 +1323,10 @@ export default class Auction {
           })
 
         case 'AUCTION_BID':
-          return this.bid(message.payload)
+          return this.bid(message.payload, { user_id, tid })
 
         case 'AUCTION_SUBMIT_NOMINATION':
-          return this.nominate(message.payload, {
-            user_id,
-            tid: message.payload.tid
-          })
+          return this.nominate(message.payload, { user_id, tid })
 
         case 'KEEPALIVE':
           return
@@ -1252,13 +1339,17 @@ export default class Auction {
 
   _setup_close_handler(ws, tid, user_id, onclose, client_id) {
     ws.on('close', () => {
-      // Remove user from connected list
-      const index = this._connected[tid].indexOf(user_id)
-      this._connected[tid].splice(index, 1)
+      // Remove user from connected list. A commissioner who manages no team in
+      // this league was never added to it -- see `join` -- so there is nothing
+      // to remove and no team whose disconnect could pause the league.
+      if (tid && this._connected[tid]) {
+        const index = this._connected[tid].indexOf(user_id)
+        if (index !== -1) this._connected[tid].splice(index, 1)
 
-      if (!this._connected[tid].length) {
-        delete this._connected[tid]
-        if (this._pause_on_team_disconnect) this.pause()
+        if (!this._connected[tid].length) {
+          delete this._connected[tid]
+          if (this._pause_on_team_disconnect) this.pause()
+        }
       }
 
       delete this._connected_client_ids[client_id]
@@ -1313,6 +1404,46 @@ export default class Auction {
         outstanding_election_tids
       }
     })
+  }
+
+  /**
+   * The team this user manages in this league, or null.
+   *
+   * Read from `users_teams` rather than from `_teams`, because ownership is
+   * what is being established and `_teams` is a capacity cache that carries no
+   * owner. Scoped to the league AND the season: `users_teams` is keyed by team
+   * and season, so a user who managed a different team in a prior year has more
+   * than one row.
+   */
+  async _resolve_acting_team_id(user_id) {
+    if (!user_id) return null
+
+    const rows = await db('users_teams')
+      .join('teams', function () {
+        this.on('teams.team_id', '=', 'users_teams.tid').andOn(
+          'teams.season_year',
+          '=',
+          'users_teams.season_year'
+        )
+      })
+      .where('users_teams.user_id', user_id)
+      .where('users_teams.season_year', current_season.year)
+      .where('teams.lid', this._lid)
+      .select('teams.team_id')
+
+    if (!rows.length) return null
+
+    // One team per user per league-season. More than one is a data defect
+    // rather than a state to pick a winner from, so it is named here instead of
+    // being resolved silently into whichever row sorted first.
+    if (rows.length > 1) {
+      this.logger(
+        `user_id ${user_id} manages ${rows.length} teams in league ${this._lid}; refusing to guess`
+      )
+      return null
+    }
+
+    return rows[0].team_id
   }
 
   async _load_teams() {

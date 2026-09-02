@@ -868,13 +868,13 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'drops'
     },
-    'stats.dryprecy': {
+    'stats.drprecy': {
       category: 'receiving',
       column_header: 'DRP YDS',
       csv_header: 'Dropped Receiving Yards',
-      player_value_path: 'stats.dryprecy',
+      player_value_path: 'stats.drprecy',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'dryprecy'
+      percentile_field: 'drprecy'
     },
     'stats.targets': {
       category: 'opportunity',

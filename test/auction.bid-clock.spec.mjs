@@ -112,7 +112,7 @@ describe('auction bid clock on the wire', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: tids[0] }
     )
 
@@ -148,7 +148,7 @@ describe('auction bid clock on the wire', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: nominator }
     )
 
@@ -156,12 +156,10 @@ describe('auction bid clock on the wire', function () {
 
     // A HUMAN BID, which resets the clock, and the engine's answer to it, which
     // must not. Both broadcast an AUCTION_BID; only one is a clock event.
-    await auction.bid({
-      user_id: 1,
-      tid: rival,
-      pid: player.pid,
-      value: 10
-    })
+    await auction.bid(
+      { pid: player.pid, value: 10 },
+      { user_id: 1, tid: rival }
+    )
 
     const bids_broadcast = broadcasts.filter(
       (message) => message.type === 'AUCTION_BID'
@@ -186,7 +184,7 @@ describe('auction bid clock on the wire', function () {
       random: false
     })
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: tids[0] }
     )
 
@@ -206,7 +204,7 @@ describe('auction bid clock on the wire', function () {
       random: false
     })
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1 },
+      { pid: player.pid, value: 0 },
       { user_id: 1, tid: tids[0] }
     )
 

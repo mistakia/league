@@ -6,11 +6,6 @@ import {
   AUCTION_BLOCK_GRANULARITY_MINUTES
 } from '#constants'
 import { auction_actions } from './actions'
-// The ACTIONS module rather than the `@core/app` barrel: the barrel pulls in
-// every saga in the app, and one of them calls `dayjs.extend` at module scope
-// with a plugin the spec loader has not registered -- which makes this reducer
-// unimportable from a spec for a reason that has nothing to do with it.
-import { app_actions } from '@core/app/actions'
 
 const initialState = new Record({
   // Whether this client has sent AUCTION_JOIN. The server tracks a join per
@@ -255,15 +250,6 @@ export function auction_reducer(state = initialState(), { payload, type }) {
     case auction_actions.SET_AUCTION_BUDGET:
       return state.merge({
         lineupBudget: payload.budget
-      })
-
-    case app_actions.AUTH_FULFILLED:
-      if (!payload.data.leagues.length) {
-        return state
-      }
-
-      return state.merge({
-        lineupBudget: Math.round(payload.data.leagues[0].salary_cap * 0.9)
       })
 
     case auction_actions.GET_AUCTION_ELECTIONS_FULFILLED: {

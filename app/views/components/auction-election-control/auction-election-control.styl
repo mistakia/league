@@ -4,11 +4,19 @@
 // and competing with the stat items for the same axis. This gives it a band of
 // its own so the layout does not have to be argued for at each of its two call
 // sites.
+//
+// Three measures the band shares with the centring rule below, named so the
+// remainder there is derived rather than copied. Stylus resolves variables in
+// source order, so they must stay above every rule that reads them.
+$election_control_state_basis = 132px
+$election_control_gap = 12px
+$election_control_content_max_width = 720px
+
 .auction-election-control
   flex 0 0 auto
   display flex
   align-items stretch
-  gap 12px
+  gap $election_control_gap
   padding 10px 16px
   border-top 1px solid $borderColor
   border-bottom 1px solid $borderColor
@@ -24,11 +32,33 @@
     padding-bottom 2px
     color rgba(0, 0, 0, 0.6)
 
+// The band spans the drawer but its content does not need to. Capping the
+// content and centring the cap keeps the divider at a fixed offset and the note
+// wrapping to a stable measure, so the group does not slide horizontally as the
+// state moves between "None set", a dollar amount, a decline and a capped
+// ceiling -- which is what centring the two children as a content-sized group
+// would have done instead. The band keeps its full-bleed rules; only the flex
+// line inside it is bounded.
+//
+// The body carries the cap because there is no wrapper element to put it on,
+// and its remainder is derived rather than written: every box here is
+// border-box (normalize.css sets it on `*`), so the state column's outer width
+// IS its 132px basis and the whole group is state + gap + body.
+//
+// SCOPED OFF COMPACT DELIBERATELY, not left to specificity. `.compact` is the
+// strip inside the 70px live bid bar and it shares every base declaration
+// above, so an unscoped `justify-content` here would reach it too.
+.auction-election-control:not(.compact)
+  justify-content center
+
+  .auction-election-control__body
+    max-width $election_control_content_max_width - $election_control_state_basis - $election_control_gap
+
 // The current election, stated before anything offers to change it. A fixed
 // basis rather than content width so the form beside it does not shift
 // horizontally when the state goes from "None set" to "$12".
 .auction-election-control__state
-  flex 0 0 132px
+  flex 0 0 $election_control_state_basis
   display flex
   flex-direction column
   justify-content center
