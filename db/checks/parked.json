@@ -514,7 +514,7 @@
     },
     "disposition": "baselined",
     "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
-    "reason": "Scattered loss rather than a silent book: 4,572 markets spread across market types and games. The current importer gates its market push on selections.length > 0, so these may predate that gate. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "reason": "Scattered loss rather than a silent book, and it PREDATES the gate -- confirmed 2026-09-02 rather than left open. Bucketing the orphans by the OPEN row's observed_at puts 954 in August 2025 and 1,324 in September, against essentially zero from October onward, and the September days resolve the boundary exactly: the orphan share runs 26 percent on the 3rd, 73 on the 4th, 61 on the 6th and 61 on the 10th, then collapses to 4 percent on the 13th, 7 on the 14th, 26 on the 15th and zero from the 16th. That cliff is the v3 importer landing in private 7da2805 on 2025-09-13, which introduced the selections.length > 0 gate, followed by 7f2d208 on the 14th and aaebca0 on the 15th closing the runners-without-odds tail. The repair is already deployed and the population is closed. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
     "evidence": "Capture rate 0.9554 over 102510 declared markets, measured 2026-09-02.",
     "validated_at": "2026-09-02"
   },
@@ -526,8 +526,32 @@
     },
     "disposition": "baselined",
     "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
-    "reason": "PrizePicks wrote ZERO selection rows between October 2025 and August 2026 while its markets kept landing daily, then resumed in September 2026 -- the whole 2025 NFL season for that book. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "reason": "PrizePicks wrote ZERO selection rows between October 2025 and August 2026 while its markets kept landing daily, then resumed in September 2026 -- the whole 2025 NFL season for that book. ROOT-CAUSED AND FIXED, in league 61a6d65fc: PrizePicks is fixed-payout pick-em whose /projections feed carries a line and no odds, so the importer has hardcoded null odds since the schema landed, and b3b2b5ce1 (2024-01-05) then made odds_american and odds_decimal unconditionally required in validate_selection, rejecting every PrizePicks selection from that day. OPEN index rows stopped immediately; once 71ff6dab9 (2025-09-14) batched the writes, the discarded pending history row took the CLOSE rows with it, which is why the visible outage starts a year after the cause. The requirement is now gated on a fixed_payout_bookmakers set. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
     "evidence": "Capture rate 0.0813 over 248492 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "PRIZEPICKS",
+      "season_year": 2026
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "A STRANDED COHORT at the boundary of the 61a6d65fc deploy, not an ongoing defect. All 462 orphan rows are 231 markets across both time_types, every one of them first seen on 2026-09-01 and last observed at 2026-09-02T02:42Z -- the final pre-fix import run. PrizePicks selections resumed at 03:00Z that morning, and the 231 markets never appeared in the feed again, so the self-healing path (an existing market whose selection is absent re-enters save_new_selection on the next observation) never got a chance to run on them. Coverage restricted to the markets observed after the deploy is 5,256 of 5,256, exactly 1.0000, which is the evidence that the importer is healthy rather than still losing rows. THIS ENTRY IS EXPECTED TO GO STALE ON ITS OWN, and that report is the designed close: the 462 are a fixed numerator against a denominator that grows every import, so the season rate crosses 0.98 once roughly 23,100 markets are declared, days away at the observed rate. Baselined rather than adjudicated because the 462 are genuinely lost rows rather than a correct reading.",
+    "evidence": "Capture rate 0.9579 over 10974 declared markets, measured 2026-09-02; post-deploy subpopulation 5256 of 5256 at 1.0000 on the same date.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "BETMGM",
+      "season_year": 2026
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/repair-betmgm-prop-market-import.md",
+    "reason": "NOT a capture failure -- a dishonest selection_count, and the only entry here whose repair is a code change rather than unrecoverable data. Every one of the 220 orphan rows is a Moneyline market: 110 markets across both time_types, all first and last observed in BetMGM's single 2026 run on 2026-08-23, while Spread and Totals captured at 1.0000 in the same run. private/scripts/import-betmgm-odds.mjs sets selection_count from options.length BEFORE any filtering, so a market whose options are all unpriced placeholders declares two runners and emits none; validate_selection then correctly rejects both sides for want of a price. The independently-derived count in the owning plan agrees exactly -- of 127 moneyline markets in the 2026-08-23 dump, 110 are fully placeholder. The owning task's step 'Skip placeholder selections and recompute selection_count' moves the count after the filter and skips a market left with zero selections, which clears this entry outright. The denominator is frozen at 1,448 until BetMGM imports again, so unlike the PrizePicks 2026 entry this one cannot dilute itself away and will sit at 0.8481 until that repair lands.",
+    "evidence": "Capture rate 0.8481 over 1448 declared markets, measured 2026-09-02. All 220 orphan rows carry source_market_name like 'Moneyline%'; the 34 non-orphan Moneyline rows, and all 34 Spread and 34 Totals rows, captured.",
     "validated_at": "2026-09-02"
   }
 ]

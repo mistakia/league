@@ -683,7 +683,17 @@ export default async function (markets, { dry_run = false } = {}) {
         selection_processing_failures: stats.selection_processing_failures,
         samples: failure_samples
       },
-      dedup_key: 'prop-market-import:processing-failures'
+      // Scoped to the books this call carried, because the queue deduplicates
+      // on this key and one book's open signal otherwise absorbs every other
+      // book's drops in silence. That is not hypothetical: signal 127750 held
+      // PrizePicks' whole-vendor loss open from 2026-08-03 until 2026-09-02,
+      // and for that month any drop from DraftKings, Pinnacle, FanDuel or
+      // Caesars -- which share this emitter and, on digitalocean-0, share one
+      // dedup scope -- would have landed on the same key and reported nothing
+      // new. The books are sorted so the key is stable across runs whatever
+      // order the markets arrive in; imports are per-book, so in practice this
+      // is one source_id.
+      dedup_key: `prop-market-import:processing-failures:${[...source_ids].sort().join(',')}`
     })
   }
 
