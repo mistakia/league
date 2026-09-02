@@ -65,6 +65,7 @@ These are the ones you cannot route to, because you hit them without deciding to
 Stated once here because it applies to every undertaking, and it is the single most repeated lesson in this repo's history:
 
 - **A green you have not shown can go red is not evidence.** Before trusting a gate, a grep, a spec or a deploy check, make it fail on a case you know is broken. A check that cannot report is indistinguishable from a clean result, and it fails in the direction that looks like success.
+- **A red you have not diffed against the baseline is not evidence either.** The rule above says make the check fail; this one says prove YOUR break is what failed it. Run the control and the unperturbed case as a pair and require the two readings to DIFFER — a check already red for an unrelated reason swallows your injected fault and reports the same number both times, which looks exactly like a control that fired.
 - **Validate a negative pattern against a match you know exists.** A pattern that cannot match returns a confident zero.
 - **Anchor on the syntactic role, not the token.** A name present in a different role proves nothing about the one you are testing.
 - **Prefer executing the behavior over reading the source.** "The fix is in the source" and "the deployed artifact no longer has the defect" are different claims.
