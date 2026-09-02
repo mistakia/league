@@ -98,6 +98,18 @@ const initialize_cli = () => {
         type: 'string',
         describe: 'Comma-separated game IDs to process (overrides week/year)'
       })
+      // NOT a substitute for --esbids; it narrows WITHIN the games that flag
+      // selects. A repair needing to re-grade a few markets otherwise has only
+      // the esbid to select on, and settling those games grades everything else
+      // in them too -- the case that motivated this option had 1,326 rows to
+      // re-grade sitting in games holding 2.4 million ungraded selections.
+      // Suppresses the market settlement status sweep, which is game-scoped and
+      // would reach every market in those games regardless of this filter.
+      .option('source_market_ids', {
+        type: 'string',
+        describe:
+          'Comma-separated source_market_ids to restrict to, within --esbids'
+      })
       .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
       .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
       .example('$0 --season_type POST --week 1', 'Process playoff week 1')
@@ -425,11 +437,23 @@ const execute_processing = async ({
 
   // Get supported market types and fetch markets
   const supported_market_types = get_supported_market_types()
+  const source_market_ids = config.source_market_ids
+    ? String(config.source_market_ids)
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+    : null
+
+  if (source_market_ids) {
+    log(`Restricting to ${source_market_ids.length} named markets`)
+  }
+
   const markets = await fetch_markets_for_games({
     esbids: valid_esbids,
     year: config.season_year,
     missing_only: config.missing_only,
-    supported_market_types
+    supported_market_types,
+    source_market_ids
   })
 
   if (markets.length === 0) {
@@ -530,15 +554,26 @@ const execute_processing = async ({
       log(`Written ${selection_count} selection results`)
     }
 
-    // Update market settlement status
-    log(`Checking market settlement status for ${valid_esbids.length} games...`)
-    const markets_updated = await update_market_settlement_status({
-      esbids: valid_esbids,
-      dry_run: config.dry_run,
-      verbose: config.verbose
-    })
-    if (!config.dry_run) {
-      log(`Updated ${markets_updated} market settlement statuses`)
+    // Update market settlement status. Skipped under --source_market_ids: this
+    // sweep is GAME-scoped, so it would evaluate every market in the selected
+    // games and flip is_market_settled on markets the run never graded --
+    // which also freezes their stamp columns against any later repair.
+    if (source_market_ids) {
+      log(
+        'Skipping market settlement status sweep -- it is game-scoped and this run is market-scoped'
+      )
+    } else {
+      log(
+        `Checking market settlement status for ${valid_esbids.length} games...`
+      )
+      const markets_updated = await update_market_settlement_status({
+        esbids: valid_esbids,
+        dry_run: config.dry_run,
+        verbose: config.verbose
+      })
+      if (!config.dry_run) {
+        log(`Updated ${markets_updated} market settlement statuses`)
+      }
     }
   }
 

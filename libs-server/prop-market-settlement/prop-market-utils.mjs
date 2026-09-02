@@ -271,7 +271,8 @@ export const fetch_markets_for_games = async ({
   esbids,
   year,
   missing_only = false,
-  supported_market_types
+  supported_market_types,
+  source_market_ids = null
 }) => {
   if (!esbids || esbids.length === 0) return []
 
@@ -316,6 +317,20 @@ export const fetch_markets_for_games = async ({
     .modify((qb) => {
       if (supported_market_types && supported_market_types.length > 0) {
         qb.whereIn('prop_markets_index.market_type', supported_market_types)
+      }
+
+      // Narrow a run to NAMED markets. A repair that has to re-grade a
+      // handful of markets otherwise has only the esbid to select on, and the
+      // games holding those markets contain everything else that was ever
+      // posted for them -- 1,326 rows needing a re-grade sat in games holding
+      // 2.4 million ungraded selections, so the esbid-scoped run is a mass
+      // settlement wearing a repair's clothes. Absent by default, so every
+      // ordinary run is unchanged.
+      if (source_market_ids && source_market_ids.length > 0) {
+        qb.whereIn(
+          'prop_market_selections_index.source_market_id',
+          source_market_ids
+        )
       }
       if (missing_only) {
         // Results are written at selection grain, so the market-grain
