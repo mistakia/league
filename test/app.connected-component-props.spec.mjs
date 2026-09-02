@@ -311,18 +311,35 @@ describe('app connected-component props', function () {
       // Consumed set: every destructured function parameter plus every
       // `this.props.x` read, so class components are covered too.
       const consumed = new Set()
+
+      // ONLY A TOP-LEVEL FUNCTION RECEIVES PROPS. A nested one is a callback,
+      // and its first parameter is whatever the caller passes -- a list item, an
+      // event, an accumulator -- which has nothing to do with the component's
+      // props. Harvesting every function's first parameter made
+      // `user_leagues.map(({ league_id, name }) => ...)` read as a prop named
+      // `league_id`, and the gate then reported drift against the `leagueId` the
+      // wiring supplies. The names collided; the syntactic roles never did, which
+      // is the trap this repo's own verification rule names.
+      //
+      // `getFunctionParent()` is null exactly for a function not enclosed by
+      // another, which is where a component is declared however it is written --
+      // a declaration, an export default, or a const initializer.
+      const is_component_scope = (p) => p.getFunctionParent() === null
       traverse(component_ast, {
         ArrowFunctionExpression(p) {
+          if (!is_component_scope(p)) return
           destructured_names_from_pattern(p.node.params[0]).forEach((n) =>
             consumed.add(n)
           )
         },
         FunctionDeclaration(p) {
+          if (!is_component_scope(p)) return
           destructured_names_from_pattern(p.node.params[0]).forEach((n) =>
             consumed.add(n)
           )
         },
         FunctionExpression(p) {
+          if (!is_component_scope(p)) return
           destructured_names_from_pattern(p.node.params[0]).forEach((n) =>
             consumed.add(n)
           )
