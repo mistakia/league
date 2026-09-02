@@ -62,13 +62,23 @@ const run = async ({
   const period = is_regular_season_projection
     ? projection_periods.SEASON
     : projection_periods.WEEK
-  const week = current_season.nfl_seas_week
   // A season-long projection is REG by construction -- the season table has no
   // season_type column to hold anything else.
   const seas_type =
     is_regular_season_projection || current_season.nfl_seas_type !== 'POST'
       ? 'REG'
       : 'POST'
+  // In POST, 4for4 numbers the playoff rounds and nfl_seas_week is the counter
+  // that matches -- it is what the POST rows already in projections_index hold.
+  // Everywhere else the question is which fantasy week is next up, and
+  // nfl_seas_week answers it wrong in PRESEASON: it names the week AFTER the one
+  // being played, so the 2026-09-02 run labelled its rows week 3 while every
+  // other source wrote week 1. During the regular season the two agree, which is
+  // why the historical rows look clean and only a preseason run exposes it.
+  const week =
+    seas_type === 'POST'
+      ? current_season.nfl_seas_week
+      : current_season.active_fantasy_week
 
   const data = await four_for_four.get_4for4_projections({
     season_year: year,
@@ -90,6 +100,31 @@ const run = async ({
   // which turned this log-and-continue check into a throw).
   if (!is_regular_season_projection && !first_item?.Week) {
     throw new Error('No Week column found in data')
+  }
+
+  // The weekly endpoint is a SINGLE url out of config -- `week` never reaches
+  // it, it only labels the write -- so 4for4 answers with whatever board it
+  // currently publishes and this script cannot tell that it is not ours unless
+  // it reads the coordinate the rows carry. On 2026-09-02 that board was still
+  // the prior postseason's (Season 2026, Week 22, 21 rows, empty Opp) and the
+  // locally-derived week wrote it into the new season under a week nobody asked
+  // for. Deriving the week correctly makes that WORSE, not better: it would have
+  // landed a stale Super Bowl board on week 1.
+  //
+  // The feed's Week is continuous across the season -- 22 is a playoff round,
+  // not a fantasy week -- so during REG it equals the fantasy week directly. The
+  // POST mapping is not asserted here because nothing in hand pins it.
+  if (!is_regular_season_projection && seas_type === 'REG') {
+    const feed_year = Number(first_item.Season)
+    const feed_week = Number(first_item.Week)
+    if (feed_year !== year || feed_week !== week) {
+      // Not a failure: 4for4 has not published our week yet. Writing this board
+      // under our coordinate would be worse than importing nothing.
+      console.log(
+        `4for4 is publishing season ${feed_year} week ${feed_week}; this run wants season ${year} week ${week}. Nothing to import, skipping`
+      )
+      return { skipped: true, unpublished: true }
+    }
   }
 
   for (const item of data) {
