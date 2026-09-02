@@ -5,14 +5,12 @@ import { createPlayer } from './player'
 import { stat_actions } from '@core/stats'
 import { roster_actions } from '@core/rosters'
 import { auction_actions } from '@core/auction'
-import { app_actions } from '@core/app'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import DefaultPlayersViews, {
   default_players_view_key,
   default_players_view_order_by
 } from './default-players-views'
 
-import { league_has_starting_position } from '#libs-shared'
 import {
   current_season,
   fantasy_positions,
@@ -68,20 +66,6 @@ const initialState = new Map({
 
 export function players_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case app_actions.AUTH_FULFILLED: {
-      const league = payload.data.leagues[0]
-      if (league) {
-        return state.merge({
-          positions: new List(
-            fantasy_positions.filter((pos) =>
-              league_has_starting_position({ pos, league })
-            )
-          )
-        })
-      }
-      return state
-    }
-
     case player_actions.SELECT_PLAYERS_PAGE_VIEW: {
       const view = state.getIn(['players_page_views', payload.view_key])
       return state.merge({

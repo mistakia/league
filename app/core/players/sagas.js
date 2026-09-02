@@ -17,6 +17,7 @@ import {
   get_player_maps,
   get_players_state,
   get_current_league,
+  get_positions_for_current_league,
   get_sources_state,
   get_rosters_for_current_league,
   get_request_history
@@ -161,6 +162,18 @@ export function* init({ payload }) {
   const router = yield select(get_router)
 
   // determine what players to load (all_active, league, team)
+  // Default the position filter to the starting positions of the league in
+  // VIEW. This used to be seeded in the reducer from `payload.data.leagues[0]`,
+  // which is the user's lowest-numbered league rather than the one on screen,
+  // so a manager in more than one league had the player list filtered by
+  // another league's roster shape. `get_positions_for_current_league` resolves
+  // it off `app.leagueId`, which the app reducer has already set by the time
+  // this saga runs.
+  if (league.league_id) {
+    const positions = yield select(get_positions_for_current_league)
+    yield put(player_actions.filter({ type: 'positions', values: positions }))
+  }
+
   const { pathname } = router.location
   const all_player_paths = ['/players', '/auction']
   const league_player_paths = ['/', '/trade', 'rosters']
@@ -179,11 +192,17 @@ export function* init({ payload }) {
   } else if (is_league_player_path) {
     yield fork(load_league_players)
   } else {
-    const team_id = (payload.data.teams[0] || {}).team_id
-    const league_id = (payload.data.leagues[0] || {}).league_id
-    yield fork(load_team_players, {
-      payload: { teamId: team_id, leagueId: league_id }
-    })
+    // The team and the league must be the pair the ROUTE names. Taking them
+    // from `payload.data.teams[0]` and `payload.data.leagues[0]` paired two
+    // independent queries by position, so for a manager in more than one
+    // league it sent a team of one league with the id of another and
+    // verify-user-team rejected it with `invalid leagueId`. Both are already
+    // resolved in scope above.
+    if (app.teamId && league.league_id) {
+      yield fork(load_team_players, {
+        payload: { teamId: app.teamId, leagueId: league.league_id }
+      })
+    }
   }
   if (league.league_id)
     yield fork(api_get_baselines, { leagueId: league.league_id })
