@@ -5,17 +5,26 @@ import MockDate from 'mockdate'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types } from '#constants'
-import { Roster } from '#libs-shared'
-import { getRoster, getLeague } from '#libs-server'
-import { resolve_nominating_team_id } from '#libs-server/auction-completion.mjs'
+import Roster from '#libs-shared/roster.mjs'
+import getRoster from '#libs-server/get-roster.mjs'
+import getLeague from '#libs-server/get-league.mjs'
 import Auction from '#api/sockets/auction.mjs'
-import { selectPlayer, fillRoster, addPlayer } from './utils/index.mjs'
+import selectPlayer from './utils/select-player.mjs'
+import fillRoster from './utils/fill-roster.mjs'
+import addPlayer from './utils/add-player.mjs'
+import make_recording_timers from './utils/recording-timers.mjs'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
 
 const league_id = 1
 const season_year = current_season.year
+
+// The fixture's commissioner, asserted in `build_live_auction` rather than
+// trusted. `MANAGER_USER_ID` is any non-commissioner, and both have a recording
+// client in every spec that drives them.
+const COMMISSIONER_USER_ID = 1
+const MANAGER_USER_ID = 2
 
 // Every rejection in this file is asserted through the error the manager
 // actually receives, because that string is the only thing distinguishing one
@@ -42,18 +51,6 @@ const make_recording_wss = (user_ids) => {
     }))
   )
   return { wss: { clients }, errors }
-}
-
-const make_recording_timers = () => {
-  const scheduled = []
-  return {
-    scheduled,
-    set_timeout: (fn, ms) => {
-      scheduled.push({ fn, ms })
-      return scheduled.length
-    },
-    clear_timeout: () => {}
-  }
 }
 
 const count_auction_transactions = async () => {
@@ -86,10 +83,56 @@ const select_players = async ({ pos, count, exclude_pids = [] }) => {
   return selected
 }
 
+// $195 of the fixture's $200 cap consumed across four running backs, leaving
+// exactly CAP_REMAINING_AFTER_SEED and plenty of open active spots. RB is used
+// deliberately: its fixture limit is 0, which `has_position_capacity` reads as
+// unlimited, so a cap spec built on this roster cannot be refused by the
+// position check instead.
+//
+// The salaries and the remaining cap are declared together because five specs
+// assert one against the other -- spelling `5` at each call site is how that
+// pair silently drifts apart.
+const SEED_SALARIES = [48, 48, 48, 51]
+const CAP_REMAINING_AFTER_SEED = 5
+
+const seed_cap_exhausted_roster = async ({ team_id, user_id }) => {
+  const salaried = await select_players({ pos: 'RB', count: 4 })
+  for (const [index, player] of salaried.entries()) {
+    await addPlayer({
+      leagueId: league_id,
+      teamId: team_id,
+      player,
+      userId: user_id,
+      value: SEED_SALARIES[index]
+    })
+  }
+  return salaried
+}
+
+// Three kickers against the fixture's `max_roster_kicker` of 3, which with
+// DST is one of only two positions the fixture caps at all.
+const seed_position_capped_roster = async ({ team_id, user_id, count = 3 }) => {
+  const kickers = await select_players({ pos: 'K', count: count + 1 })
+  for (const player of kickers.slice(0, count)) {
+    await addPlayer({
+      leagueId: league_id,
+      teamId: team_id,
+      player,
+      userId: user_id,
+      value: 1
+    })
+  }
+  // The spare is the one a spec tries to add on top of the limit.
+  return { seeded: kickers.slice(0, count), spare: kickers[count] }
+}
+
 const build_live_auction = async ({ user_ids }) => {
   const { wss, errors } = make_recording_wss(user_ids)
-  const timers = make_recording_timers()
-  const auction = new Auction({ wss, lid: league_id, timers })
+  const auction = new Auction({
+    wss,
+    lid: league_id,
+    timers: make_recording_timers()
+  })
   await auction.setup()
 
   // LIVE mode explicitly. The $0 nomination clamp and the cached-capacity
@@ -100,7 +143,20 @@ const build_live_auction = async ({ user_ids }) => {
   auction.start()
   expect(auction._paused, 'the auction is running').to.equal(false)
 
-  return { auction, errors, timers }
+  // THE COMMISSIONER IDENTITY IS LOAD-BEARING TWICE OVER, so it is pinned here
+  // rather than read where it is used. The $0 nomination clamp keys on it, and
+  // every recording client in this file is created for a hardcoded user id --
+  // so a fixture that moved the commissioner would both change which
+  // nominations get clamped AND leave replies going to a user with no client,
+  // where an `expect(errors).to.deep.equal([])` passes without the handler
+  // being consulted at all.
+  expect(
+    auction._league.commissioner_user_id,
+    'the fixture commissioner is user 1; if it moves, the $0 clamp cases and ' +
+      'every empty-errors assertion in this file stop testing what they name'
+  ).to.equal(COMMISSIONER_USER_ID)
+
+  return { auction, errors }
 }
 
 const roster_for = async (team_id) => {
@@ -135,23 +191,15 @@ describe('auction eligibility validation', function () {
       const { auction, errors } = await build_live_auction({ user_ids: [1] })
       const team_id = auction._tids[0]
 
-      // $195 of the $200 cap consumed, leaving exactly $5 and 13 open active
-      // spots. Position is RB, whose fixture limit is 0 (unlimited), so neither
-      // the roster-space nor the position check can be what fires below.
-      const salaried = await select_players({ pos: 'RB', count: 4 })
-      const salaries = [48, 48, 48, 51]
-      for (const [index, player] of salaried.entries()) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: team_id,
-          player,
-          userId: 1,
-          value: salaries[index]
-        })
-      }
+      await seed_cap_exhausted_roster({
+        team_id,
+        user_id: COMMISSIONER_USER_ID
+      })
 
       const roster = await roster_for(team_id)
-      expect(roster.availableCap, 'exactly $5 of cap remains').to.equal(5)
+      expect(roster.availableCap, 'the seeded cap boundary').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
       expect(roster.availableSpace, 'active spots remain').to.be.above(0)
 
       const target = await selectPlayer({
@@ -162,13 +210,17 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 6, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        {
+          pid: target.pid,
+          value: CAP_REMAINING_AFTER_SEED + 1,
+          user_id: COMMISSIONER_USER_ID
+        },
+        { user_id: COMMISSIONER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
-        { user_id: 1, error: 'exceeds salary limit' }
+        { user_id: COMMISSIONER_USER_ID, error: 'exceeds salary limit' }
       ])
     })
 
@@ -180,17 +232,15 @@ describe('auction eligibility validation', function () {
       const { auction, errors } = await build_live_auction({ user_ids: [1] })
       const team_id = auction._tids[0]
 
-      const salaried = await select_players({ pos: 'RB', count: 4 })
-      const salaries = [48, 48, 48, 51]
-      for (const [index, player] of salaried.entries()) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: team_id,
-          player,
-          userId: 1,
-          value: salaries[index]
-        })
-      }
+      await seed_cap_exhausted_roster({
+        team_id,
+        user_id: COMMISSIONER_USER_ID
+      })
+
+      const roster = await roster_for(team_id)
+      expect(roster.availableCap, 'the seeded cap boundary').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
 
       const target = await selectPlayer({
         pos: 'RB',
@@ -200,12 +250,34 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 5, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        {
+          pid: target.pid,
+          value: CAP_REMAINING_AFTER_SEED,
+          user_id: COMMISSIONER_USER_ID
+        },
+        { user_id: COMMISSIONER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'no rejection at the cap boundary').to.deep.equal([])
+
+      // The amount matters, not just the acceptance. Asserting only that a
+      // transaction appeared cannot tell "opened at the last affordable
+      // dollar" from "opened at $0 because the clamp fired", and those are
+      // different auctions.
+      const [nomination] = await knex('transactions')
+        .where({
+          lid: league_id,
+          season_year,
+          pid: target.pid,
+          type: transaction_types.AUCTION_BID
+        })
+        .orderBy('transaction_id', 'desc')
+        .limit(1)
+      expect(
+        nomination.player_salary,
+        'the nomination opened at the cap boundary'
+      ).to.equal(CAP_REMAINING_AFTER_SEED)
     })
 
     it('rejects a nomination that would exceed the position limit', async function () {
@@ -218,40 +290,37 @@ describe('auction eligibility validation', function () {
       // `has_position_capacity` reads as unlimited. A position-limit spec
       // written against RB would assert nothing.
       const league_row = await getLeague({ lid: league_id })
-      expect(league_row.max_roster_kicker, 'the fixture caps kickers').to.equal(
-        3
-      )
+      const kicker_limit = league_row.max_roster_kicker
+      expect(kicker_limit, 'the fixture caps kickers').to.equal(3)
 
-      const kickers = await select_players({ pos: 'K', count: 4 })
-      for (const player of kickers.slice(0, 3)) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: team_id,
-          player,
-          userId: 1,
-          value: 1
-        })
-      }
+      const { spare } = await seed_position_capped_roster({
+        team_id,
+        user_id: COMMISSIONER_USER_ID,
+        count: kicker_limit
+      })
+
+      // The isolating preconditions are COUNTED FROM THE DATABASE rather than
+      // read back through `has_bench_space_for_position`. Asserting the
+      // predicate the handler is about to call makes a roster-layer regression
+      // fail here in the setup, so a real defect reads as a broken fixture
+      // rather than as the eligibility rule it belongs to.
+      const kicker_count = await knex('rosters_players')
+        .where({ tid: team_id, lid: league_id, season_year })
+        .where('player_position', 'K')
+        .then((rows) => rows.length)
+      expect(
+        kicker_count,
+        'the team sits exactly at the kicker limit'
+      ).to.equal(kicker_limit)
 
       const roster = await roster_for(team_id)
-      // The isolating assertion: the team is at the KICKER limit while the
-      // active roster still has room and the cap is nearly untouched, so
-      // neither of the other two rejections can fire.
       expect(roster.availableSpace, 'active spots remain').to.be.above(0)
       expect(roster.availableCap, 'cap remains').to.be.above(0)
-      expect(
-        roster.has_bench_space_for_position('K'),
-        'no kicker capacity remains'
-      ).to.equal(false)
-      expect(
-        roster.has_bench_space_for_position('RB'),
-        'other positions are unaffected'
-      ).to.equal(true)
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: kickers[3].pid, value: 0, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        { pid: spare.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before)
@@ -268,16 +337,10 @@ describe('auction eligibility validation', function () {
       const { auction, errors } = await build_live_auction({ user_ids: [1] })
       const team_id = auction._tids[0]
 
-      const kickers = await select_players({ pos: 'K', count: 3 })
-      for (const player of kickers) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: team_id,
-          player,
-          userId: 1,
-          value: 1
-        })
-      }
+      await seed_position_capped_roster({
+        team_id,
+        user_id: COMMISSIONER_USER_ID
+      })
 
       const target = await selectPlayer({
         pos: 'RB',
@@ -287,8 +350,8 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: 1 },
-        { user_id: 1, tid: team_id }
+        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: team_id }
       )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
@@ -392,24 +455,19 @@ describe('auction eligibility validation', function () {
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
       const [nominating_team_id, bidding_team_id] = auction._tids
 
-      const salaried = await select_players({ pos: 'RB', count: 4 })
-      const salaries = [48, 48, 48, 51]
-      for (const [index, player] of salaried.entries()) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: bidding_team_id,
-          player,
-          userId: 2,
-          value: salaries[index]
-        })
-      }
+      await seed_cap_exhausted_roster({
+        team_id: bidding_team_id,
+        user_id: MANAGER_USER_ID
+      })
 
       const player = await open_a_nomination({ auction, nominating_team_id })
 
       const bidding_team = auction._teams.find(
         (team) => team.team_id === bidding_team_id
       )
-      expect(bidding_team.cap, 'the cached cap is $5').to.equal(5)
+      expect(bidding_team.cap, 'the cached cap boundary').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
       expect(
         bidding_team.availableSpace,
         'space is not the reason'
@@ -417,15 +475,15 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.bid({
-        user_id: 2,
+        user_id: MANAGER_USER_ID,
         tid: bidding_team_id,
         pid: player.pid,
-        value: 6
+        value: CAP_REMAINING_AFTER_SEED + 1
       })
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
-        { user_id: 2, error: 'exceeds salary limit' }
+        { user_id: MANAGER_USER_ID, error: 'exceeds salary limit' }
       ])
     })
 
@@ -437,30 +495,44 @@ describe('auction eligibility validation', function () {
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
       const [nominating_team_id, bidding_team_id] = auction._tids
 
-      const salaried = await select_players({ pos: 'RB', count: 4 })
-      const salaries = [48, 48, 48, 51]
-      for (const [index, player] of salaried.entries()) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: bidding_team_id,
-          player,
-          userId: 2,
-          value: salaries[index]
-        })
-      }
+      await seed_cap_exhausted_roster({
+        team_id: bidding_team_id,
+        user_id: MANAGER_USER_ID
+      })
 
       const player = await open_a_nomination({ auction, nominating_team_id })
 
+      const bidding_team = auction._teams.find(
+        (team) => team.team_id === bidding_team_id
+      )
+      expect(bidding_team.cap, 'the cached cap boundary').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
+
       const before = await count_auction_transactions()
       await auction.bid({
-        user_id: 2,
+        user_id: MANAGER_USER_ID,
         tid: bidding_team_id,
         pid: player.pid,
-        value: 5
+        value: CAP_REMAINING_AFTER_SEED
       })
 
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'the last dollar is spendable').to.deep.equal([])
+
+      const [bid] = await knex('transactions')
+        .where({
+          lid: league_id,
+          season_year,
+          pid: player.pid,
+          type: transaction_types.AUCTION_BID
+        })
+        .orderBy('transaction_id', 'desc')
+        .limit(1)
+      expect(bid.player_salary, 'the whole remaining cap was bid').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
+      expect(bid.tid, 'by the cap-exhausted team').to.equal(bidding_team_id)
     })
 
     it('rejects a bid from a team with no roster space', async function () {
@@ -532,128 +604,197 @@ describe('auction eligibility validation', function () {
       expect(errors, 'one open spot is enough to bid').to.deep.equal([])
     })
 
-    // POSITION LIMITS ARE NOT A BID-TIME CHECK. `_validate_bid` tests cap,
-    // roster space, player identity and bid magnitude, and nothing else -- a
-    // team already at `max_roster_kicker` can bid on a fourth kicker and the
-    // bid is recorded. The limit is enforced when the player is awarded, by
-    // `_validate_team_can_acquire_player`, so that is where the rule is
-    // asserted. See the task entity for the reporting of that gap.
+    // POSITION LIMITS ARE NOT A BID-TIME CHECK, and the auction is not wrong to
+    // work that way -- but it means the rule lives at the AWARD, so these drive
+    // a real `sold()` rather than calling the validator. Calling
+    // `_validate_team_can_acquire_player` directly tests the method and says
+    // nothing about whether `sold()` still calls it: deleting the invocation
+    // from `sold()` left an earlier version of this whole file green while a
+    // team over the kicker limit would have been awarded a fourth kicker.
+    //
+    // The first spec below also documents the gap it depends on -- the bid IS
+    // accepted -- so if a bid-time position check is ever added, this spec
+    // fails and says so rather than quietly testing nothing.
+    const settled_rows_for = async (pid) =>
+      knex('rosters_players').where({ pid, lid: league_id, season_year })
+
     it('refuses to award a player that would exceed the position limit', async function () {
       this.timeout(60 * 1000)
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
-      const bidding_team_id = auction._tids[1]
+      const [nominating_team_id, bidding_team_id] = auction._tids
 
-      const kickers = await select_players({ pos: 'K', count: 4 })
-      for (const player of kickers.slice(0, 3)) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: bidding_team_id,
-          player,
-          userId: 2,
-          value: 1
-        })
-      }
+      const league_row = await getLeague({ lid: league_id })
+      const { spare } = await seed_position_capped_roster({
+        team_id: bidding_team_id,
+        user_id: MANAGER_USER_ID,
+        count: league_row.max_roster_kicker
+      })
 
-      const roster = await roster_for(bidding_team_id)
-      expect(roster.availableSpace, 'active spots remain').to.be.above(0)
-      expect(roster.availableCap, 'cap remains').to.be.above(0)
-
-      const [player_info] = await knex('player').where('pid', kickers[3].pid)
-      const acquirable = auction._validate_team_can_acquire_player(
-        roster,
-        player_info,
-        1,
-        { tid: bidding_team_id, user_id: 2, pid: player_info.pid }
+      // The nominating team has no kickers, so it can legally open one; the
+      // limit belongs to the team that will win it.
+      await auction.nominate(
+        { pid: spare.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
 
-      expect(acquirable, 'a fourth kicker is not awardable').to.equal(false)
+      await auction.bid({
+        user_id: MANAGER_USER_ID,
+        tid: bidding_team_id,
+        pid: spare.pid,
+        value: 1
+      })
+      expect(
+        errors,
+        'the bid is ACCEPTED -- there is no bid-time position check, and this ' +
+          'spec depends on that. If a bid-time check is added, assert it here.'
+      ).to.deep.equal([])
+      expect(
+        auction._transactions[0].tid,
+        'the over-limit team holds the top bid'
+      ).to.equal(bidding_team_id)
+
+      await auction.sold()
+
+      expect(
+        await settled_rows_for(spare.pid),
+        'a fourth kicker was not rostered'
+      ).to.have.length(0)
+      const processed = await knex('transactions').where({
+        lid: league_id,
+        season_year,
+        pid: spare.pid,
+        type: transaction_types.AUCTION_PROCESSED
+      })
+      expect(processed, 'the award was not recorded').to.have.length(0)
       expect(errors).to.deep.equal([
-        { user_id: 2, error: 'exceeds roster limits' }
+        { user_id: MANAGER_USER_ID, error: 'exceeds roster limits' }
       ])
     })
 
-    it('awards an uncapped position to the same roster', async function () {
-      // The negative control for the settlement position check.
+    it('awards an uncapped position through the same settlement path', async function () {
+      // The negative control for the spec above, and the thing that makes it
+      // meaningful: the identical flow on a running back DOES roster the
+      // player, so the refusal above is the kicker limit rather than `sold()`
+      // declining for any of the several other reasons it can.
       this.timeout(60 * 1000)
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
-      const bidding_team_id = auction._tids[1]
+      const [nominating_team_id, bidding_team_id] = auction._tids
 
-      const kickers = await select_players({ pos: 'K', count: 3 })
-      for (const player of kickers) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: bidding_team_id,
-          player,
-          userId: 2,
-          value: 1
-        })
-      }
+      await seed_position_capped_roster({
+        team_id: bidding_team_id,
+        user_id: MANAGER_USER_ID
+      })
 
       const target = await selectPlayer({
         pos: 'RB',
         random: false,
         exclude_rostered_players: true
       })
-      const [player_info] = await knex('player').where('pid', target.pid)
-      const roster = await roster_for(bidding_team_id)
 
-      const acquirable = auction._validate_team_can_acquire_player(
-        roster,
-        player_info,
-        1,
-        { tid: bidding_team_id, user_id: 2, pid: player_info.pid }
+      await auction.nominate(
+        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
+      await auction.bid({
+        user_id: MANAGER_USER_ID,
+        tid: bidding_team_id,
+        pid: target.pid,
+        value: 1
+      })
 
-      expect(acquirable, 'a running back is awardable').to.equal(true)
-      expect(errors).to.deep.equal([])
+      await auction.sold()
+
+      const rostered = await settled_rows_for(target.pid)
+      expect(rostered, 'the running back was rostered').to.have.length(1)
+      expect(rostered[0].tid, 'to the winning team').to.equal(bidding_team_id)
+      expect(errors, 'no refusal on the control path').to.deep.equal([])
     })
 
-    it('refuses to award a player the team cannot afford', async function () {
+    // THE AWARD CAP CHECK IS ONLY REACHABLE THROUGH A STALE CACHE, which is
+    // why this spec goes to the trouble of producing one rather than simply
+    // bidding over the cap. `_validate_bid` enforces the same bound against
+    // `_teams` at bid time, so on a cache that agrees with the database the two
+    // checks can never disagree and the award branch is dead code.
+    //
+    // It comes alive exactly where `nominate`'s own comment says it does: a
+    // trade or a commissioner-override release moves a team's real cap during a
+    // live block, the socket's cached capacity does not follow, and `sold()`
+    // re-reads the roster from the database under the settlement lock. Signing
+    // a player a team can no longer afford is the failure this prevents.
+    it('refuses to award a player the team can no longer afford', async function () {
       this.timeout(60 * 1000)
       const { auction, errors } = await build_live_auction({ user_ids: [1, 2] })
-      const bidding_team_id = auction._tids[1]
+      const [nominating_team_id, bidding_team_id] = auction._tids
 
-      const salaried = await select_players({ pos: 'RB', count: 4 })
-      const salaries = [48, 48, 48, 51]
-      for (const [index, player] of salaried.entries()) {
-        await addPlayer({
-          leagueId: league_id,
-          teamId: bidding_team_id,
-          player,
-          userId: 2,
-          value: salaries[index]
-        })
-      }
+      await seed_cap_exhausted_roster({
+        team_id: bidding_team_id,
+        user_id: MANAGER_USER_ID
+      })
 
       const target = await selectPlayer({
         pos: 'RB',
         random: false,
         exclude_rostered_players: true
       })
-      const [player_info] = await knex('player').where('pid', target.pid)
-      const roster = await roster_for(bidding_team_id)
-      expect(roster.availableCap, 'exactly $5 of cap remains').to.equal(5)
 
-      // `_validate_team_can_acquire_player` replies to
-      // `_transactions[0].user_id` on the cap branch rather than to the bid it
-      // was handed, so a nomination has to be open for that read to resolve.
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: 1 },
-        { user_id: 1, tid: auction._tids[0] }
+        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
 
-      const acquirable = auction._validate_team_can_acquire_player(
-        roster,
-        player_info,
-        6,
-        { tid: bidding_team_id, user_id: 2, pid: player_info.pid }
-      )
+      // Legal on the board as the auction sees it: the whole remaining cap.
+      await auction.bid({
+        user_id: MANAGER_USER_ID,
+        tid: bidding_team_id,
+        pid: target.pid,
+        value: CAP_REMAINING_AFTER_SEED
+      })
+      expect(errors, 'the bid stands at the cached cap').to.deep.equal([])
 
-      expect(acquirable, '$6 against $5 of cap is not awardable').to.equal(
-        false
+      // The cap moves underneath the open bid, and nothing tells the socket.
+      // This is the trade-or-release case; `_teams` still carries the old
+      // figure, which is precisely why the award has to re-read.
+      //
+      // `target` must be excluded explicitly: it is not rostered yet, and
+      // `select_players` walks unrostered players in pid order, so without this
+      // it hands back the very player under auction -- which rosters the target
+      // in setup and makes the assertion below pass for the wrong reason.
+      const [extra] = await select_players({
+        pos: 'RB',
+        count: 1,
+        exclude_pids: [target.pid]
+      })
+      await addPlayer({
+        leagueId: league_id,
+        teamId: bidding_team_id,
+        player: extra,
+        userId: MANAGER_USER_ID,
+        value: CAP_REMAINING_AFTER_SEED - 2
+      })
+
+      const stale = auction._teams.find(
+        (team) => team.team_id === bidding_team_id
       )
-      expect(errors.map((entry) => entry.error)).to.deep.equal([
-        'exceeds salary limit'
+      expect(stale.cap, 'the cache is stale by construction').to.equal(
+        CAP_REMAINING_AFTER_SEED
+      )
+      const fresh = await roster_for(bidding_team_id)
+      expect(fresh.availableCap, 'the database disagrees').to.equal(2)
+
+      await auction.sold()
+
+      expect(
+        await settled_rows_for(target.pid),
+        'the unaffordable player was not rostered'
+      ).to.have.length(0)
+      // Addressed to the bidder. `_validate_team_can_acquire_player` replies to
+      // `_transactions[0].user_id` on this branch rather than to the `bid` it
+      // was handed -- on the live path those coincide, because the top
+      // transaction IS the winning bid, so the misaddressing is latent rather
+      // than observable. Pinned as the full object so that if the two ever
+      // diverge, this fails instead of silently changing who gets told.
+      expect(errors).to.deep.equal([
+        { user_id: MANAGER_USER_ID, error: 'exceeds salary limit' }
       ])
     })
   })
@@ -739,78 +880,7 @@ describe('auction eligibility validation', function () {
     })
   })
 
-  describe('nomination rotation skips ineligible teams', function () {
-    // `resolve_nominating_team_id` is pure and is the ONE implementation of the
-    // rotation rule, so the skip is asserted against it directly rather than
-    // through a socket. The rotation only advances past a team when the newest
-    // transaction is an AUCTION_PROCESSED -- while a player is open its
-    // nominator holds the clock -- so every case here ends in one.
-    const tids = [1, 2, 3, 4]
-    const settled_log = [
-      { type: transaction_types.AUCTION_PROCESSED, tid: 1 },
-      { type: transaction_types.AUCTION_BID, tid: 1 }
-    ]
-    const teams_with_space = (space_by_tid) =>
-      tids.map((team_id) => ({
-        team_id,
-        availableSpace: space_by_tid[team_id]
-      }))
-
-    it('hands the clock to the next team when it has roster space', function () {
-      // The negative control for the two skips below.
-      const nominating_team_id = resolve_nominating_team_id({
-        transactions: settled_log,
-        tids,
-        teams: teams_with_space({ 1: 1, 2: 1, 3: 1, 4: 1 })
-      })
-      expect(nominating_team_id).to.equal(2)
-    })
-
-    it('skips a team with no roster space', function () {
-      const nominating_team_id = resolve_nominating_team_id({
-        transactions: settled_log,
-        tids,
-        teams: teams_with_space({ 1: 1, 2: 0, 3: 1, 4: 1 })
-      })
-      expect(nominating_team_id, 'team 2 is skipped').to.equal(3)
-    })
-
-    it('skips a run of full teams and wraps the rotation', function () {
-      const nominating_team_id = resolve_nominating_team_id({
-        transactions: settled_log,
-        tids,
-        teams: teams_with_space({ 1: 1, 2: 0, 3: 0, 4: 0 })
-      })
-      // The walk starts after the last nominator and wraps, so team 1 -- the
-      // team that just nominated -- takes the clock again rather than the
-      // rotation stalling on team 2.
-      expect(nominating_team_id, 'the rotation wraps to team 1').to.equal(1)
-    })
-
-    it('returns null when every team is full, which is auction-complete', function () {
-      const nominating_team_id = resolve_nominating_team_id({
-        transactions: settled_log,
-        tids,
-        teams: teams_with_space({ 1: 0, 2: 0, 3: 0, 4: 0 })
-      })
-      expect(nominating_team_id).to.equal(null)
-    })
-
-    it('holds the clock with the nominator while a player is open', function () {
-      // The other negative control: capacity is not consulted at all on this
-      // branch, so a full team still holds the clock on the player it opened.
-      const open_log = [
-        { type: transaction_types.AUCTION_BID, tid: 2 },
-        { type: transaction_types.AUCTION_PROCESSED, tid: 1 }
-      ]
-      const nominating_team_id = resolve_nominating_team_id({
-        transactions: open_log,
-        tids,
-        teams: teams_with_space({ 1: 1, 2: 0, 3: 1, 4: 1 })
-      })
-      expect(nominating_team_id, 'the nominator holds its own player').to.equal(
-        2
-      )
-    })
-  })
+  // The rotation skip lives in test/auction.nomination-rotation.spec.mjs:
+  // `resolve_nominating_team_id` is pure, and those cases need neither the
+  // league fixture nor a socket that this file's hooks build.
 })

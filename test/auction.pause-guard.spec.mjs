@@ -7,6 +7,7 @@ import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types } from '#constants'
 import Auction from '#api/sockets/auction.mjs'
 import { selectPlayer } from './utils/index.mjs'
+import make_recording_timers from './utils/recording-timers.mjs'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
@@ -17,21 +18,6 @@ const season_year = current_season.year
 // A socket server stub. The Auction only ever iterates `clients` to broadcast,
 // so an empty set is a complete implementation for these assertions.
 const stub_wss = { clients: new Set() }
-
-// The injected timer interface, which is the whole reason clock behavior is
-// assertable at all -- MockDate moves Date.now without moving setTimeout, and
-// nothing else in this repository fakes timers.
-const make_recording_timers = () => {
-  const scheduled = []
-  return {
-    scheduled,
-    set_timeout: (fn, ms) => {
-      scheduled.push({ fn, ms })
-      return scheduled.length
-    },
-    clear_timeout: () => {}
-  }
-}
 
 describe('auction pause guard', function () {
   before(async function () {
