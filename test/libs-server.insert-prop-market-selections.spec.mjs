@@ -132,4 +132,54 @@ describe('LIBS-SERVER insert_prop_market_selections', function () {
       expect(result.failures).to.deep.equal([])
     })
   })
+
+  // A fixed-payout pick-em book posts a line with no per-side price, so the
+  // odds columns are legitimately null and requiring them rejected every
+  // PrizePicks selection for 11 months (signal 127750). Run as a PAIR against
+  // the DraftKings control below: an input that cannot distinguish the old
+  // rule from the new one would pass either way, so the two cases must differ.
+  describe('fixed-payout books carry no odds', function () {
+    const pick_em_selection = ({ id }) => ({
+      source_id: 'PRIZEPICKS',
+      source_market_id: 'market-1',
+      source_selection_id: id,
+      selection_name: id,
+      selection_metric_line: 10.5,
+      odds_decimal: null,
+      odds_american: null
+    })
+
+    it('accepts a PRIZEPICKS selection with null odds', async () => {
+      const result = await insert_prop_market_selections({
+        observed_at: OBSERVED_AT,
+        selections: [
+          pick_em_selection({ id: '1-over' }),
+          pick_em_selection({ id: '1-under' })
+        ],
+        existing_market: null,
+        market: { ...market, source_id: 'PRIZEPICKS' }
+      })
+
+      expect(result.failures).to.deep.equal([])
+      expect(result.results.length).to.equal(2)
+      // The rows actually reach the writes -- the defect was that they did not.
+      expect(result.selection_history_inserts.length).to.equal(2)
+      expect(result.selection_index_inserts.length).to.equal(4)
+    })
+
+    // The control. If this ever passes, the guard has been widened to every
+    // book and a real missing price would go unreported.
+    it('still rejects a DRAFTKINGS selection with null odds', async () => {
+      const result = await insert_prop_market_selections({
+        observed_at: OBSERVED_AT,
+        selections: [selection({ id: 'a', odds_american: null })],
+        existing_market: null,
+        market
+      })
+
+      expect(result.results).to.deep.equal([])
+      expect(result.failures.length).to.equal(1)
+      expect(result.failures[0].error).to.match(/odds_american/)
+    })
+  })
 })

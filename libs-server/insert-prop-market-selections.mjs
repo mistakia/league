@@ -2,6 +2,7 @@ import diff from 'deep-diff'
 import debug from 'debug'
 
 import { get_cached_selection_latest } from './betting-market-cache.mjs'
+import { fixed_payout_bookmakers } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('insert-prop-market-selections')
 
@@ -35,11 +36,17 @@ const validate_selection = (selection, observed_at) => {
   if (!selection.source_selection_id) {
     throw new Error('source_selection_id is required')
   }
-  if (!selection.odds_american) {
-    throw new Error('odds_american is required')
-  }
-  if (!selection.odds_decimal) {
-    throw new Error('odds_decimal is required')
+  // Required of books that post a two-sided price, and only of those. A
+  // fixed-payout pick-em book posts a line with no per-side odds, so demanding
+  // one rejects every selection it will ever send -- see
+  // fixed_payout_bookmakers for the vendor shape and the loss this caused.
+  if (!fixed_payout_bookmakers.has(selection.source_id)) {
+    if (!selection.odds_american) {
+      throw new Error('odds_american is required')
+    }
+    if (!selection.odds_decimal) {
+      throw new Error('odds_decimal is required')
+    }
   }
   if (!observed_at) {
     throw new Error('observed_at is required')

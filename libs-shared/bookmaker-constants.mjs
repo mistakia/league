@@ -11,6 +11,29 @@ export const bookmakers = {
   PINNACLE: 'PINNACLE'
 }
 
+// Books whose product is FIXED-PAYOUT pick-em: the vendor posts a line and a
+// payout that does not vary by side, so a selection has no two-sided American
+// or decimal price and never will. This is a property of the product, not a
+// gap in the feed -- PrizePicks' /projections response carries `line_score`
+// and no odds field at all, so there is nothing an importer could learn to
+// read.
+//
+// Load-bearing because `insert-prop-market-selections.mjs` validates
+// odds_american and odds_decimal as required. That check was added in
+// b3b2b5ce1 (2024-01-05) against a selection shape that had carried null odds
+// for PrizePicks since 1b67b9ccaa (2023-11-09), so it rejected every PrizePicks
+// selection from the day it landed: OPEN index rows stopped that same day, and
+// once 71ff6dab9 (2025-09-14) batched the writes the pending history row was
+// discarded too, which took CLOSE rows with it. The result was total, silent
+// loss of one vendor's selection data -- 100% of 2026 PrizePicks markets are
+// stored with zero selections beneath them (signal 127750). The nulls were
+// always correct; requiring a price of a book that posts none was the defect.
+//
+// The database has always agreed with the vendor: prop_market_selections_index
+// declares odds_american and odds_decimal NULLABLE. The requirement existed
+// only in JavaScript.
+export const fixed_payout_bookmakers = new Set(['PRIZEPICKS'])
+
 export const time_type = {
   OPEN: 'OPEN',
   CLOSE: 'CLOSE'
