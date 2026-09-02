@@ -241,6 +241,29 @@ export const caesars_market_type_by_template = {
     market_type: team_props_types.GAME_TEAM_TO_SCORE_FIRST_AND_WIN
   },
 
+  // Kicking. Still published in the v4 era, unlike the team stat totals and
+  // SB Micro families. '|Player Total Made Field Goals|' needed no new
+  // constant -- GAME_FIELD_GOALS_MADE already existed and was simply never
+  // wired to a template.
+  '|Player Total Kicking Points|': {
+    market_type: player_prop_types.GAME_KICKING_POINTS
+  },
+  '|Player Total Made Field Goals|': {
+    market_type: player_prop_types.GAME_FIELD_GOALS_MADE
+  },
+  '|Player Total Made Extra Points|': {
+    market_type: player_prop_types.GAME_EXTRA_POINTS_MADE
+  },
+  '|Alt Kicking Points|': {
+    market_type: player_prop_types.GAME_ALT_KICKING_POINTS
+  },
+  '|Alt Made Field Goals|': {
+    market_type: player_prop_types.GAME_ALT_FIELD_GOALS_MADE
+  },
+  '|Alt Made Extra Points|': {
+    market_type: player_prop_types.GAME_ALT_EXTRA_POINTS_MADE
+  },
+
   // Deliberate no-maps. Present with a null type so a residue query reports
   // them as decided rather than as an unexamined gap.
   '|Team Total Team Defensive Tackles|': {

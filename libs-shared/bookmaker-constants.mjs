@@ -197,6 +197,16 @@ export const player_game_alt_prop_types = {
   GAME_ALT_DEFENSE_INTERCEPTIONS: 'GAME_ALT_DEFENSE_INTERCEPTIONS',
   GAME_ALT_DEFENSE_SACKS: 'GAME_ALT_DEFENSE_SACKS',
 
+  // Placement in this group is what makes the settlement mapping derive: the
+  // loop in market-type-mappings.mjs iterates it, strips _ALT_, and copies the
+  // base type's mapping when that base is already supported. Only
+  // GAME_ALT_FIELD_GOALS_MADE inherits today -- GAME_FIELD_GOALS_MADE is
+  // supported -- while the kicking-points and extra-points bases are
+  // themselves unmapped, so their alt siblings resolve to UNSUPPORTED.
+  GAME_ALT_KICKING_POINTS: 'GAME_ALT_KICKING_POINTS',
+  GAME_ALT_FIELD_GOALS_MADE: 'GAME_ALT_FIELD_GOALS_MADE',
+  GAME_ALT_EXTRA_POINTS_MADE: 'GAME_ALT_EXTRA_POINTS_MADE',
+
   ...player_quarter_alt_prop_types
 }
 
@@ -299,6 +309,8 @@ export const player_game_prop_types = {
   GAME_PUNTS: 'GAME_PUNTS',
 
   GAME_FIELD_GOALS_MADE: 'GAME_FIELD_GOALS_MADE',
+  GAME_KICKING_POINTS: 'GAME_KICKING_POINTS',
+  GAME_EXTRA_POINTS_MADE: 'GAME_EXTRA_POINTS_MADE',
 
   GAME_FIRST_TOUCHDOWN_SCORER: 'GAME_FIRST_TOUCHDOWN_SCORER',
   GAME_LAST_TOUCHDOWN_SCORER: 'GAME_LAST_TOUCHDOWN_SCORER',
