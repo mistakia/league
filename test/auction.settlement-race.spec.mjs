@@ -173,16 +173,13 @@ describe('auction settlement against a firing bid clock', function () {
       maximum_bid: 30
     })
 
-    await auction.nominate(
-      { pid, value: 0, user_id: 1 },
-      { user_id: 1, tid: nominator }
-    )
+    await auction.nominate({ pid, value: 0 }, { user_id: 1, tid: nominator })
 
     // SUPERSESSION. Bidding below your own ceiling means you meant that amount,
     // so the socket binds this team to $5 and stops proxying for them. The
     // elections table still says $30 and no REST caller can tell.
-    await auction.bid({ user_id: 1, tid: ceiling_team, pid, value: 5 })
-    await auction.bid({ user_id: 1, tid: rival, pid, value: 8 })
+    await auction.bid({ pid, value: 5 }, { user_id: 1, tid: ceiling_team })
+    await auction.bid({ pid, value: 8 }, { user_id: 1, tid: rival })
 
     const leading = auction._transactions[0]
     expect(leading.tid, 'the socket has the rival leading').to.equal(rival)
@@ -235,10 +232,7 @@ describe('auction settlement against a firing bid clock', function () {
     })
     const pid = player.pid
 
-    await auction.nominate(
-      { pid, value: 0, user_id: 1 },
-      { user_id: 1, tid: nominator }
-    )
+    await auction.nominate({ pid, value: 0 }, { user_id: 1, tid: nominator })
 
     await decline_directly({ tids: others, pid })
 
@@ -270,7 +264,7 @@ describe('auction settlement against a firing bid clock', function () {
       random: false
     })
     await auction.nominate(
-      { pid: next.pid, value: 0, user_id: 1 },
+      { pid: next.pid, value: 0 },
       { user_id: 1, tid: auction.nominating_team_id }
     )
 

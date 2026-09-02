@@ -237,8 +237,7 @@ describe('auction eligibility validation', function () {
       await auction.nominate(
         {
           pid: target.pid,
-          value: CAP_REMAINING_AFTER_SEED + 1,
-          user_id: MANAGER_USER_ID
+          value: CAP_REMAINING_AFTER_SEED + 1
         },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
@@ -278,8 +277,7 @@ describe('auction eligibility validation', function () {
       await auction.nominate(
         {
           pid: target.pid,
-          value: CAP_REMAINING_AFTER_SEED,
-          user_id: MANAGER_USER_ID
+          value: CAP_REMAINING_AFTER_SEED
         },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
@@ -347,7 +345,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: spare.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: spare.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
@@ -379,7 +377,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
@@ -411,7 +409,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
@@ -452,7 +450,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
 
@@ -492,7 +490,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: out_of_turn }
       )
 
@@ -520,7 +518,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: MANAGER_USER_ID, tid: on_the_clock }
       )
 
@@ -558,7 +556,7 @@ describe('auction eligibility validation', function () {
 
       const before = await count_auction_transactions()
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: COMMISSIONER_USER_ID, tid: out_of_turn }
       )
 
@@ -603,7 +601,7 @@ describe('auction eligibility validation', function () {
         exclude_rostered_players: true
       })
       await auction.nominate(
-        { pid: player.pid, value: 0, user_id: 1 },
+        { pid: player.pid, value: 0 },
         { user_id: 1, tid: nominating_team_id }
       )
       const current = auction._transactions[0]
@@ -636,12 +634,10 @@ describe('auction eligibility validation', function () {
       ).to.be.above(0)
 
       const before = await count_auction_transactions()
-      await auction.bid({
-        user_id: MANAGER_USER_ID,
-        tid: bidding_team_id,
-        pid: player.pid,
-        value: CAP_REMAINING_AFTER_SEED + 1
-      })
+      await auction.bid(
+        { pid: player.pid, value: CAP_REMAINING_AFTER_SEED + 1 },
+        { user_id: MANAGER_USER_ID, tid: bidding_team_id }
+      )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
@@ -672,12 +668,10 @@ describe('auction eligibility validation', function () {
       )
 
       const before = await count_auction_transactions()
-      await auction.bid({
-        user_id: MANAGER_USER_ID,
-        tid: bidding_team_id,
-        pid: player.pid,
-        value: CAP_REMAINING_AFTER_SEED
-      })
+      await auction.bid(
+        { pid: player.pid, value: CAP_REMAINING_AFTER_SEED },
+        { user_id: MANAGER_USER_ID, tid: bidding_team_id }
+      )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'the last dollar is spendable').to.deep.equal([])
@@ -717,12 +711,10 @@ describe('auction eligibility validation', function () {
       expect(bidding_team.cap, 'cap is not the reason').to.be.above(0)
 
       const before = await count_auction_transactions()
-      await auction.bid({
-        user_id: 2,
-        tid: bidding_team_id,
-        pid: player.pid,
-        value: 5
-      })
+      await auction.bid(
+        { pid: player.pid, value: 5 },
+        { user_id: 2, tid: bidding_team_id }
+      )
 
       expect(await count_auction_transactions()).to.equal(before)
       expect(errors).to.deep.equal([
@@ -755,12 +747,10 @@ describe('auction eligibility validation', function () {
       const player = await open_a_nomination({ auction, nominating_team_id })
 
       const before = await count_auction_transactions()
-      await auction.bid({
-        user_id: 2,
-        tid: bidding_team_id,
-        pid: player.pid,
-        value: 5
-      })
+      await auction.bid(
+        { pid: player.pid, value: 5 },
+        { user_id: 2, tid: bidding_team_id }
+      )
 
       expect(await count_auction_transactions()).to.equal(before + 1)
       expect(errors, 'one open spot is enough to bid').to.deep.equal([])
@@ -802,16 +792,14 @@ describe('auction eligibility validation', function () {
       // The nominating team has no kickers, so it can legally open one; the
       // limit belongs to the team that will win it.
       await auction.nominate(
-        { pid: spare.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { pid: spare.pid, value: 0 },
         { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
 
-      await auction.bid({
-        user_id: MANAGER_USER_ID,
-        tid: bidding_team_id,
-        pid: spare.pid,
-        value: 1
-      })
+      await auction.bid(
+        { pid: spare.pid, value: 1 },
+        { user_id: MANAGER_USER_ID, tid: bidding_team_id }
+      )
       expect(
         errors,
         'the bid is ACCEPTED -- there is no bid-time position check YET, and ' +
@@ -863,15 +851,13 @@ describe('auction eligibility validation', function () {
       })
 
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
-      await auction.bid({
-        user_id: MANAGER_USER_ID,
-        tid: bidding_team_id,
-        pid: target.pid,
-        value: 1
-      })
+      await auction.bid(
+        { pid: target.pid, value: 1 },
+        { user_id: MANAGER_USER_ID, tid: bidding_team_id }
+      )
 
       await auction.sold()
 
@@ -909,17 +895,15 @@ describe('auction eligibility validation', function () {
       })
 
       await auction.nominate(
-        { pid: target.pid, value: 0, user_id: COMMISSIONER_USER_ID },
+        { pid: target.pid, value: 0 },
         { user_id: COMMISSIONER_USER_ID, tid: nominating_team_id }
       )
 
       // Legal on the board as the auction sees it: the whole remaining cap.
-      await auction.bid({
-        user_id: MANAGER_USER_ID,
-        tid: bidding_team_id,
-        pid: target.pid,
-        value: CAP_REMAINING_AFTER_SEED
-      })
+      await auction.bid(
+        { pid: target.pid, value: CAP_REMAINING_AFTER_SEED },
+        { user_id: MANAGER_USER_ID, tid: bidding_team_id }
+      )
       expect(errors, 'the bid stands at the cached cap').to.deep.equal([])
 
       // The cap moves underneath the open bid, and nothing tells the socket.
@@ -1001,7 +985,7 @@ describe('auction eligibility validation', function () {
       })
 
       await auction.nominate(
-        { pid: target.pid, value: 25, user_id: commissioner_user_id },
+        { pid: target.pid, value: 25 },
         { user_id: commissioner_user_id, tid: team_id }
       )
 
@@ -1039,7 +1023,7 @@ describe('auction eligibility validation', function () {
       })
 
       await auction.nominate(
-        { pid: target.pid, value: 25, user_id: MANAGER_USER_ID },
+        { pid: target.pid, value: 25 },
         { user_id: MANAGER_USER_ID, tid: team_id }
       )
 

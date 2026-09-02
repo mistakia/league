@@ -43,7 +43,9 @@ export default function (wss) {
       }
 
       if (message.type === 'AUCTION_JOIN') {
-        const { lid, tid, clientId } = message.payload
+        // NO `tid`. The acting team is resolved inside `join` from `user_id`,
+        // which came from `request.auth` rather than from this payload.
+        const { lid, clientId } = message.payload
         const auction = auctions.get(lid)
 
         const onclose = () => {
@@ -54,12 +56,12 @@ export default function (wss) {
         }
 
         if (auction) {
-          auction.join({ ws, tid, user_id, onclose, client_id: clientId })
+          await auction.join({ ws, user_id, onclose, client_id: clientId })
         } else {
           const auction = new Auction({ wss, lid })
           auctions.set(lid, auction)
           await auction.setup()
-          auction.join({ ws, tid, user_id, onclose, client_id: clientId })
+          await auction.join({ ws, user_id, onclose, client_id: clientId })
         }
         return
       }

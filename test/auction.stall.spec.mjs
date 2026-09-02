@@ -129,7 +129,7 @@ describe('auction stall and the eligible set', function () {
       const player = await free_agent()
 
       await auction.nominate(
-        { pid: player.pid, value: 0, user_id: 1 },
+        { pid: player.pid, value: 0 },
         { user_id: 1, tid: nominator }
       )
 
@@ -182,7 +182,7 @@ describe('auction stall and the eligible set', function () {
       const player = await free_agent()
 
       await auction.nominate(
-        { pid: player.pid, value: 0, user_id: 1 },
+        { pid: player.pid, value: 0 },
         { user_id: 1, tid: nominator }
       )
 
@@ -229,7 +229,7 @@ describe('auction stall and the eligible set', function () {
       const player = await free_agent()
 
       await auction.nominate(
-        { pid: player.pid, value: 0, user_id: 1 },
+        { pid: player.pid, value: 0 },
         { user_id: 1, tid: nominator }
       )
 

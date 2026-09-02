@@ -136,10 +136,12 @@ export function* optimize() {
 }
 
 export function* join_auction({ type }) {
-  const { leagueId, teamId, clientId } = yield select(get_app)
+  // NO TEAM ID. The server resolves the acting team from the authenticated
+  // session, so sending one here would be a value it is required to ignore.
+  const { leagueId, clientId } = yield select(get_app)
   const message = {
     type,
-    payload: { lid: leagueId, tid: teamId, clientId }
+    payload: { lid: leagueId, clientId }
   }
   send(message)
 }
@@ -170,7 +172,6 @@ export function* release_lock() {
 }
 
 export function* submit_bid({ payload }) {
-  const { userId, teamId } = yield select(get_app)
   const { nominated_pid, bid } = yield select(get_auction_state)
   if (payload.value <= bid) {
     yield put(auction_actions.release())
@@ -183,8 +184,6 @@ export function* submit_bid({ payload }) {
   const message = {
     type: auction_actions.AUCTION_BID,
     payload: {
-      user_id: userId,
-      tid: teamId,
       pid: nominated_pid,
       value
     }
@@ -194,14 +193,11 @@ export function* submit_bid({ payload }) {
 }
 
 export function* submit_nomination({ payload }) {
-  const { userId, teamId } = yield select(get_app)
   const { selected_pid } = yield select(get_auction_state)
   const { value } = payload
   const message = {
     type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
-      user_id: userId,
-      tid: teamId,
       value,
       pid: selected_pid
     }

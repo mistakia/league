@@ -66,7 +66,7 @@ describe('auction pause guard', function () {
     const before = await count_auction_transactions()
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1, tid: auction._tids[0] },
+      { pid: player.pid, value: 0, tid: auction._tids[0] },
       { user_id: 1, tid: auction._tids[0] }
     )
 
@@ -84,7 +84,7 @@ describe('auction pause guard', function () {
     })
 
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1, tid: auction._tids[0] },
+      { pid: player.pid, value: 0, tid: auction._tids[0] },
       { user_id: 1, tid: auction._tids[0] }
     )
 
@@ -104,7 +104,7 @@ describe('auction pause guard', function () {
 
     auction.start()
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1, tid: auction._tids[0] },
+      { pid: player.pid, value: 0, tid: auction._tids[0] },
       { user_id: 1, tid: auction._tids[0] }
     )
     auction.pause()
@@ -113,12 +113,10 @@ describe('auction pause guard', function () {
 
     // A raise the auction would accept were it running: higher than the
     // standing $0, on the player that is actually open, from another team.
-    await auction.bid({
-      user_id: 1,
-      tid: auction._tids[1],
-      pid: player.pid,
-      value: 5
-    })
+    await auction.bid(
+      { pid: player.pid, value: 5 },
+      { user_id: 1, tid: auction._tids[1] }
+    )
 
     expect(await count_auction_transactions()).to.equal(before)
   })
@@ -138,7 +136,7 @@ describe('auction pause guard', function () {
 
     const before = await count_auction_transactions()
     await auction.nominate(
-      { pid: player.pid, value: 0, user_id: 1, tid: auction._tids[0] },
+      { pid: player.pid, value: 0, tid: auction._tids[0] },
       { user_id: 1, tid: auction._tids[0] }
     )
 
