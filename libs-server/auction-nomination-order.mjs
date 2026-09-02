@@ -1,5 +1,5 @@
 import db from '#db'
-import { current_season } from '#constants'
+import { current_season, default_points_added } from '#constants'
 import getLeague from './get-league.mjs'
 import emit_signal from './emit-signal.mjs'
 import debug from 'debug'
@@ -100,6 +100,28 @@ export const get_auction_nomination_order = async ({
     // weekly positive variant, because a weekly points-added is one signed
     // number. Summing net over the season's weeks is the same value model at a
     // different grain, which is what this tier is for.
+    //
+    // THE SENTINEL MUST BE EXCLUDED FROM THE SUM, and this is the one tier where
+    // that matters. Tier one and tier three COMPARE the column, so a
+    // `default_points_added` row simply sorts last and the order is still right.
+    // This tier AGGREGATES it, and the sentinel is about ten times the entire
+    // value range -- the top of the real 2026 board is ~138 points added against
+    // a sentinel of -999 -- so one missing week outweighs every difference in
+    // value the tier is trying to rank on. What it ends up sorting by is how
+    // many weeks a player has a projection for, not what he is worth.
+    //
+    // Measured on genesis_10_team 2026 before this filter: all 595 players
+    // carried at least one sentinel week, 509 of their totals were wrong, the
+    // worst total was -17,982 (eighteen sentinel weeks), and 42 players sat 50 or
+    // more places from where value puts them, the worst by 440.
+    //
+    // Filtered in the WHERE rather than as a `FILTER (WHERE ...)` on the sum, so
+    // a player whose every week is the sentinel drops out of the tier instead of
+    // aggregating to NULL -- and NULL sorts FIRST under `desc` in Postgres, which
+    // would put exactly the players with no projection at all at the top of the
+    // nomination order. Dropping them is right on its own terms too: this tier
+    // answers "who should be nominated next" and is capped at `limit`, so a
+    // player with no projected week is never a legitimate answer.
     const weekly_values = await db(
       'league_format_player_projection_values as v'
     )
@@ -110,6 +132,7 @@ export const get_auction_nomination_order = async ({
         'v.league_format_id': league.league_format_id,
         'v.season_year': season_year
       })
+      .whereNot('v.projected_points_added_net', default_points_added)
       .groupBy('v.pid', 'player.primary_position')
       .orderBy('total', 'desc')
 

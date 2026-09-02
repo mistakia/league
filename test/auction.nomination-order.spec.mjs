@@ -4,7 +4,7 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
-import { current_season } from '#constants'
+import { current_season, default_points_added } from '#constants'
 import {
   get_auction_nomination_order,
   AUCTION_NOMINATION_ORDER_TIERS
@@ -38,6 +38,12 @@ describe('auction nomination order', function () {
     // not clear it and one test's seeded values would decide the next test's
     // tier.
     await knex('league_format_player_season_projection_values')
+      .where({ season_year })
+      .del()
+    // Same reasoning for the weekly table, which backs tier two: it is
+    // format-scoped, so without this one test's weekly rows decide the next
+    // test's ordering.
+    await knex('league_format_player_projection_values')
       .where({ season_year })
       .del()
   })
@@ -113,6 +119,100 @@ describe('auction nomination order', function () {
 
     const { players } = await get_auction_nomination_order({ lid: league_id })
     expect(players.map((player) => player.pid)).to.not.include(rostered_pid)
+  })
+
+  // The weekly tier had NO coverage at all until 2026-09-02, which is how it
+  // shipped summing the sentinel. Both cases below fail on the unfiltered sum.
+  describe('the weekly tier', function () {
+    // Seeds three unrostered players with weekly net values, and returns them in
+    // the order the tier should rank them. `sentinel_weeks` is how many of each
+    // player's weeks carry `default_points_added`.
+    const seed_weekly = async ({ league_row, specs }) => {
+      const rostered = await knex('rosters_players')
+        .where({ lid: league_id })
+        .pluck('pid')
+      const candidates = await knex('player')
+        .whereNotIn('pid', rostered.length ? rostered : [''])
+        .orderBy('pid')
+        .limit(specs.length)
+      expect(candidates, 'enough unrostered players').to.have.length(
+        specs.length
+      )
+
+      for (let index = 0; index < specs.length; index += 1) {
+        const { real_value, real_weeks, sentinel_weeks } = specs[index]
+        const rows = []
+        let week = 1
+        for (let n = 0; n < real_weeks; n += 1, week += 1) {
+          rows.push({ week, value: real_value })
+        }
+        for (let n = 0; n < sentinel_weeks; n += 1, week += 1) {
+          rows.push({ week, value: default_points_added })
+        }
+        for (const row of rows) {
+          await knex('league_format_player_projection_values').insert({
+            pid: candidates[index].pid,
+            league_format_id: league_row.league_format_id,
+            season_year,
+            week: row.week,
+            projected_points_added_net: row.value
+          })
+        }
+      }
+      return candidates
+    }
+
+    it('ranks on value rather than on how many weeks are projected', async function () {
+      this.timeout(60 * 1000)
+      const league_row = await getLeague({ lid: league_id })
+
+      // The whole defect in one fixture. The FIRST player is worth far more per
+      // week and in total (10 x 9 = 90 against 2 x 12 = 24), but carries more
+      // sentinel weeks. Summing the sentinel gives him 90 - 8991 and drops him
+      // below a player worth a quarter as much.
+      const candidates = await seed_weekly({
+        league_row,
+        specs: [
+          { real_value: 10, real_weeks: 9, sentinel_weeks: 9 },
+          { real_value: 2, real_weeks: 12, sentinel_weeks: 6 }
+        ]
+      })
+
+      const { tier, players } = await get_auction_nomination_order({
+        lid: league_id
+      })
+
+      expect(tier).to.equal(AUCTION_NOMINATION_ORDER_TIERS.FORMAT_WEEKLY_VALUE)
+      expect(players[0].pid).to.equal(candidates[0].pid)
+      expect(players[1].pid).to.equal(candidates[1].pid)
+    })
+
+    it('does not put a player with no projected week at the top', async function () {
+      this.timeout(60 * 1000)
+      const league_row = await getLeague({ lid: league_id })
+
+      // An all-sentinel player aggregates to NULL under a `FILTER (WHERE ...)`
+      // sum, and NULL sorts FIRST under `desc` in Postgres -- so the naive fix
+      // for the case above hands the nomination order to exactly the player with
+      // no projection at all. He must not appear.
+      const candidates = await seed_weekly({
+        league_row,
+        specs: [
+          { real_value: 7, real_weeks: 4, sentinel_weeks: 0 },
+          { real_value: 0, real_weeks: 0, sentinel_weeks: 18 }
+        ]
+      })
+
+      const { tier, players } = await get_auction_nomination_order({
+        lid: league_id
+      })
+
+      expect(tier).to.equal(AUCTION_NOMINATION_ORDER_TIERS.FORMAT_WEEKLY_VALUE)
+      expect(players[0].pid).to.equal(candidates[0].pid)
+      expect(players.map((player) => player.pid)).to.not.include(
+        candidates[1].pid
+      )
+    })
   })
 
   it('degrades to alphabetical rather than returning nothing', async function () {
