@@ -50,23 +50,129 @@ const format_number = (num) => {
   return Number(n.toFixed(12))
 }
 
-const format_game = (game) => ({
+// The feed's `espn` column carries 14 wrong values, found by resolving all 7,548
+// rows against ESPN's own scoreboard (site.api.espn.com, by game date and
+// matchup) on 2026-09-02 and then confirming each replacement against the event
+// endpoint. Thirteen are 2003-2010, where the ESPN legacy id — season_year minus
+// 1980, then MMDD, then a 3-digit same-day index — was mis-indexed and the feed
+// handed one game's id to another; `1999_18_BUF_TEN` carries 200109010, which is
+// not an ESPN event at all (the digits of the 2000-01-08 date are transposed).
+// Each entry below was verified twice: the feed's value resolves to a DIFFERENT
+// matchup (or to nothing), and the replacement resolves to this matchup on this
+// date. With these applied, all 7,548 feed values are distinct.
+//
+// Keyed on nflverse `game_id` rather than on the wrong value, because several
+// wrong values are shared by two or three games and the value alone does not say
+// which row to fix. Retire an entry when the feed itself is corrected — the
+// no-op is logged on every run so a stale entry is visible rather than silent.
+const espn_game_id_corrections = new Map([
+  ['1999_18_BUF_TEN', '200108010'],
+  ['2003_03_JAX_IND', '230921011'],
+  ['2003_08_BUF_KC', '231026012'],
+  ['2003_11_STL_CHI', '231116003'],
+  ['2003_11_KC_CIN', '231116004'],
+  ['2003_16_NE_NYJ', '231220020'],
+  ['2003_17_PHI_WAS', '231227028'],
+  ['2004_06_GB_DET', '241017008'],
+  ['2004_06_DEN_OAK', '241017013'],
+  ['2004_11_DET_MIN', '241121016'],
+  ['2004_17_NYJ_STL', '250102014'],
+  ['2005_11_KC_HOU', '251120034'],
+  ['2006_11_OAK_KC', '261119012'],
+  ['2010_10_HOU_JAX', '301114030']
+])
+
+// 2014_12_NYJ_BUF looks wrong by the same scoreboard test and is NOT: the feed
+// carries 400607990, the game as actually played in Detroit on 2014-11-24 after
+// the Buffalo snowstorm, while the originally-scheduled 400554331 still sits on
+// the 2014-11-23 scoreboard. The feed is right; do not "fix" it.
+
+// A correction is stale once nflverse publishes the right value itself, or once
+// the game_id it keys on leaves the payload. Neither is an error, but both mean
+// the entry can go, so the run says so rather than carrying dead weight quietly.
+export const find_stale_espn_game_id_corrections = (data) => {
+  const feed = new Map(
+    data.map((item) => [item.game_id?.trim(), item.espn?.trim()])
+  )
+
+  return [...espn_game_id_corrections]
+    .filter(
+      ([game_id, corrected]) =>
+        !feed.has(game_id) || feed.get(game_id) === corrected
+    )
+    .map(([game_id]) => game_id)
+}
+
+export const resolve_espn_game_id = (game) =>
+  espn_game_id_corrections.get(game.game_id?.trim()) ||
+  game.espn?.trim() ||
+  null
+
+// A guard against a FUTURE upstream collision, not against the 14 above: with
+// the corrections applied the feed is currently collision-free, so this finds
+// nothing today. If nflverse reintroduces a shared id, the value is ambiguous —
+// nothing in the payload says which game owns it — and it gets written for NO
+// game in its group rather than for the wrong one. Computed over the WHOLE
+// payload before any --season-year / --season-type filter, so a single-season
+// run suppresses the same set a full run does.
+export const find_ambiguous_espn_game_ids = (data) => {
+  const seen = new Set()
+  const ambiguous = new Set()
+
+  for (const item of data) {
+    const espn_game_id = resolve_espn_game_id(item)
+    if (!espn_game_id) {
+      continue
+    }
+
+    if (seen.has(espn_game_id)) {
+      ambiguous.add(espn_game_id)
+    } else {
+      seen.add(espn_game_id)
+    }
+  }
+
+  return ambiguous
+}
+
+// espn_game_id is `integer` and the feed supplies a trimmed string, so it is
+// validated rather than blindly cast: every value must be all-digits and fit a
+// signed 32-bit integer, and anything else is dropped instead of silently
+// becoming NaN or a truncated number. Measured against the live payload
+// 2026-09-02, all 7,548 rows are 9-digit numerics with a maximum of 401,873,187
+// — comfortably inside `integer`, so the column type is right and needs no
+// retype.
+const format_espn_game_id = ({ game, ambiguous_espn_game_ids }) => {
+  const value = resolve_espn_game_id(game)
+
+  if (!value || !/^\d+$/.test(value) || ambiguous_espn_game_ids.has(value)) {
+    return null
+  }
+
+  const parsed = Number(value)
+
+  return Number.isSafeInteger(parsed) && parsed <= 2147483647 ? parsed : null
+}
+
+// Filling these two columns from NULL records nothing in nfl_games_changelog:
+// update_nfl_game writes a changelog row only when the previous value is
+// truthy. That is deliberate and stays. The changelog exists to record
+// value CONFLICTS — a source overwriting what another source already wrote —
+// and an initial population from one named source is not one. A row per game
+// would be 7,548 entries whose previous_value is uniformly null and whose
+// source is uniformly 'nflverse', carrying no information the feed does not
+// already carry. Overwrites of these columns, once populated, are recorded
+// normally from the next run onward.
+const format_game = (game, { ambiguous_espn_game_ids }) => ({
   nflverse_game_id: game.game_id?.trim() || null,
   // esbid: game.old_game_id,
   gsis_game_id: format_number(game.gsis),
   pff_game_id: game.pff?.trim() || null,
+  pfr_game_id: game.pfr?.trim() || null,
+  espn_game_id: format_espn_game_id({ game, ambiguous_espn_game_ids }),
 
-  // pfr_game_id / espn_game_id / ftn_game_id are available from this feed and
-  // deliberately NOT written. Until the 2026-07-29 conform they were inert: no
-  // such column existed, and update_nfl_game keeps only `kind === 'E'` diffs, so
-  // a key with no matching column was classified new and dropped. The rename of
-  // pfrid/espnid CREATES two of those columns, which would have silently turned
-  // this into a backfill of two 100%-NULL columns (0 of 15,622 rows populated) —
-  // and one that records nothing, since update_nfl_game only writes a changelog
-  // entry when the previous value is truthy. espnid is also `integer` while the
-  // feed supplies a trimmed string. Enabling this is its own deliberate pass:
-  // validate every feed value is numeric, settle the changelog `source`
-  // behavior, and run it intentionally. ftn has no column either way.
+  // ftn is supplied by this feed and has no nfl_games column, before or after
+  // the 2026-07-29 pfrid/espnid conform. Do not add one here.
 
   // total: game.total,
   // season_year: game.season,
@@ -94,6 +200,8 @@ const format_game = (game) => ({
 
   referee: game.referee?.trim() || null
 })
+
+export { format_game }
 
 const import_nfl_games_nflverse_nfldata = async ({
   season_year = null,
@@ -137,6 +245,23 @@ const import_nfl_games_nflverse_nfldata = async ({
   let data = await readCSV(path, {
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
+
+  // Computed before the season filters below so a single-season run suppresses
+  // the same espn values a full-payload run does.
+  const ambiguous_espn_game_ids = find_ambiguous_espn_game_ids(data)
+  if (ambiguous_espn_game_ids.size) {
+    log(
+      `${ambiguous_espn_game_ids.size} espn ids are shared by more than one game and will not be written: ${[...ambiguous_espn_game_ids].join(', ')}`
+    )
+  }
+
+  const stale_espn_game_id_corrections =
+    find_stale_espn_game_id_corrections(data)
+  if (stale_espn_game_id_corrections.length) {
+    log(
+      `${stale_espn_game_id_corrections.length} espn_game_id_corrections entries are no longer needed and can be retired: ${stale_espn_game_id_corrections.join(', ')}`
+    )
+  }
 
   // Filter by season_year if specified
   if (season_year) {
@@ -250,7 +375,7 @@ const import_nfl_games_nflverse_nfldata = async ({
     }
 
     if (db_game) {
-      const game = format_game(item)
+      const game = format_game(item, { ambiguous_espn_game_ids })
 
       if (item.away_qb_id) {
         const away_qb_player = find_player({
