@@ -190,6 +190,14 @@ const GATES = [
       'non-production configs must not name league_production or a remote host, and every destructive entrypoint must import the target guard'
   },
   {
+    id: 'player-mint-guard',
+    command: ['db/gates/check-player-mint-guard.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'every automated createPlayer call site has a resolve_canonical_player call ahead of it in the enclosing function -- structural reachability only, not that the verdict was branched on correctly'
+  },
+  {
     id: 'dev-fixture-scrub',
     command: ['db/gates/check-dev-fixture-scrub.mjs'],
     requires: 'none',
