@@ -26,9 +26,9 @@ const log = debug('caesars:market-types')
 // THE PIPE WRAP IS LOAD-BEARING AND IT IS NOT DECORATION.
 //
 // The Caesars payload delivers `templateName` already wrapped in pipes, and the
-// case labels below match that wire form verbatim. The IMPORTER stores the name
-// with pipes STRIPPED, as segment 2 of `source_market_name`. So anything
-// replaying this function over stored names must re-wrap:
+// keys below are that wire form verbatim. The IMPORTER stores the name with
+// pipes STRIPPED, as segment 2 of `source_market_name`. So anything replaying
+// this function over stored names must re-wrap:
 //
 //   get_market_type({ template_name: 'Match Spread' })    -> null
 //   get_market_type({ template_name: '|Match Spread|' })  -> GAME_SPREAD
@@ -37,204 +37,231 @@ const log = debug('caesars:market-types')
 // rows and the pipe-wrapped form types 23,046. A backfill that forgets the wrap
 // runs to completion having changed nothing.
 
-// THERE IS NO CATEGORY FALL-THROUGH FROM A TEMPLATE MISS.
+// A KEY PRESENT WITH A NULL TYPE IS A DECISION; A KEY ABSENT IS A GAP.
 //
-// The template switch's `default` returns null INSIDE the `if (template_name)`
-// block. A template that misses returns null and never reaches the category
-// branch; only a FALSY template does. That matters to any caller reasoning
-// about which of the two switches graded a market -- an empty template string
-// silently takes the category branch.
+// That is the whole reason this is a table rather than a switch. A residue
+// query over stored templates can then separate the families deliberately left
+// untyped, each carrying the reason it was left, from the ones nobody has
+// looked at yet. A switch reports both as one undifferentiated pile.
 
-export const get_market_type = ({ template_name, market_category }) => {
-  // Use template_name for more specific matching
-  if (template_name) {
-    switch (template_name) {
-      case '|Match Spread|':
-        return team_game_market_types.GAME_SPREAD
-      case '|Money Line|':
-        return team_game_market_types.GAME_MONEYLINE
-      case '|Total Points|':
-        return team_game_market_types.GAME_TOTAL
+// THERE IS NO market_category FALLBACK, DELIBERATELY.
+//
+// The retired category switch carried fourteen labels and had never typed a
+// market. Two independent measurements: of 451,674 stored Caesars rows only 16
+// have a template segment falsy enough to have reached it, and none of the 16
+// is typed; and on a live 2026-09-02 payload the only markets lacking a
+// `templateName` are empty market objects that carry no `marketCategory`
+// either. A market either has a template or has nothing.
 
-      case '|Most Regular Season Passing Yards|':
-        return player_prop_types.SEASON_LEADER_PASSING_YARDS
-      case '|Most Regular Season Passing Touchdowns|':
-        return player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS
-      case '|Most Regular Season Rushing Yards|':
-        return player_prop_types.SEASON_LEADER_RUSHING_YARDS
-      case '|Most Regular Season Rushing Touchdowns|':
-        return player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS
-      case '|Most Regular Season Receiving Yards|':
-        return player_prop_types.SEASON_LEADER_RECEIVING_YARDS
-      case '|Total Regular Season Passing Yards|':
-        return player_prop_types.SEASON_PASSING_YARDS
-      case '|Total Regular Season Touchdown Passes|':
-        return player_prop_types.SEASON_PASSING_TOUCHDOWNS
-      case '|Total Regular Season Rushing Yards|':
-        return player_prop_types.SEASON_RUSHING_YARDS
-      case '|Total Regular Season Rushing Touchdowns|':
-        return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
-      case '|Total Regular Season Receiving Yards|':
-        return player_prop_types.SEASON_RECEIVING_YARDS
-      case '|Total Regular Season Receiving Touchdowns|':
-        return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
-      case '|Total Regular Season Sacks|':
-        return player_prop_types.SEASON_DEFENSE_SACKS
+export const caesars_market_type_by_template = {
+  '|Match Spread|': { market_type: team_game_market_types.GAME_SPREAD },
+  '|Money Line|': { market_type: team_game_market_types.GAME_MONEYLINE },
+  '|Total Points|': { market_type: team_game_market_types.GAME_TOTAL },
+  '|Most Regular Season Passing Yards|': {
+    market_type: player_prop_types.SEASON_LEADER_PASSING_YARDS
+  },
+  '|Most Regular Season Passing Touchdowns|': {
+    market_type: player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS
+  },
+  '|Most Regular Season Rushing Yards|': {
+    market_type: player_prop_types.SEASON_LEADER_RUSHING_YARDS
+  },
+  '|Most Regular Season Rushing Touchdowns|': {
+    market_type: player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS
+  },
+  '|Most Regular Season Receiving Yards|': {
+    market_type: player_prop_types.SEASON_LEADER_RECEIVING_YARDS
+  },
+  '|Total Regular Season Passing Yards|': {
+    market_type: player_prop_types.SEASON_PASSING_YARDS
+  },
+  '|Total Regular Season Touchdown Passes|': {
+    market_type: player_prop_types.SEASON_PASSING_TOUCHDOWNS
+  },
+  '|Total Regular Season Rushing Yards|': {
+    market_type: player_prop_types.SEASON_RUSHING_YARDS
+  },
+  '|Total Regular Season Rushing Touchdowns|': {
+    market_type: player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+  },
+  '|Total Regular Season Receiving Yards|': {
+    market_type: player_prop_types.SEASON_RECEIVING_YARDS
+  },
+  '|Total Regular Season Receiving Touchdowns|': {
+    market_type: player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+  },
+  '|Total Regular Season Sacks|': {
+    market_type: player_prop_types.SEASON_DEFENSE_SACKS
+  },
+  '|First Touchdown Scorer|': {
+    market_type: player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER
+  },
+  '|Anytime Touchdown Scorer|': {
+    market_type: player_prop_types.ANYTIME_TOUCHDOWN
+  },
+  '|Last Touchdown Scorer|': {
+    market_type: player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
+  },
+  '|Player Total Passing Touchdowns|': {
+    market_type: player_prop_types.GAME_PASSING_TOUCHDOWNS
+  },
+  '|Player Total Passing Yards|': {
+    market_type: player_prop_types.GAME_PASSING_YARDS
+  },
+  '|Player Total Rushing Yards|': {
+    market_type: player_prop_types.GAME_RUSHING_YARDS
+  },
+  '|Player Total Receiving Yards|': {
+    market_type: player_prop_types.GAME_RECEIVING_YARDS
+  },
+  '|Player Total Receptions|': {
+    market_type: player_prop_types.GAME_RECEPTIONS
+  },
+  '|Player Total Rushing + Receiving Yards|': {
+    market_type: player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+  },
+  '|Player Total Passing Attempts|': {
+    market_type: player_prop_types.GAME_PASSING_ATTEMPTS
+  },
+  '|Player Total Passing Completions|': {
+    market_type: player_prop_types.GAME_PASSING_COMPLETIONS
+  },
+  '|Player Total Interceptions|': {
+    market_type: player_prop_types.GAME_PASSING_INTERCEPTIONS
+  },
+  '|Player Longest Passing Completion|': {
+    market_type: player_prop_types.GAME_PASSING_LONGEST_COMPLETION
+  },
+  '|Player Total Rushing Attempts|': {
+    market_type: player_prop_types.GAME_RUSHING_ATTEMPTS
+  },
+  '|Player Longest Reception|': {
+    market_type: player_prop_types.GAME_LONGEST_RECEPTION
+  },
+  '|Player Total Tackles + Assists|': {
+    market_type: player_prop_types.GAME_TACKLES_ASSISTS
+  },
+  '|Alt Passing Yards|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_YARDS
+  },
+  '|Alt Rushing Yards|': {
+    market_type: player_prop_types.GAME_ALT_RUSHING_YARDS
+  },
+  '|Alt Receiving Yards|': {
+    market_type: player_prop_types.GAME_ALT_RECEIVING_YARDS
+  },
+  '|Alt Receptions|': { market_type: player_prop_types.GAME_ALT_RECEPTIONS },
+  '|Alt Receiving + Rushing Yards|': {
+    market_type: player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
+  },
+  '|Alt Longest Completion|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_LONGEST_COMPLETION
+  },
+  '|Alt Interceptions Thrown|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_INTERCEPTIONS
+  },
+  '|Alt Rushing Touchdowns|': {
+    market_type: player_prop_types.GAME_ALT_RUSHING_TOUCHDOWNS
+  },
+  '|Alt Receiving Touchdowns|': {
+    market_type: player_prop_types.GAME_ALT_RECEIVING_TOUCHDOWNS
+  },
+  '|Alt Passing Touchdowns|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS
+  },
+  '|Alt Passing Attempts|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_ATTEMPTS
+  },
+  '|Alt Passing Completions|': {
+    market_type: player_prop_types.GAME_ALT_PASSING_COMPLETIONS
+  },
+  '|Alt Rushing Attempts|': {
+    market_type: player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
+  },
+  '|Alt Longest Rush|': {
+    market_type: player_prop_types.GAME_ALT_LONGEST_RUSH
+  },
+  '|Alt Longest Reception|': {
+    market_type: player_prop_types.GAME_ALT_LONGEST_RECEPTION
+  },
+  '|Player Total Passing + Rushing Yards|': {
+    market_type: player_prop_types.GAME_PASSING_RUSHING_YARDS
+  },
+  '|Total Receiving + Rushing Yards|': {
+    market_type: player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+  },
+  '|Alt Tackles + Assists|': {
+    market_type: player_prop_types.GAME_ALT_TACKLES_ASSISTS
+  },
+  '|Alt Defensive Interceptions|': {
+    market_type: player_prop_types.GAME_ALT_DEFENSE_INTERCEPTIONS
+  },
+  '|Alt Sacks|': { market_type: player_prop_types.GAME_ALT_DEFENSE_SACKS },
+  // Team total points markets. Caesars names these three ways: one market
+  // per side ('|Total Home Points|'), and a single template whose market_name
+  // carries the team ('|Seattle Seahawks Total Points|').
+  '|Total Home Points|': {
+    market_type: team_game_market_types.GAME_TEAM_TOTAL
+  },
+  '|Total Away Points|': {
+    market_type: team_game_market_types.GAME_TEAM_TOTAL
+  },
+  '|Team Total Points|': {
+    market_type: team_game_market_types.GAME_TEAM_TOTAL
+  },
+  '|1st Half Spread|': {
+    market_type: team_game_market_types.GAME_FIRST_HALF_SPREAD
+  },
+  '|Will There Be Overtime?|': { market_type: game_props_types.GAME_OVERTIME },
+  '|Winning Margins|': { market_type: game_props_types.GAME_WINNING_MARGIN },
+  '|Winning Margin|': { market_type: game_props_types.GAME_WINNING_MARGIN },
+  '|1st Scoring Play|': {
+    market_type: game_props_types.GAME_FIRST_SCORING_PLAY_TYPE
+  },
+  '|Race to X Points|': { market_type: game_props_types.GAME_RACE_TO_POINTS },
+  // Selections are <team>/<team> pairs -- halftime leader over full-time
+  // winner, which is what GAME_HALF_TIME_FULL_TIME names.
+  '|Double Result|': { market_type: game_props_types.GAME_HALF_TIME_FULL_TIME },
+  '|First Team To Score|': {
+    market_type: game_props_types.GAME_FIRST_TO_SCORE
+  },
+  '|Highest Scoring Half|': {
+    market_type: game_props_types.GAME_HIGHEST_SCORING_HALF
+  },
+  '|Highest Scoring Quarter|': {
+    market_type: game_props_types.GAME_HIGHEST_SCORING_QUARTER
+  },
+  '|Total Points Odd/Even|': {
+    market_type: game_props_types.GAME_TOTAL_POINTS_ODD_EVEN
+  },
+  '|Team Total Points Odd/Even|': {
+    market_type: team_props_types.GAME_TEAM_TOTAL_POINTS_ODD_EVEN
+  },
+  '|Team Score First And Win|': {
+    market_type: team_props_types.GAME_TEAM_TO_SCORE_FIRST_AND_WIN
+  },
 
-      case '|First Touchdown Scorer|':
-        return player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER
-      case '|Anytime Touchdown Scorer|':
-        return player_prop_types.ANYTIME_TOUCHDOWN
-      case '|Last Touchdown Scorer|':
-        return player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
+  // Deliberate no-maps. Present with a null type so a residue query reports
+  // them as decided rather than as an unexamined gap.
+  '|Team Total Team Defensive Tackles|': {
+    market_type: null,
+    reason:
+      'Ambiguous statistic. The only player-side tackle constants are the combined GAME_TACKLES_ASSISTS and GAME_ALT_TACKLES_ASSISTS, and Caesars does not publish whether this team aggregate counts tackles plus assists or solo tackles. A settlement handler would sum whichever the constant name claimed, so coining one without the vendor terms would encode a guess as a grade.'
+  }
+}
 
-      case '|Player Total Passing Touchdowns|':
-        return player_prop_types.GAME_PASSING_TOUCHDOWNS
-      case '|Player Total Passing Yards|':
-        return player_prop_types.GAME_PASSING_YARDS
-      case '|Player Total Rushing Yards|':
-        return player_prop_types.GAME_RUSHING_YARDS
-      case '|Player Total Receiving Yards|':
-        return player_prop_types.GAME_RECEIVING_YARDS
-      case '|Player Total Receptions|':
-        return player_prop_types.GAME_RECEPTIONS
-      case '|Player Total Rushing + Receiving Yards|':
-        return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
-      case '|Player Total Passing Attempts|':
-        return player_prop_types.GAME_PASSING_ATTEMPTS
-      case '|Player Total Passing Completions|':
-        return player_prop_types.GAME_PASSING_COMPLETIONS
-      case '|Player Total Interceptions|':
-        return player_prop_types.GAME_PASSING_INTERCEPTIONS
-      case '|Player Longest Passing Completion|':
-        return player_prop_types.GAME_PASSING_LONGEST_COMPLETION
-      case '|Player Total Rushing Attempts|':
-        return player_prop_types.GAME_RUSHING_ATTEMPTS
-      case '|Player Longest Reception|':
-        return player_prop_types.GAME_LONGEST_RECEPTION
-      case '|Player Total Tackles + Assists|':
-        return player_prop_types.GAME_TACKLES_ASSISTS
-      case '|Alt Passing Yards|':
-        return player_prop_types.GAME_ALT_PASSING_YARDS
-      case '|Alt Rushing Yards|':
-        return player_prop_types.GAME_ALT_RUSHING_YARDS
-      case '|Alt Receiving Yards|':
-        return player_prop_types.GAME_ALT_RECEIVING_YARDS
-      case '|Alt Receptions|':
-        return player_prop_types.GAME_ALT_RECEPTIONS
-      case '|Alt Receiving + Rushing Yards|':
-        return player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
-      case '|Alt Longest Completion|':
-        return player_prop_types.GAME_ALT_PASSING_LONGEST_COMPLETION
-      case '|Alt Interceptions Thrown|':
-        return player_prop_types.GAME_ALT_PASSING_INTERCEPTIONS
-      case '|Alt Rushing Touchdowns|':
-        return player_prop_types.GAME_ALT_RUSHING_TOUCHDOWNS
-      case '|Alt Receiving Touchdowns|':
-        return player_prop_types.GAME_ALT_RECEIVING_TOUCHDOWNS
-      case '|Alt Passing Touchdowns|':
-        return player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS
-      case '|Alt Passing Attempts|':
-        return player_prop_types.GAME_ALT_PASSING_ATTEMPTS
-      case '|Alt Passing Completions|':
-        return player_prop_types.GAME_ALT_PASSING_COMPLETIONS
-      case '|Alt Rushing Attempts|':
-        return player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
-      case '|Alt Longest Rush|':
-        return player_prop_types.GAME_ALT_LONGEST_RUSH
-      case '|Alt Longest Reception|':
-        return player_prop_types.GAME_ALT_LONGEST_RECEPTION
-      case '|Player Total Passing + Rushing Yards|':
-        return player_prop_types.GAME_PASSING_RUSHING_YARDS
-      case '|Total Receiving + Rushing Yards|':
-        return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
-      case '|Alt Tackles + Assists|':
-        return player_prop_types.GAME_ALT_TACKLES_ASSISTS
-      case '|Alt Defensive Interceptions|':
-        return player_prop_types.GAME_ALT_DEFENSE_INTERCEPTIONS
-      case '|Alt Sacks|':
-        return player_prop_types.GAME_ALT_DEFENSE_SACKS
-
-      // Team total points markets. Caesars names these three ways: one market
-      // per side ('|Total Home Points|'), and a single template whose
-      // market_name carries the team ('|Seattle Seahawks Total Points|').
-      case '|Total Home Points|':
-      case '|Total Away Points|':
-      case '|Team Total Points|':
-        return team_game_market_types.GAME_TEAM_TOTAL
-
-      case '|1st Half Spread|':
-        return team_game_market_types.GAME_FIRST_HALF_SPREAD
-
-      // Game props
-      case '|Will There Be Overtime?|':
-        return game_props_types.GAME_OVERTIME
-      case '|Winning Margins|':
-      case '|Winning Margin|':
-        return game_props_types.GAME_WINNING_MARGIN
-      case '|1st Scoring Play|':
-        return game_props_types.GAME_FIRST_SCORING_PLAY_TYPE
-      case '|Race to X Points|':
-        return game_props_types.GAME_RACE_TO_POINTS
-      // Selections are '<team>/<team>' pairs -- halftime leader over full-time
-      // winner, which is what GAME_HALF_TIME_FULL_TIME names.
-      case '|Double Result|':
-        return game_props_types.GAME_HALF_TIME_FULL_TIME
-      case '|First Team To Score|':
-        return game_props_types.GAME_FIRST_TO_SCORE
-      case '|Highest Scoring Half|':
-        return game_props_types.GAME_HIGHEST_SCORING_HALF
-      case '|Highest Scoring Quarter|':
-        return game_props_types.GAME_HIGHEST_SCORING_QUARTER
-      case '|Total Points Odd/Even|':
-        return game_props_types.GAME_TOTAL_POINTS_ODD_EVEN
-
-      // Team props -- team grain, carrying a selection_pid
-      case '|Team Total Points Odd/Even|':
-        return team_props_types.GAME_TEAM_TOTAL_POINTS_ODD_EVEN
-      case '|Team Score First And Win|':
-        return team_props_types.GAME_TEAM_TO_SCORE_FIRST_AND_WIN
-
-      default:
-        log(`no market_type match for template_name: ${template_name}`)
-        return null
-    }
+export const get_market_type = ({ template_name }) => {
+  if (!template_name) {
+    return null
   }
 
-  if (market_category) {
-    switch (market_category) {
-      case 'PASSING_TOUCHDOWNS':
-        return player_prop_types.GAME_PASSING_TOUCHDOWNS
-      case 'PASSING_YARDS':
-        return player_prop_types.GAME_PASSING_YARDS
-      case 'RUSHING_YARDS':
-        return player_prop_types.GAME_RUSHING_YARDS
-      case 'RECEIVING_YARDS':
-        return player_prop_types.GAME_RECEIVING_YARDS
-      case 'RECEPTIONS':
-        return player_prop_types.GAME_RECEPTIONS
-      case 'RUSHING_RECEIVING_YARDS':
-        return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
-      case 'PASSING_ATTEMPTS':
-        return player_prop_types.GAME_PASSING_ATTEMPTS
-      case 'PASSING_COMPLETIONS':
-        return player_prop_types.GAME_PASSING_COMPLETIONS
-      case 'INTERCEPTIONS':
-        return player_prop_types.GAME_PASSING_INTERCEPTIONS
-      case 'LONGEST_PASSING_COMPLETION':
-        return player_prop_types.GAME_PASSING_LONGEST_COMPLETION
-      case 'RUSHING_ATTEMPTS':
-        return player_prop_types.GAME_RUSHING_ATTEMPTS
-      case 'LONGEST_RECEPTION':
-        return player_prop_types.GAME_LONGEST_RECEPTION
-      case 'TACKLES_ASSISTS':
-        return player_prop_types.GAME_TACKLES_ASSISTS
-
-      default:
-        log(`no market_type match for market_category: ${market_category}`)
-        return null
-    }
+  // hasOwn rather than a bare lookup: a template that happened to be named
+  // 'constructor' would otherwise resolve off Object.prototype and return a
+  // function instead of null.
+  if (!Object.hasOwn(caesars_market_type_by_template, template_name)) {
+    log(`no table entry for template_name: ${template_name}`)
+    return null
   }
 
-  return null
+  return caesars_market_type_by_template[template_name].market_type
 }

@@ -2,7 +2,10 @@
 
 import * as chai from 'chai'
 
-import { get_market_type } from '#libs-server/caesars/caesars-market-types.mjs'
+import {
+  get_market_type,
+  caesars_market_type_by_template
+} from '#libs-server/caesars/caesars-market-types.mjs'
 import {
   player_prop_types,
   team_game_market_types,
@@ -106,24 +109,29 @@ describe('libs-server caesars market types', function () {
     })
   })
 
-  describe('category fallback', function () {
-    it('types on market_category when there is no template', function () {
+  describe('there is no market_category fallback', function () {
+    // The retired category switch had never typed a market: of 451,674 stored
+    // Caesars rows only 16 have a template segment falsy enough to have reached
+    // it and none of the 16 is typed, and on a live payload the only markets
+    // without a `templateName` are empty market objects carrying no
+    // `marketCategory` either. These pin that a category alone types nothing,
+    // so a caller cannot come to depend on a branch that was deleted.
+    it('types nothing on a category when there is no template', function () {
       expect(get_market_type({ market_category: 'PASSING_YARDS' })).to.equal(
-        player_prop_types.GAME_PASSING_YARDS
-      )
-    })
-
-    it('returns null for an unknown category', function () {
-      expect(get_market_type({ market_category: 'NO_SUCH_CATEGORY' })).to.equal(
         null
       )
     })
 
-    // The template switch's `default` returns null INSIDE the
-    // `if (template_name)` block, so a template MISS never reaches the category
-    // branch -- only a FALSY template does. A caller that assumes fall-through
-    // will mis-attribute which switch graded a market.
-    it('does not fall through to the category when a template misses', function () {
+    it('types nothing on a category when the template is an empty string', function () {
+      expect(
+        get_market_type({
+          template_name: '',
+          market_category: 'PASSING_YARDS'
+        })
+      ).to.equal(null)
+    })
+
+    it('types nothing on a category when the template misses', function () {
       expect(
         get_market_type({
           template_name: '|No Such Market|',
@@ -131,14 +139,41 @@ describe('libs-server caesars market types', function () {
         })
       ).to.equal(null)
     })
+  })
 
-    it('does reach the category when the template is an empty string', function () {
-      expect(
-        get_market_type({
-          template_name: '',
-          market_category: 'PASSING_YARDS'
-        })
-      ).to.equal(player_prop_types.GAME_PASSING_YARDS)
+  describe('the table', function () {
+    // A key PRESENT with a null type is a deliberate no-map carrying its
+    // reason; a key ABSENT is a family nobody has looked at. Both return null
+    // from get_market_type, which is why the distinction has to be asserted on
+    // the table rather than through the function.
+    it('agrees with get_market_type on every key it holds', function () {
+      for (const [template_name, entry] of Object.entries(
+        caesars_market_type_by_template
+      )) {
+        expect(get_market_type({ template_name })).to.equal(entry.market_type)
+      }
+    })
+
+    it('distinguishes a deliberate no-map from an absent template', function () {
+      const no_map_keys = Object.entries(caesars_market_type_by_template)
+        .filter(([, entry]) => entry.market_type === null)
+        .map(([template_name]) => template_name)
+
+      for (const template_name of no_map_keys) {
+        expect(get_market_type({ template_name })).to.equal(null)
+        expect(caesars_market_type_by_template[template_name].reason).to.be.a(
+          'string'
+        )
+      }
+
+      expect(caesars_market_type_by_template).to.not.have.property(
+        '|No Such Market|'
+      )
+    })
+
+    it('does not resolve a template name off Object.prototype', function () {
+      expect(get_market_type({ template_name: 'constructor' })).to.equal(null)
+      expect(get_market_type({ template_name: 'toString' })).to.equal(null)
     })
   })
 
