@@ -5,6 +5,7 @@ import { Roster, get_free_agent_period } from '#libs-shared'
 import { current_season, AUCTION_BLOCK_GRANULARITY_MINUTES } from '#constants'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
+import { lock_auction_for_league } from './auction-settlement.mjs'
 import sendNotifications from './send-notifications.mjs'
 import { format_block_convened_message } from './format-auction-discord-message.mjs'
 import debug from 'debug'
@@ -218,62 +219,100 @@ export const evaluate_auction_block_finalization = async ({
   // block of zero teams -- which would otherwise finalize every open slot.
   if (!eligible_team_ids.length) return []
 
-  const opt_ins = await get_live_block_opt_ins({ lid, season_year })
-  const finalized = await get_finalized_auction_blocks({ lid, season_year })
+  // ONE LOCKED TRANSACTION FOR THE WHOLE EVALUATION. This runs on the opt-in
+  // write AND on every read of the schedule -- the calendar, the block route,
+  // and the socket's mode poll every fifteen seconds -- so several evaluations
+  // are routinely in flight at once against one league.
+  //
+  // Unserialised, they read `finalized` before any of them writes and then
+  // disagree about what the slot needs. The unique index catches insert against
+  // insert and nothing else: an EXTEND racing an INSERT produced a session
+  // 09:00-09:30 and a duplicate 09:15-09:30 on the same league, which is a
+  // phantom block on the calendar and a second convening announcement for a
+  // session the league was already told about. Found by running the end-to-end
+  // drive, which is also the only thing that had ever put two evaluators in
+  // flight together.
+  const newly_finalized = await db.transaction(async (trx) => {
+    await lock_auction_for_league({ trx, lid })
 
-  const by_slot = new Map()
-  for (const opt_in of opt_ins) {
-    const key = dayjs(opt_in.block_at).valueOf()
-    if (!by_slot.has(key)) by_slot.set(key, new Set())
-    by_slot.get(key).add(opt_in.tid)
-  }
-
-  const notice_floor = dayjs(now).add(
-    league.auction_block_notice_minutes,
-    'minute'
-  )
-
-  const already_covered = (slot) =>
-    finalized.some(
-      (block) =>
-        !slot.isBefore(dayjs(block.block_at)) &&
-        slot.isBefore(dayjs(block.end_at))
-    )
-
-  const newly_finalized = []
-
-  for (const [key, tids] of [...by_slot.entries()].sort(
-    (a, b) => a[0] - b[0]
-  )) {
-    const slot = dayjs(key)
-
-    if (already_covered(slot)) continue
-    if (slot.isBefore(period.start) || !slot.isBefore(period.end)) continue
-    if (slot.isBefore(notice_floor)) continue
-
-    const is_unanimous = eligible_team_ids.every((tid) => tids.has(tid))
-    if (!is_unanimous) continue
-
-    const end_at = slot.add(AUCTION_BLOCK_GRANULARITY_MINUTES, 'minute')
-    const record = await finalize_auction_block({
+    const opt_ins = await get_live_block_opt_ins({
       lid,
       season_year,
-      block_at: slot,
-      end_at,
-      eligible_team_count: eligible_team_ids.length,
-      finalized_at: dayjs(now)
+      db_client: trx
+    })
+    const finalized = await get_finalized_auction_blocks({
+      lid,
+      season_year,
+      db_client: trx
     })
 
-    if (record) {
-      newly_finalized.push(record)
-      await announce({ league, block: record })
-      // Re-read so the next slot in this same pass sees the session it may be
-      // adjacent to, including one this loop just extended.
-      finalized.length = 0
-      finalized.push(
-        ...(await get_finalized_auction_blocks({ lid, season_year }))
-      )
+    const by_slot = new Map()
+    for (const opt_in of opt_ins) {
+      const key = dayjs(opt_in.block_at).valueOf()
+      if (!by_slot.has(key)) by_slot.set(key, new Set())
+      by_slot.get(key).add(opt_in.tid)
     }
+
+    const notice_floor = dayjs(now).add(
+      league.auction_block_notice_minutes,
+      'minute'
+    )
+
+    const already_covered = (slot) =>
+      finalized.some(
+        (block) =>
+          !slot.isBefore(dayjs(block.block_at)) &&
+          slot.isBefore(dayjs(block.end_at))
+      )
+
+    const finalized_in_this_pass = []
+
+    for (const [key, tids] of [...by_slot.entries()].sort(
+      (a, b) => a[0] - b[0]
+    )) {
+      const slot = dayjs(key)
+
+      if (already_covered(slot)) continue
+      if (slot.isBefore(period.start) || !slot.isBefore(period.end)) continue
+      if (slot.isBefore(notice_floor)) continue
+
+      const is_unanimous = eligible_team_ids.every((tid) => tids.has(tid))
+      if (!is_unanimous) continue
+
+      const end_at = slot.add(AUCTION_BLOCK_GRANULARITY_MINUTES, 'minute')
+      const record = await finalize_auction_block({
+        lid,
+        season_year,
+        block_at: slot,
+        end_at,
+        eligible_team_count: eligible_team_ids.length,
+        finalized_at: dayjs(now),
+        db_client: trx
+      })
+
+      if (record) {
+        finalized_in_this_pass.push(record)
+        // Re-read so the next slot in this same pass sees the session it may be
+        // adjacent to, including one this loop just extended.
+        finalized.length = 0
+        finalized.push(
+          ...(await get_finalized_auction_blocks({
+            lid,
+            season_year,
+            db_client: trx
+          }))
+        )
+      }
+    }
+
+    return finalized_in_this_pass
+  })
+
+  // ANNOUNCED AFTER THE COMMIT. Telling the league to show up for a session that
+  // then rolls back is worse than telling them late, and it is the same rule the
+  // settlement fan-out keeps.
+  for (const block of newly_finalized) {
+    await announce({ league, block })
   }
 
   return newly_finalized
@@ -327,9 +366,14 @@ const finalize_auction_block = async ({
   block_at,
   end_at,
   eligible_team_count,
-  finalized_at
+  finalized_at,
+  db_client = db
 }) => {
-  const blocks = await get_finalized_auction_blocks({ lid, season_year })
+  const blocks = await get_finalized_auction_blocks({
+    lid,
+    season_year,
+    db_client
+  })
 
   const before = blocks.find(
     (block) => dayjs(block.end_at).valueOf() === block_at.valueOf()
@@ -339,10 +383,10 @@ const finalize_auction_block = async ({
   )
 
   if (before && after) {
-    await db('auction_blocks')
+    await db_client('auction_blocks')
       .where('block_id', before.block_id)
       .update({ end_at: after.end_at })
-    await db('auction_blocks').where('block_id', after.block_id).del()
+    await db_client('auction_blocks').where('block_id', after.block_id).del()
     log(
       `merged block ${block_at.toISOString()} into session ${dayjs(before.block_at).toISOString()} -> ${dayjs(after.end_at).toISOString()}`
     )
@@ -354,7 +398,7 @@ const finalize_auction_block = async ({
   }
 
   if (before) {
-    await db('auction_blocks')
+    await db_client('auction_blocks')
       .where('block_id', before.block_id)
       .update({ end_at: end_at.toDate() })
     log(
@@ -368,7 +412,7 @@ const finalize_auction_block = async ({
   }
 
   if (after) {
-    await db('auction_blocks')
+    await db_client('auction_blocks')
       .where('block_id', after.block_id)
       .update({ block_at: block_at.toDate() })
     log(`extended session back to ${block_at.toISOString()}`)
@@ -379,10 +423,11 @@ const finalize_auction_block = async ({
     }
   }
 
-  // ON CONFLICT DO NOTHING rather than a pre-check: finalization is evaluated
-  // from the opt-in write AND from every read, so two evaluations can race here
-  // and the unique index is the only thing that can settle it.
-  const inserted = await db('auction_blocks')
+  // ON CONFLICT DO NOTHING rather than a pre-check. The caller now holds the
+  // league's advisory lock, so this cannot race another evaluation -- but the
+  // constraint stays as the belt to that braces, since it costs nothing and it
+  // is the only thing that would survive a caller forgetting the lock.
+  const inserted = await db_client('auction_blocks')
     .insert({
       lid,
       season_year,
