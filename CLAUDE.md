@@ -26,6 +26,7 @@ Two consequences worth stating outright. **This file must be true without verifi
 | Touch a data-view column, param, field factory or golden           | [docs/guides/data.md](docs/guides/data.md)           |
 | Touch anything under `api/`                                        | [docs/guides/api.md](docs/guides/api.md)             |
 | Touch `scripts/`, `jobs/` or a crontab                             | [docs/guides/scripts.md](docs/guides/scripts.md)     |
+| Touch the free agency auction, its sockets, routes or components   | [docs/guides/auction.md](docs/guides/auction.md)     |
 | Add a gate, check, ratchet or negative control                     | [docs/guides/gates.md](docs/guides/gates.md)         |
 | Put `//@ts-check` on a file, or opt one out                        | [docs/guides/gates.md](docs/guides/gates.md)         |
 | Act on a `yarn knip` finding, or delete a module that looks unused | [docs/guides/dead-code.md](docs/guides/dead-code.md) |
