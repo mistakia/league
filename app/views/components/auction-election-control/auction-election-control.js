@@ -80,6 +80,16 @@ export default function AuctionElectionControl({
   // the price and the clock, and the note here would be the fourth sentence on
   // a surface a manager reads in seconds. The state line stays -- knowing
   // whether you already hold a ceiling on the open player is the reason to look.
+  //
+  // COMPACT IS THE STATE LINE PLUS ONE BUTTON, and that bound is a layout
+  // constraint rather than a preference. The bar body is capped at 1000px and
+  // its content already fills it, so the full form's 573px did not shrink
+  // anything -- it pushed `Undo decline` clean off the viewport and squeezed
+  // auction-settlement-status into a 71px column 188px tall, hanging 118px
+  // below a 70px bar and over the player board. Setting a NUMBER stays in the
+  // drawer, which the bar's own player name opens in one click and which is
+  // the only place that can explain the availableCap capping term anyway. A
+  // second number field 100px from `Enter Bid` was its own defect regardless.
   if (compact) class_names.push('compact')
   if (is_settled) class_names.push('settled')
   else if (is_decline) class_names.push('declined')
@@ -127,27 +137,32 @@ export default function AuctionElectionControl({
       <div className='auction-election-control__body'>
         {!is_settled && (
           <div className='auction-election-control__form'>
-            {/* A plain input, matching auction-main-bid. @mui/material sits on
-                a per-package import ratchet and one more import here would
-                exceed its budget for a field the bid bar already renders
-                without it. */}
-            <label htmlFor={`auction-election-${pid}`}>Maximum bid</label>
-            <input
-              id={`auction-election-${pid}`}
-              type='number'
-              min='0'
-              inputMode='numeric'
-              placeholder='0'
-              value={draft}
-              onChange={(event) => set_draft(event.target.value)}
-            />
-            <Button small onClick={handle_set}>
-              {has_election && !is_decline ? 'Update' : 'Set maximum'}
-            </Button>
+            {!compact && (
+              <>
+                {/* A plain input, matching auction-main-bid. @mui/material sits
+                    on a per-package import ratchet and one more import here
+                    would exceed its budget for a field the bid bar already
+                    renders without it. */}
+                <label htmlFor={`auction-election-${pid}`}>Maximum bid</label>
+                <input
+                  id={`auction-election-${pid}`}
+                  type='number'
+                  min='0'
+                  inputMode='numeric'
+                  placeholder='0'
+                  value={draft}
+                  onChange={(event) => set_draft(event.target.value)}
+                />
+                <Button small onClick={handle_set}>
+                  {has_election && !is_decline ? 'Update' : 'Set maximum'}
+                </Button>
+              </>
+            )}
             {/* A decline is revocable while its player is unsettled -- the
                 un-pass that did not exist anywhere in the codebase under the
                 retired pass mechanic, where a misclick could only be undone by
-                another team bidding. */}
+                another team bidding. This is the one button the bar keeps: it
+                is the action the retired pass occupied that slot to perform. */}
             {is_decline ? (
               <Button small onClick={withdraw}>
                 Undo decline
@@ -157,7 +172,7 @@ export default function AuctionElectionControl({
                 Decline
               </Button>
             )}
-            {has_election && !is_decline && (
+            {!compact && has_election && !is_decline && (
               <Button small onClick={withdraw}>
                 Withdraw
               </Button>

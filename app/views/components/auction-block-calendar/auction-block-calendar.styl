@@ -44,6 +44,24 @@ $grid_open_fill = #e6e6e6
   font-size 11px
   opacity 0.85
 
+// A text affordance rather than a Button: it discloses three lines of prose in
+// a narrow rail, and the app's small Button carries a min-width and a border
+// that would make the toggle louder than the rules it reveals.
+.auction__block-calendar-legend-toggle
+  display block
+  padding 4px 0
+  border none
+  background none
+  font-family inherit
+  font-size 10px
+  text-transform uppercase
+  letter-spacing 0.5px
+  color $accentColor
+  cursor pointer
+
+  &:hover
+    text-decoration underline
+
 .auction__block-calendar-legend
   font-size 11px
   line-height 1.4

@@ -84,10 +84,9 @@ export default function AuctionPage({
                 the auction's only forcing function -- a manager has to see who
                 the board is waiting on without opening anything. */}
             <AuctionSettlementStatus />
-            <AuctionBlockCalendar
-              key={`block-calendar-${is_narrow}`}
-              is_collapsible={is_narrow}
-            />
+            {/* Discloses on request on every viewport, so it needs no
+                remount keyed on the breakpoint the way its sibling does. */}
+            <AuctionBlockCalendar />
             <AuctionStandingElections
               key={`standing-elections-${is_narrow}`}
               is_collapsible={is_narrow}

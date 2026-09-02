@@ -8,9 +8,30 @@
   display flex
   max-width fit-content
 
+// `min-width 0` because a flex item defaults to `min-width auto`, which refuses
+// to shrink below its content and so converts any shortfall into overflow of
+// the BAR rather than compression of this panel. With the election control in
+// the strip the bar body ran 1445px inside a 1000px cap, putting the last
+// button past the right edge of the viewport.
 .auction__bid-info
   flex 1
+  min-width 0
   display flex
+
+  // The outstanding-teams sentence names every team still to answer, so it has
+  // no natural upper length and must not set the bar's width. Bounding it is
+  // not enough on its own: allowed to shrink freely it collapsed to a 16px
+  // sliver with the text clipped away, which loses the one surface that IS the
+  // forcing function in election mode. A basis it may shrink from, a floor it
+  // may not cross, and a three-line clamp inside the 70px bar.
+  .auction-settlement-status
+    flex 0 1 260px
+    min-width 170px
+    align-self center
+    display -webkit-box
+    -webkit-line-clamp 3
+    -webkit-box-orient vertical
+    overflow hidden
 
 .auction__bid-actions
   flex 0 0 auto
@@ -118,9 +139,17 @@
   .auction__main-timer
     flex 0 0 30px
 
+// Lives in `.auction__bid-info` beside the settlement status, not inside the
+// 60px timer box it used to share a row with. Given the same shape as the
+// status it alternates with, so the slot does not jump between live and
+// election mode.
 .auction__block-label
+  flex 0 0 auto
+  align-self center
+  margin-right 10px
+  padding 4px 8px
   font-size 10px
+  line-height 1.3
   text-transform uppercase
   letter-spacing 0.5px
   opacity 0.7
-  white-space nowrap
