@@ -23,20 +23,41 @@
 // already overflows any laptop viewport at any of these widths and widening a
 // column costs scroll distance rather than a layout that used to fit.
 //
-// 304px is measured, not chosen. The name truncates on `.player__name-top`
-// (`text-overflow: ellipsis`), and at 264px the worst row on the board --
-// a long name carrying an election chip -- overflowed by 40px, while eleven
-// chip-free rows overflowed by 5 to 14px on name length alone. 264 + 40 clears
-// both. Note the overflow is invisible to a check on `.player__name-main`,
-// which never overflows because the ellipsis child shrinks instead; measure the
-// descendant or the reading is a confident zero.
+// 280px is calculated, not swept. Every element in a row is fixed-width except
+// `.player__name-main`, so a row's required column width is the width in force
+// minus THAT element's slack -- which makes the whole board measurable in one
+// frame at one width, with no re-render to catch mid-reflow. Measured that way
+// over all 1013 rows (the list is virtualized, so a single frame sees ~30 of
+// them and reports a confident zero for the rest; scroll every column or the
+// number is fiction).
+//
+// THE REQUIREMENT IS BIMODAL, and that is the thing the old 304 hid. The
+// nominate `+` is gated on `isNominating`, which is a BOARD state rather than a
+// row state, so it appears on every nominatable row at once and vanishes
+// entirely otherwise, taking 40px off the name on the one turn you are actually
+// reading names to pick one. Zero clipping needs 290px when it is not your turn
+// and 330px when it is -- so 304 was never the width that cleared the board, it
+// was the width that cleared the board in the regime it happened to be measured
+// in, and it still clipped 11 rows on your own nomination turn.
+//
+// No width both narrows this column and clips nothing; 280 spends a budget
+// deliberately. What it clips is the fringe of hyphenated double surnames --
+// Westbrook-Ikhine, Martin-Robinson, Shelton-Mosley -- and never a name with a
+// bid on it.
+//
+// Note the overflow is invisible to a check on `.player__name-main`, which
+// never overflows because the ellipsis child shrinks instead, and equally
+// invisible to `scrollWidth` on ANY box in the chain, which returns the laid-out
+// box while the text fits. Measure the ink with a Range over the span inside
+// `.player__name-top`: an inline box keeps its full layout width when clipped,
+// because overflow hides paint rather than layout.
 .auction__targets-column
-  flex 1 1 304px
+  flex 1 1 280px
   height 100%
   display flex
   flex-direction column
   background white
-  min-width 304px
+  min-width 280px
   &:first-child
     padding-left 16px
   + .auction__targets-column
@@ -103,8 +124,11 @@ body:not(.hide-watchlist)
   justify-content flex-end
   align-items center
 
+// 16px, from the widest bye rendered on the board: a two-digit week measures
+// 12px of ink, so 20px was reserving eight pixels for nothing on every row. The
+// four pixels come back to the name, which is the only elastic element here.
 .auction__targets-player-bye
-  flex 0 0 20px
+  flex 0 0 16px
   font-size 10px
   display flex
   align-items center

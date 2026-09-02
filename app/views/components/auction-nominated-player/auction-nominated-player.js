@@ -46,12 +46,24 @@ export default function AuctionNominatedPlayer({
         />
       </div>
       <div className='nominated__player-details'>
-        <div className='selected__player-header-item'>
+        {/* TWO PRICES SIDE BY SIDE, and until now nothing in either label said
+            which one moves. `Market` is the static preseason `market_salary`;
+            the other is recomputed from the league's remaining cap money spread
+            across the value still unrostered, so it changes as the auction
+            proceeds. Both rendered as a bare dollar amount under a one-word
+            label, and `Auction` -- on the auction screen, beside the auction's
+            own bid -- named the surface rather than the number.
+
+            It is NOT the current bid, which is a different number in this same
+            bar, so `Current bid` and `Live bid` were both rejected: they would
+            have named a real quantity that this field does not hold. `Live
+            value` says the one thing that distinguishes it from `Market`. */}
+        <div className='selected__player-header-item nominated__detail-market'>
           <label>Market</label>$
           {player_map.getIn(['market_salary', 'season'], 0)}
         </div>
-        <div className='selected__player-header-item'>
-          <label>Auction</label>${auction_adjusted_salary}
+        <div className='selected__player-header-item nominated__detail-live'>
+          <label>Live value</label>${auction_adjusted_salary}
         </div>
         <div className='selected__player-header-item'>
           <label>Bye</label>

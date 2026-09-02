@@ -191,6 +191,26 @@
     margin-left -1px
     border-left-color $prose_rule_strong
 
+  // THE LIFT BELONGS TO THE GROUP, NOT TO A SEGMENT. `hover_lift()` on the base
+  // rule gives each button its own `$box_shadow` — a hard 4px offset with no
+  // blur — so hovering the middle of the auction's `- / Bid $N / +` stepper
+  // dropped a shadow INSIDE the control, printed across the `+` segment abutting
+  // it, and the segment read as one button floating off a control it is welded
+  // to. Measured: hovering `Bid $1` computed `rgb(208,208,208) 4px 4px 0 0` on
+  // that segment alone while the group itself computed `none`.
+  //
+  // The shadow moves to `.button-group:hover` in button-group.styl; the
+  // segment keeps the ground and border half of the lift, because WHICH segment
+  // the pointer is on is still the thing a stepper has to answer.
+  //
+  // This rule outranks the base hover it undoes — 0,6,0 against 0,5,0 — which
+  // is the same specificity argument the block header makes, and it has to,
+  // since `box-shadow none` written at a lower rank would emit and never apply.
+  @media (pointer: fine)
+    &:hover:not(:disabled)
+    &:hover:not([disabled])
+      box-shadow none
+
   &:not(:first-child)
     border-top-left-radius 0
     border-bottom-left-radius 0

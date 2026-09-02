@@ -5,3 +5,22 @@
 .button-group
   display inline-flex
   align-items center
+  // The radius the segments already draw. The end segments round their outer
+  // corners and the inner ones are squared, so the group's own border box was
+  // the only square thing in the control -- and a hard offset shadow follows the
+  // border box exactly, so an unrounded group would have cast square corners
+  // behind rounded ones.
+  border-radius $button_border_radius
+  transition box-shadow 120ms ease
+
+// ONE LIFT FOR THE WHOLE CONTROL. The segments' individual shadows are undone
+// in button.styl, beside the base `hover_lift()` they have to outrank; this is
+// the other half and it is written here because `.button-group` alone competes
+// with nothing.
+//
+// Only the shadow, not `hover_lift()` entire: the mixin's `$hover_background`
+// would paint a ground behind children that already tile the box opaquely, and
+// would show only in the 1px seams between them.
+@media (pointer: fine)
+  .button-group:hover
+    box-shadow $box_shadow

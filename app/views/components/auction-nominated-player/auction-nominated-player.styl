@@ -28,14 +28,30 @@
   flex 1
   display flex
   min-width 0
+  // Each detail clips its OWN ink. The group above having `overflow hidden` is
+  // not enough and the distinction is easy to get wrong: that one stops the
+  // group painting outside itself, while this stops each item painting over the
+  // item beside it. At 900px the four labels want about 170px inside a 132px
+  // group -- wrapped, which is what they do at that width -- and without this
+  // the shortfall came out as MARKET printed through LIVE VALUE rather than as
+  // either one being cut off.
   .selected__player-header-item
     min-width 0
     flex 1 1 0
+    overflow hidden
 
+// `overflow hidden` as well as `min-width 0`, the same pairing argued for at
+// the top of this file and for the same reason: `min-width 0` lets the BOX
+// shrink while the text inside keeps painting at full width over whatever
+// follows. This box had only the first half, and a nowrap label was all it took
+// to expose it -- at a 900px viewport the labels printed through each other and
+// through the headshot ("ARKETVA...", "$0$0") while every box still tiled
+// perfectly, so a box-overlap check read clean.
 .nominated__player-details
   flex 1
   display flex
   min-width 0
+  overflow hidden
   padding-top 8px
   font-size 12px
   label
@@ -46,10 +62,34 @@
     display block
     padding-bottom 6px
 
-.nominated__player-detail
-  flex 0 0 auto
-  + .nominated__player-detail
-    padding-left 16px
+// `Live value` is the only two-word label in this group, and wrapping it puts
+// its amount a line below MARKET, BYE and AGE -- the four sit on one baseline or
+// the group reads as broken. So it does not wrap, but only from 1024px up.
+//
+// THE FLOOR IS NOT CAUTION, IT IS A ZONE THAT IS ALREADY BROKEN. Between the
+// 799px breakpoint that stacks the bar and roughly 1160px where the bar gains
+// its cap, the four labels want about 170px inside a 132px group and the
+// shortfall comes out as overlapping ink -- that is true of the old one-word
+// `Auction` too, so it is a defect this label inherits rather than causes.
+// Holding nowrap above 1024 keeps the squeeze zone exactly as it was instead of
+// making it worse, and measured at 1024, 1160, 1280 and 1440 the group needs no
+// more room than it already has: `.auction__bar-body` scrollWidth equals its
+// clientWidth at every one, so nothing is pushed past the viewport.
+@media (min-width 1024px)
+  .nominated__player-details label
+    white-space nowrap
+
+// THE STATIC PRICE RECEDES AND THE LIVE ONE DOES NOT. The pair reads as one
+// number printed twice otherwise -- same size, same weight, same ink, two
+// one-word labels. Making `Market` the quiet one is a subtractive distinction:
+// it needs no second accent colour in a bar that already spends red on the
+// election amount a hundred pixels away, and it puts the emphasis on the number
+// that is actually a live claim about what the player is worth right now.
+.nominated__detail-market
+  color rgba(0, 0, 0, 0.55)
+
+.nominated__detail-live
+  font-weight 600
 
 @media (max-width 799px)
   .auction__nominated-player .player__name-headshot
