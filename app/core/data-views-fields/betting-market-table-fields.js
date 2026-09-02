@@ -135,8 +135,28 @@ const create_historical_game_prop_column_params = () => ({
 // the season line simply repeats down the weeks.
 const GAME_GRAIN_ROW_AXES = ['year', 'week']
 
+// The line axis splits a row across the RUNGS of a ladder market, and only a
+// ladder market has any: a standard market posts one selection per player-game,
+// so there is nothing to spread the row along and the server refuses the
+// request outright. Which axes a column can offer therefore depends on the
+// instance's market_type, not on its column id, so this is a function of the
+// params — react-table resolves it per column instance.
+//
+// Same reason selection_type narrows its values off market_type above: do not
+// offer a combination the database cannot answer. Here the stakes are higher,
+// because a refused request renders as one generic banner with the server's
+// message dropped, so a user who picks an impossible split sees no cause.
+//
+// Player game props only. A team market is not in the axis domain at all — the
+// server's source resolution filters on is_player_game_prop — so a team column
+// contributes no rungs whatever market_type it names.
+const game_prop_row_axes = (params) =>
+  bookmaker_constants.ladder_market_types.has(get_market_type_value(params))
+    ? [...GAME_GRAIN_ROW_AXES, 'line']
+    : GAME_GRAIN_ROW_AXES
+
 const create_field =
-  (column_groups, column_params) =>
+  (column_groups, column_params, row_axes = GAME_GRAIN_ROW_AXES) =>
   ({ column_title, header_label, player_value_path }) =>
     from_betting_market({
       column_title,
@@ -144,17 +164,19 @@ const create_field =
       player_value_path,
       column_groups,
       column_params,
-      row_axes: GAME_GRAIN_ROW_AXES
+      row_axes
     })
 
 const create_game_prop_field = create_field(
   [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
-  create_game_prop_column_params()
+  create_game_prop_column_params(),
+  game_prop_row_axes
 )
 
 const create_historical_prop_field = create_field(
   [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
-  create_historical_game_prop_column_params()
+  create_historical_game_prop_column_params(),
+  game_prop_row_axes
 )
 
 const create_team_game_prop_field = create_field(

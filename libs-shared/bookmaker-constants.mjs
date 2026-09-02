@@ -228,6 +228,28 @@ export const player_first_half_alt_prop_types = {
   GAME_FIRST_HALF_ALT_RECEIVING_YARDS: 'GAME_FIRST_HALF_ALT_RECEIVING_YARDS'
 }
 
+// Market types that post a LADDER: many selections per player-game, one at each
+// of several lines. A standard market posts exactly one selection per
+// player-game and so defines no rungs.
+//
+// Two callers turn on this distinction and must not answer it differently. The
+// server decides which markets contribute rungs to the line row axis; the
+// client decides whether to offer that axis at all. An axis offered where the
+// server contributes no rungs is a request the server refuses, and a refusal
+// renders as one generic banner with the message dropped -- so the two answers
+// disagreeing is invisible until a user hits it. Defined once here, in the
+// isomorphic layer both can import.
+//
+// Derived from the constant groups rather than from a `market_type like
+// 'GAME_ALT_%'` string match. The groups are the existing answer to this exact
+// question, they cover the whole Market dropdown, and they do not silently miss
+// a future ladder that is not named ALT.
+export const ladder_market_types = new Set([
+  ...Object.values(player_quarter_alt_prop_types),
+  ...Object.values(player_game_alt_prop_types),
+  ...Object.values(player_first_half_alt_prop_types)
+])
+
 export const player_game_prop_types = {
   GAME_PASSING_YARDS: 'GAME_PASSING_YARDS',
   GAME_RECEIVING_YARDS: 'GAME_RECEIVING_YARDS',

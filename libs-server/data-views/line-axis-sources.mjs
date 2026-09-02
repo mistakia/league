@@ -17,19 +17,6 @@
 
 import { bookmaker_constants } from '#libs-shared'
 
-// WHICH MARKETS POST A LADDER, from the constant groups rather than from a
-// `market_type like 'GAME_ALT_%'` string match. The groups are the existing
-// answer to this exact question -- fanduel-formatters.mjs already derives its
-// alt market list from player_game_alt_prop_types -- and they cover the whole
-// dropdown: measured against the 97 market types the Market control offers,
-// they select the same 42 a /ALT/ match would, so the string match buys nothing
-// and silently misses any future ladder that is not named ALT.
-const ladder_market_types = new Set([
-  ...Object.values(bookmaker_constants.player_game_alt_prop_types),
-  ...Object.values(bookmaker_constants.player_quarter_alt_prop_types),
-  ...Object.values(bookmaker_constants.player_first_half_alt_prop_types)
-])
-
 /**
  * Does this market post many selections per player-game?
  *
@@ -39,11 +26,14 @@ const ladder_market_types = new Set([
  * 1.0 for GAME_PASSING_YARDS across 2024 -- so it defines no rungs and must not
  * be correlated on one.
  *
+ * The set lives in bookmaker-constants because the client asks the same
+ * question to decide whether to OFFER the axis; see the comment there.
+ *
  * @param {string} market_type
  * @returns {boolean}
  */
 export const is_ladder_market_type = (market_type) =>
-  ladder_market_types.has(market_type)
+  bookmaker_constants.ladder_market_types.has(market_type)
 
 /**
  * Is the line row axis active for this request?
