@@ -153,6 +153,10 @@ That is not hypothetical. `keeptradecut-as-of-month-day-alias-separation.json` p
 
 So when a param's whole purpose is to make two columns differ, the coverage has to be a `result_equivalence` fixture asserting they resolve DIFFERENT seeded observations — `keeptradecut-as-of-month-day-two-days-diverge-result-equivalence.json` is the worked example. Pair it with the alias fixture rather than choosing between them: one catches a collapse, the other catches a collapse-in-value.
 
+**A REFUSAL cannot be a fixture at all.** Neither runner has any notion of an expected error, so a request the emitter is supposed to reject is simply a red test — there is no `expected_error` key to reach for and nothing in the harness reports the gap. Validation rules (a row-grain mismatch, an axis requiring another axis, two columns that may not share a view) are therefore only expressible as a spec.
+
+Write that spec against `get_data_view_results_query`, not against the validator function. Calling the rule directly proves it computes the right answer and stays green when nothing calls it — and a validator reached from exactly one line of `get-data-view-results.mjs` is one deletion away from being reached from none. Red-prove it by stubbing that call site out, which is the failure the spec exists to catch and the one a direct-call test cannot see.
+
 ## Result equivalence: when a query-match test is not enough
 
 A query-match test pins the SQL TEXT and never executes it, so it cannot see semantics that valid SQL gets wrong — a boundary resolving the wrong observation, a filter that matches nothing. For those, add a `result_equivalence` block, which seeds rows in a rolled-back transaction and compares executed output against an oracle:
