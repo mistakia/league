@@ -61,8 +61,31 @@ export const real_auction_timers = {
   clear_timeout: (handle) => clearTimeout(handle)
 }
 
+// THE SEAM FOR THE CLAIM ANNOUNCEMENT, and it exists for the same reason the
+// timers one does: without it there is no way to assert that this socket SENDS.
+//
+// `sendNotifications` refuses outside `NODE_ENV=production`, so under the suite
+// it silently does nothing -- and flipping the suite to production would
+// disable the response validator in `api/swagger/response-validation.mjs`,
+// which is a guard that has caught real defects. That leaves the delivery half
+// of every auction announcement untestable, and this subsystem has now shipped
+// a MISSING announcement twice: no Discord message on any election-mode
+// settlement, and a convening block that announced nothing at all. Both times
+// the builder was correct and nothing called it, which is precisely the half a
+// content assertion cannot see.
+//
+// Injected the same way `timers` is, defaulting to the real sender, so
+// production is unchanged and a spec can ask "were you called, and with what".
+export const real_auction_announcer = async ({ league, message }) =>
+  sendNotifications({ league, message, notifyLeague: true })
+
 export default class Auction {
-  constructor({ wss, lid, timers = real_auction_timers }) {
+  constructor({
+    wss,
+    lid,
+    timers = real_auction_timers,
+    announce = real_auction_announcer
+  }) {
     this._wss = wss
     this._lid = lid
     this._league = null
@@ -118,6 +141,7 @@ export default class Auction {
     // durations and no expiry.
     this._timer_expires_at = null
     this._timers = timers
+    this._announce = announce
 
     this.logger = debug(`auction:league:${lid}`)
   }
@@ -438,6 +462,31 @@ export default class Auction {
       // on this player. `build_auction_claims` implements that by binding the
       // team's claim to what it actually bid.
       if (this._election_mode) {
+        // A BID OUTSIDE A LIVE BLOCK IS ANNOUNCED; one inside a block is not.
+        // Operator ruling, 2026-09-02. Outside a block a bid is a rare,
+        // deliberate act against a sealed field and the league wants to hear
+        // it; inside a block bidding is rapid open outcry and announcing every
+        // one would bury the channel. `_election_mode` is exactly "not inside a
+        // live block", so the gate is the mode and nothing else.
+        //
+        // Announced BEFORE settling, and only while teams are still
+        // outstanding. The message names whom the auction is waiting on, so
+        // sending it after a bid that COMPLETES the set would announce a wait
+        // that is already over -- and the settlement announcement covers that
+        // case properly. `_get_outstanding_election_tids` re-reads the
+        // nomination, so the bid just recorded is already accounted for and the
+        // bidder is not listed as still owing an answer.
+        const outstanding = await this._get_outstanding_election_tids()
+        if (outstanding.length) {
+          await this._send_claim_notification({
+            player_id: message.pid,
+            bid_amount: message.value,
+            eligible_team_ids: outstanding,
+            claiming_team_id: tid,
+            is_nomination: false
+          })
+        }
+
         await this._settle_if_complete()
         return true
       }
@@ -540,11 +589,12 @@ export default class Auction {
     this._transactions.unshift(bid)
 
     if (this._election_mode) {
-      await this._send_nomination_notification({
+      await this._send_claim_notification({
         player_id: pid,
         bid_amount: value,
         eligible_team_ids: await this._get_outstanding_election_tids(),
-        nominating_team_id
+        claiming_team_id: nominating_team_id,
+        is_nomination: true
       })
       // An uncontested nomination can be complete the instant it opens: if
       // every other team is ineligible or has already elected -- days ago,
@@ -1247,27 +1297,46 @@ export default class Auction {
     return eligible_team_ids
   }
 
-  async _send_nomination_notification({
+  /**
+   * Announce a CLAIM on the open player -- a nomination or a bid.
+   *
+   * One method for both because they are the same announcement: a team has
+   * staked a claim at an amount, and these other teams still have to act before
+   * the player settles. `is_nomination` picks the verb and nothing else.
+   *
+   * OUTSIDE A LIVE BLOCK ONLY. Both call sites are gated on `_election_mode`,
+   * which is the operator's rule of 2026-09-02: a bid outside a block is a
+   * rare, deliberate act the league wants to hear about, while inside a block
+   * bidding is rapid open outcry and announcing each one would bury the channel.
+   *
+   * @param {object} params
+   * @param {string} params.player_id
+   * @param {number} params.bid_amount
+   * @param {number[]} params.eligible_team_ids - whom the auction still waits on
+   * @param {number} params.claiming_team_id - who nominated or bid
+   * @param {boolean} params.is_nomination
+   */
+  async _send_claim_notification({
     player_id,
     bid_amount,
     eligible_team_ids,
-    nominating_team_id
+    claiming_team_id,
+    is_nomination
   }) {
     try {
-      const nomination_message = await format_nomination_message({
-        team_id: nominating_team_id,
+      const claim_message = await format_nomination_message({
+        team_id: claiming_team_id,
         player_id,
         bid_amount,
         eligible_teams: eligible_team_ids,
-        is_nomination: true
+        is_nomination
       })
 
-      if (nomination_message) {
-        this.logger(nomination_message)
-        await sendNotifications({
+      if (claim_message) {
+        this.logger(claim_message)
+        await this._announce({
           league: this._league,
-          message: nomination_message,
-          notifyLeague: true
+          message: claim_message
         })
       }
       return true
