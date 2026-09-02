@@ -47,6 +47,14 @@ Every stat or rate-type aggregation CTE MUST be registered via `query.withMateri
 
 Split CTEs (`base_years`, `player_years`, `player_years_weeks`) remain inlineable via `.with(...)` because they are small and the planner handles them well.
 
+### Derive a Row Set From a TABLE, Not From a Sibling CTE
+
+When a builder needs a row set that feeds a JOIN — a spine's subject list, a key set, anything the planner will size a join from — read it from the real (partitioned) table rather than selecting it out of a CTE you already declared, even when the CTE holds exactly those rows.
+
+Postgres keeps no statistics for a CTE, so it sizes a CTE scan from the plan estimate of whatever built it, and a join under correlated predicates estimates badly. `player_week_teams` derived its subject list from the appearances CTE, whose `player_gamelogs`-to-`nfl_games` join estimated **6,721 rows against 104,895 actual** — a 15x miss across three seasons. Everything downstream inherited it: the spine looked tiny, and the spine-to-appearances join was planned as a merge on `(year, week)` with the `pid` equality demoted to a **Join Filter**, comparing every player-week in a week against every other. The query ran past the 30s statement timeout; reading the subject list from `player_gamelogs` gave honest statistics, restored the three-column merge, and returned the same query in **831ms**.
+
+The tell is a plan whose join condition carries fewer columns than the SQL wrote, with the rest appearing as `Join Filter`. Two consequences for authors: a redundant filter on the real table is worth it for the statistics alone, and a CTE that is cheap to compute is not therefore cheap to JOIN.
+
 ### Forwarding data_view_options
 
 Every `with:` handler (whether the direct builders in this directory or the inline `with:` functions on column definitions) MUST accept `data_view_options` and forward it into the `effective_years` computation. The dispatcher in `libs-server/get-data-view-results.mjs` already passes `data_view_options` to `with_func`; omitting it from the handler signature silently disables year pushdown for columns whose year signal comes only from row_axes.
