@@ -59,7 +59,7 @@ The final block is the opposite: computed on demand, no row, because every term 
 
 `verifyUserTeam` passes a league's commissioner for every team in it. That is right for the roster, lineup and trade routes it was written for and wrong for the standing-elections read, because in this league the commissioner is a competing manager and a maximum is a sealed bid — so `GET /auction-elections` additionally requires the caller to own the team, and is deliberately narrower than the helper it calls.
 
-The write verbs still take the commissioner branch. A commissioner placing a rival's binding maximum is a live hole, and closing it is a change to commissioner powers the whole platform shares rather than a bug fix. It needs an operator decision.
+The write verbs deliberately still take the commissioner branch. **Operator ruling, 2026-09-02: a commissioner writing another team's election is allowable, and admin privileges are appropriate there.** The asymmetry is the point and is not an oversight to be tidied up later — reading a sealed maximum reveals it, and writing one does not. Do not narrow the write verbs to match the read.
 
 ## Driving the real thing
 
