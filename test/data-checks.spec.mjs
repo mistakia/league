@@ -1183,8 +1183,8 @@ describe('data check registry', function () {
     })
   })
 
-  it('holds twenty-nine checks with unique ids', () => {
-    expect(registry).to.have.lengthOf(29)
+  it('holds thirty checks with unique ids', () => {
+    expect(registry).to.have.lengthOf(30)
     expect(checks_by_id.size).to.equal(registry.length)
   })
 
@@ -1254,17 +1254,28 @@ describe('data check registry', function () {
     // 2026-08-14 and ships as a regression detector over a clean population, so
     // a baselined entry there would suppress nothing and report stale forever.
     //
-    // adp-source-season-coverage is the one check that genuinely holds it. Its
-    // 2025 findings are unrecoverable by construction -- the ADP vendors serve
-    // the current season only -- so no repair command exists to clear them and
-    // adjudicating them would assert the missing data is correct.
+    // Two checks genuinely hold it, and both for the same reason: the missing
+    // data cannot be fetched again, so no repair command exists to clear the
+    // finding and adjudicating it would assert the absence is correct.
+    //
+    // adp-source-season-coverage -- the ADP vendors serve the current season
+    // only, so its 2025 findings are unrecoverable by construction.
+    //
+    // prop-market-selection-coverage -- no book serves closing prices for a
+    // settled game, and the lost selections are absent from
+    // prop_market_selections_history as well as from the index, so they cannot
+    // be replayed from anything we hold. Its pre-2026 book-seasons are parked;
+    // the live 2026 ones are deliberately NOT, so they raise as findings.
     const baselined = parked_entries.filter(
       (entry) => entry.disposition === 'baselined'
     )
 
-    expect([
-      ...new Set(baselined.map((entry) => entry.check_id))
-    ]).to.deep.equal(['adp-source-season-coverage'])
+    expect(
+      [...new Set(baselined.map((entry) => entry.check_id))].sort()
+    ).to.deep.equal([
+      'adp-source-season-coverage',
+      'prop-market-selection-coverage'
+    ])
 
     for (const entry of baselined) {
       expect(entry.owner, entry.check_id).to.be.a('string')

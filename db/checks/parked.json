@@ -8,7 +8,7 @@
     },
     "disposition": "adjudicated",
     "reason": "One reception PFR credits that our feed does not, in a week otherwise matching exactly. Verified against the game book rather than inferred from the aggregate.",
-    "evidence": "635 ours against 636 PFR, a ratio of 0.9984 \u2014 the tightest disagreement in the whole 2022 season.",
+    "evidence": "635 ours against 636 PFR, a ratio of 0.9984 — the tightest disagreement in the whole 2022 season.",
     "validated_at": "2026-08-13"
   },
   {
@@ -19,7 +19,7 @@
       "stat": "targets"
     },
     "disposition": "adjudicated",
-    "reason": "The target paired with the week 8 reception disagreement above \u2014 the same play, counted once on each side of the ledger.",
+    "reason": "The target paired with the week 8 reception disagreement above — the same play, counted once on each side of the ledger.",
     "evidence": "913 ours against 914 PFR.",
     "validated_at": "2026-08-13"
   },
@@ -55,7 +55,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Rich and Ron Saul are twin brothers, both of whom played in the NFL. Two people, so the rows must stay apart.",
-    "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows \u2014 the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
+    "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows — the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
     "validated_at": "2026-08-15"
   },
   {
@@ -66,7 +66,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Raleigh and Reggie McKenzie are identical twin brothers, both of whom played in the NFL. Two people.",
-    "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows \u2014 an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
+    "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows — an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
     "validated_at": "2026-08-15"
   },
   {
@@ -77,7 +77,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Harold and Herbert Shoener are brothers, both of whom played in the NFL. Two people.",
-    "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows \u2014 an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
+    "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows — an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
     "validated_at": "2026-08-15"
   },
   {
@@ -88,7 +88,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Colton Taylor and Dylan Taylor are two different Texas A&M players in the same class. NO veto can reach this pair, because both rows carry the 0000-00-00 sentinel, so there is no birth date to disagree on and no identifier held on both sides.",
-    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule \u2014 an attach would have merged them silently. A prior aside here claimed Daijun/Sevarian Edwards (Georgia 2024) was also a known two-person pair; that was WRONG \u2014 Sevarian Daijun Edwards is one person and the two rows were merged on 2026-08-17 in db/adhoc/2026-08-17-merge-nickname-legal-name-player-rows.sql. The aside is corrected here so it does not mislead a future adjudicator.",
+    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. A prior aside here claimed Daijun/Sevarian Edwards (Georgia 2024) was also a known two-person pair; that was WRONG — Sevarian Daijun Edwards is one person and the two rows were merged on 2026-08-17 in db/adhoc/2026-08-17-merge-nickname-legal-name-player-rows.sql. The aside is corrected here so it does not mislead a future adjudicator.",
     "validated_at": "2026-08-15"
   },
   {
@@ -138,7 +138,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Christopher Jones, WR, born 1971-08-07, Miami (Fla.), entered 1995, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
-    "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire \u2014 and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
+    "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire — and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
     "validated_at": "2026-08-16"
   },
   {
@@ -177,7 +177,7 @@
       "pid": "DAVI-JONE-008821"
     },
     "disposition": "adjudicated",
-    "reason": "David Jones, DE, born 1938-12-09, South Carolina State, entered 1961 \u2014 this is Deacon Jones \u2014 and David Jones, T, born 1988-05-08, entered 2011. Two people.",
+    "reason": "David Jones, DE, born 1938-12-09, South Carolina State, entered 1961 — this is Deacon Jones — and David Jones, T, born 1988-05-08, entered 2011. Two people.",
     "evidence": "50 years between the birth dates. The twin holds no college, so the college veto could not fire.",
     "validated_at": "2026-08-16"
   },
@@ -258,7 +258,7 @@
     },
     "disposition": "adjudicated",
     "reason": "William Glass, DE, born 1935-08-16, entered 1957, and William Glass, G, born 1957-12-21, drafted 1980 pick 86. Two people, both Baylor.",
-    "evidence": "22 years between the birth dates \u2014 the younger row was born the year the elder entered the league.",
+    "evidence": "22 years between the birth dates — the younger row was born the year the elder entered the league.",
     "validated_at": "2026-08-16"
   },
   {
@@ -269,7 +269,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Josh Johnson and Tyler Johnson are two different Louisiana-Monroe players in the same class. Two people.",
-    "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman \u2014 six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
+    "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman — six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
     "validated_at": "2026-08-16"
   },
   {
@@ -361,5 +361,173 @@
     "reason": "NFL Pro carries this game's plays but not its participation data, so no snap rows are derivable. Distinct from the 2021 case: there the payload is empty, here it is present and complete except for the one array snaps are built from.",
     "evidence": "2016083151 (WAS@TB, FINAL 2016-09-01) returns 176 plays, every one carrying an nflIds field, and every one of those arrays EMPTY -- total_nflIds=0. Same-week siblings measured the same way return 3,123 (2016090151) and 3,814 (2016090152), matching their stored snap counts exactly, so the measurement is sound and the gap is specific to this game rather than to the 2016 era. A --final force re-import re-saved all 176 plays and logged '0 unique snaps from 0 total nflIds'.",
     "validated_at": "2026-08-26"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "BETMGM",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.0110 over 15428 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "BETRIVERS",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.5678 over 82571 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "CAESARS",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.6524 over 20565 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "DRAFTKINGS",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.1395 over 226396 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "FANDUEL",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.5951 over 43415 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "PRIZEPICKS",
+      "season_year": 2023
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.8848 over 22779 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "BETRIVERS",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.9200 over 100 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "CAESARS",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.6102 over 332877 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "DRAFTKINGS",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.8852 over 266225 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "FANATICS",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.0252 over 12013 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "FANDUEL",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.7944 over 65341 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "PRIZEPICKS",
+      "season_year": 2024
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.4243 over 90830 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "FANDUEL",
+      "season_year": 2025
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "Scattered loss rather than a silent book: 4,572 markets spread across market types and games. The current importer gates its market push on selections.length > 0, so these may predate that gate. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.9554 over 102510 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "prop-market-selection-coverage",
+    "grain": {
+      "source_id": "PRIZEPICKS",
+      "season_year": 2025
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md",
+    "reason": "PrizePicks wrote ZERO selection rows between October 2025 and August 2026 while its markets kept landing daily, then resumed in September 2026 -- the whole 2025 NFL season for that book. Selections that never reached the write path, in a season no re-scrape can recover: no book serves closing prices for a settled game, and the lost rows are absent from prop_market_selections_history as well as from the index, so the reaper did not take them. Baselined rather than adjudicated because the data is genuinely missing rather than correct.",
+    "evidence": "Capture rate 0.0813 over 248492 declared markets, measured 2026-09-02.",
+    "validated_at": "2026-09-02"
   }
 ]

@@ -69,6 +69,7 @@ import { scoring_format_gamelog_completeness_rows } from '#libs-server/scoring-f
 import { percentile_field_vocabulary } from '#scripts/generate-nfl-team-seasonlogs.mjs'
 import { gamelog_week_team_attribution_rows } from '#libs-server/gamelog-week-team-attribution.mjs'
 import { find_duplicate_person_row_pairs } from '#libs-server/duplicate-person-row-pairs.mjs'
+import { prop_market_selection_coverage_rows } from '#libs-server/prop-market-selection-coverage.mjs'
 import {
   null_pid_counts_sql,
   null_pid_rows_sql,
@@ -1949,6 +1950,34 @@ const registry = [
     min_gradeable_units: 90,
     repair_command:
       'Establish which half of the oracle the value fails before touching data. If it is a stranded rename, the target is DERIVED rather than guessed: grep db/adhoc/*.sql for `RENAME COLUMN <old> TO`, disambiguate a multi-candidate old name against the writer vocabulary in scripts/generate-nfl-team-seasonlogs.mjs, and rewrite the values in the shape of db/adhoc/2026-08-19-conform-percentiles-field-values.sql — a value rewrite, not a recompute, since renames moved names and never numbers. If no rename exists anywhere and no writer emits the key, the rows are residue of a dropped column and the repair is a delete, in the shape of db/adhoc/2026-09-02-delete-orphan-snp-percentile-rows.sql; confirm every row is empty of measurement first. If a CONSUMER pins the old literal, as app/core/player-fields.js did for cpoe until 2026-09-02, the data migration alone BREAKS a read that works today: it ships with the repoint and a frontend deploy as one unit, and that unit holds the apply slot through the deploy rather than releasing at commit. Either repair needs the serialized production-DDL apply slot.'
+  },
+
+  {
+    check_id: 'prop-market-selection-coverage',
+    invariant:
+      "Every prop market whose header declares runners has at least one stored selection. `selection_count` on prop_markets_index is the BOOK'S own declaration of how many selections it was offering, carried on the header we did store, so a header declaring runners against zero rows in prop_market_selections_index is a capture failure rather than a market the book never posted. Nothing else can tell those two apart, and every other oracle here reads healthy: the importers report per-run success for runs that HAPPENED, the market header lands whether or not its selections do, and every consumer inner-joins the selections — so a market with none contributes nothing and is indistinguishable from a market that does not exist. prop_market_selections_history is not a fallback either; the lost rows are absent from it too, because they never reached the write path at all. Found 2026-09-02 through a line-axis data view rendering 15 of 18 weeks for one player, where two of the three missing weeks were games FanDuel had posted an eleven-rung ladder for.",
+    grain: ['source_id', 'season_year'],
+    rows: prop_market_selection_coverage_rows,
+    // A book-season too thin to judge is not evidence of health. 100 declared
+    // markets is roughly three games' worth of one book's player props, well
+    // under any real season and far above the handful a newly-added or
+    // just-retired book leaves behind.
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      row.denominator >= 100,
+    min_rate: 0.98,
+    calibration:
+      "Calibrated on the GAP between a book-season that captured its selections and one that did not, measured 2026-09-02 across all 24 (source_id, season_year) pairs holding 100+ declared markets. CLEAN readings cluster at the top and are not perfect: CAESARS 2025 and DRAFTKINGS 2026 at 1.0000, PINNACLE 2026 0.9992, FANDUEL 2026 0.9933, PINNACLE 2025 0.9914, DRAFTKINGS 2025 0.9897 — so an exact 1.0 floor would fire on every healthy book and the threshold has to sit below 0.9897. DEFECTIVE readings sit far under it: PRIZEPICKS 2025 0.0813 (that book wrote ZERO selection rows between October 2025 and August 2026 while its markets kept landing), BETMGM 2023 0.0110, FANATICS 2024 0.0252, DRAFTKINGS 2023 0.1395, PRIZEPICKS 2024 0.4243, BETRIVERS 2023 0.5678, FANDUEL 2023 0.5951, CAESARS 2024 0.6102, FANDUEL 2024 0.7944, BETMGM 2026 0.8481. 0.98 sits in the empty band between 0.9897 and the highest defective reading, PRIZEPICKS 2026 at 0.9579. The two borderline pairs are deliberately treated as findings rather than tolerated: FANDUEL 2025 at 0.9554 is 4,572 markets and PRIZEPICKS 2026 at 0.9579 is 462, both far too large to be noise. Eighteen of the 24 pairs violate at this threshold; the historical ones are parked as BASELINED debt rather than adjudicated, because the data is genuinely missing rather than correct, and it is UNRECOVERABLE — 13,238 of FanDuel 2024's 13,436 affected markets appear in neither the selections index nor its history table, and no book serves closing prices for a settled game. The threshold is a floor on capture going forward, not a claim that the corpus is clean.",
+    // 24 book-seasons today and the count only grows with time. 12 sits under
+    // that and far above the reading it exists to catch, which is the group-by
+    // collapsing and reporting a handful of books.
+    min_gradeable_units: 12,
+    // The row count is one per book-season and rises every year regardless of
+    // how little the scan read, so a floor on it alone would be met by a query
+    // that reached almost nothing. 5,000 sits an order of magnitude under the
+    // smallest healthy book-season population and above any collapsed scan.
+    min_denominator: 5000,
+    repair_command:
+      "Decide first whether the book went SILENT or is losing markets scattered — the two have different owners. Silent looks like a rate near zero across a whole season: run `select date_trunc('month', observed_at)::date, count(*) from prop_market_selections_index where source_id = '<BOOK>' group by 1 order by 1` and look for months missing entirely while prop_markets_index has rows for them, which is how PRIZEPICKS lost October 2025 through August 2026. That is an importer outage and the fix is in that book's importer (scripts/import-<book>-odds.mjs, or private/scripts/ for FanDuel). Scattered loss looks like a rate in the 0.6-0.95 band spread across market types and games, and points at the per-market formatting path dropping selections while still emitting the header — check whether the importer gates its market push on `selections.length > 0` as the FanDuel path does. Do NOT plan a backfill without checking recoverability first: closing prices for a settled game are not served by any book, and prop_market_selections_history holds almost none of the lost rows, so a past season is usually permanent and belongs parked as baselined debt."
   }
 ]
 
