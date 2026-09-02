@@ -318,6 +318,36 @@ export const current_nfl_week_identifier = () => {
 }
 
 /**
+ * Does this (year, seas_type, week) name the week the NFL is actually playing?
+ *
+ * All THREE members are load-bearing. Comparing year and week alone makes a PRE
+ * week N game indistinguishable from a REG week N game, because `nfl_seas_week`
+ * is per-type and restarts at 1 for each of PRE, REG and POST. Every consumer
+ * of this predicate gates a current-week table or cache on it, so the collision
+ * routes a stale preseason game into live-week state during the regular season.
+ * The same omission has now been written by hand three times, in
+ * `api/routes/plays.mjs`, `private/libs-server/ngs.mjs` and
+ * `private/scripts/import-plays-nfl-pro.mjs`; it lives here so there is nothing
+ * left to re-derive.
+ *
+ * Compares the LIVE triple off `current_season`, NOT `current_nfl_week_params()`.
+ * That helper is forward-looking and deliberately lies about the present: it
+ * reports the REG track while the NFL is in PRE, and clamps the offseason to REG
+ * week 1. Both are right for "what week should I fetch next" and wrong for "is
+ * this the week in play", which is the only question asked here.
+ *
+ * @param {{ year: number, seas_type: string, week: number }} params
+ * @returns {boolean}
+ */
+export const is_current_nfl_week = ({ year, seas_type, week }) => {
+  return (
+    year === current_season.year &&
+    seas_type === current_season.nfl_seas_type &&
+    week === current_season.nfl_seas_week
+  )
+}
+
+/**
  * The retrospective half of the pair, defined as ONE STEP BACK from
  * `current_nfl_week_params()` -- the most recent week that has finished.
  *

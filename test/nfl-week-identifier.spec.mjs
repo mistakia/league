@@ -8,8 +8,10 @@ import {
   validate_nfl_week_identifier,
   get_nfl_week_identifiers_for_year,
   apply_year_offset_to_nfl_weeks,
-  decompose_nfl_weeks
+  decompose_nfl_weeks,
+  is_current_nfl_week
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { current_season } from '#constants'
 
 chai.should()
 const expect = chai.expect
@@ -282,6 +284,47 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
       })
       expect(result.years).to.deep.equal([2024])
       expect(result.weeks).to.deep.equal([5])
+    })
+  })
+
+  describe('is_current_nfl_week', function () {
+    // Read at CALL time, never captured at module scope. Every member of
+    // current_season is a clock-dependent getter and other spec files in this
+    // suite install fake timers, so a triple frozen when this file loaded is
+    // compared against a different week by the time these run -- green alone,
+    // red under the full suite.
+    const live = () => ({
+      year: current_season.year,
+      seas_type: current_season.nfl_seas_type,
+      week: current_season.nfl_seas_week
+    })
+
+    it('accepts the live year, season type and week', () => {
+      expect(is_current_nfl_week(live())).to.equal(true)
+    })
+
+    // Each rejection below differs from the acceptance above in exactly one
+    // member, so it is that member's control.
+    it('rejects another season type at the same year and week', () => {
+      const current = live()
+      const other_seas_type = current.seas_type === 'PRE' ? 'REG' : 'PRE'
+      expect(
+        is_current_nfl_week({ ...current, seas_type: other_seas_type })
+      ).to.equal(false)
+    })
+
+    it('rejects another week', () => {
+      const current = live()
+      expect(
+        is_current_nfl_week({ ...current, week: current.week + 1 })
+      ).to.equal(false)
+    })
+
+    it('rejects another year', () => {
+      const current = live()
+      expect(
+        is_current_nfl_week({ ...current, year: current.year - 1 })
+      ).to.equal(false)
     })
   })
 })

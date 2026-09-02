@@ -11,6 +11,7 @@ import get_plays_view_results, {
   get_plays_view_hash
 } from '#libs-server/plays-view/get-plays-view-results.mjs'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
+import { is_current_nfl_week } from '#libs-shared/nfl-week-identifier.mjs'
 import { current_season } from '#constants'
 
 const router = express.Router()
@@ -71,16 +72,16 @@ function normalize_array_query_param(param_value) {
 }
 
 /**
- * Determines if the given week/year represents the current week
+ * Determines if the given week/year represents the current week.
+ *
+ * The two route-local rules stay here and the three-member comparison is
+ * delegated: an absent week means the caller asked for no particular one and
+ * gets the current week, and a week supplied without a seas_type is REG, which
+ * is what every pre-seas_type client sent.
  */
 function is_current_week({ week, year, seas_type }) {
   if (!week) return true
-  const effective_seas_type = seas_type || 'REG'
-  return (
-    week === current_season.nfl_seas_week &&
-    year === current_season.year &&
-    effective_seas_type === current_season.nfl_seas_type
-  )
+  return is_current_nfl_week({ year, seas_type: seas_type || 'REG', week })
 }
 
 // ============================================================================
