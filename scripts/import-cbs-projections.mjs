@@ -54,8 +54,14 @@ const run = async ({ season = false, dry = false } = {}) => {
   // season-long table -- and unlike the year, the page carries no week marker,
   // so there is nothing to verify a weekly slice against. Running this path
   // does not fail; it writes full-season totals into week-N weekly rows, which
-  // is why it must refuse rather than proceed. The weekly cron line is already
-  // commented out in server/crontab-main/league-imports.cron.
+  // is why it must refuse rather than proceed.
+  //
+  // No such rows were ever written, so there is nothing to repair: the weekly
+  // cron line in server/crontab-main/league-imports.cron has been commented out
+  // since well before CBS's URL semantics went decorative, and the newest CBS
+  // weekly slice in projections_index is 2023 week 4, whose passing yardage
+  // maxima are in the 300s rather than the 4000s a season board would carry.
+  // That commented line was load-bearing safety nobody had identified as such.
   if (!season) {
     throw new Error(
       'cbs projections: CBS publishes no weekly board -- the week segment of the URL is ignored and the page returns season-long totals, so a weekly run would write season numbers as week projections. Use --season.'
