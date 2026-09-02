@@ -118,20 +118,42 @@
   border-radius $button_border_radius
   font-weight 600
 
+// IN FLOW, NOT FLOATED. This was a 100px circle at `position absolute;
+// top -96px`, which put 96 of its 100 pixels OUTSIDE the bar -- and the bar is
+// the last thing on the page, so what sits above it is page content. Measured
+// at 768: it covered 13% of the standing elections row and overlapped the live
+// blocks header; at 600, 17%. The float was never the design, it was a
+// workaround for a bar that had no room -- `.auction__bid-info` declared 105px
+// inside a 120px bar that also owed 46px to the controls, so flex-shrink
+// crushed the player half to 74px and a 100px circle could not fit in it. That
+// declared 105px was a fiction (the contents measure 69px) and removing it in
+// auction-main-bid.styl is what buys the room for this rule to exist.
+//
+// 64px, and the height comes from the text block either way. The name and the
+// details row stack to 69px, so anything up to that is free: measured, the
+// player half is 69px tall with a 64px headshot, with a 56px one, and with no
+// headshot at all. Sized larger it would start driving the bar's height and
+// buy back the original problem.
 @media (max-width 799px)
   .auction__nominated-player .player__name-headshot
     overflow hidden
-    position absolute
+    flex 0 0 auto
+    align-self center
+    margin-left 8px
     background rgba(255,255,255,0.8)
     border 1px solid $borderColor
     border-radius 50%
-    width 100px
-    height 100px
+    width 64px
+    height 64px
     display flex
     align-items flex-end
     justify-content center
-    top -96px
-    left 8px
+
+// THE PICTURE'S OWN SIZE IS NOT SET HERE and cannot be. PlayerHeadshot writes
+// width and height onto the avatar as an inline style, which no rule in this
+// file can outrank -- so the image is sized by NARROW_HEADSHOT_WIDTH in
+// auction-nominated-player.js, and the 88x64 it renders is what fills the 64px
+// window above. Change one and the other has to move with it.
 
 @media (max-width 500px)
   .auction__nominated-player .selected__player-header-item

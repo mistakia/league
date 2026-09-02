@@ -12,15 +12,26 @@ import './auction-nominated-player.styl'
 // `round(width * 70 / 96)` -- so a width is really a height here, and 96 is the
 // only one that lands on the 70px the bid bar is tall. It was 180 and 150,
 // which render 131px and 109px, and a MUI avatar does not clip: both spilled
-// out of the bar and over the player board beneath it. The breakpoint is 799 to
-// match auction-nominated-player.styl, which below that pulls the headshot out
-// of the bar entirely into a 100px circle floated above it -- the one context
-// where a crop larger than the bar is the point.
+// out of the bar and over the player board beneath it.
+//
+// THE SIZE MUST BE SET HERE, NOT IN THE STYLESHEET. PlayerHeadshot passes width
+// and height to the avatar as an INLINE style, which outranks any rule short of
+// `!important` -- so a CSS override of these looks perfectly reasonable, emits,
+// and is silently ignored. Measured that way: the wrapper obeyed the stylesheet
+// at 64px while the image inside stayed 150x109.
+//
+// 88 below the breakpoint, which renders 88x64. The narrow layout used to pull
+// the headshot out of the bar into a 100px circle floated ABOVE it, and 150 was
+// sized for that circle; the float has since been removed (it covered the
+// standing elections and live blocks rows beneath it), so the headshot now sits
+// inside the bar in a 64px round window. 88 is the width whose derived height
+// is exactly that window, so the picture fills it and the crop takes 12px off
+// either side instead of the top of the player's head.
 const BAR_HEADSHOT_WIDTH = 96
-const FLOATED_HEADSHOT_WIDTH = 150
+const NARROW_HEADSHOT_WIDTH = 88
 
 const getHeadshotWidth = () =>
-  window.innerWidth > 799 ? BAR_HEADSHOT_WIDTH : FLOATED_HEADSHOT_WIDTH
+  window.innerWidth > 799 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
 
 export default function AuctionNominatedPlayer({
   player_map,

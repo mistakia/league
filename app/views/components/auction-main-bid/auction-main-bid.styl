@@ -123,9 +123,29 @@
     align-items center
     justify-content center
 
+  // `min-height`, not `height`. Stacked, this box owes its two halves the sum
+  // of what they need, and a FIXED height silently resolves the shortfall by
+  // shrinking whichever half will give -- it does not report it. At 768 the
+  // halves asked for 105 + 46 = 151px of a 120px box and the player half was
+  // crushed from 105 to 74; at 600 the controls wrap to two lines and grow to
+  // 64px, the player half has nothing left to give, and `.auction__bid-actions`
+  // spilled 13.4px out the BOTTOM of the bar onto the team chips below. 120px
+  // is still the right resting height and every width but 600 sits at it; the
+  // floor just lets the one width that needs more take it instead of painting
+  // outside itself.
+  // `height auto` IS LOAD-BEARING and is easy to leave out. The base rule at
+  // the top of this file sets `height 70px`, which the old `height 120px` here
+  // overrode outright. Swapping that for `min-height` alone leaves the 70px
+  // standing: the floor clamps the used value up to 120, so the box measures
+  // 120 and looks correct, but it is still a DEFINITE height and definite
+  // heights do not grow for their content. Measured in that state at 600px --
+  // rect 120, scrollHeight 133, the spill entirely intact behind a number that
+  // read as fixed. `auto` is what makes the min-height a floor rather than the
+  // whole answer.
   .auction__bar-body
     flex-direction column
-    height 120px
+    height auto
+    min-height 120px
     align-items flex-start
 
   .auction__bid-actions
@@ -133,9 +153,26 @@
     justify-content center
     width 100%
 
+  // No `height 105px`, and no `position relative` with it. The height was a
+  // fiction -- this box's contents measure 69px, so the extra 36px existed only
+  // to be shrunk away, and the shrinking is what left no room for the headshot
+  // and forced it out of the bar. Sized to its contents the two halves come to
+  // 69 + 46 = 115px, which fits the 120px above with room to spare. The
+  // `position relative` was an anchor for the floated headshot and nothing else
+  // in here is absolutely positioned, so it went with it.
+  //
+  // `flex 1 0 auto` RATHER THAN INHERITING THE BASE `flex 1`, and deleting the
+  // fixed height is not enough without it. `flex 1` is `flex 1 1 0%`: a basis of
+  // ZERO, which means this box reports no content to the column's height
+  // calculation and is then handed whatever is left over. That reproduces the
+  // exact defect the fixed height had -- at 600px the bar would size itself to
+  // 120px knowing only about the 64px controls and hand this box the remaining
+  // 56px for 69px of content. `auto` makes the basis the content, so the bar's
+  // height accounts for both halves; `0` shrink stops the leftover being taken
+  // back out; `1` grow lets it absorb the 5px of slack at 768 rather than
+  // leaving a dead strip under the controls.
   .auction__bid-info
-    height 105px
-    position relative
+    flex 1 0 auto
 
   .auction__main-timer
     border-radius 8px
