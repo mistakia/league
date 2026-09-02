@@ -307,27 +307,35 @@ describe('data-views team_attribution', () => {
   })
 
   describe('counting columns honor team_attribution', () => {
-    // team-stats-from-plays COUNTING columns (no rate aggregation) route their
-    // team join through the same passive resolver as the rate types, so they
-    // honor team_attribution identically once the param is declared on the
-    // field. 'historical' is the default; an unset param resolves through the
-    // player_year->team_year bridge exactly as before this extension, so saved
-    // views (which carry no team_attribution) are unchanged. 'current'
-    // attributes the team stat to player.current_nfl_team. SQL-shape asserts;
-    // population value checks run at live verification (AJ Brown, 2025: PHI
-    // historical vs NE current).
+    // team-stats-from-plays COUNTING columns (no rate aggregation) honor
+    // team_attribution, and the two modes reach their team by different
+    // mechanisms. 'historical' (the default) sums the stat WEEK BY WEEK over the
+    // team the player was attached to that week, inside the wrap CTE, so the
+    // season cell agrees with the same view split by week; the join the outer
+    // query emits is therefore on pid, and the team equality to assert on lives
+    // in the wrap. 'current' attributes all volume to player.current_nfl_team
+    // and skips the wrap entirely. SQL-shape asserts; population value checks
+    // run at live verification (AJ Brown, 2025: PHI historical vs NE current).
+    //
+    // These assertions anchor on the RELATION names rather than on an alias
+    // shape: every join in a data-view query carries a hashed alias, so a
+    // pattern written against `t[0-9a-f]{32}` is satisfied by any join at all.
+    const WEEK_TEAM_JOIN = '"player_week_teams"."nfl_team_most_recent" = '
     const counting_column = ({ year, team_attribution }) => {
       const params = { year }
       if (team_attribution) params.team_attribution = team_attribution
       return { column_id: 'team_pass_attempts_from_plays', params }
     }
 
-    it('default (no param) joins via the bridge, not current_nfl_team -- existing views unchanged', async () => {
+    it('default (no param) attributes week by week, not to current_nfl_team', async () => {
       const { query } = await get_data_view_results_query(
         view([counting_column({ year: [2024] })])
       )
       const sql = query.toString()
-      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.include(WEEK_TEAM_JOIN)
+      // the season-long majority rule is what the week attribution replaced --
+      // assert it is not the join, not merely that the week join exists
+      expect(sql).to.not.match(/"nfl_team" = "player_year_teams"\."team"/)
       expect(sql).to.not.match(/"player"\."current_nfl_team"/)
     })
 
@@ -338,7 +346,8 @@ describe('data-views team_attribution', () => {
         ])
       )
       const sql = query.toString()
-      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.include(WEEK_TEAM_JOIN)
+      expect(sql).to.not.match(/"nfl_team" = "player_year_teams"\."team"/)
       expect(sql).to.not.match(/"player"\."current_nfl_team"/)
     })
 
@@ -381,8 +390,8 @@ describe('data-views team_attribution', () => {
       )
       const sql = query.toString()
       // both join targets coexist -- the current column is not dragged onto the
-      // sibling's bridge, and the historical column keeps it
-      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      // sibling's week attribution, and the historical column keeps it
+      expect(sql).to.include(WEEK_TEAM_JOIN)
       expect(sql).to.match(/"nfl_team" = "player"\."current_nfl_team"/)
     })
   })

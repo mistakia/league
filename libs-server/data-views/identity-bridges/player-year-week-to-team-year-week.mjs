@@ -152,11 +152,32 @@ export const add_cte = ({ query_context, params = {} }) => {
   players_query.with(APPEARANCES_CTE_NAME, appearances)
   query_context.registered_ctes.add(APPEARANCES_CTE_NAME)
 
-  // A player enters the spine for a season if he appeared in it at all. Players
-  // with no appearance in the year range get no rows, which keeps the spine
-  // proportional to the population actually under view rather than to every pid
-  // in the table.
-  const spine_players = db.distinct('pid', 'year').from(APPEARANCES_CTE_NAME)
+  // A player enters the spine for a season if he has a gamelog row in it.
+  // Players with none get no rows, which keeps the spine proportional to the
+  // population actually under view rather than to every pid in the table.
+  //
+  // READ FROM player_gamelogs, NOT FROM THE APPEARANCES CTE, and the reason is
+  // the planner rather than the semantics. Postgres has no statistics for a
+  // CTE, so it estimates the appearances join at 6,721 rows where 104,895 come
+  // back -- a 15x miss across a three-season range. Downstream of that miss the
+  // spine looks tiny, and the join below is planned as a merge on (year, week)
+  // alone with the pid equality demoted to a Join Filter: every player-week in a
+  // week is compared against every other, and a query that runs in 831ms took
+  // longer than the 30s statement timeout. Reading the real partitioned table
+  // gives the planner honest statistics, and the same join comes back as a
+  // three-column merge. Measured on production, 2023-2025 REG.
+  //
+  // The season-type filter is deliberately NOT applied here. Applying it needs
+  // the nfl_games join, which is the correlated-predicate shape that produced
+  // the bad estimate. Its absence admits players whose only games that season
+  // were PRE or POST: they get spine rows carrying NULL in both team columns,
+  // which attribute nothing and render nothing. An inert row is the right price
+  // for a plan that does not fall off a cliff.
+  const spine_players = db
+    .distinct('player_gamelogs.pid')
+    .select(physical_year_projection('player_gamelogs'))
+    .from('player_gamelogs')
+    .whereIn('player_gamelogs.season_year', year_range)
 
   // appearance_group counts the appearances at or before this week, so every
   // week between one appearance and the next carries the same number. Grouping

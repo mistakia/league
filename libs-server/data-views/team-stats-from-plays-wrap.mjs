@@ -1,13 +1,25 @@
 // Wrap-mode detection for `team_*_from_plays` columns (team-variant) on
 // player-subject views.
 //
-// Without this, the team-variant column joins `_team_stats` on
-// `nfl_team = player_year_teams.team` with the player_year_teams CTE pinned
-// to `max(year_range)`. A player who switched teams gets a single team's
-// multi-year totals attributed; a player with no row for max(year_range)
-// returns NULL. Wrap mode re-shapes the `_team_stats` CTE so each year's
-// team-stat lands on the team the player played for that year and then
-// sums to pid.
+// Without this, the team-variant column joins `_team_stats` on the team a
+// player is resolved to for the WHOLE span -- historically the
+// `player_year_teams` majority rule, which picks the team he played the most
+// games for and then attributes that team's entire span to him. Wrap mode
+// re-shapes the `_team_stats` CTE so each WEEK's team-stat lands on the team
+// the player was attached to in that week, and then sums to the subject.
+//
+// The invariant it exists to hold: a season cell equals the sum of the cells
+// the same view renders when split by week. Those two disagreed under the
+// majority rule -- a mid-season trade moved games between teams and the
+// season cell still showed one team's full season -- and a column whose total
+// contradicts its own breakdown is not a defensible thing to render.
+//
+// Weeks before a player's first appearance in a season contribute nothing,
+// because `player_week_teams` carries a team FORWARD only: he was on no team
+// then, so there is no team-week to attribute. Backfilling his first team to
+// week 1 was considered and rejected -- a player signed in week 12 would carry
+// eleven weeks of a team he never played for, which is the error this whole
+// migration exists to remove.
 
 import {
   resolve_effective_years,
@@ -33,18 +45,18 @@ export const requires_team_stats_wrap = ({
 
   const identity_id = query_context.identity_id
   if (!identity_id || !identity_id.startsWith('player')) return false
-  if (query_context.row_axes.includes('year')) return false
-  // The wrap CTE collapses to (pid)-grain (no week); a week split would
-  // fan that single value across every per-week outer row. The standard
-  // (with-year-split-style) shape is required for week-split views.
+  // A week split already renders one cell per week, and the week-grain join
+  // through `player_week_teams` attributes each of those cells directly. The
+  // wrap is the SEASON-grain form of that same attribution, so it has nothing
+  // to add here and would fan its per-subject total across every week row.
   if (query_context.row_axes.includes('week')) return false
 
   if (extract_matchup_opponent_type(params)) return false
 
-  const years = resolve_effective_years({ query_context, params })
-  const distinct_years = new Set(years.map((y) => parseInt(y, 10)))
-  if (distinct_years.size < 2) return false
-
+  // A year split is still season grain -- one cell per (subject, year) -- so
+  // the wrap fires and keys on (pid, year). Single-year no-split fires too:
+  // the majority rule is wrong inside ONE season, which is where a trade
+  // happens, so a year count is not what decides this.
   return true
 }
 

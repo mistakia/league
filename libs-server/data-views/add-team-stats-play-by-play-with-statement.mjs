@@ -5,7 +5,7 @@ import get_effective_years from '#libs-server/data-views/get-effective-years.mjs
 import { apply_play_type_filter } from '#libs-server/data-views/apply-play-type-filter.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
-import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
+import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
   decompose_nfl_weeks,
   is_full_year_seas_type_coverage
@@ -118,7 +118,9 @@ export const add_team_stats_play_by_play_with_statement = ({
     with_query.groupBy(physical_year_group_by('nfl_plays'))
   }
 
-  if (row_axes.includes('week') || player_variant_projection) {
+  // Wrap mode attributes each WEEK to the team the player was on that week, so
+  // the base CTE has to stay week-grained for the wrap CTE to join and sum it.
+  if (row_axes.includes('week') || wrap_mode || player_variant_projection) {
     with_query.select('nfl_plays.week')
     with_query.groupBy('nfl_plays.week')
   }
@@ -161,27 +163,32 @@ export const add_team_stats_play_by_play_with_statement = ({
       data_view_options
     })
   } else if (wrap_mode) {
-    // Register `player_year_teams` BEFORE the `_team_stats` CTE that
+    // Register `player_week_teams` BEFORE the `_team_stats` CTE that
     // references it -- PostgreSQL forbids forward references between sibling
-    // CTEs. with_func runs before the dispatcher's join_func, so we apply
-    // the bridge here; the later source-attach pass is a no-op via
-    // `applied_bridges`. params.year is overridden with the wrap's resolved
+    // CTEs. with_func runs before the dispatcher's join_func, so the CTE is
+    // registered here. params.year is overridden with the wrap's resolved
     // years so the bridge doesn't fall back to current_season.year when the
     // multi-year scope came from view-level nfl_week_ids rather than from
     // params.year.
-    apply_bridge({
+    //
+    // add_cte directly rather than apply_bridge, matching
+    // period-denominator/per-team-play-wrap.mjs: the bridge's join_cte attaches
+    // the CTE to the OUTER query, where a season-grain view has no week to
+    // correlate on, so every subject row would fan out into one row per week of
+    // the season. The wrap consumes the CTE inside its own join and needs no
+    // outer attachment at all.
+    const week_bridge = resolve_bridge('player_year_week', 'team_year_week')
+    week_bridge.add_cte({
       query_context,
-      from: 'player_year',
-      to: 'team_year',
-      mode: 'default',
       params: { ...params, year: wrap_decision.years },
       source: null
     })
-    stats_query = create_player_year_team_stats_wrap_query({
+    stats_query = create_player_week_team_stats_wrap_query({
       with_table_name,
       select_column_names,
       combined_columns,
       having_clauses,
+      row_axes,
       params
     })
   } else {
@@ -231,17 +238,29 @@ export const add_team_stats_play_by_play_with_statement = ({
   query.withMaterialized(final_stats_table_name, stats_query)
 }
 
-// Wrap-mode team-stats CTE: re-shapes the (nfl_team, year)-grain base CTE so
-// each year's team-stat lands on the team the player actually played for
-// that year (via player_year_teams), then sums to pid. Output schema matches
-// the standard `_team_stats` CTE's stat columns so the column-defs'
+// Wrap-mode team-stats CTE: re-shapes the (nfl_team, year, week)-grain base
+// CTE so each WEEK's team-stat lands on the team the player was attached to
+// that week (via player_week_teams), then sums to the subject. Output schema
+// matches the standard `_team_stats` CTE's stat columns so the column-defs'
 // `with_where` / main-select expressions reference the same names; only the
-// row key changes (pid instead of nfl_team).
-function create_player_year_team_stats_wrap_query({
+// row key changes (pid, and year under a year split, instead of nfl_team).
+//
+// Summing the weeks is what makes the season cell agree with the week-split
+// view of the same column -- see team-stats-from-plays-wrap.mjs for why that
+// invariant is the point rather than a side effect.
+//
+// It joins `nfl_team_most_recent`, not `nfl_team`. A team stat is a fact about
+// the TEAM over a span, and the player's own participation is explicitly not
+// the criterion -- that is what `limit_to_player_active_games` is for -- so a
+// week he missed on injured reserve still belongs to the team he was on.
+// Joining the exact column instead would silently shrink every season total to
+// the weeks the player happened to dress.
+function create_player_week_team_stats_wrap_query({
   with_table_name,
   select_column_names,
   combined_columns,
   having_clauses,
+  row_axes = [],
   params = {}
 }) {
   // In a year_offset range the displayed rate is produced by the column's
@@ -254,12 +273,26 @@ function create_player_year_team_stats_wrap_query({
   const emit_bare_rate = !is_year_offset_range(params)
 
   const wrap_query = db(with_table_name)
-    .select('player_year_teams.pid')
-    .groupBy('player_year_teams.pid')
-    .innerJoin('player_year_teams', function () {
-      this.on('player_year_teams.team', '=', `${with_table_name}.nfl_team`)
-      this.andOn('player_year_teams.year', '=', `${with_table_name}.year`)
+    .select('player_week_teams.pid')
+    .groupBy('player_week_teams.pid')
+    .innerJoin('player_week_teams', function () {
+      this.on(
+        'player_week_teams.nfl_team_most_recent',
+        '=',
+        `${with_table_name}.nfl_team`
+      )
+      this.andOn('player_week_teams.year', '=', `${with_table_name}.year`)
+      this.andOn('player_week_teams.week', '=', `${with_table_name}.week`)
     })
+
+  // Under a year split the cell is one row per (subject, year), so the wrap
+  // keys on both and the outer join carries the year predicate. Without the
+  // split every year in scope pools into one cell, which is what the span
+  // asked for.
+  if (row_axes.includes('year')) {
+    wrap_query.select('player_week_teams.year')
+    wrap_query.groupBy('player_week_teams.year')
+  }
 
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {

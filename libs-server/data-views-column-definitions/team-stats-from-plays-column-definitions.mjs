@@ -58,8 +58,9 @@ const apply_team_stats_join = ({
   const join_week = row_axes.includes('week')
 
   // Wrap-mode `_team_stats` is keyed by pid (see
-  // add-team-stats-play-by-play-with-statement.mjs), not by nfl_team. Join
-  // on pid 1:1 and skip the team / year / week predicates.
+  // add-team-stats-play-by-play-with-statement.mjs), not by nfl_team, and by
+  // (pid, year) under a year split. Join on that key and skip the team and
+  // week predicates -- the wrap has already summed the weeks.
   const wrap_mode =
     join_on_team &&
     get_team_stats_wrap_decision({
@@ -71,6 +72,9 @@ const apply_team_stats_join = ({
   if (wrap_mode) {
     players_query[join_method](target, function () {
       this.on(`${target}.pid`, '=', pid_reference)
+      if (join_year && year_reference) {
+        this.andOn(db.raw(`${target}.year = ${year_reference}`))
+      }
     })
     return
   }
