@@ -43,7 +43,7 @@ export default function AuctionSettlementStatus({
 
   return (
     <div className='auction-settlement-status'>
-      Waiting on {names} to set a maximum or decline.
+      Waiting on {names} to make an election.
     </div>
   )
 }
