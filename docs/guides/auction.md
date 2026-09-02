@@ -14,6 +14,8 @@ The subsystem's design, its evidence, and the incidents behind each rule live in
 - A settlement must announce itself the same way from every path. `broadcast_auction_settlement` in `libs-server/auction-settlement.mjs` is that one fan-out — Discord, the sale, the advanced nomination turn, the recomputed outstanding set. It is called by the socket and by all three REST paths that can settle a player. Adding a fourth path means calling it, not writing a fourth broadcast.
 - A broadcast with no reducer case is invisible. It does not error; the client simply freezes. Two message types shipped that way and every manager watched a stale outstanding list for the length of an auction.
 
+**And a JOIN is per SOCKET, so a reconnect is a new client the auction has never heard of.** Broadcasts still arrive — those are filtered on the league id the connection query string carries — so the board looks live while the server has no message handlers for that socket and every bid it sends is dropped with no error, the team reads as disconnected, and `pause_on_team_disconnect` holds the whole league. `rejoin_auction` re-sends `AUCTION_JOIN` on `WEBSOCKET_RECONNECTED`, guarded on this client having joined, because `_send_auction_init` broadcasts rather than replies and every client in the league sees one whenever anybody joins.
+
 ## Mode is derived, never stored
 
 `libs-server/auction-modes.mjs` is the single answer to "which mode is in force". `live` inside a finalized block and from the final block to the period end; `election` everywhere else.
@@ -40,6 +42,40 @@ A team that leaves an eligible set never re-enters it, and completeness once rea
 
 Auction completion is DERIVED from an exhausted nomination rotation with the period end as the backstop. Do not add a column for it.
 
+## Two writers, one open player, and they can disagree
+
+Inside a live block the bid clock is NOT the only thing that can close the open
+player. A manager completing the eligible set over REST settles it, and so does a
+trade or a commissioner-override release through
+`reevaluate_auction_after_roster_change`. So `sold()` takes the same per-league
+advisory lock every settlement path takes, and re-reads the nomination under it
+rather than signing from `_transactions[0]`.
+
+**They resolve to different teams when they disagree, which is why serialising
+them is not merely tidy.** Supersession binds a claim downward in `_manual_bids`,
+which `build_auction_claims` is deliberately blind to, so the engine can read an
+un-superseded ceiling and name a winner the board does not show. Unserialised
+that put one player on two rosters and charged both teams.
+
+## The final block is measured from the period start, never from `now`
+
+`calculate_final_block` floors on `period_start + notice` and calls a window
+failed when the computation lands before `period_start`. Both were once compared
+against `now`, and both then pushed the block another notice-width out on every
+read — a receding horizon the clock could never reach, so the auction's only
+termination guarantee collapsed to the last hour of the period with the whole
+pace reservation discarded.
+
+**Notice is owed from when the block becomes KNOWABLE.** The final block carries
+no opt-in, is published from the first read of the calendar, and every term in it
+is configuration or rosters. And a block the clock has passed is RUNNING, not
+failed; that is the normal state for the last hours of every auction.
+
+**Assert this by walking the clock.** A single-instant assertion cannot tell a
+receding floor from a correct one — `now + notice` is what both produce — and
+that is exactly how it shipped with a past-case test and a notice test both
+green.
+
 ## Finalization is the one thing recorded
 
 `auction_blocks` exists because the unanimity denominator freezes at finalization and rosters carry no as-of timestamp. Re-deriving finalization from the opt-in rows would silently un-finalize a block the league has already been told is happening.
@@ -51,7 +87,9 @@ The final block is the opposite: computed on demand, no row, because every term 
 **Only running it finds these defects.** Every one this subsystem has produced came from executing the behavior; none came from reading the source. Two rules follow:
 
 - **Write the spec that drives the ROUTE, not the library behind it.** Both election write verbs declared a bodyless 200 in their own OpenAPI blocks and returned 500 under the test-env response validator, for exactly as long as no spec called them.
-- **The clock is addressable.** `api/sockets/auction.mjs` takes an injected timer through the `Auction` constructor; `test/auction.proxy-bidding.spec.mjs` is the worked example. `MockDate` moves `Date.now` without moving `setTimeout`, so it cannot drive any of this alone. Call `auction.stop()` in teardown — the mode poll re-arms itself.
+- **The clock is addressable, and count it by NAME.** `api/sockets/auction.mjs` takes an injected timer through the `Auction` constructor; `test/auction.proxy-bidding.spec.mjs` is the worked example. `MockDate` moves `Date.now` without moving `setTimeout`, so it cannot drive any of this alone. Call `auction.stop()` in teardown — the mode poll re-arms itself. Every `set_timeout` carries an `AUCTION_TIMERS` name because the three clocks are NOT distinguishable by duration: the padded bid clock and the mode poll are both 15,000ms in `config-test.json`, so counting durations counted two clocks as one.
+- **A saga cannot be driven from a spec here.** `@core/ws` re-exports `service.js`, which imports `@core/store`, which reads `window.__INITIAL_STATE__` and builds browser history at module scope — and there is no jsdom. Cover the reducer, which is where a broadcast actually dies, and say plainly what is left to a source gate.
+- **A `dayjs/plugin/*` import needs its `.js`.** Webpack resolves both spellings; Node's ESM loader does not hand back the plugin function without the extension, so `dayjs.extend` throws at module scope and aborts every spec whose import graph reaches that file, reported as a load failure with no test names in it.
 
 `config-test.json` carries `nominationTimer` and `bidTimer`. It did not until 2026-09-02, and without them every timer in the test environment was scheduled at `NaN`.
 
