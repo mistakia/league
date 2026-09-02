@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import dayjs from 'dayjs'
 
 import Icon from '@components/icon'
 import TeamName from '@components/team-name'
@@ -39,7 +40,9 @@ export default function AuctionMainBid({
   league,
   isStarted,
   free_agency_period_start,
-  auction_mode
+  auction_mode,
+  block_end_at,
+  is_final_block
 }) {
   const [value, set_value] = useState(0)
   const previous = useRef({ bidValue, nominated_pid })
@@ -211,6 +214,15 @@ export default function AuctionMainBid({
           <div className='auction__bid-actions'>
             {!is_election_mode && (
               <div className='auction__main-timer'>
+                {/* WHICH live block this is, because the two are not the same
+                    thing to a manager: an opt-in block they agreed to attend,
+                    or the mandatory final block that ends the auction. */}
+                <div className='auction__block-label'>
+                  {is_final_block ? 'Final block' : 'Live block'}
+                  {block_end_at
+                    ? ` until ${dayjs.unix(block_end_at).format('h:mm A')}`
+                    : ''}
+                </div>
                 <Timer
                   expiration={timer}
                   alert={isNominating || Boolean(nominated_pid)}
@@ -272,5 +284,7 @@ AuctionMainBid.propTypes = {
   league: PropTypes.object,
   isStarted: PropTypes.bool,
   free_agency_period_start: PropTypes.object,
-  auction_mode: PropTypes.string
+  auction_mode: PropTypes.string,
+  block_end_at: PropTypes.number,
+  is_final_block: PropTypes.bool
 }

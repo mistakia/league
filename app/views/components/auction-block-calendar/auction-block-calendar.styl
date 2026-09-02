@@ -1,0 +1,115 @@
+.auction__block-calendar
+  display flex
+  flex-direction column
+  padding 8px
+  border-bottom 1px solid var(--table-border)
+
+.auction__block-calendar-header
+  display flex
+  justify-content space-between
+  align-items baseline
+  gap 8px
+
+.auction__block-calendar-title
+  font-weight 600
+  text-transform uppercase
+  font-size 11px
+  letter-spacing 0.5px
+
+.auction__block-calendar-final
+  display flex
+  gap 6px
+  align-items baseline
+  font-size 11px
+  opacity 0.85
+
+.auction__block-calendar-legend
+  font-size 11px
+  opacity 0.6
+  padding 4px 0 8px
+
+.auction__block-calendar-grid
+  display flex
+  flex-direction column
+  gap 2px
+
+.auction__block-calendar-row
+  display flex
+  gap 1px
+  align-items center
+
+.auction__block-calendar-day
+  width 52px
+  flex none
+  font-size 11px
+  opacity 0.7
+
+.auction__block-calendar-cell
+  flex 1 1 0
+  min-width 8px
+  height 18px
+  display flex
+  align-items center
+  justify-content center
+  font-size 9px
+  cursor pointer
+  background var(--table-row-alt)
+
+  &.outside
+    opacity 0.15
+    cursor default
+
+  &.mine
+    outline 1px solid var(--primary)
+
+  &.finalized
+    background var(--primary)
+    color #fff
+
+  &.final-block
+    background #c0392b
+    color #fff
+
+.auction__block-calendar-detail
+  padding 8px 0 0
+  border-top 1px solid var(--table-border)
+  margin-top 8px
+
+.auction__block-calendar-detail-head
+  font-size 11px
+  font-weight 600
+  padding-bottom 4px
+
+.auction__block-calendar-slot
+  display flex
+  align-items center
+  gap 8px
+  padding 4px 0
+
+.auction__block-calendar-slot-time
+  width 72px
+  flex none
+  font-size 12px
+
+.auction__block-calendar-slot-teams
+  flex 1 1 auto
+  display flex
+  flex-wrap wrap
+  gap 4px
+  font-size 11px
+
+.auction__block-calendar-slot-action
+  flex none
+
+.auction__block-calendar-empty,
+.auction__block-calendar-lapsed
+  opacity 0.5
+  font-size 11px
+
+.auction__block-calendar-convened
+  color var(--primary)
+  font-weight 600
+  font-size 11px
+
+.auction__block-calendar-cell.selected
+  outline 2px solid var(--text)

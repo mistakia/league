@@ -14,7 +14,9 @@ import { auction_actions } from './actions'
 import {
   api_get_auction_elections,
   api_post_auction_election,
-  api_delete_auction_election
+  api_delete_auction_election,
+  api_get_auction_blocks,
+  api_post_auction_block_opt_in
 } from '@core/api'
 import { send } from '@core/ws'
 import { get_eligible_slots } from '#libs-shared'
@@ -225,6 +227,23 @@ export function* reload_auction_elections() {
   yield call(api_get_auction_elections, { leagueId, teamId })
 }
 
+export function* load_auction_blocks({ payload }) {
+  yield call(api_get_auction_blocks, payload)
+}
+
+export function* set_auction_block_opt_in({ payload }) {
+  yield call(api_post_auction_block_opt_in, payload)
+}
+
+// The schedule is loaded when the auction page mounts rather than on the socket
+// join, because opting into a block happens days before any block runs and the
+// socket join is gated on the live window.
+export function* load_auction_blocks_for_current_league() {
+  const { leagueId } = yield select(get_current_league)
+  if (!leagueId) return
+  yield call(api_get_auction_blocks, { leagueId })
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -317,6 +336,28 @@ export function* watch_delete_auction_election_fulfilled() {
   )
 }
 
+export function* watch_load_auction_blocks() {
+  yield takeLatest(auction_actions.LOAD_AUCTION_BLOCKS, load_auction_blocks)
+}
+
+export function* watch_set_auction_block_opt_in() {
+  yield takeLatest(
+    auction_actions.SET_AUCTION_BLOCK_OPT_IN,
+    set_auction_block_opt_in
+  )
+}
+
+// A block convening changes what every OTHER client's calendar shows, and the
+// opt-in write only returns the schedule to whoever sent it. The broadcast
+// carries the schedule itself, so nothing refetches here -- but a mode
+// transition does mean the final block has moved, and that is server-computed.
+export function* watch_auction_mode() {
+  yield takeLatest(
+    auction_actions.AUCTION_MODE,
+    load_auction_blocks_for_current_league
+  )
+}
+
 export function* watch_auction_toggle_pause_on_team_disconnect() {
   yield takeLatest(
     auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT,
@@ -346,5 +387,8 @@ export const auction_sagas = [
   fork(watch_submit_auction_election),
   fork(watch_withdraw_auction_election),
   fork(watch_post_auction_election_fulfilled),
-  fork(watch_delete_auction_election_fulfilled)
+  fork(watch_delete_auction_election_fulfilled),
+  fork(watch_load_auction_blocks),
+  fork(watch_set_auction_block_opt_in),
+  fork(watch_auction_mode)
 ]

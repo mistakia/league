@@ -114,6 +114,8 @@ import {
 import { get_restricted_free_agency_auctions_actions } from '@core/restricted-free-agency/actions'
 import {
   get_auction_elections_actions,
+  get_auction_blocks_actions,
+  post_auction_block_opt_in_actions,
   post_auction_election_actions,
   delete_auction_election_actions
 } from '@core/auction/actions'
@@ -514,6 +516,17 @@ export const api_delete_auction_election = fetch.bind(
   null,
   api.delete_auction_election,
   delete_auction_election_actions
+)
+
+export const api_get_auction_blocks = fetch.bind(
+  null,
+  api.get_auction_blocks,
+  get_auction_blocks_actions
+)
+export const api_post_auction_block_opt_in = fetch.bind(
+  null,
+  api.post_auction_block_opt_in,
+  post_auction_block_opt_in_actions
 )
 
 export const api_get_trade_review = fetch.bind(

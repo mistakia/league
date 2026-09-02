@@ -24,7 +24,8 @@ const map_dispatch_to_props = {
   load_all_players: player_actions.load_all_players,
   load_league: league_actions.load_league,
   load_rosters: roster_actions.load_rosters,
-  load_auction_elections: auction_actions.load_auction_elections
+  load_auction_elections: auction_actions.load_auction_elections,
+  load_auction_blocks: auction_actions.load_auction_blocks
 }
 
 export default connect(map_state_to_props, map_dispatch_to_props)(AuctionPage)

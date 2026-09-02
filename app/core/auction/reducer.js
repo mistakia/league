@@ -1,8 +1,16 @@
 import { Record, List, Map, fromJS } from 'immutable'
 
-import { transaction_types, fantasy_positions } from '#constants'
+import {
+  transaction_types,
+  fantasy_positions,
+  AUCTION_BLOCK_GRANULARITY_MINUTES
+} from '#constants'
 import { auction_actions } from './actions'
-import { app_actions } from '@core/app'
+// The ACTIONS module rather than the `@core/app` barrel: the barrel pulls in
+// every saga in the app, and one of them calls `dayjs.extend` at module scope
+// with a plugin the spec loader has not registered -- which makes this reducer
+// unimportable from a spec for a reason that has nothing to do with it.
+import { app_actions } from '@core/app/actions'
 
 const initialState = new Record({
   isPaused: true,
@@ -40,8 +48,70 @@ const initialState = new Record({
   // fromJS maps rather than a Record, matching restricted-free-agency/reducer.js
   // -- app/core/auction/ has no record.js and adding one would pull the slice
   // under app.record-declares-reducer-key.spec.mjs for no gain.
-  standing_elections: new Map()
+  standing_elections: new Map(),
+  // Map<block_at_unix, Map> carrying `opt_in_tids` and `is_finalized`. Opt-ins
+  // are PUBLIC by design and named rather than counted: an election is a sealed
+  // bid, an opt-in is an availability, and a manager cannot argue for a slot
+  // against a bare count.
+  live_blocks: new Map(),
+  // Team ids holding an open active roster spot -- the unanimity denominator as
+  // it stands right now. It shrinks as the auction fills rosters, which is why a
+  // convened block records its own.
+  block_eligible_tids: new List(),
+  // Unix seconds. Recomputed server-side on every read from
+  // `period_end - spots_remaining * pace - buffer`, never stored, so the client
+  // holds whatever the server last said rather than deriving it.
+  final_block_at: null,
+  final_block_spots_remaining: null,
+  free_agency_period_start: null,
+  free_agency_period_end: null,
+  auction_block_notice_minutes: null,
+  // Set while a live block is running, so the bid bar can say when it ends.
+  block_end_at: null,
+  is_final_block: false
 })
+
+// One shape for the schedule wherever it arrives -- the REST read, the opt-in
+// write, and the broadcast that follows one. Three call sites building this by
+// hand is how the two dead action types got in.
+const merge_block_schedule = (state, payload) => {
+  let blocks = new Map()
+  for (const slot of payload.opt_ins || []) {
+    blocks = blocks.set(
+      slot.block_at,
+      fromJS({
+        block_at: slot.block_at,
+        opt_in_tids: slot.opt_in_tids,
+        is_finalized: slot.is_finalized
+      })
+    )
+  }
+
+  // A convened SESSION is a merged run of consecutive slots, so it can cover
+  // slots nobody's opt-in row still names. Marking each covered slot finalized
+  // is what lets the calendar draw the session as one band.
+  for (const block of payload.blocks || []) {
+    for (
+      let at = block.block_at;
+      at < block.end_at;
+      at += AUCTION_BLOCK_GRANULARITY_MINUTES * 60
+    ) {
+      const existing =
+        blocks.get(at) || fromJS({ block_at: at, opt_in_tids: [] })
+      blocks = blocks.set(at, existing.set('is_finalized', true))
+    }
+  }
+
+  return state.merge({
+    live_blocks: blocks,
+    block_eligible_tids: new List(payload.eligible_team_ids || []),
+    final_block_at: payload.final_block_at,
+    final_block_spots_remaining: payload.final_block_spots_remaining,
+    free_agency_period_start: payload.period_start,
+    free_agency_period_end: payload.period_end,
+    auction_block_notice_minutes: payload.auction_block_notice_minutes
+  })
+}
 
 export function auction_reducer(state = initialState(), { payload, type }) {
   switch (type) {
@@ -143,6 +213,8 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         isComplete: payload.complete,
         pause_on_team_disconnect: payload.pause_on_team_disconnect,
         auction_mode: payload.auction_mode || 'live',
+        block_end_at: payload.block_end_at || null,
+        is_final_block: Boolean(payload.is_final_block),
         outstanding_election_tids: new List(
           payload.outstanding_election_tids || []
         )
@@ -185,6 +257,23 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       }
       return state.merge({ standing_elections: elections })
     }
+
+    case auction_actions.GET_AUCTION_BLOCKS_FULFILLED:
+    case auction_actions.POST_AUCTION_BLOCK_OPT_IN_FULFILLED:
+      return merge_block_schedule(state, payload.data)
+
+    case auction_actions.AUCTION_BLOCK_SCHEDULE:
+      return merge_block_schedule(state, payload)
+
+    // The mode flips at a wall-clock boundary with no message behind it, so the
+    // server announces it. A client deriving it from its own clock would run the
+    // bid bar against a block the server has already closed.
+    case auction_actions.AUCTION_MODE:
+      return state.merge({
+        auction_mode: payload.auction_mode,
+        block_end_at: payload.block_end_at,
+        is_final_block: payload.is_final_block
+      })
 
     case auction_actions.AUCTION_SETTLEMENT_STATUS:
       return state.merge({

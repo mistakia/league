@@ -74,6 +74,8 @@ export {
   api_get_auction_elections,
   api_post_auction_election,
   api_delete_auction_election,
+  api_get_auction_blocks,
+  api_post_auction_block_opt_in,
   api_get_trade_review,
   api_get_trade_review_trade,
   api_get_scoreboard,

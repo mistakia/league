@@ -7,6 +7,7 @@ import PageLayout from '@layouts/page'
 import AuctionTargets from '@components/auction-targets'
 import AuctionStandingElections from '@components/auction-standing-elections'
 import AuctionSettlementStatus from '@components/auction-settlement-status'
+import AuctionBlockCalendar from '@components/auction-block-calendar'
 
 import './auction.styl'
 
@@ -16,6 +17,7 @@ export default function AuctionPage({
   load_league,
   load_rosters,
   load_auction_elections,
+  load_auction_blocks,
   teamId,
   is_hosted_league
 }) {
@@ -36,6 +38,13 @@ export default function AuctionPage({
     load_auction_elections({ leagueId: lid, teamId })
   }, [load_auction_elections, lid, teamId])
 
+  // The block schedule is NOT gated on teamId: opt-ins are public and the
+  // convened blocks and the computed final block are facts about the auction
+  // rather than about one team, so every viewer gets them.
+  useEffect(() => {
+    load_auction_blocks({ leagueId: lid })
+  }, [load_auction_blocks, lid])
+
   useEffect(() => {
     const element = document.querySelector('.auction__team.winning')
     if (element) element.scrollIntoView({ behavior: 'smooth' })
@@ -53,6 +62,7 @@ export default function AuctionPage({
         {is_hosted_league && (
           <div className='auction__side'>
             <AuctionSettlementStatus />
+            <AuctionBlockCalendar />
             <AuctionStandingElections />
           </div>
         )}
@@ -69,6 +79,7 @@ AuctionPage.propTypes = {
   load_league: PropTypes.func,
   load_rosters: PropTypes.func,
   load_auction_elections: PropTypes.func,
+  load_auction_blocks: PropTypes.func,
   teamId: PropTypes.number,
   is_hosted_league: PropTypes.bool
 }

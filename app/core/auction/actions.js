@@ -11,6 +11,12 @@ export const auction_actions = {
   ...create_api_action_types('POST_AUCTION_ELECTION'),
   ...create_api_action_types('DELETE_AUCTION_ELECTION'),
 
+  // Block opt-ins travel over REST for the same reason elections do: a slot is
+  // opted into days ahead of the block it convenes, so there is no live socket
+  // to carry it.
+  ...create_api_action_types('GET_AUCTION_BLOCKS'),
+  ...create_api_action_types('POST_AUCTION_BLOCK_OPT_IN'),
+
   LOAD_AUCTION_ELECTIONS: 'LOAD_AUCTION_ELECTIONS',
   load_auction_elections: ({ leagueId, teamId }) => ({
     type: auction_actions.LOAD_AUCTION_ELECTIONS,
@@ -37,6 +43,25 @@ export const auction_actions = {
     payload: { leagueId: Number(leagueId), teamId: Number(teamId), pid }
   }),
 
+  LOAD_AUCTION_BLOCKS: 'LOAD_AUCTION_BLOCKS',
+  load_auction_blocks: ({ leagueId }) => ({
+    type: auction_actions.LOAD_AUCTION_BLOCKS,
+    payload: { leagueId: Number(leagueId) }
+  }),
+
+  SET_AUCTION_BLOCK_OPT_IN: 'SET_AUCTION_BLOCK_OPT_IN',
+  // One action for both directions. `is_opted_in` false withdraws, and a
+  // withdrawal after the block has finalized does not cancel it.
+  set_auction_block_opt_in: ({ leagueId, teamId, block_at, is_opted_in }) => ({
+    type: auction_actions.SET_AUCTION_BLOCK_OPT_IN,
+    payload: {
+      leagueId: Number(leagueId),
+      teamId: Number(teamId),
+      block_at,
+      is_opted_in
+    }
+  }),
+
   AUCTION_JOIN: 'AUCTION_JOIN',
 
   AUCTION_ERROR: 'AUCTION_ERROR',
@@ -50,6 +75,11 @@ export const auction_actions = {
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
   AUCTION_SETTLEMENT_STATUS: 'AUCTION_SETTLEMENT_STATUS',
+
+  // A block boundary is a wall-clock event with no message behind it, so the
+  // server announces the mode rather than every client deriving it.
+  AUCTION_MODE: 'AUCTION_MODE',
+  AUCTION_BLOCK_SCHEDULE: 'AUCTION_BLOCK_SCHEDULE',
 
   AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT:
     'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT',
@@ -163,4 +193,9 @@ export const post_auction_election_actions = create_api_actions(
 )
 export const delete_auction_election_actions = create_api_actions(
   'DELETE_AUCTION_ELECTION'
+)
+export const get_auction_blocks_actions =
+  create_api_actions('GET_AUCTION_BLOCKS')
+export const post_auction_block_opt_in_actions = create_api_actions(
+  'POST_AUCTION_BLOCK_OPT_IN'
 )

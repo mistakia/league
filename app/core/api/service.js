@@ -328,6 +328,14 @@ export const api = {
     const url = `${API_URL}/leagues/${leagueId}/auction-elections`
     return { url, ...DELETE(data) }
   },
+  get_auction_blocks(params) {
+    const url = `${API_URL}/leagues/${params.leagueId}/auction-blocks`
+    return { url }
+  },
+  post_auction_block_opt_in({ leagueId, ...data }) {
+    const url = `${API_URL}/leagues/${leagueId}/auction-blocks`
+    return { url, ...POST(data) }
+  },
   post_poach(data) {
     const url = `${API_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }
