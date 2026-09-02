@@ -1,5 +1,10 @@
-import db from '#db'
-import { is_main } from '#libs-server'
+// NOTHING here may statically import `#db`. It reads LEAGUE_DB_* once at module
+// load, and a static import hoists above every statement in this file --
+// including the tunnel bootstrap in `resolve_db` below, which is what points it
+// at production in the first place. `is_main` and the clone library are imported
+// by their own module paths rather than through the `#libs-server` barrel for
+// the same reason: the barrel pulls `#db`.
+import is_main from '#libs-server/is-main.mjs'
 import { current_season } from '#constants'
 import {
   LEAGUE_SCOPED_TABLES,
@@ -25,15 +30,33 @@ import {
  * through here." This is that script. The target league id is a required
  * argument for --sync, never defaulted, and league 1 is refused unconditionally.
  *
+ * HOW IT REACHES PRODUCTION. Production postgres is not reachable from a
+ * laptop, so this used to die several seconds into its first query on a knex
+ * pool timeout -- which read as the database being down rather than as the
+ * target being unreachable, and made the re-sync recipe printed in
+ * scripts/drive-auction-end-to-end.mjs's header unrunnable from the machine
+ * that prints it. It now opens the same ssh tunnel that script does, through
+ * the shared bootstrap in libs-server/production-db-tunnel.mjs. No NODE_ENV is
+ * required: the target is named explicitly rather than inherited.
+ *
  * usage:
  *   node scripts/clone-league.mjs --create --from 1 --execute
  *   node scripts/clone-league.mjs --sync --from 1 --to 2 --execute
+ *   node scripts/clone-league.mjs --sync --from 1 --to 2 --execute --db-port 15433 --ssh-host league
  *
  * Dry run by default. Nothing is written without --execute.
  */
 
+// `#config` picks its file from NODE_ENV and throws on config-undefined.json
+// when it is unset, so a bare `node scripts/clone-league.mjs` used to die before
+// it printed anything. Default rather than pin: the database target is named
+// explicitly below whatever this says, and an operator who sets NODE_ENV
+// deliberately -- production for the old recipe, test for the spec -- keeps it.
+// Nothing above this line imports `#config`, directly or through a barrel.
+process.env.NODE_ENV = process.env.NODE_ENV || 'development'
+
 const parse_args = (argv) => {
-  const args = { execute: false }
+  const args = { execute: false, db_port: 15433, ssh_host: 'league' }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--create') args.create = true
@@ -42,9 +65,39 @@ const parse_args = (argv) => {
     else if (arg === '--from') args.from = Number(argv[++i])
     else if (arg === '--to') args.to = Number(argv[++i])
     else if (arg === '--name') args.name = argv[++i]
+    else if (arg === '--db-port') args.db_port = Number(argv[++i])
+    else if (arg === '--ssh-host') args.ssh_host = argv[++i]
     else throw new Error(`unknown argument: ${arg}`)
   }
   return args
+}
+
+/**
+ * Import `#db` bound to the right database, and never before the environment
+ * that decides which one has been set.
+ *
+ * Under NODE_ENV=test the runner has already pointed this process at a local
+ * fixture database, and test/auction.clone-league.spec.mjs spawns this script
+ * with that environment inherited. Opening a tunnel there would aim a spec at
+ * production, so the bootstrap is skipped and `#db` is taken as the suite left
+ * it. Everywhere else the target IS production, and saying so costs one ssh.
+ */
+const resolve_db = async ({ db_port, ssh_host }) => {
+  if (process.env.NODE_ENV !== 'test') {
+    const { open_production_db_tunnel } =
+      await import('#libs-server/production-db-tunnel.mjs')
+    const { database } = await open_production_db_tunnel({ db_port, ssh_host })
+    console.log(
+      `target: ${database} on production, over 127.0.0.1:${db_port} -> ${ssh_host}:5432`
+    )
+  }
+  const { default: db } = await import('#db')
+  // One cheap round trip, so an unreachable target fails HERE, naming the
+  // target, rather than as a knex pool timeout inside the clone transaction
+  // minutes later -- which is what it did before, and which reads as the
+  // database being down rather than as this process never having had a route.
+  await db.raw('select 1')
+  return db
 }
 
 export const validate_args = (args) => {
@@ -78,6 +131,13 @@ export const validate_args = (args) => {
 
 const main = async () => {
   const args = validate_args(parse_args(process.argv.slice(2)))
+
+  // BEFORE the dry run, not after. A dry run's whole job is to answer "would
+  // this work", and a plan printed by a process that cannot reach the database
+  // answers a smaller question than the operator asked. Opening the tunnel here
+  // makes an unreachable target a dry-run failure rather than a surprise
+  // several minutes into the --execute run.
+  const db = await resolve_db(args)
 
   // console rather than debug(): a dry-run plan is the script's OUTPUT, and a
   // plan nobody sees unless they set DEBUG is not a dry run. The debug logger
