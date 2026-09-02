@@ -766,17 +766,24 @@ describe('auction eligibility validation', function () {
       expect(errors, 'one open spot is enough to bid').to.deep.equal([])
     })
 
-    // POSITION LIMITS ARE NOT A BID-TIME CHECK, and the auction is not wrong to
-    // work that way -- but it means the rule lives at the AWARD, so these drive
-    // a real `sold()` rather than calling the validator. Calling
-    // `_validate_team_can_acquire_player` directly tests the method and says
-    // nothing about whether `sold()` still calls it: deleting the invocation
-    // from `sold()` left an earlier version of this whole file green while a
-    // team over the kicker limit would have been awarded a fourth kicker.
+    // POSITION LIMITS ARE NOT A BID-TIME CHECK TODAY, so the rule lives at the
+    // AWARD and these drive a real `sold()` rather than calling the validator.
+    // Calling `_validate_team_can_acquire_player` directly tests the method and
+    // says nothing about whether `sold()` still calls it: deleting the
+    // invocation from `sold()` left an earlier version of this whole file green
+    // while a team over the kicker limit would have been awarded a fourth
+    // kicker.
     //
-    // The first spec below also documents the gap it depends on -- the bid IS
-    // accepted -- so if a bid-time position check is ever added, this spec
-    // fails and says so rather than quietly testing nothing.
+    // A BID-TIME CHECK IS COMING. It was ruled in, and the award check stays
+    // alongside it -- the award re-reads the roster inside the settlement
+    // transaction and is the only guard that catches a roster or cap change
+    // made during a block. So when the bid-time check lands, the first spec
+    // below moves its assertion and everything here about `sold()` survives
+    // unchanged.
+    //
+    // Until then the first spec depends on the bid being ACCEPTED and says so,
+    // which is what makes it fail loudly at that point rather than quietly
+    // testing nothing.
     const settled_rows_for = async (pid) =>
       knex('rosters_players').where({ pid, lid: league_id, season_year })
 
@@ -807,8 +814,10 @@ describe('auction eligibility validation', function () {
       })
       expect(
         errors,
-        'the bid is ACCEPTED -- there is no bid-time position check, and this ' +
-          'spec depends on that. If a bid-time check is added, assert it here.'
+        'the bid is ACCEPTED -- there is no bid-time position check YET, and ' +
+          'this spec depends on that. One has been ruled in: when it lands, ' +
+          'assert the refusal here rather than deleting the spec, because the ' +
+          'award-time refusal below it is staying.'
       ).to.deep.equal([])
       expect(
         auction._transactions[0].tid,
@@ -962,12 +971,22 @@ describe('auction eligibility validation', function () {
   })
 
   describe('commissioner nomination value', function () {
-    // THE CURRENT RULE IS THE INVERSE OF THE 2020 BRAINSTORM. That note asked
-    // for the commissioner's nomination to be forced to $0; the handler forces
-    // every OTHER nomination to $0 and preserves the commissioner's stated
-    // amount, which is what lets a commissioner open a player at a price when
-    // acting for an absent manager. These two specs pin the behaviour that
-    // ships, and the divergence is recorded on the task entity.
+    // THE CURRENT RULE IS THE INVERSE OF WHAT WAS ORIGINALLY ASKED FOR, and it
+    // is going back. The handler forces every NON-commissioner nomination to $0
+    // and preserves the commissioner's stated amount, which is what lets a
+    // commissioner open a player at a price when acting for an absent manager.
+    // That exception has been ruled out: every live-mode nomination is to open
+    // at $0, the commissioner's included.
+    //
+    // These two specs pin what ships until that change lands, so the first one
+    // below reddens when it does -- deliberately. Invert its assertion rather
+    // than deleting it, and keep the second as the control that the clamp still
+    // reaches everyone.
+    //
+    // THE ELECTION-MODE GATE IS NOT PART OF THAT RULING. In election mode
+    // nominating IS bidding and the stated amount is the nominator's claim, so
+    // the clamp stays gated on `_election_mode` being false. Do not collapse
+    // the two while removing the commissioner branch.
     it('preserves the stated amount when the commissioner nominates', async function () {
       this.timeout(60 * 1000)
       const { auction, errors } = await build_live_auction({ user_ids: [1] })
