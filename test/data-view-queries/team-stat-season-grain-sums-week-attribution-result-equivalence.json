@@ -1,0 +1,53 @@
+{
+  "name": "season-grain team stat sums the per-week team attribution (executed-result parity)",
+  "description": "The season-grain sibling of team-stat-mid-season-trade-week-attribution: the same seed, with the week axis removed. One player is on ZSA for 2023 REG weeks 1 and 2 and on ZSB for week 3, ZSA also plays in week 3, and team_pass_yards_from_plays is requested with no row axis at all. The season cell must equal the sum of the cells the week-split view renders -- 10 + 20 + 77 = 107 -- because a season cell that disagrees with the sum of its own weeks is the defect this fixture exists to hold closed. Every other attribution mechanism lands somewhere else and is distinguished here: the year-grain majority rule picks ZSA (2 weeks against 1) and sums ZSA's whole season to 60; team_attribution 'current' picks the player's current_nfl_team ZSB and renders 77; a per-week attribution that forgot to sum would render whichever single week survived. The oracle is the seeded pass_yards summed per team-week over the team the player was attached to in that week, derived from the seed rather than from output.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TSSN-990902', 'Test', 'Tseason', 'T.Tseason', 'Test Tseason', 'MLB', 'MLB', '2000-01-01', 2020, 'ZSB')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (994001, 2023, 1, 'REG', 'ZSA', 'ZSX', '2023-09-10')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (994002, 2023, 2, 'REG', 'ZSA', 'ZSY', '2023-09-17')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (994003, 2023, 3, 'REG', 'ZSA', 'ZSZ', '2023-09-24')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (994004, 2023, 3, 'REG', 'ZSB', 'ZSW', '2023-09-24')",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, is_active, season_year) VALUES (994001, 'TEST-TSSN-990902', 'ZSX', 'ZSA', 'MLB', true, 2023)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, is_active, season_year) VALUES (994002, 'TEST-TSSN-990902', 'ZSY', 'ZSA', 'MLB', true, 2023)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, is_active, season_year) VALUES (994004, 'TEST-TSSN-990902', 'ZSW', 'ZSB', 'MLB', true, 2023)",
+      "REFRESH MATERIALIZED VIEW nfl_year_week_timestamp",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, pass_yards) VALUES (994001,1,2023,1,to_timestamp(0),'REG','PASS','ZSA',10)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, pass_yards) VALUES (994002,1,2023,2,to_timestamp(0),'REG','PASS','ZSA',20)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, pass_yards) VALUES (994003,1,2023,3,to_timestamp(0),'REG','PASS','ZSA',30)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, pass_yards) VALUES (994004,1,2023,3,to_timestamp(0),'REG','PASS','ZSB',77)"
+    ],
+    "expected_rows": [
+      {
+        "team_pass_yds_from_plays_0": 107
+      }
+    ],
+    "compare_columns": ["team_pass_yds_from_plays_0"]
+  },
+  "tags": [
+    "player",
+    "plays",
+    "team-stats-from-plays",
+    "historical-team",
+    "result-equivalence"
+  ],
+  "expected_query": "with \"t43a888c621d3f08435232dd6603579a7\" as materialized (select \"nfl_plays\".\"offense_nfl_team\" as \"nfl_team\", SUM(pass_yards) AS team_pass_yds_from_plays, \"nfl_plays\".\"season_year\" as \"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where \"play_type\" in ('PASS', 'RUSH', 'KOFF', 'PUNT', 'FGXP', 'FREE') and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) group by \"nfl_plays\".\"offense_nfl_team\", \"nfl_plays\".\"season_year\", \"nfl_plays\".\"week\"), \"player_week_appearances\" as (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\" as \"week\", \"nfl_games\".\"esbid\" as \"esbid\", \"player_gamelogs\".\"nfl_team\" as \"nfl_team\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023) and \"player_gamelogs\".\"season_year\" in (2023)), \"player_week_teams\" as (select \"pid\", \"year\", \"week\", \"esbid\", \"nfl_team\", max(nfl_team) over (partition by pid, year, appearance_group) as nfl_team_most_recent from (select \"spine_players\".\"pid\", \"spine\".\"year\", \"spine\".\"week\", \"week_appearance\".\"esbid\", \"week_appearance\".\"nfl_team\", count(week_appearance.nfl_team) over (partition by spine_players.pid, spine.year order by spine.week rows between unbounded preceding and current row) as appearance_group from (select distinct \"player_gamelogs\".\"pid\", \"player_gamelogs\".\"season_year\" as \"year\" from \"player_gamelogs\" where \"player_gamelogs\".\"season_year\" in (2023)) as \"spine_players\" inner join (select distinct \"nfl_games\".\"season_year\" as \"year\", \"nfl_games\".\"week\" as \"week\" from \"nfl_games\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023)) as \"spine\" on \"spine\".\"year\" = \"spine_players\".\"year\" left join \"player_week_appearances\" as \"week_appearance\" on \"week_appearance\".\"pid\" = \"spine_players\".\"pid\" and \"week_appearance\".\"year\" = \"spine\".\"year\" and \"week_appearance\".\"week\" = \"spine\".\"week\") as \"player_week_team_spine\"), \"t43a888c621d3f08435232dd6603579a7_team_stats\" as materialized (select \"player_week_teams\".\"pid\", sum(t43a888c621d3f08435232dd6603579a7.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"t43a888c621d3f08435232dd6603579a7\" inner join \"player_week_teams\" on \"player_week_teams\".\"nfl_team_most_recent\" = \"t43a888c621d3f08435232dd6603579a7\".\"nfl_team\" and \"player_week_teams\".\"year\" = \"t43a888c621d3f08435232dd6603579a7\".\"year\" and \"player_week_teams\".\"week\" = \"t43a888c621d3f08435232dd6603579a7\".\"week\" group by \"player_week_teams\".\"pid\"), \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_year_teams\" as (select \"pid\", \"year\", (array_agg(nfl_team ORDER BY game_count DESC, nfl_team ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\" as \"year\", \"player_gamelogs\".\"nfl_team\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023) and \"player_gamelogs\".\"season_year\" in (2023) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\", \"player_gamelogs\".\"nfl_team\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.first_name, player.last_name, \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2023 left join \"t43a888c621d3f08435232dd6603579a7_team_stats\" on \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"team_pass_yds_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}
