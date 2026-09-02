@@ -651,7 +651,7 @@ export const canonicalize_bonuses = (bonuses) => {
   }
 
   const sort_key = (rule) =>
-    BONUS_RULE_KEYS.map((key) => String(rule?.[key] ?? '')).join(' ')
+    BONUS_RULE_KEYS.map((key) => String(rule?.[key] ?? '')).join('\x00')
 
   return [...bonuses]
     .map((rule) => {
