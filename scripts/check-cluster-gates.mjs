@@ -314,9 +314,9 @@ const GATES = [
     id: 'plays-column-repoint',
     command: ['db/gates/check-plays-column-repoint.mjs'],
     requires: 'none',
-    negative_control: false,
+    negative_control: true,
     oracle:
-      'consumer code vs a rename map — ANCHORED ON NINE HARDCODED TABLES, so a zero is a floor'
+      'consumer code vs a rename map, anchored on the tables the MAP itself renames on and with shared tokens derived from the schema export; the control perturbs the anchor and requires the two readings to differ'
   },
   {
     id: 'data-view-description-coverage',
