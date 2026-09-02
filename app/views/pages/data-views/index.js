@@ -62,6 +62,17 @@ const get_players_percentiles = createSelector(
       const field = data_views_fields[column_id]
 
       if (!field) {
+        // A query-backed view's column ids are ad-hoc aliases from ONE
+        // statement, so they are absent from the registry BY CONSTRUCTION and
+        // every one of them would report here -- turning a real alarm into
+        // noise proportional to how many query-backed views get opened. The
+        // alarm below exists to catch a rename that stranded a saved view, and
+        // a view that never had a registry column cannot have been stranded by
+        // one. Percentiles simply do not apply: a percentile needs a
+        // registry-declared percentile_key, which an ad-hoc alias has no way to
+        // carry.
+        if (selected_data_view.query_id) continue
+
         console.log(`Field not found for column_id: ${column_id}`)
         // This branch is the ONLY alarm for a rename that stranded a real
         // user's saved view -- the 2026-08-17 counting-stat conform blanked

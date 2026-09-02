@@ -21,15 +21,23 @@
 // ask to paginate starts at row 0 no matter what a saved view, a localStorage
 // snapshot or a URL is still carrying, so legacy stored offsets are inert
 // rather than needing a migration.
+// `query_id` is a property of the VIEW, not of table_state, and it is carried
+// here rather than inside the spread for the reason SQL never enters
+// table_state at all: table_state is a pure display contract that crosses five
+// representations, two of which are hand-maintained URL key whitelists that
+// drop what they do not know about, silently. One scalar named alongside
+// `view_id` crosses them by the same route `view_id` already does.
 export default function build_data_view_request_params({
   view_id,
   table_state,
+  query_id = null,
   offset = 0,
   append_results = false
 }) {
   return {
     view_id,
     ...table_state,
+    ...(query_id ? { query_id } : {}),
     offset,
     append_results
   }

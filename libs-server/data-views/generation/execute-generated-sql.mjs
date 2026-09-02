@@ -33,12 +33,17 @@ import validate_generated_sql, {
 //     one copy there rather than duplicated per caller
 //   - a hard row cap applied as the outer LIMIT
 //
-// RESULT CACHING SHIPS OFF. Every request through here runs skip_cache with no
-// cache_key. get_data_view_hash knows nothing about SQL, so two different
-// statements at the same offset and limit produce the SAME key and would serve
-// each other's rows -- a cross-view data leak, not a performance question. The
-// query-backed data-views task owns that file, adds query_id to the hash, and
-// turns caching on.
+// RESULT CACHING IS ON, and the condition it waited for has landed. It shipped
+// off because get_data_view_hash knew nothing about SQL, so two different
+// statements at the same offset and limit produced the SAME key and would have
+// served each other's rows -- a cross-view data leak, not a performance
+// question. get_data_view_hash now folds in query_id, so a cached result is
+// separated by the statement that produced it.
+//
+// The bound on that: caching is safe for a request that arrives through
+// run-query-backed-view.mjs, which HAS a query_id. A caller executing a raw
+// sql_text with no persisted row has no key to separate it by and must still
+// pass skip_cache.
 
 const MAX_ROW_CAP = 10000
 
@@ -328,8 +333,19 @@ export default async function execute_generated_sql({
     },
     // Resolved on the MAIN pool, outside the READ ONLY transaction that has now
     // committed.
+    //
+    // allow_unresolved, because THIS layer cannot make the decision the throw
+    // demands. An OID neither the name table nor typcategory can bucket is
+    // recoverable only from an authored column_annotations data_type, and this
+    // executor has no annotations -- it is substitutable for
+    // get_data_view_results and knows nothing about a saved view. The
+    // obligation therefore moves one layer out, to
+    // derive-view-from-query-result.mjs, which rejects a null data_type it has
+    // no annotation for. Anything calling this executor without that deriver
+    // must make the same check.
     data_view_fields: await resolve_pg_field_types({
-      fields: projected_fields
+      fields: projected_fields,
+      allow_unresolved: true
     }),
     data_view_query_string: query_string
   }

@@ -106,6 +106,7 @@ function* handle_data_view_request({
   const opts = build_data_view_request_params({
     view_id: data_view.view_id,
     table_state: data_view.table_state,
+    query_id: data_view.query_id,
     offset,
     append_results
   })

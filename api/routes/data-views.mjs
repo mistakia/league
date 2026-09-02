@@ -10,6 +10,7 @@ import {
 import betting_market_column_definitions from '#libs-server/data-views-column-definitions/player-betting-market-column-definitions.mjs'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import { execute_data_view_request } from '#libs-server/data-views/execute-data-view-request.mjs'
+import { load_data_view_query } from '#libs-server/data-views/run-query-backed-view.mjs'
 import get_param_option_counts, {
   collect_other_params
 } from '#libs-server/data-views/get-param-option-counts.mjs'
@@ -852,6 +853,48 @@ router.post('/?', async (req, res) => {
       ? await db('user_data_views').where({ view_id }).first()
       : null
 
+    // query_id is taken from the EXISTING ROW, never from the request body. A
+    // saved view's backing statement is not a display property the save route
+    // may re-point: accepting a client-supplied query_id would let any caller
+    // aim any view at any statement, and the fork branch below would then carry
+    // that anywhere. It is set exactly once, by the authoring path that also
+    // wrote the data_view_queries row.
+    //
+    // The fork branch carries it FORWARD deliberately. A shared query-backed
+    // view saved by a second user must still render, and data_view_queries is
+    // ownerless precisely so that reference can be shared -- the statement runs
+    // under the sandbox role over allowlisted relations, so a second reader
+    // gains nothing they could not already read through the original view.
+    const source_query_id = existing_view ? existing_view.query_id : null
+
+    // On a query-backed view, every persisted column id must be an alias the
+    // statement projects. The client blocks the picker, but the client is not
+    // the control: a saved view mixing an ad-hoc alias with a registry column
+    // has no join key between the two, and it fails by rendering an empty
+    // table with no error anywhere -- the silent-degradation shape this whole
+    // representation exists to avoid. Refuse it by name, here.
+    if (source_query_id) {
+      const { column_annotations } = await load_data_view_query({
+        query_id: source_query_id,
+        query_runner: db
+      })
+      const projected = new Set(Object.keys(column_annotations))
+      const foreign = [
+        ...(table_state.columns || []),
+        ...(table_state.prefix_columns || [])
+      ]
+        .map((column) =>
+          typeof column === 'string' ? column : column && column.column_id
+        )
+        .filter((column_id) => column_id && !projected.has(column_id))
+
+      if (foreign.length) {
+        return res.status(400).send({
+          error: `this view is backed by a query, so it cannot carry registry columns: ${foreign.join(', ')}`
+        })
+      }
+    }
+
     let result_view_id
     if (existing_view && existing_view.user_id === user_id) {
       await db('user_data_views')
@@ -873,6 +916,7 @@ router.post('/?', async (req, res) => {
         view_name,
         view_description,
         table_state: JSON.stringify(table_state),
+        query_id: source_query_id,
         user_id
       })
     }
@@ -1471,7 +1515,14 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       prefix_columns: table_state.prefix_columns,
       row_axes: table_state.row_axes,
       row_grain: table_state.row_grain,
-      limit
+      limit,
+      // The export route is the ONE path that loads a persisted table_state
+      // server-side, which makes it the one path that would otherwise index the
+      // registry resolver with an ad-hoc column_id and raise a TypeError as a
+      // 500 rather than render. Carrying query_id here is what routes it to the
+      // query executor instead -- and it also separates its cache key, which the
+      // registry key cannot do for two statements projecting the same aliases.
+      ...(view.query_id ? { query_id: view.query_id } : {})
     }
 
     // Generate cache key

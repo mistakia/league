@@ -114,6 +114,34 @@ Structured JSON to stdout, one line per view:
 
 ---
 
+## create-data-view-query.mjs
+
+Persists a **query-backed data view** from a hand-written SELECT: a `data_view_queries` row holding the statement and its `column_annotations`, plus a `user_data_views` row referencing it.
+
+This is what lets the whole query-backed representation ship with no LLM in it. The guard, the executor, the pg type resolver, the deriver, the render path and the share link are all exercised end to end by a human typing SQL, so every one of them is validated before an agent exists to produce one. The generation agent's emit branch calls the same exported function, inheriting a path already walked by hand.
+
+The order is the point — parse, run, reconcile, and only then persist. A row that reaches the table has already produced a renderable result once, and the two inserts share one transaction so a half-created pair cannot be collected by the unreferenced-query sweep.
+
+### CLI Invocation
+
+```bash
+# Validate, execute and derive without writing anything
+NODE_ENV=production node scripts/create-data-view-query.mjs \
+  --sql-file /tmp/view.sql --annotations-file /tmp/annotations.json \
+  --view-name 'Air yards by week' --dry-run
+
+# Persist, owned by a user
+NODE_ENV=production node scripts/create-data-view-query.mjs \
+  --sql-file /tmp/view.sql --annotations-file /tmp/annotations.json \
+  --view-name 'Air yards by week' --user-id 130
+```
+
+The annotations block is keyed by projected alias and carries ONLY what the query cannot supply: `column_title` (required), `header_label`, `fixed`, `size`, and `data_type` in the one case where an alias's pg type has no mapping. Reconciliation is total in both directions, and a `data_type` declared for an alias whose type IS derivable is a rejection rather than a hint — that is the whole class of "declared type disagrees with the real one" failure this representation deletes.
+
+JSON on stdout on success; a named code on stderr and a non-zero exit on refusal, never a plausible empty result.
+
+---
+
 ## scrape-pfr-coaches.mjs
 
 Acquires the canonical `{full_name, dob, first_season_pfr}` for each `nfl_coaches.pfr_coach_id` from Pro-Football-Reference's `/coaches/<id>.htm` pages. Output is `static-data/pfr-coaches.json`, the source-of-record fixture for the DOB-anchored own-id coach identity (see `nfl_coaches.coach_id` derivation).

@@ -64,13 +64,26 @@ export const get_sandbox_db = (pool_name) => {
     )
   }
 
-  // The same host/port overrides db/index.mjs applies to the main pool. The
-  // suite runs against a throwaway Postgres on :5433 via LEAGUE_DB_PORT, and a
-  // sandbox pool that ignored them would quietly point at a developer's local
-  // :5432 instead -- connecting successfully, to the wrong database.
+  // The same host/port/database overrides db/index.mjs applies to the main
+  // pool. The suite runs against a throwaway Postgres on :5433 via
+  // LEAGUE_DB_PORT, and a sandbox pool that ignored them would quietly point at
+  // a developer's local :5432 instead -- connecting successfully, to the wrong
+  // database.
+  //
+  // LEAGUE_DB_DATABASE is here for the same reason and was MISSING until
+  // 2026-09-02, which made the warning above true of this pool itself. Under
+  // `yarn test:isolated` that variable names a per-run database while the main
+  // pool follows it and this one did not, so every sandboxed query in an
+  // isolated run reached the SHARED league_test -- reading rows the run had not
+  // written, and writing its audit rows where a concurrent run would see them.
+  // The one sandbox spec that exists never caught it because it passes its own
+  // pool explicitly.
   const connection = { ...sandbox_config.connection }
   if (process.env.LEAGUE_DB_HOST) connection.host = process.env.LEAGUE_DB_HOST
   if (process.env.LEAGUE_DB_PORT) connection.port = process.env.LEAGUE_DB_PORT
+  if (process.env.LEAGUE_DB_DATABASE) {
+    connection.database = process.env.LEAGUE_DB_DATABASE
+  }
 
   const pool = Knex({
     ...sandbox_config,

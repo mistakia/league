@@ -249,6 +249,26 @@ Three properties matter here rather than in the tier's own documentation, becaus
 
 Full description of the controls and the allowlist: [data-views-system.md](./data-views-system.md#sandboxed-sql-tier).
 
+## Query-backed views
+
+A saved view may reference a statement instead of registry columns. The pipeline is one line:
+
+```
+sql_text -> executor -> result envelope -> deriver -> { rows, columns, table_state seed } -> client
+```
+
+`user_data_views.query_id` points at a `data_view_queries` row holding `sql_text` and `column_annotations`. `run-query-backed-view.mjs` is the `run_query` that resolves at request time inside `execute_data_view_request` whenever the params carry a `query_id` — the branch lives there rather than at each of the four call sites, because one of those call sites is the export route, the only path that loads a persisted `table_state` server-side and the one that would otherwise index the registry resolver with an ad-hoc `column_id`.
+
+**Derive everything derivable; author only what no registry carries.** `column_id`, projection order and `data_type` come off the pg field descriptors, the last through `resolve-pg-field-types.mjs` against `pg_catalog.pg_type` at runtime. `column_title`, `header_label`, `fixed` and `size` are authored. Reconciliation is total in both directions: an annotation naming an unprojected alias is a rejection, and so is a projected alias with no annotation. A declared `data_type` is a rejection too — admitted only for an OID neither `format_type` nor `typcategory` can bucket, which is where the resolver throws by name rather than returning a null.
+
+**The derived `table_state` is a SEED, not the state.** Derivation runs on every execution, because descriptors only exist once the query has run — but it produces descriptors ONLY. The sort, filters, offset and limit come from the caller and reach the data through the outer wrap. Getting this backwards silently resets a saved view's sort every time it is opened, which reads as flakiness rather than as a bug.
+
+**What a user may still change is exactly what the outer wrap can carry.** Sort, filter, paginate, reorder, remove and resize all work unmodified — filtering because it keys purely on `data_type`, the params editor because it already disables itself on a column with no `column_params`. Only "add a registry column" is blocked, in the picker and again at the save route, because there is no join key between a registry column and an arbitrary result set.
+
+**`query_id` is a VIEW key, never a `table_state` key.** A view definition has five representations, two of which are key-driven URL parsers that drop what they do not declare, silently. One scalar crosses all five by the route `view_id` already takes; an embedded statement crosses none. It is also folded into `get_data_view_hash`, without which two different statements projecting the same aliases at the same offset share a cache key and serve each other's rows.
+
+`data_view_queries` carries no owner column, so that nothing structural keys on `user_id` and opening generation to anonymous callers is a deleted admission check rather than a re-keyed table. The price is that an unreferenced row has nothing to clean it up, which is why `sweep-unreferenced-data-view-queries.mjs` ships with the table rather than after it. Create one with `scripts/create-data-view-query.mjs`.
+
 ## Adding things
 
 **A column.** Declare `source` with the grain its data actually lives at, and `measure` with the kind and expression. Run it through `derive_measure` if it is a numeric measure so the output contract is generated rather than hand-written. Confirm a source-attach rule exists for `(cell identity, your grain)` for every grain you expect the column to be usable at — the coverage assertion checks this.

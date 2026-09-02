@@ -18,6 +18,7 @@ export default function get_data_view_hash({
   sort = [],
   offset = 0,
   limit = 500,
+  query_id = null,
   user_id
 }) {
   if (user_id === undefined) {
@@ -49,6 +50,16 @@ export default function get_data_view_hash({
   // keeps every existing player-grain key valid.
   const row_grain_id = row_grain[0] || 'player'
 
+  // A query-backed view's columns are ad-hoc aliases, so two entirely different
+  // statements can project the same names -- `player_name`, `points` -- at the
+  // same offset and limit and collide onto one key, serving each other's rows.
+  // That is a cross-view data leak, not a hit-rate question, and query_id is
+  // what separates them. It is folded in only when present, so every existing
+  // registry key stays valid.
+  //
+  // The statement TEXT is deliberately not hashed. A query_id is minted per
+  // statement and the row is immutable, so the id is already a content key, and
+  // hashing multi-kilobyte SQL on every request buys nothing.
   return get_table_hash(
     JSON.stringify({
       row_axes,
@@ -59,6 +70,7 @@ export default function get_data_view_hash({
       offset,
       limit,
       ...(row_grain_id === 'player' ? {} : { row_grain: [row_grain_id] }),
+      ...(query_id ? { query_id } : {}),
       ...(viewer === null ? {} : { viewer })
     })
   )

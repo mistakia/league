@@ -191,7 +191,7 @@
     "react-redux": "^9.2.0",
     "react-router": "^6.28.1",
     "react-router-dom": "^6.28.1",
-    "react-table": "mistakia/react-table#67d7957083be8b8aaf826396c259ee308ca2106c",
+    "react-table": "mistakia/react-table#780e876808e6c836259f29c3c7aa87c8a5c183a7",
     "react-virtualized-compat": "^2.0.0",
     "redux": "^5.0.1",
     "redux-first-history": "^5.2.0",

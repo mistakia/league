@@ -45,8 +45,13 @@ const expect = chai.expect
 // this list when the executor starts passing another server-decided value.
 const SERVER_OWNED_KEYS = ['timeout', 'user_id', 'calculate_total_count']
 
+// `resolved_run_query`, not `run_query`: the executor now resolves which
+// executor to call per request -- run_query_backed_view when the params carry a
+// query_id, get_data_view_results otherwise -- and an explicitly passed
+// run_query still wins. The rename was caught by the located-the-call assertion
+// below rather than by review, which is what that assertion is for.
 const read_call_argument = (source) => {
-  const call_start = source.indexOf('await run_query({')
+  const call_start = source.indexOf('await resolved_run_query({')
   if (call_start === -1) return null
 
   const open_brace = source.indexOf('{', call_start)

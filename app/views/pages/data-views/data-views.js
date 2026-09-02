@@ -452,11 +452,36 @@ export default function DataViewsPage({
   // so an otherwise-null cell renders 0 (active-but-zero) / BYE / blank distinctly.
   // Gated on week grain: off-week-grain the signal is absent and columns are
   // passed through unchanged, so non-week views keep their current behavior.
+  // Descriptors for a query-backed view's ad-hoc columns, carried on the
+  // response metadata because nothing in the client registry can know them --
+  // they are read off the pg field descriptors of a statement the registry has
+  // never seen. Keyed by column_id so the merge below is one spread.
+  const query_backed_columns = useMemo(() => {
+    const descriptors = data_view_request.metadata?.columns
+    if (!Array.isArray(descriptors) || !descriptors.length) return null
+    const by_column_id = {}
+    for (const descriptor of descriptors) {
+      if (descriptor && descriptor.column_id) {
+        by_column_id[descriptor.column_id] = descriptor
+      }
+    }
+    return by_column_id
+  }, [data_view_request.metadata])
+
   const all_columns = useMemo(() => {
-    if (!current_row_axes.includes('week')) return data_views_fields
+    // The week-grain participation augmentation below is a no-op off week
+    // grain, but the ad-hoc merge is not, so the early return had to move
+    // rather than be appended to: returning data_views_fields here dropped
+    // every query-backed descriptor on the floor and rendered each column as
+    // its raw alias.
+    const base_columns = query_backed_columns
+      ? { ...data_views_fields, ...query_backed_columns }
+      : data_views_fields
+
+    if (!current_row_axes.includes('week')) return base_columns
 
     const augmented = {}
-    for (const [key, column] of Object.entries(data_views_fields)) {
+    for (const [key, column] of Object.entries(base_columns)) {
       if (column.data_type !== table_constants.TABLE_DATA_TYPES.NUMBER) {
         augmented[key] = column
         continue
@@ -493,7 +518,7 @@ export default function DataViewsPage({
       }
     }
     return augmented
-  }, [data_views_fields, current_row_axes])
+  }, [data_views_fields, current_row_axes, query_backed_columns])
 
   const get_row_axis_label_suffix_cb = useCallback(
     (row) => get_row_axis_label_suffix(current_row_axes, row),

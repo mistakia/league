@@ -427,7 +427,8 @@
       "created_at": "keep",
       "updated_at": "keep",
       "user_id": "keep",
-      "llm_tags_generated_at": "keep"
+      "llm_tags_generated_at": "keep",
+      "query_id": "keep"
     },
     "users": {
       "id": "keep",

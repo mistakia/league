@@ -158,6 +158,13 @@ export const EXCLUDED_RELATIONS = new Map([
   // statement other users have run is not one.
   ['data_view_sql_audit', "the sandbox's own audit trail"],
 
+  // The statements themselves, for the same reason one line up and one degree
+  // sharper: these are the saved statements OTHER users wrote against this very
+  // role, and user_data_views is already excluded as "every other user's saved
+  // data views". A query-backed view is a saved data view whose definition
+  // happens to be SQL.
+  ['data_view_queries', "every other user's saved SQL statement"],
+
   // Migration bookkeeping: no analytical content, and a moving target
   ['league_migrations', 'migration bookkeeping'],
   ['league_migrations_lock', 'migration bookkeeping'],

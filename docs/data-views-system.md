@@ -1680,26 +1680,27 @@ Below the chip strip, `<DataViewNotices>` renders soft-blue info notices (severi
 
 Current notice codes:
 
-| Code                                       | Trigger                                                                                                                                            |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                      |
-| `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key. |
+| Code                                       | Trigger                                                                                                                                                                                   |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                                                             |
+| `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key.                                        |
+| `view_backed_by_query`                     | The view references a `data_view_queries` row, so registry columns cannot be added and the row grain cannot be changed. Keyed on the view's `query_id`, not on anything in `table_state`. |
 
 Rule #2 resolves `nfl_week_id` `dynamic_type` values through the SAME `resolve_nfl_week_dynamic_value` the server expander uses, so the notice and the query cannot describe different spans — they did, before the consolidation, because the client anchored `last_n_nfl_years` on the last completed season and the server on the current one. Params other than `nfl_week_id` still skip the check rather than risk false positives.
 
 ### File map
 
-| File                                              | Role                                                          |
-| ------------------------------------------------- | ------------------------------------------------------------- |
-| `app/core/data-views/format-param-scope.mjs`      | Pure formatter shared by chips and notices                    |
-| `app/core/data-views/active-filter-summaries.mjs` | Selector input -> chip-shaped summaries                       |
-| `app/core/data-views/data-view-notices.mjs`       | The two notice rules, concatenated by `get_data_view_notices` |
-| `app/views/components/data-view-filter-chips/`    | Chip container + view + styles                                |
-| `app/views/components/data-view-notices/`         | Notice container + view + styles                              |
+| File                                              | Role                                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------ |
+| `app/core/data-views/format-param-scope.mjs`      | Pure formatter shared by chips and notices                               |
+| `app/core/data-views/active-filter-summaries.mjs` | Selector input -> chip-shaped summaries                                  |
+| `app/core/data-views/data-view-notices.mjs`       | The notice rules, applied by `get_data_view_notices` over `NOTICE_RULES` |
+| `app/views/components/data-view-filter-chips/`    | Chip container + view + styles                                           |
+| `app/views/components/data-view-notices/`         | Notice container + view + styles                                         |
 
-### Adding a third notice
+### Adding a notice
 
-Add another `find_*` function inside `data-view-notices.mjs` and concat its output in the exported selector. Promote to a registry only at three rules (rule of three).
+The rule of three has fired: `view_backed_by_query` was the third rule, and `data-view-notices.mjs` now carries a `NOTICE_RULES` array that `get_data_view_notices` flat-maps over. Add a `find_*` function taking the whole context object and returning an array, and register it in that array. A rule needing an input the others do not — `query_id` is the first — costs nothing to add, since every rule receives the same context.
 
 ## A column's `source.grain` silently determines which row axes it can ever see
 
@@ -1734,7 +1735,7 @@ execute_data_view_request({
 })
 ```
 
-**Result caching is off on this path.** `get_data_view_hash` knows nothing about SQL, so two different statements at the same offset and limit share a cache key and would serve each other's rows. The query-backed data-views work adds `query_id` to that hash and turns caching on.
+**Result caching depends on whether the request has a `query_id`.** It shipped off because `get_data_view_hash` knew nothing about SQL, so two different statements at the same offset and limit shared a cache key and would have served each other's rows — a cross-view leak, not a hit-rate question. The hash now folds in `query_id`, so a request arriving through `run-query-backed-view.mjs` is cached and separated by the statement that produced it. A caller executing a raw `sql_text` with no persisted row has no key to separate it by and must still pass `skip_cache`.
 
 ### The controls, and which are load-bearing
 
@@ -1790,7 +1791,7 @@ Every statement must project uniquely and explicitly named output columns. That 
 
 ### Result envelope
 
-Both execution paths return one envelope: `{ data_view_results, data_view_metadata, data_view_fields, data_view_query_string }`. `data_view_fields` is the pg field descriptors in projection order, resolved to `{ name, data_type_oid, pg_type_name, data_type }` by `libs-server/data-views/resolve-pg-field-types.mjs` against `pg_catalog` — `format_type` plus `typcategory`, never `information_schema`, which cannot describe an expression and reports enums as `USER-DEFINED`. An unbucketable type throws rather than returning null.
+Both execution paths return one envelope: `{ data_view_results, data_view_metadata, data_view_fields, data_view_query_string }`. `data_view_fields` is the pg field descriptors in projection order, resolved to `{ name, data_type_oid, pg_type_name, data_type }` by `libs-server/data-views/resolve-pg-field-types.mjs` against `pg_catalog` — `format_type` plus `typcategory`, never `information_schema`, which cannot describe an expression and reports enums as `USER-DEFINED`. An unbucketable type throws `UnbucketablePgTypeError` rather than returning null, because a null propagates to `DATA_TYPE_OPERATORS[data_type]` and crashes the filter control. The one opt-out is `allow_unresolved: true`, which marks that ONE field `unbucketable` instead of failing the batch — the throw is batch-wide and names an OID rather than a column, so a caller that can recover per column cannot tell which alias to recover. The executor passes it and the query-backed deriver holds the obligation, rejecting a null `data_type` it has no authored annotation for.
 
 **`data_view_fields` must never reach a client.** Raw pg descriptors carry `tableID` and `columnID` schema OIDs and the client merges `metadata` wholesale, so descriptors are deliberately not parked on `data_view_metadata`; the deriver emits `metadata.columns` from them server-side.
 
@@ -1799,6 +1800,12 @@ Both execution paths return one envelope: `{ data_view_results, data_view_metada
 `libs-server/data-views/generation/data-view-sql-kill-switch.mjs` gates execution, because a saved view of this tier reaches the executor without passing through generation at all. The Redis key `data_view_sql:enabled` is the operational control and its absence means enabled; `LEAGUE_DATA_VIEW_SQL_DISABLED=1` is the control that still works when Redis does not.
 
 `data_view_sql_audit` records one row per statement attempted — executed, rejected or errored — with the statement text, row count and duration.
+
+### Persisting one: query-backed views
+
+A statement becomes a saved view by way of a `data_view_queries` row that `user_data_views.query_id` references. `scripts/create-data-view-query.mjs` is the authoring path — guard, execute, reconcile against the annotations, then persist both rows in one transaction — and it takes a hand-written statement, so the whole representation is exercisable with no LLM anywhere in it.
+
+The representation, the deriver, the seed-versus-live rule and the edit boundary are in [data-views-architecture.md](./data-views-architecture.md#query-backed-views), which owns them end to end.
 
 ## Related Documentation
 

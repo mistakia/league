@@ -11,7 +11,9 @@ const get_notices = createSelector(
   (selected_data_view) =>
     get_data_view_notices({
       where: selected_data_view.table_state.where,
-      columns: selected_data_view.table_state.columns
+      columns: selected_data_view.table_state.columns,
+      // A view property, not a table_state one -- SQL never enters table_state.
+      query_id: selected_data_view.query_id
     })
 )
 

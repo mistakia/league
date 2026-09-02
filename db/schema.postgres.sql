@@ -195,6 +195,7 @@ DROP INDEX IF EXISTS public.idx_waivers_active_by_type_lid;
 DROP INDEX IF EXISTS public.idx_waiver_releases_waiverid;
 DROP INDEX IF EXISTS public.idx_users_sources_userid;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
+DROP INDEX IF EXISTS public.idx_user_data_views_query_id;
 DROP INDEX IF EXISTS public.idx_transactions_tid;
 DROP INDEX IF EXISTS public.idx_transactions_pid;
 DROP INDEX IF EXISTS public.idx_transactions_lid;
@@ -421,6 +422,7 @@ DROP INDEX IF EXISTS public.idx_dfs_contests_season_year_week;
 DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
 DROP INDEX IF EXISTS public.idx_data_view_sql_audit_outcome;
 DROP INDEX IF EXISTS public.idx_data_view_sql_audit_created_at;
+DROP INDEX IF EXISTS public.idx_data_view_queries_created_at;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_submitter_user_id;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_submission_trust_tier;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_status_trust_tier;
@@ -701,6 +703,7 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS d
 ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
 ALTER TABLE IF EXISTS ONLY public.data_view_sql_audit DROP CONSTRAINT IF EXISTS data_view_sql_audit_pkey;
+ALTER TABLE IF EXISTS ONLY public.data_view_queries DROP CONSTRAINT IF EXISTS data_view_queries_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_screenshots DROP CONSTRAINT IF EXISTS contribution_screenshots_pkey;
@@ -1089,6 +1092,7 @@ DROP SEQUENCE IF EXISTS public.draft_draft_pick_id_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.data_view_sql_audit;
+DROP TABLE IF EXISTS public.data_view_queries;
 DROP TABLE IF EXISTS public.contribution_trust_overrides;
 DROP TABLE IF EXISTS public.contribution_submissions;
 DROP TABLE IF EXISTS public.contribution_screenshots;
@@ -2542,6 +2546,18 @@ CREATE TABLE public.contribution_trust_overrides (
     override_reason text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT contribution_trust_overrides_submission_trust_tier_check CHECK (((submission_trust_tier)::text = ANY ((ARRAY['untrusted'::character varying, 'standard'::character varying, 'trusted'::character varying])::text[])))
+);
+
+
+--
+-- Name: data_view_queries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.data_view_queries (
+    query_id character varying(36) NOT NULL,
+    sql_text text NOT NULL,
+    column_annotations json NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -28057,7 +28073,8 @@ CREATE TABLE public.user_data_views (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     user_id bigint,
-    llm_tags_generated_at timestamp with time zone
+    llm_tags_generated_at timestamp with time zone,
+    query_id character varying(36)
 );
 
 
@@ -29551,6 +29568,14 @@ ALTER TABLE ONLY public.contribution_submissions
 
 ALTER TABLE ONLY public.contribution_trust_overrides
     ADD CONSTRAINT contribution_trust_overrides_pkey PRIMARY KEY (submitter_user_id);
+
+
+--
+-- Name: data_view_queries data_view_queries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_view_queries
+    ADD CONSTRAINT data_view_queries_pkey PRIMARY KEY (query_id);
 
 
 --
@@ -31964,6 +31989,13 @@ CREATE INDEX idx_contribution_submissions_submitter_user_id ON public.contributi
 
 
 --
+-- Name: idx_data_view_queries_created_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_data_view_queries_created_at ON public.data_view_queries USING btree (created_at DESC);
+
+
+--
 -- Name: idx_data_view_sql_audit_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33543,6 +33575,13 @@ CREATE INDEX idx_transactions_pid ON public.transactions USING btree (pid);
 --
 
 CREATE INDEX idx_transactions_tid ON public.transactions USING btree (tid);
+
+
+--
+-- Name: idx_user_data_views_query_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_user_data_views_query_id ON public.user_data_views USING btree (query_id) WHERE (query_id IS NOT NULL);
 
 
 --
@@ -59488,6 +59527,13 @@ GRANT SELECT ON TABLE public.contribution_submissions TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.contribution_trust_overrides TO league_reader;
+
+
+--
+-- Name: TABLE data_view_queries; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.data_view_queries TO league_reader;
 
 
 --

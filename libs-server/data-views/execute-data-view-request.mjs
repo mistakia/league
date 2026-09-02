@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { get_data_view_results, redis_cache, emit_signal } from '#libs-server'
 import { DATA_VIEW_DEFAULT_MAX_LIMIT } from '#libs-server/validators.mjs'
+import run_query_backed_view from '#libs-server/data-views/run-query-backed-view.mjs'
 
 // The single entry every path that executes a data-view query calls. Holds both
 // the bounded-concurrency admission gate and the telemetry/signal
@@ -337,7 +338,7 @@ const release_slot = () => {
  * @param {(state: 'waiting'|'executing') => boolean} [opts.on_heartbeat] - called
  *   every interval while queued or in flight; return false (socket closed) to stop.
  * @param {(info: object) => void} [opts.on_status] - called once when execution starts.
- * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object, data_view_fields?: Array<object> }>} [opts.run_query] - execution seam (defaults to get_data_view_results). The sandboxed-SQL tier enters here as an alternate run_query rather than as a fifth execution path.
+ * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object, data_view_fields?: Array<object> }>} [opts.run_query] - execution seam. Left unset it resolves per request: run_query_backed_view when params carry a query_id, get_data_view_results otherwise. The SQL tiers enter here as an alternate run_query rather than as a fifth execution path.
  * @param {(opts: object) => void} [opts.signal_emitter] - seam for the slow-query emitter
  * @param {(key: string) => Promise<object|null>} [opts.cache_get] - seam for the admission cache re-check
  * @param {boolean} [opts.skip_cache] - bypass the admission re-check and cache
@@ -358,7 +359,7 @@ export async function execute_data_view_request({
   on_status,
   max_limit = DATA_VIEW_DEFAULT_MAX_LIMIT,
   timeout_ms = null,
-  run_query = get_data_view_results,
+  run_query = null,
   signal_emitter = emit_signal,
   cache_get = (key) => redis_cache.get(key),
   skip_cache = false,
@@ -366,6 +367,18 @@ export async function execute_data_view_request({
   emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS,
   accepted_slow_queries = ACCEPTED_SLOW_QUERIES
 }) {
+  // Which executor runs is decided HERE rather than at each of the four call
+  // sites, because one of those call sites is the export route -- the only path
+  // that loads a persisted table_state server-side, and the one that would
+  // otherwise index the registry resolver with an ad-hoc column_id and raise a
+  // TypeError as a 500. A per-call-site branch is a branch somebody forgets;
+  // this is the single point every path already goes through.
+  //
+  // An explicitly passed run_query still wins, which is what the specs use.
+  const resolved_run_query =
+    run_query ||
+    (params && params.query_id ? run_query_backed_view : get_data_view_results)
+
   const exec_id = execution_id || mint_execution_id()
   const request_started_at = Date.now()
   const started_at = new Date(request_started_at).toISOString()
@@ -467,7 +480,7 @@ export async function execute_data_view_request({
     // transaction block because SET TRANSACTION READ ONLY has nowhere else to
     // live, and it pays a round trip per statement to get it.
     const { data_view_results, data_view_metadata, data_view_fields } =
-      await run_query({
+      await resolved_run_query({
         ...params,
         calculate_total_count,
         // Timeout after the spread: the client's table state must not be able to

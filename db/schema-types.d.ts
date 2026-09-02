@@ -277,6 +277,13 @@ export interface ContributionTrustOverridesRow {
   created_at: Date
 }
 
+export interface DataViewQueriesRow {
+  query_id: string
+  sql_text: string
+  column_annotations: any
+  created_at: Date
+}
+
 export interface DataViewSqlAuditRow {
   audit_id: number
   created_at: Date
@@ -21546,6 +21553,7 @@ export interface UserDataViewsRow {
   updated_at: Date | null
   user_id: number | null
   llm_tags_generated_at: Date | null
+  query_id: string | null
 }
 
 export interface UserPlaysViewsRow {

@@ -150,10 +150,39 @@ const find_filter_param_value_disjoint_from_columns = ({ where, columns }) => {
   return notices
 }
 
-export default function get_data_view_notices({ where, columns }) {
-  if (!Array.isArray(where) || !Array.isArray(columns)) return []
+// A query-backed view is not editable in the dimensions that would change the
+// STATEMENT, and there is no control anywhere that says so -- the picker simply
+// offers fewer columns, which reads as a bug rather than as a rule. The notice
+// is what makes the boundary legible: everything the outer wrap can carry still
+// works, and everything that would rewrite the query does not.
+const find_query_backed_view = ({ query_id }) => {
+  if (!query_id) return []
   return [
-    ...find_filter_param_key_absent_from_columns({ where, columns }),
-    ...find_filter_param_value_disjoint_from_columns({ where, columns })
+    {
+      code: 'view_backed_by_query',
+      severity: 'info',
+      message:
+        'This view is built from a query. You can sort, filter, page, reorder and resize its columns, but you cannot add registry columns or change its row grain.'
+    }
   ]
+}
+
+// Promoted to a registry at the THIRD rule, which is the threshold
+// add-data-view-notice-infrastructure-and-filter-chips set for itself when it
+// shipped the first two. Each rule takes the whole context and returns an array,
+// so a rule that needs an input the others do not costs nothing to add.
+const NOTICE_RULES = [
+  find_filter_param_key_absent_from_columns,
+  find_filter_param_value_disjoint_from_columns,
+  find_query_backed_view
+]
+
+export default function get_data_view_notices({
+  where,
+  columns,
+  query_id = null
+}) {
+  if (!Array.isArray(where) || !Array.isArray(columns)) return []
+  const context = { where, columns, query_id }
+  return NOTICE_RULES.flatMap((rule) => rule(context))
 }

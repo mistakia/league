@@ -187,6 +187,22 @@
 
 
 
+# Data View Queries
+
+## Collect data_view_queries rows no saved view references (daily)
+##
+## data_view_queries carries NO owner column, deliberately: nothing structural
+## keys on user_id, so opening generation to anonymous callers later is a
+## deleted admission check rather than a re-keyed table. The cost of that choice
+## is exactly this job -- an unreferenced row has nobody to attribute it to and
+## nothing else that would ever remove it.
+##
+## The 24h floor inside the script is a grace period, not a debounce. The
+## authoring path writes the query row and the view row in ONE transaction so a
+## correct pair is never momentarily unreferenced, but a generation job that
+## persists the query first and the view after a user confirms would be.
+15 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/sweep-data-view-queries.mjs >> /var/log/league/sweep-data-view-queries.log 2>&1
+
 # Crontab Export
 
 ## Export crontab for backup sync (hourly)
