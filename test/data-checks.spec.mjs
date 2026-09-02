@@ -11,7 +11,11 @@ import {
   load_parked,
   validate_registry
 } from '#libs-server/data-check.mjs'
-import { run_check, run_data_checks } from '#scripts/run-data-checks.mjs'
+import {
+  finding_message,
+  run_check,
+  run_data_checks
+} from '#scripts/run-data-checks.mjs'
 import registry from '#db/checks/registry.mjs'
 
 const expect = chai.expect
@@ -797,6 +801,75 @@ describe('data checks / resolve inspection', function () {
   system exists to make, and until run_data_checks took its checks as a
   parameter nothing could reach it without five production queries.
 */
+/*
+  The signal headline, over the two shapes that made it lie.
+
+  A findings signal is the ONLY surface most of these checks ever reach a human
+  through, so a headline that misstates the rate is a defect in the system
+  rather than in a check. It is also the one part of the emit path a spec can
+  reach: `emit_condition` is module-private and declines under NODE_ENV=test,
+  which is why this shipped wrong and stayed green for weeks.
+
+  Both fixtures are production measurements taken 2026-09-01, not invented
+  numbers, so a future edit that re-derives the rate from the row count fails
+  against the case that actually occurred.
+*/
+describe('data checks / finding message', function () {
+  const check = {
+    check_id: 'prop-market-open-close-esbid-coherence',
+    invariant: 'OPEN and CLOSE name the same game.',
+    repair_command: 'do the thing'
+  }
+
+  // 9,160 drifted markets emit 9,160 rows plus 6 clean per-book sentinels. The
+  // honest denominator is the scanned population, and 9,160 / 179,175 is 5.1%.
+  it('reports the scanned population, not the emitted row count', () => {
+    const message = finding_message({
+      check,
+      finding_count: 9160,
+      graded: 9167,
+      smallest_denominator: 179175,
+      largest_denominator: 363570,
+      summary: 'a sample'
+    })
+
+    expect(message).to.match(/scanned population 179175-363570/)
+    expect(message).to.match(/9160 finding\(s\) across 9167 graded row\(s\)/)
+  })
+
+  // The wording carries the whole fix, so it is asserted rather than assumed.
+  // "over N graded units" invites exactly the ratio the reader must not compute.
+  it('never phrases the row count as the denominator of a rate', () => {
+    const message = finding_message({
+      check,
+      finding_count: 9160,
+      graded: 9167,
+      smallest_denominator: 179175,
+      largest_denominator: 363570,
+      summary: 'a sample'
+    })
+
+    expect(message).to.not.match(/over \d+ graded unit/)
+  })
+
+  // The same artifact in the other direction, and the reason a fix that only
+  // special-cased huge finding counts would not be general: 4 findings over 9
+  // emitted rows reads as a gradeability collapse until the population appears.
+  it('makes a small emitted-row count legible too', () => {
+    const message = finding_message({
+      check: { ...check, check_id: 'prop-market-selection-grade-consistency' },
+      finding_count: 4,
+      graded: 9,
+      smallest_denominator: 132086,
+      largest_denominator: 132086,
+      summary: 'a sample'
+    })
+
+    expect(message).to.match(/4 finding\(s\) across 9 graded row\(s\)/)
+    expect(message).to.match(/scanned population 132086-132086/)
+  })
+})
+
 describe('data checks / runner disposition', function () {
   const fixture_check = ({ check_id, rows, ...overrides }) => ({
     check_id,

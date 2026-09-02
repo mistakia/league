@@ -266,6 +266,37 @@ const collapse_reason = ({ check, graded, smallest_denominator }) => {
 }
 
 /**
+ * The headline a findings signal leads with.
+ *
+ * Extracted and exported for ONE reason: it is the only part of the emit path a
+ * spec can reach, because `emit_condition` is module-private and declines under
+ * NODE_ENV=test. The defect this shape exists to prevent shipped once already
+ * and was invisible to a green suite for exactly that reason.
+ *
+ * `graded` counts EMITTED ROWS, not the population scanned, and on the shape
+ * that emits one row per violation the two diverge by orders of magnitude: a
+ * check finding 9,160 drifted markets emits 9,160 violating rows plus one clean
+ * sentinel per book, so "9160 over 9167" reads as 99.9% when the true rate is
+ * 5.1%. The scanned population lives in `denominator` under the schema
+ * contract. Report that range, and call the row count a row count — naming a
+ * ratio the reader must not compute is the same misleading-oracle failure this
+ * system exists to catch.
+ *
+ * The range is a range, not a single number, because the denominator is
+ * per-grain and deliberately so: the coherence check emits one denominator per
+ * book so a failing book cannot hide behind a healthy sibling.
+ */
+export const finding_message = ({
+  check,
+  finding_count,
+  graded,
+  smallest_denominator,
+  largest_denominator,
+  summary
+}) =>
+  `${check.check_id}: ${finding_count} finding(s) across ${graded} graded row(s), scanned population ${smallest_denominator}-${largest_denominator}. ${check.invariant} Sample: ${summary}. Repair: ${check.repair_command}`
+
+/**
  * Grade one check and carry its two conditions to the signal queue.
  *
  * Returns the classification plus whether every emit reached the queue. Throws
@@ -339,7 +370,14 @@ export const run_check = async ({ check, parked }) => {
       )
       .join('; ')
 
-    const message = `${check.check_id}: ${findings.length} finding(s) over ${graded} graded unit(s). ${check.invariant} Sample: ${summary}. Repair: ${check.repair_command}`
+    const message = finding_message({
+      check,
+      finding_count: findings.length,
+      graded,
+      smallest_denominator,
+      largest_denominator,
+      summary
+    })
 
     const emit_ok = await emit_condition({
       fingerprint: findings_fingerprint(check.check_id),
@@ -376,7 +414,7 @@ export const run_check = async ({ check, parked }) => {
   } else {
     const resolve_ok = await resolve_condition({
       fingerprint: findings_fingerprint(check.check_id),
-      resolution_note: `[Fix] ${check.check_id} found nothing unsuppressed across ${graded} graded unit(s)`
+      resolution_note: `[Fix] ${check.check_id} found nothing unsuppressed across ${graded} graded row(s), scanned population ${smallest_denominator}-${largest_denominator}`
     })
     emits_ok = emits_ok && resolve_ok
   }
