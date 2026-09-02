@@ -34,7 +34,9 @@ import {
   createPlayer,
   updatePlayer,
   find_player_row,
-  readCSV
+  readCSV,
+  resolve_canonical_player,
+  describe_resolution
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -185,7 +187,19 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
   log(
     `${year}: ${csv_gsis.size} unique gsis_ids in CSV, ${missing_gsis.length} missing from player table`
   )
-  if (!missing_gsis.length) return { missing: 0, created: 0, failed: 0 }
+  // Every key the totals accumulator sums must be present here. It adds
+  // `totals[k] += c[k]` over its OWN key set, so a key missing from this early
+  // return contributes `undefined` and turns that total into NaN for the whole
+  // run -- `updated` did exactly that before the skip counters were added.
+  if (!missing_gsis.length)
+    return {
+      missing: 0,
+      created: 0,
+      updated: 0,
+      failed: 0,
+      skipped_exists: 0,
+      skipped_unknown: 0
+    }
 
   // Group rows by gsis_id and pick the best-scoring row per missing player.
   const by_gsis = new Map()
@@ -201,6 +215,8 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
   let updated = 0
   let failed = 0
   const failure_samples = []
+  const skipped = { exists: 0, unknown: 0 }
+  const skipped_samples = []
   for (const [gsis_id, r] of by_gsis.entries()) {
     const player_data = csv_row_to_player_data(r)
     if (dry_run) {
@@ -302,6 +318,42 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
         continue
       }
 
+      /*
+        The matchers above are deliberately conservative -- they refuse to
+        ENRICH on a loose signal, because a wrong id write corrupts a real
+        player. That conservatism is right, and it leaves a gap this closes: a
+        candidate rejected as too-loose-to-enrich falls straight through to a
+        mint, so the very looseness that made it unsafe to write also makes it
+        look new.
+
+        The comment above once justified that as "a possible duplicate is later
+        mergeable". It is not, reliably -- the `duplicate-person-rows` class
+        recurs by construction, and each one-shot repair mints the next round's
+        findings. Refusing the mint is the cheaper error: a wrongly refused
+        create costs one player one import cycle, where a duplicate costs an
+        adjudication.
+      */
+      const backfill_name = `${player_data.first_name} ${player_data.last_name}`
+      const resolution = await resolve_canonical_player({
+        name: backfill_name,
+        date_of_birth: player_data.date_of_birth,
+        external_ids: player_data
+      })
+
+      if (resolution.status !== 'new') {
+        skipped[resolution.status === 'exists' ? 'exists' : 'unknown'] += 1
+        if (skipped_samples.length < 20) {
+          skipped_samples.push(
+            describe_resolution({
+              name: backfill_name,
+              date_of_birth: player_data.date_of_birth,
+              resolution
+            })
+          )
+        }
+        continue
+      }
+
       const result = await createPlayer(player_data)
       if (result) {
         created += 1
@@ -343,7 +395,21 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
     log('failure samples:')
     for (const s of failure_samples) log(s)
   }
-  return { missing: missing_gsis.length, created, updated, failed }
+  // A refusal is not a failure and must not be counted as one, but it is also
+  // not nothing -- the resolver logs none of them itself, so an unreported skip
+  // is invisible.
+  log(
+    `${year}: refused to mint ${skipped.exists + skipped.unknown} (exists ${skipped.exists}, unknown ${skipped.unknown})`
+  )
+  for (const s of skipped_samples) log(`SKIP ${s}`)
+  return {
+    missing: missing_gsis.length,
+    created,
+    updated,
+    failed,
+    skipped_exists: skipped.exists,
+    skipped_unknown: skipped.unknown
+  }
 }
 
 const backfill_players = async ({
@@ -363,7 +429,14 @@ const backfill_players = async ({
     years.push(year)
   }
 
-  const totals = { missing: 0, created: 0, updated: 0, failed: 0 }
+  const totals = {
+    missing: 0,
+    created: 0,
+    updated: 0,
+    failed: 0,
+    skipped_exists: 0,
+    skipped_unknown: 0
+  }
   for (const y of years) {
     const c = await backfill_year({ year: y, force_download, dry_run })
     for (const k of Object.keys(totals)) totals[k] += c[k]

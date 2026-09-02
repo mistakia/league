@@ -8,7 +8,13 @@ import { asyncBufferFromFile } from 'hyparquet'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { is_main, updatePlayer, createPlayer } from '#libs-server'
+import {
+  is_main,
+  updatePlayer,
+  createPlayer,
+  resolve_canonical_player,
+  describe_resolution
+} from '#libs-server'
 import { CREATE_PLAYER_REQUIRED_FIELDS } from '#libs-server/create-player.mjs'
 import {
   from_nfl_pro_row,
@@ -160,6 +166,15 @@ export const DISPOSITION = {
   REVIEW_DUPLICATE_INCUMBENTS: 'review_duplicate_incumbents',
   REVIEW_GSIS_ID_CONFLICT: 'review_gsis_id_conflict',
   REVIEW_NAME_ONLY_MATCH: 'review_name_only_match',
+  // The resolver's two non-`new` verdicts, kept as their own review buckets
+  // rather than folded into a skip. On an IMPORTER `unknown` means "do not mint
+  // this cycle" and the row returns on the next run; on this REPAIR it means the
+  // opposite -- the run exists to close out a fixed backlog, so a silently
+  // dropped row is a row nobody looks at again. These are set by
+  // apply_resolver_verdicts BEFORE report() runs, which is what puts them in the
+  // same report as every other case a human has to rule on.
+  REVIEW_RESOLVER_UNKNOWN: 'review_resolver_unknown',
+  REVIEW_RESOLVER_EXISTS: 'review_resolver_exists',
   MINT_NEW: 'mint_new',
   RESIDUE_NO_SOURCE: 'residue_no_source',
   RESIDUE_INCOMPLETE_SOURCE: 'residue_incomplete_source'
@@ -441,24 +456,140 @@ const apply_attaches = async ({ dispositions, dry_run }) => {
   return stats
 }
 
+/*
+  The existence question, asked as part of CLASSIFICATION rather than at the
+  moment of writing.
+
+  classify_candidate already ruled these rows MINT_NEW, so this is a second
+  opinion rather than the first. It is worth asking because the two ask
+  different questions: the classifier asks "does the gsis id I am repairing
+  belong to an existing row", which is an ATTACH question scoped to the
+  identifier columns, while the resolver asks "does this person already have a
+  row at all". A person whose incumbent row carries none of the ids this feed
+  supplies passes the first and fails the second, and that gap is a duplicate.
+
+  WHY THIS IS A SEPARATE PASS, AND NOT A CHECK INSIDE apply_mints. It ran there
+  first, and the verdict was invisible: `report()` computes the buckets and
+  writes the --output_path JSON before apply_mints is called, so a row
+  re-dispositioned during the write never appeared in any bucket, any report
+  file, or the returned value -- its only trace was a debug line. Parking a row
+  where nobody reads it is the silent drop the bucket exists to prevent. A
+  disposition has to be final before anything reports on it, which means the
+  resolver has to run here.
+
+  It also makes the refusals honest downstream: `run()` derives minted_gsis_ids
+  by filtering MINT_NEW after the writes, so a row refused as `exists` that kept
+  MINT_NEW would feed an id this run never minted into the post-run
+  placeholder-birth-date gate.
+
+  build_player_data deliberately writes `null` rather than `0000-00-00` for an
+  unknown birth date, so the resolver is handed a true absence and returns
+  `unknown` rather than being fooled by a sentinel.
+*/
+const apply_resolver_verdicts = async ({ dispositions }) => {
+  const stats = { asked: 0, confirmed_new: 0, exists: 0, unknown: 0 }
+
+  for (const row of dispositions) {
+    if (row.disposition !== DISPOSITION.MINT_NEW) continue
+
+    const player_data = build_player_data(row.source_record)
+    const name = `${player_data.first_name} ${player_data.last_name}`
+    const resolution = await resolve_canonical_player({
+      name,
+      date_of_birth: player_data.date_of_birth,
+      external_ids: player_data
+    })
+    stats.asked += 1
+
+    if (resolution.status === 'new') {
+      stats.confirmed_new += 1
+      continue
+    }
+
+    // The resolver logs nothing itself, so the verdict is recorded ON THE ROW
+    // (where the report and the JSON will carry it) as well as logged.
+    row.resolution = describe_resolution({
+      name,
+      date_of_birth: player_data.date_of_birth,
+      resolution
+    })
+    row.disposition =
+      resolution.status === 'exists'
+        ? DISPOSITION.REVIEW_RESOLVER_EXISTS
+        : DISPOSITION.REVIEW_RESOLVER_UNKNOWN
+    stats[resolution.status === 'exists' ? 'exists' : 'unknown'] += 1
+    log(`SKIP mint: ${row.resolution}`)
+  }
+
+  return stats
+}
+
 const apply_mints = async ({ dispositions, dry_run }) => {
   const mints = dispositions.filter(
     (row) => row.disposition === DISPOSITION.MINT_NEW
   )
-  const stats = { attempted: mints.length, created: 0, refused_or_failed: 0 }
+  const stats = {
+    attempted: mints.length,
+    created: 0,
+    refused_or_failed: 0,
+    refused_late: 0
+  }
+  const minted_gsis_ids = []
 
   for (const row of mints) {
     if (dry_run) continue
-    const created = await createPlayer(build_player_data(row.source_record))
+
+    const player_data = build_player_data(row.source_record)
+    const name = `${player_data.first_name} ${player_data.last_name}`
+
+    /*
+      The SECOND resolver call, and it is not redundant with the classification
+      pass. That pass ran over the whole backlog before any write; this one runs
+      immediately before THIS insert, so it is the only thing that can see a row
+      minted moments ago by an earlier iteration of this very loop. Two feed
+      entries that are the same human -- a duplicated gsis id in the source, two
+      records differing only by a suffix -- pass classification independently and
+      would both mint.
+
+      It also keeps the guard where the write is, which is what
+      db/gates/check-player-mint-guard.mjs holds every automated mint site to. A
+      guard that lives three functions upstream is real but invisible, and the
+      gate cannot tell it from an absent one.
+    */
+    const resolution = await resolve_canonical_player({
+      name,
+      date_of_birth: player_data.date_of_birth,
+      external_ids: player_data
+    })
+
+    if (resolution.status !== 'new') {
+      // Late refusals cannot reach the report, which has already been written --
+      // so they are counted into mint_stats, which run() logs, and named here.
+      stats.refused_late += 1
+      log(
+        `SKIP mint (late, after classification): ${describe_resolution({
+          name,
+          date_of_birth: player_data.date_of_birth,
+          resolution
+        })}`
+      )
+      continue
+    }
+
+    const created = await createPlayer(player_data)
     // createPlayer returns null for BOTH a refusal and a write failure, which
     // its own docstring flags as un-gradeable. The refusal predicate is
     // evaluated ahead of the call in classify_candidate, so anything null here
     // is a failure rather than a skip.
-    if (created) stats.created += 1
-    else stats.refused_or_failed += 1
+    if (created) {
+      stats.created += 1
+      minted_gsis_ids.push(row.gsis_player_id)
+    } else {
+      stats.refused_or_failed += 1
+    }
   }
 
-  return stats
+  return { stats, minted_gsis_ids }
 }
 
 /*
@@ -665,6 +796,10 @@ const repair_missing_player_gsis_ids = async ({
   log(`${source_records.size} gsis-keyed source records loaded`)
 
   const dispositions = await build_dispositions({ source_records })
+  // Before report(), so a resolver refusal lands in the buckets and the JSON
+  // rather than being written after everything that reads them.
+  const resolver_stats = await apply_resolver_verdicts({ dispositions })
+  log('resolver verdicts: %o', resolver_stats)
   const buckets = report({ dispositions, output_path })
 
   if (!(await verify_integrity_gates_can_fail())) {
@@ -675,15 +810,19 @@ const repair_missing_player_gsis_ids = async ({
 
   const attach_stats = await apply_attaches({ dispositions, dry_run })
   log('attaches: %o', attach_stats)
-  const mint_stats = await apply_mints({ dispositions, dry_run })
+  const { stats: mint_stats, minted_gsis_ids } = await apply_mints({
+    dispositions,
+    dry_run
+  })
   log('mints: %o', mint_stats)
 
   const duplicates_after = await check_no_duplicate_identities()
   const bare_bones = await check_no_bare_bones_rows()
   log(`bare-bones rows carrying a gsis id: ${bare_bones}`)
-  const minted_gsis_ids = dispositions
-    .filter((row) => row.disposition === DISPOSITION.MINT_NEW)
-    .map((row) => row.gsis_player_id)
+  // The ids apply_mints actually wrote, not every row still carrying MINT_NEW:
+  // a row refused late by the resolver keeps that disposition and was never
+  // inserted, so asking the placeholder gate about it would fail this run over
+  // a pre-existing row it did not create.
   const sentinels = await check_no_placeholder_birth_dates({
     gsis_player_ids: minted_gsis_ids
   })
@@ -695,7 +834,7 @@ const repair_missing_player_gsis_ids = async ({
   }
   log('post-run integrity gate passed')
 
-  return { buckets, attach_stats, mint_stats }
+  return { buckets, attach_stats, mint_stats, resolver_stats }
 }
 
 const main = async () => {

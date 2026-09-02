@@ -9,7 +9,9 @@ import {
   find_player_row,
   createPlayer,
   updatePlayer,
-  nfl
+  nfl,
+  resolve_canonical_player,
+  describe_resolution
 } from '#libs-server'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -63,6 +65,8 @@ const import_players_from_combine_profiles_for_year = async ({
 } = {}) => {
   let change_count = 0
   let create_count = 0
+  const skipped = { exists: 0, unknown: 0 }
+  const skipped_members = []
 
   const profiles_data = await nfl.get_combine_profiles({
     ignore_cache,
@@ -145,6 +149,36 @@ const import_players_from_combine_profiles_for_year = async ({
     const has_ngs_data = Object.values(ngs_data).some((value) => value !== null)
 
     if (!player_row) {
+      /*
+        The existence gate. Everything above only answers "did my narrow matcher
+        find a row to UPDATE" -- the esb lookup, then the draft-class name
+        fallback -- and reading that miss as "this person is not in the table" is
+        what mints the duplicate. This importer is the archetype of the
+        `duplicate-person-rows` class precisely because its payload writes the
+        `0000-00-00` sentinel below: a twin carrying vendor ids and NGS prospect
+        scores with no birth date, beside a legacy row holding the real one.
+
+        The resolver is handed no date_of_birth on purpose. The feed carries
+        none, and passing the sentinel would be passing an absence dressed as a
+        value -- it returns `unknown` for both, which is the correct verdict
+        here: a name candidate exists and nothing available can tell us whether
+        it is the same person, so this importer must not decide.
+      */
+      const name = `${profile.person.firstName} ${profile.person.lastName}`
+      const resolution = await resolve_canonical_player({
+        name,
+        external_ids: { esb_player_id: profile.person.esbId }
+      })
+
+      if (resolution.status !== 'new') {
+        // resolve_canonical_player deliberately logs nothing itself, so an
+        // unreported refusal is an invisible skip. Print every one by name and
+        // candidate pid.
+        skipped[resolution.status === 'exists' ? 'exists' : 'unknown'] += 1
+        skipped_members.push(describe_resolution({ name, resolution }))
+        continue
+      }
+
       try {
         player_row = await createPlayer({
           first_name: profile.person.firstName,
@@ -201,6 +235,12 @@ const import_players_from_combine_profiles_for_year = async ({
 
   log(`updated ${change_count} player fields`)
   log(`created ${create_count} players`)
+  log(
+    `refused to mint ${skipped.exists + skipped.unknown} (exists ${skipped.exists}, unknown ${skipped.unknown})`
+  )
+  for (const member of skipped_members) {
+    log(`SKIP ${member}`)
+  }
 }
 
 const import_all_players_from_combine_profiles = async ({
