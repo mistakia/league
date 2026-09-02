@@ -412,14 +412,30 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       return game_plays
     }
 
-    let filtered_plays = game_plays
-
-    // Filter by player if specified
-    if (market.selection_pid) {
-      filtered_plays = filtered_plays.filter(
-        (play) => play[mapping.player_column] === market.selection_pid
+    // A player market with no pid is UNGRADABLE, not a market about everyone.
+    //
+    // This branch used to filter by player only `if (market.selection_pid)`,
+    // so a null pid skipped the filter and the aggregation ran over the whole
+    // game: a MAX market took the game's longest play by anyone, and a
+    // period-scoped market took the period's total across all players. Both
+    // grade, both look plausible, and neither is about the named player -- one
+    // Longest Reception selection was marked WON for a player holding no
+    // gamelog for the game at all.
+    //
+    // Refusing here matches what the sibling handlers already do rather than
+    // inventing a rule: PLAYER_GAMELOG raises on a null pid, the
+    // first-touchdown path tests the scorer, and the team_aggregate branch
+    // above returns no plays. A market that cannot be attributed must fail to
+    // settle, because the alternative is a confident wrong grade.
+    if (!market.selection_pid) {
+      throw new Error(
+        `Market ${market.source_market_id} is a player market (${mapping.player_column}) with no selection_pid and cannot be graded`
       )
     }
+
+    let filtered_plays = game_plays.filter(
+      (play) => play[mapping.player_column] === market.selection_pid
+    )
 
     filtered_plays = this._apply_period_filters({
       plays: filtered_plays,
