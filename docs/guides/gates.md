@@ -104,6 +104,19 @@ The corollary is the case the counts view gets backwards. **An ALL-unread corpus
 
 **A NOT EXERCISED bucket is only sound where "exercised" is decided by a CORPUS, and it is a lottery where it is decided by a SAMPLE.** The bucket exists so an adjudication the run could not have reached is not reported as stale, and `check-retyped-column-arithmetic` can answer that honestly because its subject set comes from the `--base` ref and its corpus is the file tree — rerun at the same ref, same answer. The response-validation hold-out borrowed the same shape and the same vocabulary, but its corpus is whatever `(operation, status)` pairs the SUITE happened to produce, over fixtures drawn `ORDER BY RANDOM()`. Producing a response for an operation is not evidence that the run reached the violation the entry names, so an entry could read stale on an unlucky draw and fail the run over a repair nobody made — which defers **every** session's push. Before you give a gate a NOT EXERCISED bucket, ask what decides membership: a declared input and a tree is fine, a sample is not. The instance, its measurement and its repair are in [api.md](api.md).
 
+## Verify that your negative control CHANGED something, or the control is the thing that is broken
+
+**The standard move for proving a check works — break the thing and confirm the check goes red — has its own silent-failure mode: the edit that was supposed to break it did nothing, so the check passes for the reason it always did and the pass gets read as evidence.** This happened twice in one session on 2026-09-01, both times against a post-condition and a spec that were in fact sound, and both times the false "control passed" was more dangerous than a real failure would have been, because it certified a check nobody had actually tested.
+
+The mechanism is boring and that is the point. `sed "0,/pattern/s//replacement/"` is a GNU address form that **BSD sed on macOS does not support**; it wrote the file unchanged and the surrounding `&&` chain never noticed. The check then ran against pristine input and printed the same green it prints on a healthy corpus.
+
+Two habits close it, and the first is cheap enough that there is no reason to skip it:
+
+- **Assert the mutation before running the check.** In a script, `assert old in text` and `assert new != old`. At the shell, diff the mutated copy against the original and require it to be non-empty. A control whose setup silently no-ops is indistinguishable from a control that ran.
+- **Require the SHAPE of the failure, not just its presence.** The repaired control must fail on the assertions that test the changed behavior and stay green on the ones that do not. The scoped-fetch spec proved this: deleting the filter fails exactly the two scoping tests and leaves both control tests passing. A control where everything goes red is usually a broken fixture rather than a working detector.
+
+This is the verification rule in `CLAUDE.md` applied one level up. That rule says a green you have not shown can go red is not evidence; this says the showing itself is a procedure that can fail silently, and it fails in the direction that looks like diligence.
+
 ## A spec that CALLS the shared function cannot see whether anything calls it
 
 **When a rule is declared centrally and applied by several surfaces, asserting it through the shared function tests the rule and says nothing about the wiring — and the wiring is the half that breaks.** The spec is honest about what it checks, reads as coverage of the feature, and stays green for as long as a surface is disconnected. This is the corpus problem one level up: there the gate could not SEE a file, here it cannot see a CALL SITE.

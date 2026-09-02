@@ -27,6 +27,16 @@ The `FNAM-LNAM` prefix is a frozen, human-readable courtesy snapshot taken once 
 
 A DST (defense/special teams) pid is the team abbreviation (e.g. `NE`, `DAL`) — a stable non-person pseudo-identifier with no serial.
 
+## Resolving a player for a HISTORICAL row: three defaults that all fail the same way
+
+`find_player` from `libs-server/player-cache.mjs` is the resolver every betting importer calls, and its defaults are tuned for resolving a player who is playing today. Pointed at a 2023-2025 row it fails silently on exactly the population a historical repair exists to recover — rookies, practice-squad players and fringe roster names, who are the ones most likely to have failed resolution the first time and are retired or unsigned now. All three failures return a clean no-match rather than an error.
+
+- **`preload_active_players()` loads ACTIVE players only.** Pass `{ all_players: true }` or the retired half is not in the cache at all, and the two flags below cannot do anything about it. This is the one that dominates: a repair run with the flags right and the preload wrong resolved zero names by lookup and read as a genuine no-match.
+- **`ignore_free_agent` and `ignore_retired` both default TRUE.** For a historical lookup both must be false.
+- **`teams` filters on `current_nfl_team`, not on the team at the time.** A player who has since moved is excluded by the very argument meant to disambiguate him. Do not pass it for a historical row; apply team agreement afterwards instead — assert the resolved player holds a `player_gamelogs` row in the GAME'S OWN season for one of the game's two teams, which is strictly more accurate and cannot exclude a right answer.
+
+Where the resolver legitimately cannot decide, the gamelog usually can. Two players share a name and both played in the game — JAX at BUF holds two Josh Allens — so team is no help; the box score is, since the quarterback threw thirty passes and the lineman none. Nicknames (`Simione` stored, `Simi` posted), accented spellings (`Estimé`), and legal name changes (`Robbie Anderson` to `Robbie Chosen`) all miss on exact match and all resolve against era and team evidence.
+
 ## Lookup Command
 
 The lookup command searches multiple data sources in parallel to find player information.
