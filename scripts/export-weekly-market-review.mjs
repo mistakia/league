@@ -116,6 +116,29 @@ const detect_latest_week_with_longshots = async ({ year }) => {
   return week
 }
 
+// Every ROW_NUMBER partition in this file carries pmi.esbid, and it is
+// load-bearing rather than decorative.
+//
+// The partition collapses equivalent rows so the ORDER BY can keep the
+// best-priced one. Without esbid, "equivalent" spanned the whole season: one
+// player's winning longshot on the same market name in weeks 3, 7 and 12
+// collapsed to a single row. Every output here is a per-week histogram
+// (COUNT(*) FILTER (WHERE week = N)) gated on HAVING COUNT(*) >= 3, so that
+// collapse deleted exactly the repeat occurrences the report exists to find.
+// Measured over 2025 REG, it cost 4,458 of 10,314 occurrences -- 43 percent.
+//
+// This is NOT the duplicate-listing defect it was found next to
+// (user:task/league/resolve-duplicate-book-event-listings.md). The loss is
+// largest on DraftKings and FanDuel, neither of which has a single duplicated
+// event listing, which is the control that separates the two.
+//
+// STILL OPEN, and deliberately not changed here: source_market_name remains in
+// the partition, so the same player hitting the same market type in one game at
+// two books still counts twice. Whether an "occurrence" is per-book or per-game
+// is a report-semantics call for the operator; partitioning on
+// (selection_pid, market_type, esbid) alone would answer per-game and yields
+// 6,779 rather than 10,314.
+
 /**
  * Query 1: Player occurring selections aggregated by week
  */
@@ -138,7 +161,7 @@ const query_player_occurring_selections = async ({ year }) => {
         pmsi.odds_decimal,
         pmsi.odds_american,
         ROW_NUMBER() OVER (
-          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
           ORDER BY pmsi.odds_american DESC
         ) as rn
       FROM prop_market_selections_index pmsi
@@ -218,7 +241,7 @@ const query_team_occurring_selections = async ({ year }) => {
         pmsi.odds_decimal,
         pmsi.odds_american,
         ROW_NUMBER() OVER (
-          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
           ORDER BY pmsi.odds_american DESC
         ) as rn
       FROM prop_market_selections_index pmsi
@@ -317,7 +340,7 @@ const query_opponent_occurring_selections = async ({ year }) => {
         pmsi.odds_decimal,
         pmsi.odds_american,
         ROW_NUMBER() OVER (
-          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
           ORDER BY pmsi.odds_american DESC
         ) as rn
       FROM prop_market_selections_index pmsi
@@ -414,7 +437,7 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
         pmsi.selection_metric_line,
         pmsi.odds_american,
         ROW_NUMBER() OVER (
-          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
           ORDER BY pmsi.odds_american DESC
         ) as rn
       FROM prop_market_selections_index pmsi
@@ -475,7 +498,7 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
         pmsi.selection_metric_line,
         pmsi.odds_american,
         ROW_NUMBER() OVER (
-          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+          PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
           ORDER BY pmsi.odds_american DESC
         ) as rn
       FROM prop_market_selections_index pmsi
@@ -541,7 +564,7 @@ const query_market_type_occurring_selections = async ({ year, week }) => {
             pmsi.odds_decimal,
             pmsi.odds_american,
             ROW_NUMBER() OVER (
-                PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+                PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.esbid, pmi.source_market_name
                 ORDER BY pmsi.odds_american DESC
             ) as rn
         FROM prop_market_selections_index pmsi
