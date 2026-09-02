@@ -35,7 +35,7 @@ describe('auction final block', function () {
       spots_remaining: 69,
       auction_block_notice_minutes: 60,
       auction_final_block_pace_minutes: 2,
-      auction_final_block_buffer_hours: 12,
+      auction_final_block_buffer_hours: 3,
       now: dayjs('2026-09-03T04:00:00Z'),
       ...overrides
     })
@@ -44,9 +44,9 @@ describe('auction final block', function () {
     it('reserves pace for every unfilled spot and the buffer behind it', function () {
       const result = compute()
 
-      // 69 spots at 2 minutes is 2.3 hours, plus 12 hours of buffer.
+      // 69 spots at 2 minutes is 2.3 hours, plus 3 hours of buffer.
       expect(result.computed_at.toISOString()).to.equal(
-        period_end.subtract(138, 'minute').subtract(12, 'hour').toISOString()
+        period_end.subtract(138, 'minute').subtract(3, 'hour').toISOString()
       )
       expect(result.final_block_at.toISOString()).to.equal(
         result.computed_at.toISOString()
@@ -147,7 +147,7 @@ describe('auction final block', function () {
         now: period_start,
         period_end: period_start.add(2, 'hour'),
         spots_remaining: 69,
-        auction_final_block_buffer_hours: 12
+        auction_final_block_buffer_hours: 3
       })
 
       expect(result.computed_at.isBefore(period_start)).to.equal(true)
@@ -216,7 +216,7 @@ describe('auction final block', function () {
         free_agency_period_end: configured_end.toDate(),
         auction_block_notice_minutes: 60,
         auction_final_block_pace_minutes: 2,
-        auction_final_block_buffer_hours: 12
+        auction_final_block_buffer_hours: 3
       })
 
       const result = await get_auction_final_block({ lid: league_id })
@@ -229,7 +229,7 @@ describe('auction final block', function () {
       expect(result.computed_at.toISOString()).to.equal(
         dayjs(configured_end.toDate())
           .subtract(result.spots_remaining * 2, 'minute')
-          .subtract(12, 'hour')
+          .subtract(3, 'hour')
           .toISOString()
       )
     })
