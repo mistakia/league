@@ -8,13 +8,19 @@ import PlayerName from '@components/player-name'
 
 import './auction-nominated-player.styl'
 
-const getHeadshotWidth = () => {
-  if (window.innerWidth > 990) {
-    return 180
-  } else {
-    return 150
-  }
-}
+// PlayerHeadshot derives its HEIGHT from the width it is given --
+// `round(width * 70 / 96)` -- so a width is really a height here, and 96 is the
+// only one that lands on the 70px the bid bar is tall. It was 180 and 150,
+// which render 131px and 109px, and a MUI avatar does not clip: both spilled
+// out of the bar and over the player board beneath it. The breakpoint is 799 to
+// match auction-nominated-player.styl, which below that pulls the headshot out
+// of the bar entirely into a 100px circle floated above it -- the one context
+// where a crop larger than the bar is the point.
+const BAR_HEADSHOT_WIDTH = 96
+const FLOATED_HEADSHOT_WIDTH = 150
+
+const getHeadshotWidth = () =>
+  window.innerWidth > 799 ? BAR_HEADSHOT_WIDTH : FLOATED_HEADSHOT_WIDTH
 
 export default function AuctionNominatedPlayer({
   player_map,

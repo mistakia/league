@@ -4,8 +4,8 @@ import { createSelector } from 'reselect'
 import {
   get_auction_state,
   get_app,
-  get_current_league,
-  getCurrentTeamRoster
+  getCurrentTeamRoster,
+  is_free_agent_period
 } from '@core/selectors'
 import { auction_actions } from '@core/auction'
 
@@ -18,11 +18,11 @@ import AuctionElectionControl from './auction-election-control'
 const map_state_to_props = createSelector(
   get_auction_state,
   get_app,
-  get_current_league,
   getCurrentTeamRoster,
+  is_free_agent_period,
   (state) => state.getIn(['app', 'leagueId']),
   (state, props) => props.pid,
-  (auction, app, league, roster, leagueId, pid) => ({
+  (auction, app, roster, is_in_free_agent_period, leagueId, pid) => ({
     election: auction.standing_elections.get(pid),
     // The capping term, named on the control rather than only in the
     // standing-elections panel: a manager deciding a ceiling here has no other
@@ -34,11 +34,16 @@ const map_state_to_props = createSelector(
     // read of it in app/.
     leagueId,
     teamId: app.teamId,
-    // Elections open at the free agency period start, days before any live
-    // block. The auction page's own mount gate is what decides whether this is
-    // reachable; this only guards against rendering a control for a league with
-    // no free agency period configured at all.
-    is_election_window_open: Boolean(league.free_agency_period_start)
+    // THE window test, not a proxy for one, and it is this component's own
+    // because its two call sites do not agree on anything stronger. The drawer
+    // in selected-player gates on `can_elect_on_player`, which already carries
+    // `is_free_agent_period`; the compact control in auction-main-bid gates
+    // only on election mode plus a nomination. This used to ask whether a
+    // period was CONFIGURED, which is true forever once a start date is set, so
+    // the bid-bar path would have rendered a control outside the window and the
+    // server -- which does check, per test/auction.election-window.spec.mjs --
+    // would have refused the submission.
+    is_election_window_open: is_in_free_agent_period
   })
 )
 
