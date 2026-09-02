@@ -553,5 +553,379 @@
     "reason": "NOT a capture failure -- a dishonest selection_count, and the only entry here whose repair is a code change rather than unrecoverable data. Every one of the 220 orphan rows is a Moneyline market: 110 markets across both time_types, all first and last observed in BetMGM's single 2026 run on 2026-08-23, while Spread and Totals captured at 1.0000 in the same run. private/scripts/import-betmgm-odds.mjs sets selection_count from options.length BEFORE any filtering, so a market whose options are all unpriced placeholders declares two runners and emits none; validate_selection then correctly rejects both sides for want of a price. The independently-derived count in the owning plan agrees exactly -- of 127 moneyline markets in the 2026-08-23 dump, 110 are fully placeholder. The owning task's step 'Skip placeholder selections and recompute selection_count' moves the count after the filter and skips a market left with zero selections, which clears this entry outright. The denominator is frozen at 1,448 until BetMGM imports again, so unlike the PrizePicks 2026 entry this one cannot dilute itself away and will sit at 0.8481 until that repair lands.",
     "evidence": "Capture rate 0.8481 over 1448 declared markets, measured 2026-09-02. All 220 orphan rows carry source_market_name like 'Moneyline%'; the 34 non-orphan Moneyline rows, and all 34 Spread and 34 Totals rows, captured.",
     "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2002
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2003
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2004
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2005
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2006
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2007
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2008
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2009
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2010
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_contracts",
+      "season_year": 2011
+    },
+    "disposition": "adjudicated",
+    "reason": "The SOURCE thins going back, and we hold essentially all of what it publishes. nflverse historical_contracts is OverTheCap data, whose contract coverage decays smoothly into the past rather than starting at a boundary, so the peer median (dominated by 2014 onward) is not an expectation these seasons could ever meet.",
+    "evidence": "Measured against the vendor file itself, not inferred: expanding every contract in historical_contracts.parquet over [year_signed, year_signed + years) gives distinct player-seasons of 119 (2002), 151 (2003), 203 (2004), 254 (2005), 334 (2006), 404 (2007), 505 (2008), 612 (2009), 731 (2010), 1014 (2011). Our table holds 116, 144, 189, 244, 317, 391, 480, 587, 751, 1082 for those seasons — 95 to 100 percent of what the source serves. The curve is monotone with no cliff from 1983 (1 row) through 2017, which is a coverage decay and not a lost load; a partial import leaves a cliff.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_gamelogs",
+      "season_year": 2002
+    },
+    "disposition": "adjudicated",
+    "reason": "PFF's continuous grading begins with the 2006 season. Each pre-2006 season here holds exactly ONE game, which is a historic game PFF graded outside its continuous era, so the season was never served at anything approaching peer density.",
+    "evidence": "Each pre-2006 season holds exactly one distinct esbid and one distinct pff_game_id, at 69 (2002), 67 (2003) and 73 (2004) player rows — one game worth of both rosters. The esbids identify them: 2003012600, 2004020100 and 2005020600 are Super Bowls XXXVII, XXXVIII and XXXIX. The same shape holds for the other pre-2006 seasons present (1994, 1996, 1998, 2001), each one game. Continuous coverage starts at 2006 with 18,085 rows across 1,614 players.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_gamelogs",
+      "season_year": 2003
+    },
+    "disposition": "adjudicated",
+    "reason": "PFF's continuous grading begins with the 2006 season. Each pre-2006 season here holds exactly ONE game, which is a historic game PFF graded outside its continuous era, so the season was never served at anything approaching peer density.",
+    "evidence": "Each pre-2006 season holds exactly one distinct esbid and one distinct pff_game_id, at 69 (2002), 67 (2003) and 73 (2004) player rows — one game worth of both rosters. The esbids identify them: 2003012600, 2004020100 and 2005020600 are Super Bowls XXXVII, XXXVIII and XXXIX. The same shape holds for the other pre-2006 seasons present (1994, 1996, 1998, 2001), each one game. Continuous coverage starts at 2006 with 18,085 rows across 1,614 players.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_gamelogs",
+      "season_year": 2004
+    },
+    "disposition": "adjudicated",
+    "reason": "PFF's continuous grading begins with the 2006 season. Each pre-2006 season here holds exactly ONE game, which is a historic game PFF graded outside its continuous era, so the season was never served at anything approaching peer density.",
+    "evidence": "Each pre-2006 season holds exactly one distinct esbid and one distinct pff_game_id, at 69 (2002), 67 (2003) and 73 (2004) player rows — one game worth of both rosters. The esbids identify them: 2003012600, 2004020100 and 2005020600 are Super Bowls XXXVII, XXXVIII and XXXIX. The same shape holds for the other pre-2006 seasons present (1994, 1996, 1998, 2001), each one game. Continuous coverage starts at 2006 with 18,085 rows across 1,614 players.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_seasonlogs",
+      "season_year": 2003
+    },
+    "disposition": "adjudicated",
+    "reason": "The same 2006 coverage boundary as the gamelogs, seen from the season grain. The handful of pre-2006 rows are the players PFF graded in the one historic game it covered that season, not a thin load of a season it served.",
+    "evidence": "Four rows in 2003, four in 2004, sixteen in 2005, against 2,262 in 2006 — a cliff, not a ramp. The 2003 set is Tom Brady, Deion Branch, Julius Peppers and Steve Smith, and the 2004 set is Brady, Branch, Brian Westbrook and Jeremy Trotter: exactly the Patriots/Panthers and Patriots/Eagles participants of the Super Bowls that pff_player_gamelogs holds as its single graded game for those seasons.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_seasonlogs",
+      "season_year": 2004
+    },
+    "disposition": "adjudicated",
+    "reason": "The same 2006 coverage boundary as the gamelogs, seen from the season grain. The handful of pre-2006 rows are the players PFF graded in the one historic game it covered that season, not a thin load of a season it served.",
+    "evidence": "Four rows in 2003, four in 2004, sixteen in 2005, against 2,262 in 2006 — a cliff, not a ramp. The 2003 set is Tom Brady, Deion Branch, Julius Peppers and Steve Smith, and the 2004 set is Brady, Branch, Brian Westbrook and Jeremy Trotter: exactly the Patriots/Panthers and Patriots/Eagles participants of the Super Bowls that pff_player_gamelogs holds as its single graded game for those seasons.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "pff_player_seasonlogs",
+      "season_year": 2005
+    },
+    "disposition": "adjudicated",
+    "reason": "The same 2006 coverage boundary as the gamelogs, seen from the season grain. The handful of pre-2006 rows are the players PFF graded in the one historic game it covered that season, not a thin load of a season it served.",
+    "evidence": "Four rows in 2003, four in 2004, sixteen in 2005, against 2,262 in 2006 — a cliff, not a ramp. The 2003 set is Tom Brady, Deion Branch, Julius Peppers and Steve Smith, and the 2004 set is Brady, Branch, Brian Westbrook and Jeremy Trotter: exactly the Patriots/Panthers and Patriots/Eagles participants of the Super Bowls that pff_player_gamelogs holds as its single graded game for those seasons.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_history",
+      "season_year": 2011
+    },
+    "disposition": "adjudicated",
+    "reason": "Row count here measures OUR polling cadence and the vendor's archive breadth, not whether the season loaded. These seasons predate any live polling and exist only as a one-time backfill of the FantasyPros historical archive, which publishes fewer ranking types for them.",
+    "evidence": "Distinct observation days per season: 2 for 2011-2015, 3 for 2016-2019, 35 for 2024, 171 for 2025 and 126 for 2026 so far. Distinct ranking_type over the same seasons: 2 for 2011-2012, 3 for 2013-2019, 12 from 2020, 14 in 2026. The 2011-2015 rows all carry observed_at of 2024-08-28 or 2026-05-17, both backfill instants, so there is no live series to have lost.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_history",
+      "season_year": 2012
+    },
+    "disposition": "adjudicated",
+    "reason": "Row count here measures OUR polling cadence and the vendor's archive breadth, not whether the season loaded. These seasons predate any live polling and exist only as a one-time backfill of the FantasyPros historical archive, which publishes fewer ranking types for them.",
+    "evidence": "Distinct observation days per season: 2 for 2011-2015, 3 for 2016-2019, 35 for 2024, 171 for 2025 and 126 for 2026 so far. Distinct ranking_type over the same seasons: 2 for 2011-2012, 3 for 2013-2019, 12 from 2020, 14 in 2026. The 2011-2015 rows all carry observed_at of 2024-08-28 or 2026-05-17, both backfill instants, so there is no live series to have lost.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_history",
+      "season_year": 2013
+    },
+    "disposition": "adjudicated",
+    "reason": "Row count here measures OUR polling cadence and the vendor's archive breadth, not whether the season loaded. These seasons predate any live polling and exist only as a one-time backfill of the FantasyPros historical archive, which publishes fewer ranking types for them.",
+    "evidence": "Distinct observation days per season: 2 for 2011-2015, 3 for 2016-2019, 35 for 2024, 171 for 2025 and 126 for 2026 so far. Distinct ranking_type over the same seasons: 2 for 2011-2012, 3 for 2013-2019, 12 from 2020, 14 in 2026. The 2011-2015 rows all carry observed_at of 2024-08-28 or 2026-05-17, both backfill instants, so there is no live series to have lost.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_history",
+      "season_year": 2014
+    },
+    "disposition": "adjudicated",
+    "reason": "Row count here measures OUR polling cadence and the vendor's archive breadth, not whether the season loaded. These seasons predate any live polling and exist only as a one-time backfill of the FantasyPros historical archive, which publishes fewer ranking types for them.",
+    "evidence": "Distinct observation days per season: 2 for 2011-2015, 3 for 2016-2019, 35 for 2024, 171 for 2025 and 126 for 2026 so far. Distinct ranking_type over the same seasons: 2 for 2011-2012, 3 for 2013-2019, 12 from 2020, 14 in 2026. The 2011-2015 rows all carry observed_at of 2024-08-28 or 2026-05-17, both backfill instants, so there is no live series to have lost.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_history",
+      "season_year": 2015
+    },
+    "disposition": "adjudicated",
+    "reason": "Row count here measures OUR polling cadence and the vendor's archive breadth, not whether the season loaded. These seasons predate any live polling and exist only as a one-time backfill of the FantasyPros historical archive, which publishes fewer ranking types for them.",
+    "evidence": "Distinct observation days per season: 2 for 2011-2015, 3 for 2016-2019, 35 for 2024, 171 for 2025 and 126 for 2026 so far. Distinct ranking_type over the same seasons: 2 for 2011-2012, 3 for 2013-2019, 12 from 2020, 14 in 2026. The 2011-2015 rows all carry observed_at of 2024-08-28 or 2026-05-17, both backfill instants, so there is no live series to have lost.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_index",
+      "season_year": 2011
+    },
+    "disposition": "adjudicated",
+    "reason": "The snapshot half of the same backfill. It holds one row per grain the archive served, so it inherits the archive breadth adjudicated on player_rankings_history for these seasons.",
+    "evidence": "The index holds 500 rows for 2011 and 556 for 2012 against 2 ranking types, rising to 12 types and 6,726-7,556 rows by 2023-2024. It is the current-state projection of the same two-day archive backfill, and no later run has ever added a 2011 or 2012 grain.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_rankings_index",
+      "season_year": 2012
+    },
+    "disposition": "adjudicated",
+    "reason": "The snapshot half of the same backfill. It holds one row per grain the archive served, so it inherits the archive breadth adjudicated on player_rankings_history for these seasons.",
+    "evidence": "The index holds 500 rows for 2011 and 556 for 2012 against 2 ranking types, rising to 12 types and 6,726-7,556 rows by 2023-2024. It is the current-state projection of the same two-day archive backfill, and no later run has ever added a 2011 or 2012 grain.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "dvoa_team_unit_seasonlogs_history",
+      "season_year": 2021
+    },
+    "disposition": "adjudicated",
+    "reason": "The vendor serves CURRENT-STATE DVOA only, so a season already completed when weekly snapshotting began can yield exactly one observation and did. These three seasons hold precisely that one observation, which is the whole of what was ever obtainable for them.",
+    "evidence": "Each of 2021, 2022 and 2023 holds exactly 66 rows at one week (week 18), and every one of those rows carries observed_at of 2024-09-25 or 2024-09-26 — the two days weekly snapshotting started, on which the importer also pulled the season-final state of 2020. Seasons snapshotted live carry 16 weeks: 2024 holds 1,026 rows over 16 weeks and 2025 holds 1,024 over 16.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "dvoa_team_unit_seasonlogs_history",
+      "season_year": 2022
+    },
+    "disposition": "adjudicated",
+    "reason": "The vendor serves CURRENT-STATE DVOA only, so a season already completed when weekly snapshotting began can yield exactly one observation and did. These three seasons hold precisely that one observation, which is the whole of what was ever obtainable for them.",
+    "evidence": "Each of 2021, 2022 and 2023 holds exactly 66 rows at one week (week 18), and every one of those rows carries observed_at of 2024-09-25 or 2024-09-26 — the two days weekly snapshotting started, on which the importer also pulled the season-final state of 2020. Seasons snapshotted live carry 16 weeks: 2024 holds 1,026 rows over 16 weeks and 2025 holds 1,024 over 16.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "dvoa_team_unit_seasonlogs_history",
+      "season_year": 2023
+    },
+    "disposition": "adjudicated",
+    "reason": "The vendor serves CURRENT-STATE DVOA only, so a season already completed when weekly snapshotting began can yield exactly one observation and did. These three seasons hold precisely that one observation, which is the whole of what was ever obtainable for them.",
+    "evidence": "Each of 2021, 2022 and 2023 holds exactly 66 rows at one week (week 18), and every one of those rows carries observed_at of 2024-09-25 or 2024-09-26 — the two days weekly snapshotting started, on which the importer also pulled the season-final state of 2020. Seasons snapshotted live carry 16 weeks: 2024 holds 1,026 rows over 16 weeks and 2025 holds 1,024 over 16.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "props",
+      "season_year": 2020
+    },
+    "disposition": "adjudicated",
+    "reason": "A write-closed legacy archive judged against its own peak season. These are the feed ramp-up years, carrying a fraction of the books and prop types 2022 carried, and nothing has written the table since 2023.",
+    "evidence": "Last observed_at in the whole table is 2023-11-09. 2020 holds 2 source books and 7 prop types over weeks 12-22 (a mid-season start); 2021 holds 1 book and 6 types; 2022 holds 6 books and 29 types at 3,816,491 rows, which is what sets the peer median. The breadth difference is the row-count difference.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "props",
+      "season_year": 2021
+    },
+    "disposition": "adjudicated",
+    "reason": "A write-closed legacy archive judged against its own peak season. These are the feed ramp-up years, carrying a fraction of the books and prop types 2022 carried, and nothing has written the table since 2023.",
+    "evidence": "Last observed_at in the whole table is 2023-11-09. 2020 holds 2 source books and 7 prop types over weeks 12-22 (a mid-season start); 2021 holds 1 book and 6 types; 2022 holds 6 books and 29 types at 3,816,491 rows, which is what sets the peer median. The breadth difference is the row-count difference.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_dfs_ownership",
+      "season_year": 2021
+    },
+    "disposition": "adjudicated",
+    "reason": "The DraftKings contest archive begins mid-2021. Every week the source serves is present, so this is the feed's start boundary rather than a partial load.",
+    "evidence": "The 2021 rows cover weeks 10 through 18 with no gap, at 36 contests; 2022 onward covers weeks 1 through 18 at 288-326 contests. The entire table, all five seasons, was ingested in a single backfill pass on 2026-04-03, so a pass that reached 2022 week 1 would have reached 2021 week 1 had the source served it. Only DRAFTKINGS has ever written this table.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "espn_receiving_metrics_history",
+      "season_year": 2025
+    },
+    "disposition": "adjudicated",
+    "reason": "Every season in this table shares ONE observation window, because the endpoint returns all seasons on every poll. 2025 is short only because it did not exist for the first 57 of the 81 polls, which is unrecoverable by construction — a past poll cannot be re-taken.",
+    "evidence": "Seasons 2017 through 2024 each carry exactly 81 distinct observation days spanning 2024-09-30 to 2026-03-16, and 19,545-22,528 rows. Season 2025 spans 2025-09-26 to 2026-03-16 at 24 observation days and 5,026 rows. Per-season distinct players are flat across the whole table (212-255), so the difference is entirely poll count, not coverage of the season.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "espn_player_win_rates_history",
+      "season_year": 2023
+    },
+    "disposition": "adjudicated",
+    "reason": "The feed's first season, on the same snapshot-cadence shape as its sibling ESPN table: the row count is polls times players, and 2023 was only partly inside the polling window.",
+    "evidence": "The table holds three seasons only — 120 rows for 2023, 494 for 2024, 913 for 2025 — a monotone ramp with 2023 at the boundary. There is no earlier season to have lost, and no vendor endpoint serves a past poll.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "prop_markets_index",
+      "season_year": 2023
+    },
+    "disposition": "adjudicated",
+    "reason": "The feed's first NFL season, short on market-type BREADTH rather than on time. The books' market catalogs have roughly doubled since, and no book serves a settled season's markets again.",
+    "evidence": "The 2023 observation window runs 2023-03-11 to 2024-02-21, which spans the whole 2023 NFL season, so nothing was missed in time. Distinct market_type per season is 97 (2023), 133 (2024) and 168 (2025) against 6, 7 and 5 books — the catalog grew, and the row count grew with it.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_college_seasonlogs",
+      "season_year": 2019
+    },
+    "disposition": "adjudicated",
+    "reason": "season_year here is a COLLEGE season, not an NFL one, and the table holds one draft class. 2019 and 2020 hold the few members of that class whose college careers reached back that far, which is a career-depth distribution rather than an ingest level.",
+    "evidence": "All 402 rows belong to players with nfl_draft_year 2025, and all were written in one pass on 2025-03-31. Rows per college season run 4 (2019), 28 (2020), 67 (2021), 98 (2022), 101 (2023), 104 (2024) — the shape of a single class aging backwards, with one row per player per college season. Note the check anchors on completed NFL games in that season, which is not this table’s supply at all; see the task entity for the scoping point raised to the operator.",
+    "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "population-season-row-floor",
+    "grain": {
+      "table_name": "player_college_seasonlogs",
+      "season_year": 2020
+    },
+    "disposition": "adjudicated",
+    "reason": "season_year here is a COLLEGE season, not an NFL one, and the table holds one draft class. 2019 and 2020 hold the few members of that class whose college careers reached back that far, which is a career-depth distribution rather than an ingest level.",
+    "evidence": "All 402 rows belong to players with nfl_draft_year 2025, and all were written in one pass on 2025-03-31. Rows per college season run 4 (2019), 28 (2020), 67 (2021), 98 (2022), 101 (2023), 104 (2024) — the shape of a single class aging backwards, with one row per player per college season. Note the check anchors on completed NFL games in that season, which is not this table’s supply at all; see the task entity for the scoping point raised to the operator.",
+    "validated_at": "2026-09-02"
   }
 ]
