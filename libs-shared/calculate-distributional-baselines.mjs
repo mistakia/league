@@ -1,4 +1,4 @@
-import { fantasy_positions, default_points_added } from '#constants'
+import { fantasy_positions } from '#constants'
 import { seeded_random } from './seeded-random.mjs'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import calculate_projection_dispersion from './calculate-projection-dispersion.mjs'
@@ -346,7 +346,22 @@ const calculate_distributional_baselines = ({
 //
 // A player absent from expected_surplus was never in the drawn pool -- a kicker,
 // a position the league does not start, or a player with no projection for the
-// season -- and takes the same sentinel the weekly path gives him.
+// season. THE KEY IS LEFT ABSENT for him, which is the one spelling of that fact
+// across the whole period pipeline: absent in this map, absent from the API
+// payload, NULL in the season period table (operator ruling 2026-09-02).
+//
+// It used to be the weekly `-999` sentinel, and the reason to replace it is not
+// tidiness. Absence is the only spelling every reader already handles correctly
+// without knowing the convention: `whereNotNull` excludes it, `== null` skips it,
+// and `getIn(['pts_added', 'season'], default_points_added)` in the SPA takes its
+// own fallback and sorts the player last. A magic number needs every one of those
+// readers to know it, and a null WRITTEN INTO the payload is worse than either --
+// it coerces to 0 and lands the player mid-board on the draft page with no error.
+// So the rule is OMIT, never assign null.
+//
+// The weekly board keeps `-999`: a per-week points-added is a different quantity,
+// it is the input calculate-player-period-values.mjs skips during aggregation,
+// and it is its own decision.
 export const assign_expected_surplus = ({ players, expected_surplus }) => {
   for (const player of players) {
     if (!player.pts_added) {
@@ -354,8 +369,12 @@ export const assign_expected_surplus = ({ players, expected_surplus }) => {
     }
 
     const surplus = expected_surplus[player.pid]
-    player.pts_added[season_aggregate_key] =
-      surplus === undefined ? default_points_added : surplus
+    if (surplus === undefined) {
+      delete player.pts_added[season_aggregate_key]
+      continue
+    }
+
+    player.pts_added[season_aggregate_key] = surplus
   }
 
   return players

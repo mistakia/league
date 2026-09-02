@@ -161,6 +161,28 @@ describe('LIBS-SHARED calculate-prices', function () {
       expect(with_sentinel[3].market_salary.ros).to.equal(0)
     })
 
+    // A player with no value on the aggregate has no price on it either. Without
+    // the guard the arithmetic runs on `undefined`, `Math.round(NaN) || 0`
+    // floors to 0, and a player who was never in the drawn pool is stored
+    // priced-at-zero -- indistinguishable from a player the market values at
+    // nothing, which is the conflation the period tables' NULL spelling removes.
+    it('leaves the salary key absent for a player with no value', function () {
+      const players = [
+        { pid: 'a', pts_added: { ros: 30 } },
+        // In the pool and worth nothing: a REAL zero, and it must still price.
+        { pid: 'zero', pts_added: { ros: 0 } },
+        // Never in the pool: no key at all.
+        { pid: 'absent', pts_added: {} }
+      ]
+
+      calculatePrices({ league_format, players, aggregate_key: 'ros' })
+
+      expect(players[0].market_salary.ros).to.be.greaterThan(0)
+      expect(players[1].market_salary).to.have.property('ros')
+      expect(players[1].market_salary.ros).to.equal(0)
+      expect(players[2].market_salary).to.equal(undefined)
+    })
+
     // Two variants of the same board are genuinely different quantities, not a
     // rescale: a player can carry a positive positive-only aggregate and a
     // negative net one, so he belongs in the first denominator and not the

@@ -63,6 +63,9 @@ const process_league_format_year = async ({
   const write_season_period =
     current_season.is_offseason || year !== current_season.year
 
+  // Rest of season runs from the LIVE week, so it exists only for the live year.
+  const write_rest_of_season_period = year === current_season.year
+
   const final_week_result = await db('nfl_games')
     .where({ season_year: year, season_type: 'REG' })
     .max('week as final_week')
@@ -114,7 +117,8 @@ const process_league_format_year = async ({
     player_rows,
     league_format_id,
     season_year: year,
-    write_season_period
+    write_season_period,
+    write_rest_of_season_period
   })
 
   // Output oracle, asserted BEFORE the destructive rewrite below rather than

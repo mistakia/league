@@ -18,6 +18,15 @@ import apply_nfl_games_offset_week_join from './data-views/join-nfl-games-offset
 
 const log = debug('get_players')
 
+// Copy a value onto a payload map only when the database had one. A NULL column
+// leaves the key OFF the payload rather than emitting `null`; see the period
+// tables' note at the call site for why the difference is load-bearing in the
+// SPA.
+const assign_if_present = ({ target, key, value }) => {
+  if (value === null || value === undefined) return
+  target[key] = value
+}
+
 export default async function ({
   textSearch,
   teamId,
@@ -469,10 +478,36 @@ export default async function ({
         // convention across every period map means a caller can hold ONE period
         // token and index all of them with it, which is what the SPA's period
         // conditionals do.
-        player.pts_added[prefix] = row.projected_points_added_positive
-        player.pts_added[`${prefix}_net`] = row.projected_points_added_net
-        player.market_salary[prefix] = row.market_salary_positive
-        player.market_salary[`${prefix}_net`] = row.market_salary_net
+        //
+        // A NULL column is OMITTED from the payload, never emitted as null. NULL
+        // on these tables means the player was never in the drawn pool for that
+        // period, and the SPA reads exactly one spelling of that: the sorts on
+        // the draft board and the player list use
+        // `getIn(['pts_added', <period>], default_points_added)`, whose
+        // notSetValue fires on an ABSENT key and not on a present null. Emit the
+        // null and Immutable hands the comparator 0, which puts every unprojected
+        // player mid-board instead of last -- on both surfaces, with no error
+        // anywhere to say the order moved.
+        assign_if_present({
+          target: player.pts_added,
+          key: prefix,
+          value: row.projected_points_added_positive
+        })
+        assign_if_present({
+          target: player.pts_added,
+          key: `${prefix}_net`,
+          value: row.projected_points_added_net
+        })
+        assign_if_present({
+          target: player.market_salary,
+          key: prefix,
+          value: row.market_salary_positive
+        })
+        assign_if_present({
+          target: player.market_salary,
+          key: `${prefix}_net`,
+          value: row.market_salary_net
+        })
       }
     }
   }

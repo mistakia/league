@@ -419,7 +419,10 @@ const process_league_format = async ({
     player_rows,
     league_format_id,
     season_year: current_season.year,
-    write_season_period
+    write_season_period,
+    // This path only ever processes the live year, so rest of season always
+    // applies here. The backfill states the same fact as a comparison.
+    write_rest_of_season_period: true
   })
 
   // Record the dated observations BEFORE the destructive rewrites below. The
@@ -601,15 +604,20 @@ const process_league = async ({ year, lid }) => {
     }
 
     const is_available = !rostered_pids.includes(player_row.pid)
+    // A player who was never in the drawn pool has NO season key at all -- the
+    // absence IS the spelling since 2026-09-02, replacing a `-999` that read as
+    // a number here. Named as 0 for this arithmetic rather than left undefined,
+    // which would put a NaN through the denominator below and reach the
+    // multiply. The stored result is 0 either way; the sentinel got there by
+    // pricing hugely negative and being floored, which is an outcome nothing
+    // stated and an algebraic coincidence away from being wrong.
+    const season_pts_added = player_row.pts_added[season_aggregate_key] ?? 0
     const league_adjusted_rate = is_available
       ? league_available_salary_space / league_available_pts_added
       : (league_available_salary_space + player_row.player_salary) /
-        (league_available_pts_added +
-          Math.max(player_row.pts_added[season_aggregate_key], 0))
+        (league_available_pts_added + Math.max(season_pts_added, 0))
     const projected_positive_salary_at_available_cap = Math.max(
-      Math.round(
-        league_adjusted_rate * player_row.pts_added[season_aggregate_key]
-      ) || 0,
+      Math.round(league_adjusted_rate * season_pts_added) || 0,
       0
     )
     player_row.projected_positive_salary_at_available_cap =

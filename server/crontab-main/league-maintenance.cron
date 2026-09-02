@@ -19,6 +19,14 @@
 ## verify-named-format-catalog so catalog drift is reported first.
 15 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-format-data-coverage.mjs >> /var/log/league/verify-format-data-coverage.log 2>&1
 
+## Every Sunday at 4:30AM — verify every league format anyone holds roster players in has a
+## season projection board, and that the live year has a rest-of-season one. A missing
+## (format, year) pair produces no error anywhere: every reader is null-safe, so the holdings
+## valuation writes NULL, the auction nomination order falls through a tier, and the data-view
+## columns render blank. 2025 genesis_10_team — the live league's own format — sat at zero
+## season rows against 649 holdings until 2026-09-02 with nothing saying so.
+30 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-projection-period-coverage.mjs >> /var/log/league/verify-projection-period-coverage.log 2>&1
+
 ## Every Sunday at 4:45AM — assert drive_sequence numbering stays game-continuous: no
 ## drive_sequence value may appear in both halves of a game. This defect class produces
 ## wrong numbers rather than missing ones, so exit codes and output freshness are

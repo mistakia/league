@@ -5,7 +5,8 @@ import calculate_distributional_baselines, {
   build_league_starting_slots,
   default_draw_seed,
   fill_starting_slots,
-  season_aggregate_key
+  season_aggregate_key,
+  assign_expected_surplus
 } from '#libs-shared/calculate-distributional-baselines.mjs'
 import { seeded_random } from '#libs-shared/seeded-random.mjs'
 import calculate_projection_dispersion, {
@@ -466,6 +467,57 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       for (const position of ['QB', 'RB', 'WR', 'TE']) {
         expect(Number.isFinite(derived.baselines[position])).to.equal(true)
       }
+    })
+  })
+
+  // The drawn board only ever returns a surplus for a player who was IN the
+  // pool. Everyone else -- a kicker, a position the league does not start, a
+  // player with no projection for the season -- has to come back out of this
+  // function distinguishable from a player worth zero, and the spelling for that
+  // is the ABSENT key (operator ruling 2026-09-02, replacing a -999 sentinel).
+  //
+  // Asserted as a PAIR, because a check on the excluded player alone passes
+  // whether the function omits every key or writes every value correctly.
+  describe('assign_expected_surplus', function () {
+    it('omits the season key for a player who was never in the drawn pool', () => {
+      const players = [
+        { pid: 'in_pool', pts_added: {} },
+        { pid: 'excluded', pts_added: {} }
+      ]
+
+      assign_expected_surplus({
+        players,
+        expected_surplus: { in_pool: 14.5 }
+      })
+
+      expect(players[0].pts_added[season_aggregate_key]).to.equal(14.5)
+      expect(players[1].pts_added).to.not.have.property(season_aggregate_key)
+    })
+
+    // A surplus of 0 is a real measurement: E[max(X - baseline, 0)] can round to
+    // nothing for a player who was drawn every pass. It must not be confused with
+    // the exclusion above, which is the whole point of not spelling either as 0.
+    it('keeps a season key holding a real zero', () => {
+      const players = [{ pid: 'replacement_level', pts_added: {} }]
+
+      assign_expected_surplus({
+        players,
+        expected_surplus: { replacement_level: 0 }
+      })
+
+      expect(players[0].pts_added).to.have.property(season_aggregate_key)
+      expect(players[0].pts_added[season_aggregate_key]).to.equal(0)
+    })
+
+    // The client recomputes onto the same objects the payload populated, so an
+    // excluded player carrying a server value must come out of a recompute with
+    // the key GONE rather than with the stale number still on it.
+    it('clears a stale season key rather than leaving it in place', () => {
+      const players = [{ pid: 'excluded', pts_added: { season: 77 } }]
+
+      assign_expected_surplus({ players, expected_surplus: {} })
+
+      expect(players[0].pts_added).to.not.have.property(season_aggregate_key)
     })
   })
 })

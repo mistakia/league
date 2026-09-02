@@ -6,6 +6,8 @@ Everything from authoring the adhoc file to verifying the deploy. Gates are list
 
 Extracted from `CLAUDE.md`, which keeps the one-line rule and routes here.
 
+**One domain rule is binding on any projection migration and is not repeated here: [[user:guideline/nfl/league/projection-period-encoding.md]].** Period belongs in the TABLE, never as a literal `week`-column sentinel; "never in the drawn pool" is NULL in storage and an ABSENT key in the payload, never `-999`, never `0`, and never an emitted null. It also carries the validated `ros` sweep pattern, because the obvious one is structurally blind to a bare identifier and certified a purge that had missed five files.
+
 ---
 
 ## Authoring and applying an adhoc file

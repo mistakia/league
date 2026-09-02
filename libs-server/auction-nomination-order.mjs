@@ -101,10 +101,13 @@ export const get_auction_nomination_order = async ({
     // number. Summing net over the season's weeks is the same value model at a
     // different grain, which is what this tier is for.
     //
-    // THE SENTINEL MUST BE EXCLUDED FROM THE SUM, and this is the one tier where
-    // that matters. Tier one and tier three COMPARE the column, so a
-    // `default_points_added` row simply sorts last and the order is still right.
-    // This tier AGGREGATES it, and the sentinel is about ten times the entire
+    // THE SENTINEL MUST BE EXCLUDED FROM THE SUM, and this tier is the only
+    // place it still appears. The season table above spells "never in the drawn
+    // pool" as NULL since 2026-09-02, so tier one's `whereNotNull` drops those
+    // players outright; the WEEKLY table keeps `-999`, because a per-week
+    // points-added is a different quantity and its own decision.
+    //
+    // This tier AGGREGATES that sentinel, and it is about ten times the entire
     // value range -- the top of the real 2026 board is ~138 points added against
     // a sentinel of -999 -- so one missing week outweighs every difference in
     // value the tier is trying to rank on. What it ends up sorting by is how

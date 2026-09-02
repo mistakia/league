@@ -197,7 +197,11 @@ const load_indexes = async ({
   // migrated week='0' rows landed in, so it is the only one populated for
   // 2020-2025. Reading the positive variant here would return NULL for every
   // historical holding and silently reinstate the regression this comment
-  // records. The -999 sentinel means "no projection available" and is dropped.
+  // records.
+  //
+  // "No projection available" is spelled NULL on this table and nothing else --
+  // operator ruling 2026-09-02, replacing a `-999` sentinel this loop used to
+  // have to know about by name. The null check below is the whole filter.
   idx.projections = new Map()
   if (player_ids.length && format_ids.length && years.length) {
     const proj_rows = await db('league_format_player_season_projection_values')
@@ -213,7 +217,6 @@ const load_indexes = async ({
     for (const r of proj_rows) {
       if (r.projected_points_added_net == null) continue
       const v = Number(r.projected_points_added_net)
-      if (v <= -900) continue
       const k = `${r.pid}__${r.league_format_id}__${r.season_year}`
       idx.projections.set(k, v)
     }

@@ -42,9 +42,20 @@ export const rest_of_season_net_aggregate_key = 'rest_of_season_net'
 // biased in LEVEL. A distributional weekly board de-biases it later without
 // changing this definition, which is why it is a follow-on rather than a
 // prerequisite.
+//
+// `counted` is what separates a REAL zero from "never in the drawn pool", and
+// the two are not distinguishable in the sums. A player who is in the pool every
+// week but never clears replacement sums to a positive of 0, which is a true
+// measurement; a kicker, an unstarted position, or a player with no projection
+// covering the period contributes no week at all and sums to 0 for want of an
+// addend. Measured on live 2026 data, 12,617 of the 15,988 rest-of-season rows
+// are 0 and only ~1,894 of those are the second kind -- so writing 0 for both
+// makes the honest majority indistinguishable from the exclusions. The caller
+// omits the period keys entirely when `counted` is 0; see the note there.
 const sum_weekly_points_added = ({ pts_added, from_week }) => {
   let positive = 0
   let net = 0
+  let counted = 0
 
   for (const [week, value] of Object.entries(pts_added)) {
     const wk = Number(week)
@@ -58,13 +69,29 @@ const sum_weekly_points_added = ({ pts_added, from_week }) => {
     // it, or one absent week drives the whole period net to -999.
     if (value === default_points_added) continue
 
+    counted += 1
     net += value
     if (value > 0) {
       positive += value
     }
   }
 
-  return { positive, net }
+  return { positive, net, counted }
+}
+
+// Publish one aggregate onto the map, or take the key OFF it when the period
+// summed no week at all. `delete` rather than skip, because the map handed in
+// may already carry a key from a previous pass -- the SPA recomputes onto the
+// same player objects the API payload populated, so leaving a stale server value
+// behind under a key the recompute has decided is absent is the one way this
+// could publish a number nothing produced.
+const assign_or_omit = (pts_added, key, sums, variant = 'net') => {
+  if (!sums.counted) {
+    delete pts_added[key]
+    return
+  }
+
+  pts_added[key] = sums[variant]
 }
 
 /**
@@ -109,9 +136,32 @@ const calculate_player_period_values = ({
       from_week: rest_of_season_from_week
     })
 
-    player.pts_added[season_net_aggregate_key] = season.net
-    player.pts_added[rest_of_season_aggregate_key] = rest_of_season.positive
-    player.pts_added[rest_of_season_net_aggregate_key] = rest_of_season.net
+    // OMIT, never assign null. Each period key is absent for a player no week
+    // in that period contributed to -- which is the same spelling of "never in
+    // the drawn pool" that assign_expected_surplus uses for the season positive,
+    // and the same one the period tables store as NULL through the `?? null` in
+    // build-league-format-period-inserts.mjs.
+    //
+    // Assigning null here instead would reach the SPA as a PRESENT key, and the
+    // draft and player-list sorts read
+    // `getIn(['pts_added', <period>], default_points_added)` -- a notSetValue an
+    // explicit null never triggers. The player would coerce to 0 and land
+    // mid-board rather than last, silently reordering both surfaces with no
+    // error anywhere. Membership is judged per PERIOD, so a player in the pool
+    // for the season but carrying no projected week from here on is absent from
+    // the rest-of-season keys and present in the season one.
+    assign_or_omit(player.pts_added, season_net_aggregate_key, season)
+    assign_or_omit(
+      player.pts_added,
+      rest_of_season_aggregate_key,
+      rest_of_season,
+      'positive'
+    )
+    assign_or_omit(
+      player.pts_added,
+      rest_of_season_net_aggregate_key,
+      rest_of_season
+    )
   }
 
   // Each aggregate is priced against the sum of its OWN positive parts, derived

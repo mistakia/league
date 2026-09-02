@@ -29,6 +29,8 @@ import { season_aggregate_key } from '#libs-shared/calculate-distributional-base
  * @param {number} params.season_year
  * @param {boolean} params.write_season_period - whether this run recomputed the
  *   season board, and so has a season value to write. See the seal note below.
+ * @param {boolean} params.write_rest_of_season_period - whether this run is for
+ *   the live year. See the rest-of-season note below.
  * @returns {object} { weekly_value_inserts, season_value_inserts,
  *   rest_of_season_value_inserts }
  */
@@ -36,7 +38,8 @@ const build_league_format_period_inserts = ({
   player_rows,
   league_format_id,
   season_year,
-  write_season_period
+  write_season_period,
+  write_rest_of_season_period
 }) => {
   const weekly_value_inserts = []
   const season_value_inserts = []
@@ -97,6 +100,15 @@ const build_league_format_period_inserts = ({
         // of weekly nets. They come from different computations on purpose; see
         // calculate-distributional-baselines.mjs and
         // calculate-player-period-values.mjs.
+        //
+        // `?? null` IS the storage spelling for "never in the drawn pool" on
+        // both period tables (operator ruling 2026-09-02). Both producers leave
+        // the key ABSENT for such a player rather than assigning a value, so
+        // there is one condition to express and NULL is what it becomes here. It
+        // replaces a `-999` on the season table and a `0` on the rest-of-season
+        // one; the `0` was the worse of the two, because the positive variant is
+        // floored at zero by construction and a real zero was indistinguishable
+        // from an exclusion.
         projected_points_added_positive:
           pts_added[season_aggregate_key] ?? null,
         projected_points_added_net: pts_added[season_net_aggregate_key] ?? null,
@@ -104,6 +116,15 @@ const build_league_format_period_inserts = ({
         market_salary_net: market_salary[season_net_aggregate_key] ?? null
       })
     }
+
+    // REST OF SEASON IS CURRENT-YEAR-ONLY BY SEMANTIC, and this gate is what
+    // says so. The quantity is "value from the live week to the end of the
+    // year", so calculate_player_period_values sums from `current_season.week`
+    // -- against a completed year that bound is meaningless and the row it
+    // produces is a number nobody can interpret. The backfill wrote them anyway
+    // until 2026-09-02, leaving 719 rows for 2023 and 638 for 2025 on a table
+    // whose only real population is the live year.
+    if (!write_rest_of_season_period) continue
 
     rest_of_season_value_inserts.push({
       pid: player_row.pid,

@@ -105,6 +105,21 @@ const calculatePrices = ({ league_format, players, aggregate_key }) => {
     get_discretionary_cap(league_format) / total_pts_added
 
   for (const player of players) {
+    // A player with no value on this aggregate has no price on it either, and
+    // the key stays absent on both maps rather than resolving to $0. Without
+    // this the arithmetic below runs on `undefined`, `Math.round(NaN) || 0`
+    // floors to 0, and a player who was never in the drawn pool is stored as
+    // priced-at-zero -- indistinguishable from a real player the market values
+    // at nothing, which is the conflation the period tables' NULL spelling
+    // exists to remove. See assign_expected_surplus and
+    // calculate-player-period-values.mjs for where the absence originates.
+    //
+    // The weekly aggregate keys are unaffected: they carry the `-999` sentinel,
+    // which is finite, prices negative and floors to 0 exactly as before.
+    if (!Number.isFinite(player.pts_added?.[aggregate_key])) {
+      continue
+    }
+
     // Floor here, once, rather than on the way out. A weekly pts_added is
     // signed and the season path carries a -999 sentinel for anyone who was
     // never priced, so the raw product is negative for a large share of the
