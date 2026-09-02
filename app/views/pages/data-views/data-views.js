@@ -316,7 +316,8 @@ export default function DataViewsPage({
   const render_request_status = () => {
     if (!data_view_request.current_request) return null
 
-    const { status, position, client_timeout } = data_view_request
+    const { status, position, client_timeout, error, is_invalid_request } =
+      data_view_request
     const is_waiting = status === 'pending' || status === 'processing'
 
     // A dropped socket outranks whatever the last server-sent status was: that
@@ -352,19 +353,39 @@ export default function DataViewsPage({
     }
 
     if (status === 'error') {
-      // Deliberately not rendering `error`: the server sends the raw driver
-      // message, which is the full generated SQL and is neither readable nor
-      // safe to put on screen.
+      // `error` is shown only when the SERVER classified it as a bad request.
+      // An unclassified error is a driver message carrying the full generated
+      // SQL -- neither readable nor safe to put on screen -- and the client
+      // cannot tell the two apart from the text, which is why every message
+      // used to be dropped. A refusal that names the two columns to split is
+      // the whole remedy, so throwing it away left the user with a generic
+      // banner and no way to learn what was wrong.
+      //
+      // Retry is offered only for the unclassified case. Replaying a request
+      // the server has already refused on its own contents cannot succeed, and
+      // a button that reliably does nothing reads as a broken page.
       return (
-        <div className='view-request-status-container error'>
-          <span>
-            {client_timeout
-              ? 'No response from the server.'
-              : 'Error occured while processing request'}
-          </span>
-          <Button small onClick={() => reset_data_view_cache()}>
-            Retry
-          </Button>
+        <div
+          className={get_string_from_object({
+            'view-request-status-container': true,
+            error: true,
+            '-message': is_invalid_request
+          })}
+        >
+          {is_invalid_request ? (
+            <span className='view-request-status-message'>{error}</span>
+          ) : (
+            <>
+              <span>
+                {client_timeout
+                  ? 'No response from the server.'
+                  : 'Error occurred while processing request'}
+              </span>
+              <Button small onClick={() => reset_data_view_cache()}>
+                Retry
+              </Button>
+            </>
+          )}
         </div>
       )
     }

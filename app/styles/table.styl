@@ -44,6 +44,21 @@
     gap 8px
     opacity 1
 
+  // A classified refusal carries the server's own prose, which names the
+  // offending columns and the remedy. That does not fit the 300px pill the
+  // generic statuses share, and the message is the entire point of showing it,
+  // so this variant widens and wraps rather than truncating. The newlines are
+  // real -- the server joins several refusals with them -- so they must survive
+  // as line breaks instead of collapsing into one run-on sentence.
+  &.-message
+    max-width 520px
+    width auto
+
+    .view-request-status-message
+      white-space pre-line
+      text-align left
+      line-height 1.4
+
 .table__row
   width max-content
   min-width 100%

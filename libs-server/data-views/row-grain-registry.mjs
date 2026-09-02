@@ -1,12 +1,13 @@
 import player from './row-grains/player.mjs'
 import team from './row-grains/team.mjs'
+import { invalid_data_view_request } from '#libs-server/data-views/invalid-data-view-request.mjs'
 
 const row_grains = { player, team }
 
 export const resolve_row_grain = (row_grain_id) => {
   const row_grain = row_grains[row_grain_id]
   if (!row_grain) {
-    throw new Error(`Unknown row_grain: ${row_grain_id}`)
+    throw invalid_data_view_request(`Unknown row_grain: ${row_grain_id}`)
   }
   return row_grain
 }
@@ -24,7 +25,7 @@ const identity_for_row_grain_row_axes = (row_grain_id, row_axes) => {
     // answering it at week grain would silently drop the axis the caller asked
     // for; refusing says so.
     if (has_line && !has_week) {
-      throw new Error(
+      throw invalid_data_view_request(
         "row_axes 'line' requires 'week': an alternate line belongs to a single game"
       )
     }
@@ -34,7 +35,7 @@ const identity_for_row_grain_row_axes = (row_grain_id, row_axes) => {
     return 'player'
   }
   if (has_line) {
-    throw new Error(
+    throw invalid_data_view_request(
       `row_axes 'line' is not supported for row_grain '${row_grain_id}': a line is posted per player selection`
     )
   }
@@ -43,7 +44,7 @@ const identity_for_row_grain_row_axes = (row_grain_id, row_axes) => {
     if (has_year) return 'team_year'
     return 'team'
   }
-  throw new Error(`Unknown row_grain: ${row_grain_id}`)
+  throw invalid_data_view_request(`Unknown row_grain: ${row_grain_id}`)
 }
 
 export const identity_for = ({ row_grain_id, row_axes = [] }) =>

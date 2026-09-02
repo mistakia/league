@@ -147,10 +147,17 @@ export const handle_data_view_request = async ({
     }
     if (executions.get(execution_id) !== exec) return
     log('Error processing request', { request_id, error: error.toString() })
+    // is_invalid_request is what makes the message showable. Without it the
+    // client cannot tell an authored refusal ("these two columns cannot share
+    // the line split") from a driver message carrying the whole generated SQL,
+    // so it dropped every message and rendered one generic banner -- including
+    // for the refusals that say exactly which column to remove. `.message`
+    // rather than `.toString()`, which prefixes a bare "Error: ".
     send_websocket_message(ws, 'DATA_VIEW_ERROR', {
       request_id,
       execution_id,
-      error: error.toString()
+      error: error.is_invalid_request ? error.message : error.toString(),
+      is_invalid_request: Boolean(error.is_invalid_request)
     })
     exec.state = 'done'
   }
