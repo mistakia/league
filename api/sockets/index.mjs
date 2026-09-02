@@ -79,7 +79,7 @@ export default function (wss) {
         MESSAGE_TYPES.UNSUBSCRIBE_FROM_JOB
       ]
       if (external_league_message_types.includes(message.type)) {
-        return handle_external_league_import_socket(ws, message)
+        return handle_external_league_import_socket(ws, message, user_id)
       }
     })
 

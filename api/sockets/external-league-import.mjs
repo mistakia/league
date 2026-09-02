@@ -85,8 +85,20 @@ export const JOB_STATUS = {
  * Routes incoming messages to appropriate handlers
  * @param {WebSocket} ws - WebSocket connection
  * @param {object} message - Parsed message object with type and payload
+ * @param {number} user_id - the SOCKET-AUTHENTICATED user, from `request.auth`
+ *
+ * `user_id` is threaded to every handler that needs an identity rather than
+ * read out of the payload beside the rest of the request. The two verbs that
+ * act on a job -- queueing one and cancelling one -- are authorization
+ * decisions, and `cancel_job` compares against the job's `initiated_by`, so an
+ * identity taken from the payload would be checked against a value the caller
+ * also chose.
  */
-export default function handle_external_league_import_socket(ws, message) {
+export default function handle_external_league_import_socket(
+  ws,
+  message,
+  user_id
+) {
   const { type, payload } = message
 
   // Message handler registry - defined here after all handlers are declared
@@ -103,7 +115,7 @@ export default function handle_external_league_import_socket(ws, message) {
 
   const handler = MESSAGE_HANDLERS[type]
   if (handler) {
-    return handler(ws, payload)
+    return handler(ws, payload, user_id)
   }
 
   // Unknown message type
@@ -123,14 +135,15 @@ export default function handle_external_league_import_socket(ws, message) {
  * @param {string} [payload.job_type='full_sync'] - Type of sync job
  * @param {object} [payload.sync_components] - Components to sync
  * @param {boolean} [payload.dry_run=false] - Whether this is a dry run
- * @param {number} payload.user_id - User initiating the job
+ * @param {number} user_id - the socket-authenticated user initiating the job
  */
-async function handle_queue_sync_job(ws, payload) {
+async function handle_queue_sync_job(ws, payload, user_id) {
   try {
-    const validation = validate_required_fields(payload, [
-      'connection_id',
-      'user_id'
-    ])
+    if (!user_id) {
+      throw new Error('Authentication required')
+    }
+
+    const validation = validate_required_fields(payload, ['connection_id'])
     if (!validation.valid) {
       throw new Error(
         `Missing required fields: ${validation.missing.join(', ')}`
@@ -145,8 +158,7 @@ async function handle_queue_sync_job(ws, payload) {
         rosters: true,
         transactions: true
       },
-      dry_run = false,
-      user_id
+      dry_run = false
     } = payload
 
     const job_id = await sync_queue.queue_job({
@@ -170,18 +182,22 @@ async function handle_queue_sync_job(ws, payload) {
  * @param {WebSocket} ws - WebSocket connection
  * @param {object} payload - Request payload
  * @param {string} payload.job_id - Job ID to cancel
- * @param {number} payload.user_id - User requesting cancellation
+ * @param {number} user_id - the socket-authenticated user requesting it
  */
-async function handle_cancel_sync_job(ws, payload) {
+async function handle_cancel_sync_job(ws, payload, user_id) {
   try {
-    const validation = validate_required_fields(payload, ['job_id', 'user_id'])
+    if (!user_id) {
+      throw new Error('Authentication required')
+    }
+
+    const validation = validate_required_fields(payload, ['job_id'])
     if (!validation.valid) {
       throw new Error(
         `Missing required fields: ${validation.missing.join(', ')}`
       )
     }
 
-    const { job_id, user_id } = payload
+    const { job_id } = payload
 
     await sync_queue.cancel_job({ job_id, user_id })
 
