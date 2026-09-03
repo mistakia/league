@@ -8,6 +8,10 @@ import { current_season } from '#constants'
 import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import {
+  snap_group_key,
+  find_gamelog_for_snap_group
+} from '#libs-server/snap-gamelog-pairing.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const initialize_cli = () => {
@@ -47,6 +51,10 @@ const generate_player_snaps_for_week = async ({
   const gamelogs = await db('player_gamelogs')
     .select(
       'player.gsis_it_player_id',
+      // Selected so a snap group can be paired with the gamelog for its OWN
+      // game. Without it the pairing below fell back to the player's first
+      // gamelog anywhere in the week -- see libs-server/snap-gamelog-pairing.mjs.
+      'player_gamelogs.esbid',
       'player_gamelogs.nfl_team',
       'player_gamelogs.opponent_nfl_team',
       'player_gamelogs.player_position'
@@ -88,12 +96,16 @@ const generate_player_snaps_for_week = async ({
 
   log(`found ${nfl_snap_rows.length} nfl snaps`)
 
-  const nfl_snap_rows_by_gsis_it_player_id = groupBy(
-    nfl_snap_rows,
-    'gsis_it_player_id'
+  // Grouped per (player, GAME) rather than per player. A week can hold more
+  // than one game for the same player, and grouping by player alone both merged
+  // their snaps and took the esbid from whichever game sorted first.
+  const nfl_snap_rows_by_player_game = groupBy(nfl_snap_rows, snap_group_key)
+  log(
+    `found ${Object.keys(nfl_snap_rows_by_player_game).length} player-games of snaps`
   )
-  log(`found ${Object.keys(nfl_snap_rows_by_gsis_it_player_id).length} players`)
-  const gsis_it_ids = Object.keys(nfl_snap_rows_by_gsis_it_player_id)
+  const gsis_it_ids = [
+    ...new Set(nfl_snap_rows.map((row) => row.gsis_it_player_id))
+  ]
 
   const player_rows = await db('player')
     .select('pid', 'gsis_it_player_id')
@@ -217,8 +229,10 @@ const generate_player_snaps_for_week = async ({
     }
   }
 
-  for (const gsis_it_player_id_key in nfl_snap_rows_by_gsis_it_player_id) {
-    const gsis_it_player_id = Number(gsis_it_player_id_key)
+  for (const player_game_key in nfl_snap_rows_by_player_game) {
+    const player_snap_rows = nfl_snap_rows_by_player_game[player_game_key]
+    const { gsis_it_player_id, esbid } = player_snap_rows[0]
+
     const player_row = player_rows.find(
       (p) => p.gsis_it_player_id === gsis_it_player_id
     )
@@ -227,18 +241,19 @@ const generate_player_snaps_for_week = async ({
       continue
     }
 
-    const player_gamelog = gamelogs.find(
-      (p) => p.gsis_it_player_id === gsis_it_player_id
-    )
+    // Paired on (player, GAME). A gamelog from another game of the same week is
+    // not a fallback -- it is the wrong-game row this pairing exists to stop.
+    const player_gamelog = find_gamelog_for_snap_group({
+      gamelogs,
+      gsis_it_player_id,
+      esbid
+    })
     if (!player_gamelog) {
-      log(`player_gamelog not found for pid: ${player_row.pid}`)
+      log(`player_gamelog not found for pid: ${player_row.pid} esbid: ${esbid}`)
       continue
     }
 
     const { opponent_nfl_team, player_position } = player_gamelog
-    const player_snap_rows =
-      nfl_snap_rows_by_gsis_it_player_id[gsis_it_player_id]
-    const { esbid } = player_snap_rows[0]
 
     const player_snaps = {
       off: new Set(),
@@ -358,6 +373,11 @@ const generate_player_snaps_for_week = async ({
       pid: player_row.pid,
       is_active: true,
       season_year,
+      // Named explicitly. Omitting it let a NEW row take the column DEFAULT of
+      // '' on a NOT NULL column, which is how the only two source-less rows in
+      // player_gamelogs came to hold an empty team. Now that the gamelog is
+      // paired on (player, game), this is the team for THIS game.
+      nfl_team: team,
       opponent_nfl_team,
       player_position,
       snaps_offense,
