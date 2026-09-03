@@ -5,9 +5,9 @@ import MockDate from 'mockdate'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import draft from '#db/fixtures/draft.mjs'
-import { current_season, player_tag_types } from '#constants'
+import { current_season, player_tag_types, roster_slot_types } from '#constants'
 import { getRoster } from '#libs-server'
-import run from '#scripts/generate-rosters.mjs'
+import run, { check_slice_matches_source } from '#scripts/generate-rosters.mjs'
 
 process.env.NODE_ENV = 'test'
 
@@ -229,6 +229,147 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(0)
       expect(roster4.season_year).to.equal(current_season.year)
+    })
+
+    it('reports a slot-only drift the membership check cannot see', async () => {
+      // The 2026-09-02 incident: week 1 held exactly the right players in the
+      // wrong slots, so the `tid:pid` membership comparison read clean for days
+      // while the forecast pipeline consumed the drifted slice.
+      //
+      // Drive the check directly rather than through `run()`. The job REPAIRS
+      // this drift on its next pass, so a control that goes through it cannot
+      // observe the broken state at all -- it would assert against a slice the
+      // writer has already fixed and pass for the wrong reason.
+      MockDate.set(regular_season_start.subtract('2', 'day').toISOString())
+      await draft(knex)
+      await run()
+
+      const league_row = { league_id: 1 }
+      const next_week = current_season.week + 1
+      // In-season path: tags carry forward unscrubbed, which is what this run is.
+      const next_tag = (p) => p.tag
+
+      const check_args = {
+        league: league_row,
+        previous_year: current_season.year,
+        previous_week: current_season.week,
+        next_week,
+        next_tag
+      }
+
+      // Unperturbed reading. Per the verification rule this is half the
+      // evidence: without it a red control is indistinguishable from a check
+      // that was already red for an unrelated reason.
+      const clean_failures = []
+      await check_slice_matches_source({
+        ...check_args,
+        slice_failures: clean_failures
+      })
+      expect(clean_failures).to.eql([])
+
+      // Mutate ONE slot in the generated slice, leaving membership identical.
+      const target = await knex('rosters_players')
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: next_week,
+          slot: roster_slot_types.BENCH
+        })
+        .first()
+      expect(target, 'fixture must have a benched player to move').to.exist
+
+      const mutated_count = await knex('rosters_players')
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: next_week,
+          tid: target.tid,
+          pid: target.pid
+        })
+        .update({ slot: roster_slot_types.RESERVE_SHORT_TERM })
+      // Assert the mutation landed. A control whose setup silently no-ops is
+      // indistinguishable from a control that ran.
+      expect(mutated_count).to.equal(1)
+
+      // Membership is UNCHANGED by the mutation, which is the whole point: this
+      // is the decoy proving the widening is load-bearing rather than a
+      // restatement of the check it replaced.
+      const key_of = ({ tid, pid }) => `${tid}:${pid}`
+      const source_keys = (
+        await knex('rosters_players')
+          .select('tid', 'pid')
+          .where({ lid: 1, season_year: current_season.year, week: 0 })
+      ).map(key_of)
+      const generated_keys = (
+        await knex('rosters_players')
+          .select('tid', 'pid')
+          .where({ lid: 1, season_year: current_season.year, week: next_week })
+      ).map(key_of)
+      expect([...source_keys].sort()).to.eql([...generated_keys].sort())
+
+      // Must-report reading.
+      const drift_failures = []
+      await check_slice_matches_source({
+        ...check_args,
+        slice_failures: drift_failures
+      })
+      expect(drift_failures.length).to.equal(1)
+      expect(drift_failures[0]).to.contain('0 missing, 0 extra')
+      expect(drift_failures[0]).to.contain('1 slot/tag drift')
+      expect(drift_failures[0]).to.contain(key_of(target))
+
+      // The two readings differ, which is what makes either of them evidence.
+      expect(drift_failures).to.not.eql(clean_failures)
+    })
+
+    it('follows a week 0 slot change into the forward slice', async () => {
+      // The repair half: the drift above is only a detection problem if the
+      // write path already handles it. A source slot change must reach the
+      // generated slice on the next run, and the run must stay green.
+      MockDate.set(regular_season_start.subtract('2', 'day').toISOString())
+      await draft(knex)
+      await run()
+
+      const next_week = current_season.week + 1
+      const target = await knex('rosters_players')
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: 0,
+          slot: roster_slot_types.BENCH
+        })
+        .first()
+      expect(target, 'fixture must have a benched player to move').to.exist
+
+      const moved = await knex('rosters_players')
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: 0,
+          tid: target.tid,
+          pid: target.pid
+        })
+        .update({ slot: roster_slot_types.RESERVE_SHORT_TERM })
+      expect(moved).to.equal(1)
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+      expect(error).to.equal(undefined)
+
+      const forward_row = await knex('rosters_players')
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: next_week,
+          tid: target.tid,
+          pid: target.pid
+        })
+        .first()
+      expect(forward_row.slot).to.equal(roster_slot_types.RESERVE_SHORT_TERM)
     })
 
     it('scrubs non-REGULAR tags during year-rollover', async () => {

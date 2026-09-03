@@ -47,6 +47,103 @@ const check_orphan_slice = async ({
   }
 }
 
+// Post-write invariant: the generated slice must MATCH its source.
+//
+// The row-count oracle in `run` only asks whether each populated source team
+// produced any rows at all, so it is blind to a slice that exists but has
+// drifted from its source.
+//
+// MEMBERSHIP IS NOT THE WHOLE MATCH. This compared `tid:pid` alone until
+// 2026-09-02, so a slice holding exactly the right players in the wrong SLOTS
+// passed it -- which is the shape the drift actually takes, because the moves
+// that separate week 0 from its forward copy are reserve and activate, and
+// neither changes who is rostered. League 1's week 1 carried Jeanty, Nabers and
+// Burden in a reserve slot against a week 0 that had all three active, five of
+// ten teams disagreed on their slot-13 count, and the membership check read
+// clean throughout. Assert the ATTRIBUTES the write path sets -- slot and tag,
+// the same pair the `updates` filter keys on -- so a drift the update path
+// failed to apply cannot pass.
+//
+// Be clear about what this can and cannot see, because the two are easy to
+// conflate. It runs immediately after the run's own writes, so it proves the
+// slice matched its source AT THE END OF THAT RUN: it catches an update path
+// that silently applied nothing, not a slice that goes stale between runs.
+// Staleness in the gap is a property of the CONSUMER -- a reader that wants the
+// live roster must read the week the league itself considers current, not this
+// copy of it -- and no oracle inside the writer can substitute for that.
+//
+// `extensions` stays out of the comparison, matching the write path, which
+// deliberately preserves it rather than copying it forward. `next_tag` is
+// passed in rather than re-derived, so the expectation and the write are one
+// expression and a change to the rollover rule cannot make them disagree.
+//
+// Exported so a control can drive it against a state the writer cannot produce.
+// A check reachable only through the job that repairs the fault it looks for is
+// a check that can never be shown to go red.
+export const check_slice_matches_source = async ({
+  league,
+  previous_year,
+  previous_week,
+  next_week,
+  next_tag,
+  slice_failures
+}) => {
+  const key_of = ({ tid, pid }) => `${tid}:${pid}`
+  const rows_by_key = async ({ season_year, week }) =>
+    new Map(
+      (
+        await db('rosters_players')
+          .select('tid', 'pid', 'slot', 'tag')
+          .where({ lid: league.league_id, season_year, week })
+      ).map((row) => [key_of(row), row])
+    )
+
+  const source_by_key = await rows_by_key({
+    season_year: previous_year,
+    week: previous_week
+  })
+  const generated_by_key = await rows_by_key({
+    season_year: current_season.year,
+    week: next_week
+  })
+
+  const missing = [...source_by_key.keys()].filter(
+    (k) => !generated_by_key.has(k)
+  )
+  const extra = [...generated_by_key.keys()].filter(
+    (k) => !source_by_key.has(k)
+  )
+
+  const divergent = []
+  for (const [key, source_row] of source_by_key) {
+    const generated_row = generated_by_key.get(key)
+    if (!generated_row) continue
+    const expected_tag = next_tag(source_row)
+    if (
+      generated_row.slot !== source_row.slot ||
+      generated_row.tag !== expected_tag
+    ) {
+      divergent.push(
+        `${key} slot ${source_row.slot}->${generated_row.slot} tag ${expected_tag}->${generated_row.tag}`
+      )
+    }
+  }
+
+  if (!missing.length && !extra.length && !divergent.length) {
+    return
+  }
+
+  // Name a few divergent players outright. The counts alone cannot distinguish a
+  // systematic copy failure from one team's stuck update, and this log line is
+  // the only surface the job has.
+  const sample = divergent.length
+    ? `; e.g. ${divergent.slice(0, 3).join(', ')}`
+    : ''
+  slice_failures.push(
+    `slice divergence for (lid=${league.league_id}, year=${current_season.year}, week=${next_week}): ${missing.length} missing, ${extra.length} extra, ${divergent.length} slot/tag drift vs source (year=${previous_year}, week=${previous_week})${sample}`
+  )
+}
+
 const run = async () => {
   const is_new_season = current_season.now > current_season.end
 
@@ -92,6 +189,16 @@ const run = async () => {
   const highest_valid_week = generate_forward_slice
     ? nextWeek
     : current_season.week
+
+  // Tags are season-specific (FRANCHISE/ROOKIE/RFA must be re-applied each
+  // offseason). On the year-rollover insert into year=N week=0, scrub any
+  // non-REGULAR tag carried forward from year=N-1's final week.
+  //
+  // Defined once, at the level the post-write invariant can also reach: the
+  // invariant asserts the generated tag against what the write path was
+  // supposed to produce, so the two must be the same expression rather than
+  // two copies of one rule.
+  const next_tag = (p) => (is_new_season ? player_tag_types.REGULAR : p.tag)
 
   if (generate_forward_slice) {
     log(
@@ -163,11 +270,6 @@ const run = async () => {
       const extra_pids = existing_rows.filter(
         (p) => !current_pids.includes(p.pid)
       )
-      // Tags are season-specific (FRANCHISE/ROOKIE/RFA must be re-applied each
-      // offseason). On the year-rollover insert into year=N week=0, scrub any
-      // non-REGULAR tag carried forward from year=N-1's final week.
-      const next_tag = (p) => (is_new_season ? player_tag_types.REGULAR : p.tag)
-
       const inserts = missing_pids.map((p) => ({
         roster_id: rid,
         tag: next_tag(p),
@@ -236,42 +338,14 @@ const run = async () => {
       }
     }
 
-    // Post-write invariant: the generated slice must MATCH its source, and it
-    // must be the highest slice that exists for the year.
-    //
-    // The row-count oracle above only asks whether each populated source team
-    // produced any rows at all, so it is blind to a slice that exists but has
-    // drifted from its source. Within the lead window the forward slice is a
-    // nightly copy of a week 0 that keeps moving, so whether the schedule is
-    // dense enough to keep it fresh is measured here rather than assumed from
-    // the crontab.
-    const key_of = ({ tid, pid }) => `${tid}:${pid}`
-    const source_keys = new Set(
-      (
-        await db('rosters_players').select('tid', 'pid').where({
-          lid: league.league_id,
-          season_year: previousYear,
-          week: previousWeek
-        })
-      ).map(key_of)
-    )
-    const generated_keys = new Set(
-      (
-        await db('rosters_players').select('tid', 'pid').where({
-          lid: league.league_id,
-          season_year: current_season.year,
-          week: nextWeek
-        })
-      ).map(key_of)
-    )
-
-    const missing = [...source_keys].filter((k) => !generated_keys.has(k))
-    const extra = [...generated_keys].filter((k) => !source_keys.has(k))
-    if (missing.length || extra.length) {
-      slice_failures.push(
-        `slice divergence for (lid=${league.league_id}, year=${current_season.year}, week=${nextWeek}): ${missing.length} missing, ${extra.length} extra vs source (year=${previousYear}, week=${previousWeek})`
-      )
-    }
+    await check_slice_matches_source({
+      league,
+      previous_year: previousYear,
+      previous_week: previousWeek,
+      next_week: nextWeek,
+      next_tag,
+      slice_failures
+    })
 
     await check_orphan_slice({ league, highest_valid_week, slice_failures })
   }
