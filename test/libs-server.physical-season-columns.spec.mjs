@@ -40,7 +40,8 @@ import {
   physical_year_group_by,
   physical_table_names,
   tables_without_seas_type,
-  tables_with_nfl_week_id
+  tables_with_nfl_week_id,
+  tables_with_week
 } from '#libs-server/data-views/physical-season-columns.mjs'
 import { FACT_SOURCES } from '#libs-server/data-views/measure/fact-source-registry.mjs'
 
@@ -187,6 +188,26 @@ describe('physical season columns', () => {
       if (tables_with_nfl_week_id().has(table_name)) continue
       it(`${table_name} really has no nfl_week_id`, () => {
         expect(table_columns(table_name).has('nfl_week_id')).to.equal(false)
+      })
+    }
+  })
+
+  // The week declaration decides whether the scope emitter may replace the
+  // composite nfl_week_id predicate with the decomposed `week IN (...)`. A table
+  // wrongly listed emits a 42703; one wrongly omitted merely keeps the composite,
+  // which is correct but estimates badly, so only the first direction can break a
+  // request. Both are checked anyway -- the omission is the one that goes unnoticed.
+  describe('the week declaration agrees with the schema', () => {
+    for (const table_name of tables_with_week()) {
+      it(`${table_name} really carries week`, () => {
+        expect(table_columns(table_name).has('week')).to.equal(true)
+      })
+    }
+
+    for (const table_name of physical_table_names()) {
+      if (tables_with_week().has(table_name)) continue
+      it(`${table_name} really has no week`, () => {
+        expect(table_columns(table_name).has('week')).to.equal(false)
       })
     }
   })

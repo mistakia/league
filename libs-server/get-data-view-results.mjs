@@ -20,6 +20,10 @@ import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import resolve_pg_field_types from '#libs-server/data-views/resolve-pg-field-types.mjs'
 import {
+  plan_carries_clamp_signature,
+  extract_plan_from_explain_response
+} from '#libs-server/data-views/nested-loop-clamp-signature.mjs'
+import {
   TOTAL_COUNT_KEY,
   extract_total_count
 } from '#libs-server/data-views/extract-total-count.mjs'
@@ -2473,6 +2477,59 @@ export const get_data_view_results_query = async ({
 // actually changed. temp_file_limit, not work_mem, is what bounds blast radius.
 const DATA_VIEW_WORK_MEM = '1GB'
 
+// The re-plan arm, applied only to statements carrying the clamp signature.
+//
+// Capping parallelism is not a tuning preference, it is the whole reason this
+// arm is shippable. An earlier blanket sweep of `enable_nestloop = off` hard-
+// failed two statements with `ERROR: too many dynamic shared memory segments`,
+// which is a SERVER-wide resource -- so the failure lands on unrelated sessions
+// rather than on the statement that exhausted it. The segments come from
+// parallel hash joins, and this is the ceiling that stops them. It costs about
+// 25% on the worst shape (1,596/1,624ms with workers against 1,892/2,042ms
+// without) and that shape is still 156x faster than the 305,000ms it takes
+// under the default planner.
+const DATA_VIEW_MAX_PARALLEL_WORKERS_PER_GATHER = 2
+
+// Budget for the plan probe, not for the statement. Planning the whole corpus
+// measured p50 13.2ms and p90 34.5ms, so this is roughly 100x the observed
+// worst case: it exists to bound a pathological planning time, not to be
+// approached. A probe that trips it falls back to the default planner.
+const PLAN_PROBE_TIMEOUT_MS = 5000
+
+// Plan the statement, and answer whether it should be re-planned with nested
+// loops disabled.
+//
+// This is a real extra round trip on every cache-miss execution, and it is
+// bought deliberately. The alternative -- setting `enable_nestloop = off` for
+// every data-view statement -- was measured taking a small view from 851ms to
+// 9,198ms, and an interactive surface cannot pay that. Planning first costs
+// tens of milliseconds and buys the setting being applied to exactly the
+// statements it helps: 107 of the 139 statements in the production corpus carry
+// the signature, and disabling nested loops eliminates every rescan site in all
+// 107 of them.
+//
+// A plain EXPLAIN never executes the statement, so the probe is safe to run
+// against anything the executor was about to run anyway. It must also never be
+// able to FAIL a request: any error, timeout or unrecognised response shape
+// falls back to the default planner, which is what would have run without this
+// function at all.
+const should_disable_nested_loops = async ({ execution_query_string }) => {
+  try {
+    // work_mem is repeated here rather than dropped because it is an input to
+    // the planner's costing, not just an execution budget. Probing under a
+    // different work_mem would plan a different statement than the one that
+    // then runs, which is the one way this probe could be actively wrong.
+    const response = await db.raw(
+      `SET LOCAL statement_timeout = ${PLAN_PROBE_TIMEOUT_MS}; SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'; EXPLAIN (FORMAT JSON) ${execution_query_string};`
+    )
+    const plan = extract_plan_from_explain_response(response[2])
+    return plan_carries_clamp_signature(plan)
+  } catch (error) {
+    log(`data view plan probe failed, using the default planner: ${error}`)
+    return false
+  }
+}
+
 export default async function ({
   row_axes = [],
   where = [],
@@ -2527,17 +2584,32 @@ export default async function ({
   // (`1GB`), so the quotes belong here at the interpolation site. Emitting it
   // bare yields `work_mem = 1GB`, which Postgres rejects as trailing junk after
   // a numeric literal and which fails every cache-miss execution.
-  const session_settings = `SET LOCAL statement_timeout = ${timeout || 40000}; SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}';`
-  // Each `SET LOCAL` produces its own result object ahead of the query's, so
-  // the row set is the last one: index 2 (statement_timeout, then work_mem).
+  //
   // The executor always passes a timeout, so there is no no-timeout arm; the
   // `|| 40000` is a defensive fallback that keeps a null timeout from emitting
   // invalid SQL. `SET LOCAL jit = off` was deleted with this extraction: jit is
   // off server-side since 2026-08-13, making the per-statement override a no-op.
-  const rows_index = 2
+  const session_settings = [
+    `SET LOCAL statement_timeout = ${timeout || 40000}`,
+    `SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'`
+  ]
+
+  if (await should_disable_nested_loops({ execution_query_string })) {
+    session_settings.push('SET LOCAL enable_nestloop = off')
+    session_settings.push(
+      `SET LOCAL max_parallel_workers_per_gather = ${DATA_VIEW_MAX_PARALLEL_WORKERS_PER_GATHER}`
+    )
+  }
+
+  // Each `SET LOCAL` produces its own result object ahead of the query's, so
+  // the row set is the one past the last setting. Derived rather than written
+  // as a literal because the arm above makes the count conditional, and a
+  // hardcoded index would read the wrong result object -- an empty `command:
+  // 'SET'` result -- on exactly the slow statements this exists to speed up.
+  const rows_index = session_settings.length
 
   const response = await db.raw(
-    `${session_settings} ${execution_query_string};`
+    `${session_settings.map((setting) => `${setting};`).join(' ')} ${execution_query_string};`
   )
   // knex's postgres dialect returns the raw pg response for a `raw` call, so
   // this element is a pg Result carrying `.fields` alongside `.rows`. The

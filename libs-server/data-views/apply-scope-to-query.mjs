@@ -14,8 +14,12 @@
 // nfl_week_id branch:
 //   - year IN (years)          engages partition pruning + composite indexes
 //   - seas_type IN (seas_types) engages (year, seas_type, ...) composite
-//   - nfl_week_id IN (effective) only when narrower than (year x seas_type)
-//     full coverage (is_full_year_seas_type_coverage short-circuit)
+//   - a narrowing week predicate, only when the scope is narrower than
+//     (year x seas_type) full coverage (is_full_year_seas_type_coverage
+//     short-circuit). Emitted as the decomposed `week IN (weeks)` where that is
+//     provably the same restriction, and as `nfl_week_id IN (effective)`
+//     otherwise -- the two encodings and the choice between them are set out at
+//     the emission site below.
 //
 // has_season_type / has_nfl_week_id flags let callers opt out for tables that
 // only carry year (e.g. legacy aggregates).
@@ -28,7 +32,8 @@ import {
 import { resolve_params_contribution } from './resolve-view-scope.mjs'
 import {
   physical_year_column,
-  physical_seas_type_column
+  physical_seas_type_column,
+  physical_has_week
 } from './physical-season-columns.mjs'
 
 const sort_deterministic = (ids) => [...ids].sort()
@@ -132,22 +137,61 @@ export const apply_scope_to_query = ({
   const effective = compute_effective_scope({ query_context, column_params })
   if (!effective.length) return
 
-  const { years: season_years, seas_types: season_types } = decompose_nfl_weeks(
-    { nfl_weeks: effective }
-  )
+  const {
+    years: season_years,
+    seas_types: season_types,
+    weeks: season_weeks
+  } = decompose_nfl_weeks({ nfl_weeks: effective })
   // Sort decomposed components for deterministic SQL output regardless of the
   // upstream nfl_week_id list ordering.
   const sorted_season_years = [...season_years].sort((a, b) => a - b)
   const sorted_season_types = [...season_types].sort()
+  const sorted_season_weeks = [...season_weeks].sort((a, b) => a - b)
+
+  // nfl_week_id is GENERATED from (season_year, season_type, week), so emitting
+  // it alongside the year and seas_type predicates below states one restriction
+  // twice in two encodings. The planner has no way to know they are the same
+  // and multiplies their selectivities as independent -- measured on nfl_games
+  // at an estimate of 4 against an actual 272, where EITHER encoding on its own
+  // lands within 5%: 285 decomposed, 211 composite.
+  //
+  // So prefer the decomposed `week IN (...)`, but only where it is provably the
+  // same restriction. Three conditions, and each one is load-bearing:
+  //
+  //   - the effective list is the exact cross product of its own years,
+  //     seas_types and weeks. A ragged list -- 2024 week 1 plus 2025 week 2 --
+  //     decomposes to a STRICTLY WIDER predicate, so the composite has to stay.
+  //   - the relation carries a physical `week`. The fallback for an
+  //     unregistered name is a CTE alias, which projects the vocabulary columns
+  //     and need not project this one.
+  //   - the year and seas_type halves are actually going to be emitted. A
+  //     caller that suppressed either leaves `week` alone carrying the whole
+  //     restriction, which is again wider.
+  //
+  // Everything that fails those keeps today's composite emission, which is
+  // correct in isolation and merely estimates badly next to its own decomposition.
+  const is_narrowed_within_season_type = !is_full_year_seas_type_coverage({
+    nfl_weeks: effective
+  })
+  const decomposes_exactly =
+    new Set(effective).size ===
+    sorted_season_years.length *
+      sorted_season_types.length *
+      sorted_season_weeks.length
 
   // Emission order mirrors the legacy apply_play_by_play_column_params_to_query
-  // nfl_week_id branch: nfl_week_id IN (narrow), then seas_type, then year.
-  // Keeps fixture diffs minimal across the migration.
-  if (
-    has_nfl_week_id &&
-    !is_full_year_seas_type_coverage({ nfl_weeks: effective })
-  ) {
-    query.whereIn(`${table_name}.nfl_week_id`, effective)
+  // nfl_week_id branch: the narrowing week predicate, then seas_type, then year.
+  if (is_narrowed_within_season_type) {
+    if (
+      decomposes_exactly &&
+      physical_has_week(table_name) &&
+      has_season_year &&
+      has_season_type
+    ) {
+      query.whereIn(`${table_name}.week`, sorted_season_weeks)
+    } else if (has_nfl_week_id) {
+      query.whereIn(`${table_name}.nfl_week_id`, effective)
+    }
   }
   if (has_season_type && sorted_season_types.length) {
     // Resolved here rather than in the parameter list so that a caller passing
