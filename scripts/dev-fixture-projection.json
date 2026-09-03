@@ -428,6 +428,8 @@
       "updated_at": "keep",
       "user_id": "keep",
       "llm_tags_generated_at": "keep",
+      "llm_generated_at": "keep",
+      "llm_inference_provider": "keep",
       "query_id": "keep"
     },
     "users": {
