@@ -205,6 +205,42 @@ export const claim_next_generation_job = async (connection = db) => {
 }
 
 /**
+ * Return a claimed job to the queue, because the dispatch could not be made
+ * for a reason that clears on its own.
+ *
+ * THE HEAD-OF-LINE VALVE. Base refuses a dispatch with 429 whenever the
+ * profile's one session slot is occupied, which at the concurrency a single GPU
+ * tenant permits is the ORDINARY answer rather than an error. Failing the row
+ * for it would show a user a dead generation for a wait of a few seconds; the
+ * job goes back to the head of the queue instead and the next pass takes it.
+ *
+ * `dispatched_at` is cleared with the status, so a released job is
+ * indistinguishable from one that was never claimed -- otherwise the audit
+ * record would read as though the run began and the trajectory fields would
+ * hang off a dispatch that did not happen.
+ *
+ * `queued_at` is deliberately NOT touched. It is the claim order, so bumping it
+ * would send a released job to the BACK of the queue behind everything that
+ * arrived while it waited, and a job could starve indefinitely under load --
+ * which is precisely the unbounded silent wait this queue exists to refuse.
+ *
+ * Scoped to `dispatched`, so a job that has since gone `running`, `failed` or
+ * `expired` is not resurrected by a late release.
+ *
+ * @param {object} params
+ * @param {string} params.generation_id
+ * @param {object} [params.connection] - see claim_next_generation_job
+ * @returns {Promise<number>} rows updated
+ */
+export const release_generation_job = async ({
+  generation_id,
+  connection = db
+}) =>
+  connection('data_view_generation_jobs')
+    .where({ generation_id, status: 'dispatched' })
+    .update({ status: 'queued', dispatched_at: null })
+
+/**
  * Record that the dispatched session actually started.
  *
  * @param {object} params

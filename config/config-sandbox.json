@@ -1,5 +1,5 @@
 {
-  "_comment": "The generation agent's environment. Read config/index.mjs for why every credential here is BLANK and where the real values come from: this repository is public, so a plaintext credential committed here would be a published credential. LEAGUE_SANDBOX_PG_* environment variables, delivered by the thread-config profile's secret mechanism, fill them in at load.",
+  "_comment": "The generation agent's environment. Read config/index.mjs for why every credential here is BLANK and where the real values come from: this repository is public, so a plaintext credential committed here would be a published credential. A JSON credential file bind-mounted READ-ONLY at /run/secrets/league-sandbox-postgres.json fills them in at load, overridable by LEAGUE_SANDBOX_CREDENTIAL_FILE. A file rather than environment variables, because a container env value is readable from docker inspect and because a thread-config profile has no env field to deliver one with.",
   "postgres": {
     "client": "pg",
     "connection": {
