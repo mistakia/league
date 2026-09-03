@@ -1275,6 +1275,16 @@ describe('data check registry', function () {
     // the entry. BETMGM 2026 is the only baselined entry on this check whose
     // repair is a code change -- the header over-declares selection_count on
     // placeholder markets, so no data was lost and the owning task clears it.
+    //
+    // betting-market-source-week-coverage -- same reason as the two above, and
+    // measured rather than assumed on 2026-09-02: PrizePicks stopped writing on
+    // 2025-12-25 and never resumed that season, so 2025 week 18 holds zero rows
+    // in prop_markets_history AND in prop_markets_index. A book does not serve
+    // closed markets and nothing we hold can replay them, so there is no repair
+    // to own. This one closes differently from the rest and that is by design:
+    // the check grades only the last four completed fantasy weeks, so the entry
+    // reports STALE and is deleted once four 2026 weeks have finished. Expect it
+    // to be short-lived rather than standing.
     const baselined = parked_entries.filter(
       (entry) => entry.disposition === 'baselined'
     )
@@ -1283,6 +1293,7 @@ describe('data check registry', function () {
       [...new Set(baselined.map((entry) => entry.check_id))].sort()
     ).to.deep.equal([
       'adp-source-season-coverage',
+      'betting-market-source-week-coverage',
       'prop-market-selection-coverage'
     ])
 

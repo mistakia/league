@@ -927,5 +927,15 @@
     "reason": "season_year here is a COLLEGE season, not an NFL one, and the table holds one draft class. 2019 and 2020 hold the few members of that class whose college careers reached back that far, which is a career-depth distribution rather than an ingest level.",
     "evidence": "All 402 rows belong to players with nfl_draft_year 2025, and all were written in one pass on 2025-03-31. Rows per college season run 4 (2019), 28 (2020), 67 (2021), 98 (2022), 101 (2023), 104 (2024) — the shape of a single class aging backwards, with one row per player per college season. Note the check anchors on completed NFL games in that season, which is not this table’s supply at all; see the task entity for the scoping point raised to the operator.",
     "validated_at": "2026-09-02"
+  },
+  {
+    "check_id": "betting-market-source-week-coverage",
+    "grain": {
+      "season_year": 2025,
+      "week": 18,
+      "source_label": "PRIZEPICKS"
+    },
+    "disposition": "baselined",
+    "owner": "Unrecoverable, and measured so on 2026-09-02 rather than assumed: PrizePicks stopped writing entirely on 2025-12-25 and never resumed for the rest of that season, with max(observed_at) in prop_markets_index at 2025-12-25T15:59:35Z and zero rows in the 2025 week 18 window in BOTH prop_markets_index and prop_markets_history. A book does not serve closed markets and no historical source carries them, so nothing can backfill this week and there is no repair to own. The entry ages out of the check's own window once four 2026 weeks have completed. PrizePicks itself recovered and is writing normally (5,641 rows in the three days to 2026-09-02), so this is a bounded past outage rather than a live one."
   }
 ]
