@@ -33,6 +33,19 @@ export const PROVIDER_ERROR_PATTERNS = [
 // models.
 const SUBSTANTIVE_BLOCK_TYPES = ['text', 'thinking', 'tool_use']
 
+// Scratch files the agent itself created, as opposed to league source.
+//
+// THIS DISTINCTION DECIDES WHERE THE NEXT ITERATION LOOKS. A source dive means
+// a tool did not answer a question about the DOMAIN, and the fix is in the
+// tool. An agent re-reading, folding and byte-slicing its own emission JSON to
+// get it past a shell quoting problem is not that -- it is an ergonomics
+// problem in how the emission is handed over, and it lives in a different part
+// of the system. Measured on a real run: six of ten calls first bucketed as
+// source dives were this, so collapsing them would have pointed the next
+// iteration at the retrieval tools when nothing was wrong with them.
+const SCRATCH_PATH_PATTERN =
+  /(^|[^a-z])(\/tmp\/|tmp-[a-z-]*\.json|emission\.json)/i
+
 /**
  * Which bucket one tool call belongs to.
  *
@@ -70,11 +83,14 @@ export const classify_tool_call = (block) => {
     }
     if (/scripts\/data-view-[a-z-]+\.mjs/.test(command)) return 'provided-tool'
     if (/generate-data-view\.mjs/.test(command)) return 'contract-read'
+    if (SCRATCH_PATH_PATTERN.test(command)) return 'scratch-io'
     return 'source-dive'
   }
 
   if (/generate-data-view\.mjs/.test(serialized)) return 'contract-read'
+  if (SCRATCH_PATH_PATTERN.test(serialized)) return 'scratch-io'
   if (['Read', 'Grep', 'Glob', 'Search'].includes(name)) return 'source-dive'
+  if (['Write', 'Edit', 'NotebookEdit'].includes(name)) return 'file-write'
   return 'other'
 }
 

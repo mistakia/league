@@ -193,6 +193,53 @@ describe('data-view generation benchmark metrics', function () {
       ).to.equal('source-dive')
     })
 
+    it('separates wrestling with its own scratch file from diving into league source', function () {
+      // This distinction decides where the next iteration looks. Six of ten
+      // calls on a real run were the agent re-reading and byte-slicing the
+      // emission JSON it had just written, to get it past a shell quoting
+      // problem. Bucketing those as source dives would point the next iteration
+      // at the retrieval tools, which were not the problem.
+      expect(
+        classify_tool_call({
+          name: 'Bash',
+          input: { command: 'cat /tmp/emission.json | fold -w 120' }
+        })
+      ).to.equal('scratch-io')
+      expect(
+        classify_tool_call({
+          name: 'Bash',
+          input: { command: 'wc -c /tmp/emission.json' }
+        })
+      ).to.equal('scratch-io')
+      // The control: a read of real league source must still be a source dive,
+      // or the pattern above has simply swallowed the class it was meant to
+      // split.
+      expect(
+        classify_tool_call({
+          name: 'Bash',
+          input: { command: 'ls scripts/' }
+        })
+      ).to.equal('source-dive')
+    })
+
+    it('names a file write as its own class rather than "other"', function () {
+      // The generation profile is designed without a Write tool, so a write
+      // appearing at all is a containment finding rather than a cost one. It
+      // cannot be read as such while it is pooled with everything unclassified.
+      expect(
+        classify_tool_call({
+          name: 'Write',
+          input: { file_path: 'scripts/tmp-emission.json', content: '{}' }
+        })
+      ).to.equal('scratch-io')
+      expect(
+        classify_tool_call({
+          name: 'Write',
+          input: { file_path: 'libs-server/somewhere.mjs', content: '{}' }
+        })
+      ).to.equal('file-write')
+    })
+
     it('flags a reach into the session transcript, which should never happen', function () {
       expect(
         classify_tool_call({

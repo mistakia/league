@@ -104,6 +104,12 @@ const POLL_INTERVAL_MS = 5 * 1000
 // exceeding it is a defect in the sweep rather than a slow run.
 const RUN_TIMEOUT_MS = 22 * 60 * 1000
 
+// How long to wait for the harness to flush its `cost-state` line after the job
+// row goes terminal. Seconds in practice; the bound exists so a session that
+// dies without flushing costs one wait rather than the run.
+const TRANSCRIPT_SETTLE_TIMEOUT_MS = 90 * 1000
+const TRANSCRIPT_SETTLE_POLL_MS = 3 * 1000
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
@@ -265,16 +271,48 @@ export const read_session_id = async ({ thread_id }) => {
 /**
  * Pull one session transcript out of the tenant container.
  *
- * @param {string} session_id
+ * WAITS FOR THE `cost-state` LINE, and this is not politeness. The line is
+ * written when the session ends, and the session ends some seconds AFTER the
+ * job row goes terminal -- the emission closes the row, then the reap kills the
+ * harness, then the harness flushes. Reading in that window returns a transcript
+ * that is real but SHORT, and it is short in the direction that looks like a
+ * result: measured on one run, an early read reported 18 turns and 6,816 output
+ * tokens with no cost-state at all, where the settled file said 19 and 7,100
+ * with an authoritative 7,337. Nothing about the early read announces itself as
+ * partial.
+ *
+ * A transcript that never settles is still returned, with whatever it has. That
+ * is honest -- the caller can see `cost_state_present: false` -- and it is
+ * better than losing a run that has already been spent.
+ *
+ * @param {object} params
+ * @param {string} params.session_id
+ * @param {(message: string) => void} params.log
  * @returns {Promise<object[]|null>} parsed JSONL records
  */
-export const read_transcript = async ({ session_id }) => {
-  const { ok, stdout } = await try_exec('ssh', [
-    GENERATION_HOST,
-    `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} cat ${GENERATION_TRANSCRIPT_DIR}/${session_id}.jsonl`
-  ])
-  if (!ok || !stdout.trim()) return null
-  return parse_transcript(stdout)
+export const read_transcript = async ({ session_id, log = () => {} }) => {
+  const deadline = Date.now() + TRANSCRIPT_SETTLE_TIMEOUT_MS
+  let records = null
+
+  for (;;) {
+    const { ok, stdout } = await try_exec('ssh', [
+      GENERATION_HOST,
+      `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} cat ${GENERATION_TRANSCRIPT_DIR}/${session_id}.jsonl`
+    ])
+    if (ok && stdout.trim()) {
+      records = parse_transcript(stdout)
+      if (records.some((record) => record.type === 'cost-state')) return records
+    }
+    if (Date.now() > deadline) {
+      if (records) {
+        log(
+          '     transcript never wrote a cost-state line; token totals are the per-turn sums only'
+        )
+      }
+      return records
+    }
+    await sleep(TRANSCRIPT_SETTLE_POLL_MS)
+  }
 }
 
 const IDENTITY_KEY_CANDIDATES = {
@@ -491,7 +529,7 @@ export const run_one = async ({ entry, iteration, log }) => {
   if (job.thread_id) {
     session_id = await read_session_id({ thread_id: job.thread_id })
     if (session_id) {
-      const records = await read_transcript({ session_id })
+      const records = await read_transcript({ session_id, log })
       if (records) metrics = derive_transcript_metrics(records)
     }
   }
