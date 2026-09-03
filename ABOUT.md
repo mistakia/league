@@ -724,12 +724,17 @@ observations:
     histories: props with props_index, and the two league_format_player projection-value families
     whose snapshot half carries no suffix at all. The test that settles an ambiguous name is whether
     the snapshot half unique key is the history key minus the observation instant.
+  - >-
+    [gotcha] 2026-09-03 doc_overflow_x is blind to horizontal overflow wherever body is overflow
+    hidden, as on the auction page: clipped overflow does not scroll, so scrollWidth equals
+    clientWidth while an element runs past both viewport edges. Measure the rect against the
+    viewport.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-02T18:48:56.147Z'
+updated_at: '2026-09-03T03:15:41.613Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
