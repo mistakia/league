@@ -7,6 +7,11 @@ import {
 } from '#libs-server/data-views/execute-data-view-request.mjs'
 import debug from 'debug'
 import { generate_client_id, send_websocket_message } from './utils.mjs'
+import {
+  handle_generation_request,
+  handle_generation_collect,
+  stop_generation_watchers
+} from './data-view-generation.mjs'
 
 const log = debug('data-view-socket')
 
@@ -236,6 +241,24 @@ export default function handle_data_view_socket(wss) {
         })
       } else if (message.type === 'DATA_VIEW_CLIENT_TIMING') {
         handle_client_timing({ ws, payload: message.payload })
+      } else if (message.type === 'DATA_VIEW_GENERATION_REQUEST') {
+        // Both generation handlers send their own error frames; this catch is
+        // only a final log for a failure before they could.
+        handle_generation_request({
+          ws,
+          user_id,
+          payload: message.payload
+        }).catch((error) => {
+          log('handle_generation_request failed', { error: error.toString() })
+        })
+      } else if (message.type === 'DATA_VIEW_GENERATION_COLLECT') {
+        handle_generation_collect({
+          ws,
+          user_id,
+          payload: message.payload
+        }).catch((error) => {
+          log('handle_generation_collect failed', { error: error.toString() })
+        })
       }
     })
 
@@ -246,6 +269,10 @@ export default function handle_data_view_socket(wss) {
         exec.controller.abort()
       }
       socket_executions.delete(ws)
+      // Generation is the OPPOSITE of the aborts above: a query dies with its
+      // socket, a generation run does not. This stops the polling only, so the
+      // client can reconnect and collect by generation_id.
+      stop_generation_watchers(ws)
     })
   })
 }
