@@ -48,10 +48,22 @@
   .player__headshot
     border-radius 0
 
+// THE RIGHT GUTTER IS UNCONDITIONAL, because what it separates this group from
+// is different either side of 1160 and it is needed in both. Stacked, the bar
+// runs edge to edge and `Live value` ended against the SCREEN. On the single
+// desktop row it ends against `.auction__bid-actions`, and the two boxes were
+// measured touching at exactly 0px of gap at 1160, 1280, 1440, 1600 and 1920.
+//
+// The left half of the gutter is not: it is 8px in the stacked zone only, where
+// `.player__name-headshot` carries a matching 8px margin and the two add up to
+// the 16 that `.auction__text` takes. On the desktop row the headshot has no
+// such margin and this group starts at the bar's own centred edge, which needs
+// nothing.
 .auction__nominated-player
   flex 1
   display flex
   min-width 0
+  padding-right 16px
   // Each detail clips its OWN ink. The group above having `overflow hidden` is
   // not enough and the distinction is easy to get wrong: that one stops the
   // group painting outside itself, while this stops each item painting over the

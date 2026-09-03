@@ -137,12 +137,16 @@
   // edge so both need one. Only the first had it, so `Live value` sat flush
   // against the right edge of the screen at every stacked width.
   //
-  // 8px on the left rather than 16, because `.player__name-headshot` already
-  // carries `margin-left 8px` in auction-nominated-player.styl and the two add
-  // up. The pair is 16 and 16 either side, matching `.auction__text` above it.
+  // ONLY THE LEFT HALF LIVES HERE. The right gutter is unconditional and is
+  // declared on the base rule in auction-nominated-player.styl, because the
+  // desktop row needs it too -- there it separates this group from
+  // `.auction__bid-actions` rather than from the screen.
+  //
+  // 8px rather than 16, because `.player__name-headshot` already carries
+  // `margin-left 8px` in this zone and the two add up. The pair is 16 and 16
+  // either side, matching `.auction__text` above it.
   .auction__nominated-player
     padding-left 8px
-    padding-right 16px
 
   .auction__bar
     display flex
