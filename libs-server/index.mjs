@@ -84,6 +84,7 @@ export {
   is_absent_player_value
 } from './player-birth-date.mjs'
 export { default as insert_prop_markets } from './insert-prop-markets.mjs'
+export { default as insert_prop_market_events_raw } from './insert-prop-market-events-raw.mjs'
 export { format_sql, normalize_sql_for_comparison } from './format-sql.mjs'
 export { default as generate_player_id } from './generate-player-id.mjs'
 export * as espn from './espn.mjs'

@@ -306,7 +306,20 @@ const get_market_history_record = (market, observed_at) => ({
   observed_at
 })
 
-const process_market = async ({ observed_at, selections, ...market }) => {
+// `raw_payload` is destructured out with `selections`, and that is the whole
+// contract with the importers: an importer attaches the vendor's own market
+// body, this writer strips it before `market` is spread into an index insert,
+// and stores it separately. Leaving it on `market` would put an unknown column
+// into `prop_markets_index`, so the strip is load-bearing rather than tidiness.
+//
+// One answer for all ten books, adopted one book at a time -- an importer that
+// attaches nothing writes nothing here and is otherwise unaffected.
+const process_market = async ({
+  observed_at,
+  selections,
+  raw_payload,
+  ...market
+}) => {
   const { source_id, source_market_id } = market
 
   if (!source_id) {
@@ -413,8 +426,23 @@ const process_market = async ({ observed_at, selections, ...market }) => {
     market
   })
 
+  // Derived from the history inserts rather than pushed alongside them at each
+  // of the three sites above. That is what makes the two tables agree by
+  // construction: one raw row per history row, on the same key, written under
+  // exactly the same change-detection condition. Pushing at each site would
+  // restate that condition three times and let it drift.
+  const market_raw_history_inserts = raw_payload
+    ? market_history_inserts.map((history_record) => ({
+        source_id: history_record.source_id,
+        source_market_id: history_record.source_market_id,
+        observed_at: history_record.observed_at,
+        raw_payload: JSON.stringify(raw_payload)
+      }))
+    : []
+
   return {
     market_history_inserts,
+    market_raw_history_inserts,
     market_index_inserts,
     market_identity_propagations,
     selection_operations
@@ -430,6 +458,7 @@ export default async function (markets, { dry_run = false } = {}) {
   const stats = {
     total_markets: markets.length,
     market_history_inserts: 0,
+    market_raw_history_inserts: 0,
     market_index_inserts: 0,
     selection_history_inserts: 0,
     selection_index_inserts: 0,
@@ -486,6 +515,7 @@ export default async function (markets, { dry_run = false } = {}) {
       batch_count++
       const batch_start = Date.now()
       const all_market_history_inserts = []
+      const all_market_raw_history_inserts = []
       const all_market_index_inserts = []
       const all_selection_history_inserts = []
       const all_selection_index_inserts = []
@@ -504,6 +534,9 @@ export default async function (markets, { dry_run = false } = {}) {
         if (result.status === 'fulfilled') {
           const operations = result.value
           all_market_history_inserts.push(...operations.market_history_inserts)
+          all_market_raw_history_inserts.push(
+            ...operations.market_raw_history_inserts
+          )
           all_market_index_inserts.push(...operations.market_index_inserts)
           all_market_identity_propagations.push(
             ...operations.market_identity_propagations
@@ -554,6 +587,11 @@ export default async function (markets, { dry_run = false } = {}) {
         build_market_history_key
       )
 
+      const unique_market_raw_history = deduplicate_inserts(
+        all_market_raw_history_inserts,
+        build_market_history_key
+      )
+
       const unique_market_index = deduplicate_inserts(
         all_market_index_inserts,
         build_market_index_key
@@ -585,6 +623,7 @@ export default async function (markets, { dry_run = false } = {}) {
       stats.selection_identity_propagations +=
         unique_selection_identity_propagations.length
       stats.market_history_inserts += unique_market_history.length
+      stats.market_raw_history_inserts += unique_market_raw_history.length
       stats.market_index_inserts += unique_market_index.length
       stats.selection_history_inserts += unique_selection_history.length
       stats.selection_index_inserts += unique_selection_index.length
@@ -646,6 +685,22 @@ export default async function (markets, { dry_run = false } = {}) {
                   .merge()
               }
             })
+          )
+        }
+
+        // The raw body rides the INDEX phase, not the history phase, for the
+        // same reason the index rows do: change detection is baselined on
+        // prop_markets_history, so anything that must accompany a history row
+        // has to be durable before that row advances the baseline. Written
+        // after the history row instead, a failure here would lose the payload
+        // permanently -- the next run diffs clean and never re-offers it, which
+        // is precisely the observation this table exists to preserve.
+        if (unique_market_raw_history.length > 0) {
+          index_promises.push(
+            db('prop_markets_raw_history')
+              .insert(unique_market_raw_history)
+              .onConflict(['source_id', 'source_market_id', 'observed_at'])
+              .merge()
           )
         }
 

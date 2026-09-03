@@ -20856,6 +20856,13 @@ export interface ProjectionsIndexY2026Row {
   nfl_week_id: string | null
 }
 
+export interface PropMarketEventsRawHistoryRow {
+  source_id: MarketSourceId
+  source_event_id: string
+  observed_at: Date
+  raw_payload: any
+}
+
 export interface PropMarketSelectionsHistoryRow {
   source_id: MarketSourceId
   source_market_id: string
@@ -20929,6 +20936,13 @@ export interface PropMarketsIndexRow {
   observed_at: Date
   season_year: number | null
   is_market_settled: boolean | null
+}
+
+export interface PropMarketsRawHistoryRow {
+  source_id: MarketSourceId
+  source_market_id: string
+  observed_at: Date
+  raw_payload: any
 }
 
 export interface PropPairingPropsRow {

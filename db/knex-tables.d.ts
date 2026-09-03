@@ -294,10 +294,12 @@ import type {
   ProjectionsIndexY2024Row,
   ProjectionsIndexY2025Row,
   ProjectionsIndexY2026Row,
+  PropMarketEventsRawHistoryRow,
   PropMarketSelectionsHistoryRow,
   PropMarketSelectionsIndexRow,
   PropMarketsHistoryRow,
   PropMarketsIndexRow,
+  PropMarketsRawHistoryRow,
   PropPairingPropsRow,
   PropPairingsRow,
   PropsRow,
@@ -622,10 +624,12 @@ declare module 'knex/types/tables' {
     projections_index_y2024: ProjectionsIndexY2024Row
     projections_index_y2025: ProjectionsIndexY2025Row
     projections_index_y2026: ProjectionsIndexY2026Row
+    prop_market_events_raw_history: PropMarketEventsRawHistoryRow
     prop_market_selections_history: PropMarketSelectionsHistoryRow
     prop_market_selections_index: PropMarketSelectionsIndexRow
     prop_markets_history: PropMarketsHistoryRow
     prop_markets_index: PropMarketsIndexRow
+    prop_markets_raw_history: PropMarketsRawHistoryRow
     prop_pairing_props: PropPairingPropsRow
     prop_pairings: PropPairingsRow
     props: PropsRow

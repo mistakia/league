@@ -238,10 +238,12 @@ DROP INDEX IF EXISTS public.idx_rest_of_season_projections_pid;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_season_year_season_type_week;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
+DROP INDEX IF EXISTS public.idx_prop_markets_raw_history_market;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_source_event_id;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
+DROP INDEX IF EXISTS public.idx_prop_market_events_raw_history_event;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key_no_user;
@@ -826,10 +828,12 @@ DROP TABLE IF EXISTS public.props_index;
 DROP TABLE IF EXISTS public.props;
 DROP TABLE IF EXISTS public.prop_pairings;
 DROP TABLE IF EXISTS public.prop_pairing_props;
+DROP TABLE IF EXISTS public.prop_markets_raw_history;
 DROP TABLE IF EXISTS public.prop_markets_index;
 DROP TABLE IF EXISTS public.prop_markets_history;
 DROP TABLE IF EXISTS public.prop_market_selections_index;
 DROP TABLE IF EXISTS public.prop_market_selections_history;
+DROP TABLE IF EXISTS public.prop_market_events_raw_history;
 DROP TABLE IF EXISTS public.projections_index_y2026;
 DROP TABLE IF EXISTS public.projections_index_y2025;
 DROP TABLE IF EXISTS public.projections_index_y2024;
@@ -26719,6 +26723,32 @@ CREATE TABLE public.projections_index_y2026 (
 
 
 --
+-- Name: prop_market_events_raw_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.prop_market_events_raw_history (
+    source_id public.market_source_id NOT NULL,
+    source_event_id character varying(255) NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
+    raw_payload jsonb NOT NULL
+);
+
+
+--
+-- Name: TABLE prop_market_events_raw_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.prop_market_events_raw_history IS 'Vendor event envelope as received -- the fixture name and start time that fixture matching reads, which appear on no market body. Keyed to prop_markets_index.source_event_id.';
+
+
+--
+-- Name: COLUMN prop_market_events_raw_history.raw_payload; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.prop_market_events_raw_history.raw_payload IS 'The per-event vendor body, unmodified apart from jsonb normalization of key order and whitespace.';
+
+
+--
 -- Name: prop_market_selections_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -26811,6 +26841,32 @@ CREATE TABLE public.prop_markets_index (
     season_year smallint,
     is_market_settled boolean DEFAULT false
 );
+
+
+--
+-- Name: prop_markets_raw_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.prop_markets_raw_history (
+    source_id public.market_source_id NOT NULL,
+    source_market_id character varying(255) NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
+    raw_payload jsonb NOT NULL
+);
+
+
+--
+-- Name: TABLE prop_markets_raw_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.prop_markets_raw_history IS 'Vendor market body as received, keyed to match prop_markets_history so a raw payload joins to the history row it explains. Written only when the market changed.';
+
+
+--
+-- Name: COLUMN prop_markets_raw_history.raw_payload; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.prop_markets_raw_history.raw_payload IS 'The per-market vendor body, unmodified apart from jsonb normalization of key order and whitespace.';
 
 
 --
@@ -33351,6 +33407,13 @@ CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING bt
 
 
 --
+-- Name: idx_prop_market_events_raw_history_event; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_prop_market_events_raw_history_event ON public.prop_market_events_raw_history USING btree (source_id, source_event_id, observed_at);
+
+
+--
 -- Name: idx_prop_market_selections_index_composite; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33376,6 +33439,13 @@ CREATE INDEX idx_prop_markets_index_market_time_season_year ON public.prop_marke
 --
 
 CREATE INDEX idx_prop_markets_index_source_event_id ON public.prop_markets_index USING btree (source_event_id);
+
+
+--
+-- Name: idx_prop_markets_raw_history_market; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_prop_markets_raw_history_market ON public.prop_markets_raw_history USING btree (source_id, source_market_id, observed_at);
 
 
 --
@@ -62006,6 +62076,15 @@ GRANT SELECT ON TABLE public.projections_index_y2026 TO league_contribution_read
 
 
 --
+-- Name: TABLE prop_market_events_raw_history; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.prop_market_events_raw_history TO league_reader;
+GRANT SELECT ON TABLE public.prop_market_events_raw_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_market_events_raw_history TO league_contribution_reader;
+
+
+--
 -- Name: TABLE prop_market_selections_history; Type: ACL; Schema: public; Owner: -
 --
 
@@ -62039,6 +62118,15 @@ GRANT SELECT ON TABLE public.prop_markets_history TO league_contribution_reader;
 GRANT SELECT ON TABLE public.prop_markets_index TO league_reader;
 GRANT SELECT ON TABLE public.prop_markets_index TO league_data_view_reader;
 GRANT SELECT ON TABLE public.prop_markets_index TO league_contribution_reader;
+
+
+--
+-- Name: TABLE prop_markets_raw_history; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.prop_markets_raw_history TO league_reader;
+GRANT SELECT ON TABLE public.prop_markets_raw_history TO league_data_view_reader;
+GRANT SELECT ON TABLE public.prop_markets_raw_history TO league_contribution_reader;
 
 
 --
