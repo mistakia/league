@@ -131,6 +131,19 @@
   .auction__text
     padding 0 16px
 
+  // THE OTHER BRANCH OF THE SAME SLOT, and it never got the gutter. `main` in
+  // auction-main-bid.js is either `.auction__text` above -- eight message states
+  // -- or `.auction__nominated-player`, and below the cap the bar runs edge to
+  // edge so both need one. Only the first had it, so `Live value` sat flush
+  // against the right edge of the screen at every stacked width.
+  //
+  // 8px on the left rather than 16, because `.player__name-headshot` already
+  // carries `margin-left 8px` in auction-nominated-player.styl and the two add
+  // up. The pair is 16 and 16 either side, matching `.auction__text` above it.
+  .auction__nominated-player
+    padding-left 8px
+    padding-right 16px
+
   .auction__bar
     display flex
     align-items center
@@ -329,6 +342,21 @@
   .auction__main-input
     display none
 
+  // THE 12px OF TOP PADDING WENT WITH THE BID INPUT, because it was never this
+  // row's padding -- it was the room `.auction__main-input label` painted into,
+  // sitting above its box and out of flow. The input is gone here, so the label
+  // is gone, so the reservation for it is 12px of a phone's chrome held for
+  // nothing.
+  //
+  // 8px each side rather than 16. The row scrolls, so its horizontal edge is a
+  // scroll boundary rather than a line the eye aligns anything to, and 16 was
+  // costing 32px of the widest thing on the screen. The gutter lives HERE and
+  // not on the scrolling box below on purpose: padding-right on a scroll
+  // container is not honoured at the end of the scroll range in Chrome, so a
+  // gutter written there disappears exactly when it is doing something.
+  .auction__bid-actions
+    padding 0 8px 8px
+
   // THE SCROLLING ROW. `flex 1 1 100%` so it takes the bar's width to scroll
   // INSIDE, and `min-width 0` so it is allowed to be narrower than its content
   // -- without it the box grows to fit and there is nothing left to scroll.
@@ -359,7 +387,9 @@
     align-items center
     row-gap 6px
     column-gap 8px
-    padding 0 8px
+    // No horizontal padding: the gutter is on `.auction__bid-actions` above,
+    // outside the scroll. See the note there.
+    padding 0
     overflow-x auto
     // The row scrolls; the bar does not. Without this the vertical axis becomes
     // `auto` the moment the horizontal one stops being `visible`, and the bar
