@@ -17,6 +17,8 @@
 // NODE_ENV=production below is therefore load-bearing for the ledger rows, not
 // just for config selection -- this worker must be started with
 // `--env production` or it rebuilds correctly while reporting nothing.
+const require_machine_slug = require('./server/pm2-machine-slug')
+
 module.exports = {
   apps: [
     {
@@ -32,7 +34,7 @@ module.exports = {
         NODE_ENV: 'production',
         DEBUG:
           'refresh-projection-cache-worker,process-projections-for-scoring-format,process-projections-for-league-format',
-        BASE_MACHINE_SLUG: 'league',
+        BASE_MACHINE_SLUG: require_machine_slug(),
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         USER_BASE_DIRECTORY:
           process.env.USER_BASE_DIRECTORY ||

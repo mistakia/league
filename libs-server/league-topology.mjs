@@ -44,7 +44,8 @@ const SECTIONS = {
     'transcript_dir',
     'metrics_url'
   ],
-  backup: ['host', 'dev_fixture_path', 'full_dump_path', 'local_path']
+  backup: ['host', 'dev_fixture_path', 'full_dump_path', 'local_path'],
+  deploy: ['main_host', 'worker1_host']
 }
 
 /**

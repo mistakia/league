@@ -1,3 +1,5 @@
+const require_machine_slug = require('./server/pm2-machine-slug')
+
 module.exports = {
   apps: [
     {
@@ -57,7 +59,7 @@ module.exports = {
         // move to a per-source entry in user-base config/runs-source-cadence.json.
         JOB_SCHEDULE: '4h',
         JOB_SCHEDULE_TYPE: 'every',
-        BASE_MACHINE_SLUG: 'digitalocean-0',
+        BASE_MACHINE_SLUG: require_machine_slug(),
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         USER_BASE_DIRECTORY:
           process.env.USER_BASE_DIRECTORY ||

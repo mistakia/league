@@ -45,7 +45,12 @@ const backup = {
   local_path: '/a/local/backups'
 }
 
-const complete = { generation, backup }
+const deploy = {
+  main_host: 'a-main-host',
+  worker1_host: 'a-worker-host'
+}
+
+const complete = { generation, backup, deploy }
 
 describe('league topology', function () {
   const original_file = process.env.LEAGUE_TOPOLOGY_FILE
@@ -132,7 +137,7 @@ describe('league topology', function () {
   it('refuses an unknown section rather than reading it as absent config', () => {
     process.env.LEAGUE_TOPOLOGY_FILE = write_topology(complete)
     expect(() => league_topology('generatoin')).to.throw(
-      /unknown league topology section "generatoin"; known sections are generation, backup/
+      /unknown league topology section "generatoin"; known sections are generation, backup, deploy/
     )
   })
 
@@ -147,6 +152,95 @@ describe('league topology', function () {
     process.env.LEAGUE_TOPOLOGY_FILE = write_topology(complete)
     expect(league_topology('generation')).to.deep.equal(generation)
     expect(league_topology('backup')).to.deep.equal(backup)
+    expect(league_topology('deploy')).to.deep.equal(deploy)
+  })
+
+  describe('the deploy path', function () {
+    const read = (relative) =>
+      fs.readFileSync(new URL(relative, import.meta.url), 'utf8')
+
+    const deploy_scripts = () => {
+      const scripts = JSON.parse(read('../package.json')).scripts
+      return Object.entries(scripts).filter(([name]) =>
+        /^(deploy|load):/.test(name)
+      )
+    }
+
+    it('names no deploy host, in package.json or either shell script', () => {
+      const sources = [
+        read('../package.json'),
+        read('../scripts/preflight-deploy.sh'),
+        read('../scripts/setup-node-version.sh')
+      ]
+      for (const source of sources) {
+        expect(source).to.not.match(/digitalocean-0/)
+        // `league` alone is the project name and appears everywhere; what must
+        // not appear is it used AS a host, which is always adjacent to ssh, to
+        // deploy-crontab.sh, or to a scp/rsync colon.
+        expect(source).to.not.match(/ssh (-A )?league\b/)
+        expect(source).to.not.match(/deploy-crontab\.sh league\b/)
+        expect(source).to.not.match(/[ /]league:\/root\//)
+      }
+    })
+
+    // The regression that matters, and it is subtle enough to have been
+    // written the wrong way first. `ssh -A $(resolver) 'remote command'`
+    // FAILS OPEN: when the resolver exits nonzero the substitution is empty,
+    // so ssh runs with the remote command as its HOSTNAME and the script
+    // still exits 0 -- a deploy that reports success having reloaded nothing,
+    // which is this repo's named recurring incident. Assigning first and
+    // chaining with && makes the resolver's exit status fatal.
+    it('resolves the host through an assignment that can fail the script', () => {
+      for (const [name, body] of deploy_scripts()) {
+        if (!body.includes('league-topology-value.mjs')) continue
+        expect(body, `${name} must assign the host before using it`).to.match(
+          /^host=\$\(node scripts\/league-topology-value\.mjs deploy\.\w+\) && /
+        )
+        expect(
+          body,
+          `${name} must not substitute the resolver inline`
+        ).to.not.match(/(ssh|rsync|deploy-crontab\.sh)[^&]*\$\(node /)
+      }
+    })
+
+    // The pm2 configs are the one place a host names ITSELF rather than a
+    // connection target, and they cannot use the topology file at all: the
+    // worker host carries no user base. They read /etc/environment instead,
+    // through a helper that throws rather than letting an app start up and
+    // report its runs as nobody.
+    it('lets each pm2 config read its own slug instead of naming a host', () => {
+      const configs = [
+        'server',
+        'import-live-plays-worker',
+        'import-live-odds-worker',
+        'refresh-projection-cache-worker'
+      ]
+      for (const name of configs) {
+        const source = read(`../${name}.pm2.config.js`)
+        expect(source, `${name} must not hardcode a machine slug`).to.not.match(
+          /BASE_MACHINE_SLUG: '/
+        )
+        expect(
+          source,
+          `${name} must resolve its slug through the fail-loud helper`
+        ).to.include('require_machine_slug()')
+      }
+    })
+
+    it('routes every remote deploy script through the resolver', () => {
+      const remote = deploy_scripts().filter(
+        ([, body]) =>
+          /\bssh\b/.test(body) ||
+          /\brsync\b/.test(body) ||
+          /deploy-crontab\.sh/.test(body)
+      )
+      expect(remote.length).to.be.greaterThan(0)
+      for (const [name, body] of remote) {
+        expect(body, `${name} reaches a host without resolving one`).to.include(
+          'league-topology-value.mjs'
+        )
+      }
+    })
   })
 
   it('validates only the section asked for', () => {

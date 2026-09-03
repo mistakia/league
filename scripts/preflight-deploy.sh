@@ -142,7 +142,13 @@ fi
 if [ -n "${SKIP_REDIS_ENV_GATE:-}" ]; then
   echo "preflight-deploy: skipping the pm2 LEAGUE_REDIS_HOST check (SKIP_REDIS_ENV_GATE set)"
 else
-  redis_env_state=$(ssh -o BatchMode=yes -o ConnectTimeout=10 league '
+  # The API host is fleet topology, not a fact about league, and this
+  # repository is public -- so it is configuration with no default. Resolved
+  # before the probe so a missing config fails HERE, naming the file, rather
+  # than as an `ssh ''` whose error names nothing.
+  main_host=$(node scripts/league-topology-value.mjs deploy.main_host) || exit 1
+
+  redis_env_state=$(ssh -o BatchMode=yes -o ConnectTimeout=10 "$main_host" '
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     jlist=$(pm2 jlist 2>/dev/null) || { echo NO_PM2; exit 0; }
@@ -176,7 +182,7 @@ else
       "Pick it up with a delete-then-start on the host, which is the only pm2" \
       "operation that re-reads the config file:" \
       "" \
-      "  ssh league 'cd /root/league && pm2 delete server && \\" \
+      "  ssh $main_host 'cd /root/league && pm2 delete server && \\" \
       "    pm2 start server.pm2.config.js --env production'" \
       "" \
       "A delete-then-start of 'server' drops every live websocket, so it is a" \

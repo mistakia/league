@@ -5,6 +5,8 @@
 // app at a stale tree and serve a months-old bundle (see
 // user:text/league/league-server.md § Deployment Topology). Deploy with
 // `yarn deploy` (git pull + yarn install + pm2 reload) — no pm2-deploy layer.
+const require_machine_slug = require('./server/pm2-machine-slug')
+
 module.exports = {
   apps: [
     {
@@ -21,7 +23,7 @@ module.exports = {
         // with every emit_signal silently muted (the transport no-ops when the
         // variables are unset).
         BASE_API_URL: 'https://base.tint.space',
-        BASE_MACHINE_SLUG: 'league',
+        BASE_MACHINE_SLUG: require_machine_slug(),
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         // The data-view generation identity, distinct from the instance key
         // above: BASE_INSTANCE_KEY_FILE signs signals as this MACHINE, this one
