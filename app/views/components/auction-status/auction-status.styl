@@ -1,0 +1,39 @@
+// A section of the side rail, not a row of it. The settlement status below is
+// a paragraph that may take the height it needs; this one has a title, so it
+// gets the standing-elections padding and gap that give a titled panel its
+// shape.
+.auction-status
+  padding 12px
+  display flex
+  flex-direction column
+  gap 6px
+
+  &__header
+    font-size 14px
+    font-weight 700
+    color $textColor
+
+  &__line
+    font-size 12px
+    line-height 1.3
+    color rgba(0, 0, 0, 0.6)
+
+    // Both name components render block-level <div>s, so an unconstrained one
+    // throws its own line and the sentence wraps AT the name. The MUI-alert
+    // rule applies the same `display: inline` to a team name -- a player name
+    // carries markup and gets `inline-flex` instead, which lets it flow as one
+    // unit.
+    .team__name
+      display inline
+      padding 0 2px
+
+    .player__name
+      display inline-flex
+
+// STACKED, THIS IS NOW THE RAIL'S FIRST ROW. Below 800px the side rail sits
+// under the board, and being first means the bottom rule that separates the
+// settlement status from the accordions below it has to exist here too --
+// otherwise this panel's title reads as the calendar's heading.
+@media (max-width 800px)
+  .auction-status
+    border-bottom 1px solid rgba(0, 0, 0, 0.12)

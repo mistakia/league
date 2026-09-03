@@ -9,6 +9,7 @@ import AuctionTargets from '@components/auction-targets'
 import AuctionStandingElections from '@components/auction-standing-elections'
 import AuctionSettlementStatus from '@components/auction-settlement-status'
 import AuctionBlockCalendar from '@components/auction-block-calendar'
+import AuctionStatus from '@components/auction-status'
 
 import './auction.styl'
 
@@ -118,6 +119,11 @@ export default function AuctionPage({
         </div>
         {is_hosted_league && (
           <div className='auction__side' ref={side_ref}>
+            {/* Never collapsible. The main state of the auction -- whose turn
+                to nominate, or that a player is open or a block is running --
+                has to be readable without opening anything, and this is the
+                surface that carries it for the whole period. */}
+            <AuctionStatus />
             {/* Never collapsible. It is one line, and in election mode it is
                 the auction's only forcing function -- a manager has to see who
                 the board is waiting on without opening anything. */}
