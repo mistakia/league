@@ -280,17 +280,52 @@ const join_predicate = ({ columns, left, right, nullable }) =>
     .join(' AND ')
 
 /**
+ * The columns that name a feed's PRODUCER, in preference order. A feed carries
+ * at most one of them, and it is the column the reported grain widens on.
+ *
+ * Written down rather than derived because producer identity is a semantic
+ * property and no catalog carries it: `source_id` and `league_format_id` are
+ * both just grain columns to information_schema, indistinguishable from `pid`
+ * or `week`. What IS derived is whether the feed actually has one -- the name
+ * is only used after intersecting it with that feed's own derived grain, so a
+ * column of the same name outside the grain is never partitioned on, and a feed
+ * with neither reports whole, exactly as it did under the feed-only grain.
+ *
+ * A feed that later gains a producer column under a third name reports coarse
+ * until that name is added here. That is visible in the reported
+ * `partition_column`, which is null for exactly the feeds reporting whole.
+ */
+const PARTITION_COLUMN_CANDIDATES = ['source_id', 'league_format_id']
+
+export const derive_partition_column = ({ grain }) =>
+  PARTITION_COLUMN_CANDIDATES.find((column) => grain.includes(column)) ?? null
+
+/**
  * Built as a string rather than through the query builder because every part
- * of it -- table, grain columns, period columns -- is derived at runtime.
- * Nothing user-supplied reaches it: the identifiers come from
+ * of it -- table, grain columns, period columns, partition column -- is derived
+ * at runtime. Nothing user-supplied reaches it: the identifiers come from
  * information_schema and are quoted.
+ *
+ * Returns ONE ROW PER PARTITION of the index half, or a single row carrying a
+ * null partition where the feed has no producer column. Partitioning is a pure
+ * decomposition rather than a different comparison: the partition column is
+ * always a grain column, so summing any count over the rows returns exactly
+ * what the whole-feed form returned.
+ *
+ * The row set is keyed on the INDEX side's partitions. A producer present only
+ * in history has no index rows to grade -- the invariant is claimed in the
+ * index-to-history direction alone -- so it contributes to no row rather than
+ * standing as a permanently un-gradeable one. An index half holding no rows at
+ * all returns NO rows, which the caller turns into an un-gradeable pair so the
+ * feed stays visible.
  */
 export const build_parity_sql = ({
   history_table,
   index_table,
   grain,
   period,
-  nullable
+  nullable,
+  partition_column
 }) => {
   const grain_list = grain.map(quote_identifier).join(', ')
   const coverage_clause = period.length
@@ -301,6 +336,14 @@ export const build_parity_sql = ({
         nullable
       })})`
     : ''
+
+  // Cast to text so an enum, a uuid and an integer producer all arrive as the
+  // same shape: the value becomes half of a grain key that a parked entry has
+  // to match as JSON, and a driver-dependent type would make that matching
+  // depend on the column's type rather than on its value.
+  const partition = partition_column
+    ? `${quote_identifier(partition_column)}::text`
+    : 'NULL::text'
 
   return `
     WITH coverage AS (
@@ -317,25 +360,56 @@ export const build_parity_sql = ({
     idx AS (
       SELECT ${grain_list} FROM ${quote_identifier(index_table)} i
       ${coverage_clause}
-    )
-    SELECT
-      (SELECT count(*) FROM ${quote_identifier(index_table)}) AS index_rows_total,
-      (SELECT count(*) FROM idx) AS index_rows_in_coverage,
-      (SELECT count(*) FROM hist) AS history_grains,
-      (SELECT count(*) FROM idx x WHERE NOT EXISTS (
+    ),
+    totals AS (
+      SELECT ${partition} AS partition_value, count(*) AS index_rows_total
+      FROM ${quote_identifier(index_table)} GROUP BY 1
+    ),
+    scanned AS (
+      SELECT ${partition} AS partition_value, count(*) AS index_rows_in_coverage
+      FROM idx GROUP BY 1
+    ),
+    unbacked AS (
+      SELECT ${partition} AS partition_value,
+        count(*) AS index_rows_missing_from_history
+      FROM idx x WHERE NOT EXISTS (
         SELECT 1 FROM hist h WHERE ${join_predicate({
           columns: grain,
           left: 'h',
           right: 'x',
           nullable
-        })})) AS index_rows_missing_from_history,
-      (SELECT count(*) FROM hist h WHERE NOT EXISTS (
+        })})
+      GROUP BY 1
+    ),
+    history_totals AS (
+      SELECT ${partition} AS partition_value, count(*) AS history_grains
+      FROM hist GROUP BY 1
+    ),
+    history_unbacked AS (
+      SELECT ${partition} AS partition_value,
+        count(*) AS history_grains_missing_from_index
+      FROM hist h WHERE NOT EXISTS (
         SELECT 1 FROM idx x WHERE ${join_predicate({
           columns: grain,
           left: 'x',
           right: 'h',
           nullable
-        })})) AS history_grains_missing_from_index
+        })})
+      GROUP BY 1
+    )
+    SELECT
+      t.partition_value,
+      t.index_rows_total,
+      coalesce(s.index_rows_in_coverage, 0) AS index_rows_in_coverage,
+      coalesce(u.index_rows_missing_from_history, 0) AS index_rows_missing_from_history,
+      coalesce(ht.history_grains, 0) AS history_grains,
+      coalesce(hu.history_grains_missing_from_index, 0) AS history_grains_missing_from_index
+    FROM totals t
+    LEFT JOIN scanned s ON s.partition_value IS NOT DISTINCT FROM t.partition_value
+    LEFT JOIN unbacked u ON u.partition_value IS NOT DISTINCT FROM t.partition_value
+    LEFT JOIN history_totals ht ON ht.partition_value IS NOT DISTINCT FROM t.partition_value
+    LEFT JOIN history_unbacked hu ON hu.partition_value IS NOT DISTINCT FROM t.partition_value
+    ORDER BY t.partition_value
   `
 }
 
@@ -348,8 +422,15 @@ export const build_parity_sql = ({
  * denominator contract, so an emptied snapshot is distinguishable from a
  * healthy one on the same field the threshold reads.
  */
-export const evaluate_parity = ({ feed, counts }) => ({
+export const evaluate_parity = ({
   feed,
+  partition_column = null,
+  partition_value = null,
+  counts
+}) => ({
+  feed,
+  partition_column,
+  partition_value,
   numerator: Number(counts.index_rows_missing_from_history),
   denominator: Number(counts.index_rows_in_coverage),
   index_rows_total: Number(counts.index_rows_total),
@@ -369,6 +450,8 @@ export const evaluate_parity = ({ feed, counts }) => ({
  */
 const ungradeable_pair = ({ feed, reason }) => ({
   feed,
+  partition_column: null,
+  partition_value: null,
   numerator: 0,
   denominator: 0,
   reason
@@ -432,21 +515,45 @@ export const index_parity_rows = async () => {
       )
     )
 
-    const [counts] = await query_bounded(
+    const partition_column = derive_partition_column({ grain: derived.grain })
+
+    const partitions = await query_bounded(
       build_parity_sql({
         history_table: pair.history_table,
         index_table: pair.index_table,
         grain: derived.grain,
         period: derived.period,
-        nullable
+        nullable,
+        partition_column
       })
     )
 
-    rows.push({
-      ...evaluate_parity({ feed: pair.feed, counts }),
-      grain: derived.grain.join(', '),
-      period: derived.period.join(', ')
-    })
+    // An index half holding nothing partitions into nothing, so the feed would
+    // leave the row set entirely and read as one fewer pair rather than as an
+    // emptied one. The whole point of these checks is that an emptied table
+    // must not be indistinguishable from an absent one.
+    if (!partitions.length) {
+      rows.push(
+        ungradeable_pair({
+          feed: pair.feed,
+          reason: `${pair.index_table} holds no rows to compare`
+        })
+      )
+      continue
+    }
+
+    for (const counts of partitions) {
+      rows.push({
+        ...evaluate_parity({
+          feed: pair.feed,
+          partition_column,
+          partition_value: counts.partition_value,
+          counts
+        }),
+        grain: derived.grain.join(', '),
+        period: derived.period.join(', ')
+      })
+    }
   }
 
   for (const name of unpaired) {
@@ -815,6 +922,18 @@ export const pure_controls = () => {
         }).length === 0
     },
     {
+      name: 'partition derivation finds the producer column a feed does carry',
+      went_red:
+        derive_partition_column({
+          grain: ['pid', 'league_format_id', 'week', 'season_year']
+        }) === 'league_format_id'
+    },
+    {
+      name: 'partition derivation reports NO producer column rather than guessing one',
+      went_red:
+        derive_partition_column({ grain: ['nfl_team', 'season_year'] }) === null
+    },
+    {
       name: 'floor rate falls below 1 for a season holding a fraction of its peers',
       went_red: rate_of(gutted_seasons, supply, 2023) < 0.5
     },
@@ -853,23 +972,51 @@ export const sql_controls = async () => {
     index_table: 'control_index',
     grain: ['season_year', 'pid'],
     period: ['season_year'],
-    nullable: new Set()
+    nullable: new Set(),
+    partition_column: null
+  })
+
+  // The same corpus read at the widened grain. The unbacked row belongs to
+  // producer B and every other row to A, so a build that ignored the partition
+  // column returns ONE row carrying the same 1 and fails here -- which is the
+  // whole reason this control is a SECOND reading of one corpus rather than a
+  // second corpus.
+  const partitioned_sql = build_parity_sql({
+    history_table: 'control_history',
+    index_table: 'control_index',
+    grain: ['season_year', 'pid', 'source_id'],
+    period: ['season_year'],
+    nullable: new Set(),
+    partition_column: 'source_id'
   })
 
   return db.transaction(async (trx) => {
     await trx.raw(`
-      CREATE TEMP TABLE control_history (season_year int, pid text, observed_at timestamptz)
+      CREATE TEMP TABLE control_history (season_year int, pid text, source_id text, observed_at timestamptz)
         ON COMMIT DROP;
-      CREATE TEMP TABLE control_index (season_year int, pid text) ON COMMIT DROP;
-      INSERT INTO control_history VALUES (2025, 'MATCHED', now()), (2025, 'SNAPSHOTLESS', now());
-      INSERT INTO control_index VALUES (2025, 'MATCHED'), (2025, 'UNBACKED'), (2024, 'OUTSIDE');
+      CREATE TEMP TABLE control_index (season_year int, pid text, source_id text) ON COMMIT DROP;
+      INSERT INTO control_history VALUES (2025, 'MATCHED', 'A', now()), (2025, 'SNAPSHOTLESS', 'A', now());
+      INSERT INTO control_index VALUES (2025, 'MATCHED', 'A'), (2025, 'UNBACKED', 'B'), (2024, 'OUTSIDE', 'A');
     `)
 
     const [perturbed] = (await trx.raw(sql)).rows
+    const partitioned = (await trx.raw(partitioned_sql)).rows
     await trx.raw(
-      `INSERT INTO control_history VALUES (2025, 'UNBACKED', now())`
+      `INSERT INTO control_history VALUES (2025, 'UNBACKED', 'B', now())`
     )
     const [repaired] = (await trx.raw(sql)).rows
+    const partitioned_repaired = (await trx.raw(partitioned_sql)).rows
+
+    const unbacked_by_partition = (rows) =>
+      new Map(
+        rows.map((row) => [
+          row.partition_value,
+          Number(row.index_rows_missing_from_history)
+        ])
+      )
+    const partitioned_counts = unbacked_by_partition(partitioned)
+    const partitioned_repaired_counts =
+      unbacked_by_partition(partitioned_repaired)
 
     return [
       {
@@ -895,6 +1042,39 @@ export const sql_controls = async () => {
         went_red:
           Number(repaired.history_grains_missing_from_index) === 1 &&
           evaluate_parity({ feed: 'control', counts: repaired }).numerator === 0
+      },
+      {
+        name: 'parity SQL separates one producer from another rather than reporting the feed whole',
+        went_red:
+          partitioned.length === 2 &&
+          partitioned_counts.get('A') === 0 &&
+          partitioned_counts.get('B') === 1
+      },
+      {
+        name: 'parity SQL partition counts sum to the whole-feed count',
+        went_red:
+          [...partitioned_counts.values()].reduce(
+            (total, count) => total + count,
+            0
+          ) === Number(perturbed.index_rows_missing_from_history)
+      },
+      {
+        name: 'parity SQL partition count DIFFERS on the repaired corpus for the producer that owned the violation',
+        went_red:
+          partitioned_repaired_counts.get('B') === 0 &&
+          partitioned_repaired_counts.get('B') !== partitioned_counts.get('B')
+      },
+      {
+        name: 'parity SQL scopes a partition to history coverage, not the whole index',
+        went_red:
+          Number(
+            partitioned.find((row) => row.partition_value === 'A')
+              .index_rows_total
+          ) === 2 &&
+          Number(
+            partitioned.find((row) => row.partition_value === 'A')
+              .index_rows_in_coverage
+          ) === 1
       }
     ]
   })
