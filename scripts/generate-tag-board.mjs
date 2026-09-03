@@ -139,15 +139,28 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
       season_year: year
     })
     .whereIn('pid', pids)
-  const projected_points_added = new Map(
-    projection_rows.map((row) => [
-      row.pid,
-      Number(row.projected_points_added_net)
-    ])
-  )
-  const projected_market_salary = new Map(
-    projection_rows.map((row) => [row.pid, Number(row.market_salary_positive)])
-  )
+  // A NULL column leaves the pid OUT of the map, and that is load-bearing rather
+  // than tidy. build-tag-board keys `projection_missing` on `.has(pid)` and
+  // reads a missing entry as null, which is exactly the state a NULL here means
+  // -- the player was never in the drawn pool.
+  //
+  // `Number(null)` is 0, NOT NaN. Mapping the column straight through therefore
+  // put such a player in the map at 0, which reads as a real measurement two
+  // ways over on the franchise screen: `projection_missing` comes out false and
+  // `market_gap` computes `post_deadline_salary - 0`, the largest gap the board
+  // can report and its strongest cut signal, for a player it has no projection
+  // for at all. The `-999` this replaced was wrong too, differently -- it landed
+  // in `below_replacement` instead of `projection_missing` -- so neither
+  // spelling ever reached the null path build-tag-board already had.
+  const to_value_map = (column) =>
+    new Map(
+      projection_rows
+        .filter((row) => row[column] !== null)
+        .map((row) => [row.pid, Number(row[column])])
+    )
+
+  const projected_points_added = to_value_map('projected_points_added_net')
+  const projected_market_salary = to_value_map('market_salary_positive')
 
   const player_rows = await db('player')
     .select('pid', 'short_name', 'primary_position', 'nfl_draft_year')

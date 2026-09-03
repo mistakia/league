@@ -319,6 +319,46 @@ describe('tag board', function () {
       board.league_market.post_extension_room.teams_over_cap.should.equal(1)
     })
 
+    // A player with NO projection row must annotate rather than score, and this
+    // is the pair that makes the two states distinguishable. The board is
+    // deliberately built to say "unscreenable" -- projection_missing set,
+    // market_gap null -- and nothing asserted it, so a loader that turned an
+    // absent projection into a NUMBER defeated it silently.
+    //
+    // That is not hypothetical: generate-tag-board.mjs read the column straight
+    // through `Number()`, and `Number(null)` is 0 rather than NaN. An unprojected
+    // player therefore arrived carrying 0, came out with projection_missing
+    // FALSE, and had market_gap computed as his whole salary -- the largest gap
+    // the board can report, and its strongest cut signal, for a player it knows
+    // nothing about. Fixed by leaving the pid out of the map, which is the state
+    // this case pins.
+    it('annotates an unprojected player instead of scoring him at zero', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // Explicit nulls: absent from both projection maps, which is the
+            // shape the loader now produces for a NULL column.
+            { tid: 1, pid: 'NOPROJ', value: 20, pts_added: null },
+            { tid: 2, pid: 'B1', value: 10, market_salary: 12, pts_added: 8 }
+          ]
+        })
+      )
+
+      const missing = board.market_pool.find((row) => row.pid === 'NOPROJ')
+      missing.projection_missing.should.equal(true)
+      expect(missing.projected_points_added).to.equal(null)
+      expect(missing.market_gap).to.equal(null)
+      // An absent projection is not a below-replacement finding.
+      missing.below_replacement.should.equal(false)
+
+      // The control: a projected player still scores, so the assertions above
+      // are about the missing row rather than about a board that scores nothing.
+      const scored = board.market_pool.find((row) => row.pid === 'B1')
+      expect(scored.projection_missing).to.equal(false)
+      expect(scored.market_gap).to.not.equal(null)
+    })
+
     // The N.Collins case from the live 2026 board: $15 raw with two extensions
     // reads $30 while unprocessed. Once processed, the transaction carries $30
     // and `extensions` is 3, and an ungated ladder would render $50.
