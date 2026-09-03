@@ -48,7 +48,13 @@ export default function PlayerAuctionValue({
       <div
         className={`selected__player-header-item player__auction-value ${class_name}`}
       >
-        <label>Value</label>
+        {/* `Market Value`, NOT `Value`. What this holds IS a market value --
+            the preseason one re-priced against the cap money still unspent --
+            and `Value` alone left the reader to guess whose value and of what.
+            It also settles the thing the merge is for: the item that used to
+            read `Market` beside this one is now THIS item, so the name it
+            carried comes here rather than disappearing. */}
+        <label>Market Value</label>
         <div className='player__auction-value-amounts'>
           <span className='player__auction-value-amount'>
             ${auction_adjusted_salary}

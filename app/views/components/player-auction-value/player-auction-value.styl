@@ -13,10 +13,43 @@
 // 12px `.nominated__player-details` sets on the auction bar's group around it.
 // Measured, the price renders 18px on both surfaces. This component is a value
 // in someone else's row, not a row of its own.
+//
+// THE PRICE IS CENTRED UNDER THE LABEL AND THE DELTA HANGS OFF IT, which is
+// what the three-track grid buys and a flex row cannot. Flexed, the pair is
+// centred as a UNIT, so the price sits left of centre by half the delta's width
+// and MOVES as the delta changes -- `$7` under `MARKET VALUE` is at one x
+// position with no inflation, another at `+$2`, another at `+$12`. The label is
+// the fixed thing on this item and the price is what the reader looks for under
+// it, so the price is what has to hold still.
+//
+// `1fr auto 1fr`: the price takes the middle track, the delta the third, and
+// the first is empty. Equal flex factors make the two `fr` tracks the same
+// width whichever way the item is sized -- they split the surplus when the
+// label is the wider thing, and when the delta is wider than the surplus they
+// both grow to it, since an `fr` track floors at its own content. Either way
+// the outer pair match, so the middle track is centred by construction and the
+// price never moves. `justify-self start` keeps the delta against the price
+// rather than centred in a track that may be wider than it.
+//
+// `align-self stretch`, because a centred track is only centred within the
+// width it was given. `.selected__player-header-item` is a centring flex COLUMN
+// (selected-player.styl), so a child sizes to its own content by default and
+// this grid would span the price alone -- centring it inside itself, which is
+// no constraint at all. Stretched, the grid spans the item, and the item's
+// width is the label's.
 .player__auction-value-amounts
-  display flex
+  display grid
+  grid-template-columns 1fr auto 1fr
+  align-self stretch
   align-items baseline
-  gap 5px
+
+.player__auction-value-amount
+  grid-column 2
+
+.player__auction-value-inflation
+  grid-column 3
+  justify-self start
+  padding-left 5px
 
 // `em`, so the delta tracks whatever size the surrounding row set for the
 // price. Fixed at 11px it read as an annotation in the 12px auction bar and as

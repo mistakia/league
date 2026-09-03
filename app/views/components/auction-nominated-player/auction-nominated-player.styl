@@ -120,10 +120,18 @@
     display block
     padding-bottom 6px
 
-// `Value` IS ONE WORD AND CANNOT WRAP ANY MORE, so the nowrap that used to
-// protect the two-word `Live value` label is gone with the label. What can
-// still wrap is the amount row inside the box -- the price and its inflation
-// delta -- and that is handled at the row itself below.
+// `MARKET VALUE` IS TWO WORDS AND MUST NOT BREAK BETWEEN THEM, because the
+// label is what sets this box's width and the price inside it is centred on
+// that width. Wrapped, the box narrows to `MARKET` and the centring follows it,
+// which reads as the number having moved rather than as the label having
+// wrapped.
+//
+// UNCONDITIONAL, where the old two-word label's nowrap was floored at 1024px.
+// That floor was drawn when this group carried four columns into a squeeze
+// zone; it carries ONE now, so the group is about 75px wide at every width and
+// there is nothing left for a wrap to relieve.
+.nominated__player-details label
+  white-space nowrap
 
 // THE VALUE IS IN A BOX because it is now the only price on this surface and it
 // is a live one: recomputed from the cap money still unspent every time a
