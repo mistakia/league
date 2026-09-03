@@ -30,26 +30,28 @@ $grid_open_fill = #ececec
 $grid_rule = mix($borderColor, white, 70%)
 $grid_selected_ring = mix($textColorDark, white, 55%)
 
-// `OURS` UNDERLINES THE COUNT. It costs NO layout at all -- the rule sits in
-// the line box the digit already occupies -- where the ring it replaced needed
-// an inset that a cell this narrow cannot give, and the dot that replaced the
-// ring needed a six-pixel strip of reserved cell height on all 168 cells to
-// hold a mark that appears on a handful of them.
+// `OURS` UNDERLINES THE CELL: a bar across its full bottom edge, the mirror of
+// the bar `now` draws across the top. It is absolutely positioned, so like the
+// text underline it replaces it costs NO layout -- but it is the width of the
+// cell rather than the width of a digit, so it is legible at a glance across a
+// whole row instead of asking the eye to resolve a rule under an 11px glyph.
 //
-// It is drawn in currentColor, which is what makes it need no per-state
-// override. A background-based `mine` was the other candidate and it loses
-// exactly where it matters: `finalized` and `final-block` are backgrounds, so
-// they would swallow it, and an hour is routinely both the final block and one
-// the manager opted into elsewhere within it. A decoration on the glyph rides
-// whatever ground the cell has and takes the numeral's own colour with it.
-$grid_mine_underline_thickness = 2px
-$grid_mine_underline_offset = 1px
+// The two shapes it replaced each failed a different way. A ring surrounds the
+// numeral and no inset in a cell this narrow clears it. A dot needed six pixels
+// of reserved height on all 168 cells to hold a mark that appears on a handful.
+//
+// A background-based `mine` was the other candidate and it loses where it
+// matters: `finalized` and `final-block` are backgrounds and would swallow it,
+// and an hour is routinely both the final block and one the manager opted into
+// elsewhere within it. A bar sits on top of whatever ground the cell has, and
+// inverts to white on those two.
+$grid_mine_bar_thickness = 2px
 // Negated HERE, not at the use site. `-$var` inside a box-shadow list is not
 // parsed as negation -- stylus emits the literal ident
-// `-$grid_mine_underline_thickness`, which is invalid CSS, so the browser drops
-// the whole declaration and the key's `yours` swatch shows no bar at all.
-// Wrapping it in parentheses does not help; subtraction from zero does.
-$grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
+// `-$grid_mine_bar_thickness`, which is invalid CSS, so the browser drops the
+// whole declaration and the key's `yours` swatch shows no bar at all. Wrapping
+// it in parentheses does not help; subtraction from zero does.
+$grid_mine_bar_rise = 0 - $grid_mine_bar_thickness
 
 .auction__block-calendar
   display flex
@@ -170,14 +172,18 @@ $grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
   // showing that it was also yours. `outline` composites independently of
   // `box-shadow`, and `outline-offset` keeps it inside the cell rather than
   // over the neighbour.
-  // Yours: the count is underlined. Declared on the SPAN the count is wrapped
-  // in rather than on the cell, because the cell is a flex container and its
-  // text is an anonymous flex item -- decoration propagation into one is the
-  // kind of rule that is arguable in the spec and silent when it loses.
-  &.mine .auction__block-calendar-count
-    text-decoration underline
-    text-decoration-thickness $grid_mine_underline_thickness
-    text-underline-offset $grid_mine_underline_offset
+  // Yours: a bar across the cell's bottom edge. `now` owns ::after for its top
+  // bar, so this one is ::before -- the two are the only marks on the grid that
+  // read across a whole row without resolving anything inside a cell, and they
+  // deliberately sit on opposite edges so a cell carrying both says both.
+  &.mine::before
+    content ''
+    position absolute
+    left 0
+    right 0
+    bottom 0
+    height $grid_mine_bar_thickness
+    background $accentColor
 
   // `outline` rather than a border or a box-shadow: it takes no space, so it
   // cannot shift the numeral, and `outline-offset` keeps it inside the cell
@@ -197,8 +203,22 @@ $grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
     background #c0392b
     color white
 
+  // The bar inverts on the two dark grounds, exactly as the numeral does. An
+  // accent bar on `final-block` is red on red, and that is the state it
+  // composes with most often: the final block convenes by rule, so an hour is
+  // routinely both the final block and one a manager opted into elsewhere
+  // within it.
+  &.finalized.mine::before,
+  &.final-block.mine::before
+    background white
+
   // The current hour, as a bar rather than a border: a border on one side of
   // the cell shifts the numeral it sits above.
+  //
+  // NEUTRAL, not accent, and only since `mine` became a bar too. Two accent
+  // bars on opposite edges of one cell is a shape a manager has to decode
+  // rather than read, and the current hour is a temporal locator rather than
+  // anything they own -- so ownership keeps the accent and the clock does not.
   &.now::after
     content ''
     position absolute
@@ -206,7 +226,7 @@ $grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
     right 0
     top 0
     height 2px
-    background $accentColor
+    background $textColorDark
 
 // The key. The grid is six states in ten-pixel cells, which no amount of
 // colour choice makes self-evident.
@@ -238,14 +258,12 @@ $grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
   &.has-opt-ins
     background mix($accentColor, white, 16%)
 
-  // The `mine` swatch stands the underline up on its own, on the opted-in
-  // ground it appears against -- a swatch has no digit to decorate. An inset
-  // shadow rather than a border, so the bar sits at the same 2px thickness the
-  // grid draws and does not shrink the swatch. A swatch showing the ring the
-  // grid no longer draws would be a key to a state that does not exist.
+  // The `mine` swatch draws the same bottom bar on the opted-in ground it
+  // appears against. An inset shadow rather than a border, so it sits at the
+  // grid's own 2px thickness without shrinking the swatch.
   &.mine
     background mix($accentColor, white, 16%)
-    box-shadow inset 0 $grid_mine_underline_rise 0 darken($accentColor, 25%)
+    box-shadow inset 0 $grid_mine_bar_rise 0 $accentColor
 
   &.finalized
     background $successColor

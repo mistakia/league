@@ -276,16 +276,7 @@ export default function AuctionBlockCalendar({
                     )
                   }}
                 >
-                  {/* Wrapped rather than bare, because `mine` underlines the
-                      count and the cell is a flex container -- a bare text
-                      node in one is an anonymous flex item, and whether a
-                      decoration set on the container reaches it is the kind of
-                      rule that fails silently rather than loudly. */}
-                  {Boolean(hour.is_in_period && opted) && (
-                    <span className='auction__block-calendar-count'>
-                      {opted}
-                    </span>
-                  )}
+                  {hour.is_in_period && opted ? opted : ''}
                 </div>
               )
             })}
