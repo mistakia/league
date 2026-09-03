@@ -333,13 +333,30 @@ describe('data views line row axis', function () {
       with_axis = await emit(['year', 'week', 'line'])
     })
 
-    it('keeps the dedup and builds no rung CTE without the axis', () => {
-      expect(without_axis).to.match(/distinct on/)
+    it('builds no rung CTE without the axis', () => {
       expect(without_axis).to.not.include('player_years_weeks_lines')
     })
 
-    it('suppresses the dedup under the axis', () => {
-      expect(with_axis).to.not.match(/distinct on/)
+    // The axis WIDENS the dedup key; it does not remove it. Suppressing it
+    // outright shipped once, on the reasoning that the rows the dedup discards
+    // are exactly the rungs the axis asks for -- true of the rungs, false of a
+    // rung the book published under two market ids, which then rendered twice
+    // at two prices. Asserting the key rather than the mere presence of
+    // `distinct on` is the point: presence alone passed throughout the defect's
+    // life on the no-axis path.
+    it('widens the dedup key to the rung under the axis', () => {
+      expect(with_axis).to.match(
+        /distinct on \("pms"\."selection_pid", "m"\."esbid", "pms"\."selection_metric_line"\)/
+      )
+    })
+
+    it('keys the dedup on the game alone without the axis', () => {
+      expect(without_axis).to.match(
+        /distinct on \("pms"\."selection_pid", "m"\."esbid"\)/
+      )
+      expect(without_axis).to.not.match(
+        /distinct on \([^)]*selection_metric_line[^)]*\)/
+      )
     })
 
     it('builds the rung CTE and correlates the join on the rung', () => {
@@ -361,19 +378,16 @@ describe('data views line row axis', function () {
       expect(new Set(cte_names).size).to.equal(1)
     })
 
-    // Suppressing the dedup also removed the optimization fence it incidentally
-    // provided, and Postgres then inlined this CTE into the join and re-probed
-    // prop_markets_index once per candidate cell -- 203,456 loops per column on
-    // a single week, which took the saved 18-week view past the 40s statement
-    // timeout. The fence has to be asked for explicitly once the dedup is gone.
-    it('materializes the market CTE under the axis', () => {
-      expect(with_axis).to.match(/"t[0-9a-f]{32}" as materialized \(/)
-    })
-
-    // Gated, not unconditional: without the axis the dedup is back and the same
-    // 18-week request measured the same either way, so materializing there
-    // would take on planner risk for nothing.
-    it('leaves the market CTE un-materialized without the axis', () => {
+    // The CTE was materialized under the axis for exactly as long as the axis
+    // suppressed the dedup: an unfenced undeduplicated CTE collapses into the
+    // join and re-probes prop_markets_index per candidate cell. The dedup now
+    // runs on both paths, so its DISTINCT ON is the fence again and the
+    // explicit one is not merely redundant but costly -- materializing hides
+    // the CTE's keys from the planner, which nested-loops the scan instead of
+    // merge-joining it: 3356 ms against 346 ms on the 18-week single-book
+    // ladder, measured on production.
+    it('never materializes the market CTE, with or without the axis', () => {
+      expect(with_axis).to.not.match(/"t[0-9a-f]{32}" as materialized \(/)
       expect(without_axis).to.not.match(/"t[0-9a-f]{32}" as materialized \(/)
     })
   })

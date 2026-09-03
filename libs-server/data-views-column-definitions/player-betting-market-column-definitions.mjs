@@ -425,24 +425,25 @@ const player_betting_market_with = ({
     }
   })
 
-  // MATERIALIZED ONLY UNDER THE LINE AXIS, and it is the dedup's absence that
-  // makes it necessary rather than anything about the axis itself. Postgres
-  // inlines a non-recursive CTE referenced once, so this CTE and the markets CTE
-  // feeding it collapse into the join and get re-probed per outer row. Without
-  // the axis the DISTINCT ON below keeps that from mattering; suppress it and
-  // the collapse is unfenced, so each betting column re-probes
-  // prop_markets_index once per candidate cell -- measured at 203,456 loops per
-  // column on a single-week view, four columns deep, which is the whole of its
-  // runtime. Over 18 weeks the same view exceeded the 40s statement timeout and
-  // rendered nothing.
+  // PLAIN `with` ON EVERY PATH, including under the line axis. This CTE was
+  // briefly materialized when the axis was live, and the reason was never the
+  // axis: it was that the axis SUPPRESSED the dedup below. An unfenced
+  // undeduplicated CTE collapses into the join and gets re-probed per outer
+  // row, measured then at 203,456 loops per column. The dedup now runs on every
+  // path -- the axis widens its key instead of removing it -- so the DISTINCT ON
+  // fences the collapse exactly as it always did without the axis, and the
+  // fence has nothing left to add.
   //
-  // Gated rather than unconditional because a view with no line axis does not
-  // need it: measured at 1.3s either way on the same 18-week request, so
-  // materializing there would buy nothing and take on the planner risk for free.
-  // Do NOT read this as "materialize the rung CTE too" -- that one is plain
-  // `with` for the opposite and measured reason, recorded in its own bridge.
-  const with_cte = line_split ? 'withMaterialized' : 'with'
-  query[with_cte](with_table_name, (qb) => {
+  // Keeping it would not be free. Materializing hides the CTE's keys from the
+  // planner, which then nested-loops the CTE scan instead of merge-joining it:
+  // on the 18-week single-book alt ladder that this defect was reported
+  // against, materialized runs 3356 ms against 346 ms plain, discarding 22.3M
+  // rows in a join filter to produce 505. Measured on production, twice,
+  // through two independent paths.
+  //
+  // This restores the rule the rest of the file already followed, and it agrees
+  // with the rung bridge, which is plain `with` for its own measured reason.
+  query.with(with_table_name, (qb) => {
     qb.from(`${markets_cte} as m`).join(
       'prop_market_selections_index as pms',
       function () {
@@ -469,27 +470,29 @@ const player_betting_market_with = ({
     if (is_week_scoped) {
       qb.select('m.year', 'm.week')
 
-      // THE DEDUP IS SUPPRESSED ONLY UNDER A LIVE LINE AXIS, and gating on the
-      // AXIS rather than on the market type is the whole point. An alt column
-      // in a view with no line axis still has one cell to fill, so collapsing
-      // its ladder to one deterministic rung remains the correct render there;
-      // a `market_type like 'GAME_ALT_%'` branch would have changed that too.
-      // Axis-gating also leaves the single-line guarantee untouched by
-      // construction -- 194 of 544 DRAFTKINGS CLOSE GAME_SPREAD team-weeks in
-      // 2025 carry a duplicated market, and every one of them still dedups.
+      // THE DEDUP ALWAYS RUNS. The line axis WIDENS its key; it does not
+      // switch it off, and the difference is the whole defect this call site
+      // once shipped. Suppressing it entirely was justified by "the rows the
+      // dedup would discard are exactly the rows being asked for" -- true of
+      // the ladder rungs, false of a rung the book published twice, because
+      // one key was closing both. Widening separates them: rungs differ on the
+      // line and all survive, a duplicated rung still collapses to one row.
       //
-      // With the axis live the rung is part of the cell key, so the rows the
-      // dedup would discard are exactly the rows being asked for. The join
-      // below correlates on the rung, so nothing fans out: each cell selects
-      // the one selection at its own line.
-      if (!line_split) {
-        // One row per player per game, or the LEFT JOIN multiplies the cell.
-        // Keyed on the game rather than on (year, week) because the game is
-        // what the market attaches to and it fixes the week as a consequence;
-        // see market-row-dedup.mjs for why the coarser key is the unsafe
-        // direction.
-        apply_market_row_dedup({ qb })
-      }
+      // Keyed on the game rather than on (year, week) because the game is what
+      // the market attaches to and it fixes the week as a consequence; see
+      // market-row-dedup.mjs for why the coarser key is the unsafe direction,
+      // and for the production population that made this bite.
+      //
+      // The ladder test is the SECOND question, not a refinement of the first,
+      // and it pairs with the identical test in the join below. A single-line
+      // market under a line axis is not correlated on the rung, so widening its
+      // key would let two duplicate markets at two different lines both
+      // survive with nothing to choose between them -- the original fanout,
+      // restored on the one market shape the axis was never about.
+      apply_market_row_dedup({
+        qb,
+        include_line_in_key: line_split && is_ladder_market_type(market_type)
+      })
     }
 
     if (career_year.length) {

@@ -76,8 +76,10 @@ export const add_cte = ({ query_context }) => {
 
   // The line axis manufactures one ROW per rung, so an in-play rung does not
   // quietly outrank a pregame one -- it renders alongside it as an extra row
-  // the columns then have to fill. market-row-dedup.mjs is suppressed on this
-  // path, so its ordering cannot reach here and the filter has to.
+  // the columns then have to fill. This CTE builds the rung DOMAIN and never
+  // calls market-row-dedup.mjs, so that helper's newest-observation ordering
+  // cannot reach here and the filter has to. The columns dedup their own rows
+  // under a widened key; the domain is deduped by the DISTINCT above.
   apply_pregame_market_filter({ qb: cte_query, column: 'm.is_live' })
 
   // Both sides carry the year so the partitioned scans prune; see the Year
