@@ -1,7 +1,7 @@
 // @ts-check
 import pg from 'pg'
 import Knex from 'knex'
-import config from '#config'
+import config, { assert_sandbox_credentials } from '#config'
 
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, Number)
 pg.types.setTypeParser(pg.types.builtins.INT8, Number)
@@ -45,5 +45,26 @@ const postgres_config = {
   }
 }
 
-const postgres = Knex(postgres_config)
+// ANCHOR THE SANDBOX CREDENTIAL REQUIREMENT AT THE POOL, NOT AT ITS CALLERS.
+//
+// The named refusal is asserted in the two agent tools that open a connection
+// and in db/sandbox-pool.mjs. That is three hand-placed call sites and nothing
+// enforcing a fourth: any NEW sandbox entry point importing this module -- the
+// generation drainer, a debug CLI, a REPL -- would connect with the committed
+// blank host and password and get a raw pg error naming neither the config nor
+// the variable. Knex calls a function-valued `connection` per connection, so
+// putting the assert here makes the guarantee structural.
+//
+// Scoped to NODE_ENV=sandbox deliberately: every other environment keeps the
+// plain object it has always had, so this cannot change how development, test
+// or production connect.
+const connection_config =
+  process.env.NODE_ENV === 'sandbox'
+    ? () => {
+        assert_sandbox_credentials()
+        return postgres_config.connection
+      }
+    : postgres_config.connection
+
+const postgres = Knex({ ...postgres_config, connection: connection_config })
 export default postgres

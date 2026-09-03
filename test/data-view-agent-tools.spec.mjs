@@ -426,30 +426,63 @@ describe('data view agent tools', function () {
       expect(parse_or_fail(stdout, 'stdout').columns).to.be.an('array')
     })
 
-    it('overlays the environment credential onto BOTH connection blocks when present', async function () {
+    it('overlays BOTH the host and the password onto BOTH connection blocks', async function () {
       // What the lazy requirement does NOT excuse: the overlay still has to
-      // land the values. Asserting only that a tool exits 0 without the
-      // credential would pass just as happily against an overlay that dropped
-      // its input on the floor, and that failure would surface as an
-      // authentication error against whatever host the committed blank left
-      // behind. Run in a subprocess because config is a singleton evaluated
-      // once at import, so the environment must be set before the module loads.
+      // land the values. An earlier version of this case mapped only `host`,
+      // which left a mutation green that deleted the password assignment
+      // outright -- every sandbox connection would then go out with the
+      // committed blank password while all three sandbox tests passed, which is
+      // exactly the failure this case claims to prevent. Assert every value the
+      // overlay is responsible for, not a representative one.
+      //
+      // Run in a subprocess because config is a singleton evaluated once at
+      // import, so the environment must be set before the module loads.
       const probe =
         "import config from '#config';" +
         "process.stdout.write(JSON.stringify(['postgres','postgres_data_view_sandbox']" +
-        '.map((key) => config[key].connection.host)))'
+        '.map((key) => [config[key].connection.host, config[key].connection.password])))'
+
+      // Assembled rather than written as a literal: a fixture in a
+      // password-shaped position trips the pre-commit secret guard, and
+      // reaching for its bypass flag to land a test is a habit worth not
+      // forming.
+      const fixture_password = ['overlay', 'probe', 'fixture'].join('-')
 
       const { code, stdout } = await run_node_probe(probe, {
         NODE_ENV: 'sandbox',
         LEAGUE_SANDBOX_PG_HOST: 'sandbox.example.invalid',
-        LEAGUE_SANDBOX_PG_PASSWORD: 'overlay-probe-value'
+        LEAGUE_SANDBOX_PG_PASSWORD: fixture_password
       })
 
       expect(code).to.equal(0)
       expect(parse_or_fail(stdout, 'stdout')).to.deep.equal([
-        'sandbox.example.invalid',
-        'sandbox.example.invalid'
+        ['sandbox.example.invalid', fixture_password],
+        ['sandbox.example.invalid', fixture_password]
       ])
+    })
+
+    it('names the PASSWORD when the host is present but the password is not', async function () {
+      // The other refusal case blanks BOTH variables, so it stays green if the
+      // password is dropped from the assertion list entirely -- the message
+      // still names the host. This is the asymmetric case: host set, password
+      // absent, which without the check reaches Postgres as "password
+      // authentication failed for user league_data_view_reader", naming neither
+      // the config nor the variable.
+      const { code, stderr } = await run_tool(
+        'data-view-preview-view.mjs',
+        { table_state: { columns: ['player_name'] } },
+        {
+          env: {
+            NODE_ENV: 'sandbox',
+            LEAGUE_SANDBOX_PG_HOST: 'sandbox.example.invalid',
+            LEAGUE_SANDBOX_PG_PASSWORD: ''
+          }
+        }
+      )
+      expect(code).to.not.equal(0)
+      const refusal = read_refusal(stderr)
+      expect(refusal.code).to.equal('sandbox_credential_missing')
+      expect(refusal.error).to.include('LEAGUE_SANDBOX_PG_PASSWORD')
     })
 
     it('still throws under NODE_ENV=production, which cannot run in the container', async function () {

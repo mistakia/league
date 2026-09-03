@@ -210,14 +210,18 @@ export const claim_next_generation_job = async (connection = db) => {
  * @param {object} params
  * @param {string} params.generation_id
  * @param {string} params.thread_id - base's session id
+ * @param {object} [params.connection] - see claim_next_generation_job; every
+ *   mutator here takes one for the same reason, and the reason is a deadlock
+ * @returns {Promise<number>} rows updated
  */
 export const mark_generation_job_running = async ({
   generation_id,
-  thread_id
+  thread_id,
+  connection = db
 }) =>
-  db('data_view_generation_jobs')
+  connection('data_view_generation_jobs')
     .where({ generation_id, status: 'dispatched' })
-    .update({ status: 'running', thread_id, started_at: db.fn.now() })
+    .update({ status: 'running', thread_id, started_at: connection.fn.now() })
 
 /**
  * Complete a job with the agent's emitted envelope and its trajectory.
@@ -227,19 +231,22 @@ export const mark_generation_job_running = async ({
  * @param {object} params.result - the emit envelope
  * @param {string} params.generation_branch - registry | query | refusal
  * @param {object} [params.trajectory] - tool_call_count, total_tokens
+ * @param {object} [params.connection] - see claim_next_generation_job
+ * @returns {Promise<number>} rows updated
  */
 export const complete_generation_job = async ({
   generation_id,
   result,
   generation_branch,
-  trajectory = {}
+  trajectory = {},
+  connection = db
 }) =>
   // ONE statement. An earlier draft read the row first purely to get
   // started_at, which shipped instruction, input_table_state and result --
   // three TOAST-able jsonb columns -- to Node to compute one subtraction.
   // Deriving it in SQL also puts both ends of the interval on the server clock,
   // where a Date.now() minus a server-generated started_at mixed two.
-  db('data_view_generation_jobs')
+  connection('data_view_generation_jobs')
     .where({ generation_id })
     .whereIn('status', LIVE_STATUSES)
     .update({
@@ -251,10 +258,10 @@ export const complete_generation_job = async ({
       generation_branch,
       tool_call_count: trajectory.tool_call_count ?? null,
       total_tokens: trajectory.total_tokens ?? null,
-      duration_milliseconds: db.raw(
+      duration_milliseconds: connection.raw(
         'CASE WHEN started_at IS NULL THEN NULL ELSE (EXTRACT(EPOCH FROM (now() - started_at)) * 1000)::integer END'
       ),
-      completed_at: db.fn.now()
+      completed_at: connection.fn.now()
     })
 
 /**
@@ -264,20 +271,23 @@ export const complete_generation_job = async ({
  * @param {string} params.generation_id
  * @param {string} params.error_code
  * @param {string} params.error_message
+ * @param {object} [params.connection] - see claim_next_generation_job
+ * @returns {Promise<number>} rows updated
  */
 export const fail_generation_job = async ({
   generation_id,
   error_code,
-  error_message
+  error_message,
+  connection = db
 }) =>
-  db('data_view_generation_jobs')
+  connection('data_view_generation_jobs')
     .where({ generation_id })
     .whereIn('status', LIVE_STATUSES)
     .update({
       status: 'failed',
       error_code,
       error_message,
-      completed_at: db.fn.now()
+      completed_at: connection.fn.now()
     })
 
 /**
