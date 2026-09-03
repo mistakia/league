@@ -28,6 +28,17 @@ import ed25519 from '@trashman/ed25519-blake2b'
 // THE SECOND TRAP: the server hashes `JSON.stringify(data)` and signs the HASH,
 // not the raw bytes. A serializer that pretty-prints, or a signer that signs
 // the payload directly, fails with the same `invalid signature`.
+//
+// THE THIRD TRAP, and it is the one that actually shipped broken: the RAW
+// `@trashman/ed25519-blake2b` `sign` takes THREE arguments -- message, secret
+// key, PUBLIC KEY -- and throws `public key must be a buffer or hex string` when
+// the third is omitted. Base's own `libs-server/crypto/ed25519-blake2b.mjs`
+// wrapper takes the same three and IGNORES the third, so code copied from base's
+// call sites signs happily there and throws here. The throw surfaces as
+// `dispatch_failed` rather than as anything naming a key, which sends the reader
+// to the network and to base's auth rather than to this line. Every dispatch
+// failed this way until 2026-09-03; the path had only ever been exercised with
+// base's own tooling, never through this module.
 
 const SESSION_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000
 // Re-mint an hour before expiry rather than on rejection. A token that expires
@@ -86,6 +97,35 @@ const read_identity_seed = () => {
   return Buffer.from(raw, 'hex')
 }
 
+/**
+ * Build the signed body base's session route expects.
+ *
+ * Separated from the fetch ON PURPOSE, so the three signing traps at the top of
+ * this file are exercisable without a network and without base being up. All
+ * three fail in ways that surface far from the signing line -- two as base's
+ * `invalid signature`, and the third as a local throw filed under
+ * `dispatch_failed` -- so a test that cannot reach this code cannot see any of
+ * them.
+ *
+ * @param {Buffer} seed - the 32-byte identity seed
+ * @returns {{data: object, signature: string}}
+ */
+export const build_session_request = (seed) => {
+  const public_key = Buffer.from(ed25519.publicKey(seed))
+  const data = {
+    user_public_key: public_key.toString('hex'),
+    timestamp: Date.now(),
+    nonce: crypto.randomUUID()
+  }
+  // The HASH, not the payload -- see the second trap at the top of this file.
+  // And the PUBLIC KEY as the third argument -- see the third trap, which is
+  // what made every dispatch fail before 2026-09-03.
+  const signature = Buffer.from(
+    ed25519.sign(ed25519.hash(JSON.stringify(data)), seed, public_key)
+  ).toString('hex')
+  return { data, signature }
+}
+
 let cached_token = null
 let cached_token_expires_at = 0
 
@@ -113,16 +153,7 @@ export const get_base_session_token = async ({ force = false } = {}) => {
     )
   }
 
-  const seed = read_identity_seed()
-  const data = {
-    user_public_key: Buffer.from(ed25519.publicKey(seed)).toString('hex'),
-    timestamp: Date.now(),
-    nonce: crypto.randomUUID()
-  }
-  // The HASH, not the payload -- see the second trap at the top of this file.
-  const signature = Buffer.from(
-    ed25519.sign(ed25519.hash(JSON.stringify(data)), seed)
-  ).toString('hex')
+  const { data, signature } = build_session_request(read_identity_seed())
 
   const response = await fetch(
     `${base_url.replace(/\/$/, '')}/api/users/session`,
@@ -295,6 +326,7 @@ export const dispatch_generation_session = async ({
 export default {
   BaseSessionError,
   build_generation_prompt,
+  build_session_request,
   dispatch_generation_session,
   get_base_session_token,
   reset_base_session_token,
