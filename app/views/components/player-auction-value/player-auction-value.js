@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Tooltip from '@mui/material/Tooltip'
 
+import Icon from '@components/icon'
+
 import './player-auction-value.styl'
 
 /**
@@ -15,25 +17,23 @@ import './player-auction-value.styl'
  * ambiguous -- `$7` under a label reading `Live value`, a few inches from the
  * bid controls, was taken for the current bid, which is a different number.
  *
- * So the pair collapses into ONE price and its ORIGIN: the amount is what the
- * player is worth right now, inflation already applied, and `from $5` beside it
- * is where that started.
+ * So the pair collapses into THREE ROWS: the label, the price, and a footnote
+ * under it in small type reading `+$12 from $33`.
  *
- * `from $5`, NOT `+$2`, AND THE DELTA FORM WAS AMBIGUOUS IN THE ONE WAY THAT
- * MATTERS AT A BID. `$7 +$2` does not say whether the two are to be added:
- * read as "seven, and two more of inflation on top" it makes the player worth
- * nine, and read as "seven, of which two is inflation" it makes them worth
- * seven. Both readings are available from the glyphs and the surface picked
- * neither, so a manager could be a dollar or two off in either direction with
- * no way to tell -- on the one screen where that number decides a bid.
+ * THE FOOTNOTE NAMES ITS ORIGIN BECAUSE A BARE DELTA DID NOT. `$45 +$12` does
+ * not say whether the two are to be added: read as "forty-five, and twelve more
+ * of inflation on top" the player is worth fifty-seven, and read as
+ * "forty-five, of which twelve is inflation" they are worth forty-five. Both
+ * readings are available from the glyphs and the surface picked neither, so a
+ * manager could be off by the whole delta in either direction -- on the one
+ * screen where that number decides a bid. `from $33` closes it: the arithmetic
+ * is stated rather than implied, and there is no third number for the pair to
+ * suggest.
  *
- * A baseline cannot be read that way. `$7 from $5` states the endpoint and the
- * origin, so the only arithmetic left is the subtraction the reader does not
- * have to do, and there is no third number for the pair to imply. It also keeps
- * the preseason figure ON the surface rather than in the tooltip, which is
- * where the merge had put it -- so `Market Value` names something the reader
- * can see the whole of, and the exact inflation is still spelled out in words
- * on hover for anyone who wants it.
+ * The size is the other half of the same fix. On the price's own line and in
+ * the price's own size, the delta was a second figure of equal standing; below
+ * it and smaller than even the label, it is unmistakably an annotation ON the
+ * price rather than a companion to it.
  *
  * `.selected__player-header-item` is the shared label-over-value item class,
  * carried here rather than by each caller, because every caller wants it -- the
@@ -66,24 +66,42 @@ export default function PlayerAuctionValue({
             It also settles the thing the merge is for: the item that used to
             read `Market` beside this one is now THIS item, so the name it
             carried comes here rather than disappearing. */}
-        <label>Market Value</label>
-        <div className='player__auction-value-amounts'>
-          <span className='player__auction-value-amount'>
-            ${auction_adjusted_salary}
-          </span>
-          {/* NOTHING WHEN THE TWO ARE EQUAL. `from $7` beside `$7` is a line
-              that says the auction has not moved this player, which is what an
-              unannotated price already says. */}
-          {inflation !== 0 && (
-            <span
-              className={`player__auction-value-baseline ${
-                inflation > 0 ? 'over' : 'under'
-              }`}
-            >
-              from ${market_salary}
-            </span>
-          )}
+        <label className='player__auction-value-label'>
+          Market Value
+          {/* THE ICON IS THE ONLY THING THAT SAYS THERE IS A TOOLTIP. The whole
+              item is the hover target and always was, but a plain label and a
+              number look like every other item in these rows, so nobody hovers
+              -- the explanation was reachable and undiscoverable, which is the
+              same as absent. `.icon` is `pointer-events none`, so the glyph
+              does not need to be the trigger itself: the hover falls through to
+              the item, which is where the Tooltip already sits. */}
+          <Icon name='info-outline' className='player__auction-value-info' />
+        </label>
+        <div className='player__auction-value-amount'>
+          ${auction_adjusted_salary}
         </div>
+        {/* NOTHING WHEN THE TWO ARE EQUAL, because `+$0 from $7` beside `$7` is
+            a line that says the auction has not moved this player, which is
+            what an unannotated price already says.
+
+            ITS OWN ROW, AT A SIZE BELOW THE LABEL'S. Beside the price it was a
+            second figure competing with the subject, and it forced the price
+            off centre -- the price now centres because it is alone on its line,
+            which needs no grid. Under it and smaller, it reads as the footnote
+            it is, and the extra room a full line gives is what lets it carry
+            the MAGNITUDE as well as the origin: `+$12 from $33` says how far
+            the auction has moved this player and from where, and neither number
+            can be mistaken for something to add to the price above. */}
+        {inflation !== 0 && (
+          <div
+            className={`player__auction-value-context ${
+              inflation > 0 ? 'over' : 'under'
+            }`}
+          >
+            {inflation > 0 ? '+' : '-'}${Math.abs(inflation)} from $
+            {market_salary}
+          </div>
+        )}
       </div>
     </Tooltip>
   )

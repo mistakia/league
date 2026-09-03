@@ -1,70 +1,74 @@
-// THE TWO NUMBERS SHARE A BASELINE AND DO NOT SHARE A WEIGHT. The price is the
-// subject; `from $5` is an annotation on it, so it is smaller, lighter and set
-// in the direction's colour rather than sitting beside the price as a second
-// figure of equal standing -- which is exactly the failure the two-column
-// `Market` / `Live value` pair had, and the type is doing the work the word
-// `from` is doing in the copy.
+// THREE ROWS IN A COLUMN THE CALL SITE ALREADY DRAWS.
+// `.selected__player-header-item` (selected-player.styl) is a centring flex
+// column, so the label, the price and the footnote each take their own line and
+// each centres on the item's width without a rule here. That is the whole
+// reason this file no longer carries the `1fr auto 1fr` grid it did while the
+// footnote sat BESIDE the price: side by side, the two centred as a unit and
+// the price drifted left as the footnote changed width, so the price had to be
+// pinned to the middle track of a grid whose empty first track cost as much
+// width as the footnote itself -- 164px at `$45 from $33` against 96px bare.
+// Stacked, the centring is structural and the width is back to the label's.
 //
-// `align-items baseline`, not `center`: the annotation is a size smaller than
-// the price, and centred the smaller type floats visibly above the dollar sign.
-//
-// The size of the price itself is NOT set here. It comes from
-// `.selected__player-header-item` in selected-player.styl, which both call
-// sites carry -- and note that rule sets 18px on the ITEM, so it wins over the
-// 12px `.nominated__player-details` sets on the auction bar's group around it.
-// Measured, the price renders 18px on both surfaces. This component is a value
-// in someone else's row, not a row of its own.
-//
-// THE PRICE IS CENTRED UNDER THE LABEL AND THE BASELINE HANGS OFF IT, which is
-// what the three-track grid buys and a flex row cannot. Flexed, the pair is
-// centred as a UNIT, so the price sits left of centre by half the annotation's
-// width and MOVES as that changes -- `$7` under `MARKET VALUE` is at one x
-// position with no inflation, another at `from $5`, another at `from $33`. The
-// label is the fixed thing on this item and the price is what the reader looks
-// for under it, so the price is what has to hold still.
-//
-// `1fr auto 1fr`: the price takes the middle track, the annotation the third,
-// and the first is empty. Equal flex factors make the two `fr` tracks the same
-// width whichever way the item is sized -- they split the surplus when the
-// label is the wider thing, and when the annotation is wider than the surplus
-// they both grow to it, since an `fr` track floors at its own content. Either
-// way the outer pair match, so the middle track is centred by construction and
-// the price never moves. `justify-self start` keeps the annotation against the
-// price rather than centred in a track that may be wider than it.
-//
-// `align-self stretch`, because a centred track is only centred within the
-// width it was given. `.selected__player-header-item` is a centring flex COLUMN
-// (selected-player.styl), so a child sizes to its own content by default and
-// this grid would span the price alone -- centring it inside itself, which is
-// no constraint at all. Stretched, the grid spans the item, and the item's
-// width is the label's.
-.player__auction-value-amounts
-  display grid
-  grid-template-columns 1fr auto 1fr
-  align-self stretch
-  align-items baseline
+// The label's own size, weight and casing are NOT here either, for the same
+// reason: both call sites style `label` inside their own header rows, and this
+// component is a value in someone else's row rather than a row of its own.
 
-.player__auction-value-amount
-  grid-column 2
+// THE LABEL CARRIES THE ICON, so it stops being a line of text and becomes a
+// row of two things.
+//
+// QUALIFIED BY THE COMPONENT ON PURPOSE. Both call sites set `display` on a
+// bare `label` inside a class -- `.selected__player-header label` and
+// `.nominated__player-details label` -- and those rank 0,1,1. A rule written
+// `.player__auction-value label` ranks 0,1,1 too, which is a TIE decided by
+// chunk order rather than intent, and the drawer's `display flex` would have
+// masked the loss on one surface while the bar's `display block` broke the row
+// on the other. Naming the label's own class lifts this to 0,2,0 so it wins
+// outright on both.
+.player__auction-value .player__auction-value-label
+  display flex
+  flex-direction row
+  align-items center
+  justify-content center
+  gap 3px
 
-// `em`, so the annotation tracks whatever size the surrounding row set for the
-// price. Fixed at 11px it read as an annotation in the 12px auction bar and as
-// a footnote against the drawer's 18px.
+// 12px, AND IT HAS TO BEAT `.icon`. icon.styl sizes every glyph 24px with an
+// 18px `small` variant, both far too big beside a 9-to-10px label -- and both
+// are ordinary CSS rather than the inline style PlayerHeadshot writes, so a
+// rule CAN win here. `.icon.player__auction-value-info` doubles up to 0,2,0
+// because the single-class form ties `.icon` at 0,1,0 and would be settled by
+// whichever chunk webpack emitted last.
 //
-// COLOUR CARRIES THE DIRECTION and the copy carries the magnitude. `from $5`
-// beside `$7` states the direction outright once the reader subtracts, and the
-// colour is what makes it legible before they do.
+// `fill currentColor` on `.icon` means the glyph takes the label's own ink, so
+// it reads as part of the label rather than as a control sitting next to it.
+// `flex 0 0 auto` because the label is a flex row now and a shrunk circle looks
+// like a rendering fault rather than a smaller icon.
+.icon.player__auction-value-info
+  width 12px
+  height 12px
+  flex 0 0 auto
+  opacity 0.55
+
+// SMALLER THAN THE LABEL ABOVE IT, which is the point of putting it on its own
+// line. `em` rather than a fixed size, so it tracks whatever the surrounding
+// row set for the price -- the drawer and the auction bar both render the price
+// at 18px, but neither promises to, and a footnote pinned at 9px would stop
+// being a footnote the moment one of them changed.
 //
+// `nowrap`, because `+$12 from $33` broken across two lines reads as two
+// separate annotations and doubles the item's height in a bar whose band is
+// 70px.
+//
+// COLOUR CARRIES THE DIRECTION and the copy carries the magnitude.
 // $successColor for over-market and a lightened $textColor for under. NOT red
 // for under: red is $accentColor, and the auction bar spends it on the standing
-// election a few inches away, so an under-market annotation in red would read
-// as an alert about the bid rather than as a direction.
-.player__auction-value-baseline
-  grid-column 3
-  justify-self start
-  padding-left 5px
-  font-size 0.72em
+// election a few inches away, so an under-market footnote in red would read as
+// an alert about the bid rather than as a direction.
+.player__auction-value-context
+  font-size 0.55em
   font-weight 500
+  line-height 1.2
+  white-space nowrap
+  padding-top 1px
   &.over
     color $successColor
   &.under

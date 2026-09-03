@@ -105,12 +105,20 @@
 // need and `.nominated__player` -- which is still `flex 1` -- absorbs the whole
 // remainder, which is where the name lives. Shrink stays at 1 so the squeeze
 // zone below 1160px compresses the details rather than pushing the bar wide.
+//
+// NO TOP PADDING. It was 8px, which was the offset that put this group's
+// baseline on the name's back when the group was one line of label over one
+// line of value. The item inside is three rows now and `align-self center`
+// (below) is what places it, so the padding no longer aligns anything -- it
+// just pushes a centred box down by 8px inside a band that is 70px hard. It
+// left the item 1.6px off the band's floor and 9.6px from its ceiling, which is
+// a box that reads as having slipped rather than as being centred, and 1.6px of
+// slack before a change in the type overflows the bar.
 .nominated__player-details
   flex 0 1 auto
   display flex
   min-width 0
   overflow hidden
-  padding-top 8px
   font-size 12px
   label
     font-size 10px
@@ -264,12 +272,6 @@
   // before the name does.
   .auction__nominated-player .nominated__player
     flex 1 1 auto
-
-  // The 8px was the offset that put this group's baseline on the name's while
-  // the two shared a line. On its own line it is what leaves a gap under the
-  // name instead.
-  .auction__nominated-player .nominated__player-details
-    padding-top 0
 
   // THE NAME BLOCK COMES DOWN SO THE ROW FITS ONE LINE AT 320, and the budget is
   // arithmetic rather than a tuned number. The row has 296px there -- 320 less
