@@ -50,6 +50,54 @@ export const BETMGM_SEASON_LEADER_TEMPLATE_IDS = {
 }
 
 /**
+ * Positions to retry a leader-market player lookup against, in order.
+ *
+ * Leader markets list a bare name with no team, so a name held by more than one
+ * player cannot be resolved from the market alone -- and the misses are the
+ * PROMINENT names rather than the obscure ones, because prominence is what makes
+ * a name reused. Measured on 2026-09-02: three players are named Josh Allen (QB,
+ * OL, DL) and two Justin Jefferson (WR, LB), and both resolve correctly in the
+ * SEASON_* markets, which carry a '(TEAM)' qualifier these lack.
+ *
+ * The statistic the market is about implies the position group, which is the
+ * discriminator the market does carry. Ordered most to least likely, and used
+ * ONLY as a fallback after an unfiltered lookup has failed -- so a name that
+ * already resolves keeps resolving through exactly the path it does today.
+ */
+export const BETMGM_SEASON_LEADER_FALLBACK_POSITIONS = {
+  [player_prop_types.SEASON_LEADER_PASSING_YARDS]: ['QB'],
+  [player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS]: ['QB'],
+  // A quarterback leads rushing touchdowns often enough that QB is not a
+  // long shot here, and Josh Allen is the measured case.
+  [player_prop_types.SEASON_LEADER_RUSHING_YARDS]: ['RB', 'QB', 'WR'],
+  [player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS]: ['RB', 'QB', 'WR'],
+  [player_prop_types.SEASON_LEADER_RECEIVING_YARDS]: ['WR', 'TE', 'RB'],
+  [player_prop_types.SEASON_LEADER_RECEIVING_TOUCHDOWNS]: ['WR', 'TE', 'RB'],
+  [player_prop_types.SEASON_LEADER_SACKS]: ['DE', 'LB', 'DL', 'DT']
+}
+
+/**
+ * Market families whose selections name something that is not a team, but that a
+ * team resolver would answer for anyway.
+ *
+ * Only families where the resolver answers WRONGLY belong here. A selection like
+ * 'AFC East' or 'Bills/Dolphins' already resolves to null because fixTeam throws
+ * on it; these two do not:
+ *
+ *  - WINNING_CONFERENCE lists AFC and NFC, which fixTeam resolves to non-franchise
+ *    tokens. Guarded in the resolver as well, since those are not player rows.
+ *  - WINNING_STATE lists US states, and Washington is both a state and a team
+ *    city, so it resolves to WAS. No such selection is published today -- the
+ *    region is listed as 'Maryland/DC' -- which makes this the one collision in
+ *    the family that a payload census cannot find, and cheaper to name than to
+ *    rediscover from a wrong pid.
+ */
+export const MARKET_TYPES_WITHOUT_TEAM_SELECTIONS = new Set([
+  futures_types.WINNING_CONFERENCE,
+  futures_types.WINNING_STATE
+])
+
+/**
  * Vendor `MarketType` values that have no canonical equivalent.
  *
  * Named for what it HOLDS -- BetMGM's own vocabulary -- rather than as a
@@ -60,8 +108,6 @@ export const BETMGM_SEASON_LEADER_TEMPLATE_IDS = {
 export const BETMGM_UNTYPED_SOURCE_MARKET_TYPES = new Set([
   // Total points bucketed into ranges ("0-20", "21-30"). No canonical band type.
   'HappeningBand',
-  // "Highest scoring quarter" -- a which-period market with no canonical home.
-  'MultiplePeriodsWithMostHappenings2Way',
   // Moneyline AND both-teams-to-score combined into one selection. A parlay
   // shape; typing it as either leg would misrepresent both.
   '2wayAndBTTSXOrMore'
@@ -111,7 +157,21 @@ const OPTION_MARKET_TYPES = {
   'Winning margin: 4-way (including OT)': game_props_types.GAME_WINNING_MARGIN,
   'Halftime/fulltime (excluding OT)': game_props_types.GAME_HALF_TIME_FULL_TIME,
   'Total points: Odd or even': game_props_types.GAME_TOTAL_POINTS_ODD_EVEN,
-  'Game to go into overtime': game_props_types.GAME_OVERTIME
+  'Game to go into overtime': game_props_types.GAME_OVERTIME,
+  'Highest scoring quarter': game_props_types.GAME_HIGHEST_SCORING_QUARTER,
+
+  // The GAME-grain total touchdowns over/under. Its team-qualified sibling
+  // resolves through TEAM_OPTION_MARKET_TYPES above, and the qualifier check in
+  // the resolver runs first, so the two grains cannot collide.
+  //
+  // This descriptor previously sat in OPTION_KNOWN_UNTYPED_NAMES under a comment
+  // justifying that list as period-scoped variants -- but it is Period FullTime,
+  // so the justification did not apply and the entry silently suppressed the
+  // unknown-descriptor detector for the family. DRAFTKINGS publishes the same
+  // market and types it GAME_BOTH_TEAMS_TO_SCORE (254 selections in production),
+  // which is a mis-type on that side: BetMGM uses that constant for its genuine
+  // 'Both teams to score N+' family, and one type cannot mean both.
+  'Total TDs O/U': game_props_types.GAME_TOTAL_TOUCHDOWNS
 }
 
 // Team-scoped option markets, keyed on the remainder after the team qualifier.
@@ -215,7 +275,6 @@ const GAME_PATH_KNOWN_UNTYPED_TEMPLATE_IDS = new Set([
  * as GAME_WINNING_MARGIN would misstate its grain.
  */
 const OPTION_KNOWN_UNTYPED_NAMES = new Set([
-  'Total TDs O/U',
   '1st half TDs',
   '1st half winning margin',
   '1st quarter winning margin',

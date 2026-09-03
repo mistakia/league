@@ -88,6 +88,40 @@ describe('libs-server/betmgm market types', function () {
       )
     })
 
+    // Both grains of 'Total TDs O/U' resolve, and to DIFFERENT types. The
+    // game-grain one used to sit on OPTION_KNOWN_UNTYPED_NAMES under a comment
+    // justifying that list as period-scoped variants -- but it is Period
+    // FullTime, so the justification did not hold and the entry silently
+    // suppressed the unknown-descriptor detector for the family.
+    it('types both grains of the total-touchdowns family', function () {
+      expect(
+        resolve_market_type({
+          source_market_type: 'Over/Under',
+          market_name: 'Total TDs O/U'
+        }).market_type
+      ).to.equal('GAME_TOTAL_TOUCHDOWNS')
+
+      expect(
+        resolve_market_type({
+          source_market_type: 'Over/Under',
+          market_name: 'Los Angeles Rams: Total TDs O/U'
+        }).market_type
+      ).to.equal('GAME_TEAM_TOUCHDOWNS')
+    })
+
+    // Suppressed at the vendor MarketType level, which is coarser than the
+    // name-keyed lists -- so every market published under that MarketType went
+    // untyped regardless of name, while GAME_HIGHEST_SCORING_QUARTER existed in
+    // the catalog the whole time and Caesars already mapped to it.
+    it('types the highest-scoring-quarter family', function () {
+      expect(
+        resolve_market_type({
+          source_market_type: 'MultiplePeriodsWithMostHappenings2Way',
+          market_name: 'Highest scoring quarter'
+        }).market_type
+      ).to.equal('GAME_HIGHEST_SCORING_QUARTER')
+    })
+
     it('reports a reviewed untyped family as known, not unknown', function () {
       const { market_type, is_known } = resolve_option(
         fixture.option_markets.happening_band
@@ -169,6 +203,43 @@ describe('libs-server/betmgm market types', function () {
     it('returns null rather than the INA fallback on empty input', function () {
       expect(get_team_from_selection_name(null)).to.equal(null)
       expect(get_team_from_selection_name('')).to.equal(null)
+    })
+
+    // The defect this guards was shipped, not hypothetical. fixTeam resolves
+    // ABBREVIATIONS as well as names, 'No' IS the New Orleans Saints to it, and
+    // the resolver ran on every selection of every Yes/No market -- so the No
+    // side of 59 selections on a 2026-09-02 payload was stamped with the Saints,
+    // across TEAM_TO_MAKE_PLAYOFFS, GAME_BOTH_TEAMS_TO_SCORE and GAME_OVERTIME.
+    it('refuses an outcome word that is also a team abbreviation', function () {
+      expect(get_team_from_selection_name('No')).to.equal(null)
+      expect(get_team_from_selection_name('Yes')).to.equal(null)
+    })
+
+    // 'Yes' returned null before the guard too -- because no team is
+    // abbreviated YES, which is luck. Paired with the 'No' case above so a
+    // change that only special-cased the one word it had seen cannot pass:
+    // these are abbreviations of real teams and must be refused on shape.
+    it('refuses a bare team abbreviation, which BetMGM never writes', function () {
+      expect(get_team_from_selection_name('NE')).to.equal(null)
+      expect(get_team_from_selection_name('LA')).to.equal(null)
+      expect(get_team_from_selection_name('TB')).to.equal(null)
+    })
+
+    // fixTeam answers for tokens that name no franchise and therefore no row in
+    // `player`, and 'Super Bowl: Winning conference' lists exactly these two as
+    // its selections -- so both were written as a selection_pid referencing
+    // nothing.
+    it('refuses a conference, which is not a player row', function () {
+      expect(get_team_from_selection_name('AFC')).to.equal(null)
+      expect(get_team_from_selection_name('NFC')).to.equal(null)
+    })
+
+    // The control for the length guard. A guard set one character higher would
+    // pass every case above while silently dropping two real teams, and nothing
+    // else here would notice.
+    it('still resolves the shortest real team nicknames', function () {
+      expect(get_team_from_selection_name('Jets')).to.equal('NYJ')
+      expect(get_team_from_selection_name('Rams')).to.equal('LA')
     })
   })
 

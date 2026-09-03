@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { fixTeam } from '#libs-shared'
+import { fixTeam, canonical_nfl_teams } from '#libs-shared'
 
 const log = debug('betmgm:formatters')
 
@@ -108,23 +108,51 @@ export const get_option_team = (option) =>
  * Tampa Bay and Kansas City passed. It cost `selection_pid` on 21 of 32
  * moneyline selections and the line on 15 of 16 spread markets, silently.
  *
- * `fixTeam` alone is the precise instrument here: verified against this payload's
- * vocabulary, it THROWS on every player name and every US state ('Super Bowl:
- * Winning state' lists those) while resolving every real team spelling BetMGM
- * uses, including the bare nickname 'Bills' and 'San Francisco 49ers'. The
- * try/catch keeps that throw from escaping, and the empty-input guard keeps
- * `fixTeam(null)` -- which returns 'INA', a silently wrong abbreviation -- off
- * this path entirely.
+ * `fixTeam` throws on a player name, which is the property that made it look
+ * sufficient on its own. It is not, and the two guards below are what make it
+ * safe. Both are bounded by the same fact: BetMGM never writes a team as an
+ * ABBREVIATION -- every team spelling in its payload is a full 'City Nickname'
+ * or a bare nickname -- while `fixTeam` accepts abbreviations too, and answers
+ * for tokens that name no franchise at all.
+ */
+
+// Every team form BetMGM writes is at least four characters ('Jets', 'Rams',
+// '49ers'), and every abbreviation fixTeam accepts is at most three. That gap is
+// the guard, and it is not a stylistic one: 'No' IS the New Orleans Saints to
+// fixTeam, so the No side of every Yes/No market was stamped with the Saints --
+// 59 selections measured on a live 2026-09-02 payload, across
+// TEAM_TO_MAKE_PLAYOFFS, GAME_BOTH_TEAMS_TO_SCORE and GAME_OVERTIME. 'Yes'
+// escaped only because no team is abbreviated YES, which is luck rather than a
+// guard, and 'Odd', 'Tie' and 'Ne' would each have landed the same way.
+const MINIMUM_TEAM_NAME_LENGTH = 4
+
+/**
+ * Resolve a team abbreviation from a selection display name, or null.
+ *
+ * The return value is used as a `selection_pid`, so it must name a row in
+ * `player` -- which is what the second guard enforces and the length guard alone
+ * cannot.
  */
 export const get_team_from_selection_name = (selection_name) => {
   const stripped = strip_trailing_line(selection_name)
   if (!stripped || typeof stripped !== 'string') return null
 
+  if (stripped.length < MINIMUM_TEAM_NAME_LENGTH) return null
+
+  let team
   try {
-    return fixTeam(stripped)
+    team = fixTeam(stripped)
   } catch (err) {
     return null
   }
+
+  // fixTeam also answers with tokens that name no franchise and therefore no
+  // player row: INA is its no-team sentinel -- which is what it returns for
+  // empty input -- and AFC and NFC are the Pro Bowl conference sides. This is a
+  // live case, not a defensive one: 'Super Bowl: Winning conference' lists AFC
+  // and NFC as its two selections, and both were written as a selection_pid
+  // referencing nothing.
+  return canonical_nfl_teams.includes(team) ? team : null
 }
 
 /**
