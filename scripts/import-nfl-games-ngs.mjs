@@ -30,6 +30,7 @@ const run = async ({
     games_processed: 0,
     games_updated: 0,
     games_skipped_missing_esbid: 0,
+    games_skipped_malformed: 0,
     games_failed: 0
   }
 
@@ -57,8 +58,10 @@ const run = async ({
   // truncated payload -- a distinct failure from a row we decline to write.
   result.games_processed = data.length
 
-  const { inserts, skipped_missing_esbid } = select_game_inserts(data)
+  const { inserts, skipped_missing_esbid, skipped_malformed } =
+    select_game_inserts(data)
   result.games_skipped_missing_esbid = skipped_missing_esbid
+  result.games_skipped_malformed = skipped_malformed
 
   /*
     ROW BY ROW, deliberately, and not in chunks. A single multi-row insert
@@ -94,6 +97,7 @@ const run = async ({
       games_processed: result.games_processed,
       games_updated: result.games_updated,
       games_skipped_missing_esbid: result.games_skipped_missing_esbid,
+      games_skipped_malformed: result.games_skipped_malformed,
       games_failed: result.games_failed
     })
   }
@@ -131,7 +135,9 @@ const main = async () => {
       result.games_failed > 0 &&
         `nfl_games write failures for season_year ${season}: ${result.games_failed} of ${result.games_processed} rows failed to write`,
       result.games_skipped_missing_esbid > 0 &&
-        `nfl_games feed items with no gameId for season_year ${season}: ${result.games_skipped_missing_esbid} skipped, so they carry no esbid to key on`
+        `nfl_games feed items with no gameId for season_year ${season}: ${result.games_skipped_missing_esbid} skipped, so they carry no esbid to key on`,
+      result.games_skipped_malformed > 0 &&
+        `nfl_games feed items that could not be parsed for season_year ${season}: ${result.games_skipped_malformed} skipped`
     ].filter(Boolean)
 
     throw_if_shortfall(shortfalls.length ? shortfalls.join('; ') : null)

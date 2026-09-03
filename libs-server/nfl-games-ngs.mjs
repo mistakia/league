@@ -97,6 +97,7 @@ export const format = (item) => {
 export const select_game_inserts = (data) => {
   const inserts = []
   let skipped_missing_esbid = 0
+  let skipped_malformed = 0
 
   for (const item of data) {
     if (!item.gameId) {
@@ -105,10 +106,28 @@ export const select_game_inserts = (data) => {
       continue
     }
 
-    inserts.push(format(item))
+    /*
+      format() is inside the try for the same reason the write loop is: it
+      DEREFERENCES the feed's shape (item.site.siteFullName among others), so an
+      item missing a key raises a TypeError. Called outside a guard that
+      TypeError propagates out of this function, `run` throws before writing
+      anything, and the whole slate is lost with games_failed still reading 0 --
+      which is precisely the whole-slate loss the row-by-row write loop exists
+      to prevent, arriving one phase earlier and invisible to the same counter.
+
+      Counted separately from the esbid skip because the two mean different
+      things: one is a feed item we understand and decline, the other is one we
+      could not parse.
+    */
+    try {
+      inserts.push(format(item))
+    } catch (error) {
+      skipped_malformed += 1
+      log(`skipping malformed feed item ${item.gameId}: ${error.message}`)
+    }
   }
 
-  return { inserts, skipped_missing_esbid }
+  return { inserts, skipped_missing_esbid, skipped_malformed }
 }
 
 /*

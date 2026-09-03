@@ -266,6 +266,65 @@ describe('libs-shared nfl-team-franchise-eras', function () {
     })
   })
 
+  describe('tokens that name one franchise across their whole history', function () {
+    /*
+      RAM, RAI and OAK were originally bounded to a stadium or a city era --
+      RAM to 1980-1994 (the move to Anaheim, which changed neither name nor
+      abbreviation), RAI to 1982-1994, OAK to 1960-2019. None of the three is
+      season-ambiguous: each has only ever named one franchise, so a bound on
+      them buys nothing and costs a THROW on any row outside it. That is the
+      failure a too-narrow range actually produces -- it cannot mis-write a row,
+      it refuses to resolve one it should have repaired.
+    */
+    it('resolves outside the ranges those tokens used to carry', function () {
+      const cases = [
+        ['RAM', 1975, 'LA'],
+        ['RAM', 2024, 'LA'],
+        ['RAI', 1975, 'LV'],
+        ['RAI', 2024, 'LV'],
+        ['OAK', 2024, 'LV']
+      ]
+
+      for (const [era_nfl_team, season_year, canonical] of cases) {
+        expect(
+          resolve_canonical_nfl_team({ era_nfl_team, season_year }),
+          `${era_nfl_team} ${season_year}`
+        ).to.equal(canonical)
+      }
+    })
+
+    it('still resolves them inside the old ranges, unchanged', function () {
+      // Widening must not move an answer that already resolved. These are the
+      // readings the narrow ranges gave.
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'RAM', season_year: 1990 })
+      ).to.equal('LA')
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'RAI', season_year: 1990 })
+      ).to.equal('LV')
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'OAK', season_year: 2000 })
+      ).to.equal('LV')
+    })
+
+    it('does not disturb the three tokens that ARE season-ambiguous', function () {
+      // The contrast that makes the widening safe: STL, BAL and HOU stay
+      // bounded, because for them the season is the only thing that answers.
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'STL', season_year: 1975 })
+      ).to.equal('ARI')
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'STL', season_year: 2000 })
+      ).to.equal('LA')
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'BAL', season_year: 1975 })
+      ).to.equal('IND')
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'BAL', season_year: 2020 })
+      ).to.equal('BAL')
+    })
+  })
+
   describe('nfl_team_franchise_eras table', function () {
     it('resolves every era entry to a canonical abbreviation', function () {
       for (const era of nfl_team_franchise_eras) {

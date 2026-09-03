@@ -109,9 +109,22 @@ export const nfl_team_spelling_aliases = Object.freeze({
 /*
   Every (token, season range) pair whose canonical franchise is not the token
   itself, plus -- deliberately -- the ranges where it IS. The BAL and HOU
-  identity ranges are not redundant: they are what makes a range lookup total
-  over those tokens, so the resolver never has to fall back to a
-  token-only answer for a franchise whose token is ambiguous by season.
+  identity ranges are not redundant: they are what make the range lookup answer
+  those tokens from the SEASON in the years each franchise actually existed,
+  rather than falling back to a token-only answer for a franchise whose token is
+  ambiguous by season.
+
+  That is NOT the same as being total, and an earlier revision of this comment
+  claimed it was. Both tokens have a GAP -- BAL 1984-1995, between the Colts
+  leaving and the Ravens arriving, and HOU 1997-2001 between the Oilers and the
+  Texans -- and a row dated inside a gap falls through to the canonical-identity
+  case and resolves to itself. No correct row can exist there, since no
+  franchise held the token in those years, so this is not reachable by good
+  data; a MIS-DATED row (a 1983 Colts game stored as 1984) resolves silently
+  rather than raising. Filling the gaps with explicit ranges is not obviously
+  right either -- there is no correct canonical answer for a season in which
+  nobody used the token -- so the behaviour is recorded here rather than
+  changed.
 
   end_year null means the era is current. Ranges are inclusive on both ends and
   are drawn from franchise history, not from the row counts that happen to be
@@ -160,11 +173,21 @@ export const nfl_team_franchise_eras = Object.freeze([
     canonical_nfl_team: 'HOU'
   }),
 
-  // Rams: Los Angeles, Anaheim, St. Louis, Los Angeles again.
+  /*
+    Rams: Los Angeles, Anaheim, St. Louis, Los Angeles again.
+
+    RAM is UNBOUNDED because it is not season-ambiguous -- it has only ever
+    named this franchise, so the answer is LA in every year. It was originally
+    bounded 1980-1994, which anchored it on the move to Anaheim Stadium: a
+    change of stadium, not of name or abbreviation. That made resolve throw on a
+    1975 RAM row and on any modern one, and the throw is the failure mode a
+    bound like this actually produces -- a token narrower than its real usage
+    cannot mis-write a row, it just refuses to resolve one it should have.
+  */
   Object.freeze({
     era_nfl_team: 'RAM',
-    start_year: 1980,
-    end_year: 1994,
+    start_year: 1946,
+    end_year: null,
     canonical_nfl_team: 'LA'
   }),
   Object.freeze({
@@ -189,14 +212,14 @@ export const nfl_team_franchise_eras = Object.freeze([
   */
   Object.freeze({
     era_nfl_team: 'RAI',
-    start_year: 1982,
-    end_year: 1994,
+    start_year: 1960,
+    end_year: null,
     canonical_nfl_team: 'LV'
   }),
   Object.freeze({
     era_nfl_team: 'OAK',
     start_year: 1960,
-    end_year: 2019,
+    end_year: null,
     canonical_nfl_team: 'LV'
   }),
 

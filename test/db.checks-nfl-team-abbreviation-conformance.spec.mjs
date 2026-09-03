@@ -56,7 +56,13 @@ const seed_game = async ({
     home_nfl_team
   })
 
-const clear = async () => db('nfl_games').where('esbid', '>=', esbid_base).del()
+const clear = async () => {
+  await db('nfl_play_stats').where('esbid', '>=', esbid_base).del()
+  await db('player_gamelogs').where('esbid', '>=', esbid_base).del()
+  await db('nfl_plays').where('esbid', '>=', esbid_base).del()
+  await db('nfl_games').where('esbid', '>=', esbid_base).del()
+  await db('player').where({ pid: 'CONF-TEST-999999' }).del()
+}
 
 /*
   The check's own rows, run for real. Reduced to the questions each case asks,
@@ -255,24 +261,76 @@ describe('data checks / nfl-team-abbreviation-conformance', function () {
     ).to.have.lengthOf(0)
   })
 
-  it("every declared source's query executes, and the undatable population is declared", async () => {
-    // The suite's database is empty of plays, gamelogs and players, so a
-    // source with no rows contributes no row here -- which is correct and is
-    // exactly why this cannot assert that all five sources APPEAR. What it can
-    // assert is that every source's generated SQL runs: check.rows() issues one
-    // query per source and a malformed one throws rather than returning
-    // nothing, so reaching the assertions below is itself the coverage.
+  it('scans every source it declares, so one dropping out is visible', async () => {
+    /*
+      The registry's min_gradeable_units floor is 400 against ~472 rows, which
+      nfl_plays and nfl_games alone very nearly satisfy -- so if
+      player_gamelogs, player or nfl_play_stats stopped contributing, the floor
+      would still be met and nothing would fire. The registry says this spec
+      covers that gap, and for a while it did not: it asserted only that
+      nfl_games appeared, because the suite's database is empty and an empty
+      table contributes no row.
+
+      Seeding one row per source is what makes the assertion possible. Each
+      source is then required to appear, so a source silently dropped from
+      slot_sources fails here rather than passing a floor it never reached.
+    */
     await seed_game({
       esbid: esbid_base + 7,
       season_year: 2024,
       away_nfl_team: 'BAL',
       home_nfl_team: 'MIA'
     })
+    await db('nfl_plays').insert({
+      esbid: esbid_base + 7,
+      play_id: 1,
+      season_year: 2024,
+      week: 1,
+      season_type: 'REG',
+      possession_nfl_team: 'BAL',
+      updated: new Date()
+    })
+    await db('nfl_play_stats').insert({
+      esbid: esbid_base + 7,
+      play_id: 1,
+      stat_id: 1,
+      nfl_team: 'BAL'
+    })
+    await db('player').insert({
+      pid: 'CONF-TEST-999999',
+      first_name: 'Conform',
+      last_name: 'Fixture',
+      short_name: 'C.Fixture',
+      formatted_name: 'conform fixture',
+      primary_position: 'WR',
+      secondary_position: 'WR',
+      nfl_draft_year: 2024,
+      draft_team: 'BAL'
+    })
+    await db('player_gamelogs').insert({
+      esbid: esbid_base + 7,
+      pid: 'CONF-TEST-999999',
+      season_year: 2024,
+      player_position: 'WR',
+      nfl_team: 'BAL',
+      opponent_nfl_team: 'MIA'
+    })
 
     const { rows } = await run()
-
     const scanned_tables = new Set(rows.map((row) => row.table_name))
-    expect(scanned_tables.has('nfl_games')).to.equal(true)
+
+    for (const table_name of [
+      'nfl_games',
+      'nfl_plays',
+      'nfl_play_stats',
+      'player_gamelogs',
+      'player'
+    ]) {
+      expect(
+        scanned_tables.has(table_name),
+        `${table_name} contributed no row -- it was dropped from the scan`
+      ).to.equal(true)
+    }
 
     // The undatable nfl_play_stats population is reported un-gradeable rather
     // than dropped by the esbid join. It is emitted unconditionally, so it is

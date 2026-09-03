@@ -89,6 +89,29 @@ describe('libs-server / nfl-games-ngs', function () {
       expect(inserts).to.have.lengthOf(3)
     })
 
+    it('skips a malformed item instead of losing the whole slate', () => {
+      /*
+        format() dereferences the feed's shape (item.site.siteFullName among
+        others), so an item missing a key raises a TypeError. Called outside a
+        guard that TypeError propagates out of select_game_inserts, `run` throws
+        before writing anything, and the entire slate is lost with games_failed
+        still 0 -- the same whole-slate loss the row-by-row WRITE loop exists to
+        prevent, one phase earlier and invisible to that counter.
+      */
+      const { inserts, skipped_malformed, skipped_missing_esbid } =
+        select_game_inserts([
+          feed_item({ gameId: esbid }),
+          feed_item({ gameId: esbid + 1, site: undefined }),
+          feed_item({ gameId: esbid + 2 })
+        ])
+
+      expect(skipped_malformed).to.equal(1)
+      // The good rows on either side still survive, which is the property that
+      // distinguishes a skip from an abort.
+      expect(inserts).to.have.lengthOf(2)
+      expect(skipped_missing_esbid).to.equal(0)
+    })
+
     it('normalises the era abbreviations the feed supplies', () => {
       // fixTeam maps the feed's SD and OAK to the current tokens. This is
       // recorded because it is the reason the OLD conflict key breaks: what is
