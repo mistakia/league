@@ -49,6 +49,38 @@ const DATA_TYPE_NAMES = Object.fromEntries(
   ])
 )
 
+// The params `resolve_nfl_week_id_from_year_param` reads straight off the params
+// object, which every column therefore accepts whether or not it declares them.
+//
+// They appear in NO column's `param_keys`, and that is not an oversight in the
+// registries -- the resolver reads them before a column definition is ever
+// consulted, so there is nothing for a column to declare. But the catalog only
+// ever advertised per-column params, which made the omission read as "this
+// column does not take a year".
+//
+// That gap is the single most expensive defect two measured generation runs hit.
+// SHAPE_PROMPT's example uses `year: [2024]`, the correct emission for run 1 used
+// `year: [2023]`, and `describe_column` on the very column it used listed 246
+// params without `year` among them. Both runs concluded the tools were wrong and
+// went reading league source to settle it; the second one never recovered and
+// spent its entire budget confirming the `seas_type` default stated below.
+export const SCOPE_PARAMS = {
+  year: {
+    param_key: 'year',
+    data_type: 'SELECT',
+    label: 'Year',
+    note: 'Season year, always an array: {"year": [2023]}. Accepted by EVERY column, and not listed in any column param_keys. Prefer it over spelling out nfl_week_id for a whole season.'
+  },
+  seas_type: {
+    param_key: 'seas_type',
+    data_type: 'SELECT',
+    label: 'Season Type',
+    values: ['PRE', 'REG', 'POST'],
+    default_value: ['REG'],
+    note: 'Defaults to ["REG"] when unset, so `year` on its own ALREADY means the regular season. Set it only to ask for preseason or postseason.'
+  }
+}
+
 // The param registries a column definition can draw a key from. Later entries
 // win a key collision, which matches the spread order the column definitions
 // themselves use.
@@ -56,6 +88,21 @@ const default_param_registries = [
   common_column_params,
   nfl_plays_team_column_params,
   nfl_plays_column_params
+]
+
+// The play-by-play FILTER registries, named separately from the list above
+// because membership in them is what sorts a column's params into the two kinds
+// a caller needs at different moments.
+//
+// The split cannot be made by which declaration path a param arrived through:
+// the client field registry declares the whole play-filter surface directly on
+// most plays-backed columns, so `consumes_params_extra` catches almost none of
+// it. Measured on `player_receiving_yards_from_plays`, 246 of its 247 params are
+// in these two registries and the remaining five -- career_year, career_game,
+// nfl_week_id, year_offset, output -- are the ones that configure the column.
+const default_play_filter_registries = [
+  nfl_plays_column_params,
+  nfl_plays_team_column_params
 ]
 
 // A param's `values` are either bare scalars or `{ value, label, group }`
@@ -126,7 +173,8 @@ const build_column_params = ({
   column_id,
   definition,
   shared_params,
-  column_params_from_client
+  column_params_from_client,
+  play_filter_registries
 }) => {
   // `consumes_params_extra` is the third declared source, and the only one that
   // is keys rather than definitions: a plays-backed column lists every
@@ -146,6 +194,18 @@ const build_column_params = ({
   // The server definition wins a key collision: it is what actually answers the
   // query, so where the registries spell a param differently the executable
   // spelling is the honest one to advertise.
+  //
+  // The two sources are kept apart rather than merged into one flat list,
+  // because they differ in KIND and a caller needs them at different moments.
+  // The client and server declarations are how the column is CONFIGURED -- the
+  // season, the aggregation, the market. `consumes_params_extra` is the
+  // play-by-play FILTER registry, every predicate the column may be narrowed by,
+  // and it runs to 200-plus keys on a plays-backed column.
+  //
+  // Flattened together they made `describe_column` return 63,791 bytes for
+  // `player_receiving_yards_from_plays` -- roughly 16k tokens, for a column
+  // whose leaderboard use needs about four of those params. The caller asking
+  // about the column it most wants was the caller punished hardest.
   const column_params = {
     ...params_from_consumes,
     ...column_params_from_client[column_id],
@@ -156,11 +216,27 @@ const build_column_params = ({
     return {}
   }
 
+  // `common_column_params` WINS. The registries overlap -- career_year,
+  // career_game, nfl_week_id and year_offset are declared in both the common set
+  // and the play-filter set -- and classifying on play-filter membership alone
+  // swept all four into the tail, leaving the expanded block empty and taking
+  // `nfl_week_id` with it. A param the common registry claims is configuration,
+  // whatever else also lists it.
+  const is_play_filter = (param_key) =>
+    !(param_key in common_column_params) &&
+    play_filter_registries.some((registry) => param_key in registry)
+
   const param_keys = []
+  const play_filter_param_keys = []
   const param_overrides = {}
 
   for (const [param_key, param_definition] of Object.entries(column_params)) {
     if (!param_definition || typeof param_definition !== 'object') {
+      continue
+    }
+
+    if (is_play_filter(param_key)) {
+      play_filter_param_keys.push(param_key)
       continue
     }
 
@@ -179,6 +255,9 @@ const build_column_params = ({
 
   return compact({
     param_keys: param_keys.length ? param_keys : undefined,
+    play_filter_param_keys: play_filter_param_keys.length
+      ? play_filter_param_keys
+      : undefined,
     param_overrides: Object.keys(param_overrides).length
       ? param_overrides
       : undefined
@@ -189,6 +268,7 @@ export const build_data_view_generation_catalog = ({
   column_definitions = data_view_column_definitions,
   field_descriptions = data_view_fields_index,
   param_registries = default_param_registries,
+  play_filter_registries = default_play_filter_registries,
   column_params_from_client = client_column_params
 } = {}) => {
   const shared_params = build_shared_params({ param_registries })
@@ -210,6 +290,14 @@ export const build_data_view_generation_catalog = ({
       compact({
         column_id,
         description: description || undefined,
+        // Which entity one row of this column is. Every definition declares it
+        // as `source.grain`, and surfacing it is what lets retrieval answer a
+        // question the lexical index cannot see: an instruction always implies a
+        // grain ("wide receivers" is a player question), while the words
+        // "receiving yards" match team and player columns equally. Unfiltered,
+        // that query returns ten `nfl_team_seasonlogs_*` columns and no player
+        // column at all.
+        grain: definition.source?.grain,
         // How a numeric measure may aggregate to a row. Declared by the
         // column, so it is the one per-column param vocabulary the server
         // holds in full.
@@ -218,7 +306,8 @@ export const build_data_view_generation_catalog = ({
           column_id,
           definition,
           shared_params,
-          column_params_from_client
+          column_params_from_client,
+          play_filter_registries
         })
       })
     )
@@ -231,6 +320,7 @@ export const build_data_view_generation_catalog = ({
   return {
     columns,
     params: shared_params,
+    scope_params: SCOPE_PARAMS,
     coverage: {
       column_count: columns.length,
       described_column_count,

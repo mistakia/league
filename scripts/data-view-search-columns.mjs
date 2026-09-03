@@ -20,11 +20,18 @@ import { run_agent_tool } from '#libs-server/data-views/generation/agent-tool-ru
 run_agent_tool({
   tool: 'search_columns',
   run: async (input) => {
-    const columns = search_columns({
+    const { match_count, returned_count, columns } = search_columns({
       query: input.query,
       limit: input.limit,
-      min_score_ratio: input.min_score_ratio
+      min_score_ratio: input.min_score_ratio,
+      grain: input.grain
     })
-    return { query: input.query || '', match_count: columns.length, columns }
+    return {
+      query: input.query || '',
+      grain: input.grain || null,
+      match_count,
+      returned_count,
+      columns
+    }
   }
 })

@@ -147,7 +147,11 @@ describe('data view agent tools', function () {
       const result = parse_or_fail(stdout, 'stdout')
       expect(result.tool).to.equal('search_columns')
       expect(result.columns).to.be.an('array')
-      expect(result.match_count).to.equal(result.columns.length)
+      // match_count is the WHOLE match set and returned_count is the page. They
+      // were the same field until a truncated result proved indistinguishable
+      // from an exhaustive one, which is a difference the caller has to see.
+      expect(result.returned_count).to.equal(result.columns.length)
+      expect(result.match_count).to.be.at.least(result.returned_count)
       expect(result.columns.length).to.be.above(0)
     })
 

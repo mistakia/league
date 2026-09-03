@@ -18,9 +18,18 @@ import {
 //
 //   echo '{"column_id":"player_targets_from_plays"}' | \
 //     NODE_ENV=sandbox node scripts/data-view-describe-column.mjs
+//
+// Configuration params come back expanded; the play-by-play filter tail comes
+// back as names. Pass param_keys to open one of those by name:
+//
+//   echo '{"column_id":"player_targets_from_plays","param_keys":["down_number"]}' | \
+//     NODE_ENV=sandbox node scripts/data-view-describe-column.mjs
 
 run_agent_tool({
   tool: 'describe_column',
   run: async (input) =>
-    describe_column({ column_id: require_input(input, 'column_id') })
+    describe_column({
+      column_id: require_input(input, 'column_id'),
+      param_keys: input.param_keys
+    })
 })
