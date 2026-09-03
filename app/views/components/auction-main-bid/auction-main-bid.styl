@@ -54,14 +54,21 @@
     font-weight 300
     text-transform uppercase
 
+// NO `min-width` ON THE BUTTONS, and the rule that used to be here had never
+// applied. It read `.button { min-width 150px }`, which is 0,2,0; button.styl
+// declares `min-width 30px` on
+// `.button:not(.MuiButton-root):not(.MuiIconButton-root):not(.MuiFab-root):not(.MuiButtonBase-root)`,
+// which is 0,5,0 and wins outright. Every button on this row computes 30px and
+// sits at its content width -- measured at 320: the stepper's icons at 40 each,
+// `Bid $1` at 56.3, `Decline` at 65, `Change maximum` at 125.5. It was removed
+// rather than made to work: a 150px floor on five buttons is 750px on a row that
+// cannot afford 535.
 .auction__main-action
   flex 0 0 auto
   padding 0 16px
   display flex
   align-items center
   gap 8px
-  .button
-    min-width 150px
 
 .auction__main-timer
   position relative
@@ -164,11 +171,28 @@
   // where "the details group cuts into the player" comes from -- and a box
   // overlap check reads clean through it, because the boxes tile while the ink
   // does not.
+  // `max-width 100%` REPLACES THE BASE RULE'S `fit-content`, and this is the
+  // whole of the bar running past both edges of a phone. `fit-content` resolves
+  // to the box's MIN-CONTENT when that exceeds the space available, and the
+  // actions row's min-content was 535.1px flat -- so at 420, 372, 360, 320 and
+  // 300 the bar body measured 535.1 at every one of them, centred by the
+  // `justify-content center` above and therefore hanging off BOTH sides: 82px
+  // each at 372, 118px at 300.
+  //
+  // `doc_overflow_x` READ 0 AT ALL OF THOSE WIDTHS. `body` is `overflow hidden`
+  // on this page, so the overflow is clipped rather than scrolled and the
+  // document reports nothing. The read that sees it is the element's rect
+  // against the viewport -- `-rect.left` and `rect.right - vw`. A document-level
+  // overflow check is not evidence of anything here.
+  //
+  // The cap alone would only move the failure inside the box; the wrapping below
+  // is what lets the content answer it.
   .auction__bar-body
     flex-direction column
     height auto
     min-height 120px
     align-items stretch
+    max-width 100%
 
   // The 12px of top padding is the room the bid input's label paints into --
   // see `.auction__main-input` below, whose label sits above its box and out of
@@ -178,6 +202,19 @@
     padding 12px 16px 8px
     justify-content center
     width 100%
+    // THE ROW WRAPS RATHER THAN SWITCHING LAYOUT AT A BREAKPOINT, and that is
+    // deliberate: it is self-regulating, so there is no width to pick and no
+    // second layout to keep in step. It needs 535.1px on one line -- 32px of
+    // padding, 443.1px of stepper and election control, and the 60px bid input
+    // -- and below 800px the bar gets the raw viewport, so the line stops
+    // fitting below 536px and only there.
+    //
+    // No amount of slimming reaches 300px on one line. The row's content is
+    // 503.1px against a 268px budget there, and the buttons are already at their
+    // content width (see .auction__main-action above); the timer is not even
+    // rendered in election mode. Wrapping is the only thing that spans the gap.
+    flex-wrap wrap
+    row-gap 10px
 
   // No `height 105px`, and no `position relative` with it. The height was a
   // fiction -- this box's contents measure 69px, so the extra 36px existed only
@@ -199,6 +236,22 @@
   // leaving a dead strip under the controls.
   .auction__bid-info
     flex 1 0 auto
+
+  // `flex 0 1 auto` AND `min-width 0`, replacing the base rule's `flex 0 0
+  // auto`. Shrink, but never grow: growing would stretch this group across the
+  // row and push the bid input to the far edge at every stacked width, changing
+  // a layout that is correct from 536 up. `min-width 0` removes the `auto`
+  // minimum that otherwise refuses to shrink below content and converts the
+  // shortfall into overflow rather than into a wrap.
+  //
+  // It wraps internally as well as being wrappable, so the stepper takes one
+  // line and the election control the next once they stop sharing one.
+  .auction__main-action
+    flex 0 1 auto
+    min-width 0
+    flex-wrap wrap
+    justify-content center
+    row-gap 10px
 
   .auction__main-timer
     border-radius 8px

@@ -166,13 +166,34 @@ $election_control_content_max_width = 720px
 // note, because the bar around it already carries the player, the price and the
 // clock. The state line stays -- whether you already hold a ceiling on the open
 // player is exactly what a manager checks before bidding.
+// SCOPED BY `.compact`, WHICH IS A CLASS AND NOT A MEDIA QUERY, so everything
+// below is confined to the bar however narrow the drawer gets. The reverse
+// mistake -- an unqualified selector inside a `max-width` block -- is what the
+// note above this one is about.
 .auction-election-control.compact
-  flex 0 0 auto
+  // `flex 0 1 auto` and `min-width 0`: this is the widest atom on the bar's
+  // actions row at 315px, so it is the one that has to give when the row wraps.
+  // With `flex 0 0 auto` it kept its 315px inside whatever it was handed and
+  // overflowed instead.
+  flex 0 1 auto
+  min-width 0
   padding 0 8px
   gap 8px
   border none
   background transparent
   align-items center
+  // THE STATE DROPS BELOW THE FORM BEFORE THE FORM BREAKS IN HALF. Both this
+  // and the form wrap, and the order they give way in is what decides how the
+  // control reads on a 280px screen: state over a single row of buttons is
+  // still a caption and its two actions, where `Your election / $5 / Decline`
+  // on one line and `Change maximum` orphaned on the next is not.
+  //
+  // Wrapping here is what takes the control's floor from 284.8px to the widest
+  // single button on it -- `Change maximum` at 125.5px -- which is what puts a
+  // 280px screen in reach at all.
+  flex-wrap wrap
+  justify-content center
+  row-gap 6px
 
   // STACKED, like its drawer twin, rather than laid out as a row. This block
   // read `YOUR ELECTION $5` on one line to save vertical room in a 70px bar,
@@ -204,8 +225,22 @@ $election_control_content_max_width = 720px
     font-size 12px
     font-weight 600
 
-  // The compact form is one button, so wrapping can only ever produce a second
-  // row inside a fixed-height strip -- there is nothing for it to wrap TO.
+  // IT WRAPS NOW, and the comment this replaces was true when it was written
+  // and is not any more. It read: "the compact form is one button, so wrapping
+  // can only ever produce a second row inside a fixed-height strip -- there is
+  // nothing for it to wrap TO." Two of those three premises have moved. The form
+  // is TWO buttons since the bar gained its route to a maximum (`Decline` at
+  // 65px and `Change maximum` at 125.5px), and the strip is no longer
+  // fixed-height -- `.auction__bar-body` took `min-height` with `height auto`,
+  // and `.auction__controls` now publishes what it measures rather than
+  // reserving a constant. There is somewhere to wrap to.
+  //
+  // `white-space nowrap` STAYS. It stops a label breaking mid-phrase, which is a
+  // different question from whether the buttons may sit on two rows, and
+  // `Change / maximum` split over two lines inside a 26px button is the defect
+  // that keeps it here.
   .auction-election-control__form
-    flex-wrap nowrap
+    flex-wrap wrap
+    justify-content center
+    row-gap 6px
     white-space nowrap

@@ -211,3 +211,41 @@
     padding 4px
     flex 0 0 auto
     min-width 24px
+
+// THE DETAILS DROP BELOW THE NAME rather than sharing its line with it. The name
+// half needs about 250px -- a 64px headshot, its 8px margin, and 178px of "ADAM
+// PRENTICE" -- and MARKET with LIVE VALUE need about 131px, so the row stops
+// fitting below roughly 381px. The name is what gives when it does not fit:
+// `.player__name-lead` is `flex 0 0 auto` and cannot shrink, so the shortfall
+// lands on `.nominated__player` and the clip-path at the top of this file cuts
+// the name off. Measured, it rendered "PRENTI" at 320 and "PRENT" at 300, with
+// every box still tiling perfectly -- the ink is clipped, not the layout, which
+// is why an overlap check reads clean through it.
+//
+// A ROW THAT CANNOT FIT IS THE SAME PROBLEM THE ACTIONS ROW HAS one box down,
+// and it takes the same answer. The name is the subject of this surface;
+// clipping it to keep a second reading of a $0 market value on the same line is
+// the wrong trade at any width.
+//
+// 400 rather than 500: at 420 the row measures clean and the name renders in
+// full, so the two boxes still belong on one line there. 400 is the boundary
+// `.auction__main-timer` already uses in auction-main-bid.styl.
+@media (max-width 400px)
+  .auction__nominated-player
+    flex-wrap wrap
+    row-gap 2px
+
+  // `flex 1 1 auto`, so this box's BASE SIZE is its content rather than the
+  // `flex 1` basis of ZERO it takes above. A zero-basis item can never force a
+  // wrap -- it reports no content to the line-breaking pass, so the details
+  // would stay beside it however little room was left. Confined to this query
+  // because above it that same zero basis is what makes the details shrink
+  // before the name does.
+  .auction__nominated-player .nominated__player
+    flex 1 1 auto
+
+  // The 8px was the offset that put this group's baseline on the name's while
+  // the two shared a line. On its own line it is what leaves a gap under the
+  // name instead.
+  .auction__nominated-player .nominated__player-details
+    padding-top 0
