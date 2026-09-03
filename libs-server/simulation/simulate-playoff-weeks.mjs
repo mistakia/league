@@ -51,6 +51,8 @@ const log = debug('simulation:playoff-weeks')
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Unset keeps the pipeline's own week, which is a strict no-op.
  * @returns {Promise<object>} { raw_team_scores: Map<tid, number[]>, raw_team_scores_by_week: Map<week, Map<tid, number[]>>, week_results: Object[] }
  */
 export async function simulate_playoff_weeks_correlated({
@@ -61,7 +63,8 @@ export async function simulate_playoff_weeks_correlated({
   n_simulations,
   locked_week_scores = new Map(),
   seed,
-  roster_overrides = null
+  roster_overrides = null,
+  roster_week
 }) {
   log(
     `Running correlated playoff simulation for ${team_ids.length} teams, weeks ${weeks.join(',')}`
@@ -92,7 +95,8 @@ export async function simulate_playoff_weeks_correlated({
     // active_fantasy_week, not week: `week` is 0 for the whole offseason and
     // preseason, and load_teams_starters_by_week refuses anything below 1.
     current_week: current_season.active_fantasy_week,
-    roster_overrides
+    roster_overrides,
+    roster_week
   })
 
   // Collect all player IDs across all weeks

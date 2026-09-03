@@ -53,6 +53,8 @@ const log = debug('simulation:simulate-league-week')
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id, applied to the roster pool
  *   before the optimal lineup is chosen. Absent or empty is a strict no-op.
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Unset keeps the pipeline's own week, which is a strict no-op.
  * @returns {Promise<object>} League-wide simulation results
  */
 export async function simulate_league_week({
@@ -62,7 +64,8 @@ export async function simulate_league_week({
   n_simulations = 10000,
   seed,
   use_actual_results = true,
-  roster_overrides = null
+  roster_overrides = null,
+  roster_week
 }) {
   const start_time = Date.now()
   log(
@@ -91,7 +94,8 @@ export async function simulate_league_week({
       // preseason, and load_team_starters refuses anything below 1, so the
       // roster load threw on every call between the Super Bowl and Week 1.
       current_week: current_season.active_fantasy_week,
-      roster_overrides
+      roster_overrides,
+      roster_week
     }),
     load_nfl_schedule({ season_year: year, week })
   ])

@@ -270,6 +270,7 @@ const accumulate_completed_all_play = ({
  * @param {boolean} params.use_actual_results - Use actual points for final games
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id
+ * @param {number} [params.roster_week] - Week to read the roster POOL from
  * @returns {Promise<Map<number, number[]>>} Per-team score vectors
  */
 const load_week_raw_team_scores = async ({
@@ -279,7 +280,8 @@ const load_week_raw_team_scores = async ({
   n_simulations,
   seed,
   use_actual_results,
-  roster_overrides
+  roster_overrides,
+  roster_week
 }) => {
   const week_result = await simulate_league_week({
     league_id,
@@ -288,7 +290,8 @@ const load_week_raw_team_scores = async ({
     n_simulations,
     seed,
     use_actual_results,
-    roster_overrides
+    roster_overrides,
+    roster_week
   })
 
   return week_result.raw_team_scores
@@ -311,6 +314,7 @@ const load_week_raw_team_scores = async ({
  * @param {number} [params.seed] - Seed for the correlated draw
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id
+ * @param {number} [params.roster_week] - Week to read the roster POOL from
  * @returns {Promise<Map<number, Map<number, number[]>>>} week -> tid -> vector
  */
 const load_playoff_raw_team_scores_by_week = async ({
@@ -320,7 +324,8 @@ const load_playoff_raw_team_scores_by_week = async ({
   year,
   n_simulations,
   seed,
-  roster_overrides
+  roster_overrides,
+  roster_week
 }) => {
   const { raw_team_scores_by_week } = await simulate_playoff_weeks_correlated({
     league_id,
@@ -329,7 +334,8 @@ const load_playoff_raw_team_scores_by_week = async ({
     year,
     n_simulations,
     seed,
-    roster_overrides
+    roster_overrides,
+    roster_week
   })
 
   return raw_team_scores_by_week
@@ -362,6 +368,11 @@ const load_playoff_raw_team_scores_by_week = async ({
  *   strict no-op. A team carrying an override is forecast from its optimal
  *   lineup even in a week whose actual slot assignments exist, since those
  *   assignments cannot express the counterfactual.
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Unset keeps the week the pipeline already runs on, so an unset call is a
+ *   strict no-op. In the preseason, 0 is the roster get-roster.mjs serves --
+ *   the live one the cap and auction paths act on, ahead of the next nightly
+ *   sync of the week 1 forward slice.
  * @param {(params: object) => Promise<object>} [params.load_context] - Test
  *   seam: everything the forecast reads out of the database
  * @param {(params: object) => Promise<Map<number, number[]>>} [params.load_week_scores] -
@@ -379,6 +390,7 @@ export async function simulate_season_forecast({
   force_win_tid = null,
   force_loss_tid = null,
   roster_overrides = null,
+  roster_week,
   load_context = load_forecast_context,
   load_week_scores = load_week_raw_team_scores,
   load_playoff_scores = load_playoff_raw_team_scores_by_week
@@ -429,6 +441,7 @@ export async function simulate_season_forecast({
       wildcard_week,
       championship_weeks,
       roster_overrides,
+      roster_week,
       load_playoff_scores
     })
   }
@@ -468,7 +481,8 @@ export async function simulate_season_forecast({
       n_simulations,
       seed: week_seed,
       use_actual_results,
-      roster_overrides
+      roster_overrides,
+      roster_week
     })
 
     // The pre-pass carried the only guard that a week covers every team, and
@@ -785,6 +799,7 @@ const resolve_conditional_indexes = ({
  * @param {number[]} params.championship_weeks - Championship round weeks
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id
+ * @param {number} [params.roster_week] - Week to read the roster POOL from
  * @param {(params: object) => Promise<Map<number, Map<number, number[]>>>} params.load_playoff_scores -
  *   Playoff score vector loader
  * @returns {Promise<object>} Forecast results keyed by team ID
@@ -801,6 +816,7 @@ async function build_post_season_forecast({
   wildcard_week,
   championship_weeks,
   roster_overrides = null,
+  roster_week,
   load_playoff_scores
 }) {
   const playoffs = await db('playoffs').where({

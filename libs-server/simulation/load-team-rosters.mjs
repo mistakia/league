@@ -100,7 +100,8 @@ const apply_roster_override = ({ roster_pids, override }) => {
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
  * @param {number} [params.roster_week] - Week to read the roster POOL from.
- *   Defaults to the week the league itself considers current.
+ *   Defaults to `current_week`, which is what the pipeline runs on. Set it only
+ *   to ask a counterfactual question of a different roster snapshot.
  * @returns {Promise<object>} { team_id, player_ids: string[] }
  */
 export async function load_team_starters({
@@ -112,7 +113,7 @@ export async function load_team_starters({
   scoring_format_id,
   league,
   roster_overrides = null,
-  roster_week = current_season.fantasy_season_week
+  roster_week = current_week
 }) {
   // Validate current_week to prevent undefined comparison issues
   if (typeof current_week !== 'number' || current_week < 1) {
@@ -141,23 +142,20 @@ export async function load_team_starters({
   } else {
     // Future week: compute optimal from current roster pool.
     //
-    // The POOL week and the TARGET week are different questions, and conflating
-    // them read a stale roster for the whole preseason. `current_week` here is
-    // `active_fantasy_week`, floored to 1 because the branch above refuses a
-    // target week below 1 -- but that floor is about the week being projected,
-    // not about which roster snapshot is live. In the preseason the live
-    // snapshot is week 0, which is the week `get-roster.mjs` reads and
-    // therefore the one the league's own cap, auction and poach paths act on;
-    // week 1 is a snapshot written ahead of it. For league 1 in 2026 the two
-    // disagreed by three players -- Jeanty, Nabers and Burden sat in a reserve
-    // slot in the week 1 rows and on the active roster in week 0 -- so every
-    // forecast optimized a lineup missing its best three players.
+    // The POOL week and the TARGET week are separate questions, which is why
+    // `roster_week` exists at all -- but they are not in conflict, so the
+    // default keeps them together and the pipeline is unaffected. `current_week`
+    // here is `active_fantasy_week`, floored to 1 because the branch above
+    // refuses a target week below 1, and in the preseason that names the week 1
+    // forward slice that generate-rosters materializes from week 0 and re-syncs
+    // nightly. That slice is the intended pool.
     //
-    // `fantasy_season_week` rather than `week`: the two agree from the
-    // preseason through the season, and it is what get-roster.mjs reads, so the
-    // pool and the league's authoritative roster are the same row by
-    // construction. `week` keeps counting past the season's end, where it would
-    // name a roster week that was never written.
+    // What the parameter buys is the counterfactual: week 0 is the snapshot
+    // `get-roster.mjs` reads, so it is what the league's cap, auction and poach
+    // paths act on RIGHT NOW, ahead of the next slice sync. Asking the forecast
+    // to run on it is a legitimate question -- an auction decision rests on the
+    // live roster, not on last night's slice -- and it is the caller's to ask
+    // rather than a default to change underneath the nightly forecast.
     const player_ids = await calculate_optimal_starters({
       league_id,
       team_id,
@@ -246,6 +244,8 @@ export async function load_teams_starters({
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Unset defaults to `current_week`, which is a strict no-op.
  * @returns {Promise<Map<number, {player_ids: string[]}>>} Map of team_id -> roster
  */
 export async function load_all_teams_starters({
@@ -253,7 +253,8 @@ export async function load_all_teams_starters({
   week,
   year,
   current_week = current_season.week,
-  roster_overrides = null
+  roster_overrides = null,
+  roster_week
 }) {
   log(`Loading all team starters for league ${league_id}, week ${week}`)
 
@@ -281,7 +282,8 @@ export async function load_all_teams_starters({
         current_week,
         scoring_format_id,
         league,
-        roster_overrides
+        roster_overrides,
+        roster_week
       })
     )
   )
@@ -444,6 +446,8 @@ async function calculate_optimal_starters({
  * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Unset defaults to `current_week`, which is a strict no-op.
  * @returns {Promise<Map<number, Array<{team_id: number, player_ids: string[]}>>>} Map of week -> team rosters
  */
 export async function load_teams_starters_by_week({
@@ -452,7 +456,8 @@ export async function load_teams_starters_by_week({
   weeks,
   year,
   current_week = current_season.week,
-  roster_overrides = null
+  roster_overrides = null,
+  roster_week
 }) {
   log(
     `Loading starters for ${team_ids.length} teams across ${weeks.length} weeks`
@@ -477,7 +482,8 @@ export async function load_teams_starters_by_week({
             current_week,
             scoring_format_id,
             league,
-            roster_overrides
+            roster_overrides,
+            roster_week
           })
         )
       )
