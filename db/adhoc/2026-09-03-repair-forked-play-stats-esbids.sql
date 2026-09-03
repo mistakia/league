@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-09-03 against league_production
 --
 -- Repair the forked play-stats esbids. Closes
 -- user:task/league/repair-forked-play-stats-esbids.md.

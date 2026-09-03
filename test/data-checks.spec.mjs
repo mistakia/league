@@ -1254,7 +1254,7 @@ describe('data check registry', function () {
     // 2026-08-14 and ships as a regression detector over a clean population, so
     // a baselined entry there would suppress nothing and report stale forever.
     //
-    // Two checks genuinely hold it, and both for the same reason: the missing
+    // Four checks hold it, and three for the same reason: the missing
     // data cannot be fetched again, so no repair command exists to clear the
     // finding and adjudicating it would assert the absence is correct.
     //
@@ -1305,28 +1305,23 @@ describe('data check registry', function () {
     // is a derived consensus whose history was deliberately deleted, so its
     // divergence is correct rather than owed. A feed-grained entry could not
     // have said both.
-    // nfl-play-stats-game-linkage -- the one entry on this list whose repair CAN
-    // land, stated plainly because it is a real widening of the rule above and
-    // hiding it would defeat the point of the list. Its 132 entries are not
-    // irrecoverable: every one names a game we hold under a different esbid, and
-    // the mapping was proven exhaustively rather than sampled (esbid + 50
-    // resolves 130 of 130 of the 2013/2014 orphans, all season_type PRE). They
-    // are baselined under the guideline's OTHER limb -- "a population awaiting
-    // cleanup" is debt -- rather than under "no repair exists".
+    // nfl-play-stats-game-linkage USED TO BE ON THIS LIST and is deliberately
+    // no longer, which is the outcome its entry predicted rather than a
+    // loosening of the rule. It was the one baselined check whose repair COULD
+    // land -- 132 games filed under a forked esbid, every one naming a game we
+    // held under a different key -- so it was parked under the guideline's
+    // "population awaiting cleanup" limb rather than "no repair exists", and its
+    // note said the count should shrink to zero as the repair drained it.
     //
-    // The alternative was measured and rejected: standing all 132 as findings on
-    // the check's first run reports green over nothing and puts 132
-    // permanently-open rows in front of the one that is real, which is the
-    // failure the sibling gamelogs-games-season-agreement calibration names as
-    // its reason for declining the population in the first place. The check is
-    // registered NOW rather than after the repair because the two singletons
-    // (2020112602, 2021122201) accrued AFTER the historical block with nothing
-    // firing, so the gap this closes is live.
+    // It did. db/adhoc/2026-09-03-repair-forked-play-stats-esbids.sql re-pointed
+    // the 130 and deleted the two duplicate singletons, the check re-measured at
+    // 8,291 gradeable esbids with zero findings, and all 132 entries were
+    // deleted. Removing it from this set is what closing that debt looks like.
     //
-    // Expect this entry to behave unlike the other four: its count should shrink
-    // to zero as the repair drains it, and each drained game reports STALE and is
-    // deleted. A count that is still 132 after the repair task closes is itself
-    // the finding.
+    // The precedent it set is worth keeping: baselining a repairable population
+    // is legitimate when standing every row as a finding on day one would bury
+    // the one finding that is live, PROVIDED the entry names its owner and is
+    // expected to drain. That is the bar a future addition here has to clear.
     const baselined = parked_entries.filter(
       (entry) => entry.disposition === 'baselined'
     )
@@ -1336,7 +1331,6 @@ describe('data check registry', function () {
     ).to.deep.equal([
       'adp-source-season-coverage',
       'betting-market-source-week-coverage',
-      'nfl-play-stats-game-linkage',
       'population-index-rebuild-parity',
       'prop-market-selection-coverage'
     ])
