@@ -2514,6 +2514,7 @@ const PLAN_PROBE_TIMEOUT_MS = 5000
 // falls back to the default planner, which is what would have run without this
 // function at all.
 const should_disable_nested_loops = async ({ execution_query_string }) => {
+  const probe_started_at = Date.now()
   try {
     // work_mem is repeated here rather than dropped because it is an input to
     // the planner's costing, not just an execution budget. Probing under a
@@ -2523,7 +2524,17 @@ const should_disable_nested_loops = async ({ execution_query_string }) => {
       `SET LOCAL statement_timeout = ${PLAN_PROBE_TIMEOUT_MS}; SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'; EXPLAIN (FORMAT JSON) ${execution_query_string};`
     )
     const plan = extract_plan_from_explain_response(response[2])
-    return plan_carries_clamp_signature(plan)
+    const carries_signature = plan_carries_clamp_signature(plan)
+    // Log the DECISION, not just the failures. Once this works the statements
+    // it fixes stop crossing log_min_duration_statement, so the postgres log
+    // goes quiet and stops being able to answer whether the arm fired at all --
+    // and a probe that silently answered false for every statement would look
+    // exactly like a workload that no longer needs it. This line is the only
+    // place that distinguishes them.
+    log(
+      `data view plan probe: ${carries_signature ? 'clamp signature present, disabling nested loops' : 'no clamp signature, keeping the default planner'} (probed in ${Date.now() - probe_started_at}ms)`
+    )
+    return carries_signature
   } catch (error) {
     log(`data view plan probe failed, using the default planner: ${error}`)
     return false
