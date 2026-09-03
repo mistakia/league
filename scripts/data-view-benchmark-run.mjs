@@ -60,6 +60,10 @@ import {
   parse_transcript,
   row_identity
 } from '#libs-server/data-views/generation/benchmark-metrics.mjs'
+import {
+  generation_topology,
+  resolve_user_base_directory
+} from '#libs-server/data-views/generation/generation-topology.mjs'
 import { is_main } from '#libs-server'
 
 const exec_file = promisify(execFile)
@@ -74,27 +78,17 @@ const INSTRUCTIONS_PATH = path.join(
 )
 
 // The session rail lives on another host, so every fact about a run that league
-// does not store has to be fetched over ssh. Overridable because a second
-// deployment of this system would key them differently; defaulted because
-// requiring three environment variables to run a benchmark is friction on every
-// invocation.
-const GENERATION_HOST = process.env.LEAGUE_GENERATION_HOST || 'base-storage'
-const GENERATION_CONTAINER =
-  process.env.LEAGUE_GENERATION_CONTAINER ||
-  'base-user-league-data-view-generation--league-data-view-generation'
-const GENERATION_TRANSCRIPT_DIR =
-  process.env.LEAGUE_GENERATION_TRANSCRIPT_DIR ||
-  '/home/node/.claude-local/projects/-Users-trashman-user-base-repository-active-league'
+// does not store has to be fetched over ssh -- which needs a hostname, a tenant
+// container, the uid that owns the 0600 transcript inside it, and where that
+// transcript sits. All four describe this fleet rather than the application,
+// and this repository is public, so they are CONFIGURATION with no default:
+// see generation-topology.mjs for the file they come from and why it is not
+// sops-encrypted. Resolved lazily at each call site, because
+// data-view-benchmark-ground-truth.mjs imports this module for
+// `check_correctness` alone and must not need any of it.
+//
 // `base` and `base thread` run against the user base, not this checkout.
-const USER_BASE_DIR =
-  process.env.USER_BASE_DIRECTORY || '/Users/trashman/user-base'
-// The container's own user. Both reads below run as `node` rather than root:
-// the transcript is 0600 owned by that uid, so this is what makes the read
-// work, not only house style.
-const GENERATION_CONTAINER_USER =
-  process.env.LEAGUE_GENERATION_CONTAINER_USER || 'node'
-const VLLM_METRICS_URL =
-  process.env.LEAGUE_GENERATION_METRICS_URL || 'localhost:8113/metrics'
+const USER_BASE_DIR = resolve_user_base_directory()
 
 const PRINCIPAL_KEY = process.env.LEAGUE_BENCHMARK_PRINCIPAL_KEY || 'user:1'
 const BENCHMARK_USER_ID = Number(process.env.LEAGUE_BENCHMARK_USER_ID || 1)
@@ -165,9 +159,10 @@ export const read_contention = async () => {
  * @returns {Promise<{queries: number, hits: number}|null>}
  */
 export const read_prefix_cache_counters = async () => {
+  const topology = generation_topology()
   const { ok, stdout } = await try_exec('ssh', [
-    GENERATION_HOST,
-    `curl -s ${VLLM_METRICS_URL} | grep -E '^vllm:prefix_cache_(queries|hits)_total'`
+    topology.host,
+    `curl -s ${topology.metrics_url} | grep -E '^vllm:prefix_cache_(queries|hits)_total'`
   ])
   if (!ok) return null
   const read = (name) => {
@@ -293,12 +288,13 @@ export const read_session_id = async ({ thread_id }) => {
  */
 export const read_transcript = async ({ session_id, log = () => {} }) => {
   const deadline = Date.now() + TRANSCRIPT_SETTLE_TIMEOUT_MS
+  const topology = generation_topology()
   let records = null
 
   for (;;) {
     const { ok, stdout } = await try_exec('ssh', [
-      GENERATION_HOST,
-      `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} cat ${GENERATION_TRANSCRIPT_DIR}/${session_id}.jsonl`
+      topology.host,
+      `docker exec -u ${topology.container_user} ${topology.container} cat ${topology.transcript_dir}/${session_id}.jsonl`
     ])
     if (ok && stdout.trim()) {
       records = parse_transcript(stdout)
@@ -439,9 +435,10 @@ export const reap_stranded_session = async ({ thread_id, log }) => {
   if (!thread_id)
     return { reaped: false, reason: 'no thread_id on the job row' }
 
+  const topology = generation_topology()
   const { ok, stdout } = await try_exec('ssh', [
-    GENERATION_HOST,
-    `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} ps -eo pid,args || true`
+    topology.host,
+    `docker exec -u ${topology.container_user} ${topology.container} ps -eo pid,args || true`
   ])
   if (!ok) {
     return { reaped: false, reason: 'could not inspect container processes' }
