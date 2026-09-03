@@ -28,8 +28,23 @@ $grid_open_fill = #ececec
 // swatch border disappeared entirely. Reducing a line to nothing is not
 // reducing it.
 $grid_rule = mix($borderColor, white, 70%)
-$grid_mine_ring = mix($accentColor, white, 42%)
 $grid_selected_ring = mix($textColorDark, white, 55%)
+
+// `OURS` IS A MARK, NOT A RING. A ring is the one shape that cannot be made to
+// stop competing with the numeral, because it surrounds it: paling the colour
+// only trades a hard edge beside an 11px digit for a soft one, and at the width
+// of a cell in the side rail there is no ring inset that clears the glyph. The
+// mark instead takes the strip of cell the numeral does not use -- the numeral
+// is pushed up by the cell's bottom padding and the dot sits under it, touching
+// nothing.
+//
+// It also COMPOSES, which the ring only accidentally did. `finalized` and
+// `final-block` are backgrounds and would have swallowed a fill-based `mine`
+// outright; a pseudo-element sits on top of whatever ground the cell has, so an
+// hour that is both convened and yours still says so. `now` owns ::after for
+// the same reason, which is why this one is ::before.
+$grid_mine_mark = $accentColor
+$grid_mine_mark_size = 4px
 
 .auction__block-calendar
   display flex
@@ -100,7 +115,12 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
   position relative
   flex 1 1 0
   min-width 10px
-  height 22px
+  height 24px
+  // The bottom strip belongs to the `mine` mark, so the numeral is centred in
+  // what is left rather than in the whole cell. Reserved unconditionally: a
+  // padding that appeared only on `mine` cells would move the digit whenever a
+  // manager opted in, which reads as the grid twitching under the click.
+  padding-bottom 6px
   display flex
   align-items center
   justify-content center
@@ -150,9 +170,23 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
   // showing that it was also yours. `outline` composites independently of
   // `box-shadow`, and `outline-offset` keeps it inside the cell rather than
   // over the neighbour.
-  &.mine
-    box-shadow inset 0 0 0 1px $grid_mine_ring
+  // Yours: a dot in the strip under the numeral. Centred rather than cornered
+  // because a cell is about eleven pixels wide in the side rail, so a corner
+  // mark and a centred digit overlap horizontally at every count.
+  &.mine::before
+    content ''
+    position absolute
+    left 50%
+    bottom 2px
+    margin-left -($grid_mine_mark_size / 2)
+    width $grid_mine_mark_size
+    height $grid_mine_mark_size
+    border-radius 50%
+    background $grid_mine_mark
 
+  // `outline` rather than a border or a box-shadow: it takes no space, so it
+  // cannot shift the numeral, and `outline-offset` keeps it inside the cell
+  // rather than over the neighbour.
   &.selected
     outline 1px solid $grid_selected_ring
     outline-offset -1px
@@ -168,9 +202,16 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
     background #c0392b
     color white
 
-  // The current hour, as a bar rather than a border: a border on one side of a
-  // 22px cell shifts the numeral it sits above, and it would also have to share
-  // the `box-shadow` slot with `mine`.
+  // The mark inverts on the two dark grounds, exactly as the numeral does. An
+  // accent dot on `final-block` is red on red, which is the state it composes
+  // with most often: the final block convenes by rule, so an hour is routinely
+  // both the final block and one a manager opted into elsewhere in the hour.
+  &.finalized.mine::before,
+  &.final-block.mine::before
+    background white
+
+  // The current hour, as a bar rather than a border: a border on one side of
+  // the cell shifts the numeral it sits above.
   &.now::after
     content ''
     position absolute
@@ -196,6 +237,7 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
     gap 4px
 
 .auction__block-calendar-swatch
+  position relative
   width 10px
   height 10px
   flex none
@@ -209,9 +251,26 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
   &.has-opt-ins
     background mix($accentColor, white, 16%)
 
+  // The `mine` swatch carries the MARK, on the opted-in ground it appears
+  // against. A swatch showing the ring the grid no longer draws is a key to a
+  // state the grid does not have.
   &.mine
-    background $grid_open_fill
-    box-shadow inset 0 0 0 1px $grid_mine_ring
+    background mix($accentColor, white, 16%)
+
+    &::before
+      content ''
+      position absolute
+      left 50%
+      top 50%
+      // Two longhands, not a four-value `margin`. Stylus reads the `0 0 -(x)`
+      // run in a shorthand as arithmetic and emits `0 - 2px`, so the four
+      // values collapse to three and the mark lands off-centre.
+      margin-top -($grid_mine_mark_size / 2)
+      margin-left -($grid_mine_mark_size / 2)
+      width $grid_mine_mark_size
+      height $grid_mine_mark_size
+      border-radius 50%
+      background $grid_mine_mark
 
   &.finalized
     background $successColor
@@ -285,7 +344,7 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
 // cursor and the rail is the full page width there rather than 320px.
 @media (max-width 800px)
   .auction__block-calendar-cell
-    height 26px
+    height 28px
 
 // Same as the standing-elections panel: when collapsible the root is the
 // Accordion and its summary button owns the padding.
