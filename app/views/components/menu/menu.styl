@@ -317,16 +317,29 @@
   padding 6px
   font-size 10px
 
-// 801/800 THROUGHOUT THE AUCTION, which is the side rail's boundary. It used to
-// be 800/799 here and in auction-main-bid.styl and auction-controls.styl while
-// the rail, the page's own `is_narrow` and the teams strip all switched at 800 —
-// so at EXACTLY 800px the rail was already stacked under the board while the
-// controls were still their desktop height and this button used the desktop
-// offset, landing it on the rail. One boundary, no 1px column where half the
-// layout has changed and half has not.
-@media (min-width 801px)
+// THE AUCTION HAS THREE ZONES, NOT TWO, and this button is the one control that
+// has to know about all three. They are set by 1160 and 800:
+//
+//   >= 1160  the bid bar is a single 70px row, capped at 1120px and centred;
+//            the side rail is beside the board. Chrome is $auctionHeightDesktop.
+//   801-1159 the bar STACKS, because below the cap it gets the viewport and the
+//            actions row is a fixed 551px, leaving the player half 233px at 1024
+//            and 29px at 820. The rail is still beside the board.
+//   <= 800   the bar is stacked AND the rail has stacked under it, so the button
+//            has a rail to clear as well as the chrome.
+//
+// 1160 is not a new number — it is where the bar already gained its
+// `max-width 1120px` cap, and the cap is exactly the condition under which the
+// single row fits. auction-controls.styl, page.styl and
+// auction-commissioner-controls.styl move with it or the chrome and the page
+// disagree about where the chrome ends.
+@media (min-width 1160px)
   .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
+
+@media (max-width 1159px)
+  .auction__live .main__menu-button
+    bottom $auctionHeightMobile + 8px
 
 @media (max-width 800px)
   // The drawer comes in from the right on a phone, so the button that opens it
@@ -336,18 +349,23 @@
     left auto
     right 16px
 
-  // CLEARS THE WHOLE SIDE RAIL, not just the auction chrome. Stacked, the rail
-  // sits between the chrome and the board, and it DOES NOT SCROLL — measured at
-  // 768, 600 and 400 it is exactly its three rows with no slack, so any offset
-  // that leaves the button inside it covers a row that can never be moved out
-  // from under it. At the old $auctionHeightMobile + 8px that row was the
-  // standing elections summary, and 83% of its disclosure chevron.
+  // CLEARS THE WHOLE SIDE RAIL, not just the auction chrome, and ONLY in this
+  // zone — above 800 the rail is beside the board rather than under it, and the
+  // button is on the left edge anyway. Stacked, the rail sits between the chrome
+  // and the board and it DOES NOT SCROLL — measured at 768, 600 and 400 it is
+  // exactly its three rows with no slack, so any offset that leaves the button
+  // inside it covers a row that can never be moved out from under it. At the old
+  // $auctionHeightMobile + 8px that row was the standing elections summary, and
+  // 83% of its disclosure chevron.
   //
   // The rail's height is not a constant — 115px at 768, 145px at 400, and the
   // settlement status inside it names every team still to answer, so it grows
   // with the league. auction.js measures it and publishes
-  // --auction-side-height; the fallback of 0px degrades to the old behaviour
-  // rather than to something wild if the property is ever missing.
+  // --auction-side-height; the fallback of 0px degrades to the rule above rather
+  // than to something wild if the property is ever missing.
+  //
+  // MUST STAY BELOW the max-width 1159px rule: both are 0,2,0 and the cascade
+  // decides on source order, so reordering these silently drops the rail term.
   .auction__live .main__menu-button
     bottom s(
       'calc(%s + var(--auction-side-height, 0px) + 8px)',

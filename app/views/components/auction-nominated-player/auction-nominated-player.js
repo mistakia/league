@@ -29,16 +29,21 @@ import './auction-nominated-player.styl'
 // height is exactly that 64px window, so the picture fills it and the crop
 // takes 12px off either side instead of the top of the player's head.
 //
-// THE BREAKPOINT IS 800, the auction's one boundary -- the width the side rail
-// stops being a rail at, and now also the width the bar, the controls and the
-// menu button switch at. That is what makes the two sizes mean something: the
-// large headshot belongs to the layout that has a SCROLLING board above the
-// bar, and that is exactly the layout this boundary separates.
+// THE BREAKPOINT IS 1160, WHICH IS WHERE THE BAR IS A SINGLE ROW, and that is
+// the only layout the large size means anything in. Overflowing needs something
+// to overflow: at 1160 and up the bar is one 70px row with the scrolling board
+// above it, so 131px of picture rises 61px out of the chrome. Below 1160 the bar
+// STACKS into two rows and nothing overflows -- the picture just sits inside a
+// taller box and DRIVES ITS HEIGHT. Measured with the large size in the stacked
+// bar at 1024, the bar went to 177px against the 120px the chrome reserves, and
+// the chrome overflowed its own band by 31px. So the size follows the bar's
+// SHAPE, not the side rail: 1160 is the same boundary auction-main-bid.styl
+// stacks at and page.styl reserves against.
 const BAR_HEADSHOT_WIDTH = 180
 const NARROW_HEADSHOT_WIDTH = 88
 
 const getHeadshotWidth = () =>
-  window.innerWidth > 800 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
+  window.innerWidth > 1159 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
 
 export default function AuctionNominatedPlayer({
   player_map,

@@ -17,13 +17,23 @@
   position relative
   overflow hidden
 
+// The drawer's own boundary, which is not the auction's. It is about whether
+// there is room beside the page for a 240px rail of navigation, and it has
+// nothing to do with how tall the auction chrome is.
 @media (min-width 800px)
   .menu__open .page
     margin-left $menuWidth
 
+// THE BAND THE AUCTION CHROME OCCUPIES, reserved here so the page's own scroll
+// ends above it. 1160 rather than 800: that is where the bid bar gains its
+// `max-width 1120px` cap and stops stacking, and the chrome is a different
+// height either side of it. auction-controls.styl sets the matching height and
+// menu.styl offsets the floating button by it -- the three move together or the
+// page and the chrome disagree about where the chrome ends.
+@media (min-width 1160px)
   .auction__live .page
     margin-bottom $auctionHeightDesktop
 
-@media (max-width 799px)
+@media (max-width 1159px)
   .auction__live .page
     margin-bottom $auctionHeightMobile

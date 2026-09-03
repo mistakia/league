@@ -18,7 +18,7 @@
 // printing "PICKETT" straight through "MARKET $0". A box-overlap check cannot
 // see it either: the boxes tile perfectly while the ink does not.
 //
-// What must NOT be clipped is the headshot, upward: above 800px it is 131px
+// What must NOT be clipped is the headshot, upward: from 1160px it is 131px
 // tall in a 70px bar and rises out of the chrome on purpose. It is a sibling of
 // the name inside this box, so `overflow hidden` cannot tell the two apart --
 // it cut the large headshot off flat at the bar's top edge.
@@ -59,8 +59,10 @@
   // carry, the labels wanted about 170px inside a 132px group -- wrapped, which
   // is what they do at that width -- and without this the shortfall came out as
   // MARKET printed through LIVE VALUE rather than as either one being cut off.
-  // Two columns is more room, not a different rule: the squeeze zone below
-  // 1160px still runs the group out of space.
+  // Two columns is more room, and below 1160 the bar now stacks and hands this
+  // group the full width, so the squeeze that motivated the rule is gone -- but
+  // the rule stays, because it is what stops the two columns painting over each
+  // other at the narrow end where the bar is 400px wide.
   // `flex 0 1 auto` for the same reason the group above takes it: a basis of 0
   // makes each column claim an equal share of whatever the group was given
   // rather than the width its own label and value need, so `Market` and
@@ -110,15 +112,14 @@
 // amount a line below MARKET -- the two sit on one baseline or the group reads
 // as broken. So it does not wrap, but only from 1024px up.
 //
-// THE FLOOR IS NOT CAUTION, IT IS A ZONE THAT IS ALREADY BROKEN. Between the
-// 800px breakpoint that stacks the bar and roughly 1160px where the bar gains
-// its cap, the group is squeezed harder than it can answer and the shortfall
-// comes out as overlapping ink -- that was true of the old one-word `Auction`
-// too, so it is a defect this label inherits rather than causes. Dropping `Bye`
-// and `Age` bought the group about 142px, which is enough from 1280px up and
-// nowhere near enough at 1024, where the player half has 233px in total.
-// Holding nowrap above 1024 keeps that zone exactly as it was instead of making
-// it worse.
+// THE 1024 FLOOR IS A LEFTOVER FROM A ZONE THAT NO LONGER EXISTS. It was drawn
+// when the bar ran as a single row all the way down to 800 and the stretch from
+// there to 1160 was badly squeezed -- the group wanted about 170px inside 132px
+// and the shortfall came out as overlapping ink. The bar now stacks below 1160,
+// so that stretch gets the full bar width and the squeeze is gone. The floor is
+// kept because nothing below it has been shown to need nowrap, not because the
+// zone it was protecting is still there; the narrow widths wrap the label and
+// that is fine in a two-row bar.
 @media (min-width 1024px)
   .nominated__player-details label
     white-space nowrap
@@ -178,14 +179,13 @@
 // headshot at all. Sized larger it would start driving the bar's height and
 // buy back the original problem.
 //
-// 800, THE AUCTION'S ONE BREAKPOINT. The question this rule answers is what
-// sits above the bar: at 800 and below that is the side rail, which does not
-// scroll, so a covered row is unreadable for good; above it, the scrolling
-// player board, where the overflow costs nothing. The rail is what changes at
-// 800, and the bar, the controls and the menu button were moved onto that same
-// boundary so there is no width where half the layout has switched and half has
-// not. `getHeadshotWidth()` in auction-nominated-player.js tests the same 800.
-@media (max-width 800px)
+// 1159, WHICH IS WHERE THE BAR STOPS BEING A SINGLE ROW. This window is for the
+// stacked bar, and the stacked bar is every width below the cap -- not just the
+// phone. A picture bigger than this does not overflow a stacked bar, it makes it
+// taller: measured at 1024 with the large size, the bar went to 177px against a
+// 120px reservation. `getHeadshotWidth()` in auction-nominated-player.js tests
+// the same boundary and must move with it.
+@media (max-width 1159px)
   .auction__nominated-player .player__name-headshot
     overflow hidden
     flex 0 0 auto

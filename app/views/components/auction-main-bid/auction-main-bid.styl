@@ -88,7 +88,7 @@
     background rgb(46, 125, 50)
     color rgba(255,255,255,0.8)
 
-@media (min-width 801px)
+@media (min-width 1160px)
   .auction__bid-actions
     height 100%
     background white
@@ -110,14 +110,20 @@
     max-width 1120px
     margin 0 auto
 
-// Paired with the cap above: below the width where the bar is centred and
-// bounded, it runs edge to edge and the text needs its own gutter. The two
-// boundaries move together or a band opens up that is full-bleed AND unpadded.
+// EVERYTHING BELOW THE CAP IS THE STACKED LAYOUT, and 1160 is one boundary for
+// both facts because they are the same fact. The cap is what decides whether the
+// single row fits: `.auction__bid-actions` is fixed content and measures 551px,
+// so below the cap -- where the bar gets the raw viewport -- the player half is
+// whatever is left, which measured 233px at 1024, 109px at 900 and 29px at 820
+// against the 502px it needs. The row cannot be honest there, so it stacks.
+//
+// This used to switch at 800, which is why 800-1160 was a documented broken
+// zone rather than a layout. Below the cap the bar also runs edge to edge, so
+// the text needs its own gutter in the same breath.
 @media (max-width 1159px)
   .auction__text
     padding 0 16px
 
-@media (max-width 800px)
   .auction__bar
     display flex
     align-items center
