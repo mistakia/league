@@ -469,23 +469,16 @@ export default class Auction {
         // one would bury the channel. `_election_mode` is exactly "not inside a
         // live block", so the gate is the mode and nothing else.
         //
-        // Announced BEFORE settling, and only while teams are still
-        // outstanding. The message names whom the auction is waiting on, so
-        // sending it after a bid that COMPLETES the set would announce a wait
-        // that is already over -- and the settlement announcement covers that
-        // case properly. `_get_outstanding_election_tids` re-reads the
-        // nomination, so the bid just recorded is already accounted for and the
-        // bidder is not listed as still owing an answer.
-        const outstanding = await this._get_outstanding_election_tids()
-        if (outstanding.length) {
-          await this._send_claim_notification({
-            player_id: message.pid,
-            bid_amount: message.value,
-            eligible_team_ids: outstanding,
-            claiming_team_id: tid,
-            is_nomination: false
-          })
-        }
+        // The message names the claim and nothing else. Whom the auction is
+        // still waiting on is the client's surface -- the
+        // `AUCTION_SETTLEMENT_STATUS` broadcast and the settlement-status
+        // component -- never Discord.
+        await this._send_claim_notification({
+          player_id: message.pid,
+          bid_amount: message.value,
+          claiming_team_id: tid,
+          is_nomination: false
+        })
 
         await this._settle_if_complete()
         return true
@@ -589,10 +582,11 @@ export default class Auction {
     this._transactions.unshift(bid)
 
     if (this._election_mode) {
+      // The claim message names the nomination and nothing else; whom the
+      // auction still waits on is the client's surface, not Discord.
       await this._send_claim_notification({
         player_id: pid,
         bid_amount: value,
-        eligible_team_ids: await this._get_outstanding_election_tids(),
         claiming_team_id: nominating_team_id,
         is_nomination: true
       })
@@ -1301,25 +1295,27 @@ export default class Auction {
    * Announce a CLAIM on the open player -- a nomination or a bid.
    *
    * One method for both because they are the same announcement: a team has
-   * staked a claim at an amount, and these other teams still have to act before
-   * the player settles. `is_nomination` picks the verb and nothing else.
+   * staked a claim at an amount. `is_nomination` picks the verb and nothing
+   * else.
    *
    * OUTSIDE A LIVE BLOCK ONLY. Both call sites are gated on `_election_mode`,
    * which is the operator's rule of 2026-09-02: a bid outside a block is a
    * rare, deliberate act the league wants to hear about, while inside a block
    * bidding is rapid open outcry and announcing each one would bury the channel.
    *
+   * THE MESSAGE CARRIES THE CLAIM AND NOTHING ELSE. Whom the auction is still
+   * waiting on lives in the `AUCTION_SETTLEMENT_STATUS` broadcast and the
+   * settlement-status component -- the client is that surface, not Discord.
+   *
    * @param {object} params
    * @param {string} params.player_id
    * @param {number} params.bid_amount
-   * @param {number[]} params.eligible_team_ids - whom the auction still waits on
    * @param {number} params.claiming_team_id - who nominated or bid
    * @param {boolean} params.is_nomination
    */
   async _send_claim_notification({
     player_id,
     bid_amount,
-    eligible_team_ids,
     claiming_team_id,
     is_nomination
   }) {
@@ -1328,7 +1324,6 @@ export default class Auction {
         team_id: claiming_team_id,
         player_id,
         bid_amount,
-        eligible_teams: eligible_team_ids,
         is_nomination
       })
 

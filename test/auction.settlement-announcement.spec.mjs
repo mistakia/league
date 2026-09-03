@@ -366,16 +366,16 @@ describe('auction settlement announcement', function () {
   // THE SAME HOLE, ONE MESSAGE OVER.
   //
   // `format_nomination_message` is the announcement at the OTHER end of a
-  // player -- it opens the nomination and names whom the auction is waiting on,
-  // where `format_nomination_complete_message` closes it. It sits behind the
+  // player -- it opens the nomination and names the claim, where
+  // `format_nomination_complete_message` closes it. It sits behind the
   // same election-mode gate, is reached from the same swallow-everything
   // `try/catch`, and until now no spec anywhere referenced it either.
   //
   // WHAT THIS COVERS AND WHAT IT DOES NOT. These are builder cases -- the
   // equivalent of case 1 above, and they carry its limitation: content
   // assertions cannot tell a called builder from an uncalled one. The
-  // corresponding case 2, that `_send_nomination_notification` actually calls
-  // it, has no seam to hang on. `announce_auction_settlement` is injectable
+  // corresponding case 2, that `_send_claim_notification` actually calls it,
+  // has no seam to hang on. `announce_auction_settlement` is injectable
   // because e817d65cc made it so; the nomination path has no such parameter,
   // and adding one is a runtime change on a live auction. Left explicitly
   // uncovered rather than papered over with a content assertion dressed up as
@@ -384,15 +384,12 @@ describe('auction settlement announcement', function () {
     it('names the team, the player and the amount it opened at', async function () {
       this.timeout(60 * 1000)
 
-      const tids = await team_ids()
       const pid = await nominate_free_agent({ tid: 1 })
-      const outstanding = tids.filter((tid) => tid !== 1)
 
       const message = await format_nomination_message({
         team_id: 1,
         player_id: pid,
         bid_amount: 0,
-        eligible_teams: outstanding,
         is_nomination: true
       })
 
@@ -412,13 +409,12 @@ describe('auction settlement announcement', function () {
       expect(message, 'says it was a nomination').to.include('nominated')
     })
 
-    // WHOM THE AUCTION IS WAITING ON IS THE ACTIONABLE CONTENT of this message
-    // -- it is the only place a manager learns the player is waiting on THEM.
-    // `format_team_list` drops any team it cannot resolve with a silent
-    // `.filter(team !== null)`, so a partial list reads exactly like a complete
-    // one. Assert every outstanding team by name rather than that the list is
-    // non-empty.
-    it('names every team the auction is still waiting on', async function () {
+    // WHOM THE AUCTION IS WAITING ON IS THE CLIENT'S SURFACE, now that the claim
+    // message has shed it -- the `AUCTION_SETTLEMENT_STATUS` broadcast and the
+    // settlement-status component carry the outstanding set. The Discord claim
+    // names the claim and nothing else, so a future edit that reintroduces the
+    // list must trip. Assert against every outstanding team by name.
+    it('does not name whom the auction is still waiting on', async function () {
       this.timeout(60 * 1000)
 
       const tids = await team_ids()
@@ -430,7 +426,6 @@ describe('auction settlement announcement', function () {
         team_id: 1,
         player_id: pid,
         bid_amount: 0,
-        eligible_teams: outstanding,
         is_nomination: true
       })
 
@@ -440,10 +435,12 @@ describe('auction settlement announcement', function () {
       expect(teams.length, 'every outstanding team resolves').to.equal(
         outstanding.length
       )
+      expect(message, 'no waiting list at all').to.not.include('Waiting on')
       for (const team of teams) {
-        expect(message, `names waiting team ${team.team_id}`).to.include(
-          team.name
-        )
+        expect(
+          message,
+          `never names waiting team ${team.team_id}`
+        ).to.not.include(team.name)
       }
     })
 
@@ -460,7 +457,6 @@ describe('auction settlement announcement', function () {
           team_id: 1,
           player_id: 'NOSU-CHPL-999999',
           bid_amount: 0,
-          eligible_teams: await team_ids(),
           is_nomination: true
         })
       } catch (caught) {

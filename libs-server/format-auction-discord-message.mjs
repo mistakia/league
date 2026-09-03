@@ -43,32 +43,6 @@ const get_team_info = async (tid) => {
 }
 
 /**
- * Format team list for Discord display
- * @param {number[]} team_ids - Array of team IDs
- * @returns {Promise<string>} Formatted team names string
- */
-const format_team_list = async (team_ids) => {
-  if (!team_ids || team_ids.length === 0) {
-    return 'No teams'
-  }
-
-  try {
-    const team_info_promises = team_ids.map((tid) => get_team_info(tid))
-    const teams = await Promise.all(team_info_promises)
-
-    const team_names = teams
-      .filter((team) => team !== null)
-      .map((team) => team.name || `Team ${team.team_id}`)
-      .join(', ')
-
-    return team_names || 'Unknown teams'
-  } catch (error) {
-    console.error('Error formatting team list:', error)
-    return 'Error loading teams'
-  }
-}
-
-/**
  * Format player name for Discord display
  * @param {object} player - Player object from database
  * @returns {string} Formatted player name with position
@@ -86,11 +60,16 @@ const format_player_display = (player) => {
 }
 
 /**
- * Format nomination message for Discord
- * @param {string} team_id - Team ID that nominated the player
+ * Format a claim message for Discord.
+ *
+ * ANNOUNCES THE CLAIM AND NOTHING ELSE. Whom the auction is still waiting on
+ * is the client's surface -- `AUCTION_SETTLEMENT_STATUS` carries the
+ * outstanding team ids and the settlement-status component renders them -- so
+ * this names only who claimed the player and at what amount.
+ *
+ * @param {string} team_id - Team ID that nominated or bid on the player
  * @param {string} player_id - Player ID
- * @param {number} bid_amount - Current bid amount
- * @param {number[]} eligible_teams - team ids the auction is still waiting on
+ * @param {number} bid_amount - The claimed amount
  * @param {boolean} is_nomination - Whether the message is for a nomination or a bid
  * @returns {Promise<string>} Formatted Discord message
  */
@@ -98,7 +77,6 @@ export const format_nomination_message = async ({
   team_id,
   player_id,
   bid_amount,
-  eligible_teams,
   is_nomination
 }) => {
   const player = await get_player_info(player_id)
@@ -113,9 +91,8 @@ export const format_nomination_message = async ({
 
   const player_display = format_player_display(player)
   const team_name = team.name || `Team ${team.team_id}`
-  const teams_display = await format_team_list(eligible_teams)
 
-  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Waiting on: ${teams_display}. Each must set a maximum bid or decline before this player settles.`
+  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}.`
 }
 
 /**

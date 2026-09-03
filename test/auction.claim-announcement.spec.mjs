@@ -141,6 +141,9 @@ describe('auction claim announcement', function () {
       )
       expect(announced[0].message).to.not.include('bid on')
       expect(announced[0].league, 'the league it sends to').to.exist
+      // THE CLAIM AND NOTHING ELSE. The outstanding set is the client's
+      // surface now, so a message carrying it would trip here.
+      expect(announced[0].message).to.not.include('Waiting on')
     })
 
     // THE OPERATOR'S RULE, first half. A bid outside a block is a rare,
@@ -169,6 +172,9 @@ describe('auction claim announcement', function () {
       expect(bid_message, 'the bid verb').to.include('bid on')
       expect(bid_message, 'not the nomination verb').to.not.include('nominated')
       expect(bid_message, 'the amount bid').to.include('$2')
+      expect(bid_message, 'no outstanding set in a claim').to.not.include(
+        'Waiting on'
+      )
     })
   })
 
