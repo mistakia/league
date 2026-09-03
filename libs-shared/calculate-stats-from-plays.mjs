@@ -75,7 +75,11 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.ball_carrier_pid, 'mbt', play.missed_or_broken_tackle)
         if (play.rush_yards > 0) addStat(play.ball_carrier_pid, 'posra', 1)
         if (play.is_first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
-        if (play.is_touchdown)
+        // is_touchdown is true for ANY touchdown on the play, including one the
+        // defense scored on a fumble it returned -- and the play is still a
+        // RUSH with ball_carrier_pid naming the player who lost the ball.
+        // is_rushing_touchdown is the flag that names the scorer's role.
+        if (play.is_rushing_touchdown)
           addStat(play.ball_carrier_pid, 'rushing_touchdowns', 1)
         break
       }
@@ -146,7 +150,10 @@ const calculateStatsFromPlays = (plays) => {
             addStat(play.target_pid, 'first_down', 1)
           }
 
-          if (play.is_touchdown) {
+          // Same reason as the rushing case above: a completion the receiver
+          // fumbled back to a defender who scored is is_touchdown = true with
+          // passer_pid and target_pid naming the offense.
+          if (play.is_passing_touchdown) {
             addStat(play.passer_pid, 'passing_touchdowns', 1)
             addStat(play.target_pid, 'receiving_touchdowns', 1)
           }

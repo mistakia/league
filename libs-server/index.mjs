@@ -239,6 +239,10 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.interceptor_pid',
       'nfl_plays.is_completion',
       'nfl_plays.is_touchdown',
+      // The role-named flags calculate-stats-from-plays.mjs credits touchdowns
+      // by. is_touchdown alone cannot say WHO scored, so it cannot carry them.
+      'nfl_plays.is_passing_touchdown',
+      'nfl_plays.is_rushing_touchdown',
       'nfl_plays.is_sack',
       'nfl_plays.down_number',
       'nfl_plays.quarter',
