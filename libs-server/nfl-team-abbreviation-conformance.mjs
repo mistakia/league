@@ -101,6 +101,20 @@ const reference_ctes = `
 */
 const conforms_predicate = `
   case
+    /*
+      An UNDATABLE row is a violation, never a pass. Without this arm a NULL
+      season makes both range comparisons NULL, so neither EXISTS is true and
+      control reaches the membership arm below -- where BAL and HOU are
+      canonical and a Colts or Oilers row grades CLEAN. That is the exact
+      collision this check exists to catch, arriving through the one column in
+      scope that is nullable (nfl_games.season_year), and it is inherited by
+      every nfl_play_stats row joining such a game.
+
+      Reported as a violation rather than as un-gradeable because it is loud in
+      the direction that matters: nothing can say whether the row conforms, and
+      a check that cannot tell must not answer yes. Zero such rows exist today.
+    */
+    when s.season_year is null then false
     when exists (
       select 1 from era e
       where e.era_nfl_team = s.t

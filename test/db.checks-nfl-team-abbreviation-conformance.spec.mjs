@@ -192,6 +192,35 @@ describe('data checks / nfl-team-abbreviation-conformance', function () {
       .exist
   })
 
+  it('reports an UNDATABLE row rather than grading it clean', async () => {
+    /*
+      nfl_games.season_year is nullable, and it is the only season column in
+      scope that is. With a NULL season both range comparisons are NULL, so
+      neither EXISTS fires and control used to reach the membership arm -- where
+      BAL is canonical, so a Colts game with no season graded CLEAN. The check's
+      whole reason for existing is that BAL cannot be judged on the token alone,
+      and a missing season is the case where it cannot be judged at all.
+    */
+    await db('nfl_games').insert({
+      esbid: esbid_base + 8,
+      season_year: null,
+      week: 1,
+      season_type: 'REG',
+      away_nfl_team: 'BAL',
+      home_nfl_team: 'MIA'
+    })
+
+    const { result } = await run()
+    const finding = result.findings.find(
+      (row) =>
+        row.table_name === 'nfl_games' &&
+        row.column_name === 'away_nfl_team' &&
+        row.season_year === null
+    )
+
+    expect(finding, 'a row with no season must not grade clean').to.exist
+  })
+
   it('reports an unmodelled token rather than passing it through', async () => {
     // The SQL predicate's form of the resolver's `throw`: a token in no era
     // range and in neither the canonical nor the non-franchise set is a

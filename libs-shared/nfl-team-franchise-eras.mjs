@@ -253,10 +253,30 @@ export const resolve_canonical_nfl_team = ({ era_nfl_team, season_year }) => {
     throw new Error(`resolve_canonical_nfl_team: missing era_nfl_team`)
   }
 
-  const year = Number(season_year)
+  /*
+    Number() is NOT a usable guard here and reading it as one is the bug this
+    shape exists to prevent: Number(null), Number('') and Number([]) are all 0,
+    and 0 is an integer, so a bare `Number.isInteger(Number(season_year))`
+    ACCEPTS every one of them and resolves at year 0. Year 0 matches no era
+    range, so the token falls through to the canonical-identity case and a
+    ('BAL', null) row resolves to BAL -- silently answering the Ravens for a row
+    whose season nobody knows, which is precisely the collision this module
+    exists to get right. Only `undefined` threw.
+
+    So the type is checked BEFORE any coercion, and a numeric string is admitted
+    explicitly rather than by accident. season_year is nullable on nfl_games,
+    which is where such a row would come from.
+  */
+  const year =
+    typeof season_year === 'number'
+      ? season_year
+      : typeof season_year === 'string' && season_year.trim() !== ''
+        ? Number(season_year)
+        : NaN
+
   if (!Number.isInteger(year)) {
     throw new Error(
-      `resolve_canonical_nfl_team: invalid season_year (${season_year}) for ${era_nfl_team}`
+      `resolve_canonical_nfl_team: invalid season_year (${JSON.stringify(season_year)}) for ${era_nfl_team}`
     )
   }
 

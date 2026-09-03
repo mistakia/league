@@ -167,6 +167,33 @@ describe('libs-shared nfl-team-franchise-eras', function () {
       ).to.throw(/invalid season_year/)
     })
 
+    it('throws on every falsy season_year that Number() would coerce to 0', function () {
+      /*
+        The guard used to be Number.isInteger(Number(season_year)), which
+        ACCEPTS all three of these: Number(null), Number('') and Number([]) are
+        0, and 0 is an integer. Resolution then ran at year 0, matched no era
+        range, fell through to the canonical-identity case, and answered BAL
+        for a Colts row whose season was unknown -- the module's own collision
+        case, resolved wrongly and silently. Only `undefined` threw, which is
+        why the omitted-key test below did not catch it.
+      */
+      for (const season_year of [null, '', [], {}, NaN, '   ']) {
+        expect(
+          () =>
+            resolve_canonical_nfl_team({ era_nfl_team: 'BAL', season_year }),
+          `season_year ${JSON.stringify(season_year)} must throw`
+        ).to.throw(/invalid season_year/)
+      }
+    })
+
+    it('still accepts a numeric string, which is what a driver may hand back', function () {
+      // The green half: the guard above must reject absence without rejecting
+      // a legitimately-typed year.
+      expect(
+        resolve_canonical_nfl_team({ era_nfl_team: 'BAL', season_year: '1975' })
+      ).to.equal('IND')
+    })
+
     it('throws on a non-numeric season_year', function () {
       expect(() =>
         resolve_canonical_nfl_team({
