@@ -440,7 +440,8 @@
       "watchlist": "keep",
       "last_visit_at": "keep",
       "invite_code": "NULL",
-      "data_view_export_max_rows": "keep"
+      "data_view_export_max_rows": "keep",
+      "data_view_generation_is_enabled": "keep"
     },
     "user_api_keys": {
       "api_key_id": "keep",

@@ -21614,6 +21614,7 @@ export interface UsersRow {
   last_visit_at: Date | null
   invite_code: string | null
   data_view_export_max_rows: number | null
+  data_view_generation_is_enabled: boolean
 }
 
 export interface UsersSourcesRow {

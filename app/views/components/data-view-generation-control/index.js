@@ -16,11 +16,14 @@ const pending_generation = load_pending_generation()
 const map_state_to_props = createSelector(
   (state) => state.get('data_view_generation'),
   get_selected_data_view,
-  (state) => state.getIn(['app', 'userId']),
-  (generation, selected_data_view, user_id) => ({
+  // The per-account entitlement, read off the user record GET /api/me
+  // populates. It subsumes the old is_logged_in prop: an anonymous visitor has
+  // no user record, so the flag is undefined and the control does not render.
+  (state) => state.getIn(['app', 'user', 'data_view_generation_is_enabled']),
+  (generation, selected_data_view, is_generation_enabled) => ({
     generation: generation ? generation.toJS() : {},
     table_state: selected_data_view?.table_state ?? null,
-    is_logged_in: Boolean(user_id),
+    is_generation_enabled: Boolean(is_generation_enabled),
     pending_generation_id: pending_generation?.generation_id ?? null
   })
 )

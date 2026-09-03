@@ -28234,8 +28234,16 @@ CREATE TABLE public.users (
     watchlist text,
     last_visit_at timestamp with time zone,
     invite_code character varying(20),
-    data_view_export_max_rows integer DEFAULT 100000
+    data_view_export_max_rows integer DEFAULT 100000,
+    data_view_generation_is_enabled boolean DEFAULT false NOT NULL
 );
+
+
+--
+-- Name: COLUMN users.data_view_generation_is_enabled; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.users.data_view_generation_is_enabled IS 'Whether this account may run agentic data view generation. Closed by default; opened one account at a time with an UPDATE, never a deploy.';
 
 
 --

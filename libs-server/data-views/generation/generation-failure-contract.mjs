@@ -59,6 +59,17 @@ export const GENERATION_FAILURES = Object.freeze({
     caller_fault: true,
     retryable: false
   },
+  // The per-account entitlement, and it is the caller's fault only in the sense
+  // that the account is theirs. NOT retryable: the caller can ask for access,
+  // but waiting changes nothing, and a client that rendered this like queue_full
+  // would send them back every few seconds forever. The client is expected to
+  // render no generation control at all rather than surface this -- it is here
+  // for the caller who reaches the socket some other way.
+  generation_not_enabled: {
+    summary: 'this account is not enabled for view generation',
+    caller_fault: true,
+    retryable: false
+  },
   // Retryable and the caller's to retry: the queue is full RIGHT NOW, and it
   // reports its depth so the caller can decide rather than guess.
   queue_full: {

@@ -57,12 +57,44 @@ const no_watch = () => {
 describe('data view generation socket', function () {
   this.timeout(30000)
 
+  // The entitled accounts every other case in this file acts as, and the ONE
+  // that is not. GENERATION_USER_ID and OTHER_USER_ID carry the flag because
+  // admission now requires it; NOT_ENABLED_USER_ID is the negative control, and
+  // it is a real row rather than a missing one so the two refusal causes stay
+  // distinguishable.
+  const GENERATION_USER_ID = 1
+  const OTHER_USER_ID = 2
+  const NOT_ENABLED_USER_ID = 3
+
   before(async function () {
     const exists = await db.schema.hasTable('data_view_generation_jobs')
     expect(
       exists,
       'data_view_generation_jobs exists -- apply db/adhoc/2026-09-02-create-data-view-generation-jobs.sql'
     ).to.equal(true)
+
+    await db('users')
+      .insert([
+        {
+          id: GENERATION_USER_ID,
+          username: 'generation_one',
+          email: 'generation_one@example.invalid',
+          data_view_generation_is_enabled: true
+        },
+        {
+          id: OTHER_USER_ID,
+          username: 'generation_two',
+          email: 'generation_two@example.invalid',
+          data_view_generation_is_enabled: true
+        },
+        {
+          id: NOT_ENABLED_USER_ID,
+          username: 'generation_none',
+          email: 'generation_none@example.invalid'
+        }
+      ])
+      .onConflict('id')
+      .merge()
   })
 
   beforeEach(async function () {
@@ -70,15 +102,57 @@ describe('data view generation socket', function () {
   })
 
   describe('admission', function () {
-    it('requires authentication at launch', function () {
-      expect(require_generation_principal(null).admitted).to.equal(false)
-      expect(require_generation_principal(null).error_code).to.equal(
-        'authentication_required'
-      )
+    it('requires authentication at launch', async function () {
+      const admission = await require_generation_principal({ user_id: null })
+      expect(admission.admitted).to.equal(false)
+      expect(admission.error_code).to.equal('authentication_required')
     })
 
-    it('admits a signed-in account', function () {
-      expect(require_generation_principal(7).admitted).to.equal(true)
+    it('admits an entitled account', async function () {
+      const admission = await require_generation_principal({
+        user_id: GENERATION_USER_ID
+      })
+      expect(admission.admitted).to.equal(true)
+    })
+
+    // THE NEGATIVE CONTROL FOR THE ENTITLEMENT, and it runs beside the positive
+    // one above so the gate cannot be passing by refusing everybody.
+    it('refuses a signed-in account that is not enabled', async function () {
+      const admission = await require_generation_principal({
+        user_id: NOT_ENABLED_USER_ID
+      })
+      expect(admission.admitted).to.equal(false)
+      expect(admission.error_code).to.equal('generation_not_enabled')
+    })
+
+    // Fails CLOSED on a row that is not there. An authenticated id with no user
+    // row is a deleted account or a token that outlived one, and neither is a
+    // reason to admit a run -- which is the direction a `!== false` read of the
+    // column would have gone.
+    it('refuses an authenticated id with no user row', async function () {
+      const admission = await require_generation_principal({
+        user_id: 99999
+      })
+      expect(admission.admitted).to.equal(false)
+      expect(admission.error_code).to.equal('generation_not_enabled')
+    })
+
+    // The column DEFAULT is read off a FRESHLY INSERTED ROW rather than off the
+    // DDL, because what the gate depends on is what an account created tomorrow
+    // actually gets.
+    it('defaults a newly created account to closed', async function () {
+      // An explicit id rather than the sequence: this file seeds ids 1-3
+      // directly, which does not advance users_id_seq, so a bare insert would
+      // collide on the primary key instead of exercising the column default.
+      const [inserted] = await db('users')
+        .insert({
+          id: 424242,
+          username: 'generation_fresh',
+          email: 'generation_fresh@example.invalid'
+        })
+        .returning('*')
+      expect(inserted.data_view_generation_is_enabled).to.equal(false)
+      await db('users').where({ id: inserted.id }).del()
     })
 
     it('refuses an anonymous request WITHOUT creating a job', async function () {
@@ -92,6 +166,44 @@ describe('data view generation socket', function () {
       expect(job).to.equal(null)
       expect(ws.last().type).to.equal('DATA_VIEW_GENERATION_ERROR')
       expect(await db('data_view_generation_jobs')).to.have.lengthOf(0)
+    })
+
+    it('refuses an unentitled request WITHOUT creating a job', async function () {
+      const ws = fake_socket()
+      const job = await handle_generation_request({
+        ws,
+        user_id: NOT_ENABLED_USER_ID,
+        payload: { instruction: 'top receivers' },
+        watch: no_watch()
+      })
+      expect(job).to.equal(null)
+      expect(ws.last().payload.error_code).to.equal('generation_not_enabled')
+      expect(await db('data_view_generation_jobs')).to.have.lengthOf(0)
+    })
+
+    // The SAME instruction, in the SAME run, from an entitled account. Without
+    // this the refusal above could be a handler that refuses everything.
+    it('admits the same request from an entitled account', async function () {
+      const ws = fake_socket()
+      const job = await handle_generation_request({
+        ws,
+        user_id: GENERATION_USER_ID,
+        payload: { instruction: 'top receivers' },
+        watch: no_watch()
+      })
+      expect(job).to.not.equal(null)
+      expect(ws.last().type).to.equal('DATA_VIEW_GENERATION_ACCEPTED')
+    })
+
+    it('refuses an unentitled account a COLLECT of its own job', async function () {
+      const ws = fake_socket()
+      await handle_generation_collect({
+        ws,
+        user_id: NOT_ENABLED_USER_ID,
+        payload: { generation_id: 'anything' },
+        watch: no_watch()
+      })
+      expect(ws.last().payload.error_code).to.equal('generation_not_enabled')
     })
   })
 

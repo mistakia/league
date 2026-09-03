@@ -39,15 +39,23 @@ const describe_error = ({
   if (error_code === 'queue_full' && max_queue_depth) {
     return `The generation queue is full — ${queue_depth ?? max_queue_depth} of ${max_queue_depth} runs are in flight. Try again shortly.`
   }
+  // Both reach a rendered control only when the store is STALE against the
+  // server: the panel does not render at all without the entitlement, so
+  // arriving here means the session expired or the flag was revoked while the
+  // page stayed open. Named rather than folded into the generic message,
+  // because "sign in again" and "ask for access" are different actions.
   if (error_code === 'authentication_required') {
     return 'Generating a view requires a signed-in account.'
+  }
+  if (error_code === 'generation_not_enabled') {
+    return 'This account is not enabled for view generation.'
   }
   return error_message || 'The generation could not be completed.'
 }
 
 export default function DataViewGenerationControl({
   generation,
-  is_logged_in,
+  is_generation_enabled,
   table_state,
   submit_data_view_generation,
   dismiss_data_view_generation,
@@ -62,11 +70,22 @@ export default function DataViewGenerationControl({
   // populates the panel, including for a run that finished while the tab was
   // closed.
   useEffect(() => {
-    if (!pending_generation_id) return
+    if (!is_generation_enabled || !pending_generation_id) return
     set_is_open(true)
     resume_data_view_generation({ generation_id: pending_generation_id })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [is_generation_enabled])
+
+  // NO CONTROL AT ALL for an account that is not entitled, rather than one that
+  // always refuses -- a refusal a user can do nothing about is worse than no
+  // control. This covers an anonymous visitor too, who has no user record and
+  // therefore no flag. The socket refuses independently
+  // (require_generation_principal); this is the half that decides what is
+  // offered, not the half that decides what is allowed.
+  //
+  // AFTER the hooks, deliberately: an early return above them changes the hook
+  // order between renders the moment the flag arrives from GET /api/me.
+  if (!is_generation_enabled) return null
 
   const status = generation.status
   const is_live = LIVE_STATUSES.includes(status)
@@ -104,7 +123,7 @@ export default function DataViewGenerationControl({
           className='data-view-generation__input'
           type='text'
           value={instruction}
-          disabled={!is_logged_in || is_live}
+          disabled={is_live}
           placeholder='Describe the view you want'
           aria-label='Describe the view you want'
           onChange={(event) => set_instruction(event.target.value)}
@@ -112,7 +131,7 @@ export default function DataViewGenerationControl({
         <button
           type='submit'
           className='data-view-generation__submit'
-          disabled={!is_logged_in || is_live || !instruction.trim()}
+          disabled={is_live || !instruction.trim()}
         >
           Build it
         </button>
@@ -128,12 +147,6 @@ export default function DataViewGenerationControl({
           ×
         </button>
       </form>
-
-      {!is_logged_in && (
-        <div className='data-view-generation__notice'>
-          Sign in to generate a view.
-        </div>
-      )}
 
       {status && (
         <div className='data-view-generation__status'>
@@ -183,7 +196,7 @@ export default function DataViewGenerationControl({
 
 DataViewGenerationControl.propTypes = {
   generation: PropTypes.object.isRequired,
-  is_logged_in: PropTypes.bool,
+  is_generation_enabled: PropTypes.bool,
   table_state: PropTypes.object,
   submit_data_view_generation: PropTypes.func.isRequired,
   dismiss_data_view_generation: PropTypes.func.isRequired,

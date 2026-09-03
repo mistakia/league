@@ -1,5 +1,6 @@
 import debug from 'debug'
 
+import db from '#db'
 import {
   enqueue_generation_job,
   get_generation_job,
@@ -80,17 +81,32 @@ export const project_generation_job = (job) => ({
 })
 
 /**
- * The admission check, and the ONE place authentication is required.
+ * The admission check, and the ONE place a caller is required to be both signed
+ * in and entitled.
  *
- * Written so that opening generation to anonymous callers is deleting this
- * function's body rather than re-keying anything. The principal the queue
- * stores is resolved separately by resolve_principal_key, whose anonymous
- * branch already exists and is already exercised by its own spec.
+ * BOTH CHECKS LIVE HERE, AND THAT IS THE PROPERTY WORTH KEEPING. The whole
+ * anonymous-later design rests on opening generation up being the DELETION of
+ * checks in this function rather than a re-keying of anything; a second gate
+ * somewhere else would break it, because deleting this body would then still
+ * leave a caller refused with no obvious cause.
  *
- * @param {number|null} user_id
- * @returns {{admitted: boolean, error_code?: string, message?: string}}
+ * The entitlement fails CLOSED on a user row that is not there. A missing row
+ * for an authenticated id means the account was deleted mid-session or the
+ * token outlived it, and neither is a reason to admit a run.
+ *
+ * The principal the queue stores is resolved separately by
+ * resolve_principal_key, whose anonymous branch already exists and is already
+ * exercised by its own spec.
+ *
+ * @param {object} params
+ * @param {number|null} params.user_id
+ * @param {object} [params.connection] - knex handle, injectable for the spec
+ * @returns {Promise<{admitted: boolean, error_code?: string, message?: string}>}
  */
-export const require_generation_principal = (user_id) => {
+export const require_generation_principal = async ({
+  user_id,
+  connection = db
+}) => {
   if (!user_id) {
     return {
       admitted: false,
@@ -98,6 +114,20 @@ export const require_generation_principal = (user_id) => {
       message: 'generation requires a signed-in account'
     }
   }
+
+  const user = await connection('users')
+    .select('data_view_generation_is_enabled')
+    .where({ id: user_id })
+    .first()
+
+  if (!user?.data_view_generation_is_enabled) {
+    return {
+      admitted: false,
+      error_code: 'generation_not_enabled',
+      message: 'this account is not enabled for view generation'
+    }
+  }
+
   return { admitted: true }
 }
 
@@ -189,7 +219,7 @@ export const handle_generation_request = async ({
   payload,
   watch = watch_generation_job
 }) => {
-  const admission = require_generation_principal(user_id)
+  const admission = await require_generation_principal({ user_id })
   if (!admission.admitted) {
     send_error(ws, admission)
     return null
@@ -262,7 +292,7 @@ export const handle_generation_collect = async ({
   read_job = get_generation_job,
   watch = watch_generation_job
 }) => {
-  const admission = require_generation_principal(user_id)
+  const admission = await require_generation_principal({ user_id })
   if (!admission.admitted) {
     send_error(ws, admission)
     return null
