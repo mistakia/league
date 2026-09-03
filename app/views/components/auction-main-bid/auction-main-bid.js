@@ -154,6 +154,29 @@ export default function AuctionMainBid({
     return `Cap $${auction_capacity.available_cap} is under the $${auction_capacity.current_price} price — no decline or maximum needed.`
   }
 
+  // A NARROWER REFUSAL, and it takes away one button rather than the control.
+  //
+  // `/auction-elections` refuses a DECLINE from the team that nominated the open
+  // player -- nominating is bidding, so the nominator already holds a claim and
+  // cannot answer "I will not bid" on top of it. It refuses nothing else: a
+  // maximum from the same team is an ordinary raise on its own nomination, and
+  // withdrawing an election it placed before nominating is a different verb the
+  // route does not check. So `Set maximum` and `Undo decline` stay live and
+  // only `Decline` goes.
+  //
+  // `isNominating` IS the nominator while a player is open, and it is not a
+  // second reading of the field. `resolve_nominating_team_id` returns the last
+  // nomination's team for as long as the latest transaction is a bid, and moves
+  // to the next team in the rotation only once the player is processed -- so the
+  // team on the clock and the nominator of the open player are the same team by
+  // construction, and the `nominated_pid` term is what says which of the two
+  // questions is being asked.
+  const nominated_by_this_team = Boolean(nominated_pid) && isNominating
+
+  const decline_refusal_reason = nominated_by_this_team
+    ? 'Nominating is bidding — you cannot decline your own nomination.'
+    : null
+
   const classNames = []
   let action = null
   let disabled = false
@@ -341,6 +364,7 @@ export default function AuctionMainBid({
                   pid={nominated_pid}
                   compact
                   ineligible_reason={ineligible_election_reason()}
+                  decline_refusal_reason={decline_refusal_reason}
                 />
               )}
             </div>

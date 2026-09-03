@@ -255,8 +255,11 @@ $election_control_content_max_width = 720px
     max-width 320px
 
 // The reason a control is dead is not a footnote about a control that works, so
-// it does not take the 0.6 grey the explanatory notes do.
+// it does not take the 0.6 grey the explanatory notes do. Both states qualify:
+// `ineligible` is every write off, `decline-refused` is the nominator's own
+// Decline alone.
 .auction-election-control.ineligible .auction-election-control__note
+.auction-election-control.decline-refused .auction-election-control__note
   color rgba(0, 0, 0, 0.78)
 
 // THE PHONE LAYOUT OF THE COMPACT STRIP, and it is a different shape rather than

@@ -38,6 +38,7 @@ export default function AuctionElectionControl({
   is_election_window_open,
   select_player,
   ineligible_reason = null,
+  decline_refusal_reason = null,
   compact = false
 }) {
   // WHY EVERY WRITE HERE IS OFF, in the caller's words. The control does not
@@ -54,6 +55,16 @@ export default function AuctionElectionControl({
   // an absent control reads as a bug on a bar that was offering one a second
   // ago, and it answers no question about why.
   const is_ineligible = Boolean(ineligible_reason)
+
+  // ONE BUTTON, not the control. The route refuses a decline from the team that
+  // nominated the open player and refuses nothing else from it, so a maximum and
+  // a withdrawal stay available -- disabling the group here would take away two
+  // writes the server would have honored, on the one surface where the manager
+  // is most likely to want them.
+  //
+  // Subordinate to `is_ineligible`: a team that cannot roster the player has
+  // nothing to set either, and the two lines would otherwise both want the note.
+  const is_decline_refused = Boolean(decline_refusal_reason) && !is_ineligible
   const has_election = Boolean(election)
   const is_decline = has_election && election.get('maximum_bid') === null
   const maximum_bid = has_election ? election.get('maximum_bid') : null
@@ -116,6 +127,7 @@ export default function AuctionElectionControl({
   // day, which returned the ~260px basis it had been holding.
   if (compact) class_names.push('compact')
   if (is_ineligible) class_names.push('ineligible')
+  if (is_decline_refused) class_names.push('decline-refused')
   if (is_settled) class_names.push('settled')
   else if (is_decline) class_names.push('declined')
   else if (has_election) class_names.push('maximum')
@@ -142,6 +154,7 @@ export default function AuctionElectionControl({
     // of the others explains how a write here will be honored; there is no
     // write here to explain.
     if (is_ineligible) return ineligible_reason
+    if (is_decline_refused) return decline_refusal_reason
     if (is_decline) {
       return 'You will not bid. Revocable until this player settles.'
     }
@@ -200,7 +213,7 @@ export default function AuctionElectionControl({
             ) : (
               <Button
                 small
-                disabled={is_ineligible}
+                disabled={is_ineligible || is_decline_refused}
                 onClick={() => submit(null)}
               >
                 Decline
@@ -238,7 +251,7 @@ export default function AuctionElectionControl({
             there. Two disabled buttons and no reason is the state this change
             exists to remove, so the strip carries the line for exactly the case
             that produced it. */}
-        {(!compact || is_ineligible) && (
+        {(!compact || is_ineligible || is_decline_refused) && (
           <div className='auction-election-control__note'>{render_note()}</div>
         )}
       </div>
@@ -257,5 +270,6 @@ AuctionElectionControl.propTypes = {
   is_election_window_open: PropTypes.bool,
   select_player: PropTypes.func,
   ineligible_reason: PropTypes.string,
+  decline_refusal_reason: PropTypes.string,
   compact: PropTypes.bool
 }
