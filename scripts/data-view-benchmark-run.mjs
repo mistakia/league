@@ -1,0 +1,679 @@
+#!/usr/bin/env node
+
+// The instruction-to-answer benchmark for agentic data-view generation.
+//
+// Takes a set of natural-language instructions and emits ONE COMPARABLE ROW PER
+// RUN: status, duration, turns, output tokens, tool-call composition by class,
+// branch, contention, and pass/fail. The point is to rank a change by
+// measurement instead of by a single run, so everything here is built around
+// two rules that a casual harness gets wrong.
+//
+// RULE ONE: A GREEN RUN PROVES NOTHING ABOUT CORRECTNESS. A run that completes
+// and emits a plausible-looking table_state has demonstrated that it produced
+// well-formed output, not that it answered the question. So this runner
+// EXECUTES the emitted table_state against production and compares the rows to
+// an answer derived independently in SQL -- see
+// scripts/data-view-benchmark-ground-truth.mjs, which is where the expected
+// values come from and why they are not hand-written. Status and correctness
+// are separate columns and they disagree often enough that collapsing them
+// would hide the interesting cases.
+//
+// RULE TWO: COUNT TURNS BY DISTINCT `message.id`. The transcript writes roughly
+// 2.7 records per API call, so counting `type: "assistant"` records inflates
+// everything downstream of it -- measured 80 records against 26 real turns, and
+// 40,294 output tokens against 12,553, while the authoritative `cost-state`
+// line disagreed the whole time. A distinct id is one API call. This runner
+// additionally requires the id to carry at least one text, thinking or tool_use
+// block, because some providers emit empty assistant messages mid-turn; on
+// deepseek-v4-flash the two rules agree exactly, and the stricter one costs
+// nothing while protecting against the provider that does not.
+//
+// WALL CLOCK IS NOT COMPARABLE ACROSS SITTINGS. Both GPUs are shared with every
+// other live session on the fleet and cold prefill throughput swings by more
+// than an order of magnitude on load alone. Duration is recorded because it is
+// cheap and occasionally diagnostic, but a change is ranked on turns, output
+// tokens and tool-call composition. Contention is sampled PER INSTRUCTION
+// rather than once per invocation, because prefix retention is eviction-driven
+// and two instructions at different contention are measuring different systems.
+//
+//   NODE_ENV=production node scripts/data-view-benchmark-run.mjs
+//   NODE_ENV=production node scripts/data-view-benchmark-run.mjs \
+//     --select qb-passing-yards-2023 --select wr-receiving-yards-2023 --repeat 3
+//   NODE_ENV=production node scripts/data-view-benchmark-run.mjs --json
+//
+// Runs are SERIALIZED because the generation profile permits one concurrent
+// session. Nothing here dispatches a second job while one is live.
+
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
+
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+import db from '#db'
+import { execute_data_view_request } from '#libs-server/data-views/execute-data-view-request.mjs'
+import {
+  derive_transcript_metrics,
+  parse_transcript
+} from '#libs-server/data-views/generation/benchmark-metrics.mjs'
+import { is_main } from '#libs-server'
+
+const exec_file = promisify(execFile)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const INSTRUCTIONS_PATH = path.join(
+  __dirname,
+  '..',
+  'test',
+  'data-view-benchmark',
+  'instructions.json'
+)
+
+// The session rail lives on another host, so every fact about a run that league
+// does not store has to be fetched over ssh. Overridable because a second
+// deployment of this system would key them differently; defaulted because
+// requiring three environment variables to run a benchmark is friction on every
+// invocation.
+const GENERATION_HOST = process.env.LEAGUE_GENERATION_HOST || 'base-storage'
+const GENERATION_CONTAINER =
+  process.env.LEAGUE_GENERATION_CONTAINER ||
+  'base-user-league-data-view-generation--league-data-view-generation'
+const GENERATION_TRANSCRIPT_DIR =
+  process.env.LEAGUE_GENERATION_TRANSCRIPT_DIR ||
+  '/home/node/.claude-local/projects/-Users-trashman-user-base-repository-active-league'
+// `base` and `base thread` run against the user base, not this checkout.
+const USER_BASE_DIR =
+  process.env.USER_BASE_DIRECTORY || '/Users/trashman/user-base'
+// The container's own user. Both reads below run as `node` rather than root:
+// the transcript is 0600 owned by that uid, so this is what makes the read
+// work, not only house style.
+const GENERATION_CONTAINER_USER =
+  process.env.LEAGUE_GENERATION_CONTAINER_USER || 'node'
+const VLLM_METRICS_URL =
+  process.env.LEAGUE_GENERATION_METRICS_URL || 'localhost:8113/metrics'
+
+const PRINCIPAL_KEY = process.env.LEAGUE_BENCHMARK_PRINCIPAL_KEY || 'user:1'
+const BENCHMARK_USER_ID = Number(process.env.LEAGUE_BENCHMARK_USER_ID || 1)
+
+const POLL_INTERVAL_MS = 5 * 1000
+// The job's own deadline is 15 minutes and the sweep closes it there. This is
+// the runner's patience for the row reaching a terminal status AFTER that, and
+// exceeding it is a defect in the sweep rather than a slow run.
+const RUN_TIMEOUT_MS = 22 * 60 * 1000
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * Run a command, returning stdout and never throwing.
+ *
+ * Every shell-out here is diagnostic rather than load-bearing: a benchmark run
+ * that cannot read the contention figure should still report its turns, with a
+ * null in that column, rather than dying and losing the run it just spent.
+ *
+ * @param {string} command
+ * @param {string[]} args
+ * @param {object} [options]
+ * @returns {Promise<{ok: boolean, stdout: string, error: string|null}>}
+ */
+const try_exec = async (command, args, options = {}) => {
+  try {
+    const { stdout } = await exec_file(command, args, {
+      maxBuffer: 64 * 1024 * 1024,
+      ...options
+    })
+    return { ok: true, stdout, error: null }
+  } catch (error) {
+    return { ok: false, stdout: '', error: error.message }
+  }
+}
+
+/**
+ * How many sessions are running fleet-wide right now.
+ *
+ * @returns {Promise<number|null>}
+ */
+export const read_contention = async () => {
+  const { ok, stdout } = await try_exec(
+    'base',
+    ['thread', 'list', '--running'],
+    {
+      cwd: USER_BASE_DIR
+    }
+  )
+  if (!ok) return null
+  const lines = stdout.split('\n').filter((line) => line.trim().length)
+  return lines.length
+}
+
+/**
+ * The vLLM prefix-cache counters, sampled now.
+ *
+ * Cumulative and fleet-wide, so only the DIFFERENCE across one dispatch is
+ * attributable -- and even that is contaminated by concurrent sessions, which
+ * is why the contention figure is recorded beside it.
+ *
+ * @returns {Promise<{queries: number, hits: number}|null>}
+ */
+export const read_prefix_cache_counters = async () => {
+  const { ok, stdout } = await try_exec('ssh', [
+    GENERATION_HOST,
+    `curl -s ${VLLM_METRICS_URL} | grep -E '^vllm:prefix_cache_(queries|hits)_total'`
+  ])
+  if (!ok) return null
+  const read = (name) => {
+    const match = stdout.match(
+      new RegExp(`^vllm:prefix_cache_${name}_total[^ ]* ([0-9.e+]+)`, 'm')
+    )
+    return match ? Number(match[1]) : null
+  }
+  const queries = read('queries')
+  const hits = read('hits')
+  if (queries === null && hits === null) return null
+  return { queries, hits }
+}
+
+/**
+ * Insert one queued job. The drainer claims it within seconds.
+ *
+ * `deadline_at` is deliberately not supplied so the column default applies --
+ * setting it here would let a benchmark quietly measure a different deadline
+ * than production uses.
+ *
+ * @param {object} params
+ * @param {string} params.instruction
+ * @returns {Promise<string>} generation_id
+ */
+export const enqueue_generation_job = async ({ instruction }) => {
+  const [row] = await db('data_view_generation_jobs')
+    .insert({
+      instruction,
+      user_id: BENCHMARK_USER_ID,
+      principal_key: PRINCIPAL_KEY,
+      status: 'queued'
+    })
+    .returning('generation_id')
+  return row.generation_id || row
+}
+
+const TERMINAL_JOB_STATUSES = ['completed', 'failed', 'expired']
+
+/**
+ * Poll one job row to a terminal status.
+ *
+ * @param {object} params
+ * @param {string} params.generation_id
+ * @param {(message: string) => void} params.log
+ * @returns {Promise<object>}
+ */
+export const await_job_completion = async ({ generation_id, log }) => {
+  const started = Date.now()
+  let last_status = null
+  for (;;) {
+    const job = await db('data_view_generation_jobs')
+      .where({ generation_id })
+      .first()
+    if (!job) throw new Error(`job ${generation_id} disappeared`)
+
+    if (job.status !== last_status) {
+      log(`  status: ${job.status}`)
+      last_status = job.status
+    }
+    if (TERMINAL_JOB_STATUSES.includes(job.status)) return job
+
+    if (Date.now() - started > RUN_TIMEOUT_MS) {
+      // Returned rather than thrown: a row stuck in `running` past its own
+      // deadline is a real measurement about the sweep, and losing the rest of
+      // the benchmark over it would be the wrong trade.
+      log(
+        `  gave up waiting after ${Math.round((Date.now() - started) / 1000)}s`
+      )
+      return { ...job, runner_timed_out: true }
+    }
+    await sleep(POLL_INTERVAL_MS)
+  }
+}
+
+/**
+ * The claude session id backing a thread.
+ *
+ * The transcript on disk is named for the SESSION, while league only ever
+ * records the THREAD, so this hop is required and there is no way to guess it
+ * from the job row.
+ *
+ * @param {string} thread_id
+ * @returns {Promise<string|null>}
+ */
+export const read_session_id = async ({ thread_id }) => {
+  const { ok, stdout } = await try_exec(
+    'base',
+    ['thread', 'get', thread_id, '--json'],
+    { cwd: USER_BASE_DIR }
+  )
+  if (!ok) return null
+  try {
+    const parsed = JSON.parse(stdout)
+    const thread = parsed.thread || parsed
+    return thread?.external_session?.session_id || null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Pull one session transcript out of the tenant container.
+ *
+ * @param {string} session_id
+ * @returns {Promise<object[]|null>} parsed JSONL records
+ */
+export const read_transcript = async ({ session_id }) => {
+  const { ok, stdout } = await try_exec('ssh', [
+    GENERATION_HOST,
+    `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} cat ${GENERATION_TRANSCRIPT_DIR}/${session_id}.jsonl`
+  ])
+  if (!ok || !stdout.trim()) return null
+  return parse_transcript(stdout)
+}
+
+const IDENTITY_KEY_CANDIDATES = {
+  pid: ['pid', 'player_id'],
+  team: [
+    'team',
+    'nfl_team',
+    'team_abbreviation',
+    'abbreviation',
+    'offense_nfl_team'
+  ]
+}
+
+/**
+ * Pull the identity out of one result row.
+ *
+ * @param {object} row
+ * @param {string} identity_key
+ * @returns {string|null}
+ */
+const row_identity = (row, identity_key) => {
+  for (const candidate of IDENTITY_KEY_CANDIDATES[identity_key] || [
+    identity_key
+  ]) {
+    if (row[candidate] !== undefined && row[candidate] !== null) {
+      return String(row[candidate])
+    }
+  }
+  return null
+}
+
+/**
+ * Does the row carry the expected measure anywhere in it?
+ *
+ * Checked against EVERY numeric field rather than a named column, because the
+ * agent chooses its own columns and their order, so the result key for the
+ * ranked statistic is not knowable in advance. Matching on value is
+ * column-key-agnostic and still discriminating: a run that ranked by the wrong
+ * statistic returns the wrong magnitude and fails here even when it happened to
+ * order the leaders correctly.
+ *
+ * @param {object} row
+ * @param {number} expected
+ * @param {number} tolerance
+ * @returns {boolean}
+ */
+const row_carries_measure = (row, expected, tolerance) => {
+  const allowed = Math.max(Math.abs(expected) * tolerance, 0.011)
+  return Object.values(row).some(
+    (value) =>
+      typeof value === 'number' && Math.abs(value - expected) <= allowed
+  )
+}
+
+/**
+ * Execute the emitted table_state against production and grade it.
+ *
+ * THIS IS THE STEP A GREEN RUN CANNOT SUBSTITUTE FOR. Everything above measures
+ * what a run spent; this measures whether it was right.
+ *
+ * @param {object} params
+ * @param {object} params.table_state
+ * @param {object} params.entry - the instruction entry with its assertion
+ * @returns {Promise<object>}
+ */
+export const check_correctness = async ({ table_state, entry }) => {
+  if (!table_state) {
+    return { correct: false, reason: 'no table_state was emitted' }
+  }
+
+  const limit = Math.max(entry.min_rows || 0, entry.expected_leaders.length, 5)
+
+  let rows
+  try {
+    const { data_view_results } = await execute_data_view_request({
+      request_id: null,
+      params: { ...table_state, offset: 0, limit },
+      user_id: null,
+      path: 'benchmark',
+      cache_key: null,
+      skip_cache: true
+    })
+    rows = data_view_results || []
+  } catch (error) {
+    return {
+      correct: false,
+      reason: `emitted table_state failed to execute: ${error.message}`
+    }
+  }
+
+  if (rows.length < Math.min(entry.min_rows || 0, limit)) {
+    return {
+      correct: false,
+      reason: `returned ${rows.length} rows, expected at least ${entry.min_rows}`,
+      returned_rows: rows.length
+    }
+  }
+
+  const mismatches = []
+  entry.expected_leaders.forEach((leader, index) => {
+    const row = rows[index]
+    if (!row) {
+      mismatches.push(`rank ${index + 1}: no row returned`)
+      return
+    }
+    const identity = row_identity(row, entry.identity_key)
+    if (identity === null) {
+      mismatches.push(
+        `rank ${index + 1}: no ${entry.identity_key} in row (keys: ${Object.keys(row).join(',')})`
+      )
+      return
+    }
+    if (identity !== leader.identity) {
+      mismatches.push(
+        `rank ${index + 1}: got ${identity}, expected ${leader.identity} (${leader.label})`
+      )
+      return
+    }
+    if (!row_carries_measure(row, leader.measure, entry.measure_tolerance)) {
+      mismatches.push(
+        `rank ${index + 1}: ${leader.label} present but no field equals ${leader.measure}`
+      )
+    }
+  })
+
+  return {
+    correct: mismatches.length === 0,
+    reason: mismatches.length ? mismatches.join('; ') : null,
+    returned_rows: rows.length
+  }
+}
+
+/**
+ * Release the session a finished run strands.
+ *
+ * Every finished run leaves its session registered as running, where it holds
+ * the profile's single concurrency slot and blocks the next dispatch. This is a
+ * base-side reconciler defect, not something the benchmark caused, and it is
+ * not fixed -- so the runner clears it or the second instruction never
+ * dispatches.
+ *
+ * The process check comes first: ending a thread whose agent is still thinking
+ * would kill a live run, and the whole point is to reap the ones that are
+ * already gone.
+ *
+ * @param {object} params
+ * @param {string} params.thread_id
+ * @param {(message: string) => void} params.log
+ * @returns {Promise<{reaped: boolean, reason: string}>}
+ */
+export const reap_stranded_session = async ({ thread_id, log }) => {
+  if (!thread_id)
+    return { reaped: false, reason: 'no thread_id on the job row' }
+
+  const { ok, stdout } = await try_exec('ssh', [
+    GENERATION_HOST,
+    `docker exec -u ${GENERATION_CONTAINER_USER} ${GENERATION_CONTAINER} ps -eo pid,args || true`
+  ])
+  if (!ok) {
+    return { reaped: false, reason: 'could not inspect container processes' }
+  }
+  const claude_processes = stdout
+    .split('\n')
+    .filter((line) => /claude/.test(line) && !/grep/.test(line))
+  if (claude_processes.length) {
+    return {
+      reaped: false,
+      reason: `${claude_processes.length} claude process(es) still running; left alone`
+    }
+  }
+
+  const ended = await try_exec(
+    'base',
+    ['thread', 'end', thread_id, '--force-cross-thread'],
+    { cwd: USER_BASE_DIR }
+  )
+  if (!ended.ok) {
+    log(`  session reap failed: ${ended.error}`)
+    return { reaped: false, reason: ended.error }
+  }
+  log('  stranded session released')
+  return { reaped: true, reason: 'ended' }
+}
+
+/**
+ * One instruction, once: dispatch, wait, measure, grade.
+ *
+ * @param {object} params
+ * @returns {Promise<object>}
+ */
+export const run_one = async ({ entry, iteration, log }) => {
+  log(`\n${entry.instruction_id} (run ${iteration})`)
+  log(`  "${entry.instruction}"`)
+
+  const contention_before = await read_contention()
+  const cache_before = await read_prefix_cache_counters()
+  const wall_start = Date.now()
+
+  const generation_id = await enqueue_generation_job({
+    instruction: entry.instruction
+  })
+  log(`  generation_id ${generation_id}`)
+
+  const job = await await_job_completion({ generation_id, log })
+  const wall_ms = Date.now() - wall_start
+
+  const contention_after = await read_contention()
+  const cache_after = await read_prefix_cache_counters()
+
+  const reap = await reap_stranded_session({ thread_id: job.thread_id, log })
+
+  let metrics = null
+  let session_id = null
+  if (job.thread_id) {
+    session_id = await read_session_id({ thread_id: job.thread_id })
+    if (session_id) {
+      const records = await read_transcript({ session_id })
+      if (records) metrics = derive_transcript_metrics(records)
+    }
+  }
+
+  const table_state = job.result?.table_state || null
+  const correctness = await check_correctness({ table_state, entry })
+
+  const cache_delta =
+    cache_before && cache_after
+      ? {
+          queries: cache_after.queries - cache_before.queries,
+          hits: cache_after.hits - cache_before.hits
+        }
+      : null
+
+  const row = {
+    instruction_id: entry.instruction_id,
+    capability: entry.capability,
+    iteration,
+    generation_id,
+    thread_id: job.thread_id || null,
+    session_id,
+    status: job.status,
+    runner_timed_out: Boolean(job.runner_timed_out),
+    branch: job.generation_branch || null,
+    error_code: job.error_code || null,
+    wall_ms,
+    job_duration_ms: job.duration_milliseconds ?? null,
+    turns: metrics?.turns ?? null,
+    output_tokens: metrics?.output_tokens ?? null,
+    input_tokens: metrics?.input_tokens ?? null,
+    cost_state_output_tokens: metrics?.cost_state_output_tokens ?? null,
+    output_token_gap: metrics?.output_token_gap ?? null,
+    tool_calls: metrics?.tool_call_count ?? null,
+    buckets: metrics?.buckets ?? null,
+    tool_names: metrics?.tool_names ?? null,
+    api_duration_ms: metrics?.total_api_duration_ms ?? null,
+    tool_duration_ms: metrics?.total_tool_duration_ms ?? null,
+    models: metrics?.models ?? null,
+    provider_error: metrics?.provider_error ?? null,
+    correct: correctness.correct,
+    correctness_reason: correctness.reason,
+    returned_rows: correctness.returned_rows ?? null,
+    contention_before,
+    contention_after,
+    prefix_cache_delta: cache_delta,
+    session_reaped: reap.reaped,
+    measured_at: new Date().toISOString()
+  }
+
+  log(
+    `  -> ${row.status} | turns ${row.turns ?? '?'} | output ${row.output_tokens ?? '?'} | ` +
+      `calls ${row.tool_calls ?? '?'} | correct ${row.correct ? 'YES' : 'NO'}`
+  )
+  if (!row.correct && row.correctness_reason) {
+    log(`     ${row.correctness_reason}`)
+  }
+  if (row.provider_error) {
+    log(`     PROVIDER ERROR in transcript: ${row.provider_error}`)
+  }
+  if (metrics === null) {
+    log(
+      '     no transcript metrics; turn and token columns are absence of data, not zero'
+    )
+  }
+
+  return row
+}
+
+/**
+ * @param {object[]} rows
+ * @returns {string}
+ */
+export const format_table = (rows) => {
+  const header = [
+    'instruction',
+    'run',
+    'status',
+    'branch',
+    'turns',
+    'output',
+    'calls',
+    'dives',
+    'correct',
+    'contention'
+  ]
+  const body = rows.map((row) => [
+    row.instruction_id,
+    String(row.iteration),
+    row.runner_timed_out ? 'STUCK' : row.status,
+    row.branch || '-',
+    row.turns === null ? '?' : String(row.turns),
+    row.output_tokens === null ? '?' : String(row.output_tokens),
+    row.tool_calls === null ? '?' : String(row.tool_calls),
+    row.buckets ? String(row.buckets['source-dive'] || 0) : '?',
+    row.provider_error ? 'PROVIDER' : row.correct ? 'yes' : 'NO',
+    row.contention_before === null ? '?' : String(row.contention_before)
+  ])
+  const widths = header.map((cell, index) =>
+    Math.max(cell.length, ...body.map((line) => line[index].length))
+  )
+  const render = (cells) =>
+    cells.map((cell, index) => cell.padEnd(widths[index])).join('  ')
+  return [
+    render(header),
+    render(widths.map((width) => '-'.repeat(width))),
+    ...body.map(render)
+  ].join('\n')
+}
+
+const main = async () => {
+  const argv = yargs(hideBin(process.argv))
+    .option('select', {
+      type: 'array',
+      describe: 'instruction_id to run; repeatable. Default: every instruction'
+    })
+    .option('repeat', {
+      type: 'number',
+      default: 1,
+      describe:
+        'runs per instruction. Run-to-run spread on one instruction was 8, 9, 11 turns, so a single run cannot rank a change'
+    })
+    .option('json', { type: 'boolean', default: false })
+    .option('out', {
+      type: 'string',
+      describe: 'append each row as JSON to this file as it completes'
+    })
+    .help().argv
+
+  const quiet = argv.json
+  const log = (message) => {
+    if (!quiet) console.log(message)
+  }
+
+  const instruction_set = JSON.parse(fs.readFileSync(INSTRUCTIONS_PATH, 'utf8'))
+  const selected = argv.select?.length
+    ? instruction_set.entries.filter((entry) =>
+        argv.select.includes(entry.instruction_id)
+      )
+    : instruction_set.entries
+
+  if (!selected.length) {
+    throw new Error(
+      `no instructions matched --select. Available: ${instruction_set.entries.map((entry) => entry.instruction_id).join(', ')}`
+    )
+  }
+
+  log(
+    `benchmark: ${selected.length} instruction(s) x ${argv.repeat} run(s), serialized`
+  )
+  log(`assertions derived ${instruction_set.generated_at}`)
+
+  const rows = []
+  for (let iteration = 1; iteration <= argv.repeat; iteration++) {
+    for (const entry of selected) {
+      const row = await run_one({ entry, iteration, log })
+      rows.push(row)
+      if (argv.out) fs.appendFileSync(argv.out, `${JSON.stringify(row)}\n`)
+    }
+  }
+
+  if (argv.json) {
+    console.log(JSON.stringify({ rows }, null, 2))
+  } else {
+    console.log(`\n${format_table(rows)}`)
+    const correct = rows.filter((row) => row.correct).length
+    console.log(`\n${correct}/${rows.length} correct`)
+  }
+}
+
+if (is_main(import.meta.url)) {
+  main()
+    .then(() => db.destroy())
+    .catch(async (error) => {
+      console.error(error.stack || error.message)
+      await db.destroy()
+      process.exit(1)
+    })
+}
+
+export default {
+  check_correctness,
+  format_table,
+  run_one
+}

@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-03T21:28:33.171Z",
+  "leader_depth": 5,
+  "entry_count": 8,
+  "entries": [
+    {
+      "instruction_id": "qb-passing-yards-2023",
+      "instruction": "top 10 quarterbacks by passing yards in the 2023 regular season",
+      "capability": "single stat, single season, player grain",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "TUAX-TAGO-005436",
+          "measure": 4624,
+          "label": "Tua Tagovailoa"
+        },
+        {
+          "identity": "JARE-GOFF-002009",
+          "measure": 4575,
+          "label": "Jared Goff"
+        },
+        {
+          "identity": "DAKX-PRES-004203",
+          "measure": 4516,
+          "label": "Dak Prescott"
+        },
+        {
+          "identity": "JOSH-ALLE-000098",
+          "measure": 4306,
+          "label": "Josh Allen"
+        },
+        {
+          "identity": "BROC-PURD-004112",
+          "measure": 4280,
+          "label": "Brock Purdy"
+        }
+      ],
+      "ground_truth_sql": "select p.passer_pid as pid, pl.first_name, pl.last_name,\n             sum(p.yards_gained)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.passer_pid\n      where p.season_year = 2023 and p.season_type = 'REG'\n        and p.play_type = 'PASS' and p.is_completion = true\n        and pl.primary_position = 'QB'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "wr-receiving-yards-2023",
+      "instruction": "top 25 wide receivers by receiving yards in the 2023 regular season, with their targets and receptions",
+      "capability": "multi-column composition, player grain",
+      "identity_key": "pid",
+      "min_rows": 25,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "TYRE-HILL-015926",
+          "measure": 1799,
+          "label": "Tyreek Hill"
+        },
+        {
+          "identity": "CEED-LAMB-017761",
+          "measure": 1749,
+          "label": "CeeDee Lamb"
+        },
+        {
+          "identity": "AMON-STBR-007533",
+          "measure": 1515,
+          "label": "Amon-Ra St. Brown"
+        },
+        {
+          "identity": "PUKA-NACU-010505",
+          "measure": 1486,
+          "label": "Puka Nacua"
+        },
+        {
+          "identity": "AJXX-BROW-007507",
+          "measure": 1456,
+          "label": "A.J. Brown"
+        }
+      ],
+      "ground_truth_sql": "select p.target_pid as pid, pl.first_name, pl.last_name,\n             sum(p.yards_gained)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.target_pid\n      where p.season_year = 2023 and p.season_type = 'REG'\n        and p.play_type = 'PASS' and p.is_completion = true\n        and pl.primary_position = 'WR'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "rb-rushing-yards-2024",
+      "instruction": "top 15 running backs by rushing yards in the 2024 regular season, with rushing touchdowns",
+      "capability": "different stat family and season than the canonical pair",
+      "identity_key": "pid",
+      "min_rows": 15,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "SAQU-BARK-005169",
+          "measure": 2005,
+          "label": "Saquon Barkley"
+        },
+        {
+          "identity": "DERR-HENR-005674",
+          "measure": 1921,
+          "label": "Derrick Henry"
+        },
+        {
+          "identity": "BIJA-ROBI-012303",
+          "measure": 1456,
+          "label": "Bijan Robinson"
+        },
+        {
+          "identity": "JONA-TAYL-005633",
+          "measure": 1431,
+          "label": "Jonathan Taylor"
+        },
+        {
+          "identity": "JAHM-GIBB-012301",
+          "measure": 1412,
+          "label": "Jahmyr Gibbs"
+        }
+      ],
+      "ground_truth_sql": "select p.ball_carrier_pid as pid, pl.first_name, pl.last_name,\n             sum(p.yards_gained)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.ball_carrier_pid\n      where p.season_year = 2024 and p.season_type = 'REG'\n        and p.play_type = 'RUSH'\n        and pl.primary_position = 'RB'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "qb-passing-touchdowns-2024",
+      "instruction": "top 10 quarterbacks by passing touchdowns in the 2024 regular season",
+      "capability": "counting stat rather than a summed yardage stat",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "JOEX-BURR-000131",
+          "measure": 43,
+          "label": "Joe Burrow"
+        },
+        {
+          "identity": "BAKE-MAYF-002054",
+          "measure": 41,
+          "label": "Baker Mayfield"
+        },
+        {
+          "identity": "LAMA-JACK-008142",
+          "measure": 41,
+          "label": "Lamar Jackson"
+        },
+        {
+          "identity": "JARE-GOFF-002009",
+          "measure": 37,
+          "label": "Jared Goff"
+        },
+        {
+          "identity": "SAMX-DARN-005673",
+          "measure": 35,
+          "label": "Sam Darnold"
+        }
+      ],
+      "ground_truth_sql": "select p.passer_pid as pid, pl.first_name, pl.last_name,\n             count(*) filter (where p.is_passing_touchdown)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.passer_pid\n      where p.season_year = 2024 and p.season_type = 'REG'\n        and p.play_type = 'PASS'\n        and pl.primary_position = 'QB'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "te-receiving-yards-2023",
+      "instruction": "top 10 tight ends by receiving yards in the 2023 regular season",
+      "capability": "position filter the agent must apply rather than assume",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "GEOR-KITT-002700",
+          "measure": 1020,
+          "label": "George Kittle"
+        },
+        {
+          "identity": "TRAV-KELC-002004",
+          "measure": 991,
+          "label": "Travis Kelce"
+        },
+        {
+          "identity": "EVAN-ENGR-027555",
+          "measure": 963,
+          "label": "Evan Engram"
+        },
+        {
+          "identity": "TJXX-HOCK-027527",
+          "measure": 960,
+          "label": "T.J. Hockenson"
+        },
+        {
+          "identity": "SAMX-LAPO-024993",
+          "measure": 889,
+          "label": "Sam LaPorta"
+        }
+      ],
+      "ground_truth_sql": "select p.target_pid as pid, pl.first_name, pl.last_name,\n             sum(p.yards_gained)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.target_pid\n      where p.season_year = 2023 and p.season_type = 'REG'\n        and p.play_type = 'PASS' and p.is_completion = true\n        and pl.primary_position = 'TE'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "wr-receptions-min-targets-2023",
+      "instruction": "wide receivers with at least 100 targets in the 2023 regular season, ranked by receptions",
+      "capability": "a filter on one stat while ranking by another",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "CEED-LAMB-017761",
+          "measure": 135,
+          "label": "CeeDee Lamb"
+        },
+        {
+          "identity": "AMON-STBR-007533",
+          "measure": 119,
+          "label": "Amon-Ra St. Brown"
+        },
+        {
+          "identity": "TYRE-HILL-015926",
+          "measure": 119,
+          "label": "Tyreek Hill"
+        },
+        {
+          "identity": "MICH-PITT-007119",
+          "measure": 109,
+          "label": "Michael Pittman"
+        },
+        {
+          "identity": "KEEN-ALLE-025291",
+          "measure": 108,
+          "label": "Keenan Allen"
+        }
+      ],
+      "ground_truth_sql": "select pid, first_name, last_name, measure from (\n        select p.target_pid as pid, pl.first_name, pl.last_name,\n               count(*) filter (where p.is_completion)::int as measure,\n               count(*)::int as targets\n        from nfl_plays p\n        join player pl on pl.pid = p.target_pid\n        where p.season_year = 2023 and p.season_type = 'REG'\n          and p.play_type = 'PASS'\n          and pl.primary_position = 'WR'\n        group by 1, 2, 3\n      ) t\n      where targets >= 100\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "wr-yards-per-reception-2023",
+      "instruction": "top 10 wide receivers by yards per reception in the 2023 regular season, minimum 50 receptions",
+      "capability": "a derived rate rather than a stored total",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "GEOR-PICK-003342",
+          "measure": 18.21,
+          "label": "George Pickens"
+        },
+        {
+          "identity": "BRAN-AIYU-006142",
+          "measure": 17.89,
+          "label": "Brandon Aiyuk"
+        },
+        {
+          "identity": "AMAR-COOP-007280",
+          "measure": 17.36,
+          "label": "Amari Cooper"
+        },
+        {
+          "identity": "DKXX-METC-025224",
+          "measure": 16.88,
+          "label": "D.K. Metcalf"
+        },
+        {
+          "identity": "NICO-COLL-025146",
+          "measure": 16.21,
+          "label": "Nico Collins"
+        }
+      ],
+      "ground_truth_sql": "select pid, first_name, last_name, measure from (\n        select p.target_pid as pid, pl.first_name, pl.last_name,\n               round(\n                 sum(p.yards_gained) filter (where p.is_completion)::numeric\n                 / nullif(count(*) filter (where p.is_completion), 0),\n                 2\n               )::float8 as measure,\n               count(*) filter (where p.is_completion)::int as receptions\n        from nfl_plays p\n        join player pl on pl.pid = p.target_pid\n        where p.season_year = 2023 and p.season_type = 'REG'\n          and p.play_type = 'PASS'\n          and pl.primary_position = 'WR'\n        group by 1, 2, 3\n      ) t\n      where receptions >= 50\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "team-passing-yards-2024",
+      "instruction": "total passing yards by team in the 2024 regular season, ranked highest first",
+      "capability": "team row grain rather than player",
+      "identity_key": "team",
+      "min_rows": 30,
+      "measure_tolerance": 0.02,
+      "expected_leaders": [
+        {
+          "identity": "CIN",
+          "measure": 4918,
+          "label": "CIN"
+        },
+        {
+          "identity": "DET",
+          "measure": 4718,
+          "label": "DET"
+        },
+        {
+          "identity": "TB",
+          "measure": 4505,
+          "label": "TB"
+        },
+        {
+          "identity": "SF",
+          "measure": 4424,
+          "label": "SF"
+        },
+        {
+          "identity": "MIN",
+          "measure": 4379,
+          "label": "MIN"
+        }
+      ],
+      "ground_truth_sql": "select p.offense_nfl_team as team,\n             sum(p.yards_gained)::int as measure\n      from nfl_plays p\n      where p.season_year = 2024 and p.season_type = 'REG'\n        and p.play_type = 'PASS' and p.is_completion = true\n        and p.offense_nfl_team is not null\n      group by 1\n      order by measure desc, team asc\n      limit 5"
+    }
+  ]
+}
