@@ -1285,6 +1285,26 @@ describe('data check registry', function () {
     // the check grades only the last four completed fantasy weeks, so the entry
     // reports STALE and is deleted once four 2026 weeks have finished. Expect it
     // to be short-lived rather than standing.
+    //
+    // population-index-rebuild-parity -- the newest and the one that fits this
+    // rule least comfortably, so the reasoning is spelled out. Its debt is not
+    // data that cannot be fetched again; it is data whose OBSERVATION INSTANT
+    // does not exist anywhere and cannot be manufactured. Every one of its 22
+    // baselined entries is a block of index rows whose history counterparts
+    // were never written: 2023 weeks 13-18 across twelve projection sources
+    // where the 2020-2023 backfill stopped short of the season end, five
+    // complete (league_format_id, season) blocks the recompute path skipped,
+    // and one FanDuel selections residue. The values are re-derivable in the
+    // league-format case and irrecoverable in the others, but in BOTH a
+    // backfill would stamp a synthetic instant into a table whose only job is
+    // to say when a value was observed -- which is why these are debt with a
+    // named owner rather than a repair somebody has simply not run yet.
+    //
+    // The two AVERAGE entries on the same check are adjudicated and not
+    // baselined, and the split is the point of the whole disposition: source 18
+    // is a derived consensus whose history was deliberately deleted, so its
+    // divergence is correct rather than owed. A feed-grained entry could not
+    // have said both.
     const baselined = parked_entries.filter(
       (entry) => entry.disposition === 'baselined'
     )
@@ -1294,6 +1314,7 @@ describe('data check registry', function () {
     ).to.deep.equal([
       'adp-source-season-coverage',
       'betting-market-source-week-coverage',
+      'population-index-rebuild-parity',
       'prop-market-selection-coverage'
     ])
 

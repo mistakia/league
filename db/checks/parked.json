@@ -937,5 +937,249 @@
     },
     "disposition": "baselined",
     "owner": "Unrecoverable, and measured so on 2026-09-02 rather than assumed: PrizePicks stopped writing entirely on 2025-12-25 and never resumed for the rest of that season, with max(observed_at) in prop_markets_index at 2025-12-25T15:59:35Z and zero rows in the 2025 week 18 window in BOTH prop_markets_index and prop_markets_history. A book does not serve closed markets and no historical source carries them, so nothing can backfill this week and there is no repair to own. The entry ages out of the check's own window once four 2026 weeks have completed. PrizePicks itself recovered and is writing normally (5,641 rows in the three days to 2026-09-02), so this is a bounded past outage rather than a live one."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "18"
+    },
+    "disposition": "adjudicated",
+    "reason": "Source 18 is AVERAGE, the derived consensus rather than a vendor. Its history was deliberately deleted on 2026-07-29, so an index row with no history counterpart is exactly what that decision produces and is correct here rather than a gap.",
+    "evidence": "db/adhoc/2026-07-29-drop-average-source-projection-history.sql IS the evidence and records the reasoning at the time: all 61,948 rows carried the epoch sentinel in both the Postgres and the MySQL era, so the consensus never had a real observation instant to preserve; a genuinely dated consensus would be roughly 184M rows a year; and it is exactly re-derivable from the 13 dated sources at any instant those sources are dated for. The divergence measured 2026-09-03 is 108,215 of 108,215 scanned -- EVERY AVERAGE row inside coverage, spread evenly over every week of 2021 through 2026 at 748 to 1,287 rows a week. A writer that sometimes skipped its history append would leave a ragged edge; a deletion leaves exactly this.",
+    "validated_at": "2026-09-03"
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "18"
+    },
+    "disposition": "adjudicated",
+    "reason": "The same AVERAGE consensus as the projections entry, on the season-long feed. Deleted by the same 2026-07-29 decision, so the absence of history is the decision rather than a gap.",
+    "evidence": "db/adhoc/2026-07-29-drop-average-source-projection-history.sql IS the evidence and records the reasoning at the time: all 61,948 rows carried the epoch sentinel in both the Postgres and the MySQL era, so the consensus never had a real observation instant to preserve; a genuinely dated consensus would be roughly 184M rows a year; and it is exactly re-derivable from the 13 dated sources at any instant those sources are dated for. The divergence measured 2026-09-03 is 6,787 of 6,787 scanned -- every AVERAGE row inside coverage, 683 to 1,287 in each season from 2020 through 2026.",
+    "validated_at": "2026-09-03"
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "1"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 2,020 of these 2,054 rows: 1,664 in 2023 weeks 13-18, 356 in 2024 week 18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 34 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "10"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,991 of these 2,009 rows: 1,797 in 2023 weeks 13-18, 194 in 2023 week 1. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 18 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "11"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,678 of these 1,689 rows: 1,527 in 2023 weeks 13-18, 151 in 2023 week 1. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 11 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "13"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 2,308 of these 2,326 rows: 2,308 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 18 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "16"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,690 of these 1,707 rows: 1,690 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 17 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "19"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 2,376 of these 2,395 rows: 2,146 in 2023 weeks 13-18, 230 in 2023 week 1. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 19 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "27"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,777 of these 1,779 rows: 1,777 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 2 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "3"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 5,103 of these 5,159 rows: 5,103 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 56 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "4"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 131 of these 162 rows: 131 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 31 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "5"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,367 of these 1,367 rows: 1,367 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 0 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "6"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 73 of these 134 rows: 73 in 2023 weeks 13-18. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 61 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "projections",
+      "partition_column": "source_id",
+      "partition_value": "9"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/backfill-2023-projection-history-tail.md owns 1,814 of these 1,829 rows: 1,700 in 2023 weeks 13-18, 114 in 2023 week 1. They are contiguous block boundaries of the 2020-2023 history backfill, which stopped short of the season end -- the rows exist in the index, their observation instants exist nowhere, and the 2023-11-29 MySQL archive predates them, so that task decides between a real backfill and a formal write-off rather than assuming one. The remaining 15 rows sit in cells of a single row rather than in any block, and belong to the five-pid residue owned by user:task/league/diagnose-residual-index-only-rows.md. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "1"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/diagnose-residual-index-only-rows.md. All 6 rows here belong to the five-pid residue that spans both projection feeds rather than to any block: CARY-ANGE-015539, CHRI-BROO-017731, PROX-WELL-003851, SPEN-BROW-001150. That task carries the diagnosis of all five, including the one that exists in no player row at all. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "28"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/diagnose-residual-index-only-rows.md. The single row here belongs to the five-pid residue that spans both projection feeds rather than to any block: CHRI-BROO-017731. That task carries the diagnosis of all five, including the one that exists in no player row at all. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "3"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/diagnose-residual-index-only-rows.md. All 4 rows here belong to the five-pid residue that spans both projection feeds rather than to any block: CHRI-BROO-017731, MARQ-STEV-2021-0000-00-00, SPEN-BROW-001150. That task carries the diagnosis of all five, including the one that exists in no player row at all. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "4"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/diagnose-residual-index-only-rows.md. The single row here belongs to the five-pid residue that spans both projection feeds rather than to any block: CHRI-BROO-017731. That task carries the diagnosis of all five, including the one that exists in no player row at all. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "season_projections",
+      "partition_column": "source_id",
+      "partition_value": "6"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/diagnose-residual-index-only-rows.md. All 2 rows here belong to the five-pid residue that spans both projection feeds rather than to any block: CHRI-BROO-017731, MARQ-STEV-2021-0000-00-00. That task carries the diagnosis of all five, including the one that exists in no player row at all. Measured 2026-09-03."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "league_format_player_projection_values",
+      "partition_column": "league_format_id",
+      "partition_value": "07db3422-c456-4402-9468-273a5d122514"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/write-league-format-projection-history-unconditionally.md. Measured 2026-09-03 at 45,485 of 79,955 scanned, in 3 complete season blocks: 2021 (17,352 rows), 2022 (16,848 rows), 2025 (11,285 rows). Complete means every pid and every week of that season that history covers at all, against zero history rows -- and this is one of FIVE such blocks across five seasons and three formats, so the recompute path skips its history append routinely rather than once. Recomputable in principle because the values are derived, but the observation instant would be synthetic, which is why the repair is the write path rather than a backfill. RE-MEASURE BEFORE ACTING ON ANY FIGURE HERE: this feed is under active write and its index total moved 409,869 to 407,889 within minutes on 2026-09-02."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "league_format_player_projection_values",
+      "partition_column": "league_format_id",
+      "partition_value": "776e3d91-122c-4204-b15e-3f48ddf346f8"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/write-league-format-projection-history-unconditionally.md. Measured 2026-09-03 at 11,556 of 11,556 scanned, in one complete season block: 2026 (11,556 rows). Complete means every pid and every week of that season that history covers at all, against zero history rows -- and this is one of FIVE such blocks across five seasons and three formats, so the recompute path skips its history append routinely rather than once. Recomputable in principle because the values are derived, but the observation instant would be synthetic, which is why the repair is the write path rather than a backfill. RE-MEASURE BEFORE ACTING ON ANY FIGURE HERE: this feed is under active write and its index total moved 409,869 to 407,889 within minutes on 2026-09-02."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "league_format_player_projection_values",
+      "partition_column": "league_format_id",
+      "partition_value": "f663e70c-8232-4881-8af6-8ca38379c068"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/write-league-format-projection-history-unconditionally.md. Measured 2026-09-03 at 12,223 of 46,423 scanned, in one complete season block: 2023 (12,223 rows). Complete means every pid and every week of that season that history covers at all, against zero history rows -- and this is one of FIVE such blocks across five seasons and three formats, so the recompute path skips its history append routinely rather than once. Recomputable in principle because the values are derived, but the observation instant would be synthetic, which is why the repair is the write path rather than a backfill. RE-MEASURE BEFORE ACTING ON ANY FIGURE HERE: this feed is under active write and its index total moved 409,869 to 407,889 within minutes on 2026-09-02."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "league_format_player_rest_of_season_projection_values",
+      "partition_column": "league_format_id",
+      "partition_value": "776e3d91-122c-4204-b15e-3f48ddf346f8"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/write-league-format-projection-history-unconditionally.md. Measured 2026-09-03 at 642 of 642 scanned, in one complete season block: 2026 (642 rows). Complete means every pid and every week of that season that history covers at all, against zero history rows -- and this is one of FIVE such blocks across five seasons and three formats, so the recompute path skips its history append routinely rather than once. Recomputable in principle because the values are derived, but the observation instant would be synthetic, which is why the repair is the write path rather than a backfill. RE-MEASURE BEFORE ACTING ON ANY FIGURE HERE: this feed is under active write and its index total moved 409,869 to 407,889 within minutes on 2026-09-02."
+  },
+  {
+    "check_id": "population-index-rebuild-parity",
+    "grain": {
+      "feed": "prop_market_selections",
+      "partition_column": "source_id",
+      "partition_value": "FANDUEL"
+    },
+    "disposition": "baselined",
+    "owner": "user:task/league/close-prop-market-selection-capture-gaps.md, which already owns the FanDuel importer defect the sibling prop-market-selection-coverage check names -- the private/scripts path gating its market push on selections.length. Measured 2026-09-03 at 435 of 1,386,099 scanned, and the residue is 100 percent one book across a feed of eight, which is the whole of the evidence pointing there: the mechanism that writes an index row without a history row has not been traced, and user:task/league/diagnose-residual-index-only-rows.md carries that lead if the importer turns out not to explain it. Lost selections are absent from prop_market_selections_history as well as the index and no book serves closing prices for a settled game, so these rows cannot be replayed from anything we hold."
   }
 ]
