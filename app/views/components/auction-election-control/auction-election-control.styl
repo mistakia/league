@@ -244,3 +244,62 @@ $election_control_content_max_width = 720px
     justify-content center
     row-gap 6px
     white-space nowrap
+
+// THE PHONE LAYOUT OF THE COMPACT STRIP, and it is a different shape rather than
+// a smaller one. Paired with the `max-width 535px` block in auction-main-bid.styl
+// -- the two are one layout written in two files because the boxes they place
+// belong to two components, and the breakpoint has to be the same number in both.
+//
+// STILL SCOPED BY `.compact`, WHICH IS A CLASS. Every selector here carries it,
+// so none of this can reach the drawer's copy of the control however narrow the
+// drawer gets. That is the mistake the note fifty lines up is about, and a media
+// query adds no specificity to stop it.
+@media (max-width 535px)
+  // `display contents` DISSOLVES THIS BOX so its two children become items of
+  // the bar's grid directly. They have to be placed on different rows of it --
+  // the state on its own line, the form beside the stepper -- and a child cannot
+  // be placed on its grandparent's grid while its parent is still a box between
+  // them.
+  //
+  // The box carried nothing but layout: `background transparent`, `border none`
+  // and padding the grid now supplies. The one exception is `opacity` for a
+  // settled election, which cannot apply to a box that no longer exists, so it
+  // moves onto the state below.
+  .auction-election-control.compact
+  .auction-election-control.compact .auction-election-control__body
+    display contents
+
+  .auction-election-control.compact.settled .auction-election-control__state
+    opacity 0.7
+
+  // ALONG THE LINE, NOT STACKED, and the argument that made it stacked does not
+  // hold here. It was stacked because `YOUR ELECTION $5` on one baseline read as
+  // a prefix to the number rather than as its caption -- true when it sat in a
+  // row of controls, where the eye groups horizontally. On its own full-width
+  // line there is nothing beside it to be confused with, and the caption reads as
+  // a caption again. Stacked it costs 27px of a bar that has none to give; along
+  // the line it costs one 15px row.
+  //
+  // `baseline` rather than `center`, so the 9px label and the 12px amount sit on
+  // one line of type instead of two boxes centred on each other.
+  .auction-election-control.compact .auction-election-control__state
+    grid-area state
+    flex-direction row
+    align-items baseline
+    justify-content flex-start
+    gap 6px
+    padding-right 0
+    border-right none
+
+    // The 2px was the gap under a caption sitting ON its value. Beside it, it is
+    // a nudge off the baseline the two now share.
+    label
+      padding-bottom 0
+
+  .auction-election-control.compact .auction-election-control__form
+    grid-area form
+    // `nowrap`, undoing the wrap above: this row is the one that scrolls, and a
+    // row that wraps never overflows and so never scrolls. The scroll container
+    // is `.auction__main-action` in auction-main-bid.styl.
+    flex-wrap nowrap
+    justify-content flex-start

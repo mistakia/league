@@ -26,11 +26,18 @@ $commissioner_controls_offset = 8px + $floating_action_height + 8px
 
 // Not inside the stack, so the stack's z-index does not have to sit above a
 // child of its own. Fixed to the viewport rather than to the control.
+//
+// BOTH RUNGS SIT BELOW THE NAV DRAWER'S, and that is the point of them being
+// their own pair. This control shared $z_overlay_panel with the drawer and beat
+// it on source order, so the graphite button floated over an open drawer instead
+// of being covered by it. The drawer is the larger surface and the one the user
+// just asked for, so it wins; $z_floating_action_backdrop / $z_floating_action
+// are under $z_overlay_backdrop, which is what the drawer's own scrim takes.
 .commissioner-controls__backdrop
   position fixed
   inset 0
   background rgba(0, 0, 0, 0.5)
-  z-index $z_overlay_backdrop
+  z-index $z_floating_action_backdrop
   -webkit-tap-highlight-color transparent
 
 // A COLUMN ANCHORED BY ITS BOTTOM, which is what makes the actions open UPWARD
@@ -38,7 +45,7 @@ $commissioner_controls_offset = 8px + $floating_action_height + 8px
 // so its bottom edge is the offset below and everything else grows off the top.
 .commissioner-controls__stack
   position fixed
-  z-index $z_overlay_panel
+  z-index $z_floating_action
   display flex
   flex-direction column
   // `stretch`, so the actions and the toggle share one width -- the widest

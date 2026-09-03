@@ -77,9 +77,17 @@ $smooth_transition = 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
 // poppers sit above dialogs rather than beside them: ten confirmation dialogs
 // here contain a Select or an Autocomplete.
 $z_page_chrome = 1000            // sticky table headers, fixed in-page notices
-$z_floating_action = 1100        // floating action buttons
+// A FLOATING ACTION'S OWN SCRIM, and it sits BELOW the button it belongs to
+// rather than above it. The pair has to land under $z_overlay_backdrop so that
+// opening the nav drawer covers a floating control rather than sliding out from
+// under it: the drawer is the larger surface and the one the user just asked
+// for. The commissioner controls shared $z_overlay_panel with the drawer until
+// 2026-09-02 and won on source order, so a graphite button floated over an open
+// drawer.
+$z_floating_action_backdrop = 1050
+$z_floating_action = 1100        // floating action buttons and their own menus
 $z_overlay_backdrop = 1200       // scrim behind a hand-rolled overlay panel
-$z_overlay_panel = 1300          // nav drawer, speed dial — MUI's drawer layer
+$z_overlay_panel = 1300          // nav drawer — MUI's drawer layer
 $z_selected_player = 1400        // selected-player drawer, above the nav drawer
 $z_react_table_base = 1450       // react-table's own six-rung band, 1451-1456
 $z_dialog = 1500                 // MUI dialogs and confirmations

@@ -298,7 +298,77 @@
       height 26px
       padding-top 0
 
-@media (max-width 400px)
+// THE PHONE LAYOUT, and it replaces wrapping with a single scrolling line.
+//
+// 535 is measured, not chosen: `.auction__bid-actions` needs 535.1px on one line
+// and below 800px the bar gets the raw viewport, so this is exactly the zone
+// where the row cannot be honest. Above it nothing here applies and the row is
+// the one line it has always been.
+//
+// THREE MOVES, and they only make sense together:
+//   1. the bid input goes, which is 60px and the only box on the row nobody can
+//      reach with a thumb without a keyboard covering half the screen;
+//   2. `Your election` takes its own line, laid out along it rather than
+//      stacked, which costs one 15px line instead of a 27px block beside the
+//      buttons;
+//   3. what is left -- the stepper, `Decline` and `Change maximum` -- stays on
+//      ONE line and scrolls sideways when it does not fit, rather than wrapping
+//      to a third row.
+//
+// Together they take the chrome at 320 from 312px to a little over half the
+// screen's worth less. Wrapping was correct as a first answer and is the wrong
+// one here: a phone bid bar that grows a row every time a label does is a bar
+// that eats the board it exists to sit under.
+@media (max-width 535px)
+  // GONE, AND THIS IS THE ONE ITEM HERE THAT COSTS SOMETHING. Without it a
+  // manager on a phone reaches a bid amount with the stepper's plus and minus
+  // rather than by typing it, which is more taps for a large jump. The trade is
+  // deliberate: it is 60px of a 268px budget, it is the only control on the row
+  // that opens a keyboard over the auction it is bidding in, and every amount is
+  // still reachable.
+  .auction__main-input
+    display none
+
+  // THE SCROLLING ROW. `flex 1 1 100%` so it takes the bar's width to scroll
+  // INSIDE, and `min-width 0` so it is allowed to be narrower than its content
+  // -- without it the box grows to fit and there is nothing left to scroll.
+  .auction__main-action
+    flex 1 1 100%
+    min-width 0
+
+  // GRID, NOT FLEX, and the reason is that flex cannot do this. The two things
+  // that have to happen -- one item on its own line, the rest on a single line
+  // that scrolls -- are `flex-wrap wrap` and `flex-wrap nowrap` on the same box,
+  // and a wrapped line cannot scroll because it wraps instead. Grid places the
+  // state on its own row by name and leaves the second row a single line.
+  //
+  // `max-content` columns are what make the second row OVERFLOW rather than
+  // compress, which is what there is to scroll. `auto` or `1fr` would shrink the
+  // buttons to fit and there would be no overflow and no scrollbar -- the
+  // content would simply be squeezed, which is the defect, not the fix.
+  //
+  // `justify-content start`, NOT `center`. A centred track whose content
+  // overflows puts the overflow on BOTH sides, and the left half is then
+  // unreachable -- a scroll container cannot scroll to a negative offset. The
+  // row reads left-aligned under a left-aligned player name above it.
+  .auction__bid-actions .auction__main-action
+    display grid
+    grid-template-columns max-content max-content
+    grid-template-areas 'state state' 'stepper form'
+    justify-content start
+    align-items center
+    row-gap 6px
+    column-gap 8px
+    padding 0 8px
+    overflow-x auto
+    // The row scrolls; the bar does not. Without this the vertical axis becomes
+    // `auto` the moment the horizontal one stops being `visible`, and the bar
+    // grows a second scrollbar it has no height to show.
+    overflow-y hidden
+
+  .auction__bid-actions .button-group
+    grid-area stepper
+
   .auction__main-timer
     flex 0 0 30px
 
