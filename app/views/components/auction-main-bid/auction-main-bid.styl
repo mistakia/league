@@ -142,11 +142,27 @@
   // rect 120, scrollHeight 133, the spill entirely intact behind a number that
   // read as fixed. `auto` is what makes the min-height a floor rather than the
   // whole answer.
+  // `align-items stretch`, NOT `flex-start`, AND THAT ONE WORD IS THE WHOLE OF
+  // the player half being narrower than the bar it sits in. Stacked, this box is
+  // a COLUMN, so `align-items` governs the children's WIDTH -- and `flex-start`
+  // sizes each row to its own content instead of to the column. The bar's width
+  // is set by the wider of the two rows, the actions, so the player half was
+  // left at its content width with the difference as dead space on its right:
+  // measured at 768, a 583px bar with a 402px player half, 181px short; at 600,
+  // 489 against 398. `flex 1 0 auto` on `.auction__bid-info` cannot fix it,
+  // because grow distributes free space along the MAIN axis and this is the
+  // cross one.
+  //
+  // The 181px is also what the name and the details were fighting over. They are
+  // both flex items inside that half, so a half narrower than it needs to be is
+  // where "the details group cuts into the player" comes from -- and a box
+  // overlap check reads clean through it, because the boxes tile while the ink
+  // does not.
   .auction__bar-body
     flex-direction column
     height auto
     min-height 120px
-    align-items flex-start
+    align-items stretch
 
   // The 12px of top padding is the room the bid input's label paints into --
   // see `.auction__main-input` below, whose label sits above its box and out of
