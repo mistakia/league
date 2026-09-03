@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { getYardlineInfoFromString } from '#libs-shared'
 import { is_main, readCSV, getPlay, format_starting_hash } from '#libs-server'
+import { MultiplePlayMatchError } from '#libs-server/play-cache.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -100,6 +101,7 @@ const run = async ({ dry = false, filepath } = {}) => {
   log(`read ${games.length} games`)
   log(`read ${chartedPlays.length} charted plays`)
   const playNotMatched = []
+  const playAmbiguous = []
   for (const cPlay of chartedPlays) {
     const game = games.find((g) => g.gid === cPlay.gid)
     const play = plays.find((p) => p.pid === cPlay.pid)
@@ -119,21 +121,50 @@ const run = async ({ dry = false, filepath } = {}) => {
       down_number: cPlay.dwn,
       ...getYardlineInfoFromString(cPlay.los)
     }
-    const dbPlay = await getPlay(opts)
+    let dbPlay
+    try {
+      dbPlay = await getPlay(opts)
+    } catch (err) {
+      if (!(err instanceof MultiplePlayMatchError)) {
+        throw err
+      }
 
-    if (dbPlay && !dry) {
+      // An ambiguous match is an integrity failure, not a miss: the charting
+      // cannot be attributed to either play, and treating it as "not matched"
+      // is what hid a duplicated game for three years.
+      console.log(
+        `AMBIGUOUS: ${cPlay.pid} matched ${err.match_count} plays: ${err.matching_plays
+          .map((p) => `${p.esbid}/${p.play_id}`)
+          .join(', ')}`
+      )
+      playAmbiguous.push({ charted_play: cPlay, error: err })
+      continue
+    }
+
+    if (!dbPlay) {
+      log(`${cPlay.pid} - ${cPlay.detail}`)
+      log(opts)
+      playNotMatched.push(cPlay)
+      continue
+    }
+
+    if (!dry) {
       await db('nfl_plays').update(formatPlay(cPlay)).where({
         esbid: dbPlay.esbid,
         play_id: dbPlay.play_id
       })
-    } else {
-      log(`${cPlay.pid} - ${cPlay.detail}`)
-      log(opts)
-      playNotMatched.push(cPlay)
     }
   }
 
   log(`${playNotMatched.length} plays not matched`)
+
+  if (playAmbiguous.length) {
+    throw new Error(
+      `${playAmbiguous.length} charted plays matched more than one play in nfl_plays; ` +
+        'the charting cannot be attributed and was not written. ' +
+        'Resolve the duplicate plays before re-running.'
+    )
+  }
 }
 
 const main = async () => {

@@ -1,7 +1,18 @@
 import db from '#db'
 
 import { fixTeam } from '#libs-shared'
+import { MultiplePlayMatchError } from './play-cache.mjs'
 
+/**
+ * Finds the single play matching the given criteria.
+ *
+ * Returns null when nothing matches. Throws when MORE than one play matches --
+ * "no such play" is a data question, "two plays answer to this description" is
+ * an integrity alarm, and collapsing both to null is what let a duplicated game
+ * silently drop three years of charting.
+ *
+ * @throws {MultiplePlayMatchError} If more than one play matches
+ */
 export default async function ({
   esbid,
   play_id,
@@ -84,9 +95,30 @@ export default async function ({
   }
 
   const plays = await query
-  if (plays.length === 1) {
-    return plays[0]
-  } else {
-    return null
+
+  if (plays.length > 1) {
+    throw new MultiplePlayMatchError(
+      plays.length,
+      {
+        esbid,
+        play_id,
+        week,
+        season_year,
+        offense_nfl_team,
+        defense_nfl_team,
+        quarter,
+        game_clock_start,
+        down_number,
+        yards_to_go,
+        play_type,
+        yard_line_number,
+        yard_line_side,
+        yard_line_100,
+        seconds_remaining_quarter
+      },
+      plays.map((play) => ({ esbid: play.esbid, play_id: play.play_id }))
+    )
   }
+
+  return plays.length === 1 ? plays[0] : null
 }
