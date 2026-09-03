@@ -268,6 +268,8 @@ const accumulate_completed_all_play = ({
  * @param {number} params.n_simulations - Draws to build
  * @param {number} [params.seed] - Seed for the correlated draw
  * @param {boolean} params.use_actual_results - Use actual points for final games
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id
  * @returns {Promise<Map<number, number[]>>} Per-team score vectors
  */
 const load_week_raw_team_scores = async ({
@@ -276,7 +278,8 @@ const load_week_raw_team_scores = async ({
   year,
   n_simulations,
   seed,
-  use_actual_results
+  use_actual_results,
+  roster_overrides
 }) => {
   const week_result = await simulate_league_week({
     league_id,
@@ -284,7 +287,8 @@ const load_week_raw_team_scores = async ({
     year,
     n_simulations,
     seed,
-    use_actual_results
+    use_actual_results,
+    roster_overrides
   })
 
   return week_result.raw_team_scores
@@ -305,6 +309,8 @@ const load_week_raw_team_scores = async ({
  * @param {number} params.year - Season year
  * @param {number} params.n_simulations - Draws to build
  * @param {number} [params.seed] - Seed for the correlated draw
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id
  * @returns {Promise<Map<number, Map<number, number[]>>>} week -> tid -> vector
  */
 const load_playoff_raw_team_scores_by_week = async ({
@@ -313,7 +319,8 @@ const load_playoff_raw_team_scores_by_week = async ({
   weeks,
   year,
   n_simulations,
-  seed
+  seed,
+  roster_overrides
 }) => {
   const { raw_team_scores_by_week } = await simulate_playoff_weeks_correlated({
     league_id,
@@ -321,7 +328,8 @@ const load_playoff_raw_team_scores_by_week = async ({
     weeks,
     year,
     n_simulations,
-    seed
+    seed,
+    roster_overrides
   })
 
   return raw_team_scores_by_week
@@ -346,6 +354,14 @@ const load_playoff_raw_team_scores_by_week = async ({
  *   the first remaining week
  * @param {string} [params.force_loss_tid] - Force this team to lose its matchup
  *   in the first remaining week
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id, as `{ add, remove }` lists
+ *   of pids. Applied to the roster POOL every simulated week draws its optimal
+ *   lineup from, regular season and playoffs alike, so an added player is
+ *   projected and scored like any other roster member. Absent or empty is a
+ *   strict no-op. A team carrying an override is forecast from its optimal
+ *   lineup even in a week whose actual slot assignments exist, since those
+ *   assignments cannot express the counterfactual.
  * @param {(params: object) => Promise<object>} [params.load_context] - Test
  *   seam: everything the forecast reads out of the database
  * @param {(params: object) => Promise<Map<number, number[]>>} [params.load_week_scores] -
@@ -362,6 +378,7 @@ export async function simulate_season_forecast({
   seed,
   force_win_tid = null,
   force_loss_tid = null,
+  roster_overrides = null,
   load_context = load_forecast_context,
   load_week_scores = load_week_raw_team_scores,
   load_playoff_scores = load_playoff_raw_team_scores_by_week
@@ -411,6 +428,7 @@ export async function simulate_season_forecast({
       seed,
       wildcard_week,
       championship_weeks,
+      roster_overrides,
       load_playoff_scores
     })
   }
@@ -449,7 +467,8 @@ export async function simulate_season_forecast({
       year,
       n_simulations,
       seed: week_seed,
-      use_actual_results
+      use_actual_results,
+      roster_overrides
     })
 
     // The pre-pass carried the only guard that a week covers every team, and
@@ -488,7 +507,8 @@ export async function simulate_season_forecast({
     weeks: playoff_weeks,
     year,
     n_simulations,
-    seed: Number.isInteger(seed) ? seed + 100000 : undefined
+    seed: Number.isInteger(seed) ? seed + 100000 : undefined,
+    roster_overrides
   })
 
   const wildcard_survivor_count = count_wildcard_survivors({
@@ -763,6 +783,8 @@ const resolve_conditional_indexes = ({
  * @param {number} [params.seed] - Seed for every draw
  * @param {number | null} params.wildcard_week - Wildcard round week
  * @param {number[]} params.championship_weeks - Championship round weeks
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id
  * @param {(params: object) => Promise<Map<number, Map<number, number[]>>>} params.load_playoff_scores -
  *   Playoff score vector loader
  * @returns {Promise<object>} Forecast results keyed by team ID
@@ -778,6 +800,7 @@ async function build_post_season_forecast({
   seed,
   wildcard_week,
   championship_weeks,
+  roster_overrides = null,
   load_playoff_scores
 }) {
   const playoffs = await db('playoffs').where({
@@ -863,7 +886,8 @@ async function build_post_season_forecast({
     weeks: playoff_weeks,
     year,
     n_simulations,
-    seed: Number.isInteger(seed) ? seed + 100000 : undefined
+    seed: Number.isInteger(seed) ? seed + 100000 : undefined,
+    roster_overrides
   })
 
   const wildcard_survivor_count = count_wildcard_survivors({

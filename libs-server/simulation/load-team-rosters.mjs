@@ -26,6 +26,63 @@ import { load_simulation_context } from './simulation-helpers.mjs'
 const log = debug('simulation:load-team-rosters')
 
 /**
+ * Read one team's counterfactual roster override.
+ *
+ * The collection is accepted either as a Map keyed by team_id or as a plain
+ * object keyed by team_id, because a caller assembling one from JSON or from a
+ * script argument cannot build a Map. An override present but empty on both
+ * sides is treated as absent, so an "override" that changes nothing takes the
+ * unmodified code path rather than a parallel one that happens to agree.
+ *
+ * @param {object} params
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] - Overrides keyed by team_id
+ * @param {number} params.team_id - Fantasy team ID
+ * @returns {{add: string[], remove: string[]} | null} The team's override, or null
+ */
+const resolve_roster_override = ({ roster_overrides, team_id }) => {
+  if (!roster_overrides) return null
+
+  const override =
+    roster_overrides instanceof Map
+      ? (roster_overrides.get(team_id) ?? roster_overrides.get(String(team_id)))
+      : roster_overrides[team_id]
+
+  if (!override) return null
+
+  const add = override.add || []
+  const remove = override.remove || []
+
+  if (!add.length && !remove.length) return null
+
+  return { add, remove }
+}
+
+/**
+ * Apply a roster override to a roster pool.
+ *
+ * Removals run before additions, and an addition already in the pool is not
+ * duplicated -- a pid listed twice would be optimized twice into the same
+ * lineup and scored twice into the team's total.
+ *
+ * @param {object} params
+ * @param {string[]} params.roster_pids - The pool read from rosters_players
+ * @param {{add: string[], remove: string[]} | null} params.override - Override to apply
+ * @returns {string[]} The modified pool
+ */
+const apply_roster_override = ({ roster_pids, override }) => {
+  if (!override) return roster_pids
+
+  const removed = new Set(override.remove)
+  const pool = roster_pids.filter((pid) => !removed.has(pid))
+
+  for (const pid of override.add) {
+    if (!pool.includes(pid)) pool.push(pid)
+  }
+
+  return pool
+}
+
+/**
  * Load starters for a single team.
  *
  * For current/past weeks: Returns actual starters from roster slot assignments.
@@ -39,6 +96,9 @@ const log = debug('simulation:load-team-rosters')
  * @param {number} params.current_week - The actual current week (for determining actual vs optimal)
  * @param {string} params.scoring_format_id - Scoring format hash for projections
  * @param {object} params.league - League settings for optimizer constraints
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
+ *   no-op.
  * @param {number} [params.roster_week] - Week to read the roster POOL from.
  *   Defaults to the week the league itself considers current.
  * @returns {Promise<object>} { team_id, player_ids: string[] }
@@ -51,6 +111,7 @@ export async function load_team_starters({
   current_week,
   scoring_format_id,
   league,
+  roster_overrides = null,
   roster_week = current_season.fantasy_season_week
 }) {
   // Validate current_week to prevent undefined comparison issues
@@ -60,7 +121,15 @@ export async function load_team_starters({
     )
   }
 
-  if (week <= current_week) {
+  const override = resolve_roster_override({ roster_overrides, team_id })
+
+  // An overridden team takes the optimal path whatever the week. The actual
+  // path reads slot assignments recorded in rosters_players, which cannot
+  // express a counterfactual: a player added by the override was never
+  // assigned a slot and a player removed still holds one, so routing an
+  // overridden team through it would ignore the override in silence and report
+  // the unmodified forecast as the answer to the question that was asked.
+  if (week <= current_week && !override) {
     // Current/past week: use actual roster slot assignments
     const player_ids = await load_actual_starters({
       league_id,
@@ -96,7 +165,8 @@ export async function load_team_starters({
       projection_week: week,
       year,
       scoring_format_id,
-      league
+      league,
+      override
     })
     return { team_id, player_ids }
   }
@@ -173,13 +243,17 @@ export async function load_teams_starters({
  * @param {number} params.week - Target week
  * @param {number} params.year - NFL year
  * @param {number} [params.current_week] - Current week (defaults to current_season.week)
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
+ *   no-op.
  * @returns {Promise<Map<number, {player_ids: string[]}>>} Map of team_id -> roster
  */
 export async function load_all_teams_starters({
   league_id,
   week,
   year,
-  current_week = current_season.week
+  current_week = current_season.week,
+  roster_overrides = null
 }) {
   log(`Loading all team starters for league ${league_id}, week ${week}`)
 
@@ -206,7 +280,8 @@ export async function load_all_teams_starters({
         year,
         current_week,
         scoring_format_id,
-        league
+        league,
+        roster_overrides
       })
     )
   )
@@ -260,6 +335,8 @@ async function load_actual_starters({ league_id, team_id, week, year }) {
  * @param {number} params.year - NFL year
  * @param {string} params.scoring_format_id - Scoring format hash
  * @param {object} params.league - League settings for optimizer
+ * @param {{add: string[], remove: string[]} | null} [params.override] - Already
+ *   resolved roster override for this team
  * @returns {Promise<string[]>} Array of optimal starter player IDs
  */
 async function calculate_optimal_starters({
@@ -269,7 +346,8 @@ async function calculate_optimal_starters({
   projection_week,
   year,
   scoring_format_id,
-  league
+  league,
+  override = null
 }) {
   log(
     `Calculating optimal starters for team ${team_id}, roster week ${roster_week}, projection week ${projection_week}`
@@ -286,12 +364,25 @@ async function calculate_optimal_starters({
     .whereIn('slot', active_roster_slots)
     .select('pid')
 
-  if (roster_players.length === 0) {
+  // The override applies to the POOL, before anything is loaded for it, so an
+  // added player flows through the projection and player-info loads below like
+  // any other roster member and is optimized on a real projection rather than
+  // a special-cased zero.
+  const roster_pids = apply_roster_override({
+    roster_pids: roster_players.map((r) => r.pid),
+    override
+  })
+
+  if (roster_pids.length === 0) {
     log(`No roster players found for team ${team_id}, week ${roster_week}`)
     return []
   }
 
-  const roster_pids = roster_players.map((r) => r.pid)
+  if (override) {
+    log(
+      `Applied roster override for team ${team_id}: +${override.add.length} -${override.remove.length}, pool ${roster_pids.length}`
+    )
+  }
 
   // Load projections for target week and player info in parallel
   const [projections, player_info] = await Promise.all([
@@ -350,6 +441,9 @@ async function calculate_optimal_starters({
  * @param {number[]} params.weeks - Array of weeks to load
  * @param {number} params.year - NFL year
  * @param {number} [params.current_week] - Current week (defaults to current_season.week)
+ * @param {Map<number, {add?: string[], remove?: string[]}> | Record<string|number, {add?: string[], remove?: string[]}> | null} [params.roster_overrides] -
+ *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
+ *   no-op.
  * @returns {Promise<Map<number, Array<{team_id: number, player_ids: string[]}>>>} Map of week -> team rosters
  */
 export async function load_teams_starters_by_week({
@@ -357,7 +451,8 @@ export async function load_teams_starters_by_week({
   team_ids,
   weeks,
   year,
-  current_week = current_season.week
+  current_week = current_season.week,
+  roster_overrides = null
 }) {
   log(
     `Loading starters for ${team_ids.length} teams across ${weeks.length} weeks`
@@ -381,7 +476,8 @@ export async function load_teams_starters_by_week({
             year,
             current_week,
             scoring_format_id,
-            league
+            league,
+            roster_overrides
           })
         )
       )
