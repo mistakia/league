@@ -185,6 +185,8 @@ Dynamic table configurations in `app/core/data-views/` with configurable columns
 
 A second tier executes generated SQL under a sandbox — the `league_data_view_reader` role on its own connection pool, guarded by a `libpg-query` parse. Before touching it, read [docs/data-views-system.md](docs/data-views-system.md#sandboxed-sql-tier): the controls are load-bearing individually and two of them stop attacks the others cannot.
 
+Views can also be built by a tool-using agent from a natural-language instruction. **League runs no model and no agent loop** — the loop is a harness session in a container on base's managed rail, and league supplies a job row, a dispatch seam, six CLI tools and a socket. Before touching any of it, read [docs/data-views-system.md](docs/data-views-system.md#agentic-view-generation): access is gated per account and closed by default, and several of its guarantees are narrower than their names suggest.
+
 ### Script pattern
 
 ```javascript

@@ -43,7 +43,8 @@ The `rate_type` **request** param is not retired and never will be — shared sh
 11. [Error Handling and Edge Cases](#error-handling-and-edge-cases)
 12. [Performance Improvement Opportunities](#performance-improvement-opportunities)
 13. [Sandboxed SQL Tier](#sandboxed-sql-tier)
-14. [Related Documentation](#related-documentation)
+14. [Agentic View Generation](#agentic-view-generation)
+15. [Related Documentation](#related-documentation)
 
 ## System Overview
 
@@ -1801,11 +1802,55 @@ Both execution paths return one envelope: `{ data_view_results, data_view_metada
 
 `data_view_sql_audit` records one row per statement attempted — executed, rejected or errored — with the statement text, row count and duration.
 
+**It records nothing for the generation agent's own exploration, and the tool reports success anyway.** `run_sql` inside the agent container holds the `league_data_view_reader` credential, which is read-only by default, so the audit INSERT is refused with `cannot execute INSERT in a read-only transaction` and the tool treats that as non-fatal. The cause is the control the whole sandbox rests on, so the fix is not to grant INSERT to that role — it is to decide whether exploration warrants an audit row at all, and if so to write it from a connection the agent does not hold. Until then, read this table as covering the SAVED-VIEW execution path only.
+
 ### Persisting one: query-backed views
 
 A statement becomes a saved view by way of a `data_view_queries` row that `user_data_views.query_id` references. `scripts/create-data-view-query.mjs` is the authoring path — guard, execute, reconcile against the annotations, then persist both rows in one transaction — and it takes a hand-written statement, so the whole representation is exercisable with no LLM anywhere in it.
 
 The representation, the deriver, the seed-versus-live rule and the edit boundary are in [data-views-architecture.md](./data-views-architecture.md#query-backed-views), which owns them end to end.
+
+## Agentic View Generation
+
+A user types an instruction and a tool-using agent builds the view. **League runs no model and no agent loop.** The loop is a `claude` harness session in a container on base's managed rail; league supplies a durable job row, a dispatch seam, six callable tools and a delivery socket, and nothing else.
+
+Which representation comes back is the agent's choice, made by attempting the registry and observing that it falls short. Registry first, SQL for the long tail, refusal third.
+
+### The path a request takes
+
+| Step                    | Where                                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Instruction submitted   | `app/core/data-view-generation/` and `app/views/components/data-view-generation-control/`                                             |
+| Admitted, then queued   | `api/sockets/data-view-generation.mjs` (`require_generation_principal`), `libs-server/data-views/generation/generation-job-queue.mjs` |
+| Claimed and dispatched  | `generation-drainer.mjs`, `base-session-client.mjs`                                                                                   |
+| Agent runs, calls tools | `scripts/data-view-{search-columns,describe-column,validate-table-state,preview-view,run-sql,emit}.mjs` over `agent-tool-runner.mjs`  |
+| Result pushed back      | `data-view-emit.mjs` → `POST /api/data-views/generation-emission` → `deliver-emission.mjs`, `validate-emission.mjs`                   |
+| Cost and liveness read  | `generation-collector.mjs`, from base's thread record                                                                                 |
+| Delivered to the client | the same socket, on `generation_id`                                                                                                   |
+
+**The job row is the audit record.** Its DDL, `db/adhoc/2026-09-02-create-data-view-generation-jobs.sql`, carries the reasoning for the whole shape — why a durable row rather than the in-process admission gate, and why the key is an opaque `generation_id` rather than a user.
+
+### The controls, and what each one bounds
+
+- **The entitlement.** `users.data_view_generation_is_enabled`, `NOT NULL DEFAULT false`. Read in `require_generation_principal` and nowhere else. Opening an account is one `UPDATE`, with no deploy and no restart; the client hides the control entirely for an account without it, rather than offering one that always refuses.
+- **The queue depth.** `MAX_QUEUE_DEPTH`. Above it the queue REFUSES and reports its depth, rather than accepting work it cannot start — an unbounded wait at a concurrency of one is the failure this design exists not to repeat.
+- **The spend limits.** `generation-limits.mjs`: an hourly run count, an hourly token budget, and a per-job token ceiling distinct from the budget, all keyed on the principal the queue resolves and all held in Redis so none of them resets on a deploy.
+- **The kill switch.** Also Redis. It stops ADMISSION and DISPATCH. It cannot stop a run already inside a container — base's session-termination route takes a hook credential rather than the session token league dispatches with — so the honest guarantee is "no new run starts", with whatever is in flight bounded by its own `deadline_at`.
+- **The sandbox role.** The container holds `league_data_view_reader` and nothing else: no `sops` age identity, no `league_writer` credential, `NODE_ENV=sandbox` reading a plaintext credential-free config with the host and password overlaid from a read-only mounted file.
+
+### What the agent may emit
+
+One tool, two branches, one envelope — `validate-emission.mjs`. The registry branch carries a `table_state`; the query branch carries `sql_text` and `column_annotations`. Both at once is rejected, a query branch with no prior `validate_table_state` is rejected, a refusal with no `inexpressible_reason` is rejected, and a declared `data_type` at any depth is rejected because types are DERIVED and a declared one is a contract violation rather than a hint.
+
+**The emission schema carries no `limit`, deliberately.** Measured against the 189 described production views: zero carry one. An instruction naming a count ("top 25") therefore emits a sort with no bound and says so, rather than truncating an answer nobody asked to truncate.
+
+The registry-first precondition on the query branch is a speed bump rather than a control — one throwaway `validate_table_state` call satisfies it. The control is the measurement: every corpus view is registry-expressible by construction, so a query-backed answer to one is an unnecessary SQL reach and is reportable as a rate.
+
+### Failure vocabulary
+
+`generation-failure-contract.mjs` is the one home for every named outcome and whether the caller can do anything about it. A client cannot render a refusal it has never heard of, so `test/data-view-generation-failure-contract.spec.mjs` reads the modules that raise codes and fails on any that is unregistered. **Adding a module to that spec's `CODE_SOURCES` is the load-bearing half of adding a failure code** — the gate can only see files it is told to read.
+
+A refusal the AGENT made is not a failure. It is a completed job carrying `generation_branch: 'refusal'` and an explanation, and it is rendered as one.
 
 ## Related Documentation
 

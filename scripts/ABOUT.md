@@ -142,6 +142,31 @@ JSON on stdout on success; a named code on stderr and a non-zero exit on refusal
 
 ---
 
+## data-view-search-columns.mjs, -describe-column, -validate-table-state, -preview-view, -run-sql, -emit
+
+**The generation agent's entire tool surface.** These six are not an operator's scripts: they are what a `claude` harness session invokes through Bash from inside the `league-data-view-generation` container, against a read-only checkout, under `NODE_ENV=sandbox`. There is no MCP server and no HTTP tool endpoint, and there is no league-side agent loop — the harness is the loop.
+
+One shared contract, in `libs-server/data-views/generation/agent-tool-runner.mjs`: JSON on stdin or argv, JSON on stdout, and a named error code on refusal.
+
+| Script                               | Answers                                                                                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `data-view-search-columns.mjs`       | scored catalog matches for a phrase                                                                                                 |
+| `data-view-describe-column.mjs`      | one column's params and enumerated values; refuses an unknown id WITH near misses drawn from the real catalog                       |
+| `data-view-validate-table-state.mjs` | whether a candidate resolves, and what is wrong with it if not                                                                      |
+| `data-view-preview-view.mjs`         | a few real rows, through `execute_data_view_request` so it contends for the same bounded admission slots as every user-facing query |
+| `data-view-run-sql.mjs`              | arbitrary SELECT under the sandbox role, for exploration the registry cannot do                                                     |
+| `data-view-emit.mjs`                 | the agent asserting it is done — validates, then DELIVERS the envelope to `POST /api/data-views/generation-emission`                |
+
+Three conventions that read as bugs until you know them:
+
+- **stderr is SHARED, so a refusal is its LAST LINE.** Node writes its own diagnostics there and this repo reliably provokes `MODULE_TYPELESS_PACKAGE_JSON` before any tool code runs, so a reader parsing the whole buffer fails on every refusal and reads it as the tool crashing rather than refusing.
+- **`data-view-validate-table-state.mjs` exits 0 on an INVALID candidate.** A rejected candidate is the ordinary case in a loop and the errors ARE the answer; a non-zero exit would route the agent's own working output to stderr. `data-view-emit.mjs` does exit non-zero, because emitting is a claim to be finished.
+- **`NODE_ENV=production` cannot run these in the container**, by design. Production config is sops ciphertext needing an age identity, and the decrypted file carries `league_writer` credentials, which would dissolve the read-only sandbox role the whole design rests on. `config/config-sandbox.json` is committed credential-free with `LEAGUE_SANDBOX_PG_HOST` and `LEAGUE_SANDBOX_PG_PASSWORD` overlaid from a read-only mounted file, and it throws by NAME when either is absent.
+
+The end-to-end path these sit inside is in [../docs/data-views-system.md](../docs/data-views-system.md#agentic-view-generation).
+
+---
+
 ## scrape-pfr-coaches.mjs
 
 Acquires the canonical `{full_name, dob, first_season_pfr}` for each `nfl_coaches.pfr_coach_id` from Pro-Football-Reference's `/coaches/<id>.htm` pages. Output is `static-data/pfr-coaches.json`, the source-of-record fixture for the DOB-anchored own-id coach identity (see `nfl_coaches.coach_id` derivation).
