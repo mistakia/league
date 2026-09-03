@@ -399,6 +399,24 @@ export async function simulate_season_forecast({
   const current_week = week || current_season.active_fantasy_week
   const regular_season_final_week = current_season.regular_season_final_week
 
+  // The week every future week draws its roster POOL from. Resolved here rather
+  // than defaulted deeper down, because this is the only level that knows
+  // whether `week` was given, and the answer differs on exactly that:
+  //
+  // - An explicit `week` names a historical or what-if context, whose live
+  //   roster is that week's. Defaulting the pool to the live clock instead
+  //   would silently forecast week 12 of a past season off today's roster.
+  // - A live run wants the week `get-roster.mjs` serves. That is
+  //   `fantasy_season_week`, which is 0 in the preseason -- where `current_week`
+  //   reads 1, because `active_fantasy_week` floors it for the TARGET week and
+  //   that floor says nothing about which snapshot is live. Week 1 in the
+  //   preseason is a nightly copy of week 0, so it never holds an answer week 0
+  //   does not and goes stale between syncs.
+  //
+  // An explicit `roster_week` still wins over both; that is what it is for.
+  const roster_pool_week =
+    roster_week ?? week ?? current_season.fantasy_season_week
+
   log(
     `Starting season forecast for league ${league_id}, week ${current_week}, year ${year}`
   )
@@ -441,7 +459,7 @@ export async function simulate_season_forecast({
       wildcard_week,
       championship_weeks,
       roster_overrides,
-      roster_week,
+      roster_week: roster_pool_week,
       load_playoff_scores
     })
   }
@@ -482,7 +500,7 @@ export async function simulate_season_forecast({
       seed: week_seed,
       use_actual_results,
       roster_overrides,
-      roster_week
+      roster_week: roster_pool_week
     })
 
     // The pre-pass carried the only guard that a week covers every team, and
@@ -523,7 +541,7 @@ export async function simulate_season_forecast({
     n_simulations,
     seed: Number.isInteger(seed) ? seed + 100000 : undefined,
     roster_overrides,
-    roster_week
+    roster_week: roster_pool_week
   })
 
   const wildcard_survivor_count = count_wildcard_survivors({

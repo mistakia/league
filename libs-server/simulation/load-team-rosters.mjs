@@ -100,9 +100,10 @@ const apply_roster_override = ({ roster_pids, override }) => {
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
  * @param {number} [params.roster_week] - Week to read the roster POOL from.
- *   Defaults to the week the league itself serves as live
- *   (`current_season.fantasy_season_week`, which is 0 in the preseason). Set it
- *   only to ask a counterfactual question of a different roster snapshot.
+ *   Defaults to `current_week`, a pure function of the arguments: this function
+ *   must not reach for the clock, because its callers already know which week
+ *   they mean and one of them means a historical week. `simulate_season_forecast`
+ *   resolves the live-vs-historical question and passes the answer explicitly.
  * @returns {Promise<object>} { team_id, player_ids: string[] }
  */
 export async function load_team_starters({
@@ -114,7 +115,7 @@ export async function load_team_starters({
   scoring_format_id,
   league,
   roster_overrides = null,
-  roster_week = current_season.fantasy_season_week
+  roster_week = current_week
 }) {
   // Validate current_week to prevent undefined comparison issues
   if (typeof current_week !== 'number' || current_week < 1) {
@@ -141,33 +142,25 @@ export async function load_team_starters({
     })
     return { team_id, player_ids }
   } else {
-    // Future week: compute optimal from current roster pool.
+    // Future week: compute optimal from the roster pool at `roster_week`.
     //
     // The POOL week and the TARGET week are separate questions, which is why
-    // `roster_week` exists as a parameter. The DEFAULT is the live roster week.
+    // `roster_week` is a parameter. Callers that mean the live roster must say
+    // so; `simulate_season_forecast` resolves it and passes it explicitly, and
+    // that is where the reasoning lives.
     //
-    // It was `current_week` -- `active_fantasy_week`, floored to 1 because the
-    // branch above refuses a target week below 1. That floor is about the week
-    // being projected and says nothing about which snapshot is live, so in the
-    // preseason it named the week 1 forward slice: a nightly copy of week 0 that
-    // generate-rosters re-syncs at 23:55 local. The argument for keeping it was
-    // that the slice is the intended pool. It is not, and the reason is that the
-    // slice is a COPY -- it never holds an answer week 0 does not, so there is no
-    // state of the world where reading it is more correct, and one where it is
-    // less: every roster move between a sync and the next one is invisible to it.
-    //
-    // Measured on league 1, 2026-09-02, n=10000 over three seeds: reading the
-    // slice gave team 1 championship 0.155 and bye 0.343; reading week 0 gave
-    // 0.445 and 0.873. Four of that team's players were in a reserve or practice
-    // squad slot in the copy and active in week 0, and five of the ten teams
-    // disagreed. Note n matters here -- at n=2000 the week 0 arm ranged 0.21 to
-    // 0.49 across seeds and no single run of it is evidence of anything.
-    //
-    // `fantasy_season_week` is what `get-roster.mjs` serves, so the pool and the
-    // league's authoritative roster are the same row by construction. In-season
-    // the two expressions are equal, so this changes nothing once Week 1 starts;
-    // it only removes the preseason gap. `week` is not a candidate -- it keeps
-    // counting past the season's end onto a roster week never written.
+    // Why it matters, recorded once here because the default here is the thing
+    // most likely to be "simplified" back: in the preseason `current_week` is
+    // `active_fantasy_week`, floored to 1, and week 1 is then a nightly COPY of
+    // week 0 that generate-rosters re-syncs at 23:55 local. A copy never holds
+    // an answer its source does not, so reading it is never more correct and is
+    // less correct for every roster move made between two syncs. Measured on
+    // league 1, 2026-09-02, n=10000 over three seeds: the copy gave team 1
+    // championship 0.155 and bye 0.343, week 0 gave 0.445 and 0.873, with four
+    // of that team's players in a reserve or practice squad slot in the copy and
+    // active in week 0. Five of the ten teams disagreed. Note n matters -- at
+    // n=2000 the week 0 arm ranged 0.21 to 0.49 across seeds, so no single
+    // low-n run of it is evidence of anything.
     const player_ids = await calculate_optimal_starters({
       league_id,
       team_id,
