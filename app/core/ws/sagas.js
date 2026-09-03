@@ -38,6 +38,14 @@ export function* connect_auth() {
   // no-op for the ordinary sign-in that precedes opening the auction page, and
   // the redundant join on the ordering where the effect already reached the new
   // socket is refused by the same-socket branch in `Auction.join`.
+  //
+  // THIS REACHES EVERY RECONNECT CONSUMER, NOT ONLY THE AUCTION, and that is
+  // the point rather than a side effect. The scoreboard re-registers, the
+  // data-view request replays if one is in flight, and generation re-subscribes
+  // -- each of those registrations lives on the SOCKET too, so each was being
+  // silently lost by the sign-in swap in exactly the way the auction join was.
+  // All three guard themselves on having something to restore, so the ordinary
+  // sign-in with nothing in flight costs nothing.
   yield put(wsActions.reconnected())
 }
 

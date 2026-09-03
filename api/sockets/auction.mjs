@@ -268,11 +268,14 @@ export default class Auction {
       this.logger(`client_id ${client_id} superseded by a new socket`)
       // `terminate` rather than `close`: the socket being replaced is one this
       // side has no reason to believe is still reachable, and a close handshake
-      // waits for a peer that is frequently gone. Optional because the stubs in
-      // the suite stand in for a transport rather than implementing it.
-      if (typeof superseded.ws?.terminate === 'function') {
-        superseded.ws.terminate()
-      }
+      // waits for a peer that is frequently gone.
+      //
+      // Called outright rather than behind a `typeof` check. The guard that was
+      // here existed only so a spec stub without `terminate` would not throw,
+      // which is production code shaped by a test double -- and it would have
+      // silently skipped the terminate against a real socket that had somehow
+      // lost the method, which is the failure it looks like it prevents.
+      superseded.ws.terminate()
     }
 
     this.logger(`user_id ${user_id} joined as team_id ${tid}`)
