@@ -61,11 +61,12 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
 // both, and `ours` versus `convened` is a distinction a manager acts on.
 //
 // Against the #ffd6d6 opt-in ground it always sits on, this measures about
-// 5.8:1 -- comfortably past the 3:1 a 2px graphic needs. Against the two dark
-// fills it measures 1.5:1 and 1.2:1, which is why the white inversion below is
-// load-bearing rather than a nicety.
+// 5.8:1 -- comfortably past the 3:1 a non-text graphic needs, which is what
+// lets the bar be a hairline without going faint. Against the two dark fills
+// it measures 1.5:1 and 1.2:1, which is why the white inversion below is
+// load-bearing rather than a nicety, and more so at 1px than it was at 2px.
 $grid_mine_bar_color = $blue
-$grid_mine_bar_thickness = 2px
+$grid_mine_bar_thickness = 1px
 // Negated HERE, not at the use site. `-$var` inside a box-shadow list is not
 // parsed as negation -- stylus emits the literal ident
 // `-$grid_mine_bar_thickness`, which is invalid CSS, so the browser drops the
