@@ -79,6 +79,34 @@ export const non_franchise_nfl_teams = Object.freeze([
 ])
 
 /*
+  Vendor SPELLINGS of a franchise that is not in question. These are NOT eras:
+  the token names one franchise across its whole history, so no season is
+  needed to resolve it, and that is exactly why they are a separate map rather
+  than unbounded rows in the era table below -- putting them there would say a
+  franchise changed abbreviation when nothing changed but a feed's spelling.
+
+  Every one is season-independent and unambiguous: none is canonical, and none
+  is an era token of any other franchise. fixTeam already collapses all five to
+  the same targets, so this map agrees with the resolution the rest of the
+  codebase performs.
+
+  Found by sweeping every team column in production for tokens in neither the
+  canonical set nor the era table (2026-09-02): ARZ/BLT/CLV/HST appear on 239
+  nfl_play_stats rows in 2020-2021, and LAR on one player.draft_team row for
+  1994. Nothing else in the database is unaccounted for except four
+  EMPTY-STRING slots, which are deliberately not mapped here -- an empty team is
+  an absence wearing a value, a different defect with a different repair, and
+  quietly resolving it to a franchise would hide it.
+*/
+export const nfl_team_spelling_aliases = Object.freeze({
+  ARZ: 'ARI',
+  BLT: 'BAL',
+  CLV: 'CLE',
+  HST: 'HOU',
+  LAR: 'LA'
+})
+
+/*
   Every (token, season range) pair whose canonical franchise is not the token
   itself, plus -- deliberately -- the ranges where it IS. The BAL and HOU
   identity ranges are not redundant: they are what makes a range lookup total
@@ -207,8 +235,12 @@ export const is_non_franchise_nfl_team = (nfl_team) =>
     1. a (token, season_year) range match wins, even when the token is itself
        canonical -- this is what makes ('BAL', 1975) return IND rather than BAL;
     2. only then does a canonical token with no matching range return itself;
-    3. the non-franchise tokens pass through;
-    4. anything else throws, so an unmodelled token is loud rather than written
+    3. a vendor SPELLING alias resolves to its franchise. It sits after the two
+       cases above and cannot shadow either, because no alias is canonical and
+       no alias is an era token -- so its position is safe rather than merely
+       untested;
+    4. the non-franchise tokens pass through;
+    5. anything else throws, so an unmodelled token is loud rather than written
        through unchanged.
 
   Putting case 2 first would be a silent no-op on every Colts and Oilers row --
@@ -235,6 +267,11 @@ export const resolve_canonical_nfl_team = ({ era_nfl_team, season_year }) => {
 
   if (is_canonical_nfl_team(era_nfl_team)) {
     return era_nfl_team
+  }
+
+  const alias = nfl_team_spelling_aliases[era_nfl_team]
+  if (alias) {
+    return alias
   }
 
   if (is_non_franchise_nfl_team(era_nfl_team)) {

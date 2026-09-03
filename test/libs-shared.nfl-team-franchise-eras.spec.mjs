@@ -4,9 +4,11 @@ import * as chai from 'chai'
 import {
   resolve_canonical_nfl_team,
   nfl_team_franchise_eras,
+  nfl_team_spelling_aliases,
   canonical_nfl_teams,
   non_franchise_nfl_teams
 } from '#libs-shared/nfl-team-franchise-eras.mjs'
+import { fixTeam } from '#libs-shared'
 
 const expect = chai.expect
 
@@ -178,6 +180,62 @@ describe('libs-shared nfl-team-franchise-eras', function () {
       expect(() =>
         resolve_canonical_nfl_team({ era_nfl_team: null, season_year: 2024 })
       ).to.throw(/missing era_nfl_team/)
+    })
+  })
+
+  describe('resolve_canonical_nfl_team vendor spelling aliases', function () {
+    /*
+      These are the tokens a production sweep found in neither the canonical
+      set nor the era table on 2026-09-02: ARZ/BLT/CLV/HST on 239
+      nfl_play_stats rows and LAR on one player.draft_team row. Before the
+      alias map they THREW, which would have aborted the conform mid-file.
+    */
+    it('resolves each alias to its franchise', function () {
+      const cases = [
+        ['ARZ', 'ARI'],
+        ['BLT', 'BAL'],
+        ['CLV', 'CLE'],
+        ['HST', 'HOU'],
+        ['LAR', 'LA']
+      ]
+
+      for (const [alias, canonical] of cases) {
+        // Season-independent by construction, so both ends of the corpus must
+        // give the same answer -- an alias that moved with the season would be
+        // an era and would belong in the table instead.
+        expect(
+          resolve_canonical_nfl_team({ era_nfl_team: alias, season_year: 1994 })
+        ).to.equal(canonical)
+        expect(
+          resolve_canonical_nfl_team({ era_nfl_team: alias, season_year: 2021 })
+        ).to.equal(canonical)
+      }
+    })
+
+    it('agrees with fixTeam on every alias', function () {
+      // The aliases exist because other code already collapses them. If this
+      // map and fixTeam disagreed, the conform would write a token the rest of
+      // the codebase resolves somewhere else.
+      for (const [alias, canonical] of Object.entries(
+        nfl_team_spelling_aliases
+      )) {
+        expect(fixTeam(alias)).to.equal(canonical)
+      }
+    })
+
+    it('no alias shadows a canonical token or an era token', function () {
+      // What makes the alias case SAFE to consult after the two season-aware
+      // cases. An alias that were also canonical, or also an era token, would
+      // be resolved by an earlier branch and this map would silently not apply.
+      for (const alias of Object.keys(nfl_team_spelling_aliases)) {
+        expect(canonical_nfl_teams, `${alias} is canonical`).to.not.include(
+          alias
+        )
+        expect(
+          nfl_team_franchise_eras.map((era) => era.era_nfl_team),
+          `${alias} is an era token`
+        ).to.not.include(alias)
+      }
     })
   })
 
