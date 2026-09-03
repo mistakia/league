@@ -5,9 +5,11 @@ import run_query_backed_view from '#libs-server/data-views/run-query-backed-view
 
 // The single entry every path that executes a data-view query calls. Holds both
 // the bounded-concurrency admission gate and the telemetry/signal
-// instrumentation, so admission and timeout policy cannot diverge across the
-// four call sites again. The gate is two-class -- interactive and bulk -- but
-// both classes are admitted here, from one budget, for the same reason.
+// instrumentation, so admission and timeout policy cannot diverge across its
+// call sites again -- they did once, when there were four; there are five now,
+// and the count is not what the guarantee rests on. The gate is two-class --
+// interactive and bulk -- but both classes are admitted here, from one budget,
+// for the same reason.
 //
 // Cap derived from measurement on 2026-08-19 (see
 // user:task/league/data-views/tune-data-view-request-queue.md): the heaviest
@@ -33,11 +35,15 @@ const DATA_VIEW_MAX_CONCURRENT_QUERIES = 2
 // of 91,623ms -- 91 seconds of pure queueing, against a continuous stream of
 // `SET LOCAL statement_timeout = 1800000` backends in pg_stat_activity.
 //
-// What the sub-cap guarantees is a BOUND, not a zero: an interactive request
-// can still wait behind other interactive requests on the remaining slot, but
-// its wait is now a multiple of an interactive query (seconds) instead of a
-// bulk export's timeout (up to 30 minutes). Raising this to 2 restores exactly
-// the starvation it was added to remove.
+// What the sub-cap guarantees is a BOUND, not a zero, and the bound is worth
+// stating exactly because it is the thing a future editor will reason from: an
+// interactive request can still wait behind other interactive requests on the
+// remaining slot, so its worst case is (waiters ahead of it) x
+// DATA_VIEW_SIGNED_IN_TIMEOUT_MS, five minutes each. That is far above the
+// seconds a real interactive query takes and far below the thirty minutes an
+// export may hold a slot for -- the point of the sub-cap is that the export
+// timeout is no longer in the interactive bound at all. Raising this to 2 puts
+// it back and restores exactly the starvation the split was added to remove.
 const DATA_VIEW_MAX_CONCURRENT_BULK_QUERIES = 1
 const DATA_VIEW_HEARTBEAT_INTERVAL_MS = 2000
 // The 5s target IS the emission threshold (operator ruling 2026-08-19), never a
@@ -74,14 +80,20 @@ const admission_class_for_path = (path) =>
     : ADMISSION_CLASS_INTERACTIVE
 
 // Counting-semaphore state over module scope: one gate shared by every path,
-// not a class, holding a total budget plus a bulk sub-budget. `waiting` holds a
-// FIFO of waiter handles PER class; release decrements and then re-pumps both
-// queues in one synchronous step, so the counter never drifts and a slot freed
-// by a bulk request can go to an interactive waiter (which a
+// not a class, holding a total budget plus a bulk sub-budget. `waiting` stays a
+// SINGLE arrival-ordered FIFO carrying both classes, and release decrements and
+// then re-pumps it in one synchronous step, so the counter never drifts and a
+// slot freed by a bulk request can go to an interactive waiter (which a
 // pass-the-slot-to-my-own-head-waiter release could not do).
+//
+// One queue rather than a queue per class, deliberately: per-class queues drained
+// interactive-first would leave a bulk waiter with NO bound at all, admitted only
+// at an instant when a release coincides with an empty interactive queue and aged
+// up by nothing. The single FIFO keeps arrival order as the tie-break for both
+// classes, and the sub-cap alone does the protecting.
 const admission = {
   active: { interactive: 0, bulk: 0 },
-  waiting: { interactive: [], bulk: [] },
+  waiting: [],
   counters: {
     arrivals: 0,
     admitted: 0,
@@ -97,21 +109,23 @@ const admission = {
 }
 
 const active_total = () => admission.active.interactive + admission.active.bulk
-const waiting_total = () =>
-  admission.waiting.interactive.length + admission.waiting.bulk.length
+const waiting_count_for_class = (admission_class) =>
+  admission.waiting.filter(
+    (waiter) => waiter.admission_class === admission_class
+  ).length
 
 export const get_admission_state = () => ({
   active_request_count: active_total(),
-  waiting_request_count: waiting_total(),
+  waiting_request_count: admission.waiting.length,
   max_concurrent_queries: DATA_VIEW_MAX_CONCURRENT_QUERIES,
   max_concurrent_bulk_queries: DATA_VIEW_MAX_CONCURRENT_BULK_QUERIES,
   interactive: {
     active_request_count: admission.active.interactive,
-    waiting_request_count: admission.waiting.interactive.length
+    waiting_request_count: waiting_count_for_class(ADMISSION_CLASS_INTERACTIVE)
   },
   bulk: {
     active_request_count: admission.active.bulk,
-    waiting_request_count: admission.waiting.bulk.length
+    waiting_request_count: waiting_count_for_class(ADMISSION_CLASS_BULK)
   },
   heartbeat_interval_ms: DATA_VIEW_HEARTBEAT_INTERVAL_MS,
   counters: { ...admission.counters }
@@ -122,8 +136,7 @@ export const get_admission_state = () => ({
 export const reset_admission_state = () => {
   admission.active.interactive = 0
   admission.active.bulk = 0
-  admission.waiting.interactive = []
-  admission.waiting.bulk = []
+  admission.waiting = []
   for (const key of Object.keys(admission.counters)) {
     admission.counters[key] = 0
   }
@@ -338,34 +351,53 @@ const can_admit = (admission_class) => {
   return true
 }
 
+// Both per-class counters are written by name rather than by an interpolated
+// key, so a search for `bulk_admitted` finds the increment and not just the
+// declaration.
 const take_slot = (admission_class) => {
   admission.active[admission_class]++
   admission.counters.admitted++
-  admission.counters[`${admission_class}_admitted`]++
+  if (admission_class === ADMISSION_CLASS_BULK) {
+    admission.counters.bulk_admitted++
+  } else {
+    admission.counters.interactive_admitted++
+  }
 }
 
-// Interactive waiters are drained before bulk waiters, so a freed slot goes to
-// the class that has someone waiting on it. Bulk does not starve in return: it
-// is capped, not deprioritised out of existence -- an in-flight export keeps its
-// slot for its whole run, and interactive arrivals are sparse (p50 admission
-// wait 1ms) so the interactive queue is empty nearly always.
+// Walks the one queue in arrival order, admitting every waiter whose class has
+// room and SKIPPING -- not stopping at -- one whose class does not.
+//
+// Both halves are load-bearing, and they protect opposite classes. Skipping is
+// what keeps an interactive request off an export's runtime: a queued export
+// blocked by the running one is passed over rather than made to block the
+// interactive requests behind it. Walking in arrival order rather than by class
+// is what keeps that export from waiting forever, since it is admitted on the
+// first release after the running export ends, whatever has queued since.
 const pump_waiters = () => {
-  for (const admission_class of [
-    ADMISSION_CLASS_INTERACTIVE,
-    ADMISSION_CLASS_BULK
-  ]) {
-    const queue = admission.waiting[admission_class]
-    while (queue.length && can_admit(admission_class)) {
-      const waiter = queue.shift()
-      take_slot(admission_class)
-      waiter.resolve()
+  let index = 0
+  while (
+    index < admission.waiting.length &&
+    active_total() < DATA_VIEW_MAX_CONCURRENT_QUERIES
+  ) {
+    const waiter = admission.waiting[index]
+    if (!can_admit(waiter.admission_class)) {
+      index++
+      continue
     }
+    admission.waiting.splice(index, 1)
+    take_slot(waiter.admission_class)
+    waiter.resolve()
   }
 }
 
 // Acquires a slot in the caller's class, abortable while waiting. The abort path
 // is how a disconnect or a superseding request from the same client cancels a
 // request that has not yet started executing.
+//
+// The arrival fast path can admit ahead of a waiter, and that is not a fairness
+// hole: every release runs pump_waiters to exhaustion, so a waiter still in the
+// queue while a slot is free is one its own class cannot admit -- an export
+// behind another export. It would not have run at this instant either way.
 const acquire_slot = (signal, admission_class) => {
   admission.counters.arrivals++
   if (can_admit(admission_class)) {
@@ -374,16 +406,15 @@ const acquire_slot = (signal, admission_class) => {
   }
 
   return new Promise((resolve, reject) => {
-    const queue = admission.waiting[admission_class]
-    const waiter = { resolve, reject }
-    queue.push(waiter)
+    const waiter = { resolve, reject, admission_class }
+    admission.waiting.push(waiter)
     if (signal) {
       signal.addEventListener(
         'abort',
         () => {
-          const index = queue.indexOf(waiter)
+          const index = admission.waiting.indexOf(waiter)
           if (index !== -1) {
-            queue.splice(index, 1)
+            admission.waiting.splice(index, 1)
             admission.counters.superseded_waiters++
           }
           reject(
@@ -413,9 +444,10 @@ const release_slot = (admission_class) => {
  *   it and the executor mints one.
  * @param {object} opts.params - the table state
  * @param {number|null} opts.user_id
- * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' | 'sql'.
- *   Also decides the admission class: 'export' is bulk, everything else is
- *   interactive.
+ * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' |
+ *   'agent-preview'. Also decides the admission class: 'export' is bulk,
+ *   everything else is interactive. The sandboxed-SQL tier is NOT a value here
+ *   -- it enters as an alternate run_query on one of these paths.
  * @param {string} opts.cache_key - the redis key the caller already computed
  * @param {number|null} [opts.max_limit] - server-resolved ceiling on the table
  *   state's limit; null for no ceiling (export API key only)
@@ -454,8 +486,8 @@ export async function execute_data_view_request({
   emission_threshold_ms = DATA_VIEW_EMISSION_THRESHOLD_MS,
   accepted_slow_queries = ACCEPTED_SLOW_QUERIES
 }) {
-  // Which executor runs is decided HERE rather than at each of the four call
-  // sites, because one of those call sites is the export route -- the only path
+  // Which executor runs is decided HERE rather than at each call site, because
+  // one of those call sites is the export route -- the only path
   // that loads a persisted table_state server-side, and the one that would
   // otherwise index the registry resolver with an ad-hoc column_id and raise a
   // TypeError as a 500. A per-call-site branch is a branch somebody forgets;

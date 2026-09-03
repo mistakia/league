@@ -268,33 +268,47 @@ describe('data view admission gate and instrumentation', function () {
     expect(get_admission_state().active_request_count).to.equal(0)
   })
 
-  it('hands a freed slot to an interactive waiter ahead of an older bulk waiter', async function () {
+  it('passes over a queued export that cannot run and admits the interactive request behind it', async function () {
     const order = []
-    const holder_gates = [make_gate(), make_gate()]
-    const holders = holder_gates.map((holder_gate, i) =>
-      execute_data_view_request({
-        request_id: `h${i}`,
-        params: sample_params(),
-        user_id: null,
-        path: 'socket',
-        cache_key: `k-prio-holder-${i}`,
-        run_query: async () => {
-          await holder_gate.promise
-          return empty_result()
-        },
-        cache_get: async () => null
-      })
-    )
-    await sleep(20)
+    const export_gate = make_gate()
+    const interactive_gate = make_gate()
 
-    // The bulk waiter queues FIRST, so FIFO across one shared queue would run it
-    // first. Interactive priority is what must reorder them.
-    const bulk_waiter = execute_data_view_request({
+    // One slot each, so the bulk sub-cap is full and the total budget is full.
+    const running_export = execute_data_view_request({
       request_id: null,
       params: sample_params(),
       user_id: null,
       path: 'export',
-      cache_key: 'k-prio-bulk',
+      cache_key: 'k-skip-running-export',
+      run_query: async () => {
+        await export_gate.promise
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    const running_interactive = execute_data_view_request({
+      request_id: 'h',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-skip-running-interactive',
+      run_query: async () => {
+        await interactive_gate.promise
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+
+    // The second export queues FIRST. It cannot run -- the bulk sub-cap is full
+    // -- so a queue that STOPS at an ineligible head would park the interactive
+    // waiter behind it for the running export's whole 30-minute budget.
+    const queued_export = execute_data_view_request({
+      request_id: null,
+      params: sample_params(),
+      user_id: null,
+      path: 'export',
+      cache_key: 'k-skip-queued-export',
       run_query: async () => {
         order.push('bulk')
         return empty_result()
@@ -307,7 +321,7 @@ describe('data view admission gate and instrumentation', function () {
       params: sample_params(),
       user_id: null,
       path: 'socket',
-      cache_key: 'k-prio-interactive',
+      cache_key: 'k-skip-interactive',
       run_query: async () => {
         order.push('interactive')
         return empty_result()
@@ -317,16 +331,81 @@ describe('data view admission gate and instrumentation', function () {
     await sleep(20)
     expect(get_admission_state().waiting_request_count).to.equal(2)
 
-    // Free exactly ONE slot, so the two waiters are competing for it.
-    holder_gates[0].release()
-    await interactive_waiter
-    expect(order[0], 'the interactive waiter took the freed slot').to.equal(
-      'interactive'
+    // Free the INTERACTIVE slot only. The export is still holding the bulk one.
+    interactive_gate.release()
+    await running_interactive
+    expect(await admission_outcome(interactive_waiter)).to.equal('admitted')
+    expect(
+      order[0],
+      'the interactive waiter did not wait on the export'
+    ).to.equal('interactive')
+
+    export_gate.release()
+    await Promise.all([running_export, queued_export])
+    expect(order).to.deep.equal(['interactive', 'bulk'])
+    expect(get_admission_state().active_request_count).to.equal(0)
+  })
+
+  it('admits a waiting export ahead of a later interactive waiter once the sub-cap frees', async function () {
+    // The other half of the discipline. Skipping an ineligible export must not
+    // become an unbounded deferral: with no export running, the queued one is
+    // eligible and arrival order governs, so it is admitted before an
+    // interactive request that queued after it. Draining by class instead would
+    // leave this export waiting on an empty interactive queue that a steady
+    // stream of arrivals never produces.
+    const order = []
+    const holder_gates = [make_gate(), make_gate()]
+    const holders = holder_gates.map((holder_gate, i) =>
+      execute_data_view_request({
+        request_id: `h${i}`,
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: `k-order-holder-${i}`,
+        run_query: async () => {
+          await holder_gate.promise
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
     )
+    await sleep(20)
+
+    const bulk_waiter = execute_data_view_request({
+      request_id: null,
+      params: sample_params(),
+      user_id: null,
+      path: 'export',
+      cache_key: 'k-order-bulk',
+      run_query: async () => {
+        order.push('bulk')
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+    const interactive_waiter = execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-order-interactive',
+      run_query: async () => {
+        order.push('interactive')
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+
+    // Free exactly ONE slot, so the two waiters compete for it.
+    holder_gates[0].release()
+    await bulk_waiter
+    expect(order[0], 'the earlier export took the freed slot').to.equal('bulk')
 
     holder_gates[1].release()
-    await Promise.all([...holders, bulk_waiter])
-    expect(order).to.deep.equal(['interactive', 'bulk'])
+    await Promise.all([...holders, interactive_waiter])
+    expect(order).to.deep.equal(['bulk', 'interactive'])
     expect(get_admission_state().active_request_count).to.equal(0)
   })
 
