@@ -37,6 +37,14 @@ export const build_market_history_key = ({
   observed_at
 }) => join_key([source_id, source_market_id, observed_at])
 
+// Book-scoped selection identity, without time_type. Used to group work that
+// targets one time_type explicitly rather than being keyed by it.
+export const build_selection_key = ({
+  source_id,
+  source_market_id,
+  source_selection_id
+}) => join_key([source_id, source_market_id, source_selection_id])
+
 // prop_market_selections_index unique index:
 // (source_id, source_market_id, source_selection_id, time_type)
 export const build_selection_index_key = ({

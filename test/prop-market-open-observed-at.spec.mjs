@@ -7,10 +7,13 @@ import insert_prop_markets from '#libs-server/insert-prop-markets.mjs'
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
 
-// Two real 2024 games. The esbid moving between them is what makes the importer
-// re-push the index rows at all -- MARKET_INDEX_UPDATE_FIELDS is exactly
-// ['esbid', 'season_year'], so a change to either is the only path by which an
-// already-inserted OPEN row is written a second time.
+// Two real 2024 games. Every case below clears prop_markets_history, so the
+// importer sees no cached prior observation and takes the NEW-market path --
+// which is the only path that still upserts a whole OPEN row, and therefore the
+// only one that can exercise the merge expression these cases are about. An
+// existing market no longer rewrites its OPEN row at all; identity columns reach
+// it by targeted update instead (libs-server/propagate-prop-market-identity.mjs,
+// and the spec beside it).
 const WEEK_12_ESBID = 2024112404
 const WEEK_13_ESBID = 2024112802
 

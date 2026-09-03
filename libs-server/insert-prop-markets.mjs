@@ -14,12 +14,18 @@ import {
 } from './betting-market-cache.mjs'
 import {
   build_market_key,
+  build_selection_key,
   build_market_index_key,
   build_market_history_key,
   build_selection_index_key,
   build_selection_history_key
 } from './betting-market-keys.mjs'
 import emit_signal from './emit-signal.mjs'
+import {
+  propagate_market_identity_to_open,
+  propagate_selection_identity_to_open,
+  MARKET_IDENTITY_COLUMNS
+} from './propagate-prop-market-identity.mjs'
 
 const log = debug('insert-prop-markets')
 
@@ -54,9 +60,6 @@ const MARKET_HISTORY_UPDATE_FIELDS = [
   'is_live',
   'source_market_name'
 ]
-
-// Fields that trigger an index update when changed
-const MARKET_INDEX_UPDATE_FIELDS = ['esbid', 'season_year']
 
 const MARKET_INDEX_CONFLICT_TARGET = [
   'source_id',
@@ -259,6 +262,39 @@ export const cleanup_stale_selections = async (cleanup_operations) => {
   return result
 }
 
+// Project both sides of a change comparison onto the fields the gate watches.
+//
+// deep-diff reports a key present on one side and absent from the other as a
+// difference, and the two sides here are not the same shape: the cache is
+// baselined on prop_markets_history (7 columns, via
+// betting-market-cache.mjs:15) while the incoming object is index-shaped (14).
+// A gate that read `differences.some(...)` over an unprojected diff therefore
+// answered a question about columns the history table does not have, and the
+// index gate that watched esbid and season_year -- neither of which exists in
+// prop_markets_history -- was unconditionally true for every existing market,
+// every run, for every book. Widening its field list was a no-op, and a test of
+// it passed identically before and after the change.
+//
+// Projecting makes the comparison like against like, so a gate can only fire on
+// a field it actually watches AND that both sides actually carry. Every field in
+// MARKET_HISTORY_UPDATE_FIELDS is present in prop_markets_history, which is what
+// makes that gate answerable; the index gate was not, and it is gone. Identity
+// columns now reach the OPEN row through propagate-prop-market-identity.mjs,
+// which reads the index row it is repairing rather than a history row standing
+// in for one.
+const has_watched_change = (previous, next, watched_fields) => {
+  const project = (source) => {
+    const projected = {}
+    for (const field of watched_fields) {
+      projected[field] = source[field] ?? null
+    }
+    return projected
+  }
+
+  const differences = diff(project(previous), project(next))
+  return Boolean(differences && differences.length)
+}
+
 // Extract fields needed for market history inserts
 const get_market_history_record = (market, observed_at) => ({
   source_id: market.source_id,
@@ -283,6 +319,7 @@ const process_market = async ({ observed_at, selections, ...market }) => {
 
   const market_history_inserts = []
   const market_index_inserts = []
+  const market_identity_propagations = []
 
   const existing_market = get_cached_market_latest({
     source_id,
@@ -310,7 +347,21 @@ const process_market = async ({ observed_at, selections, ...market }) => {
       })
     }
   } else {
-    // Existing market - find the version before this observed_at for comparison
+    // Existing market. Its OPEN index row was written when the market was first
+    // seen and is never rewritten as a whole row again -- see
+    // propagate-prop-market-identity.mjs for why, and for what does reach it.
+    market_identity_propagations.push({
+      source_id,
+      source_market_id,
+      ...Object.fromEntries(
+        MARKET_IDENTITY_COLUMNS.map((column) => [
+          column,
+          market[column] ?? null
+        ])
+      )
+    })
+
+    // find the version before this observed_at for comparison
     const previous_market_row = get_cached_market_before_observed_at({
       source_id,
       source_market_id,
@@ -328,35 +379,16 @@ const process_market = async ({ observed_at, selections, ...market }) => {
       market_to_compare.is_open = Boolean(market_to_compare.is_open)
       market_to_compare.is_live = Boolean(market_to_compare.is_live)
 
-      const differences = diff(market_to_compare, market)
+      const should_update_history = has_watched_change(
+        market_to_compare,
+        market,
+        MARKET_HISTORY_UPDATE_FIELDS
+      )
 
-      if (differences && differences.length) {
-        const should_update_history = differences.some((d) =>
-          MARKET_HISTORY_UPDATE_FIELDS.includes(d.path[0])
+      if (should_update_history) {
+        market_history_inserts.push(
+          get_market_history_record(market, observed_at)
         )
-
-        if (should_update_history) {
-          market_history_inserts.push(
-            get_market_history_record(market, observed_at)
-          )
-        }
-
-        const should_update_index = differences.some((d) =>
-          MARKET_INDEX_UPDATE_FIELDS.includes(d.path[0])
-        )
-
-        if (should_update_index) {
-          market_index_inserts.push({
-            ...market,
-            observed_at,
-            time_type: 'OPEN'
-          })
-          market_index_inserts.push({
-            ...market,
-            observed_at,
-            time_type: 'CLOSE'
-          })
-        }
       }
 
       // Use the previous row for selection lookup since it wasn't mutated
@@ -384,6 +416,7 @@ const process_market = async ({ observed_at, selections, ...market }) => {
   return {
     market_history_inserts,
     market_index_inserts,
+    market_identity_propagations,
     selection_operations
   }
 }
@@ -400,6 +433,10 @@ export default async function (markets, { dry_run = false } = {}) {
     market_index_inserts: 0,
     selection_history_inserts: 0,
     selection_index_inserts: 0,
+    market_identity_propagations: 0,
+    selection_identity_propagations: 0,
+    market_open_rows_repaired: 0,
+    selection_open_rows_repaired: 0,
     cleanup_operations: 0,
     selection_deletes: 0,
     market_processing_failures: 0,
@@ -452,6 +489,8 @@ export default async function (markets, { dry_run = false } = {}) {
       const all_market_index_inserts = []
       const all_selection_history_inserts = []
       const all_selection_index_inserts = []
+      const all_market_identity_propagations = []
+      const all_selection_identity_propagations = []
       const all_selection_cleanup_operations = []
 
       // Process all markets in the batch concurrently
@@ -466,6 +505,9 @@ export default async function (markets, { dry_run = false } = {}) {
           const operations = result.value
           all_market_history_inserts.push(...operations.market_history_inserts)
           all_market_index_inserts.push(...operations.market_index_inserts)
+          all_market_identity_propagations.push(
+            ...operations.market_identity_propagations
+          )
 
           if (operations.selection_operations) {
             all_selection_history_inserts.push(
@@ -473,6 +515,9 @@ export default async function (markets, { dry_run = false } = {}) {
             )
             all_selection_index_inserts.push(
               ...operations.selection_operations.selection_index_inserts
+            )
+            all_selection_identity_propagations.push(
+              ...operations.selection_operations.selection_identity_propagations
             )
             all_selection_cleanup_operations.push(
               ...operations.selection_operations.cleanup_operations
@@ -524,7 +569,21 @@ export default async function (markets, { dry_run = false } = {}) {
         build_selection_index_key
       )
 
+      const unique_market_identity_propagations = deduplicate_inserts(
+        all_market_identity_propagations,
+        build_market_key
+      )
+
+      const unique_selection_identity_propagations = deduplicate_inserts(
+        all_selection_identity_propagations,
+        build_selection_key
+      )
+
       // Accumulate stats
+      stats.market_identity_propagations +=
+        unique_market_identity_propagations.length
+      stats.selection_identity_propagations +=
+        unique_selection_identity_propagations.length
       stats.market_history_inserts += unique_market_history.length
       stats.market_index_inserts += unique_market_index.length
       stats.selection_history_inserts += unique_selection_history.length
@@ -591,6 +650,26 @@ export default async function (markets, { dry_run = false } = {}) {
         }
 
         await Promise.all(index_promises)
+
+        // Identity propagation belongs in the index phase and AFTER the upserts
+        // above, for two reasons. It targets the same OPEN rows those
+        // statements may create, so a market first seen this run must already
+        // exist for the repair to find it; and it is an index write, so the
+        // ordering argument above -- index durable before history, because the
+        // change baseline is the history table -- covers it too. A failure here
+        // leaves the baseline behind and the next run retries the repair.
+        //
+        // Sequential rather than joined into index_promises: these UPDATEs and
+        // the upserts above touch overlapping rows, and running them
+        // concurrently on separate connections is how a deadlock gets written.
+        stats.market_open_rows_repaired +=
+          await propagate_market_identity_to_open(
+            unique_market_identity_propagations
+          )
+        stats.selection_open_rows_repaired +=
+          await propagate_selection_identity_to_open(
+            unique_selection_identity_propagations
+          )
 
         const history_promises = []
 
@@ -706,9 +785,12 @@ export default async function (markets, { dry_run = false } = {}) {
     log(`  - Selection history records: ${stats.selection_history_inserts}`)
     log(`  - Selection index records: ${stats.selection_index_inserts}`)
     log(`  - Cleanup operations: ${stats.cleanup_operations}`)
+    log(
+      `  - Identity propagation candidates: ${stats.market_identity_propagations} market(s), ${stats.selection_identity_propagations} selection(s)`
+    )
   } else {
     log(
-      `Market insertion completed in ${total_duration}s (${stats.selection_deletes} stale selections deleted)`
+      `Market insertion completed in ${total_duration}s (${stats.selection_deletes} stale selections deleted, ${stats.market_open_rows_repaired} OPEN market and ${stats.selection_open_rows_repaired} OPEN selection identity repairs)`
     )
   }
 

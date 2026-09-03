@@ -2,6 +2,7 @@ import diff from 'deep-diff'
 import debug from 'debug'
 
 import { get_cached_selection_latest } from './betting-market-cache.mjs'
+import { SELECTION_IDENTITY_COLUMNS } from './propagate-prop-market-identity.mjs'
 import { fixed_payout_bookmakers } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('insert-prop-market-selections')
@@ -61,6 +62,7 @@ const process_market_selection = ({
 }) => {
   const selection_history_inserts = []
   const selection_index_inserts = []
+  const selection_identity_propagations = []
 
   const save_new_selection = () => {
     validate_selection(selection, observed_at)
@@ -90,7 +92,8 @@ const process_market_selection = ({
       selection_name_changed: false,
       odds_change_amount: 0,
       selection_history_inserts,
-      selection_index_inserts
+      selection_index_inserts,
+      selection_identity_propagations
     }
   }
 
@@ -146,6 +149,32 @@ const process_market_selection = ({
     })
   }
 
+  // The OPEN row is written once, above, and never rewritten as a whole row --
+  // it preserves the opening odds and the opening line, and refreshing it would
+  // destroy the only record of them. That stranded selection_pid and
+  // selection_type with the prices, so a selection whose player the importer
+  // could not resolve on its first observation stayed unresolvable on OPEN
+  // forever. Settlement reads both time_types, so an OPEN row with a null pid
+  // never settles.
+  //
+  // No gate here, deliberately. selection_pid is absent from
+  // prop_market_selections_history, so a diff against the cached history row
+  // reports it as a difference on every run and could never gate anything; the
+  // propagation is instead null-guarded against the INDEX row it is repairing,
+  // inside the statement that writes it. See
+  // propagate-prop-market-identity.mjs.
+  selection_identity_propagations.push({
+    source_id: selection.source_id,
+    source_market_id: selection.source_market_id,
+    source_selection_id: selection.source_selection_id,
+    ...Object.fromEntries(
+      SELECTION_IDENTITY_COLUMNS.map((column) => [
+        column,
+        selection[column] ?? null
+      ])
+    )
+  })
+
   return {
     source_selection_id: selection.source_selection_id,
     new_selection: false,
@@ -153,7 +182,8 @@ const process_market_selection = ({
     selection_name_changed,
     metric_line_changed,
     selection_history_inserts,
-    selection_index_inserts
+    selection_index_inserts,
+    selection_identity_propagations
   }
 }
 
@@ -166,6 +196,7 @@ export default async function ({
   const results = []
   const all_selection_history_inserts = []
   const all_selection_index_inserts = []
+  const all_selection_identity_propagations = []
   const cleanup_operations = []
   const failures = []
 
@@ -175,6 +206,7 @@ export default async function ({
     return {
       selection_history_inserts: all_selection_history_inserts,
       selection_index_inserts: all_selection_index_inserts,
+      selection_identity_propagations: all_selection_identity_propagations,
       cleanup_operations,
       failures,
       results
@@ -205,6 +237,11 @@ export default async function ({
       }
       if (result.selection_index_inserts) {
         all_selection_index_inserts.push(...result.selection_index_inserts)
+      }
+      if (result.selection_identity_propagations) {
+        all_selection_identity_propagations.push(
+          ...result.selection_identity_propagations
+        )
       }
     } catch (error) {
       log(selection)
@@ -244,6 +281,7 @@ export default async function ({
   return {
     selection_history_inserts: all_selection_history_inserts,
     selection_index_inserts: all_selection_index_inserts,
+    selection_identity_propagations: all_selection_identity_propagations,
     cleanup_operations,
     failures,
     results
