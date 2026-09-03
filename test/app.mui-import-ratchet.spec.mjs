@@ -26,7 +26,10 @@ chai.should()
 // that repo is converted too. A green run here is not evidence that MUI has
 // left the bundle.
 const import_budget = {
-  '@mui/material': 215,
+  // 215 -> 211: the auction's commissioner controls were a MUI SpeedDial with a
+  // Backdrop and two SpeedDialActions, and the component now renders three plain
+  // buttons importing nothing from MUI at all.
+  '@mui/material': 211,
   '@mui/base': 7,
   '@mui/lab': 1,
   '@mui/icons-material': 0,
