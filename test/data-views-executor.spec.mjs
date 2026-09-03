@@ -50,6 +50,26 @@ const sample_params = () => ({
 
 const empty_result = () => ({ data_view_results: [], data_view_metadata: {} })
 
+// A slot held until the spec says otherwise. Sleeps make a concurrency spec
+// assert on a race; a gate makes it assert on the gate.
+const make_gate = () => {
+  let release = null
+  const promise = new Promise((resolve) => {
+    release = resolve
+  })
+  return { promise, release }
+}
+
+// Whether a request was ADMITTED, distinguished from a request that is still
+// queued -- without waiting on a promise that a starving gate would never
+// settle. A regression here must report as a failed assertion, not as a mocha
+// timeout.
+const admission_outcome = async (promise, budget_ms = 150) =>
+  Promise.race([
+    promise.then(() => 'admitted'),
+    sleep(budget_ms).then(() => 'blocked')
+  ])
+
 const expect_throws = async (promise) => {
   let threw = null
   try {
@@ -185,6 +205,187 @@ describe('data view admission gate and instrumentation', function () {
     expect(heartbeats, 'heartbeat fired during execution').to.include(
       'executing'
     )
+  })
+
+  it('keeps a slot reachable by an interactive request while bulk exports saturate the gate', async function () {
+    // The failure this exists for: two API-key exports, each carrying a
+    // 30-minute statement_timeout, occupying every slot while browser tables
+    // queue behind them.
+    const state = get_admission_state()
+    const gate = make_gate()
+    const exports_in_flight = Array.from(
+      { length: state.max_concurrent_queries },
+      (_, i) =>
+        execute_data_view_request({
+          request_id: null,
+          params: sample_params(),
+          user_id: null,
+          path: 'export',
+          cache_key: `k-export-${i}`,
+          run_query: async () => {
+            await gate.promise
+            return empty_result()
+          },
+          cache_get: async () => null
+        })
+    )
+    await sleep(20)
+
+    const saturated = get_admission_state()
+    expect(saturated.bulk.active_request_count).to.equal(
+      saturated.max_concurrent_bulk_queries
+    )
+    expect(
+      saturated.bulk.waiting_request_count,
+      'the exports over the bulk sub-cap are queued, not running'
+    ).to.equal(
+      saturated.max_concurrent_queries - saturated.max_concurrent_bulk_queries
+    )
+
+    let interactive_ran = false
+    const interactive = execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-interactive',
+      run_query: async () => {
+        interactive_ran = true
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+
+    expect(await admission_outcome(interactive)).to.equal('admitted')
+    expect(interactive_ran).to.equal(true)
+    expect(
+      get_admission_state().bulk.active_request_count,
+      'the export was still in flight when the interactive request ran'
+    ).to.equal(saturated.max_concurrent_bulk_queries)
+
+    gate.release()
+    await Promise.all(exports_in_flight)
+    expect(get_admission_state().active_request_count).to.equal(0)
+  })
+
+  it('hands a freed slot to an interactive waiter ahead of an older bulk waiter', async function () {
+    const order = []
+    const holder_gates = [make_gate(), make_gate()]
+    const holders = holder_gates.map((holder_gate, i) =>
+      execute_data_view_request({
+        request_id: `h${i}`,
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: `k-prio-holder-${i}`,
+        run_query: async () => {
+          await holder_gate.promise
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
+    )
+    await sleep(20)
+
+    // The bulk waiter queues FIRST, so FIFO across one shared queue would run it
+    // first. Interactive priority is what must reorder them.
+    const bulk_waiter = execute_data_view_request({
+      request_id: null,
+      params: sample_params(),
+      user_id: null,
+      path: 'export',
+      cache_key: 'k-prio-bulk',
+      run_query: async () => {
+        order.push('bulk')
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+    const interactive_waiter = execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-prio-interactive',
+      run_query: async () => {
+        order.push('interactive')
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+    expect(get_admission_state().waiting_request_count).to.equal(2)
+
+    // Free exactly ONE slot, so the two waiters are competing for it.
+    holder_gates[0].release()
+    await interactive_waiter
+    expect(order[0], 'the interactive waiter took the freed slot').to.equal(
+      'interactive'
+    )
+
+    holder_gates[1].release()
+    await Promise.all([...holders, bulk_waiter])
+    expect(order).to.deep.equal(['interactive', 'bulk'])
+    expect(get_admission_state().active_request_count).to.equal(0)
+  })
+
+  it('classifies admissions by path and releases a superseded bulk waiter cleanly', async function () {
+    const gate = make_gate()
+    const controller = new AbortController()
+    const running_export = execute_data_view_request({
+      request_id: null,
+      params: sample_params(),
+      user_id: null,
+      path: 'export',
+      cache_key: 'k-class-export',
+      run_query: async () => {
+        await gate.promise
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+
+    let queued_export_ran = false
+    const queued_export = execute_data_view_request({
+      request_id: null,
+      params: sample_params(),
+      user_id: null,
+      path: 'export',
+      cache_key: 'k-class-export-2',
+      signal: controller.signal,
+      run_query: async () => {
+        queued_export_ran = true
+        return empty_result()
+      },
+      cache_get: async () => null
+    })
+    await sleep(20)
+    controller.abort()
+    await expect_throws(queued_export)
+
+    await execute_data_view_request({
+      request_id: 'v',
+      params: sample_params(),
+      user_id: null,
+      path: 'socket',
+      cache_key: 'k-class-socket',
+      run_query: async () => empty_result(),
+      cache_get: async () => null
+    })
+
+    gate.release()
+    await running_export
+
+    const { counters, bulk, active_request_count } = get_admission_state()
+    expect(queued_export_ran).to.equal(false)
+    expect(counters.bulk_admitted).to.equal(1)
+    expect(counters.interactive_admitted).to.equal(1)
+    expect(counters.admitted).to.equal(2)
+    expect(counters.superseded_waiters).to.equal(1)
+    expect(bulk.waiting_request_count).to.equal(0)
+    expect(active_request_count).to.equal(0)
   })
 
   it('emits a stable dedup key for repeated identical slow requests and emits nothing under target', async function () {

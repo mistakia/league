@@ -6,7 +6,8 @@ import run_query_backed_view from '#libs-server/data-views/run-query-backed-view
 // The single entry every path that executes a data-view query calls. Holds both
 // the bounded-concurrency admission gate and the telemetry/signal
 // instrumentation, so admission and timeout policy cannot diverge across the
-// four call sites again.
+// four call sites again. The gate is two-class -- interactive and bulk -- but
+// both classes are admitted here, from one budget, for the same reason.
 //
 // Cap derived from measurement on 2026-08-19 (see
 // user:task/league/data-views/tune-data-view-request-queue.md): the heaviest
@@ -16,7 +17,28 @@ import run_query_backed_view from '#libs-server/data-views/run-query-backed-view
 // so N=2 sits well below pool max and cannot starve auth/roster reads. The
 // Postgres blast-radius backstops (temp_file_limit, idle_in_transaction_session_timeout)
 // land in the same change.
+//
+// This TOTAL is unchanged by the bulk split below and must stay that way
+// without a fresh measurement: the 24%/66% figures are readings at N=2 and
+// N=4, and nothing has measured N=3. The split partitions the same two slots,
+// it does not add a third.
 const DATA_VIEW_MAX_CONCURRENT_QUERIES = 2
+// Sub-cap on the bulk class WITHIN the total above, so at least one slot is
+// always reachable by an interactive request. This exists because bulk and
+// interactive have incomparable deadlines sharing one counter: the export route
+// raises statement_timeout to 30 minutes for an API-key holder, so before the
+// split two concurrent exports could hold both slots for half an hour while
+// every browser table queued behind them. Measured on 2026-09-03: admission
+// wait is p50 1ms / p90 3ms across 449 cache-miss executions but has a maximum
+// of 91,623ms -- 91 seconds of pure queueing, against a continuous stream of
+// `SET LOCAL statement_timeout = 1800000` backends in pg_stat_activity.
+//
+// What the sub-cap guarantees is a BOUND, not a zero: an interactive request
+// can still wait behind other interactive requests on the remaining slot, but
+// its wait is now a multiple of an interactive query (seconds) instead of a
+// bulk export's timeout (up to 30 minutes). Raising this to 2 restores exactly
+// the starvation it was added to remove.
+const DATA_VIEW_MAX_CONCURRENT_BULK_QUERIES = 1
 const DATA_VIEW_HEARTBEAT_INTERVAL_MS = 2000
 // The 5s target IS the emission threshold (operator ruling 2026-08-19), never a
 // cutoff. Severity tiers are sized off the real distribution (current-log p50
@@ -33,16 +55,38 @@ const SEVERITY_TIERS = [
   { min_ms: DATA_VIEW_EMISSION_THRESHOLD_MS, severity: 'low' }
 ]
 
+// The two admission classes. Bulk is the class whose deadline is a caller's
+// batch job rather than a person watching a table redraw, and membership is
+// decided HERE from `path` rather than passed by each call site -- same reason
+// the executor resolves run_query and the timeout itself, since a per-call-site
+// classification is a classification somebody forgets.
+//
+// Only the export route is bulk. `agent-preview` is deliberately interactive:
+// it is row-capped, short, and a live generation session is waiting on it, so
+// it belongs with the socket rather than behind a 30-minute export.
+const ADMISSION_CLASS_INTERACTIVE = 'interactive'
+const ADMISSION_CLASS_BULK = 'bulk'
+const BULK_ADMISSION_PATHS = new Set(['export'])
+
+const admission_class_for_path = (path) =>
+  BULK_ADMISSION_PATHS.has(path)
+    ? ADMISSION_CLASS_BULK
+    : ADMISSION_CLASS_INTERACTIVE
+
 // Counting-semaphore state over module scope: one gate shared by every path,
-// not a class. `waiting` holds the FIFO of waiter handles; release passes the
-// slot to the head waiter rather than decrementing, so the counter never drifts
-// under concurrent release.
+// not a class, holding a total budget plus a bulk sub-budget. `waiting` holds a
+// FIFO of waiter handles PER class; release decrements and then re-pumps both
+// queues in one synchronous step, so the counter never drifts and a slot freed
+// by a bulk request can go to an interactive waiter (which a
+// pass-the-slot-to-my-own-head-waiter release could not do).
 const admission = {
-  active_request_count: 0,
-  waiting: [],
+  active: { interactive: 0, bulk: 0 },
+  waiting: { interactive: [], bulk: [] },
   counters: {
     arrivals: 0,
     admitted: 0,
+    interactive_admitted: 0,
+    bulk_admitted: 0,
     completed: 0,
     failed: 0,
     superseded_waiters: 0,
@@ -52,10 +96,23 @@ const admission = {
   }
 }
 
+const active_total = () => admission.active.interactive + admission.active.bulk
+const waiting_total = () =>
+  admission.waiting.interactive.length + admission.waiting.bulk.length
+
 export const get_admission_state = () => ({
-  active_request_count: admission.active_request_count,
-  waiting_request_count: admission.waiting.length,
+  active_request_count: active_total(),
+  waiting_request_count: waiting_total(),
   max_concurrent_queries: DATA_VIEW_MAX_CONCURRENT_QUERIES,
+  max_concurrent_bulk_queries: DATA_VIEW_MAX_CONCURRENT_BULK_QUERIES,
+  interactive: {
+    active_request_count: admission.active.interactive,
+    waiting_request_count: admission.waiting.interactive.length
+  },
+  bulk: {
+    active_request_count: admission.active.bulk,
+    waiting_request_count: admission.waiting.bulk.length
+  },
   heartbeat_interval_ms: DATA_VIEW_HEARTBEAT_INTERVAL_MS,
   counters: { ...admission.counters }
 })
@@ -63,16 +120,13 @@ export const get_admission_state = () => ({
 // Test seam: zeroes the gate so a spec can assert deltas rather than
 // accumulating counters. Not part of the runtime contract.
 export const reset_admission_state = () => {
-  admission.active_request_count = 0
-  admission.waiting = []
-  admission.counters.arrivals = 0
-  admission.counters.admitted = 0
-  admission.counters.completed = 0
-  admission.counters.failed = 0
-  admission.counters.superseded_waiters = 0
-  admission.counters.discarded_results = 0
-  admission.counters.cache_hits = 0
-  admission.counters.signals_emitted = 0
+  admission.active.interactive = 0
+  admission.active.bulk = 0
+  admission.waiting.interactive = []
+  admission.waiting.bulk = []
+  for (const key of Object.keys(admission.counters)) {
+    admission.counters[key] = 0
+  }
 }
 
 const mint_execution_id = () => crypto.randomBytes(8).toString('hex')
@@ -269,37 +323,67 @@ const report_slow_query = ({
   })
 }
 
-// Acquires a slot, abortable while waiting. The abort path is how a disconnect
-// or a superseding request from the same client cancels a request that has not
-// yet started executing.
-const acquire_slot = (signal) => {
+// A class may enter only while the TOTAL budget has room, and bulk additionally
+// only while the bulk sub-budget has room. The second clause is what keeps a
+// slot reachable by interactive traffic no matter how many exports are in
+// flight.
+const can_admit = (admission_class) => {
+  if (active_total() >= DATA_VIEW_MAX_CONCURRENT_QUERIES) return false
+  if (
+    admission_class === ADMISSION_CLASS_BULK &&
+    admission.active.bulk >= DATA_VIEW_MAX_CONCURRENT_BULK_QUERIES
+  ) {
+    return false
+  }
+  return true
+}
+
+const take_slot = (admission_class) => {
+  admission.active[admission_class]++
+  admission.counters.admitted++
+  admission.counters[`${admission_class}_admitted`]++
+}
+
+// Interactive waiters are drained before bulk waiters, so a freed slot goes to
+// the class that has someone waiting on it. Bulk does not starve in return: it
+// is capped, not deprioritised out of existence -- an in-flight export keeps its
+// slot for its whole run, and interactive arrivals are sparse (p50 admission
+// wait 1ms) so the interactive queue is empty nearly always.
+const pump_waiters = () => {
+  for (const admission_class of [
+    ADMISSION_CLASS_INTERACTIVE,
+    ADMISSION_CLASS_BULK
+  ]) {
+    const queue = admission.waiting[admission_class]
+    while (queue.length && can_admit(admission_class)) {
+      const waiter = queue.shift()
+      take_slot(admission_class)
+      waiter.resolve()
+    }
+  }
+}
+
+// Acquires a slot in the caller's class, abortable while waiting. The abort path
+// is how a disconnect or a superseding request from the same client cancels a
+// request that has not yet started executing.
+const acquire_slot = (signal, admission_class) => {
   admission.counters.arrivals++
-  if (admission.active_request_count < DATA_VIEW_MAX_CONCURRENT_QUERIES) {
-    admission.active_request_count++
-    admission.counters.admitted++
+  if (can_admit(admission_class)) {
+    take_slot(admission_class)
     return Promise.resolve()
   }
 
   return new Promise((resolve, reject) => {
-    const waiter = {
-      // The waiter's resolve TAKES the slot (increments active count), and the
-      // releaser passes it by resolving the head waiter rather than by
-      // decrementing, so exactly one slot moves per release.
-      resolve: () => {
-        admission.active_request_count++
-        admission.counters.admitted++
-        resolve()
-      },
-      reject
-    }
-    admission.waiting.push(waiter)
+    const queue = admission.waiting[admission_class]
+    const waiter = { resolve, reject }
+    queue.push(waiter)
     if (signal) {
       signal.addEventListener(
         'abort',
         () => {
-          const index = admission.waiting.indexOf(waiter)
+          const index = queue.indexOf(waiter)
           if (index !== -1) {
-            admission.waiting.splice(index, 1)
+            queue.splice(index, 1)
             admission.counters.superseded_waiters++
           }
           reject(
@@ -312,10 +396,11 @@ const acquire_slot = (signal) => {
   })
 }
 
-const release_slot = () => {
-  const next = admission.waiting.shift()
-  if (next) next.resolve()
-  else admission.active_request_count--
+// The decrement and the re-pump are one synchronous step with no await between
+// them, so the counters cannot drift and no request observes the gate mid-move.
+const release_slot = (admission_class) => {
+  admission.active[admission_class]--
+  pump_waiters()
 }
 
 /**
@@ -328,7 +413,9 @@ const release_slot = () => {
  *   it and the executor mints one.
  * @param {object} opts.params - the table state
  * @param {number|null} opts.user_id
- * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' | 'sql'
+ * @param {string} opts.path - 'socket' | 'search' | 'debug' | 'export' | 'sql'.
+ *   Also decides the admission class: 'export' is bulk, everything else is
+ *   interactive.
  * @param {string} opts.cache_key - the redis key the caller already computed
  * @param {number|null} [opts.max_limit] - server-resolved ceiling on the table
  *   state's limit; null for no ceiling (export API key only)
@@ -420,10 +507,14 @@ export async function execute_data_view_request({
   }
   if (signal) signal.addEventListener('abort', stop_heartbeat, { once: true })
 
+  // Admission class travels with the path, so the export route needs to do
+  // nothing but keep passing path: 'export' as it already does.
+  const admission_class = admission_class_for_path(path)
+
   let state = 'waiting'
   let acquired = false
   try {
-    await acquire_slot(signal)
+    await acquire_slot(signal, admission_class)
     acquired = true
 
     // Re-check the cache at admission: a concurrent execution of the same view
@@ -578,6 +669,6 @@ export async function execute_data_view_request({
   } finally {
     stop_heartbeat()
     if (signal) signal.removeEventListener('abort', stop_heartbeat)
-    if (acquired) release_slot()
+    if (acquired) release_slot(admission_class)
   }
 }
