@@ -26,6 +26,19 @@ export const PROVIDER_ERROR_PATTERNS = [
   /rate.?limit exceeded/i
 ]
 
+// The model name the harness stamps on a message IT generated rather than
+// received -- an API failure, an interrupt, a deadline.
+//
+// THE SECOND SHAPE A PROVIDER OUTAGE ARRIVES IN, and the patterns above do not
+// catch it. Measured 2026-09-03, on the first run after the provider came back
+// from a pause: the transcript held ONE turn, carrying zero output tokens and
+// no error text to match, stamped `<synthetic>`; the run reported `expired` with
+// `deadline_exceeded` after a full fifteen minutes. Nothing in the row said the
+// model had never answered, so a cold backend was on course to be recorded as an
+// agent that failed to finish -- the exact substitution the oracle exists to
+// prevent, entering through a door it was not watching.
+const SYNTHETIC_MODEL = '<synthetic>'
+
 // Content blocks that make an assistant message a real turn. Some providers
 // emit EMPTY assistant messages mid-turn; counting those inflates every run on
 // that provider and leaves runs on others untouched, which is the worst shape a
@@ -201,9 +214,29 @@ export const derive_transcript_metrics = (records) => {
     0
   )
 
-  const provider_error = PROVIDER_ERROR_PATTERNS.find((pattern) =>
+  const matched_pattern = PROVIDER_ERROR_PATTERNS.find((pattern) =>
     pattern.test(assistant_text)
   )
+
+  // Real models the provider actually answered with, synthetic excluded.
+  const models = [
+    ...new Set(
+      substantive
+        .map((entry) => entry.model)
+        .filter((model) => model && model !== SYNTHETIC_MODEL)
+    )
+  ]
+
+  // A run that produced turns but never heard from a real model did not measure
+  // the agent. Gated on there being turns at all, so an empty transcript still
+  // reports as empty rather than as an outage.
+  const never_reached_provider = substantive.length > 0 && models.length === 0
+
+  const provider_error = matched_pattern
+    ? String(matched_pattern)
+    : never_reached_provider
+      ? `no response from any real model: every one of the ${substantive.length} turn(s) is ${SYNTHETIC_MODEL}`
+      : null
 
   return {
     turns: substantive.length,
@@ -217,9 +250,7 @@ export const derive_transcript_metrics = (records) => {
     tool_call_count,
     buckets,
     tool_names,
-    models: [
-      ...new Set(substantive.map((entry) => entry.model).filter(Boolean))
-    ],
+    models,
     cost_state_present: Boolean(cost_state),
     cost_state_output_tokens: cost_state ? cost_state_output : null,
     // A gap is not automatically wrong -- title generation is a real API call

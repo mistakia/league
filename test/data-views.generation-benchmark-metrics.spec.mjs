@@ -280,6 +280,62 @@ describe('data-view generation benchmark metrics', function () {
       const metrics = derive_transcript_metrics(two_turn_transcript)
       expect(metrics.provider_error).to.equal(null)
     })
+
+    it('flags a run whose every turn is SYNTHETIC, carrying no error text', function () {
+      // The real shape of the 2026-09-03 cold-start failure, and the reason the
+      // text patterns are not sufficient. The provider had just come back from a
+      // pause; the transcript held one turn, zero output tokens, and NO error
+      // text to match, stamped `<synthetic>` because the harness rather than the
+      // model produced it. The run reported `expired` after a full fifteen
+      // minutes, so without this the row reads as an agent that failed to finish
+      // rather than a backend that never answered.
+      const cold = [
+        { type: 'user', message: { content: 'top 10 quarterbacks' } },
+        assistant_record({
+          id: 'synthetic-1',
+          model: '<synthetic>',
+          blocks: [{ type: 'text', text: '' }],
+          usage: { output_tokens: 0, input_tokens: 0 }
+        })
+      ]
+      const metrics = derive_transcript_metrics(cold)
+      expect(metrics.turns).to.equal(1)
+      expect(metrics.output_tokens).to.equal(0)
+      expect(metrics.provider_error).to.not.equal(null)
+      expect(metrics.provider_error).to.include('synthetic')
+      // The synthetic name must not be reported as a model the run used, or a
+      // reader comparing models across rows sees a provider that does not exist.
+      expect(metrics.models).to.eql([])
+    })
+
+    it('does NOT flag a run that merely contains a synthetic turn', function () {
+      // The discriminating control. An interrupt or a deadline notice can land
+      // as one synthetic record inside a run the model otherwise answered
+      // normally, and calling that an outage would discard real measurements.
+      const mixed = [
+        ...two_turn_transcript,
+        assistant_record({
+          id: 'synthetic-tail',
+          model: '<synthetic>',
+          blocks: [{ type: 'text', text: 'Interrupted by user' }],
+          usage: { output_tokens: 0 }
+        })
+      ]
+      const metrics = derive_transcript_metrics(mixed)
+      expect(metrics.provider_error).to.equal(null)
+      expect(metrics.models).to.eql(['deepseek-v4-flash'])
+    })
+
+    it('reports an EMPTY transcript as empty rather than as an outage', function () {
+      // Guards the gate itself. Keying only on "no real model" would call a
+      // transcript with no turns at all a provider failure, which is a
+      // confident answer to a question the file has no evidence about.
+      const metrics = derive_transcript_metrics([
+        { type: 'user', message: { content: 'top 10 quarterbacks' } }
+      ])
+      expect(metrics.turns).to.equal(0)
+      expect(metrics.provider_error).to.equal(null)
+    })
   })
 
   describe('row identity resolution', function () {
