@@ -9,7 +9,9 @@ import derive_view_from_query_result, {
   QueryViewDerivationError
 } from '#libs-server/data-views/derive-view-from-query-result.mjs'
 import run_query_backed_view from '#libs-server/data-views/run-query-backed-view.mjs'
-import sweep_unreferenced_data_view_queries from '#libs-server/data-views/sweep-unreferenced-data-view-queries.mjs'
+import sweep_unreferenced_data_view_queries, {
+  build_sweep_cutoff
+} from '#libs-server/data-views/sweep-unreferenced-data-view-queries.mjs'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import resolve_pg_field_types, {
   reset_pg_field_type_memo,
@@ -518,6 +520,35 @@ describe('data views -- query backed', function () {
         )
       }
       expect(with_no_floor).to.include(fresh_id)
+    })
+
+    // THE CAUSE OF BULLETIN #613, asserted deterministically.
+    //
+    // The case above is a real behavioural check and it is also the reason that
+    // defect survived for days: `created_at` is stamped on the DATABASE clock
+    // and the cutoff used to be computed on the NODE clock, so a just-inserted
+    // row was collected or not depending on which way the two had drifted.
+    // league-test-pg measured ~50ms AHEAD of the host, which puts a fresh row's
+    // created_at in the FUTURE relative to a Node-computed `now` and excludes
+    // it from a no-floor sweep -- while a run that happened to spend more than
+    // 50ms between the insert and the sweep passed. Hence "fails in a full run,
+    // passes in isolation", with nothing in the assertion pointing at a clock.
+    //
+    // No amount of re-running the case above settles that, because it is a
+    // timing race either way. This one is decidable: the cutoff is either a
+    // database expression or a client-supplied timestamp.
+    it('derives its age cutoff on the database clock, not the API host clock', function () {
+      const sql = build_sweep_cutoff({
+        query_runner: db,
+        min_age_hours: 24
+      }).toString()
+
+      expect(sql).to.include('now()')
+
+      // The negative half, and the one that actually fails on a regression: a
+      // Node-computed cutoff renders as a bound ISO timestamp. Asserting only
+      // the presence of `now()` would pass on an expression that carried both.
+      expect(sql).to.not.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)
     })
   })
 })
