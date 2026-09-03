@@ -15,13 +15,25 @@ import './player-auction-value.styl'
  * ambiguous -- `$7` under a label reading `Live value`, a few inches from the
  * bid controls, was taken for the current bid, which is a different number.
  *
- * So the pair collapses into a valuation and its inflation: the amount is what
- * the player is worth right now, the delta beside it is how far the auction has
- * carried that above the preseason figure, and the preseason figure moves into
- * the tooltip -- it is the BASELINE for the delta, not a competing price to bid
- * against. The delta is also the number neither surface ever showed and is the
- * actual bidding input: it says the room is paying over book, which is a fact
- * about the auction rather than about the player.
+ * So the pair collapses into ONE price and its ORIGIN: the amount is what the
+ * player is worth right now, inflation already applied, and `from $5` beside it
+ * is where that started.
+ *
+ * `from $5`, NOT `+$2`, AND THE DELTA FORM WAS AMBIGUOUS IN THE ONE WAY THAT
+ * MATTERS AT A BID. `$7 +$2` does not say whether the two are to be added:
+ * read as "seven, and two more of inflation on top" it makes the player worth
+ * nine, and read as "seven, of which two is inflation" it makes them worth
+ * seven. Both readings are available from the glyphs and the surface picked
+ * neither, so a manager could be a dollar or two off in either direction with
+ * no way to tell -- on the one screen where that number decides a bid.
+ *
+ * A baseline cannot be read that way. `$7 from $5` states the endpoint and the
+ * origin, so the only arithmetic left is the subtraction the reader does not
+ * have to do, and there is no third number for the pair to imply. It also keeps
+ * the preseason figure ON the surface rather than in the tooltip, which is
+ * where the merge had put it -- so `Market Value` names something the reader
+ * can see the whole of, and the exact inflation is still spelled out in words
+ * on hover for anyone who wants it.
  *
  * `.selected__player-header-item` is the shared label-over-value item class,
  * carried here rather than by each caller, because every caller wants it -- the
@@ -59,13 +71,16 @@ export default function PlayerAuctionValue({
           <span className='player__auction-value-amount'>
             ${auction_adjusted_salary}
           </span>
+          {/* NOTHING WHEN THE TWO ARE EQUAL. `from $7` beside `$7` is a line
+              that says the auction has not moved this player, which is what an
+              unannotated price already says. */}
           {inflation !== 0 && (
             <span
-              className={`player__auction-value-inflation ${
+              className={`player__auction-value-baseline ${
                 inflation > 0 ? 'over' : 'under'
               }`}
             >
-              {inflation > 0 ? '+' : '-'}${Math.abs(inflation)}
+              from ${market_salary}
             </span>
           )}
         </div>
