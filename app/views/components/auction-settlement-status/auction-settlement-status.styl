@@ -23,3 +23,21 @@
   // and has to be declared somewhere before it means anything. The literal
   // below is the same secondary-text value the auction election control uses.
   color rgba(0, 0, 0, 0.6)
+
+// STACKED, THIS ROW NEEDS ITS OWN BOTTOM RULE. Below 800px the side rail sits
+// under the board rather than beside it, and this is its first row. The two
+// blocks beneath it -- the block calendar and the standing elections -- are
+// `.accordion`s that bring their own separators, so without a rule here the
+// sentence reads as the calendar's heading rather than as its own row.
+//
+// 1px solid rgba(0, 0, 0, 0.12) is the rail's own separator value: it is what
+// `.auction__side` takes for `border-left` beside the board and for
+// `border-top` once stacked (app/views/pages/auction/auction.styl).
+//
+// The right margin goes with it. A 10px inset on one end only reads as a
+// misaligned rule rather than as a deliberate one, and the rail's own borders
+// span its full width.
+@media (max-width 800px)
+  .auction-settlement-status
+    margin-right 0
+    border-bottom 1px solid rgba(0, 0, 0, 0.12)
