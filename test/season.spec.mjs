@@ -274,6 +274,39 @@ describe('LIBS-SHARED Season', function () {
     expect(current_season.week).to.equal(9)
   })
 
+  // calculate_week is the only entry point taking a caller-supplied date, and
+  // every odds importer hands it a vendor `startDate` string parsed in the
+  // HOST's zone. dayjs counts week diffs in LOCAL calendar weeks, so before
+  // the argument was re-framed to Eastern the answer depended on where the
+  // process ran: base-storage is the fleet's only UTC host and is where the
+  // BetMGM import is scheduled, and it put Denver at Kansas City -- a Monday
+  // night opener at 2026-09-15T00:15Z -- a week late.
+  //
+  // A spec cannot restart the process under another TZ, so it asserts the
+  // property that defect violated: one instant, several offset
+  // representations, one answer. Measured 2026-09-03 by sweeping every
+  // 15-minute instant of the season under six host zones -- the pre-fix
+  // expression produced three different results and the fixed one produces
+  // the Eastern answer identically under all six.
+  it('calculate_week reads the instant, not the caller offset', function () {
+    // Monday-night kickoff slots sit just inside the Tuesday 00:00 ET
+    // boundary, which is why they are the ones a wrong frame moves.
+    for (const week of [1, 9, 17]) {
+      const boundary = regular_season_start.add(week, 'week')
+      const kickoff_ms = boundary.valueOf() + 15 * 60 * 1000
+      const expected = current_season.calculate_week(dayjs(kickoff_ms))
+
+      for (const offset of [0, -240, -300, -420, 330, 600]) {
+        const same_instant = dayjs(kickoff_ms).utc().utcOffset(offset)
+        expect(same_instant.valueOf(), 'same instant').to.equal(kickoff_ms)
+        expect(
+          current_season.calculate_week(same_instant),
+          `week ${week} at offset ${offset}`
+        ).to.deep.equal(expected)
+      }
+    }
+  })
+
   it('practice_squad_protection_start', function () {
     const { opening_day, practice_squad_protection_start } = current_season
 

@@ -33,6 +33,32 @@ export const eastern = (unix_seconds) => {
   return instant.utc().utcOffset(instant.tz(LEAGUE_TIMEZONE).utcOffset())
 }
 
+// Re-frame an arbitrary dayjs date into Eastern, preserving the instant.
+//
+// This is `eastern()` above for a value that is already a dayjs object rather
+// than a unix timestamp, and it exists because of what dayjs `.diff(other,
+// 'weeks')` actually computes. For the day and week units diff subtracts a
+// zone delta -- `other.utcOffset() - this.utcOffset()` -- before dividing, so
+// the count is of LOCAL calendar weeks, in whatever frame the operands carry.
+//
+// That is the behavior this class wants, and it is load-bearing: the league's
+// week boundary is Tuesday 00:00 Eastern LOCAL, which is not a uniform grid.
+// The week containing the November fall-back is 169 hours long. A plain
+// millisecond division imposes a uniform 168 and walks the boundary an hour
+// off Tuesday midnight for the rest of the season -- verified by
+// `week boundaries stay at Tuesday 00:00 ET across the fall-back`, which goes
+// red on exactly that.
+//
+// The defect is therefore not diff's zone handling but the FRAME it is handed.
+// `this.now` and the anchors are all Eastern, so the getters below were always
+// right. `calculate_week` is the one entry point taking a caller-supplied
+// date, and every odds importer hands it a vendor `startDate` parsed in the
+// HOST's zone -- so diff counted local weeks in Denver, or in UTC, instead of
+// in Eastern. base-storage is the fleet's only UTC host and is where the
+// BetMGM import is scheduled, which is what surfaced this.
+const to_eastern = (dayjs_date) =>
+  dayjs_date.utc().utcOffset(dayjs_date.tz(LEAGUE_TIMEZONE).utcOffset())
+
 export default class Season {
   constructor({
     offseason,
@@ -235,7 +261,7 @@ export default class Season {
   // POST and REG seas_type starts at 1
   // PRE seas_type starts at 0
   calculate_week(dayjs_date) {
-    const diff = dayjs_date.diff(this.regular_season_start, 'weeks')
+    const diff = to_eastern(dayjs_date).diff(this.regular_season_start, 'weeks')
     let seas_type = 'PRE'
     let week_number = 0
 
