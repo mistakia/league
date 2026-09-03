@@ -1,4 +1,4 @@
-/* global describe before it beforeEach */
+/* global describe before it beforeEach afterEach */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
