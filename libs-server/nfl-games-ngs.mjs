@@ -95,14 +95,42 @@ export const format = (item) => {
   the skip can be tested.
 */
 export const select_game_inserts = (data) => {
+  /*
+    A non-array payload is a FEED failure, not an empty slate, and it has to
+    raise here rather than downstream. `data.length` on a non-array is
+    undefined, and the per-year floor compares `undefined < 100`, which is
+    FALSE -- so a malformed response would clear the floor and report success
+    over zero games written.
+  */
+  if (!Array.isArray(data)) {
+    throw new Error(
+      `select_game_inserts: expected an array of feed items, got ${typeof data}`
+    )
+  }
+
   const inserts = []
   let skipped_missing_esbid = 0
+  let skipped_missing_season = 0
   let skipped_malformed = 0
 
   for (const item of data) {
     if (!item.gameId) {
       skipped_missing_esbid += 1
       log(`skipping feed item with no gameId (season ${item.season})`)
+      continue
+    }
+
+    /*
+      A row with no season is unwritable for this database's purposes even
+      though the column accepts it: nfl_games.season_year is nullable, so such
+      a row lands, and NOTHING downstream can then date it -- the abbreviation
+      conformance check reports it un-judgeable, and every nfl_play_stats row
+      joining it inherits the same. Skipping is cheaper than minting a row that
+      permanently cannot be graded.
+    */
+    if (!item.season) {
+      skipped_missing_season += 1
+      log(`skipping feed item ${item.gameId} with no season`)
       continue
     }
 
@@ -127,7 +155,12 @@ export const select_game_inserts = (data) => {
     }
   }
 
-  return { inserts, skipped_missing_esbid, skipped_malformed }
+  return {
+    inserts,
+    skipped_missing_esbid,
+    skipped_missing_season,
+    skipped_malformed
+  }
 }
 
 /*
@@ -145,3 +178,36 @@ export const select_game_inserts = (data) => {
 */
 export const upsert_game = (insert) =>
   db('nfl_games').insert(insert).onConflict('esbid').merge()
+
+// Conservative floor for a full NFL season schedule (~285 games including PRE,
+// REG and POST). 100 catches a catastrophic feed failure -- empty payload,
+// truncated response -- while staying loose enough for a partial year.
+export const NFL_GAMES_FLOOR_PER_YEAR = 100
+
+/*
+  Every reason this run fell short, as a list rather than a single message.
+
+  It lives in this module rather than beside `main` for the reason the whole
+  file exists: `main` is in a script that statically imports #private, so no
+  spec can load it, and the claim this function encodes -- that a partial import
+  is LOUD rather than a clean exit -- was the central claim of the change that
+  added the counters and the one thing no test could reach. A claim about
+  failure behaviour that cannot be tested is a claim about nothing.
+
+  Returned as an array so a run reports EVERY reason it fell short rather than
+  the first: a slate that both failed writes and skipped items should say so
+  once, not across two runs.
+*/
+export const nfl_games_shortfalls = ({ season_year, result }) =>
+  [
+    result.games_processed < NFL_GAMES_FLOOR_PER_YEAR &&
+      `nfl_games row-count shortfall for season_year ${season_year}: ${result.games_processed} games received (floor=${NFL_GAMES_FLOOR_PER_YEAR})`,
+    result.games_failed > 0 &&
+      `nfl_games write failures for season_year ${season_year}: ${result.games_failed} of ${result.games_processed} rows failed to write`,
+    result.games_skipped_missing_esbid > 0 &&
+      `nfl_games feed items with no gameId for season_year ${season_year}: ${result.games_skipped_missing_esbid} skipped, so they carry no esbid to key on`,
+    result.games_skipped_missing_season > 0 &&
+      `nfl_games feed items with no season for season_year ${season_year}: ${result.games_skipped_missing_season} skipped, since nothing downstream could date them`,
+    result.games_skipped_malformed > 0 &&
+      `nfl_games feed items that could not be parsed for season_year ${season_year}: ${result.games_skipped_malformed} skipped`
+  ].filter(Boolean)

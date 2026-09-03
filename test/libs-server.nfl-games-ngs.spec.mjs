@@ -5,7 +5,8 @@ import db from '#db'
 import {
   format,
   select_game_inserts,
-  upsert_game
+  upsert_game,
+  nfl_games_shortfalls
 } from '#libs-server/nfl-games-ngs.mjs'
 
 const expect = chai.expect
@@ -112,6 +113,29 @@ describe('libs-server / nfl-games-ngs', function () {
       expect(skipped_missing_esbid).to.equal(0)
     })
 
+    it('skips an item with no season, which nothing downstream could date', () => {
+      // nfl_games.season_year is nullable, so such a row LANDS and is then
+      // permanently un-judgeable: the conformance check cannot grade it and
+      // every nfl_play_stats row joining it inherits that.
+      const { inserts, skipped_missing_season } = select_game_inserts([
+        feed_item({ gameId: esbid }),
+        feed_item({ gameId: esbid + 1, season: undefined })
+      ])
+
+      expect(skipped_missing_season).to.equal(1)
+      expect(inserts).to.have.lengthOf(1)
+    })
+
+    it('raises on a non-array payload rather than reporting an empty slate', () => {
+      // data.length on a non-array is undefined, and the floor compares
+      // `undefined < 100`, which is FALSE -- so a malformed response would
+      // clear the floor and report success over zero games written.
+      expect(() => select_game_inserts({ games: [] })).to.throw(
+        /expected an array/
+      )
+      expect(() => select_game_inserts(null)).to.throw(/expected an array/)
+    })
+
     it('normalises the era abbreviations the feed supplies', () => {
       // fixTeam maps the feed's SD and OAK to the current tokens. This is
       // recorded because it is the reason the OLD conflict key breaks: what is
@@ -119,6 +143,70 @@ describe('libs-server / nfl-games-ngs', function () {
       const row = format(feed_item())
       expect(row.away_nfl_team).to.equal('LAC')
       expect(row.home_nfl_team).to.equal('LV')
+    })
+  })
+
+  describe('nfl_games_shortfalls', function () {
+    /*
+      The claim these exist to make is that a PARTIAL import is loud rather than
+      a clean exit. That claim lived entirely in `main`, inside a script that
+      statically imports #private and so cannot be loaded by any spec -- so the
+      one behaviour the row-by-row rewrite was justified by was the one nothing
+      tested. Extracting the computation is what makes these assertions possible.
+    */
+    const healthy = {
+      games_processed: 285,
+      games_updated: 285,
+      games_failed: 0,
+      games_skipped_missing_esbid: 0,
+      games_skipped_missing_season: 0,
+      games_skipped_malformed: 0
+    }
+
+    it('is silent on a healthy run', () => {
+      expect(
+        nfl_games_shortfalls({ season_year: 2026, result: healthy })
+      ).to.eql([])
+    })
+
+    it('reports a write failure that the floor alone cannot see', () => {
+      // The whole point: games_processed is still 285, so the row-count floor
+      // is satisfied while almost nothing was written.
+      const shortfalls = nfl_games_shortfalls({
+        season_year: 2026,
+        result: { ...healthy, games_updated: 3, games_failed: 282 }
+      })
+
+      expect(shortfalls).to.have.lengthOf(1)
+      expect(shortfalls[0]).to.match(/282 of 285 rows failed to write/)
+    })
+
+    it('reports EVERY reason at once rather than the first', () => {
+      // A run that both failed writes and skipped items must say so in one
+      // pass, or the second reason is only discovered on the next run.
+      const shortfalls = nfl_games_shortfalls({
+        season_year: 2026,
+        result: {
+          ...healthy,
+          games_processed: 40,
+          games_failed: 2,
+          games_skipped_missing_esbid: 1,
+          games_skipped_missing_season: 1,
+          games_skipped_malformed: 1
+        }
+      })
+
+      expect(shortfalls).to.have.lengthOf(5)
+    })
+
+    it('catches an empty feed through the row-count floor', () => {
+      const shortfalls = nfl_games_shortfalls({
+        season_year: 2026,
+        result: { ...healthy, games_processed: 0, games_updated: 0 }
+      })
+
+      expect(shortfalls).to.have.lengthOf(1)
+      expect(shortfalls[0]).to.match(/floor=100/)
     })
   })
 
