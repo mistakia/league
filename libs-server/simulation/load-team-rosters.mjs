@@ -39,6 +39,8 @@ const log = debug('simulation:load-team-rosters')
  * @param {number} params.current_week - The actual current week (for determining actual vs optimal)
  * @param {string} params.scoring_format_id - Scoring format hash for projections
  * @param {object} params.league - League settings for optimizer constraints
+ * @param {number} [params.roster_week] - Week to read the roster POOL from.
+ *   Defaults to the week the league itself considers current.
  * @returns {Promise<object>} { team_id, player_ids: string[] }
  */
 export async function load_team_starters({
@@ -48,7 +50,8 @@ export async function load_team_starters({
   year,
   current_week,
   scoring_format_id,
-  league
+  league,
+  roster_week = current_season.fantasy_season_week
 }) {
   // Validate current_week to prevent undefined comparison issues
   if (typeof current_week !== 'number' || current_week < 1) {
@@ -67,11 +70,29 @@ export async function load_team_starters({
     })
     return { team_id, player_ids }
   } else {
-    // Future week: compute optimal from current roster pool
+    // Future week: compute optimal from current roster pool.
+    //
+    // The POOL week and the TARGET week are different questions, and conflating
+    // them read a stale roster for the whole preseason. `current_week` here is
+    // `active_fantasy_week`, floored to 1 because the branch above refuses a
+    // target week below 1 -- but that floor is about the week being projected,
+    // not about which roster snapshot is live. In the preseason the live
+    // snapshot is week 0, which is the week `get-roster.mjs` reads and
+    // therefore the one the league's own cap, auction and poach paths act on;
+    // week 1 is a snapshot written ahead of it. For league 1 in 2026 the two
+    // disagreed by three players -- Jeanty, Nabers and Burden sat in a reserve
+    // slot in the week 1 rows and on the active roster in week 0 -- so every
+    // forecast optimized a lineup missing its best three players.
+    //
+    // `fantasy_season_week` rather than `week`: the two agree from the
+    // preseason through the season, and it is what get-roster.mjs reads, so the
+    // pool and the league's authoritative roster are the same row by
+    // construction. `week` keeps counting past the season's end, where it would
+    // name a roster week that was never written.
     const player_ids = await calculate_optimal_starters({
       league_id,
       team_id,
-      roster_week: current_week,
+      roster_week,
       projection_week: week,
       year,
       scoring_format_id,
