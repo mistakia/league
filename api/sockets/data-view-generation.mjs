@@ -4,10 +4,12 @@ import {
   enqueue_generation_job,
   get_generation_job,
   get_queue_depth,
+  resolve_principal_key,
   GenerationQueueError,
   MAX_QUEUE_DEPTH,
   LIVE_STATUSES
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
+import { assert_generation_admissible } from '#libs-server/data-views/generation/generation-limits.mjs'
 import { send_websocket_message } from './utils.mjs'
 
 const log = debug('data-view-generation-socket')
@@ -195,6 +197,15 @@ export const handle_generation_request = async ({
 
   let job
   try {
+    // The spend limits are checked BEFORE the queue's depth limit, because they
+    // answer different questions and the caller can act on only one of them. A
+    // depth refusal says "try again shortly" and is true; a rate refusal that
+    // arrived as a depth refusal would send a caller back every few seconds for
+    // an hour.
+    await assert_generation_admissible({
+      principal_key: resolve_principal_key({ user_id })
+    })
+
     job = await enqueue_generation_job({
       instruction: payload?.instruction,
       input_table_state: payload?.table_state ?? null,
@@ -202,13 +213,17 @@ export const handle_generation_request = async ({
     })
   } catch (error) {
     if (error instanceof GenerationQueueError) {
-      // The depth limit reports the DEPTH, so a refused caller learns how full
-      // the queue is rather than being told only "no". An unbounded silent wait
-      // is the failure this queue exists to refuse.
+      // EVERY refusal reports the number it refused on, not just the depth
+      // one. A caller told only "no" cannot tell "wait ten seconds" from "wait
+      // an hour" from "this is switched off", and those are the three answers
+      // this path gives. The detail fields ride on the error itself
+      // (queue_depth, runs, total_tokens), so a new limit reports its own
+      // number without touching this frame.
+      const { code, message, is_invalid_request, ...detail } = error
       send_error(ws, {
-        error_code: error.code,
-        message: error.message,
-        queue_depth: error.queue_depth ?? null,
+        error_code: code,
+        message,
+        ...detail,
         max_queue_depth: MAX_QUEUE_DEPTH
       })
       return null

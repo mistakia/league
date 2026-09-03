@@ -66,6 +66,28 @@ export const GENERATION_FAILURES = Object.freeze({
     caller_fault: true,
     retryable: true
   },
+  // THE THREE SPEND LIMITS, and the distinction that matters between them and
+  // queue_full is TIME. A full queue clears in minutes; these clear at the end
+  // of an hour-long window, or not at all. A client that rendered all four
+  // alike would send a rate-limited caller back every few seconds for an hour.
+  generation_rate_limited: {
+    summary: 'this account has run its hourly limit of generations',
+    caller_fault: true,
+    retryable: true
+  },
+  generation_budget_exhausted: {
+    summary: 'this account has spent its hourly generation token budget',
+    caller_fault: true,
+    retryable: true
+  },
+  // NOT retryable, and not the caller's fault. An operator switched generation
+  // off; nothing the caller does changes that and nothing about waiting does
+  // either.
+  generation_disabled: {
+    summary: 'view generation is switched off',
+    caller_fault: false,
+    retryable: false
+  },
 
   // --- dispatch: league could not hand the job to base's session rail ---
   // The only two that clear by waiting. Both are the rail being busy or
@@ -145,6 +167,38 @@ export const GENERATION_FAILURES = Object.freeze({
     summary: 'the generation job row no longer exists',
     caller_fault: false,
     retryable: false
+  },
+
+  // --- the run ended and produced nothing, learned by reading base's thread ---
+  //
+  // These are what stop a dead run sitting in `running` until its deadline.
+  // They are named apart because each sends an operator somewhere different,
+  // and that distinction is invisible from the job row alone: a session that
+  // ENDED cleanly without emitting is the agent giving up without using its
+  // emit tool, a FAILED one is the rail or the model, and a MISSING thread is
+  // base having no record of the session league was told it created.
+  //
+  // All three are retryable: the same instruction against a warm model is a
+  // different run, and none of them says anything was wrong with the request.
+  agent_ended_without_emission: {
+    summary: 'the agent session ended without emitting a view',
+    caller_fault: false,
+    retryable: true
+  },
+  agent_session_failed: {
+    summary: 'the agent session failed before emitting a view',
+    caller_fault: false,
+    retryable: true
+  },
+  agent_session_missing: {
+    summary: 'base has no thread for the session this generation was given',
+    caller_fault: false,
+    retryable: true
+  },
+  base_thread_unreadable: {
+    summary: "base refused a read of the generation's own thread",
+    caller_fault: false,
+    retryable: true
   }
 })
 

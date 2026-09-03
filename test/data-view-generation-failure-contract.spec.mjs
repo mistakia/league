@@ -20,10 +20,20 @@ const expect = chai.expect
 // union of what these raise, so the drift gate below reads them rather than a
 // hand-kept list -- a hand-kept list is the same maintenance burden the
 // registry exists to replace, one layer up.
+// Adding a module here is the load-bearing half of adding a failure code: the
+// gate can only see the files it is told to read, so a new module raising
+// unregistered codes passes silently until it is listed.
+//
+// deliver-emission.mjs is deliberately NOT here. Its codes are raised INSIDE
+// the container and answer the agent, not the user -- they never reach a job
+// row or a client frame, so registering them would put container-side tool
+// diagnostics in a table whose whole purpose is deciding what a viewer is told.
 const CODE_SOURCES = [
   'libs-server/data-views/generation/generation-job-queue.mjs',
   'libs-server/data-views/generation/base-session-client.mjs',
   'libs-server/data-views/generation/generation-drainer.mjs',
+  'libs-server/data-views/generation/generation-limits.mjs',
+  'libs-server/data-views/generation/generation-collector.mjs',
   'api/sockets/data-view-generation.mjs'
 ]
 
@@ -157,10 +167,23 @@ describe('data view generation failure contract', function () {
         .filter(([, failure]) => failure.retryable)
         .map(([code]) => code)
         .sort()
+      // A PIN, not a summary: every entry here is a claim that trying the same
+      // thing again could succeed with nothing else changing. The three
+      // agent_* codes qualify because the same instruction against a warm
+      // model is a different run and none of them says the request was wrong;
+      // the two spend limits qualify because an hour passing is not a change
+      // the caller has to make. `generation_disabled` deliberately does NOT --
+      // waiting does not switch it back on.
       expect(retryable).to.deep.equal([
+        'agent_ended_without_emission',
+        'agent_session_failed',
+        'agent_session_missing',
         'base_capacity_reached',
         'base_container_unreadable',
+        'base_thread_unreadable',
         'deadline_exceeded',
+        'generation_budget_exhausted',
+        'generation_rate_limited',
         'queue_full'
       ])
     })

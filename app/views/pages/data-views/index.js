@@ -19,6 +19,10 @@ import {
 } from '@core/data-views'
 import { data_view_request_reducer } from '@core/data-view-request/reducer'
 import {
+  data_view_generation_reducer,
+  data_view_generation_sagas
+} from '@core/data-view-generation'
+import {
   get_enriched_data_views_fields,
   get_data_view_organization_props_for_table_view_controller
 } from '@core/data-views/selectors'
@@ -32,8 +36,9 @@ import DataViewsPage from './data-views'
 inject_reducer('data_views', data_views_reducer)
 inject_reducer('data_view_organization', data_view_organization_reducer)
 inject_reducer('data_view_request', data_view_request_reducer)
+inject_reducer('data_view_generation', data_view_generation_reducer)
 inject_saga('data_views', function* root_data_views_saga() {
-  yield all(data_views_sagas)
+  yield all([...data_views_sagas, ...data_view_generation_sagas])
 })
 
 const get_players_percentiles = createSelector(

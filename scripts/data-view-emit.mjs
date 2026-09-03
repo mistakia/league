@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import validate_emission from '#libs-server/data-views/generation/validate-emission.mjs'
+import { deliver_emission } from '#libs-server/data-views/generation/deliver-emission.mjs'
 import {
   run_agent_tool,
   require_input
@@ -35,6 +36,18 @@ run_agent_tool({
       throw failure
     }
 
-    return { ok, branch, errors: [] }
+    // DELIVERY IS PART OF EMITTING, not a step after it. A validated envelope
+    // that stays in the container is indistinguishable to the agent from a
+    // finished job, and it was the last structural gap in the transport: the
+    // job row's `result` column had no writer. Failing here means the agent
+    // sees a non-zero exit and knows its deliverable did not land, rather than
+    // reading "ok" over a run that produced nothing.
+    const { delivered, generation_id } = await deliver_emission({
+      emission: input.emission,
+      tool_calls: input.tool_calls || [],
+      branch
+    })
+
+    return { ok, branch, errors: [], delivered, generation_id }
   }
 })

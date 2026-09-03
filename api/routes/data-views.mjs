@@ -27,6 +27,12 @@ import load_view_organization from '#libs-server/view-organization/load-view-org
 import add_user_tag from '#libs-server/view-organization/add-user-tag.mjs'
 import remove_user_tag from '#libs-server/view-organization/remove-user-tag.mjs'
 import toggle_favorite from '#libs-server/view-organization/toggle-favorite.mjs'
+import validate_emission from '#libs-server/data-views/generation/validate-emission.mjs'
+import {
+  get_generation_job_by_thread_id,
+  complete_generation_job,
+  LIVE_STATUSES
+} from '#libs-server/data-views/generation/generation-job-queue.mjs'
 
 const router = express.Router()
 
@@ -822,7 +828,8 @@ router.get('/:data_view_id', async (req, res) => {
 router.post('/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
-    const { view_id, view_name, table_state, view_description } = req.body
+    const { view_id, view_name, table_state, view_description, generation_id } =
+      req.body
 
     if (!req.auth || !req.auth.userId) {
       return res.status(401).send({ error: 'invalid userId' })
@@ -895,6 +902,33 @@ router.post('/?', async (req, res) => {
       }
     }
 
+    // PROVENANCE IS RESOLVED, NEVER ASSERTED. The client names the generation
+    // it is saving; the timestamp and the provider come off that job row. A
+    // client-supplied llm_generated_at would be a claim nothing could check,
+    // and the field exists precisely so a reader can tell a generated view from
+    // a hand-built one.
+    //
+    // Scoped to the caller's OWN completed job, so naming someone else's
+    // generation stamps nothing. An unresolvable id is silently no provenance
+    // rather than a 400: a save must not fail because a generation expired
+    // while the user was still editing what it produced.
+    const generation_provenance = { llm_generated_at: null }
+    if (generation_id) {
+      const job = await db('data_view_generation_jobs')
+        .where({ generation_id, user_id, status: 'completed' })
+        .first()
+      if (job) {
+        generation_provenance.llm_generated_at = job.completed_at
+        generation_provenance.llm_inference_provider = job.inference_provider
+      }
+    }
+    // Absent provenance leaves the existing columns ALONE rather than writing
+    // NULL over them. Provenance records where a view came from, and a later
+    // hand-edit does not make it stop having been generated.
+    if (!generation_provenance.llm_generated_at) {
+      delete generation_provenance.llm_generated_at
+    }
+
     let result_view_id
     if (existing_view && existing_view.user_id === user_id) {
       await db('user_data_views')
@@ -905,7 +939,8 @@ router.post('/?', async (req, res) => {
         .update({
           view_name,
           view_description,
-          table_state: JSON.stringify(table_state)
+          table_state: JSON.stringify(table_state),
+          ...generation_provenance
         })
       result_view_id = view_id
     } else {
@@ -917,7 +952,8 @@ router.post('/?', async (req, res) => {
         view_description,
         table_state: JSON.stringify(table_state),
         query_id: source_query_id,
-        user_id
+        user_id,
+        ...generation_provenance
       })
     }
 
@@ -1711,6 +1747,66 @@ router.post('/param-option-counts', async (req, res) => {
     if (error.is_invalid_request) {
       return res.status(400).send({ error: error.message })
     }
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+// The generation agent's delivery door, and the ONLY write league accepts from
+// a tenant container.
+//
+// UNAUTHENTICATED BY JWT, ON PURPOSE. The container holds no league session and
+// must not: its whole design is that it carries a read-only database role and
+// nothing else. What admits a caller here is the pairing of a `thread_id` base
+// minted and league recorded, with a job still in a live state. The client
+// never learns a thread_id (project_generation_job withholds it), so only the
+// session base dispatched for this job can satisfy it, and only once.
+//
+// EVERYTHING IN THE BODY IS AGENT-CONTROLLED, so the emission is re-validated
+// here rather than trusted. `emit` inside the container validates too; that
+// check is for the agent's benefit, this one is the contract.
+router.post('/generation-emission', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { thread_id, emission, tool_calls = [] } = req.body || {}
+
+    if (!thread_id || typeof thread_id !== 'string') {
+      return res.status(400).send({ error: 'thread_id is required' })
+    }
+
+    const job = await get_generation_job_by_thread_id(thread_id)
+
+    // ONE refusal for "no such thread", "not a generation thread" and "that job
+    // already finished". Distinguishing them would make this an oracle for
+    // which thread ids exist, and the caller can do nothing different with the
+    // three answers.
+    if (!job || !LIVE_STATUSES.includes(job.status)) {
+      return res
+        .status(404)
+        .send({ error: 'no live generation is accepting an emission' })
+    }
+
+    const { ok, branch, errors } = validate_emission({
+      emission,
+      tool_calls
+    })
+
+    if (!ok) {
+      // 400 with the errors, because the agent is the caller and the errors are
+      // the only thing that lets it emit something better. The job is left
+      // RUNNING rather than failed: a rejected emission is a failed claim, not
+      // a dead run, and the agent still has its deadline to fix it.
+      return res.status(400).send({ error: 'emission rejected', errors })
+    }
+
+    await complete_generation_job({
+      generation_id: job.generation_id,
+      result: emission,
+      generation_branch: branch
+    })
+
+    res.send({ generation_id: job.generation_id, branch })
+  } catch (error) {
+    logger(error)
     res.status(500).send({ error: error.toString() })
   }
 })

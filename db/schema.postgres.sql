@@ -2577,6 +2577,7 @@ CREATE TABLE public.data_view_generation_jobs (
     tool_call_count integer,
     total_tokens integer,
     duration_milliseconds integer,
+    inference_provider character varying(100),
     CONSTRAINT data_view_generation_jobs_generation_branch_check CHECK (((generation_branch IS NULL) OR ((generation_branch)::text = ANY (ARRAY[('registry'::character varying)::text, ('query'::character varying)::text, ('refusal'::character varying)::text])))),
     CONSTRAINT data_view_generation_jobs_status_check CHECK (((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('dispatched'::character varying)::text, ('running'::character varying)::text, ('completed'::character varying)::text, ('failed'::character varying)::text, ('expired'::character varying)::text]))),
     CONSTRAINT data_view_generation_jobs_tool_call_count_check CHECK (((tool_call_count IS NULL) OR (tool_call_count >= 0))),
@@ -2596,6 +2597,13 @@ COMMENT ON TABLE public.data_view_generation_jobs IS 'Agentic data view generati
 --
 
 COMMENT ON COLUMN public.data_view_generation_jobs.principal_key IS 'Rate-limit and token-budget principal: user_id when authenticated, CF-Connecting-IP otherwise.';
+
+
+--
+-- Name: COLUMN data_view_generation_jobs.inference_provider; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.data_view_generation_jobs.inference_provider IS 'Which inference provider served the agent, read off the base thread record rather than self-reported by the container.';
 
 
 --
@@ -28123,8 +28131,24 @@ CREATE TABLE public.user_data_views (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     user_id bigint,
     llm_tags_generated_at timestamp with time zone,
-    query_id character varying(36)
+    query_id character varying(36),
+    llm_generated_at timestamp with time zone,
+    llm_inference_provider character varying(100)
 );
+
+
+--
+-- Name: COLUMN user_data_views.llm_generated_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.user_data_views.llm_generated_at IS 'When an agent generated this view. NULL means a human built it; the whole table was NULL at the time this column was added.';
+
+
+--
+-- Name: COLUMN user_data_views.llm_inference_provider; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.user_data_views.llm_inference_provider IS 'The inference provider behind llm_generated_at, copied from the generation job rather than asserted by the client.';
 
 
 --

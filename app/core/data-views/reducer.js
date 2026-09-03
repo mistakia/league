@@ -82,13 +82,19 @@ export function data_views_reducer(
     case data_views_actions.POST_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
         const table_state = migrate_persisted(payload.data.table_state)
+        // SPREAD, like the two GET cases above, rather than naming four fields.
+        // The explicit list here silently dropped every OTHER column the save
+        // route returns -- the route answers with the whole row -- so a view's
+        // server-owned properties vanished from the store the moment its owner
+        // saved it, and came back only on a reload. `query_id` was already a
+        // live victim: saving a query-backed view dropped it, which un-rendered
+        // its notice and made the data-views page report "Field not found" for
+        // every ad-hoc alias, the exact alarm that page suppresses on query_id.
+        // `llm_generated_at` would have been the second.
         state.set(
           payload.data.view_id,
           new Map({
-            view_id: payload.data.view_id,
-            view_name: payload.data.view_name,
-            view_description: payload.data.view_description,
-            user_id: payload.data.user_id,
+            ...payload.data,
             table_state,
             saved_table_state: table_state
           })

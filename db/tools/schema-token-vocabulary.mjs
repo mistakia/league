@@ -438,6 +438,7 @@ const english_words = [
   'incompletion',
   'index',
   'individual',
+  'inference',
   'inflated',
   'ingested',
   'initial',

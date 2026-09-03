@@ -297,6 +297,7 @@ export interface DataViewGenerationJobsRow {
   tool_call_count: number | null
   total_tokens: number | null
   duration_milliseconds: number | null
+  inference_provider: string | null
 }
 
 export interface DataViewQueriesRow {
@@ -21576,6 +21577,8 @@ export interface UserDataViewsRow {
   user_id: number | null
   llm_tags_generated_at: Date | null
   query_id: string | null
+  llm_generated_at: Date | null
+  llm_inference_provider: string | null
 }
 
 export interface UserPlaysViewsRow {

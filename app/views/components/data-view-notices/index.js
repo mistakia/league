@@ -13,7 +13,10 @@ const get_notices = createSelector(
       where: selected_data_view.table_state.where,
       columns: selected_data_view.table_state.columns,
       // A view property, not a table_state one -- SQL never enters table_state.
-      query_id: selected_data_view.query_id
+      query_id: selected_data_view.query_id,
+      // Also a view property, and server-stamped: the client cannot make this
+      // notice appear or disappear.
+      llm_generated_at: selected_data_view.llm_generated_at
     })
 )
 

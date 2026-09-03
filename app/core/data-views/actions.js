@@ -62,6 +62,18 @@ export const data_views_actions = {
     payload: { view_id, table_state }
   }),
 
+  // Step ONE entry back through the browser-local edit history.
+  //
+  // Deliberately NOT routed through REVERT_DATA_VIEW below, which calls
+  // clear_view and deletes the whole history rather than stepping back through
+  // it -- a revert throws the history away, and an undo is the one operation
+  // that needs it kept.
+  STEP_DATA_VIEW_HISTORY_BACK: 'STEP_DATA_VIEW_HISTORY_BACK',
+  step_data_view_history_back: () => ({
+    type: data_views_actions.STEP_DATA_VIEW_HISTORY_BACK,
+    payload: {}
+  }),
+
   REVERT_DATA_VIEW: 'REVERT_DATA_VIEW',
   revert_data_view: ({ view_id }) => ({
     type: data_views_actions.REVERT_DATA_VIEW,

@@ -167,6 +167,27 @@ const find_query_backed_view = ({ query_id }) => {
   ]
 }
 
+// An agent built this view, and the reader is entitled to know before they act
+// on it. The claim is deliberately narrow -- it says where the view came from
+// and nothing about whether it is right, because the notice cannot know that
+// and a reassuring one would be worse than none.
+//
+// Driven off llm_generated_at, which the SERVER stamps from the generation job
+// rather than from anything the client asserts, so the notice cannot be made to
+// appear or disappear from the browser. That also means it survives a reload
+// and a share link, which a client-state notice would not.
+const find_generated_view = ({ llm_generated_at }) => {
+  if (!llm_generated_at) return []
+  return [
+    {
+      code: 'view_generated_by_llm',
+      severity: 'info',
+      message:
+        'This view was built by an agent from a written instruction. Check that its columns and filters say what you meant before relying on the numbers.'
+    }
+  ]
+}
+
 // Promoted to a registry at the THIRD rule, which is the threshold
 // add-data-view-notice-infrastructure-and-filter-chips set for itself when it
 // shipped the first two. Each rule takes the whole context and returns an array,
@@ -174,15 +195,17 @@ const find_query_backed_view = ({ query_id }) => {
 const NOTICE_RULES = [
   find_filter_param_key_absent_from_columns,
   find_filter_param_value_disjoint_from_columns,
-  find_query_backed_view
+  find_query_backed_view,
+  find_generated_view
 ]
 
 export default function get_data_view_notices({
   where,
   columns,
-  query_id = null
+  query_id = null,
+  llm_generated_at = null
 }) {
   if (!Array.isArray(where) || !Array.isArray(columns)) return []
-  const context = { where, columns, query_id }
+  const context = { where, columns, query_id, llm_generated_at }
   return NOTICE_RULES.flatMap((rule) => rule(context))
 }

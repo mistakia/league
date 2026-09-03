@@ -49,7 +49,8 @@ import {
   clear_view,
   clear_all,
   reconcile_server_views,
-  get_all_stored_view_ids
+  get_all_stored_view_ids,
+  load_history
 } from '#libs-shared/data-view-storage/storage.mjs'
 import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
 import deep_equal from '@core/utils/deep_equal'
@@ -356,6 +357,22 @@ export function* save_data_view({ payload }) {
     params.client_generated_view_id = view_id
   }
 
+  // Provenance rides the SAVE, and it is an id rather than a claim. The client
+  // says which generation produced this state; the server looks the job up,
+  // confirms it is the caller's and finished, and stamps llm_generated_at from
+  // the job's own completed_at. A client-asserted timestamp would be provenance
+  // nobody could check, which is not provenance.
+  //
+  // Absent unless a generation is what put this table_state on the page: the
+  // slice is cleared on dismiss and on a new submit, so a save minutes after
+  // the user kept editing by hand still carries the id that started it, and
+  // deliberately -- provenance records where a view came from, not what it
+  // currently contains.
+  const generation_id = yield select((state) =>
+    state.getIn(['data_view_generation', 'generation_id'])
+  )
+  if (generation_id) params.generation_id = generation_id
+
   yield call(api_post_data_view, params)
 }
 
@@ -452,6 +469,12 @@ export function* persist_table_state_to_browser({ payload }) {
 
     if (view_state_changed === false) return
     if (!data_view) return
+
+    // A history step REPLAYS an entry that is already in the history. Appending
+    // it would grow the history by one on every step back, so the second step
+    // would return to the state the first one left -- an undo that oscillates
+    // between two states and can never reach a third.
+    if (change_type === 'history_step') return
 
     const { view_id, table_state } = data_view
     if (!view_id) return
@@ -589,6 +612,58 @@ export function* cleanup_browser_state_on_delete({ payload }) {
     yield call(clear_view, view_id)
   } catch (error) {
     console.error('Error cleaning up browser state on delete:', error)
+  }
+}
+
+/**
+ * Step one entry back through the browser-local edit history.
+ *
+ * THE POSITION IS DERIVED, NOT TRACKED. There is no cursor in the store, and
+ * deliberately: a cursor has to be reset on a new edit, on a view change, on a
+ * restore and on a save, and every one of those is a rule that can be missed —
+ * a stale cursor then steps into a different view's history. Instead the
+ * current table_state is located IN the history and the step is to the entry
+ * before it, which is correct by construction after any of those events.
+ *
+ * Skipping backwards over entries equal to the current state matters because
+ * consecutive snapshots can be identical (a save writes a `server_save` entry
+ * for a state a `user_edit` entry already holds). Landing on a twin would look
+ * like the control doing nothing.
+ *
+ * When the current state is in the history not at all — an edit the debounced
+ * writer has not persisted yet, or a generated view just applied — the loop
+ * does not advance and the step lands on the newest entry, which is the right
+ * answer: go back from an unrecorded state means return to the last recorded
+ * one.
+ */
+export function* step_data_view_history_back() {
+  try {
+    const data_view = yield select(get_selected_data_view)
+    if (!data_view || !data_view.view_id) return
+
+    const history = yield call(load_history, data_view.view_id)
+    if (history.length < 2) return
+
+    let index = history.length - 1
+    while (
+      index >= 0 &&
+      deep_equal(history[index].table_state, data_view.table_state)
+    ) {
+      index -= 1
+    }
+    if (index < 0) return
+
+    // change_type `history_step` is what stops persist_table_state_to_browser
+    // appending this state as a new entry. Without it, going back would GROW
+    // the history and a second step would return to where the user started.
+    yield put(
+      data_views_actions.data_view_changed(
+        { ...data_view, table_state: history[index].table_state },
+        { view_state_changed: true, change_type: 'history_step' }
+      )
+    )
+  } catch (error) {
+    console.error('Error stepping data view history back:', error)
   }
 }
 
@@ -782,6 +857,13 @@ export function* watch_revert_data_view() {
   yield takeLatest(data_views_actions.REVERT_DATA_VIEW, handle_revert_data_view)
 }
 
+export function* watch_step_data_view_history_back() {
+  yield takeLatest(
+    data_views_actions.STEP_DATA_VIEW_HISTORY_BACK,
+    step_data_view_history_back
+  )
+}
+
 export function* watch_clear_local_view_cache() {
   yield takeLatest(
     data_views_actions.CLEAR_LOCAL_VIEW_CACHE,
@@ -934,6 +1016,7 @@ export const data_views_sagas = [
   fork(watch_delete_data_view_fulfilled_for_browser_cleanup),
   fork(watch_set_selected_data_view_for_browser_persist),
   fork(watch_revert_data_view),
+  fork(watch_step_data_view_history_back),
   fork(watch_clear_local_view_cache),
   fork(watch_get_data_views_fulfilled_load_organization),
   fork(watch_post_data_view_favorite_failed),

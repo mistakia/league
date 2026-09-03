@@ -6,6 +6,13 @@ import { STORAGE_SCHEMA_VERSION, run_migrations } from './migrations.mjs'
 const STORAGE_KEY_PREFIX = 'data_view_history_'
 const METADATA_KEY = 'data_view_metadata'
 const LAST_ACTIVE_KEY = 'data_view_last_active'
+const PENDING_GENERATION_KEY = 'data_view_pending_generation'
+
+// Matches the generation job's own wall-clock deadline (JOB_DEADLINE_MS in
+// libs-server/data-views/generation/generation-job-queue.mjs). A stored id older
+// than the deadline names a job the server has already expired, so collecting on
+// it can only ever answer `generation_not_found`.
+const PENDING_GENERATION_TTL_MS = 15 * 60 * 1000
 
 export const MAX_SNAPSHOTS_PER_VIEW = 20
 export const MAX_VIEWS_CACHED = 50
@@ -307,3 +314,45 @@ export const get_all_stored_view_ids = () => {
   const metadata = load_metadata()
   return Object.keys(metadata.view_access_times || {})
 }
+
+// A generation run outlives the page that started it: it takes minutes, and the
+// server deliberately does NOT cancel it when the socket drops. So the
+// generation_id has to survive a reload, or reconnect-and-collect is a server
+// feature no client can reach.
+//
+// Stored beside the view rather than in the URL. The id is a capability -- it
+// is the whole of what collecting a result requires -- and a URL is shared,
+// pasted and logged, so putting it there would hand a run's result to anyone
+// the link reaches.
+//
+// Deliberately OUTSIDE the snapshot history: this is not a table_state and it
+// must not participate in the TTL sweep, the per-view cap, or the dirty check.
+export const save_pending_generation = ({ generation_id, view_id }) => {
+  write_json(PENDING_GENERATION_KEY, {
+    generation_id,
+    view_id,
+    timestamp: Date.now()
+  })
+}
+
+/**
+ * Read the pending generation, dropping one older than the job deadline.
+ *
+ * Expiring it here is what keeps a browser that was closed during a run from
+ * collecting forever against a generation_id the server expired hours ago --
+ * the collect answers `generation_not_found`, which reads as a bug rather than
+ * as an old tab.
+ *
+ * @returns {{generation_id: string, view_id: string|null}|null}
+ */
+export const load_pending_generation = () => {
+  const stored = read_json(PENDING_GENERATION_KEY)
+  if (!stored || !stored.generation_id) return null
+  if (Date.now() - (stored.timestamp || 0) > PENDING_GENERATION_TTL_MS) {
+    remove_key(PENDING_GENERATION_KEY)
+    return null
+  }
+  return stored
+}
+
+export const clear_pending_generation = () => remove_key(PENDING_GENERATION_KEY)

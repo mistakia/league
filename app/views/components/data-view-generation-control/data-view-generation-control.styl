@@ -1,0 +1,94 @@
+.data-view-generation
+  display flex
+  flex-direction column
+  gap 4px
+  font 400 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+
+.data-view-generation__open
+  align-self flex-start
+  background transparent
+  border 1px solid $borderColor
+  border-radius 4px
+  padding 4px 10px
+  cursor pointer
+  color $textColor
+
+  &:hover
+    border-color $accentColor
+
+.data-view-generation__form
+  display flex
+  align-items center
+  gap 6px
+
+.data-view-generation__input
+  // Every flex item takes min-width auto, and an input carries an intrinsic
+  // width from its size attribute -- so without this it refuses to compress and
+  // widens the whole controls row.
+  min-width 0
+  flex 1
+  padding 5px 8px
+  border 1px solid $borderColor
+  border-radius 4px
+  font inherit
+
+  &:disabled
+    background mix($borderColor, white, 25%)
+
+.data-view-generation__submit
+  flex-shrink 0
+  padding 5px 12px
+  border 1px solid $accentColor
+  border-radius 4px
+  background $accentColor
+  color white
+  cursor pointer
+
+  &:disabled
+    opacity 0.5
+    cursor default
+
+.data-view-generation__close
+  flex-shrink 0
+  background transparent
+  border 0
+  padding 0 4px
+  cursor pointer
+  font-size 18px
+  line-height 1
+  opacity 0.55
+
+  &:hover
+    opacity 1
+
+.data-view-generation__status
+  display flex
+  align-items center
+  gap 8px
+  color mix($textColor, white, 70%)
+
+.data-view-generation__status-label
+  font-weight 600
+
+.data-view-generation__instruction
+  // The instruction is arbitrary user text on one line in a constrained row.
+  min-width 0
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+.data-view-generation__notice,
+.data-view-generation__explanation,
+.data-view-generation__refusal
+  padding 6px 10px
+  border 1px solid rgba(2, 136, 209, 0.35)
+  border-radius 4px
+  background rgb(229, 246, 253)
+  color rgb(1, 67, 97)
+
+.data-view-generation__error
+  padding 6px 10px
+  border 1px solid rgba(211, 47, 47, 0.35)
+  border-radius 4px
+  background rgb(253, 237, 237)
+  color rgb(95, 33, 32)

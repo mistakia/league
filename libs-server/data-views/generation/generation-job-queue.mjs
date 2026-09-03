@@ -161,6 +161,67 @@ export const get_generation_job = async (generation_id) =>
   db('data_view_generation_jobs').where({ generation_id }).first()
 
 /**
+ * Read one job by the base thread the drainer dispatched it onto.
+ *
+ * THIS IS THE AGENT'S OWN HANDLE ON ITS JOB, and it is deliberately not the
+ * generation_id. The container learns its thread id from THREAD_ID in its own
+ * environment, which base sets at spawn -- so the agent needs nothing copied
+ * out of its prompt, and no capability of any kind transits the prompt or the
+ * thread timeline, both of which are synced and full-text indexed.
+ *
+ * The client never learns a thread_id: project_generation_job withholds it. So
+ * the pairing "knows the thread id AND the job is still running" is what admits
+ * an emission, and only the session base actually dispatched satisfies it.
+ *
+ * @param {string} thread_id
+ * @returns {Promise<object|undefined>}
+ */
+export const get_generation_job_by_thread_id = async (thread_id) =>
+  db('data_view_generation_jobs').where({ thread_id }).first()
+
+/**
+ * Record what a run COST, without touching what it produced.
+ *
+ * Separate from complete_generation_job because the two facts arrive from
+ * different places at different times: the agent pushes its emission the moment
+ * it emits, and league learns the trajectory only by reading the thread base
+ * owns. Folding them together would mean holding the user's finished view back
+ * until a token count arrived, which is the wrong trade in an obvious direction.
+ *
+ * duration_milliseconds is COALESCEd rather than overwritten: complete_ already
+ * derives it in SQL across both ends of the interval on the server clock, and
+ * base's own duration is measured on another host's.
+ *
+ * @param {object} params
+ * @param {string} params.generation_id
+ * @param {number|null} [params.tool_call_count]
+ * @param {number|null} [params.total_tokens]
+ * @param {number|null} [params.duration_milliseconds]
+ * @param {string|null} [params.inference_provider]
+ * @param {object} [params.connection]
+ * @returns {Promise<number>} rows updated
+ */
+export const record_generation_trajectory = async ({
+  generation_id,
+  tool_call_count = null,
+  total_tokens = null,
+  duration_milliseconds = null,
+  inference_provider = null,
+  connection = db
+}) =>
+  connection('data_view_generation_jobs')
+    .where({ generation_id })
+    .update({
+      tool_call_count,
+      total_tokens,
+      inference_provider,
+      duration_milliseconds: connection.raw(
+        'COALESCE(duration_milliseconds, ?)',
+        [duration_milliseconds]
+      )
+    })
+
+/**
  * Claim the oldest queued job for dispatch, atomically.
  *
  * FOR UPDATE SKIP LOCKED on the subselect is the whole mechanism, matching

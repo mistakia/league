@@ -25,6 +25,8 @@ import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
 import DataViewFilterChips from '@components/data-view-filter-chips'
 import DataViewNotices from '@components/data-view-notices'
+import DataViewGenerationControl from '@components/data-view-generation-control'
+import DataViewHistoryControl from '@components/data-view-history-control'
 import {
   ROW_GRAIN_DEFAULTS,
   ROW_GRAIN_OPTIONS,
@@ -585,6 +587,8 @@ export default function DataViewsPage({
       <Table
         controls_extension={
           <>
+            <DataViewGenerationControl />
+            <DataViewHistoryControl />
             <DataViewFilterChips
               set_filter_controls_open={set_filter_controls_open}
             />

@@ -22,7 +22,18 @@ module.exports = {
         // variables are unset).
         BASE_API_URL: 'https://base.tint.space',
         BASE_MACHINE_SLUG: 'league',
-        BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key'
+        BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
+        // The data-view generation identity, distinct from the instance key
+        // above: BASE_INSTANCE_KEY_FILE signs signals as this MACHINE, this one
+        // mints container sessions as the generation IDENTITY. Named here
+        // rather than left to the module default so that a host reading this
+        // file learns the API process depends on a second key, and where.
+        // Redundant with resolve_identity_key_path's default today, and
+        // deliberately so: pm2 re-reads this file only on a delete-then-start,
+        // never on a reload, so a value that differed from the default would
+        // not be live until someone did one.
+        LEAGUE_GENERATION_IDENTITY_KEY_FILE:
+          '/root/.league-data-view-generation-identity.key'
       },
       max_memory_restart: '3G',
       node_args: '--max-old-space-size=3072'
