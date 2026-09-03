@@ -89,6 +89,40 @@ const measure_pair = async ({ table, league_format_id, season_year }) => {
   }
 }
 
+// A points-added of NULL must pair with a salary of NULL ON THE SAME VARIANT.
+//
+// This is a whole-table sweep rather than a per-pair one, because the defect it
+// catches is not about coverage: it is the sentinel-era conflation surviving in
+// the price DERIVED from the points added. Under `-999` the price computed
+// negative and floored to $0, so the row read "the market values him at nothing"
+// where it meant "he was never in the pool" -- and clearing the points-added
+// column alone leaves that behind, one column over, saying the same wrong thing.
+//
+// Per VARIANT is the part that is easy to get wrong, and I did:
+// `market_salary_positive` is derived from `pts_added['season']` and
+// `market_salary_net` from `pts_added['season_net']`, which are different
+// computations. A player can legitimately have no drawn-pool positive and a real
+// weekly-sum net, so a check demanding both columns be NULL together passes over
+// exactly the rows that are broken.
+const find_pairing_violations = async (table) => {
+  const [row] = await db(table).select(
+    db.raw(
+      `count(*) FILTER (
+         WHERE projected_points_added_positive IS NULL
+           AND market_salary_positive IS NOT NULL
+       ) AS positive`
+    ),
+    db.raw(
+      `count(*) FILTER (
+         WHERE projected_points_added_net IS NULL
+           AND market_salary_net IS NOT NULL
+       ) AS net`
+    )
+  )
+
+  return { positive: Number(row.positive), net: Number(row.net) }
+}
+
 const pricing_models_by_format_id = async (league_format_ids) => {
   if (!league_format_ids.length) return {}
   const rows = await db('league_formats')
@@ -198,6 +232,17 @@ export const verify_projection_period_coverage = async () => {
         league_format_id,
         season_year,
         detail: `${describe}: 0 rows on the live year`
+      })
+    }
+  }
+
+  for (const table of [SEASON_TABLE, REST_OF_SEASON_TABLE]) {
+    const violations = await find_pairing_violations(table)
+    for (const [variant, count] of Object.entries(violations)) {
+      if (!count) continue
+      gaps.push({
+        table,
+        detail: `${count} row(s) carry a market salary on the ${variant} variant while its points added is NULL`
       })
     }
   }
