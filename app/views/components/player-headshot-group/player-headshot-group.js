@@ -2,10 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import AvatarGroup from '@mui/material/AvatarGroup'
-import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
 
 import { get_player_image_url } from '@core/utils'
+import Tooltip from '@components/tooltip'
 
 export default class PlayerHeadshotGroup extends React.Component {
   render() {

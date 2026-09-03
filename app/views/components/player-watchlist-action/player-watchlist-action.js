@@ -1,9 +1,9 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Tooltip from '@mui/material/Tooltip'
 
 import Icon from '@components/icon'
+import Tooltip from '@components/tooltip'
 
 import './player-watchlist-action.styl'
 

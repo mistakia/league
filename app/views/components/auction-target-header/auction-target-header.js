@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Tooltip from '@mui/material/Tooltip'
 
 import Position from '@components/position'
+import Tooltip from '@components/tooltip'
 
 import './auction-target-header.styl'
 

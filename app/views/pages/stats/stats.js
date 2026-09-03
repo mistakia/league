@@ -4,12 +4,12 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
 import Toolbar from '@mui/material/Toolbar'
-import Tooltip from '@mui/material/Tooltip'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
 import { get_eligible_slots, toPercent } from '#libs-shared'
 import SelectYear from '@components/select-year'
+import Tooltip from '@components/tooltip'
 
 import './stats.styl'
 import {

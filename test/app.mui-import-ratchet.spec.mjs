@@ -29,7 +29,24 @@ const import_budget = {
   // 215 -> 211: the auction's commissioner controls were a MUI SpeedDial with a
   // Backdrop and two SpeedDialActions, and the component now renders three plain
   // buttons importing nothing from MUI at all.
-  '@mui/material': 211,
+  //
+  // 211 -> 204: Tooltip moved behind a seam. Nine components imported
+  // `@mui/material/Tooltip` directly and now import `@components/tooltip`, which
+  // is the only file naming the package. The rendered tree is unchanged, because
+  // the seam re-exports MUI's component rather than wrapping it.
+  //
+  // The arithmetic is 212 - 9 + 1, not 211 - 9 + 1, and the difference is the
+  // reason this slice exists: the count had already gone to 212 and reddened
+  // master, because `player-auction-value` was added in the auction lane with a
+  // direct Tooltip import. The seam is what pays that back and then some. The
+  // budget matches the count exactly either way -- the `not slack` case fails a
+  // ceiling nobody is at -- so a wrong starting figure cannot be quietly wrong
+  // here.
+  //
+  // NOT A CONVERSION: MUI still ships the tooltip and the budget cannot tell the
+  // two apart. What it buys is that the eventual conversion is a one-file change
+  // instead of a nine-file one.
+  '@mui/material': 204,
   '@mui/base': 7,
   '@mui/lab': 1,
   '@mui/icons-material': 0,

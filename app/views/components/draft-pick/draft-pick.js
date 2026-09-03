@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Tooltip from '@mui/material/Tooltip'
 
 import Icon from '@components/icon'
 import TeamName from '@components/team-name'
 import DraftPickSheet from '@components/draft-pick-sheet'
+import Tooltip from '@components/tooltip'
 
 import './draft-pick.styl'
 

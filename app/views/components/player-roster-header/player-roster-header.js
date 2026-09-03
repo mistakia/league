@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Tooltip from '@mui/material/Tooltip'
+import Tooltip from '@components/tooltip'
 
 export default function PlayerRosterHeader(props) {
   return (
