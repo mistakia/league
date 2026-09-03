@@ -128,13 +128,29 @@ $election_control_content_max_width = 720px
 
 // On a phone the drawer header already wraps to several rows, so the state and
 // the form stack rather than sharing a line, and the divider becomes horizontal.
+//
+// SCOPED OFF COMPACT, and it was not before -- this is the same mistake this
+// file already warns about for `justify-content` fifty lines up, made again with
+// a media query instead of a bare rule. These selectors were unqualified, so
+// everything here also reached the strip inside the live bid bar: at 600 the
+// compact control grew a horizontal divider it has no room for and its state
+// went from stacked to a baseline row, taking it from 26px to 54px against
+// neighbours that are 26. That is a doubled control in a row that had already
+// run out of width, so it wrapped, and the wrap is most of what reads as the
+// mobile bid area being poorly aligned. Measured at 600 before this: control
+// 54px tall inside a 143px bar; the same control at 1024 was 26px.
+//
+// A media query adds no specificity, which is what made this invisible from the
+// stylesheet -- the compact block outranks these selectors on every property it
+// declares, so the only ones that leaked through are the ones compact never
+// mentions. Those are exactly the four here.
 @media (max-width 700px)
-  .auction-election-control
+  .auction-election-control:not(.compact)
     flex-direction column
     gap 8px
     padding 10px 12px
 
-  .auction-election-control__state
+  .auction-election-control:not(.compact) .auction-election-control__state
     flex 0 0 auto
     flex-direction row
     align-items baseline
@@ -171,10 +187,22 @@ $election_control_content_max_width = 720px
   .auction-election-control__state
     flex 0 0 auto
     border-right none
-    padding-right 8px
+    padding-right 6px
 
+  // 12px AND 600, down from 14px and the base block's 700. This is a STATUS,
+  // not a control: it says what you have already committed, and everything
+  // beside it in the row -- the stepper, the decline, the bid input -- is
+  // something you can act on right now. At 14/700 it was the heaviest thing on
+  // the row and read as the row's subject.
+  //
+  // The stacked caption shape is deliberately NOT touched. It was a row once,
+  // and `YOUR ELECTION $5` on one baseline made the 9px uppercase label read as
+  // a prefix to the number rather than its caption; it also stopped matching
+  // MARKET and LIVE VALUE, which are label-over-value a few inches to the left.
+  // Smaller is the ask, and smaller is available without reopening that.
   .auction-election-control__state-value
-    font-size 14px
+    font-size 12px
+    font-weight 600
 
   // The compact form is one button, so wrapping can only ever produce a second
   // row inside a fixed-height strip -- there is nothing for it to wrap TO.

@@ -15,27 +15,33 @@ $auctionHeightDesktop = 164px
 // `.page` bottom margin that reserves the space, the floating menu button's
 // offset, and the commissioner controls'.
 //
-// 240 rather than 215 because the narrow bar is no longer a fixed height. It
-// takes 120px at 768 and 145px at 600, where the election controls wrap to two
-// lines, and the team strip wants 94 -- so the tallest the chrome gets is 239.
-// At 215 the strip was the thing that gave: it is the last child of a
-// fixed-height box, so the overflow came out as the `Nominating` label being
-// clipped off the chips at 600 and below, which reads as a missing label rather
-// than as a layout that ran out of room.
+// 214 = the stacked bar's 120 plus the team strip's 94, and it is now a flat
+// number rather than a maximum over widths because THE BAR NO LONGER WRAPS
+// ANYWHERE. It was 240, which was 145 -- the bar at 600, where the election
+// controls wrapped to two lines -- plus the strip. That wrap turned out to be a
+// leaked stylesheet rule rather than a width problem: the `max-width 700px`
+// block in auction-election-control.styl is written for the drawer form and its
+// selectors were unqualified, so it also reached the compact strip in the bar
+// and doubled it from 26px to 54px. Scoped off compact, the bar measures 120px
+// at every width from 1159 down to 320 and the chrome measures 214 at all of
+// them.
 //
-// It has to be the MAXIMUM over the widths, not the height at any one of them,
-// because the reservation is a static number while the thing it reserves for is
-// not: `.auction__controls` sits in the band this margin opens, so anything it
-// needs beyond this is taken out of its own last child rather than out of the
-// page. The cost of the extra 25px is 25px of board at narrow widths, and it is
-// only spent while an auction is live.
+// It still has to be the MAXIMUM over the widths rather than the height at any
+// one of them, because the reservation is a static number while the thing it
+// reserves for is not: `.auction__controls` sits in the band this margin opens,
+// so anything it needs beyond this comes out of its own last child rather than
+// out of the page. That is what the old 215 got wrong -- the strip is that last
+// child, and the overflow surfaced as the `Nominating` label clipped off the
+// chips rather than as a layout that had run out of room. The maximum happens to
+// equal the height everywhere right now; if a width is ever found where the bar
+// wraps again, this has to go up to meet it.
 //
 // DO NOT TUNE THIS BY WATCHING THE CLIP SHRINK. The strip REFLOWS under
 // pressure -- squeezed it reports 79, then 84, then 87 as it is given room, so
 // each increment closes less of the gap than it should and the sequence reads
 // as converging on a value below the real one. Measured with room to spare it
 // wants 94 flat at every narrow width, and that is the number to add the bar to.
-$auctionHeightMobile = 240px
+$auctionHeightMobile = 214px
 
 $successColor = green
 $yellowColor = #ff0
