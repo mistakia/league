@@ -27,8 +27,52 @@
       display inline
       padding 0 2px
 
+    // A PLAYER NAME IS FIVE BOXES, NOT ONE, and inlining the outer one is not
+    // enough. player-name.styl sizes it for a TABLE ROW -- the position column
+    // is `flex 0 0 34px`, the name block is `flex 1`, and the status/tag column
+    // that follows it is a SIBLING of `.player__name` rather than a child,
+    // `flex 0 0 20px`. Dropped into a sentence unchanged, the fixed columns
+    // print as gaps ("Selling  WR   T.McLaurin WAS" with a 34px void around the
+    // chip), the `flex 1` block claims the whole remaining line, and the sibling
+    // -- a block-level div, empty for most players -- throws its own line, so
+    // `for $2.` lands UNDER the name it belongs to.
+    //
+    // Every box here is content-sized instead: the name occupies the width of
+    // its own ink and the sentence closes on the same line.
     .player__name
       display inline-flex
+      vertical-align middle
+      flex 0 0 auto
+      align-items center
+      gap 4px
+
+      .player__name-position
+        flex 0 0 auto
+
+      // `line-height 20px` and `max-height 35px` are the row's, and they set the
+      // name's own line taller than the sentence around it. Inherited instead,
+      // the name sits on the sentence's line rather than raising it.
+      .player__name-main
+        flex 0 0 auto
+        display inline-flex
+        align-items center
+        gap 4px
+        line-height inherit
+        max-height none
+        overflow visible
+
+      .player__name-top
+        margin-right 0
+        overflow visible
+
+    // The empty-for-most-players status column. Inline and content-sized, it
+    // collapses to nothing when it holds nothing and sits beside the name when
+    // it holds a tag -- rather than reserving 20px on a line of its own.
+    .player__name-label
+      display inline-flex
+      vertical-align middle
+      flex 0 0 auto
+      align-items center
 
 // STACKED, THIS IS NOW THE RAIL'S FIRST ROW. Below 800px the side rail sits
 // under the board, and being first means the bottom rule that separates the
