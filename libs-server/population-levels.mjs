@@ -56,6 +56,10 @@
   cannot see.
 */
 
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+
 import db from '#db'
 
 // Parity and floor queries scan whole feeds. A query that runs past this is a
@@ -457,7 +461,30 @@ const ungradeable_pair = ({ feed, reason }) => ({
   reason
 })
 
+// Each call scans every _index/_history pair in full, unindexed DISTINCT
+// scans against tables that reach tens of millions of rows -- a single call
+// can run for minutes. There is no scheduler for this check (it is invoked
+// by hand or from the weekly registry run), so nothing else stands between a
+// re-run loop and production: a session re-invoking the repair_command's
+// suggested re-measure every few minutes burned 90-208s of database time per
+// call for five hours on 2026-09-02. The lockfile is the only guard.
+const INDEX_PARITY_ROWS_COOLDOWN_MS = 5 * 60 * 1000
+const index_parity_rows_lock_path = () =>
+  path.join(os.tmpdir(), 'league-index-parity-rows.lock')
+
 export const index_parity_rows = async () => {
+  const lock_path = index_parity_rows_lock_path()
+  const last_run = fs.existsSync(lock_path) ? fs.statSync(lock_path).mtimeMs : 0
+  const elapsed_ms = Date.now() - last_run
+  if (elapsed_ms < INDEX_PARITY_ROWS_COOLDOWN_MS) {
+    throw new Error(
+      `index_parity_rows() ran ${Math.round(elapsed_ms / 1000)}s ago, inside its ${
+        INDEX_PARITY_ROWS_COOLDOWN_MS / 1000
+      }s cooldown -- it scans every feed's full history and is not meant to be re-run in a tight loop. Wait for the cooldown, or delete ${lock_path} if this run is intentional.`
+    )
+  }
+  fs.writeFileSync(lock_path, '')
+
   await assert_population_level_controls()
 
   const columns_by_table = await load_table_columns()
