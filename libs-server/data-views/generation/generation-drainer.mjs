@@ -234,9 +234,49 @@ export const start_generation_drainer_if_configured = ({
   return { started: true, reason, ...start_generation_drainer({ interval_ms }) }
 }
 
+/**
+ * Escalate a drainer that did not start, so the readiness verdict survives the
+ * debug-namespace list.
+ *
+ * `report` above announces both outcomes, but only through a `debug` namespace,
+ * and a namespace is enabled by an ENUMERATION that decays -- exactly the decay
+ * `enable_debug_namespaces` was written for. `server` was missing from the
+ * production list, so the line the entry point calls its guarantee that
+ * "generation silently never drains is not a state this can reach quietly" went
+ * to a disabled logger on the one host where it matters, from the day it
+ * shipped. Adding `server` back fixes today; this makes the guarantee stop
+ * depending on that list at all, because a signal needs no namespace.
+ *
+ * Only in production, and only on the not-started branch. A dev machine without
+ * the identity key is SUPPOSED not to start, and signalling that would train the
+ * reader to ignore the signal that matters.
+ *
+ * @param {object} params
+ * @param {{started: boolean, reason: string}} params.drainer
+ * @param {boolean} params.is_production
+ * @param {{error: Function}} params.logger
+ * @returns {boolean} whether an escalation was emitted
+ */
+export const escalate_drainer_not_started = ({
+  drainer,
+  is_production,
+  logger
+}) => {
+  if (drainer.started || !is_production) return false
+  logger.error(
+    `data-view generation drainer did not start: ${drainer.reason}`,
+    {
+      severity: 'high',
+      context: { reason: drainer.reason }
+    }
+  )
+  return true
+}
+
 export default {
   DRAIN_INTERVAL_MS,
   describe_drainer_readiness,
+  escalate_drainer_not_started,
   drain_once,
   is_retryable_dispatch_failure,
   start_generation_drainer,

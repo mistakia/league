@@ -10,7 +10,8 @@ import {
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
 import {
   drain_once,
-  is_retryable_dispatch_failure
+  is_retryable_dispatch_failure,
+  escalate_drainer_not_started
 } from '#libs-server/data-views/generation/generation-drainer.mjs'
 import {
   BaseSessionError,
@@ -265,6 +266,68 @@ describe('data view generation drainer', function () {
       expect(prompt).to.include('EDIT')
       expect(prompt).to.include('complete replacement, not a patch')
       expect(prompt).to.include('"player_name"')
+    })
+  })
+
+  // The readiness verdict must survive the debug-namespace list.
+  //
+  // `report` announces both outcomes, but only to `debug('server')`, and
+  // `server` was absent from the production enable list -- so on the one host
+  // where a non-draining drainer matters, the announcement went to a disabled
+  // logger. These assert the branch that does NOT depend on that list.
+  describe('escalating a drainer that did not start', function () {
+    const make_logger = () => {
+      const calls = []
+      const logger = {
+        error: (message, options) => calls.push({ message, options })
+      }
+      return { logger, calls }
+    }
+
+    it('emits a high-severity signal in production, carrying the reason', function () {
+      const { logger, calls } = make_logger()
+      const escalated = escalate_drainer_not_started({
+        drainer: { started: false, reason: 'BASE_API_URL is not set' },
+        is_production: true,
+        logger
+      })
+
+      expect(escalated).to.equal(true)
+      expect(calls).to.have.length(1)
+      // The reason is the whole diagnostic value: 'did not start' alone sends
+      // the reader to the drainer, and the causes are all outside it.
+      expect(calls[0].message).to.include('BASE_API_URL is not set')
+      expect(calls[0].options.severity).to.equal('high')
+      expect(calls[0].options.context.reason).to.equal(
+        'BASE_API_URL is not set'
+      )
+    })
+
+    it('stays silent when the drainer started', function () {
+      const { logger, calls } = make_logger()
+      const escalated = escalate_drainer_not_started({
+        drainer: { started: true, reason: 'dispatching with the identity key' },
+        is_production: true,
+        logger
+      })
+
+      expect(escalated).to.equal(false)
+      expect(calls).to.have.length(0)
+    })
+
+    // The negative control that keeps the signal worth reading: a dev machine
+    // without the identity key is SUPPOSED not to start, and signalling that
+    // would train the reader to ignore the production case.
+    it('stays silent outside production even when it did not start', function () {
+      const { logger, calls } = make_logger()
+      const escalated = escalate_drainer_not_started({
+        drainer: { started: false, reason: 'the identity key is not readable' },
+        is_production: false,
+        logger
+      })
+
+      expect(escalated).to.equal(false)
+      expect(calls).to.have.length(0)
     })
   })
 })

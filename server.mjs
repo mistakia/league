@@ -8,7 +8,10 @@ import db from '#db'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
-import { start_generation_drainer_if_configured } from '#libs-server/data-views/generation/generation-drainer.mjs'
+import {
+  start_generation_drainer_if_configured,
+  escalate_drainer_not_started
+} from '#libs-server/data-views/generation/generation-drainer.mjs'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 const IS_PROD = process.env.NODE_ENV === 'production'
@@ -27,7 +30,7 @@ if (IS_DEV) {
   )
 } else if (IS_PROD) {
   enable_debug_namespaces(
-    'api*,notifications*,auction*,scoreboard*,data-view-socket'
+    'server,api*,notifications*,auction*,scoreboard*,data-view-socket'
   )
 } else {
   enable_debug_namespaces('*')
@@ -45,13 +48,22 @@ const main = async () => {
   // It starts only where it can actually dispatch (see
   // describe_drainer_readiness) and says which way it went either way, so a
   // production host where generation silently never drains is not a state this
-  // can reach quietly.
+  // can reach quietly. The report is a debug line, so in production the
+  // not-started branch ALSO emits a signal -- see escalate_drainer_not_started
+  // for why the line alone was not enough.
   const drainer = start_generation_drainer_if_configured({
     report: (message) => logger(message)
   })
   if (drainer.started) {
     process.on('SIGTERM', drainer.stop)
   }
+  escalate_drainer_not_started({
+    drainer,
+    is_production: IS_PROD,
+    logger: create_logger('server:generation-drainer', {
+      service: 'league-server'
+    })
+  })
 
   if (argv.clean && process.env.NODE_ENV === 'development') {
     await db.seed.run()
