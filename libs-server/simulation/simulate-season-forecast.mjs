@@ -522,7 +522,8 @@ export async function simulate_season_forecast({
     year,
     n_simulations,
     seed: Number.isInteger(seed) ? seed + 100000 : undefined,
-    roster_overrides
+    roster_overrides,
+    roster_week
   })
 
   const wildcard_survivor_count = count_wildcard_survivors({
@@ -903,7 +904,8 @@ async function build_post_season_forecast({
     year,
     n_simulations,
     seed: Number.isInteger(seed) ? seed + 100000 : undefined,
-    roster_overrides
+    roster_overrides,
+    roster_week
   })
 
   const wildcard_survivor_count = count_wildcard_survivors({
