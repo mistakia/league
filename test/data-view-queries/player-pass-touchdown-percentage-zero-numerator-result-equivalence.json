@@ -6,11 +6,17 @@
     "columns": [
       {
         "column_id": "player_pass_touchdown_percentage_from_plays",
-        "params": { "year": [2024] }
+        "params": {
+          "year": [2024]
+        }
       }
     ],
     "where": [
-      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
     ]
   },
   "result_equivalence": {
@@ -21,9 +27,13 @@
       "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, is_sack, is_touchdown) VALUES (990121, 3, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-ZNUM-000903', false, false)",
       "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, is_sack, is_touchdown) VALUES (990121, 4, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-ZNUM-000903', false, false)"
     ],
-    "expected_rows": [{ "pass_td_pct_from_plays_0": "0" }],
+    "expected_rows": [
+      {
+        "pass_td_pct_from_plays_0": "0"
+      }
+    ],
     "compare_columns": ["pass_td_pct_from_plays_0"]
   },
   "tags": ["from_plays", "season", "result-equivalence"],
-  "expected_query": "with \"te7da4d5c703a3ad1795a1fcae44f5e58\" as materialized (select COALESCE(passer_pid) as pid, ROUND(100.0 * SUM(CASE WHEN is_touchdown = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 0), 2) as pass_td_pct_from_plays from \"nfl_plays\" where \"play_type\" in ('PASS', 'RUSH', 'KOFF', 'PUNT', 'FGXP', 'FREE') and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024) group by COALESCE(passer_pid)), \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pass_td_pct_from_plays\" AS \"pass_td_pct_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"te7da4d5c703a3ad1795a1fcae44f5e58\" on \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pass_td_pct_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+  "expected_query": "with \"te7da4d5c703a3ad1795a1fcae44f5e58\" as materialized (select COALESCE(passer_pid) as pid, ROUND(100.0 * SUM(CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END), 0), 2) as pass_td_pct_from_plays from \"nfl_plays\" where \"play_type\" in ('PASS', 'RUSH', 'KOFF', 'PUNT', 'FGXP', 'FREE') and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024) group by COALESCE(passer_pid)), \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pass_td_pct_from_plays\" AS \"pass_td_pct_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"te7da4d5c703a3ad1795a1fcae44f5e58\" on \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"te7da4d5c703a3ad1795a1fcae44f5e58\".\"pass_td_pct_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
 }
