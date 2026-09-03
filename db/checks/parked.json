@@ -1181,5 +1181,1061 @@
     },
     "disposition": "baselined",
     "owner": "user:task/league/close-prop-market-selection-capture-gaps.md, which already owns the FanDuel importer defect the sibling prop-market-selection-coverage check names -- the private/scripts path gating its market push on selections.length. Measured 2026-09-03 at 435 of 1,386,099 scanned, and the residue is 100 percent one book across a feed of eight, which is the whole of the evidence pointing there: the mechanism that writes an index row without a history row has not been traced, and user:task/league/diagnose-residual-index-only-rows.md carries that lead if the importer turns out not to explain it. Lost selections are absent from prop_market_selections_history as well as the index and no book serves closing prices for a settled game, so these rows cannot be replayed from anything we hold."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080400
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080800
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080801
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080802
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080803
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080804
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080805
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080900
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080901
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080902
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080903
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080904
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080905
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080906
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013080907
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081000
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081100
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081500
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081501
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081502
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081503
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081600
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081601
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081602
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081603
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081700
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081701
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081702
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081703
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081704
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081705
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081800
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013081900
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082200
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082201
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082300
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082301
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082400
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082401
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082402
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082403
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082404
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082405
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082406
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082407
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082408
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082409
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082500
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082501
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082900
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082901
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082902
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082903
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082904
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082905
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082906
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082907
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082908
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082909
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082910
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082911
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082912
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082913
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082914
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2013082915
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2013 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2013 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080300
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080700
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080701
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080702
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080703
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080704
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080705
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080800
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080801
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080802
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080803
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080804
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080805
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080900
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080901
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080902
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014080903
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081400
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081501
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081502
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081503
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081504
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081600
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081601
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081602
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081603
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081604
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081605
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081606
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081607
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081700
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081701
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014081800
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082100
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082200
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082201
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082202
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082203
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082204
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082300
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082301
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082302
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082303
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082304
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082305
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082306
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082307
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082400
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082401
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082800
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082801
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082802
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082803
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082804
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082805
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082806
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082807
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082808
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082809
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082810
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082811
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082812
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082813
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082814
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2014082815
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair, not an absent game: the play-stats importer minted this esbid from a date and a sequence using the regular-season 00+ convention, while the 2014 preseason slate in nfl_games carries the 50+ convention. The target is esbid + 50, verified for all 130 of the 2014 and sibling-season orphans -- 130 of 130 exist in nfl_games and 130 of 130 are season_type PRE. Clears when the key repair re-points these rows; until then this entry keeps the game out of the findings without hiding that it is owed."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2020112602
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair. This is the Thanksgiving 2020 slot of the BAL at PIT week 12 game, which was postponed and now lives in nfl_games at esbid 2020120200. The play-stats importer keyed on the pre-postponement esbid and nothing reconciled it afterwards. It is one of the two singletons that accrued AFTER the 2013/2014 block, which is the evidence that this class is live rather than historical. Its team values are all null, so a team-pair match cannot identify the target and the date plus the schedule history is what does."
+  },
+  {
+    "check_id": "nfl-play-stats-game-linkage",
+    "grain": {
+      "esbid": 2021122201
+    },
+    "disposition": "baselined",
+    "owner": "Standing debt with an owning repair. This is the SEA at LA week 15 game, which nfl_games carries one calendar day earlier at esbid 2021122101; the play-stats importer took the date from its own source and forked the key across the boundary. The second of the two singletons that accrued after the 2013/2014 block."
   }
 ]
