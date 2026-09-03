@@ -249,3 +249,48 @@
   // name instead.
   .auction__nominated-player .nominated__player-details
     padding-top 0
+
+  // THE NAME BLOCK COMES DOWN SO THE ROW FITS ONE LINE AT 320, and the budget is
+  // arithmetic rather than a tuned number. The row has 296px there -- 320 less
+  // the 8 and 16 of gutter -- and it was spending 370.2: a 76px headshot with its
+  // margins, a 178.3px name block, and 115.9px of Market and Live value. 74.2px
+  // over.
+  //
+  // 40 OF THAT 178.3 WAS PADDING, so that is where it comes from first. The
+  // block is `padding 8px 16px 0 24px` in player-name.styl -- an asymmetric
+  // gutter for a name sitting beside a headshot in a wide table row, which is
+  // not what this is. 12px here, and the type carries the separation instead.
+  //
+  // The rest comes off the last name, 2em to 1.25em: 28px to 17.5px, which takes
+  // ADAM PRENTICE from 138.3px of ink to 86.4. It stays the largest thing in the
+  // block -- the first name above it is 14px -- so the hierarchy that makes the
+  // surname the subject survives the reduction.
+  //
+  // Together: 72 + 98.4 + 115.9 against 296, with room to spare rather than a
+  // hairline fit. THE SPARE IS THE POINT -- ADAM PRENTICE is eight characters and
+  // this league has names twice that, so a reduction tuned to fit exactly this
+  // one would wrap again for the next nomination.
+  .auction__nominated-player .player__name-lead
+    // `flex 0 1 auto` and `min-width 0`, replacing the `flex 0 0 auto` that
+    // makes this block content-sized and unshrinkable everywhere else. It is the
+    // guard for the long name the numbers above cannot pre-empt: shrink first,
+    // and the ellipsis below rather than pushing the row wider. Safe HERE and not
+    // above, because the details beside it are `flex 0 1 auto` too now -- when
+    // they were `flex 1 1 0%` a shrinkable name took the whole shortfall and
+    // rendered ADAM PREN at 1440.
+    flex 0 1 auto
+    min-width 0
+    padding 8px 4px 0 8px
+
+  .auction__nominated-player .player__name-last
+    font-size 1.25em
+
+  // ELLIPSIS, NOT A CLIP. `.nominated__player` clips with a clip-path so the
+  // headshot can rise out of the bar, and a name that meets that edge is simply
+  // cut mid-letter. These two shorten with a marker instead, which is what
+  // `.player__name-top` already does one component over.
+  .auction__nominated-player .player__name-first
+  .auction__nominated-player .player__name-last
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
