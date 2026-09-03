@@ -49,6 +49,8 @@ export default class ActivateConfirmation extends React.Component {
       const practice_data = practice_week ? practice_week.toJS() : null
 
       if (
+        // active-roster to reserve is frozen while the free agency auction runs
+        !props.auction_freezes_active_roster_reserve &&
         isReserveEligible({
           roster_status: activePlayerMap.get('roster_status'),
           game_designation: activePlayerMap.get('game_designation'),
@@ -230,5 +232,6 @@ ActivateConfirmation.propTypes = {
   activate: PropTypes.func,
   player_map: ImmutablePropTypes.map,
   team: PropTypes.object,
-  psquad_eligible_active_players: ImmutablePropTypes.list
+  psquad_eligible_active_players: ImmutablePropTypes.list,
+  auction_freezes_active_roster_reserve: PropTypes.bool
 }

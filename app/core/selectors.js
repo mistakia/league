@@ -36,6 +36,7 @@ import {
   current_season,
   roster_slot_types,
   starting_lineup_slots,
+  active_roster_slots,
   practice_squad_slots,
   practice_squad_protected_slots,
   practice_squad_unprotected_slots,
@@ -386,6 +387,44 @@ export const is_free_agent_period = createSelector(
 
     const faPeriod = get_free_agent_period(league)
     return current_season.now.isBetween(faPeriod.start, faPeriod.end)
+  }
+)
+
+// Mirror of the server's `is_auction_in_progress` from
+// libs-server/auction-completion.mjs. The auction's completion is DERIVED from
+// the rosters -- no team with an open active spot means the rotation is
+// exhausted -- and rosters are fixed for the period, so an active-roster move
+// that frees a slot would disturb the count the auction is running on. The
+// pre-period window is carved out the same way the server does it, because
+// before the period opens there is no auction and `is_auction_complete` cannot
+// tell that apart from an unfinished one.
+export const is_auction_in_progress = createSelector(
+  get_current_league,
+  get_rosters_for_current_league,
+  (league, roster_records) => {
+    if (!league.free_agency_period_start) {
+      return false
+    }
+
+    const fa_period = get_free_agent_period(league)
+
+    if (current_season.now.isBefore(fa_period.start)) {
+      return false
+    }
+
+    // The period end is the backstop completion. Past it the auction is over
+    // whatever the rosters say, matching the server.
+    if (!current_season.now.isBefore(fa_period.end)) {
+      return false
+    }
+
+    let spots_remaining = 0
+    for (const roster_record of roster_records.valueSeq()) {
+      const roster = new Roster({ roster: roster_record.toJS(), league })
+      spots_remaining += Math.max(roster.availableSpace, 0)
+    }
+
+    return spots_remaining > 0
   }
 )
 
@@ -1337,8 +1376,17 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         status.eligible.ps = true
       }
 
+      // Rosters are fixed for the free agency auction, so an active-roster
+      // player can not be moved to reserve while it runs -- the move would free
+      // a slot the auction's completion is derived from. Practice squad
+      // activations are untouched: the player never occupied an active slot.
+      const auction_freezes_active_roster_reserve =
+        active_roster_slots.includes(playerSlot) &&
+        is_auction_in_progress(state)
+
       if (
         !status.protected &&
+        !auction_freezes_active_roster_reserve &&
         current_season.week <= current_season.final_week
       ) {
         const reserve = get_reserve_eligibility_from_player_map({ player_map })

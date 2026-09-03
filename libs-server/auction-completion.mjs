@@ -106,6 +106,36 @@ export const may_process_free_agency_waivers = async ({
 }
 
 /**
+ * Is the free agency auction currently holding rosters fixed?
+ *
+ * The complement of `is_auction_complete` inside the period, with the
+ * pre-period window carved out: before the period opens there is no auction to
+ * be holding anything, and `is_auction_complete` alone cannot tell that from a
+ * not-yet-complete state.
+ *
+ * The freeze is what makes the derivation in `is_auction_complete` monotone:
+ * "no team has an open active spot" only stays true because nothing may add one
+ * back while the auction runs. A caller enforcing the freeze must also check
+ * the player's source slot, since a practice squad activation moves no active
+ * roster row and so is untouched by it.
+ */
+export const is_auction_in_progress = async ({
+  lid,
+  season_year = current_season.year
+}) => {
+  const league = await getLeague({ lid })
+
+  if (!league.free_agency_period_start) return false
+
+  const period = get_free_agent_period(league)
+
+  // Before the period opens there is no auction.
+  if (current_season.now.isBefore(period.start)) return false
+
+  return !(await is_auction_complete({ lid, season_year }))
+}
+
+/**
  * Whose nomination turn is it, from the auction's transaction log.
  *
  * PURE, and the ONE implementation of the rotation rule. The socket used to own
@@ -207,6 +237,7 @@ export default {
   get_auction_spots_remaining,
   is_auction_complete,
   may_process_free_agency_waivers,
+  is_auction_in_progress,
   resolve_nominating_team_id,
   get_auction_nominating_team_id
 }

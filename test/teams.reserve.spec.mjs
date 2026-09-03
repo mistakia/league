@@ -1300,6 +1300,159 @@ describe('API /teams - reserve', function () {
     })
   })
 
+  describe('free agency auction freeze', function () {
+    const league_id = 1
+    const season_year = current_season.year
+
+    const put_league_in_auction_window = async () => {
+      await knex('seasons')
+        .where({ lid: league_id, season_year })
+        .update({
+          free_agency_period_start: regular_season_start
+            .clone()
+            .subtract('2', 'months')
+            .toDate(),
+          free_agency_period_end: regular_season_start.clone().toDate()
+        })
+    }
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+      // Inside the auction window: two months before the season, one month ago.
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'month').toISOString()
+      )
+      await put_league_in_auction_window()
+    })
+
+    afterEach(function () {
+      MockDate.reset()
+    })
+
+    it('rejects moving an active roster player to reserve during the auction', async () => {
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
+        value
+      })
+
+      await knex('player')
+        .update({
+          roster_status: player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: roster_slot_types.RESERVE_SHORT_TERM
+        })
+
+      await error(
+        request,
+        'active roster players can not be moved to reserve during the free agency auction'
+      )
+    })
+
+    it('moves an active roster player to reserve once the auction period is over', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      // TRADE bypasses the rostered-long-enough check now that the season has
+      // started and last week's roster is a distinct one.
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
+        value
+      })
+
+      await knex('player')
+        .update({
+          roster_status: player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: roster_slot_types.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
+    })
+
+    it('still activates a practice squad player to reserve during the auction', async () => {
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
+        value
+      })
+
+      await knex('player')
+        .update({
+          roster_status: player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: roster_slot_types.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
+    })
+  })
+
   describe('practice status eligibility', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)

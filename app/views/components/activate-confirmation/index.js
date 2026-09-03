@@ -4,6 +4,7 @@ import { createSelector } from 'reselect'
 import { roster_actions } from '@core/rosters'
 import {
   get_current_players_for_league,
+  is_auction_in_progress,
   isPlayerPracticeSquadEligible
 } from '@core/selectors'
 
@@ -20,7 +21,10 @@ const map_state_to_props = createSelector(
 
     return {
       team,
-      psquad_eligible_active_players
+      psquad_eligible_active_players,
+      // Rosters are fixed for the free agency auction, so the reserve dropdown
+      // that makes activation room is unavailable while it runs.
+      auction_freezes_active_roster_reserve: is_auction_in_progress(state)
     }
   }
 )

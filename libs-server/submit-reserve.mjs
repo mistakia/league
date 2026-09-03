@@ -9,7 +9,8 @@ import {
   practice_squad_unprotected_slots,
   roster_slot_types,
   transaction_types,
-  transaction_type_display_names
+  transaction_type_display_names,
+  active_roster_slots
 } from '#constants'
 import getLeague from './get-league.mjs'
 import getRoster from './get-roster.mjs'
@@ -21,6 +22,7 @@ import getLastTransaction from './get-last-transaction.mjs'
 import apply_practice_current_week_join from './data-views/join-practice-current-week.mjs'
 import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
 import apply_nfl_games_offset_week_join from './data-views/join-nfl-games-offset-week.mjs'
+import { is_auction_in_progress } from './auction-completion.mjs'
 
 export default async function ({
   slot,
@@ -167,6 +169,21 @@ export default async function ({
     rosterPlayer.slot === roster_slot_types.PSDP
   ) {
     throw new Error('protected practice squad players can not be activated')
+  }
+
+  // Rosters are fixed for the free agency auction. Its completion is DERIVED
+  // from each team's open active slots, so moving an active-roster player to
+  // reserve mid-auction would free a slot the auction is counting on --
+  // re-opening an exhausted rotation or enlarging the final block. Practice
+  // squad activations are deliberately untouched: the player never occupied an
+  // active slot, so the move cannot change `availableSpace`.
+  if (
+    active_roster_slots.includes(rosterPlayer.slot) &&
+    (await is_auction_in_progress({ lid: league_id }))
+  ) {
+    throw new Error(
+      'active roster players can not be moved to reserve during the free agency auction'
+    )
   }
 
   // An unprotected practice squad player moves straight to reserve without ever

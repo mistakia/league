@@ -23,6 +23,11 @@ const router = express.Router({ mergeParams: true })
  *       - Unprotected practice squad players (PS, PSD) can be placed on reserve directly. The move activates the player — a ROSTER_ACTIVATE transaction is recorded alongside the reserve transaction — and requires no active roster space. The player is no longer practice squad eligible afterward, and any pending poaching claim on him is marked unsuccessful.
  *       - Player must have been rostered for at least one week (unless acquired via trade)
  *       - Player must meet NFL injury status requirements for the reserve type
+ *       - While the free agency auction is in progress, active-roster players cannot be moved
+ *         to reserve at all -- rosters are fixed for the period and the auction's completion is
+ *         derived from them. The move is allowed again once the auction completes (all spots
+ *         filled or the period ends); unprotected practice squad players may still be activated
+ *         straight to reserve, since that move consumes no active roster slot.
  *     security:
  *       - bearerAuth: []
  *     parameters:
