@@ -11,6 +11,7 @@ import readline from 'readline'
 import { is_main } from '#libs-server'
 import { assert_destructive_target_values_allowed } from '#db/guard-destructive-target.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import { league_topology } from '#libs-server/league-topology.mjs'
 
 // Increase maxBuffer size to handle larger outputs
 const exec = (cmd, options = {}) =>
@@ -225,15 +226,15 @@ DO UPDATE SET config_value = '${escaped_value}', updated_at = '${timestamp || 'N
   return output_file
 }
 
-const STORAGE_BACKUP_PATH = '/storage/backups/servers/league-production/backups'
-const LOCAL_BACKUP_PATH = '/root/backups'
-// Whole-DB directory-format (-Fd) full dumps land under the canonical DB-dump tree
-// on storage (/storage/backups/database-dumps/, NOT the backups/servers/ tree that
-// holds the plain-SQL user tarballs), and directly in /root/backups on the league
-// server itself. Each full is a DIRECTORY named `<timestamp>-full` (toc.dat +
-// per-table *.dat.gz). This path matches league-backup-pull's FULL_DIR.
-const STORAGE_FULL_DUMP_PATH =
-  '/storage/backups/database-dumps/league-production'
+// The storage host and the three dump paths are fleet topology, not facts about
+// league, and this repository is public -- so they are configuration with no
+// default. `backup.local_path` is the league host's own dump directory, probed
+// first so a run ON that host reads locally instead of reaching back over ssh;
+// `backup.full_dump_path` is the canonical DB-dump tree, NOT the backups/servers
+// tree that holds the plain-SQL user tarballs, and matches league-backup-pull's
+// FULL_DIR. Each full dump is a DIRECTORY named `<timestamp>-full` (toc.dat plus
+// per-table *.dat.gz). Resolved lazily so importing this module costs nothing.
+// See libs-server/league-topology.mjs.
 
 // This script pulls onto a DEV machine, so it is only ever allowed to see the
 // SCRUBBED dev fixture (`*-dev.tar.gz`, produced by derive-dev-fixture.mjs on
@@ -263,29 +264,31 @@ const no_fixture_error = ({ query, location }) =>
  * Returns { name, remote_path } where remote_path is set for storage files.
  */
 const find_backup_file = async ({ query }) => {
-  if (existsSync(LOCAL_BACKUP_PATH)) {
-    log('Searching local dev fixtures at %s', LOCAL_BACKUP_PATH)
+  const backup = league_topology('backup')
+
+  if (existsSync(backup.local_path)) {
+    log('Searching local dev fixtures at %s', backup.local_path)
     const { stdout } = await exec(
-      `ls -t "${LOCAL_BACKUP_PATH}"/${DEV_FIXTURE_GLOB} 2>/dev/null || true`
+      `ls -t "${backup.local_path}"/${DEV_FIXTURE_GLOB} 2>/dev/null || true`
     )
     const files = stdout.trim().split('\n').filter(Boolean)
     const match = files.find((f) => path.basename(f).includes(query))
     if (!match) {
-      throw no_fixture_error({ query, location: LOCAL_BACKUP_PATH })
+      throw no_fixture_error({ query, location: backup.local_path })
     }
     return { name: path.basename(match), local_path: match }
   }
 
   log('Searching storage server dev fixtures via SSH')
   const { stdout } = await exec(
-    `ssh base-storage 'ls -t ${STORAGE_BACKUP_PATH}/${DEV_FIXTURE_GLOB} 2>/dev/null || true'`
+    `ssh ${backup.host} 'ls -t ${backup.dev_fixture_path}/${DEV_FIXTURE_GLOB} 2>/dev/null || true'`
   )
   const files = stdout.trim().split('\n').filter(Boolean)
   const match = files.find((f) => path.basename(f).includes(query))
   if (!match) {
     throw no_fixture_error({
       query,
-      location: `base-storage:${STORAGE_BACKUP_PATH}`
+      location: `${backup.host}:${backup.dev_fixture_path}`
     })
   }
   return { name: path.basename(match), remote_path: match }
@@ -303,7 +306,8 @@ const download_file = async ({ file }) => {
   const local_dest = `./${file.name}`
   log('Downloading %s from storage via scp', file.name)
   // -r so directory-format full dumps copy recursively (harmless for files).
-  await exec(`scp -r base-storage:${file.remote_path} ${local_dest}`)
+  const backup = league_topology('backup')
+  await exec(`scp -r ${backup.host}:${file.remote_path} ${local_dest}`)
   log('Download complete: %s', file.name)
   return local_dest
 }
@@ -643,10 +647,12 @@ const download_backup_from_drive = async (
  * first, then the database-dumps tree on storage.
  */
 const find_full_dump_file = async ({ query }) => {
-  if (existsSync(LOCAL_BACKUP_PATH)) {
-    log('Searching local full dumps at %s', LOCAL_BACKUP_PATH)
+  const backup = league_topology('backup')
+
+  if (existsSync(backup.local_path)) {
+    log('Searching local full dumps at %s', backup.local_path)
     const { stdout } = await exec(
-      `ls -dt "${LOCAL_BACKUP_PATH}"/*-full 2>/dev/null || true`
+      `ls -dt "${backup.local_path}"/*-full 2>/dev/null || true`
     )
     const files = stdout.trim().split('\n').filter(Boolean)
     const match = files.find((f) => path.basename(f).includes(query))
@@ -658,13 +664,13 @@ const find_full_dump_file = async ({ query }) => {
 
   log('Searching storage server full dumps via SSH')
   const { stdout } = await exec(
-    `ssh base-storage 'ls -dt ${STORAGE_FULL_DUMP_PATH}/*-full 2>/dev/null || true'`
+    `ssh ${backup.host} 'ls -dt ${backup.full_dump_path}/*-full 2>/dev/null || true'`
   )
   const files = stdout.trim().split('\n').filter(Boolean)
   const match = files.find((f) => path.basename(f).includes(query))
   if (!match) {
     throw new Error(
-      `No full dump directories found matching "${query}" in ${LOCAL_BACKUP_PATH} or base-storage:${STORAGE_FULL_DUMP_PATH}`
+      `No full dump directories found matching "${query}" in ${backup.local_path} or ${backup.host}:${backup.full_dump_path}`
     )
   }
   return { name: path.basename(match), remote_path: match }

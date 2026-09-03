@@ -61,9 +61,9 @@ import {
   row_identity
 } from '#libs-server/data-views/generation/benchmark-metrics.mjs'
 import {
-  generation_topology,
+  league_topology,
   resolve_user_base_directory
-} from '#libs-server/data-views/generation/generation-topology.mjs'
+} from '#libs-server/league-topology.mjs'
 import { is_main } from '#libs-server'
 
 const exec_file = promisify(execFile)
@@ -82,7 +82,7 @@ const INSTRUCTIONS_PATH = path.join(
 // container, the uid that owns the 0600 transcript inside it, and where that
 // transcript sits. All four describe this fleet rather than the application,
 // and this repository is public, so they are CONFIGURATION with no default:
-// see generation-topology.mjs for the file they come from and why it is not
+// see libs-server/league-topology.mjs for where they come from and why it is not
 // sops-encrypted. Resolved lazily at each call site, because
 // data-view-benchmark-ground-truth.mjs imports this module for
 // `check_correctness` alone and must not need any of it.
@@ -159,7 +159,7 @@ export const read_contention = async () => {
  * @returns {Promise<{queries: number, hits: number}|null>}
  */
 export const read_prefix_cache_counters = async () => {
-  const topology = generation_topology()
+  const topology = league_topology('generation')
   const { ok, stdout } = await try_exec('ssh', [
     topology.host,
     `curl -s ${topology.metrics_url} | grep -E '^vllm:prefix_cache_(queries|hits)_total'`
@@ -288,7 +288,7 @@ export const read_session_id = async ({ thread_id }) => {
  */
 export const read_transcript = async ({ session_id, log = () => {} }) => {
   const deadline = Date.now() + TRANSCRIPT_SETTLE_TIMEOUT_MS
-  const topology = generation_topology()
+  const topology = league_topology('generation')
   let records = null
 
   for (;;) {
@@ -435,7 +435,7 @@ export const reap_stranded_session = async ({ thread_id, log }) => {
   if (!thread_id)
     return { reaped: false, reason: 'no thread_id on the job row' }
 
-  const topology = generation_topology()
+  const topology = league_topology('generation')
   const { ok, stdout } = await try_exec('ssh', [
     topology.host,
     `docker exec -u ${topology.container_user} ${topology.container} ps -eo pid,args || true`
