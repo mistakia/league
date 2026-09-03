@@ -189,6 +189,40 @@ describe('data view agent tools', function () {
       expect(Object.keys(result.params).length).to.be.above(0)
     })
 
+    it('keeps has_params about the column when a play filter is opened by name', function () {
+      // `has_params` answers "does this column take params at all", so an agent
+      // reading an empty `params` object knows whether to re-ask. Computed from
+      // the FILTERED response it inverted its own meaning on the second call
+      // the tool tells the agent to make: opening a play-filter key by name
+      // leaves `params` empty, which reported `has_params: false` about a
+      // column carrying hundreds of them.
+      const column = catalog.columns.find(
+        (candidate) =>
+          candidate.param_keys?.length &&
+          candidate.play_filter_param_keys?.length
+      )
+      expect(
+        column,
+        'a column with both configuration params and a play-filter tail exists'
+      ).to.exist
+
+      const [play_filter_key] = column.play_filter_param_keys
+      const result = describe_column({
+        column_id: column.column_id,
+        param_keys: [play_filter_key]
+      })
+
+      expect(Object.keys(result.params)).to.eql(
+        [],
+        'the request asked for a play-filter key only, so the configuration params are correctly absent'
+      )
+      expect(result.play_filters[play_filter_key]).to.exist
+      expect(result.has_params).to.equal(
+        true,
+        'the column takes params whether or not this particular request asked for any'
+      )
+    })
+
     it('carries enumerated values, which is the gap it exists to close', async function () {
       // The retired design scored 0.009 on param agreement against 0.303 on
       // columns: it found roughly the right columns and got their parameters

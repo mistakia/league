@@ -44,7 +44,20 @@ const REQUIRED_PARAM_KEYS = [
 describe('data view generation catalog / param coverage', () => {
   const catalog = build_data_view_generation_catalog()
 
+  // Reachability, across BOTH buckets a column now sorts its params into.
+  // `param_keys` is the configuration surface `describe_column` expands by
+  // default; `play_filter_param_keys` is the play-by-play predicate tail it
+  // returns as names and expands on request. A key in either is reachable, and
+  // the question this file exists to answer is whether the catalog can see the
+  // key at all -- not which of the two halves it landed in.
   const columns_carrying = (param_key) =>
+    catalog.columns.filter(
+      (column) =>
+        column.param_keys?.includes(param_key) ||
+        column.play_filter_param_keys?.includes(param_key)
+    ).length
+
+  const columns_configuring = (param_key) =>
     catalog.columns.filter((column) => column.param_keys?.includes(param_key))
       .length
 
@@ -66,6 +79,26 @@ describe('data view generation catalog / param coverage', () => {
       [],
       `no column advertises these params, so nothing built on the catalog can produce them: ${unreachable.join(', ')}`
     )
+  })
+
+  it('sorts the play-by-play predicates into the deferred tail', () => {
+    // The companion to the test above, and the reason broadening it to both
+    // buckets is not a way of making a failure disappear. `team_unit` and
+    // `quarter` are play-by-play predicates: they are reachable, and they are
+    // deliberately NOT in the default-expanded configuration surface, because
+    // expanding that tail unconditionally is what made describe_column cost
+    // ~16k tokens. Assert both halves of that, so a change that flattens the
+    // split back into one list fails here rather than passing quietly.
+    for (const param_key of ['team_unit', 'quarter']) {
+      expect(columns_carrying(param_key)).to.be.above(
+        0,
+        `${param_key} is reachable from no column in either bucket`
+      )
+      expect(columns_configuring(param_key)).to.equal(
+        0,
+        `${param_key} is a play-by-play predicate and belongs in the deferred tail, not in the default-expanded configuration params`
+      )
+    }
   })
 
   it('reads the client field registry rather than the server half alone', () => {

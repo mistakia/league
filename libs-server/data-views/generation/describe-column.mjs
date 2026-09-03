@@ -166,7 +166,14 @@ export const describe_column = ({
     // Stated rather than implied: a column with no params is a legitimate
     // answer, and an agent that reads an empty object as a failed lookup will
     // waste a turn re-asking.
-    has_params: Object.keys(params).length > 0,
+    //
+    // It describes the COLUMN, not this response. Computed from the filtered
+    // `params` it went false whenever the caller opened play-filter keys by
+    // name -- the exact second call the tool tells them to make -- answering
+    // "this column takes no params" about a column with two hundred of them.
+    has_params: Boolean(
+      column.param_keys?.length || play_filter_param_keys.length
+    ),
     play_filters: Object.keys(play_filters).length ? play_filters : undefined
   })
 }
