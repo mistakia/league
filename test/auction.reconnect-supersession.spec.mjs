@@ -193,6 +193,40 @@ describe('auction reconnect supersession', function () {
     expect(onclose_calls, 'a superseded close tears nothing down').to.equal(0)
   })
 
+  it('tears down once when the live socket closes before the one it replaced', async function () {
+    // THE OTHER CLOSE ORDER. The guard reads "do I still own this client id",
+    // and `undefined` is not ownership -- the entry is deleted only by this
+    // handler, so its absence means the teardown already ran. Written as
+    // `current && current.ws !== ws` it fell THROUGH on the absent case and ran
+    // a second teardown: `onclose` again, which can drop the auction out of the
+    // `auctions` map in api/sockets/index.mjs while a socket is still joined,
+    // and a duplicate AUCTION_CONNECTED behind it.
+    const { auction, received } = await build_auction(2)
+    const first = make_socket()
+    const second = make_socket()
+    let onclose_calls = 0
+    const onclose = () => {
+      onclose_calls += 1
+    }
+
+    await auction.join({ ws: first, user_id: 2, onclose, client_id: 'tab-a' })
+    await auction.join({ ws: second, user_id: 2, onclose, client_id: 'tab-a' })
+
+    // The LIVE socket goes first, which is the ordinary case of a manager
+    // closing the tab after a reconnect.
+    second.fire_close()
+    expect(onclose_calls, 'the live socket tore down').to.equal(1)
+
+    received.length = 0
+    first.fire_close()
+
+    expect(
+      onclose_calls,
+      'the corpse tore nothing down a second time'
+    ).to.equal(1)
+    expect(received).to.not.include('AUCTION_CONNECTED')
+  })
+
   it('registers one message handler when the same socket joins twice', async function () {
     // Both the mount effect and the reconnect saga can send AUCTION_JOIN for one
     // socket -- the client-side fix in `connect_auth` makes that MORE likely, not
@@ -213,6 +247,40 @@ describe('auction reconnect supersession', function () {
       onclose: () => {},
       client_id: 'tab-a'
     })
+
+    expect(socket.message_handler_count()).to.equal(1)
+    expect(auction._connected[2]).to.deep.equal([2])
+  })
+
+  it('registers one handler when two joins race on one socket', async function () {
+    // THE AWAIT IS THE HAZARD. `join` reads the client-id map, then awaits a
+    // database round trip to resolve the acting team, then writes. The socket
+    // message handler in api/sockets/index.mjs is `async` and its promise is
+    // never awaited, so two AUCTION_JOIN frames interleave freely -- and with the
+    // claim written after the await, BOTH frames read an empty slot, both passed
+    // the same-socket check, and both called `_setup_message_handlers`. The
+    // socket then bid twice for every bid its manager placed, at two prices,
+    // against their own cap.
+    //
+    // The client sends exactly this pair: AuctionControls' mount effect and the
+    // reconnect saga, both on one socket.
+    const { auction } = await build_auction(2)
+    const socket = make_socket()
+
+    await Promise.all([
+      auction.join({
+        ws: socket,
+        user_id: 2,
+        onclose: () => {},
+        client_id: 'tab-a'
+      }),
+      auction.join({
+        ws: socket,
+        user_id: 2,
+        onclose: () => {},
+        client_id: 'tab-a'
+      })
+    ])
 
     expect(socket.message_handler_count()).to.equal(1)
     expect(auction._connected[2]).to.deep.equal([2])

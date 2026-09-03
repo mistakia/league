@@ -210,6 +210,24 @@ export default class Auction {
       return
     }
 
+    // CLAIMED SYNCHRONOUSLY, BEFORE THE FIRST AWAIT, and this ordering is the
+    // whole of the guard above.
+    //
+    // `ws.on('message', async ...)` in `api/sockets/index.mjs` does not
+    // serialize: the handler is invoked per frame and its promise is never
+    // awaited, so two AUCTION_JOIN frames on one socket interleave freely. With
+    // the claim written after `_resolve_acting_team_id` -- a database round trip
+    // -- both frames read the same empty slot, both passed the same-socket
+    // check, and both went on to call `_setup_message_handlers`. That registers
+    // a listener per call, so the socket then bid TWICE for every bid its
+    // manager placed, at two different prices, against their own cap. The client
+    // sends exactly this pair: AuctionControls' mount effect and the reconnect
+    // saga both fire on the same socket.
+    //
+    // Rolled back on the one refusal below, so a claim never outlives the join
+    // that made it.
+    this._connected_client_ids[client_id] = { user_id, ws }
+
     const tid = await this._resolve_acting_team_id(user_id)
 
     // A commissioner who manages no team in this league still runs the auction
@@ -218,6 +236,8 @@ export default class Auction {
     // place no bid, because there is no team to charge.
     if (!tid && user_id !== this._league.commissioner_user_id) {
       this.logger(`user_id ${user_id} manages no team in league ${this._lid}`)
+      if (superseded) this._connected_client_ids[client_id] = superseded
+      else delete this._connected_client_ids[client_id]
       this.reply(user_id, 'invalid team')
       return
     }
@@ -240,13 +260,10 @@ export default class Auction {
       }
     }
 
-    // OVERWRITTEN BEFORE THE OLD SOCKET IS TOUCHED, because this map is what
-    // the close handler reads to decide whether it still owns the client id.
-    // Terminating first would run that handler against an entry still naming
-    // the dead socket, which is the deregistration this whole branch exists to
-    // avoid.
-    this._connected_client_ids[client_id] = { user_id, ws }
-
+    // The claim above already points at this socket, which is what the close
+    // handler reads to decide whether it still owns the client id -- so the
+    // replaced socket can be torn down without its handler deregistering the
+    // one that replaced it.
     if (superseded) {
       this.logger(`client_id ${client_id} superseded by a new socket`)
       // `terminate` rather than `close`: the socket being replaced is one this
@@ -1490,8 +1507,15 @@ export default class Auction {
       // registered under is deleted. `onclose` is skipped with it, because the
       // auction is plainly still in use by the socket that took this one's
       // place.
+      // `!current` counts as not owning it, not as owning it. The entry is
+      // deleted only by this handler, so its absence means the teardown for this
+      // client id has already run -- and falling through would run it a second
+      // time, calling `onclose` again (which can drop the auction out of the
+      // `auctions` map while a socket is still joined) and broadcasting a
+      // duplicate AUCTION_CONNECTED. Reachable when a supersession's live socket
+      // closes before the socket it replaced does.
       const current = this._connected_client_ids[client_id]
-      if (current && current.ws !== ws) {
+      if (!current || current.ws !== ws) {
         this.logger(`ignoring close of a superseded socket for ${client_id}`)
         return
       }
@@ -1760,6 +1784,21 @@ export default class Auction {
     this.logger('leaving live mode')
     this._clear_timers()
     this._election_mode = true
+
+    // ELECTION MODE IS ALWAYS UNPAUSED, and this is the second of the two
+    // places that has to establish it -- `_load_league` is the other, and it
+    // runs once at setup, so entering election mode at a BLOCK BOUNDARY was
+    // reaching it by a path that cleared nothing.
+    //
+    // A pause taken inside a live block is legitimate: there is a bid clock and
+    // stopping it is what the control is for. But the block then ends, this
+    // flips the mode, and `_paused` stays true with nothing able to clear it --
+    // `start()` is the only other writer and only AUCTION_RESUME reaches it,
+    // which the commissioner controls no longer offer in election mode because
+    // `pause()` refuses there. The auction refuses every socket write with
+    // `auction is paused` and every client renders that string until the last
+    // manager disconnects and the instance is discarded.
+    this._paused = false
     this._pending_election_mode = false
     this._broadcast_mode()
   }

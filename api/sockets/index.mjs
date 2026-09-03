@@ -48,8 +48,23 @@ export default function (wss) {
         const { lid, clientId } = message.payload
         const auction = auctions.get(lid)
 
+        // THE AUCTION MAY ALREADY BE GONE, and dereferencing it here kills the
+        // whole API process: this runs inside a `close` listener, so the
+        // TypeError is an uncaughtException, and `install_process_handlers`
+        // exits on those -- dropping every socket in every league.
+        //
+        // Reached whenever two sockets outlive each other across an emptying
+        // auction, and the commissioner is the standing case: one who manages no
+        // team joins deliberately (see `Auction.join`) and is never added to
+        // `_connected`, so the last MANAGER leaving empties the map and deletes
+        // the auction while the commissioner is still connected. Their close
+        // then finds nothing. The websocket heartbeat makes this ordinary rather
+        // than rare -- before it, a departed socket could sit ESTABLISHED for
+        // long enough that the process restarted first.
         const onclose = () => {
           const auction = auctions.get(lid)
+          if (!auction) return
+
           if (!Object.keys(auction._connected).length) {
             auctions.delete(lid)
           }

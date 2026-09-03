@@ -339,11 +339,23 @@ export function auction_reducer(state = initialState(), { payload, type }) {
     // The mode flips at a wall-clock boundary with no message behind it, so the
     // server announces it. A client deriving it from its own clock would run the
     // bid bar against a block the server has already closed.
+    // ENTERING ELECTION MODE CLEARS THE PAUSE HERE TOO, mirroring the server.
+    //
+    // `_leave_live_mode` clears `_paused` on the server, but the client cannot
+    // learn that from this message alone: in election mode nothing broadcasts
+    // AUCTION_START, and the only other cases that clear `isPaused` are
+    // AUCTION_BID and AUCTION_PROCESSED. So a client that received one
+    // AUCTION_PAUSED during a live block kept rendering `Auction is paused` for
+    // the whole election window that followed -- with `is_initialized` true, so
+    // the load gate does not cover it -- while the server was accepting every
+    // election it was refusing to offer a control for.
     case auction_actions.AUCTION_MODE:
       return state.merge({
         auction_mode: payload.auction_mode,
         block_end_at: payload.block_end_at,
-        is_final_block: payload.is_final_block
+        is_final_block: payload.is_final_block,
+        isPaused:
+          payload.auction_mode === 'election' ? false : state.get('isPaused')
       })
 
     case auction_actions.AUCTION_SETTLEMENT_STATUS:

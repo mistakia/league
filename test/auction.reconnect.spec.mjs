@@ -101,10 +101,13 @@ describe('auction rejoin on websocket reconnect', function () {
   // A source gate for the same reason as the block above -- `@core/ws/sagas`
   // reaches `@core/store`, which reads `window` at module scope.
   describe('the deliberate socket swap', function () {
-    const ws_sagas_source = fs.readFileSync(
-      path.join(repo_root, 'app/core/ws/sagas.js'),
-      'utf8'
-    )
+    // READ AND SLICED INSIDE EACH TEST, not at describe scope. An `expect` or a
+    // `readFileSync` evaluated while the describe callback runs throws during
+    // FILE LOAD, and mocha reports a load failure with zero test names rather
+    // than one red assertion -- so a gate firing would be indistinguishable from
+    // an unrelated harness break, which is the opposite of what a gate is for.
+    const read_ws_sagas = () =>
+      fs.readFileSync(path.join(repo_root, 'app/core/ws/sagas.js'), 'utf8')
 
     // SCOPED TO ONE FUNCTION, and the first draft of this block was not.
     //
@@ -119,16 +122,18 @@ describe('auction rejoin on websocket reconnect', function () {
     // The first `\n}\n` after a top-level signature is its closing brace, since
     // everything nested is indented.
     const body_of = (signature) => {
-      const start = ws_sagas_source.indexOf(signature)
+      const source = read_ws_sagas()
+      const start = source.indexOf(signature)
       expect(start, `${signature} is still declared`).to.be.above(-1)
-      const end = ws_sagas_source.indexOf('\n}\n', start)
+      const end = source.indexOf('\n}\n', start)
       expect(end, `${signature} has a closing brace`).to.be.above(start)
-      return ws_sagas_source.slice(start, end)
+      return source.slice(start, end)
     }
 
-    const connect_auth_body = body_of('export function* connect_auth()')
+    const connect_auth = () => body_of('export function* connect_auth()')
 
     it('cuts the body of connect_auth and nothing else', function () {
+      const connect_auth_body = connect_auth()
       // THE CONTROL ON THE SLICE. Every assertion below is only worth what this
       // one is: if the slice ran past its function it would swallow
       // `reconnect()` and go green on that function's announcement, which is the
@@ -141,13 +146,14 @@ describe('auction rejoin on websocket reconnect', function () {
     })
 
     it('announces the new socket after an auth swap', function () {
-      expect(connect_auth_body).to.include('yield put(wsActions.reconnected())')
+      expect(connect_auth()).to.include('yield put(wsActions.reconnected())')
     })
 
     it('announces it AFTER connecting, not before', function () {
       // Order is the whole property. Put ahead of `connect` and the rejoin
       // sends AUCTION_JOIN into the socket being torn down, which is the defect
       // restated rather than fixed.
+      const connect_auth_body = connect_auth()
       const connect_at = connect_auth_body.indexOf('yield call(connect)')
       const put_at = connect_auth_body.indexOf(
         'yield put(wsActions.reconnected())'

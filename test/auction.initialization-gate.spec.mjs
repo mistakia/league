@@ -73,6 +73,64 @@ describe('auction initialization gate', function () {
       expect(state.isPaused).to.equal(true)
     })
 
+    it('clears a live-block pause when the mode flips to election', function () {
+      // THE CLIENT MIRROR OF THE SERVER LATCH, and it survives the server fix on
+      // its own. In election mode nothing broadcasts AUCTION_START, and only
+      // AUCTION_BID and AUCTION_PROCESSED otherwise clear `isPaused` -- so a
+      // client that took one AUCTION_PAUSED inside a live block kept rendering
+      // `Auction is paused` for the whole election window that followed, with
+      // `is_initialized` true, so the load gate does not cover it.
+      const paused = auction_reducer(
+        auction_reducer(undefined, {
+          type: auction_actions.AUCTION_INIT,
+          payload: {
+            transactions: [],
+            tids: [],
+            teams: [],
+            connected: [],
+            paused: false,
+            auction_mode: 'live'
+          }
+        }),
+        { type: auction_actions.AUCTION_PAUSED }
+      )
+      expect(paused.isPaused, 'the live-block pause took').to.equal(true)
+
+      const after = auction_reducer(paused, {
+        type: auction_actions.AUCTION_MODE,
+        payload: {
+          auction_mode: 'election',
+          block_end_at: null,
+          is_final_block: false
+        }
+      })
+
+      expect(after.auction_mode).to.equal('election')
+      expect(after.isPaused).to.equal(false)
+    })
+
+    it('leaves a pause alone when the mode flips to live', function () {
+      // THE CONTROL. A blanket `isPaused: false` on every AUCTION_MODE would
+      // satisfy the test above and silently discard a commissioner's pause the
+      // moment a block convened -- which is when a pause has a clock to stop and
+      // therefore means something.
+      const paused = auction_reducer(undefined, {
+        type: auction_actions.AUCTION_PAUSED
+      })
+
+      const after = auction_reducer(paused, {
+        type: auction_actions.AUCTION_MODE,
+        payload: {
+          auction_mode: 'live',
+          block_end_at: 123,
+          is_final_block: false
+        }
+      })
+
+      expect(after.auction_mode).to.equal('live')
+      expect(after.isPaused).to.equal(true)
+    })
+
     it('is not answered by joining, only by being told', function () {
       // Sending AUCTION_JOIN is not hearing back. This is the distinction the
       // whole gate rests on: the defect cases are all ones where the client
@@ -123,20 +181,44 @@ describe('auction initialization gate', function () {
   // the control away on exactly the screens that most needed it -- and made one
   // wrong `isPaused` into two symptoms a manager reports separately.
   describe('the decline control', function () {
-    const source = fs.readFileSync(
-      path.join(
-        repo_root,
-        'app/views/components/auction-main-bid/auction-main-bid.js'
-      ),
-      'utf8'
-    )
+    // Read inside each test rather than at describe scope: a `readFileSync` that
+    // runs while the describe callback executes throws during FILE LOAD, and
+    // mocha then reports a load failure with no test names instead of one red
+    // assertion.
+    const read_source = () =>
+      fs.readFileSync(
+        path.join(
+          repo_root,
+          'app/views/components/auction-main-bid/auction-main-bid.js'
+        ),
+        'utf8'
+      )
 
     it('does not draw on the running flag', function () {
+      const source = read_source()
+      // The paired negative that used to sit here targeted
+      // `{is_election_mode && nominated_pid && (`, a string no longer anywhere
+      // in the tree -- so it could not be validated against a known match, and
+      // it was pinned to one prettier line break of the old form. A regression
+      // spelled `{is_running && is_election_mode && ...` walked straight past
+      // it. The positive below is what carries the property.
       expect(source).to.include('{show_election_control && (')
-      expect(source).to.not.include('{is_election_mode && nominated_pid && (')
+    })
+
+    it('reaches the actions row when only the election control shows', function () {
+      // THE OUTER WRAPPER, and without this assertion the whole decline fix is
+      // revertible with every other gate here still green. `show_election_control`
+      // is computed correctly and the inner `{show_election_control && (` still
+      // reads right -- but if the row itself is drawn on `{is_running && (`,
+      // nothing inside it renders while the client believes the auction is
+      // paused, which is precisely the symptom team 6 reported.
+      expect(read_source()).to.include(
+        '{(is_running || show_election_control) && ('
+      )
     })
 
     it('states the condition without the pause in it', function () {
+      const source = read_source()
       // Bounded FORWARD from the declaration. `classNames` is declared a
       // hundred lines EARLIER in this file, so slicing to it yields the empty
       // string and every `not.include` below passes against nothing at all --

@@ -19,6 +19,7 @@ import cache from './cache.mjs'
 import routes from './routes/index.mjs'
 import db from '#db'
 import sockets from './sockets/index.mjs'
+import { install_websocket_heartbeat } from './sockets/websocket-heartbeat.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
 import { create_render_html_middleware } from '#libs-server/middleware/render-html.mjs'
@@ -306,47 +307,13 @@ const createServer = () => {
 const server = createServer()
 const wss = new WebSocket.Server({ noServer: true })
 
-// HOW LONG A DEAD SOCKET STAYS INDISTINGUISHABLE FROM AN IDLE ONE.
-//
-// A phone that changes network, sleeps, or walks out of range sends no FIN, so
-// the connection stays ESTABLISHED on this side until TCP gives up -- which is
-// minutes at best and, on a connection with nothing to retransmit, effectively
-// never. Until then the socket is in `wss.clients` at readyState OPEN, the
-// auction counts its team as present, and everything broadcast to it is written
-// into a hole.
-//
-// THE CLIENT'S OWN KEEPALIVE CANNOT ANSWER THIS. `app/core/ws/service.js` sends
-// a KEEPALIVE message every 30 seconds, but it is one-directional: its absence
-// is not something this side is watching for, and it stops arriving for a
-// backgrounded tab whose timers the browser has frozen -- a tab that is very
-// much still connected. A protocol ping is the read that distinguishes them,
-// because the browser answers it from the socket itself rather than from
-// script, so a frozen tab still pongs and a dead connection still does not.
-//
-// One missed pong is the threshold rather than several: the auction's whole
-// disconnect story -- auto-pause, the connected-team list, and the reconnect
-// supersession in `api/sockets/auction.mjs` -- wants to hear about a departure
-// in seconds, and a false positive costs a client one reconnect it already
-// knows how to perform.
-const HEARTBEAT_INTERVAL_MS = 30_000
-
-wss.on('connection', (ws) => {
-  ws.is_alive = true
-  ws.on('pong', () => {
-    ws.is_alive = true
-  })
-})
-
-const heartbeat = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (ws.is_alive === false) return ws.terminate()
-
-    ws.is_alive = false
-    ws.ping()
-  })
-}, HEARTBEAT_INTERVAL_MS)
-
-wss.on('close', () => clearInterval(heartbeat))
+// A browser socket carries no heartbeat of its own, and a phone that changes
+// network never sends a FIN -- so without this a dead connection sits in
+// `wss.clients` at readyState OPEN for as long as TCP takes to notice, counted
+// as present by everything that reads that set. See
+// `api/sockets/websocket-heartbeat.mjs`
+// for why the client's own KEEPALIVE cannot stand in for a protocol ping.
+install_websocket_heartbeat({ wss })
 
 server.on('upgrade', async (request, socket, head) => {
   const parsed = new url.URL(request.url, config.url)

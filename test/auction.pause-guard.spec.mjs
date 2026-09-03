@@ -179,29 +179,101 @@ describe('auction pause guard', function () {
     })
 
     it('refuses the pause a disconnecting team triggers', async function () {
-      // The path that took league 1 down. `pause_on_team_disconnect` calls
-      // `pause()` from the close handler, and a phone changing networks is a
-      // close.
+      // DRIVEN THROUGH THE CLOSE HANDLER, not by calling `pause()` again. An
+      // earlier version of this test called `pause()` directly and was
+      // byte-identical to the one above -- it named the auto-pause path and
+      // never touched it, because `_pause_on_team_disconnect` is read in
+      // `_setup_close_handler` and nowhere else. A phone changing networks is a
+      // close, and the close is the subject.
       const auction = await build_election_auction()
       auction._pause_on_team_disconnect = true
 
-      auction.pause()
+      const close_handlers = []
+      const socket = {
+        on(event, fn) {
+          if (event === 'close') close_handlers.push(fn)
+        }
+      }
+      auction._setup_close_handler(socket, 1, 1, () => {}, 'tab-a')
+      auction._connected[1] = [1]
+      auction._connected_client_ids['tab-a'] = { user_id: 1, ws: socket }
 
+      expect(
+        close_handlers,
+        'the close handler registered; without it the disconnect below is a ' +
+          'no-op and this passes for the wrong reason'
+      ).to.have.length(1)
+
+      close_handlers[0]()
+
+      expect(auction._connected[1], 'the team did disconnect').to.equal(
+        undefined
+      )
       expect(auction._paused).to.equal(false)
     })
 
     it('refuses the pause a league pause triggers, and still refuses writes', async function () {
-      // The two flags are separate on purpose. `_league_paused` is what `bid`
-      // and `nominate` consult first, so declining to move `_paused` here costs
-      // the league pause nothing -- and asserting BOTH halves is what stops a
-      // future reader from "simplifying" the pause back into one flag.
+      // DRIVEN THROUGH `_refresh_league_pause`, which is what `bid` and
+      // `nominate` call first. The earlier version set `_league_paused` by hand
+      // and then asserted it was still true -- an assertion `pause()` cannot
+      // affect, so it passed against every implementation including a deleted
+      // one. Here the flag is READ from the open pause row, and the write half
+      // is actually attempted.
       const auction = await build_election_auction()
+      const player = await selectPlayer({
+        exclude_rostered_players: true,
+        random: false
+      })
 
-      auction._league_paused = true
+      await knex('league_pauses').insert({
+        league_id,
+        paused_at: new Date(),
+        resumed_at: null,
+        pause_reason: 'pause guard spec',
+        paused_by_user_id: 1
+      })
+
+      const refused = await auction._refresh_league_pause()
+
+      expect(refused, 'the league pause was read from the row').to.equal(true)
+      expect(auction._paused, 'election mode took no clock pause').to.equal(
+        false
+      )
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: player.pid, value: 0, tid: auction._tids[0] },
+        { user_id: 1, tid: auction._tids[0] }
+      )
+
+      expect(
+        await count_auction_transactions(),
+        'the league pause refuses the write on its own flag'
+      ).to.equal(before)
+    })
+
+    it('clears a live-mode pause when the block ends', async function () {
+      // THE BOUNDARY CROSSING, which is the same incident by a second door and
+      // was not covered at all: `pause()` refusing in election mode says nothing
+      // about ENTERING election mode already paused.
+      //
+      // A pause inside a live block is legitimate -- there is a bid clock to
+      // stop. The block then ends, `_leave_live_mode` flips the mode, and
+      // `_paused` used to survive the crossing with nothing able to clear it:
+      // `_load_league` runs once at setup, and `start()` is reachable only by
+      // AUCTION_RESUME, which the commissioner controls no longer offer in
+      // election mode. Every socket write refuses from there on.
+      const auction = await build_election_auction()
+      auction._election_mode = false
+
       auction.pause()
+      expect(auction._paused, 'the live-mode pause took').to.equal(true)
 
+      await auction._leave_live_mode()
+
+      expect(auction._election_mode, 'the block ended').to.equal(true)
       expect(auction._paused).to.equal(false)
-      expect(auction._league_paused).to.equal(true)
+      expect(auction._refuse_while_paused('nomination', 1)).to.equal(false)
     })
 
     it('still pauses in live mode', async function () {
