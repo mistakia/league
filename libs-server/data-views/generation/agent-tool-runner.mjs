@@ -52,9 +52,12 @@ export class AgentToolError extends Error {
  * Postgres. Asserting it here keeps the fail-by-name property exactly where the
  * dependency is real.
  *
- * The refusal goes through AgentToolError rather than the raw config throw so
- * the agent reads one JSON object with a code, per this file's contract, rather
- * than a stack trace it has to parse.
+ * The wrapper earns its keep on ONE thing: the named code. run_agent_tool
+ * already renders any thrown Error as a single JSON object on stderr, so the
+ * agent was never going to see a stack trace either way -- an earlier version
+ * of this comment claimed otherwise and was wrong. What it would have seen is
+ * the generic `tool_failed`, which does not distinguish "this environment has
+ * no database credential" from "the tool broke".
  */
 export const require_database_credential = () => {
   try {

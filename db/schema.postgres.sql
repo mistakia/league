@@ -423,6 +423,8 @@ DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
 DROP INDEX IF EXISTS public.idx_data_view_sql_audit_outcome;
 DROP INDEX IF EXISTS public.idx_data_view_sql_audit_created_at;
 DROP INDEX IF EXISTS public.idx_data_view_queries_created_at;
+DROP INDEX IF EXISTS public.idx_data_view_generation_jobs_queued;
+DROP INDEX IF EXISTS public.idx_data_view_generation_jobs_live;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_submitter_user_id;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_submission_trust_tier;
 DROP INDEX IF EXISTS public.idx_contribution_submissions_status_trust_tier;
@@ -704,6 +706,7 @@ ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
 ALTER TABLE IF EXISTS ONLY public.data_view_sql_audit DROP CONSTRAINT IF EXISTS data_view_sql_audit_pkey;
 ALTER TABLE IF EXISTS ONLY public.data_view_queries DROP CONSTRAINT IF EXISTS data_view_queries_pkey;
+ALTER TABLE IF EXISTS ONLY public.data_view_generation_jobs DROP CONSTRAINT IF EXISTS data_view_generation_jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_trust_overrides DROP CONSTRAINT IF EXISTS contribution_trust_overrides_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_submissions DROP CONSTRAINT IF EXISTS contribution_submissions_pkey;
 ALTER TABLE IF EXISTS ONLY public.contribution_screenshots DROP CONSTRAINT IF EXISTS contribution_screenshots_pkey;
@@ -1093,6 +1096,7 @@ DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.data_view_sql_audit;
 DROP TABLE IF EXISTS public.data_view_queries;
+DROP TABLE IF EXISTS public.data_view_generation_jobs;
 DROP TABLE IF EXISTS public.contribution_trust_overrides;
 DROP TABLE IF EXISTS public.contribution_submissions;
 DROP TABLE IF EXISTS public.contribution_screenshots;
@@ -2547,6 +2551,51 @@ CREATE TABLE public.contribution_trust_overrides (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT contribution_trust_overrides_submission_trust_tier_check CHECK (((submission_trust_tier)::text = ANY ((ARRAY['untrusted'::character varying, 'standard'::character varying, 'trusted'::character varying])::text[])))
 );
+
+
+--
+-- Name: data_view_generation_jobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.data_view_generation_jobs (
+    generation_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    principal_key text NOT NULL,
+    user_id bigint,
+    instruction text NOT NULL,
+    input_table_state jsonb,
+    status character varying(20) DEFAULT 'queued'::character varying NOT NULL,
+    thread_id text,
+    queued_at timestamp with time zone DEFAULT now() NOT NULL,
+    dispatched_at timestamp with time zone,
+    started_at timestamp with time zone,
+    completed_at timestamp with time zone,
+    deadline_at timestamp with time zone DEFAULT (now() + '00:15:00'::interval) NOT NULL,
+    result jsonb,
+    error_code character varying(50),
+    error_message text,
+    generation_branch character varying(20),
+    tool_call_count integer,
+    total_tokens integer,
+    duration_milliseconds integer,
+    CONSTRAINT data_view_generation_jobs_generation_branch_check CHECK (((generation_branch IS NULL) OR ((generation_branch)::text = ANY (ARRAY[('registry'::character varying)::text, ('query'::character varying)::text, ('refusal'::character varying)::text])))),
+    CONSTRAINT data_view_generation_jobs_status_check CHECK (((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('dispatched'::character varying)::text, ('running'::character varying)::text, ('completed'::character varying)::text, ('failed'::character varying)::text, ('expired'::character varying)::text]))),
+    CONSTRAINT data_view_generation_jobs_tool_call_count_check CHECK (((tool_call_count IS NULL) OR (tool_call_count >= 0))),
+    CONSTRAINT data_view_generation_jobs_total_tokens_check CHECK (((total_tokens IS NULL) OR (total_tokens >= 0)))
+);
+
+
+--
+-- Name: TABLE data_view_generation_jobs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.data_view_generation_jobs IS 'Agentic data view generation jobs: queue, delivery record, and audit trajectory. Keyed on an opaque generation_id so a result outlives the connection that asked for it.';
+
+
+--
+-- Name: COLUMN data_view_generation_jobs.principal_key; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.data_view_generation_jobs.principal_key IS 'Rate-limit and token-budget principal: user_id when authenticated, CF-Connecting-IP otherwise.';
 
 
 --
@@ -29571,6 +29620,14 @@ ALTER TABLE ONLY public.contribution_trust_overrides
 
 
 --
+-- Name: data_view_generation_jobs data_view_generation_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.data_view_generation_jobs
+    ADD CONSTRAINT data_view_generation_jobs_pkey PRIMARY KEY (generation_id);
+
+
+--
 -- Name: data_view_queries data_view_queries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -31986,6 +32043,20 @@ CREATE INDEX idx_contribution_submissions_submission_trust_tier ON public.contri
 --
 
 CREATE INDEX idx_contribution_submissions_submitter_user_id ON public.contribution_submissions USING btree (submitter_user_id, submitted_at DESC) WHERE (submitter_user_id IS NOT NULL);
+
+
+--
+-- Name: idx_data_view_generation_jobs_live; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_data_view_generation_jobs_live ON public.data_view_generation_jobs USING btree (deadline_at) WHERE ((status)::text = ANY (ARRAY['queued'::text, 'dispatched'::text, 'running'::text]));
+
+
+--
+-- Name: idx_data_view_generation_jobs_queued; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_data_view_generation_jobs_queued ON public.data_view_generation_jobs USING btree (queued_at) WHERE ((status)::text = 'queued'::text);
 
 
 --
@@ -59527,6 +59598,13 @@ GRANT SELECT ON TABLE public.contribution_submissions TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.contribution_trust_overrides TO league_reader;
+
+
+--
+-- Name: TABLE data_view_generation_jobs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.data_view_generation_jobs TO league_reader;
 
 
 --

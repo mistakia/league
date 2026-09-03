@@ -42,6 +42,7 @@ import type {
   ContributionScreenshotsRow,
   ContributionSubmissionsRow,
   ContributionTrustOverridesRow,
+  DataViewGenerationJobsRow,
   DataViewQueriesRow,
   DataViewSqlAuditRow,
   DfsContestsRow,
@@ -369,6 +370,7 @@ declare module 'knex/types/tables' {
     contribution_screenshots: ContributionScreenshotsRow
     contribution_submissions: ContributionSubmissionsRow
     contribution_trust_overrides: ContributionTrustOverridesRow
+    data_view_generation_jobs: DataViewGenerationJobsRow
     data_view_queries: DataViewQueriesRow
     data_view_sql_audit: DataViewSqlAuditRow
     dfs_contests: DfsContestsRow

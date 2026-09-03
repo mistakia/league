@@ -277,6 +277,28 @@ export interface ContributionTrustOverridesRow {
   created_at: Date
 }
 
+export interface DataViewGenerationJobsRow {
+  generation_id: string
+  principal_key: string
+  user_id: number | null
+  instruction: string
+  input_table_state: any | null
+  status: string
+  thread_id: string | null
+  queued_at: Date
+  dispatched_at: Date | null
+  started_at: Date | null
+  completed_at: Date | null
+  deadline_at: Date
+  result: any | null
+  error_code: string | null
+  error_message: string | null
+  generation_branch: string | null
+  tool_call_count: number | null
+  total_tokens: number | null
+  duration_milliseconds: number | null
+}
+
 export interface DataViewQueriesRow {
   query_id: string
   sql_text: string
