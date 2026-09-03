@@ -1,5 +1,6 @@
 /* global describe, before, beforeEach, it */
 import * as chai from 'chai'
+import MockDate from 'mockdate'
 
 import knex from '#db'
 import insert_prop_markets from '#libs-server/insert-prop-markets.mjs'
@@ -23,16 +24,33 @@ const SOURCE_ID = 'DRAFTKINGS'
 const MARKET_ID = 'identity-propagation-market'
 const ESBID = 2024112404
 
-// Dates are relative to now rather than fixed, and both halves of that are
-// load-bearing. betting-market-cache.mjs only prefetches history rows from the
-// last 7 days, so a fixed past date leaves the cache empty and the importer
-// takes the new-market path, skipping everything under test. And the CLOSE row
-// is only rewritten when the incoming observation is NEWER than the cached one,
-// so the ordering below is what makes the CLOSE control cases reachable.
+// The clock is PINNED, and the fixture dates are derived from the pin rather
+// than from Date.now(). Two independent reasons, and the spec is wrong without
+// either:
+//
+//  - betting-market-cache.mjs prefetches only the last 7 days of history, so the
+//    fixture's history row has to sit inside that window at RUN time. Outside
+//    it the cache is empty and the importer takes the NEW-market path, which
+//    writes OPEN and CLOSE alike from the incoming values -- so the identity
+//    assertions still pass, against a row that was created rather than
+//    repaired, and only the five "OPEN is unchanged" cases report it.
+//  - Reading Date.now() at module load makes the spec hostage to whatever clock
+//    the previously-ordered spec left behind. 70 spec files in this suite call
+//    MockDate.set and none call reset -- that is the convention here, not a
+//    leak, so a spec that needs a particular clock sets it. Ordered after
+//    scripts.generate.roster.spec.mjs, which sets the clock a month before the
+//    season, the unpinned version failed on five cases that all read as OPEN
+//    being rewritten.
+//
+// The CLOSE row is only rewritten when the incoming observation is NEWER than
+// the cached one, so the ordering of the three instants is what makes the CLOSE
+// control cases reachable.
+const PINNED_CLOCK = '2026-09-02T12:00:00.000Z'
 const DAY = 24 * 60 * 60 * 1000
-const OPENED_AT = new Date(Date.now() - 3 * DAY)
-const PREVIOUS_OBSERVED_AT = new Date(Date.now() - 2 * DAY)
-const RE_OBSERVED_AT = new Date(Date.now() - 1 * DAY)
+const pinned_now = new Date(PINNED_CLOCK).getTime()
+const OPENED_AT = new Date(pinned_now - 3 * DAY)
+const PREVIOUS_OBSERVED_AT = new Date(pinned_now - 2 * DAY)
+const RE_OBSERVED_AT = new Date(pinned_now - 1 * DAY)
 
 // The OPEN row as first written: no market_type, and a source_event_name that
 // the later observation revises. source_event_name is the control column --
@@ -137,6 +155,8 @@ describe('prop market identity propagation to OPEN', function () {
   before(clear)
 
   beforeEach(async function () {
+    MockDate.set(PINNED_CLOCK)
+
     await clear()
 
     await knex('prop_markets_index').insert([
