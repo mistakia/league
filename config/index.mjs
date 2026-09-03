@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import os from 'os'
@@ -78,43 +78,66 @@ const load_plaintext_config = () =>
 // whole boundary rests on. Dev and test read plaintext but leave credentials
 // blank, so neither is reusable as is.
 //
-// WHY THE CREDENTIALS ARE BLANK IN THE FILE AND OVERLAID FROM THE ENVIRONMENT.
-// This repository is PUBLIC and every file in it is published, so a plaintext
-// credential committed in config-sandbox.json would be a published credential --
-// the same rule that keeps config-development.json and config-test.json to
-// placeholders. The plan this implements called for a plaintext config carrying
-// the reader credential; that is not available here, and an env overlay is the
-// nearest shape that keeps the property the plan actually wanted: the container
-// never holds the age identity or any write-capable credential.
+// WHY A MOUNTED FILE AND NOT ENVIRONMENT VARIABLES. This repository is PUBLIC,
+// so a credential committed in config-sandbox.json would be a published
+// credential -- the same rule that keeps config-development.json and
+// config-test.json to placeholders. The value therefore arrives from outside
+// the repo, and it arrives as a FILE for two independent reasons:
 //
-// The values arrive through the thread-config profile's secret mechanism as
-// environment variables, never as a literal in a command -- tool calls are
-// recorded verbatim in a synced, indexed timeline.
+//   - A thread-config profile CANNOT set an environment variable. The posture
+//     allowlist (THREAD_CONFIG_FIELDS in the base repo) carries no env field
+//     and the loader refuses a profile naming one, so an earlier version of
+//     this comment describing "the profile's secret mechanism as environment
+//     variables" described a mechanism that does not exist. What a profile CAN
+//     do is mount a host path read-only, which is how this file arrives.
+//   - An environment value is visible in `docker inspect` and in
+//     /proc/<pid>/environ. Base makes exactly this choice for its own tenant
+//     credentials: the file is mounted read-only and what goes into the
+//     environment is its PATH, never the value.
 //
-// It applies ONLY under NODE_ENV=sandbox. Reading these variables in any other
-// environment would let an ambient variable silently re-point a production or
-// test process at a different database.
+// The path is a constant rather than a variable for the first reason above --
+// nothing can set a variable in this container. LEAGUE_SANDBOX_CREDENTIAL_FILE
+// overrides it so a test can point at a temporary file; the container uses the
+// default.
 //
-// THE CREDENTIAL IS REQUIRED LAZILY, NOT AT LOAD. This overlay threw when the
-// variables were absent until 2026-09-02, and the throw ran at config LOAD --
-// which is module import, which every tool script does. That gated all six
-// agent tools on a database credential when only two of them open a connection:
-// search_columns, describe_column, validate_table_state and emit are registry
-// and schema operations that never reach Postgres, and they died at import
-// under a message about Postgres. db/sandbox-pool.mjs already states the rule
-// this now follows -- an environment lacking a credential must fail when a
-// query is actually run, naming what is missing, rather than at start. The
-// named throw did not go away; it moved to the connection sites, which is where
-// the dependency is real. See assert_sandbox_credentials below.
+// Applies ONLY under NODE_ENV=sandbox: reading this file in any other
+// environment would let a stray mount silently re-point a production or test
+// process at a different database.
+export const SANDBOX_CREDENTIAL_CONTAINER_PATH =
+  '/run/secrets/league-sandbox-postgres.json'
+
+const sandbox_credential_path = () =>
+  process.env.LEAGUE_SANDBOX_CREDENTIAL_FILE ||
+  SANDBOX_CREDENTIAL_CONTAINER_PATH
+
+// Read is tolerant; the REQUIREMENT is enforced lazily by
+// assert_sandbox_credentials at the connection sites. A missing file here is
+// not an error, because four of the six agent tools never open a connection.
+const read_sandbox_credential = () => {
+  const path = sandbox_credential_path()
+  if (!existsSync(path)) return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch (error) {
+    // A malformed credential file is NOT a missing one, and must not degrade
+    // into "no credential" -- that would surface as an authentication failure
+    // naming neither this file nor the parse error.
+    throw new Error(
+      `sandbox credential file at ${path} is not valid JSON: ${error.message}`
+    )
+  }
+}
+
 const overlay_sandbox_environment = (loaded) => {
-  const host = process.env.LEAGUE_SANDBOX_PG_HOST
-  const password = process.env.LEAGUE_SANDBOX_PG_PASSWORD
-  const port = process.env.LEAGUE_SANDBOX_PG_PORT
+  const credential = read_sandbox_credential()
+  if (!credential) return loaded
 
   for (const key of ['postgres', 'postgres_data_view_sandbox']) {
-    if (host) loaded[key].connection.host = host
-    if (password) loaded[key].connection.password = password
-    if (port) loaded[key].connection.port = Number(port)
+    if (credential.host) loaded[key].connection.host = credential.host
+    if (credential.password) {
+      loaded[key].connection.password = credential.password
+    }
+    if (credential.port) loaded[key].connection.port = Number(credential.port)
   }
 
   return loaded
@@ -124,23 +147,38 @@ const overlay_sandbox_environment = (loaded) => {
  * Refuse, by name, to open a sandbox database connection without a credential.
  *
  * Called from the places that actually build a pool or run a query, never at
- * import. Fail LOUD and by name is the whole point: a blank password reaches
- * Postgres as an authentication failure whose message names neither the config
- * file nor the missing variable, and the debugger goes looking at pg_hba or at
- * the role grants instead of at the environment.
+ * import. The requirement is lazy because four of the six agent tools --
+ * search_columns, describe_column, validate_table_state and emit -- are
+ * registry and schema operations that never reach Postgres; requiring it at
+ * import killed all six under a message about Postgres. db/sandbox-pool.mjs
+ * states the same rule: fail when a query is actually run, naming what is
+ * missing.
  *
- * A no-op outside NODE_ENV=sandbox, so the ordinary environments are untouched.
+ * Fail LOUD and by name. A blank password reaches Postgres as an authentication
+ * failure whose message names neither this config nor the credential file, and
+ * the debugger goes looking at pg_hba or at the role grants instead.
+ *
+ * A no-op outside NODE_ENV=sandbox, so ordinary environments are untouched.
  */
 export const assert_sandbox_credentials = () => {
   if (process.env.NODE_ENV !== 'sandbox') return
 
-  const missing = ['LEAGUE_SANDBOX_PG_HOST', 'LEAGUE_SANDBOX_PG_PASSWORD']
-    .filter((name) => !process.env[name])
+  const path = sandbox_credential_path()
+  const credential = read_sandbox_credential()
+
+  if (!credential) {
+    throw new Error(
+      `NODE_ENV=sandbox needs the postgres credential file at ${path} to open a database connection; it is not mounted. The sandbox config is committed credential-free because this repository is public.`
+    )
+  }
+
+  const missing = ['host', 'password']
+    .filter((field) => !credential[field])
     .join(' and ')
 
   if (missing) {
     throw new Error(
-      `NODE_ENV=sandbox requires ${missing} to open a database connection; the sandbox config is committed credential-free because this repository is public`
+      `the sandbox credential file at ${path} is missing ${missing}`
     )
   }
 }

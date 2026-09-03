@@ -4,6 +4,7 @@ import { execFile } from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
+import os from 'os'
 
 import * as chai from 'chai'
 
@@ -50,6 +51,32 @@ const run_node_probe = (source, env = {}) =>
       }
     )
   })
+
+// The sandbox credential is a MOUNTED FILE, not an environment variable -- a
+// thread-config profile cannot set one, and an env value would be visible in
+// `docker inspect`. Tests point at a temporary file through the path override;
+// the container uses the compiled-in default.
+const credential_fixture_dir = fs.mkdtempSync(
+  path.join(os.tmpdir(), 'league-sandbox-credential-')
+)
+
+let credential_fixture_serial = 0
+const write_credential_fixture = (credential) => {
+  const file = path.join(
+    credential_fixture_dir,
+    `credential-${(credential_fixture_serial += 1)}.json`
+  )
+  fs.writeFileSync(file, JSON.stringify(credential), { mode: 0o600 })
+  return file
+}
+
+// A path inside the fixture directory that deliberately does NOT exist, for the
+// "nothing is mounted" cases. Named rather than a bare literal so the refusal
+// assertion can match on it.
+const absent_credential_path = path.join(
+  credential_fixture_dir,
+  'not-mounted.json'
+)
 
 const parse_or_fail = (raw, channel) => {
   try {
@@ -391,15 +418,14 @@ describe('data view agent tools', function () {
         {
           env: {
             NODE_ENV: 'sandbox',
-            LEAGUE_SANDBOX_PG_HOST: '',
-            LEAGUE_SANDBOX_PG_PASSWORD: ''
+            LEAGUE_SANDBOX_CREDENTIAL_FILE: absent_credential_path
           }
         }
       )
       expect(code).to.not.equal(0)
       const refusal = read_refusal(stderr)
       expect(refusal.code).to.equal('sandbox_credential_missing')
-      expect(refusal.error).to.include('LEAGUE_SANDBOX_PG_HOST')
+      expect(refusal.error).to.include(absent_credential_path)
     })
 
     it('runs a REGISTRY tool with no credential at all, because it opens no connection', async function () {
@@ -417,8 +443,7 @@ describe('data view agent tools', function () {
         {
           env: {
             NODE_ENV: 'sandbox',
-            LEAGUE_SANDBOX_PG_HOST: '',
-            LEAGUE_SANDBOX_PG_PASSWORD: ''
+            LEAGUE_SANDBOX_CREDENTIAL_FILE: absent_credential_path
           }
         }
       )
@@ -448,10 +473,14 @@ describe('data view agent tools', function () {
       // forming.
       const fixture_password = ['overlay', 'probe', 'fixture'].join('-')
 
+      const credential_file = write_credential_fixture({
+        host: 'sandbox.example.invalid',
+        password: fixture_password
+      })
+
       const { code, stdout } = await run_node_probe(probe, {
         NODE_ENV: 'sandbox',
-        LEAGUE_SANDBOX_PG_HOST: 'sandbox.example.invalid',
-        LEAGUE_SANDBOX_PG_PASSWORD: fixture_password
+        LEAGUE_SANDBOX_CREDENTIAL_FILE: credential_file
       })
 
       expect(code).to.equal(0)
@@ -474,15 +503,33 @@ describe('data view agent tools', function () {
         {
           env: {
             NODE_ENV: 'sandbox',
-            LEAGUE_SANDBOX_PG_HOST: 'sandbox.example.invalid',
-            LEAGUE_SANDBOX_PG_PASSWORD: ''
+            LEAGUE_SANDBOX_CREDENTIAL_FILE: write_credential_fixture({
+              host: 'sandbox.example.invalid'
+            })
           }
         }
       )
       expect(code).to.not.equal(0)
       const refusal = read_refusal(stderr)
       expect(refusal.code).to.equal('sandbox_credential_missing')
-      expect(refusal.error).to.include('LEAGUE_SANDBOX_PG_PASSWORD')
+      expect(refusal.error).to.include('password')
+    })
+
+    it('refuses a MALFORMED credential file rather than treating it as absent', async function () {
+      // A parse failure must not degrade into "no credential". If it did, a
+      // corrupted or half-written mount would read as an ordinary missing file
+      // and the operator would go looking for a mount that is right there.
+      const file = path.join(credential_fixture_dir, 'malformed.json')
+      fs.writeFileSync(file, '{not json', { mode: 0o600 })
+
+      const { code, stderr } = await run_tool(
+        'data-view-preview-view.mjs',
+        { table_state: { columns: ['player_name'] } },
+        { env: { NODE_ENV: 'sandbox', LEAGUE_SANDBOX_CREDENTIAL_FILE: file } }
+      )
+      expect(code).to.not.equal(0)
+      expect(stderr).to.include('not valid JSON')
+      expect(stderr).to.include(file)
     })
 
     it('still throws under NODE_ENV=production, which cannot run in the container', async function () {
