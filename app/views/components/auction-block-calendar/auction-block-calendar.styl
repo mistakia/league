@@ -30,21 +30,26 @@ $grid_open_fill = #ececec
 $grid_rule = mix($borderColor, white, 70%)
 $grid_selected_ring = mix($textColorDark, white, 55%)
 
-// `OURS` IS A MARK, NOT A RING. A ring is the one shape that cannot be made to
-// stop competing with the numeral, because it surrounds it: paling the colour
-// only trades a hard edge beside an 11px digit for a soft one, and at the width
-// of a cell in the side rail there is no ring inset that clears the glyph. The
-// mark instead takes the strip of cell the numeral does not use -- the numeral
-// is pushed up by the cell's bottom padding and the dot sits under it, touching
-// nothing.
+// `OURS` UNDERLINES THE COUNT. It costs NO layout at all -- the rule sits in
+// the line box the digit already occupies -- where the ring it replaced needed
+// an inset that a cell this narrow cannot give, and the dot that replaced the
+// ring needed a six-pixel strip of reserved cell height on all 168 cells to
+// hold a mark that appears on a handful of them.
 //
-// It also COMPOSES, which the ring only accidentally did. `finalized` and
-// `final-block` are backgrounds and would have swallowed a fill-based `mine`
-// outright; a pseudo-element sits on top of whatever ground the cell has, so an
-// hour that is both convened and yours still says so. `now` owns ::after for
-// the same reason, which is why this one is ::before.
-$grid_mine_mark = $accentColor
-$grid_mine_mark_size = 4px
+// It is drawn in currentColor, which is what makes it need no per-state
+// override. A background-based `mine` was the other candidate and it loses
+// exactly where it matters: `finalized` and `final-block` are backgrounds, so
+// they would swallow it, and an hour is routinely both the final block and one
+// the manager opted into elsewhere within it. A decoration on the glyph rides
+// whatever ground the cell has and takes the numeral's own colour with it.
+$grid_mine_underline_thickness = 2px
+$grid_mine_underline_offset = 1px
+// Negated HERE, not at the use site. `-$var` inside a box-shadow list is not
+// parsed as negation -- stylus emits the literal ident
+// `-$grid_mine_underline_thickness`, which is invalid CSS, so the browser drops
+// the whole declaration and the key's `yours` swatch shows no bar at all.
+// Wrapping it in parentheses does not help; subtraction from zero does.
+$grid_mine_underline_rise = 0 - $grid_mine_underline_thickness
 
 .auction__block-calendar
   display flex
@@ -115,12 +120,7 @@ $grid_mine_mark_size = 4px
   position relative
   flex 1 1 0
   min-width 10px
-  height 24px
-  // The bottom strip belongs to the `mine` mark, so the numeral is centred in
-  // what is left rather than in the whole cell. Reserved unconditionally: a
-  // padding that appeared only on `mine` cells would move the digit whenever a
-  // manager opted in, which reads as the grid twitching under the click.
-  padding-bottom 6px
+  height 22px
   display flex
   align-items center
   justify-content center
@@ -170,19 +170,14 @@ $grid_mine_mark_size = 4px
   // showing that it was also yours. `outline` composites independently of
   // `box-shadow`, and `outline-offset` keeps it inside the cell rather than
   // over the neighbour.
-  // Yours: a dot in the strip under the numeral. Centred rather than cornered
-  // because a cell is about eleven pixels wide in the side rail, so a corner
-  // mark and a centred digit overlap horizontally at every count.
-  &.mine::before
-    content ''
-    position absolute
-    left 50%
-    bottom 2px
-    margin-left -($grid_mine_mark_size / 2)
-    width $grid_mine_mark_size
-    height $grid_mine_mark_size
-    border-radius 50%
-    background $grid_mine_mark
+  // Yours: the count is underlined. Declared on the SPAN the count is wrapped
+  // in rather than on the cell, because the cell is a flex container and its
+  // text is an anonymous flex item -- decoration propagation into one is the
+  // kind of rule that is arguable in the spec and silent when it loses.
+  &.mine .auction__block-calendar-count
+    text-decoration underline
+    text-decoration-thickness $grid_mine_underline_thickness
+    text-underline-offset $grid_mine_underline_offset
 
   // `outline` rather than a border or a box-shadow: it takes no space, so it
   // cannot shift the numeral, and `outline-offset` keeps it inside the cell
@@ -201,14 +196,6 @@ $grid_mine_mark_size = 4px
   &.final-block
     background #c0392b
     color white
-
-  // The mark inverts on the two dark grounds, exactly as the numeral does. An
-  // accent dot on `final-block` is red on red, which is the state it composes
-  // with most often: the final block convenes by rule, so an hour is routinely
-  // both the final block and one a manager opted into elsewhere in the hour.
-  &.finalized.mine::before,
-  &.final-block.mine::before
-    background white
 
   // The current hour, as a bar rather than a border: a border on one side of
   // the cell shifts the numeral it sits above.
@@ -251,26 +238,14 @@ $grid_mine_mark_size = 4px
   &.has-opt-ins
     background mix($accentColor, white, 16%)
 
-  // The `mine` swatch carries the MARK, on the opted-in ground it appears
-  // against. A swatch showing the ring the grid no longer draws is a key to a
-  // state the grid does not have.
+  // The `mine` swatch stands the underline up on its own, on the opted-in
+  // ground it appears against -- a swatch has no digit to decorate. An inset
+  // shadow rather than a border, so the bar sits at the same 2px thickness the
+  // grid draws and does not shrink the swatch. A swatch showing the ring the
+  // grid no longer draws would be a key to a state that does not exist.
   &.mine
     background mix($accentColor, white, 16%)
-
-    &::before
-      content ''
-      position absolute
-      left 50%
-      top 50%
-      // Two longhands, not a four-value `margin`. Stylus reads the `0 0 -(x)`
-      // run in a shorthand as arithmetic and emits `0 - 2px`, so the four
-      // values collapse to three and the mark lands off-centre.
-      margin-top -($grid_mine_mark_size / 2)
-      margin-left -($grid_mine_mark_size / 2)
-      width $grid_mine_mark_size
-      height $grid_mine_mark_size
-      border-radius 50%
-      background $grid_mine_mark
+    box-shadow inset 0 $grid_mine_underline_rise 0 darken($accentColor, 25%)
 
   &.finalized
     background $successColor
@@ -344,7 +319,7 @@ $grid_mine_mark_size = 4px
 // cursor and the rail is the full page width there rather than 320px.
 @media (max-width 800px)
   .auction__block-calendar-cell
-    height 28px
+    height 26px
 
 // Same as the standing-elections panel: when collapsible the root is the
 // Accordion and its summary button owns the padding.
