@@ -45,6 +45,26 @@ $grid_selected_ring = mix($textColorDark, white, 55%)
 // and an hour is routinely both the final block and one the manager opted into
 // elsewhere within it. A bar sits on top of whatever ground the cell has, and
 // inverts to white on those two.
+
+// BLUE, AND NOT THE ACCENT. `$accentColor` was the reflexive pick and it was
+// the wrong one: this grid already spends red on two other meanings -- the
+// opt-in density tint and its numeral, and the #c0392b final block -- so an
+// accent bar made `ours` the THIRD thing on one small surface saying red. The
+// app's own language agrees; red here is the ACTIVE colour (a winning bid, a
+// link, a hover), while auction-team.styl marks the team you own with a green
+// tint. Green is taken on this grid by `finalized`, so ownership takes the
+// remaining primary.
+//
+// It is also the one choice that survives the common colour vision
+// deficiency. The grid encodes density in red and convened in green, which is
+// exactly the pair deuteranopia collapses; `ours` in blue stays separable from
+// both, and `ours` versus `convened` is a distinction a manager acts on.
+//
+// Against the #ffd6d6 opt-in ground it always sits on, this measures about
+// 5.8:1 -- comfortably past the 3:1 a 2px graphic needs. Against the two dark
+// fills it measures 1.5:1 and 1.2:1, which is why the white inversion below is
+// load-bearing rather than a nicety.
+$grid_mine_bar_color = $blue
 $grid_mine_bar_thickness = 2px
 // Negated HERE, not at the use site. `-$var` inside a box-shadow list is not
 // parsed as negation -- stylus emits the literal ident
@@ -167,11 +187,6 @@ $grid_mine_bar_rise = 0 - $grid_mine_bar_thickness
     background mix($accentColor, white, 16%)
     color darken($accentColor, 25%)
 
-  // MINE AND SELECTED USE DIFFERENT MECHANISMS ON PURPOSE. Both were
-  // `box-shadow`, so the later rule silently won and a selected hour stopped
-  // showing that it was also yours. `outline` composites independently of
-  // `box-shadow`, and `outline-offset` keeps it inside the cell rather than
-  // over the neighbour.
   // Yours: a bar across the cell's bottom edge. `now` owns ::after for its top
   // bar, so this one is ::before -- the two are the only marks on the grid that
   // read across a whole row without resolving anything inside a cell, and they
@@ -183,7 +198,7 @@ $grid_mine_bar_rise = 0 - $grid_mine_bar_thickness
     right 0
     bottom 0
     height $grid_mine_bar_thickness
-    background $accentColor
+    background $grid_mine_bar_color
 
   // `outline` rather than a border or a box-shadow: it takes no space, so it
   // cannot shift the numeral, and `outline-offset` keeps it inside the cell
@@ -263,7 +278,7 @@ $grid_mine_bar_rise = 0 - $grid_mine_bar_thickness
   // grid's own 2px thickness without shrinking the swatch.
   &.mine
     background mix($accentColor, white, 16%)
-    box-shadow inset 0 $grid_mine_bar_rise 0 $accentColor
+    box-shadow inset 0 $grid_mine_bar_rise 0 $grid_mine_bar_color
 
   &.finalized
     background $successColor
