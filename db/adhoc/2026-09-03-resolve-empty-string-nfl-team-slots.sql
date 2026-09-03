@@ -1,6 +1,6 @@
--- STATUS: NOT APPLIED. Authored and rehearsed only. Needs operator approval at
--- execution time, and the DDL at the end needs `yarn export:schema` in the SAME
--- commit as the apply.
+-- STATUS: APPLIED 2026-09-03 against league_production
+--
+-- The DDL at the end needs `yarn export:schema` in the SAME commit as the apply.
 --
 -- Resolve the four empty-string NFL team slots, and remove the column DEFAULT
 -- that minted two of them. Closes user:task/league/resolve-empty-string-nfl-team-slots.md.
