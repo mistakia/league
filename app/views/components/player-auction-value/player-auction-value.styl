@@ -1,0 +1,39 @@
+// THE TWO NUMBERS SHARE A BASELINE AND DO NOT SHARE A WEIGHT. The price is the
+// subject; the delta is an annotation on it, so it is smaller, lighter and set
+// in the direction's colour rather than sitting beside the price as a second
+// figure of equal standing -- which is exactly the failure the two-column
+// `Market` / `Live value` pair had.
+//
+// `baseline`, not `center`: the delta is a size smaller than the price, and
+// centred the smaller type floats visibly above the dollar sign.
+//
+// The size of the price itself is NOT set here. It comes from
+// `.selected__player-header-item` in selected-player.styl, which both call
+// sites carry -- and note that rule sets 18px on the ITEM, so it wins over the
+// 12px `.nominated__player-details` sets on the auction bar's group around it.
+// Measured, the price renders 18px on both surfaces. This component is a value
+// in someone else's row, not a row of its own.
+.player__auction-value-amounts
+  display flex
+  align-items baseline
+  gap 5px
+
+// `em`, so the delta tracks whatever size the surrounding row set for the
+// price. Fixed at 11px it read as an annotation in the 12px auction bar and as
+// a footnote against the drawer's 18px.
+//
+// COLOUR IS THE ONLY THING CARRYING THE DIRECTION at a glance -- the sign is
+// one character -- so the sign is rendered as well and the colour reinforces it
+// rather than being the whole message.
+//
+// $successColor for over-market and a lightened $textColor for under. NOT red
+// for under: red is $accentColor, and the auction bar spends it on the standing
+// election a few inches away, so an under-market delta in red would read as an
+// alert about the bid rather than as a direction.
+.player__auction-value-inflation
+  font-size 0.72em
+  font-weight 500
+  &.over
+    color $successColor
+  &.under
+    color lighten($textColor, 25)

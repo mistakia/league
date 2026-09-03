@@ -1,34 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import {
-  getAvailableSalarySpaceForCurrentLeague,
-  get_auction_info_for_position,
-  getPlayerById
-} from '@core/selectors'
+import { getPlayerById } from '@core/selectors'
 
 import AuctionNominatedPlayer from './auction-nominated-player'
 
-const map_state_to_props = createSelector(
-  getPlayerById,
-  getAvailableSalarySpaceForCurrentLeague,
-  get_auction_info_for_position,
-  (player_map, league_available_salary_space, auction_info) => {
-    const remaining_pts_added =
-      auction_info.pts_added.total - auction_info.pts_added.rostered
-    const rate = league_available_salary_space / remaining_pts_added
-    const player_pts_added = player_map.getIn(['pts_added', 'season'], 0)
-    // The LIVE auction price -- see selected-player/index.js.
-    const auction_adjusted_salary = Math.max(
-      Math.round(player_pts_added * rate) || 0,
-      0
-    )
-
-    return {
-      player_map,
-      auction_adjusted_salary
-    }
-  }
-)
+const map_state_to_props = createSelector(getPlayerById, (player_map) => ({
+  player_map
+}))
 
 export default connect(map_state_to_props)(AuctionNominatedPlayer)

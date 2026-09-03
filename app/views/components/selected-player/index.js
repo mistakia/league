@@ -6,8 +6,6 @@ import { current_season } from '#constants'
 import {
   getSelectedPlayer,
   get_app,
-  getAvailableSalarySpaceForCurrentLeague,
-  get_auction_info_for_position,
   get_current_league,
   get_player_seasonlogs_for_selected_player,
   is_free_agent_period
@@ -19,32 +17,10 @@ import SelectedPlayer from './selected-player'
 const map_state_to_props = createSelector(
   getSelectedPlayer,
   get_app,
-  getAvailableSalarySpaceForCurrentLeague,
-  get_auction_info_for_position,
   get_current_league,
   get_player_seasonlogs_for_selected_player,
   is_free_agent_period,
-  (
-    player_map,
-    app,
-    league_available_salary_space,
-    auction_info,
-    league,
-    player_seasonlogs,
-    is_in_free_agent_period
-  ) => {
-    const remaining_pts_added =
-      auction_info.pts_added.total - auction_info.pts_added.rostered
-    const rate = league_available_salary_space / remaining_pts_added
-    const player_pts_added = player_map.getIn(['pts_added', 'season'], 0)
-    // The LIVE auction price: what the player costs given the cap space and
-    // value still on the board right now. Distinct from the persisted
-    // projected_positive_salary_at_available_cap, which is the same question answered at cron time.
-    const auction_adjusted_salary = Math.max(
-      Math.round(player_pts_added * rate) || 0,
-      0
-    )
-
+  (player_map, app, league, player_seasonlogs, is_in_free_agent_period) => {
     const free_agency_period_dates = get_free_agent_period(league)
     // The auction concludes when the free agency period does, so one
     // comparison replaces the pair.
@@ -55,7 +31,6 @@ const map_state_to_props = createSelector(
     return {
       player_map,
       player_seasonlogs,
-      auction_adjusted_salary,
       is_logged_in: Boolean(app.userId),
       is_hosted_league: Boolean(league.is_hosted),
       is_before_live_auction_end,

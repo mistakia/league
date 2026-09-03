@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Tooltip from '@mui/material/Tooltip'
 
 import PlayerName from '@components/player-name'
+import PlayerAuctionValue from '@components/player-auction-value'
 
 import './auction-nominated-player.styl'
 
@@ -46,13 +45,7 @@ const NARROW_HEADSHOT_WIDTH = 88
 const getHeadshotWidth = () =>
   window.innerWidth > 1159 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
 
-export default function AuctionNominatedPlayer({
-  player_map,
-  auction_adjusted_salary
-}) {
-  const market_salary = player_map.getIn(['market_salary', 'season'], 0)
-  const inflation = auction_adjusted_salary - market_salary
-
+export default function AuctionNominatedPlayer({ player_map }) {
   const [headshot_width, set_headshot_width] = useState(getHeadshotWidth())
   const update = () => set_headshot_width(getHeadshotWidth())
 
@@ -73,53 +66,17 @@ export default function AuctionNominatedPlayer({
         />
       </div>
       <div className='nominated__player-details'>
-        {/* ONE PRICE, NOT TWO, AND THE SECOND NUMBER IS THE DIFFERENCE BETWEEN
-            THEM. `Market` was the static preseason `market_salary` and `Live
-            value` beside it was that same valuation re-priced against the cap
-            money still unspent -- two dollar amounts, same size, same weight,
-            one word of label each, and nothing on the surface saying they were
-            the SAME quantity measured twice. Read cold beside the bar's own bid
-            controls, `$7` under a label reading `Live value` was taken for the
-            current bid, which is a different number a few inches to the right.
+        {/* ONE PRICE, NOT TWO. `Market` and `Live value` used to sit here as two
+            columns, and the reason they are one is in PlayerAuctionValue --
+            they were the same quantity measured twice, and beside this bar's
+            own bid controls the live one was read as the current bid.
 
-            So the pair collapses into a valuation and its inflation: `$7` is
-            what the player is worth right now, `+$2` is how far the auction has
-            carried it above the preseason figure, and the preseason figure
-            itself moves into the tooltip -- it is the baseline for the delta,
-            not a competing price to bid against. The delta is also the number
-            that was never shown and is the actual bidding input: it says the
-            room is paying over book, which is a fact about the auction rather
-            than about the player.
-
-            Collapsing two columns into one is worth width as well as clarity --
-            see the note below on what the columns cost the name. */}
-        <Tooltip
-          title={
-            inflation === 0
-              ? `Market value $${market_salary}, unchanged by auction inflation`
-              : `Market value $${market_salary}, ${
-                  inflation > 0 ? 'up' : 'down'
-                } $${Math.abs(inflation)} on auction inflation`
-          }
-        >
-          <div className='selected__player-header-item nominated__detail-value'>
-            <label>Value</label>
-            <div className='nominated__detail-value-amounts'>
-              <span className='nominated__detail-value-amount'>
-                ${auction_adjusted_salary}
-              </span>
-              {inflation !== 0 && (
-                <span
-                  className={`nominated__detail-value-inflation ${
-                    inflation > 0 ? 'over' : 'under'
-                  }`}
-                >
-                  {inflation > 0 ? '+' : '-'}${Math.abs(inflation)}
-                </span>
-              )}
-            </div>
-          </div>
-        </Tooltip>
+            Collapsing them is worth width as well as clarity: see the note
+            below on what the columns cost the player's name. */}
+        <PlayerAuctionValue
+          player_map={player_map}
+          class_name='nominated__detail-value'
+        />
         {/* NO `Bye` OR `Age`. Neither is a bidding input -- a bye week and an
             age do not change what a player is worth in the next thirty
             seconds, and both are on the player's own row in the board directly
@@ -135,6 +92,5 @@ export default function AuctionNominatedPlayer({
 }
 
 AuctionNominatedPlayer.propTypes = {
-  player_map: ImmutablePropTypes.map,
-  auction_adjusted_salary: PropTypes.number
+  player_map: ImmutablePropTypes.map
 }

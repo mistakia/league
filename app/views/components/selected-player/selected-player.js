@@ -30,6 +30,7 @@ import SelectedPlayerPlays from '@components/selected-player-plays'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import AuctionElectionControl from '@components/auction-election-control'
 import PlayerContextMenu from '@components/player-context-menu'
+import PlayerAuctionValue from '@components/player-auction-value'
 
 import './selected-player.styl'
 
@@ -49,7 +50,6 @@ export default function SelectedPlayer({
   player_map,
   player_seasonlogs = new List(),
   is_logged_in,
-  auction_adjusted_salary,
   is_before_live_auction_end,
   deselect,
   load_all_players,
@@ -347,19 +347,30 @@ export default function SelectedPlayer({
                     {playerValue ? `$${playerValue}` : '-'}
                   </div>
                 )}
-                {current_season.is_offseason && (
-                  <div className='selected__player-header-item'>
-                    <label>Market</label>$
-                    {player_map.getIn(['market_salary', 'season'], 0)}
-                  </div>
-                )}
+                {/* ONE PRICE WHEN THE AUCTION IS LIVE, THE PRESEASON ONE
+                    OTHERWISE. `Market` and `Auction` used to render as two
+                    independent items, and whenever both conditions held the
+                    drawer showed the same valuation twice under two one-word
+                    labels -- `Auction` naming the SURFACE rather than the
+                    number, so nothing said which of the two moved.
+
+                    PlayerAuctionValue subsumes `Market`: it renders the live
+                    price with the preseason figure as the baseline of its
+                    inflation delta, so showing `Market` beside it would be
+                    the same duplication in a new shape. `Market` therefore
+                    renders only when the live price does not. */}
                 {is_logged_in &&
-                  is_hosted_league &&
-                  is_before_live_auction_end && (
+                is_hosted_league &&
+                is_before_live_auction_end ? (
+                  <PlayerAuctionValue player_map={player_map} />
+                ) : (
+                  current_season.is_offseason && (
                     <div className='selected__player-header-item'>
-                      <label>Auction</label>${auction_adjusted_salary}
+                      <label>Market</label>$
+                      {player_map.getIn(['market_salary', 'season'], 0)}
                     </div>
-                  )}
+                  )
+                )}
                 <div className='selected__player-header-item'>
                   <label>Proj/G</label>
                   {rest_of_season_points && projWks
@@ -515,7 +526,6 @@ SelectedPlayer.propTypes = {
   player_map: ImmutablePropTypes.map,
   player_seasonlogs: ImmutablePropTypes.list,
   is_logged_in: PropTypes.bool,
-  auction_adjusted_salary: PropTypes.number,
   is_before_live_auction_end: PropTypes.bool,
   load_all_players: PropTypes.func,
   load_player_seasonlogs: PropTypes.func,

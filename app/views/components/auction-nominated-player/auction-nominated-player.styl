@@ -164,34 +164,10 @@
   border-radius $button_border_radius
   font-weight 600
 
-  // THE TWO NUMBERS SHARE A BASELINE AND DO NOT SHARE A WEIGHT. The price is the
-  // subject; the delta is an annotation on it, so it is smaller, lighter and set
-  // in the direction's colour rather than sitting beside the price as a second
-  // figure of equal standing -- which is exactly the failure the old two-column
-  // pair had.
-  //
-  // `baseline`, not `center`: the delta is 11px against the price's 12px, and
-  // centred the smaller type floats visibly above the dollar sign.
-  .nominated__detail-value-amounts
-    display flex
-    align-items baseline
-    gap 5px
-
-  // COLOUR IS THE ONLY THING CARRYING THE DIRECTION at a glance -- the sign is
-  // one character at 11px -- so the sign is rendered as well and the colour is
-  // the reinforcement rather than the message.
-  //
-  // $successColor for over-market and $textColor for under. NOT red for under:
-  // red is $accentColor here and the bar spends it on the standing election a
-  // few inches away, so an under-market delta in red would read as an alert
-  // about the bid rather than as a direction.
-  .nominated__detail-value-inflation
-    font-size 11px
-    font-weight 500
-    &.over
-      color $successColor
-    &.under
-      color lighten($textColor, 25)
+// ONLY THE BOX IS HERE. How the price and its inflation delta relate to each
+// other is the component's own business and lives in player-auction-value.styl,
+// which the selected-player drawer shares -- this file owns the treatment that
+// makes the item read as part of THIS bar and nothing more.
 
 // IN FLOW, NOT FLOATED. This was a 100px circle at `position absolute;
 // top -96px`, which put 96 of its 100 pixels OUTSIDE the bar -- and the bar is
