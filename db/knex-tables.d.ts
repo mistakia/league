@@ -205,7 +205,6 @@ import type {
   NflTeamSeasonlogsRow,
   NgsProspectScoresHistoryRow,
   NgsProspectScoresIndexRow,
-  NullsNotDistinctBackup20260903NflPlayStatsRow,
   PercentilesRow,
   PffPlayerFacetGamelogsRow,
   PffPlayerFacetSeasonlogsRow,
@@ -536,7 +535,6 @@ declare module 'knex/types/tables' {
     nfl_team_seasonlogs: NflTeamSeasonlogsRow
     ngs_prospect_scores_history: NgsProspectScoresHistoryRow
     ngs_prospect_scores_index: NgsProspectScoresIndexRow
-    nulls_not_distinct_backup_20260903_nfl_play_stats: NullsNotDistinctBackup20260903NflPlayStatsRow
     percentiles: PercentilesRow
     pff_player_facet_gamelogs: PffPlayerFacetGamelogsRow
     pff_player_facet_seasonlogs: PffPlayerFacetSeasonlogsRow

@@ -930,7 +930,6 @@ DROP TABLE IF EXISTS public.pff_player_facet_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_gamelogs;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
-DROP TABLE IF EXISTS public.nulls_not_distinct_backup_20260903_nfl_play_stats;
 DROP TABLE IF EXISTS public.ngs_prospect_scores_index;
 DROP TABLE IF EXISTS public.ngs_prospect_scores_history;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
@@ -19701,24 +19700,6 @@ CREATE TABLE public.ngs_prospect_scores_index (
     ngs_production_score numeric(5,2),
     ngs_size_score numeric(5,2),
     updated_at timestamp with time zone DEFAULT now()
-);
-
-
---
--- Name: nulls_not_distinct_backup_20260903_nfl_play_stats; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.nulls_not_distinct_backup_20260903_nfl_play_stats (
-    esbid integer,
-    play_id integer,
-    nfl_team character varying(10),
-    player_name character varying(36),
-    stat_id integer,
-    stat_yards integer,
-    gsis_player_id character varying(36),
-    smart_player_id character varying(47),
-    nfl_team_id character varying(36),
-    is_valid boolean
 );
 
 
@@ -61236,13 +61217,6 @@ GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_contribution_
 GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_reader;
 GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_data_view_reader;
 GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_contribution_reader;
-
-
---
--- Name: TABLE nulls_not_distinct_backup_20260903_nfl_play_stats; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.nulls_not_distinct_backup_20260903_nfl_play_stats TO league_reader;
 
 
 --
