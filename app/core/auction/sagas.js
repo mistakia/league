@@ -258,6 +258,18 @@ export function* set_auction_block_opt_in({ payload }) {
   yield call(api_post_auction_block_opt_in, payload)
 }
 
+// The reducer drew the opt-in before the round trip, so a refusal leaves the
+// calendar claiming something the server never recorded. Refetching is the
+// rollback rather than inverting the click: a request can cover slots it did
+// not change -- the hour-wide button sends all four quarters whatever their
+// current state -- and inverting would then withdraw an opt-in the manager
+// made earlier and still holds.
+export function* reload_auction_blocks_after_failed_opt_in({ payload }) {
+  const { leagueId } = payload.opts || {}
+  if (!leagueId) return
+  yield call(api_get_auction_blocks, { leagueId })
+}
+
 // The schedule is loaded when the auction page mounts rather than on the socket
 // join, because opting into a block happens days before any block runs and the
 // socket join is gated on the live window.
@@ -377,6 +389,13 @@ export function* watch_set_auction_block_opt_in() {
   )
 }
 
+export function* watch_set_auction_block_opt_in_failed() {
+  yield takeLatest(
+    auction_actions.POST_AUCTION_BLOCK_OPT_IN_FAILED,
+    reload_auction_blocks_after_failed_opt_in
+  )
+}
+
 // A block convening changes what every OTHER client's calendar shows, and the
 // opt-in write only returns the schedule to whoever sent it. The broadcast
 // carries the schedule itself, so nothing refetches here -- but a mode
@@ -420,5 +439,6 @@ export const auction_sagas = [
   fork(watch_delete_auction_election_fulfilled),
   fork(watch_load_auction_blocks),
   fork(watch_set_auction_block_opt_in),
+  fork(watch_set_auction_block_opt_in_failed),
   fork(watch_auction_mode)
 ]

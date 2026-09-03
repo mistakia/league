@@ -50,14 +50,17 @@ export const auction_actions = {
   }),
 
   SET_AUCTION_BLOCK_OPT_IN: 'SET_AUCTION_BLOCK_OPT_IN',
-  // One action for both directions. `is_opted_in` false withdraws, and a
-  // withdrawal after the block has finalized does not cancel it.
-  set_auction_block_opt_in: ({ leagueId, teamId, block_at, is_opted_in }) => ({
+  // One action for both directions and for any number of slots. `is_opted_in`
+  // false withdraws, and a withdrawal after the block has finalized does not
+  // cancel it. `block_ats` is always a list, including for a single slot: the
+  // reducer applies it optimistically and the route writes it whole, and a
+  // scalar second form would have to be handled by both.
+  set_auction_block_opt_in: ({ leagueId, teamId, block_ats, is_opted_in }) => ({
     type: auction_actions.SET_AUCTION_BLOCK_OPT_IN,
     payload: {
       leagueId: Number(leagueId),
       teamId: Number(teamId),
-      block_at,
+      block_ats: block_ats.map(Number),
       is_opted_in
     }
   }),

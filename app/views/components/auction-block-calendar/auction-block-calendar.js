@@ -36,6 +36,12 @@ const HOUR_LABELS = ['12a', '6a', '12p', '6p']
  * selectable days and blocks" was. An hour is now open, opted-into, mine,
  * convened, the final block, too soon to convene, or outside the period, each
  * distinct and each named in the key beneath the grid.
+ *
+ * THE HOUR IS THE UNIT A MANAGER ACTUALLY MEANS. "I am free between eight and
+ * nine" was four separate clicks and four round trips, so the detail panel
+ * carries one control for the whole hour alongside the four per-slot ones. It
+ * sends only the slots outside the notice threshold, since the rest cannot
+ * convene and the route refuses a set whole rather than in part.
  */
 export default function AuctionBlockCalendar({
   live_blocks,
@@ -125,12 +131,35 @@ export default function AuctionBlockCalendar({
     set_auction_block_opt_in({
       leagueId,
       teamId,
-      block_at: slot.at,
+      block_ats: [slot.at],
       is_opted_in
     })
   }
 
   const selected_slots = selected_hour ? slots_for_hour(selected_hour) : []
+
+  // The whole hour in one act. Opting in slot by slot is four round trips for
+  // what a manager almost always means -- "I am free this hour" -- and the
+  // slots inside the notice threshold cannot be acted on at all, so they are
+  // excluded rather than sent and refused.
+  const actionable_slots = selected_slots.filter(
+    (slot) => slot.at >= notice_floor
+  )
+  const holds_every_actionable_slot =
+    actionable_slots.length > 0 &&
+    actionable_slots.every(
+      (slot) => slot.opt_in_tids && slot.opt_in_tids.includes(teamId)
+    )
+
+  const on_toggle_hour = () => {
+    if (!teamId || !actionable_slots.length) return
+    set_auction_block_opt_in({
+      leagueId,
+      teamId,
+      block_ats: actionable_slots.map((slot) => slot.at),
+      is_opted_in: !holds_every_actionable_slot
+    })
+  }
 
   // The header doubles as the collapsed summary, so a manager who has not
   // opened the grid still sees the one fact they cannot act without: when the
@@ -166,7 +195,9 @@ export default function AuctionBlockCalendar({
       <div className='auction__block-calendar-legend'>
         A block convenes when all {denominator} teams with an open roster spot
         opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
-        hour to see its four 15-minute slots.
+        hour to see its {SLOTS_PER_HOUR} {AUCTION_BLOCK_GRANULARITY_MINUTES}
+        -minute slots, and to take the whole hour at once. A cell&apos;s number
+        is the most teams any one of its slots has drawn.
       </div>
 
       <div className='auction__block-calendar-grid'>
@@ -227,7 +258,10 @@ export default function AuctionBlockCalendar({
                 if (!hour.is_in_period) return `${when} -- outside the period`
                 if (finalized) return `${when} -- a block is convened`
                 if (is_too_soon) return `${when} -- too soon to convene`
-                return `${when} -- ${opted} of ${denominator} opted in`
+                const yours = mine
+                  ? `, you in ${mine} of ${SLOTS_PER_HOUR}`
+                  : ''
+                return `${when} -- ${opted} of ${denominator} opted in${yours}`
               }
 
               return (
@@ -285,15 +319,27 @@ export default function AuctionBlockCalendar({
       {selected_hour && (
         <div className='auction__block-calendar-detail'>
           <div className='auction__block-calendar-detail-head'>
-            {dayjs.unix(selected_hour).format('ddd MMM D, h:mm A')}
+            <span className='auction__block-calendar-detail-when'>
+              {dayjs.unix(selected_hour).format('ddd MMM D, h:mm A')}
+            </span>
+            {Boolean(teamId) && actionable_slots.length > 0 && (
+              <Button small onClick={on_toggle_hour}>
+                {holds_every_actionable_slot
+                  ? 'Withdraw from hour'
+                  : `Opt into all ${actionable_slots.length}`}
+              </Button>
+            )}
           </div>
           {selected_slots.map((slot) => {
             const tids = slot.opt_in_tids
             const is_mine = Boolean(tids && tids.includes(teamId))
             const is_inside_notice = slot.at < notice_floor
 
+            const slot_classes = ['auction__block-calendar-slot']
+            if (is_mine) slot_classes.push('mine')
+
             return (
-              <div className='auction__block-calendar-slot' key={slot.at}>
+              <div className={slot_classes.join(' ')} key={slot.at}>
                 <div className='auction__block-calendar-slot-time'>
                   {dayjs.unix(slot.at).format('h:mm A')}
                 </div>

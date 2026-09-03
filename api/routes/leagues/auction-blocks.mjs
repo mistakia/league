@@ -5,6 +5,7 @@ import { current_season } from '#constants'
 import { verifyUserTeam, getLeague } from '#libs-server'
 import {
   set_auction_block_opt_in,
+  assert_auction_block_slot_open,
   get_live_block_opt_ins,
   get_finalized_auction_blocks,
   get_block_eligible_team_ids,
@@ -150,27 +151,33 @@ router.get('/?', async (req, res) => {
  *   post:
  *     tags:
  *       - Leagues
- *     summary: Opt into or out of a live auction block
+ *     summary: Opt into or out of one or more live auction blocks
  *     description: |
+ *       `block_ats` is a SET of slot start instants, so a manager can take a
+ *       whole hour in one request. Every slot is validated before any is
+ *       written, so the request succeeds or refuses whole.
+ *
  *       `is_opted_in` false WITHDRAWS. A withdrawal after the block has
  *       finalized does NOT cancel it: the opt-in row moves, the finalized block
  *       does not, and the block runs.
  *
- *       If this opt-in completes unanimity outside the notice threshold, the
+ *       If these opt-ins complete unanimity outside the notice threshold, the
  *       block finalizes in the same request and the whole schedule comes back
  *       with it.
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:
  *       200:
- *         description: Opt-in recorded, with the resulting schedule
+ *         description: Opt-ins recorded, with the resulting schedule
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 block_at:
- *                   type: integer
+ *                 block_ats:
+ *                   type: array
+ *                   items:
+ *                     type: integer
  *                 is_opted_in:
  *                   type: boolean
  *                 eligible_team_ids:
@@ -207,15 +214,25 @@ router.post('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const teamId = Number(req.body.teamId)
-    const block_at = Number(req.body.block_at)
     const is_opted_in = req.body.is_opted_in !== false
+
+    // ALWAYS A SET, even for one slot. Opting into a whole hour is four writes
+    // that have to succeed or fail together, and a scalar form alongside the
+    // set would be a second wire shape with no reader.
+    const block_ats = [...new Set((req.body.block_ats || []).map(Number))].sort(
+      (a, b) => a - b
+    )
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId param' })
     }
 
-    if (!block_at) {
-      return res.status(400).send({ error: 'missing block_at param' })
+    if (!block_ats.length) {
+      return res.status(400).send({ error: 'missing block_ats param' })
+    }
+
+    if (block_ats.some((block_at) => !Number.isFinite(block_at) || !block_at)) {
+      return res.status(400).send({ error: 'invalid block_ats param' })
     }
 
     try {
@@ -229,21 +246,40 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    let result
+    // EVERY SLOT IS CHECKED BEFORE ANY IS WRITTEN. An hour-wide opt-in that
+    // refused its last quarter after committing the first three would leave the
+    // manager opted into a partial hour they never chose, and the response would
+    // report the refusal rather than the writes.
+    const league = await getLeague({ lid: Number(leagueId) })
     try {
-      result = await set_auction_block_opt_in({
-        lid: Number(leagueId),
-        tid: teamId,
-        user_id: req.auth.userId,
-        block_at: dayjs.unix(block_at),
-        is_opted_in,
-        season_year: current_season.year
-      })
+      for (const block_at of block_ats) {
+        assert_auction_block_slot_open({
+          league,
+          block_at: dayjs.unix(block_at)
+        })
+      }
     } catch (error) {
       if (error.is_auction_block_error) {
         return res.status(400).send({ error: error.message })
       }
       throw error
+    }
+
+    for (const block_at of block_ats) {
+      await set_auction_block_opt_in({
+        lid: Number(leagueId),
+        tid: teamId,
+        user_id: req.auth.userId,
+        block_at: dayjs.unix(block_at),
+        is_opted_in,
+        season_year: current_season.year,
+        league,
+        // `build_schedule` below evaluates finalization for the whole league
+        // once, which is what convenes and announces any block these writes
+        // completed. Evaluating per slot here would duplicate that work and
+        // announce a merged session from the middle of the run.
+        evaluate_finalization: false
+      })
     }
 
     const schedule = await build_schedule({
@@ -252,7 +288,7 @@ router.post('/?', async (req, res) => {
     })
 
     res.send({
-      block_at: result.block_at.unix(),
+      block_ats,
       is_opted_in,
       ...schedule
     })

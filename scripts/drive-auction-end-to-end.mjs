@@ -250,7 +250,7 @@ const read_elections = (teamId) =>
 const settlement_status = () => api('GET', `${elections_path}/status`)
 
 const set_opt_in = (teamId, block_at, is_opted_in = true) =>
-  api('POST', blocks_path, { teamId, block_at, is_opted_in })
+  api('POST', blocks_path, { teamId, block_ats: [block_at], is_opted_in })
 
 const read_schedule = () => api('GET', blocks_path)
 

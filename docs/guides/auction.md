@@ -85,6 +85,12 @@ green.
 
 The final block is the opposite: computed on demand, no row, because every term is configuration or derived from the rosters. A column would be a second source of truth that can disagree with the board.
 
+## An opt-in write is a SET of slots, and it lands whole or not at all
+
+`POST /auction-blocks` takes `block_ats`, always a list, because a manager opts into an hour far more often than into one quarter of one. Two properties follow and neither is optional. **Every slot is validated before any is written** — `assert_auction_block_slot_open` runs over the whole set first, so a request whose last quarter falls outside the period leaves nothing behind rather than three quarters the manager never chose. And **the per-write finalization evaluation is suppressed** (`evaluate_finalization: false`), because the route's own `build_schedule` evaluates once for the league afterwards; leaving it on takes the league advisory lock once per slot and can announce a merged session from the middle of the run.
+
+The client draws the opt-in before the reply, since the route rebuilds the whole schedule before it answers and the dead interval reads as a click that did not land. **Rollback on refusal is a REFETCH, not an inverse** — a request routinely covers slots it does not change, so inverting it withdraws opt-ins the manager made earlier and still holds.
+
 ## Testing it
 
 **Only running it finds these defects.** Every one this subsystem has produced came from executing the behavior; none came from reading the source. Two rules follow:

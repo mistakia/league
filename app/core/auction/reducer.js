@@ -116,6 +116,53 @@ const merge_block_schedule = (state, payload) => {
   })
 }
 
+/**
+ * Draw the manager's own opt-in the moment they click it, before the round trip.
+ *
+ * THE ROUND TRIP IS NOT FAST HERE. The opt-in route re-evaluates finalization
+ * for the whole league and rebuilds the entire schedule before it answers, so a
+ * click had a visible dead interval in which the button still said `Opt in` and
+ * the hour's density mark had not moved -- which reads as a click that did not
+ * land, and the manager clicks again. This writes only the viewing team's own
+ * tid, which is the one fact the client can predict; the server's reply
+ * replaces the whole map with the real schedule, including the unanimity it may
+ * have just convened.
+ *
+ * ROLLBACK IS A REFETCH rather than an inverse, in `sagas.js`. Inverting the
+ * click would remove a tid that was already there for any slot the request did
+ * not change -- an hour where one quarter was already taken is exactly the case
+ * the hour-wide button creates.
+ */
+const apply_optimistic_opt_in = (state, { teamId, block_ats, is_opted_in }) => {
+  if (!teamId || !block_ats || !block_ats.length) return state
+
+  let blocks = state.live_blocks
+  for (const block_at of block_ats) {
+    const existing = blocks.get(block_at)
+    const tids = existing
+      ? existing.get('opt_in_tids') || new List()
+      : new List()
+
+    if (is_opted_in) {
+      if (tids.includes(teamId)) continue
+      const base =
+        existing || fromJS({ block_at, opt_in_tids: [], is_finalized: false })
+      blocks = blocks.set(block_at, base.set('opt_in_tids', tids.push(teamId)))
+    } else {
+      if (!existing || !tids.includes(teamId)) continue
+      blocks = blocks.set(
+        block_at,
+        existing.set(
+          'opt_in_tids',
+          tids.filter((tid) => tid !== teamId)
+        )
+      )
+    }
+  }
+
+  return state.set('live_blocks', blocks)
+}
+
 export function auction_reducer(state = initialState(), { payload, type }) {
   switch (type) {
     case auction_actions.AUCTION_SEARCH_PLAYERS:
@@ -259,6 +306,9 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       }
       return state.merge({ standing_elections: elections })
     }
+
+    case auction_actions.SET_AUCTION_BLOCK_OPT_IN:
+      return apply_optimistic_opt_in(state, payload)
 
     case auction_actions.GET_AUCTION_BLOCKS_FULFILLED:
     case auction_actions.POST_AUCTION_BLOCK_OPT_IN_FULFILLED:

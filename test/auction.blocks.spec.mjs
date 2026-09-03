@@ -73,12 +73,29 @@ describe('auction live blocks', function () {
 
   const eligible_tids = () => get_block_eligible_team_ids({ lid: league_id })
 
-  const opt_in_over_rest = ({ teamId, block_at, is_opted_in = true, token }) =>
+  const opt_in_slots_over_rest = ({
+    teamId,
+    block_ats,
+    is_opted_in = true,
+    token
+  }) =>
     chai_request
       .execute(server)
       .post(`/api/leagues/${league_id}/auction-blocks`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ teamId, block_at: block_at.unix(), is_opted_in })
+      .send({
+        teamId,
+        block_ats: block_ats.map((block_at) => block_at.unix()),
+        is_opted_in
+      })
+
+  const opt_in_over_rest = ({ teamId, block_at, is_opted_in = true, token }) =>
+    opt_in_slots_over_rest({
+      teamId,
+      block_ats: [block_at],
+      is_opted_in,
+      token
+    })
 
   // Opt in every eligible team but one over the LIBRARY, so the single opt-in
   // under test is the one that completes unanimity. The route is exercised on
@@ -151,7 +168,7 @@ describe('auction live blocks', function () {
       })
 
       expect(res.status, JSON.stringify(res.body)).to.equal(200)
-      expect(res.body.block_at).to.equal(block_at.unix())
+      expect(res.body.block_ats).to.deep.equal([block_at.unix()])
 
       const slot = res.body.opt_ins.find(
         (entry) => entry.block_at === block_at.unix()
@@ -161,6 +178,61 @@ describe('auction live blocks', function () {
       // count -- they need to see who is already there and who is missing.
       expect(slot.opt_in_tids).to.deep.equal([1])
       expect(slot.is_finalized).to.equal(false)
+    })
+
+    it('records every slot of an hour in one request', async function () {
+      const hour = slot_at(5)
+      const block_ats = [0, 15, 30, 45].map((minutes) =>
+        hour.add(minutes, 'minute')
+      )
+
+      const res = await opt_in_slots_over_rest({
+        teamId: 1,
+        block_ats,
+        token: user1
+      })
+
+      expect(res.status, JSON.stringify(res.body)).to.equal(200)
+      expect(res.body.block_ats).to.deep.equal(
+        block_ats.map((block_at) => block_at.unix())
+      )
+
+      for (const block_at of block_ats) {
+        const slot = res.body.opt_ins.find(
+          (entry) => entry.block_at === block_at.unix()
+        )
+        expect(slot, `${block_at.format()} appears in the schedule`).to.exist
+        expect(slot.opt_in_tids).to.deep.equal([1])
+      }
+    })
+
+    it('writes no slot of an hour when one of them is refused', async function () {
+      const hour = slot_at(6)
+      // The last quarter falls outside the period, so the request must refuse
+      // WHOLE. A route that validated as it wrote would leave the manager opted
+      // into three quarters of an hour they never asked for a piece of.
+      const block_ats = [
+        hour,
+        hour.add(15, 'minute'),
+        period_end.add(1, 'day').minute(0).second(0).millisecond(0)
+      ]
+
+      const res = await opt_in_slots_over_rest({
+        teamId: 1,
+        block_ats,
+        token: user1
+      })
+
+      expect(res.status).to.equal(400)
+      expect(res.body.error).to.match(/outside the free agency period/)
+
+      const written = await knex('auction_block_opt_ins')
+        .where({ lid: league_id, tid: 1 })
+        .whereIn(
+          'block_at',
+          block_ats.map((block_at) => block_at.toDate())
+        )
+      expect(written, 'no partial write').to.have.length(0)
     })
   })
 

@@ -75,6 +75,87 @@ describe('auction block reducer', function () {
     )
   })
 
+  // THE CLICK IS DRAWN BEFORE THE ROUND TRIP. The opt-in route re-evaluates
+  // finalization and rebuilds the whole schedule before it answers, so without
+  // this the button and the hour's density mark both sat unchanged for the
+  // length of that request -- which reads as a click that did not land.
+  describe('the optimistic opt-in', function () {
+    const seeded = () =>
+      auction_reducer(undefined, {
+        type: auction_actions.AUCTION_BLOCK_SCHEDULE,
+        payload: schedule
+      })
+
+    const toggle = (state, { block_ats, is_opted_in }) =>
+      auction_reducer(state, {
+        type: auction_actions.SET_AUCTION_BLOCK_OPT_IN,
+        payload: { leagueId: 1, teamId: 4, block_ats, is_opted_in }
+      })
+
+    it('adds the viewing team to a slot nobody has taken', function () {
+      const state = toggle(seeded(), {
+        block_ats: [1_800_007_200],
+        is_opted_in: true
+      })
+
+      expect(
+        state.live_blocks.getIn([1_800_007_200, 'opt_in_tids']).toJS()
+      ).to.deep.equal([4])
+      expect(state.live_blocks.getIn([1_800_007_200, 'is_finalized'])).to.equal(
+        false
+      )
+    })
+
+    it('takes a whole hour in one action', function () {
+      const block_ats = [0, 900, 1800, 2700].map(
+        (offset) => 1_800_010_800 + offset
+      )
+      const state = toggle(seeded(), { block_ats, is_opted_in: true })
+
+      for (const block_at of block_ats) {
+        expect(
+          state.live_blocks.getIn([block_at, 'opt_in_tids']).toJS(),
+          `slot ${block_at}`
+        ).to.deep.equal([4])
+      }
+    })
+
+    it('leaves other teams alone on a withdrawal', function () {
+      const opted_in = toggle(seeded(), {
+        block_ats: [1_800_003_600],
+        is_opted_in: true
+      })
+      expect(
+        opted_in.live_blocks.getIn([1_800_003_600, 'opt_in_tids']).toJS()
+      ).to.deep.equal([2, 4])
+
+      const withdrawn = toggle(opted_in, {
+        block_ats: [1_800_003_600],
+        is_opted_in: false
+      })
+      expect(
+        withdrawn.live_blocks.getIn([1_800_003_600, 'opt_in_tids']).toJS()
+      ).to.deep.equal([2])
+    })
+
+    it('is replaced wholesale by the server reply', function () {
+      const optimistic = toggle(seeded(), {
+        block_ats: [1_800_007_200],
+        is_opted_in: true
+      })
+
+      // The prediction covers only the viewing team's own tid. Unanimity, a
+      // convened session and the moved final block all arrive with the reply,
+      // which rebuilds the map rather than merging into the guess.
+      const settled = auction_reducer(optimistic, {
+        type: auction_actions.POST_AUCTION_BLOCK_OPT_IN_FULFILLED,
+        payload: { data: schedule }
+      })
+
+      expect(settled.live_blocks.get(1_800_007_200)).to.equal(undefined)
+    })
+  })
+
   it('takes the mode from the server rather than deriving it', function () {
     const state = apply(auction_actions.AUCTION_MODE, {
       auction_mode: 'live',

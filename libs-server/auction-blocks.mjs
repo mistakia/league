@@ -89,6 +89,45 @@ export const get_finalized_auction_blocks = async ({
     .orderBy('block_at', 'asc')
 
 /**
+ * The rules a slot must satisfy before a team may opt into it, and the floored
+ * slot they were checked against.
+ *
+ * SEPARATE FROM THE WRITE because a manager can now opt into a whole hour at
+ * once, and a request that writes three of four slots and then refuses the
+ * fourth leaves the league in a state nobody asked for. The route checks every
+ * slot through this before it writes any of them.
+ */
+export const assert_auction_block_slot_open = ({
+  league,
+  block_at,
+  now = current_season.now
+}) => {
+  const period = get_free_agent_period(league)
+
+  if (!period.start) {
+    throw auction_block_error('league has no free agency period configured')
+  }
+
+  if (!is_block_boundary(block_at)) {
+    throw auction_block_error(
+      `block_at must be a ${AUCTION_BLOCK_GRANULARITY_MINUTES}-minute boundary`
+    )
+  }
+
+  const slot = floor_to_block(block_at)
+
+  if (slot.isBefore(period.start) || !slot.isBefore(period.end)) {
+    throw auction_block_error('block is outside the free agency period')
+  }
+
+  if (!slot.isAfter(now)) {
+    throw auction_block_error('block has already started')
+  }
+
+  return slot
+}
+
+/**
  * Record or revise a team's opt-in on one block.
  *
  * `is_opted_in` false WITHDRAWS rather than deleting, and the row survives,
@@ -109,30 +148,16 @@ export const set_auction_block_opt_in = async ({
   user_id,
   block_at,
   is_opted_in,
-  now = current_season.now
+  now = current_season.now,
+  league: provided_league,
+  // A caller writing several slots in one request evaluates once at the end
+  // rather than once per slot: the evaluation takes the league advisory lock and
+  // walks every opt-in row, so four slots would otherwise pay for it four times
+  // and announce a merged session from the middle of the run.
+  evaluate_finalization = true
 }) => {
-  const league = await getLeague({ lid })
-  const period = get_free_agent_period(league)
-
-  if (!period.start) {
-    throw auction_block_error('league has no free agency period configured')
-  }
-
-  const slot = floor_to_block(block_at)
-
-  if (!is_block_boundary(block_at)) {
-    throw auction_block_error(
-      `block_at must be a ${AUCTION_BLOCK_GRANULARITY_MINUTES}-minute boundary`
-    )
-  }
-
-  if (slot.isBefore(period.start) || !slot.isBefore(period.end)) {
-    throw auction_block_error('block is outside the free agency period')
-  }
-
-  if (!slot.isAfter(now)) {
-    throw auction_block_error('block has already started')
-  }
+  const league = provided_league || (await getLeague({ lid }))
+  const slot = assert_auction_block_slot_open({ league, block_at, now })
 
   const existing = await db('auction_block_opt_ins')
     .where({ lid, season_year, tid })
@@ -160,10 +185,13 @@ export const set_auction_block_opt_in = async ({
     })
   }
 
+  if (!evaluate_finalization) return { block_at: slot, finalized: null }
+
   const finalized = await evaluate_auction_block_finalization({
     lid,
     season_year,
-    now
+    now,
+    league
   })
 
   return { block_at: slot, finalized }
