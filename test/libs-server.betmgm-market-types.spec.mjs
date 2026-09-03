@@ -8,8 +8,10 @@ import {
   get_team_from_selection_name,
   format_selection_type,
   is_placeholder_option,
-  strip_trailing_line
+  strip_trailing_line,
+  PLAYER_AWARD_MARKET_TYPES
 } from '#libs-server/betmgm/index.mjs'
+import { awards_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const expect = chai.expect
 
@@ -367,6 +369,59 @@ describe('libs-server/betmgm market types', function () {
       expect(
         is_placeholder_option({ price: { odds: 1.9, americanOdds: -110 } })
       ).to.equal(false)
+    })
+  })
+
+  /*
+    The award families list a bare player name per selection, exactly as the
+    leader boards do, and were left off the player-matching arm when the leader
+    templates were wired -- 490 selections carrying no selection_pid while the
+    structurally identical leader markets resolved.
+
+    The two exclusions are the cases worth pinning. A coach has no player row, so
+    a name lookup returns null for most of the field and a WRONG pid for any
+    coach sharing a name with a player; and MVP_AND_SUPER_BOWL_WINNER names a
+    player AND a team in one selection, which a scalar pid cannot represent.
+  */
+  describe('player award families', function () {
+    const award_market_type = (name) =>
+      resolve_market_type({ template_id: null, market_name: name }).market_type
+
+    it('routes the six player awards to the bare-name matcher', function () {
+      const names = [
+        'AP MVP winner',
+        'AP Offensive Player of the Year',
+        'AP Defensive Player of the Year',
+        'AP Offensive Rookie of the Year',
+        'AP Defensive Rookie of the Year',
+        'AP Comeback Player of the Year'
+      ]
+
+      for (const name of names) {
+        const market_type = award_market_type(name)
+        expect(market_type, name).to.be.a('string')
+        expect(PLAYER_AWARD_MARKET_TYPES.has(market_type), name).to.equal(true)
+      }
+    })
+
+    it('excludes coach of the year, whose selections are not players', function () {
+      const market_type = award_market_type('AP Coach of the Year')
+
+      expect(market_type).to.equal(awards_prop_types.COACH_OF_THE_YEAR)
+      expect(PLAYER_AWARD_MARKET_TYPES.has(market_type)).to.equal(false)
+    })
+
+    it('excludes the compound award, which names a player AND a team', function () {
+      expect(
+        PLAYER_AWARD_MARKET_TYPES.has(
+          awards_prop_types.MVP_AND_SUPER_BOWL_WINNER
+        )
+      ).to.equal(false)
+    })
+
+    it('resolves no team for an award selection, which names a player', function () {
+      expect(get_team_from_selection_name('Patrick Mahomes')).to.equal(null)
+      expect(get_team_from_selection_name('Micah Parsons')).to.equal(null)
     })
   })
 })

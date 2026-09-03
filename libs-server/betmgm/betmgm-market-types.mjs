@@ -77,6 +77,41 @@ export const BETMGM_SEASON_LEADER_FALLBACK_POSITIONS = {
 }
 
 /**
+ * Award families whose selections name a PLAYER.
+ *
+ * These carry the same selection shape as the leader templates above -- a bare
+ * player name, a result-level `playerId`, and no '(TEAM)' qualifier -- so they
+ * resolve through the same path. Keyed on OUR canonical values rather than on a
+ * second list of BetMGM templateIds: the awards are typed by market NAME above,
+ * so a templateId list here would be a parallel key that the type map could
+ * silently drift away from.
+ *
+ * Two members of `awards_prop_types` are deliberately absent:
+ *
+ *  - COACH_OF_THE_YEAR lists coaches, who have no player row. A name lookup
+ *    would return null for most and a WRONG pid for any coach sharing a name
+ *    with a player, which is the one outcome worse than the null it replaces.
+ *  - MVP_AND_SUPER_BOWL_WINNER pairs a player with a team in one selection, and
+ *    a scalar pid cannot represent a pair -- the same reason NAME_THE_FINALISTS
+ *    and the division forecasts carry none.
+ *
+ * Measured on a 2026-09-03 payload: 472 of 490 award selections resolve, and the
+ * 18 misses are the documented ambiguity class (three players are named Josh
+ * Allen, two Justin Jefferson) plus a handful of college prospects with no row
+ * yet. The rookie fields resolve as well as the rest, which is worth stating
+ * because the opposite is the intuitive guess.
+ */
+export const PLAYER_AWARD_MARKET_TYPES = new Set([
+  awards_prop_types.SEASON_MVP,
+  awards_prop_types.OFFENSIVE_PLAYER_OF_THE_YEAR,
+  awards_prop_types.DEFENSIVE_PLAYER_OF_THE_YEAR,
+  awards_prop_types.COMEBACK_PLAYER_OF_THE_YEAR,
+  awards_prop_types.OFFENSIVE_ROOKIE_OF_THE_YEAR,
+  awards_prop_types.DEFENSIVE_ROOKIE_OF_THE_YEAR,
+  awards_prop_types.PROTECTOR_OF_THE_YEAR
+])
+
+/**
  * Market families whose selections name something that is not a team, but that a
  * team resolver would answer for anyway.
  *
