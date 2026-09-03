@@ -8,6 +8,14 @@ $borderColor = #d0d0d0
 $borderColorLight = lighten($borderColor, 90)
 
 $menuWidth = 240px
+
+// THESE TWO ARE FALLBACKS NOW, NOT THE MEASURE. The auction chrome publishes
+// its real height as `--auction-controls-height` from a ResizeObserver in
+// auction-controls.js, and every consumer reads that property with the matching
+// constant below as its fallback -- see auction_chrome_bottom() at the foot of
+// this file. What follows is the history of why a constant could not hold, kept
+// because the next session to see a round number here will otherwise try to
+// tune it again.
 $auctionHeightDesktop = 164px
 // THE WHOLE AUCTION CHROME, not just the bid bar: the bar plus the team strip
 // beneath it. Four places derive from it and they must agree or the chrome and
@@ -41,6 +49,14 @@ $auctionHeightDesktop = 164px
 // each increment closes less of the gap than it should and the sequence reads
 // as converging on a value below the real one. Measured with room to spare it
 // wants 94 flat at every narrow width, and that is the number to add the bar to.
+//
+// THAT WIDTH WAS FOUND: below 536px the actions row cannot fit on one line at
+// all. `.auction__bid-actions` needs 535.1px flat -- 32px of padding, 443.1px of
+// stepper and election control, and the 60px bid input -- and below 800px the
+// bar gets the raw viewport, so the row wraps and the bar grows past 120px. That
+// is what retired the constant rather than raising it: the next phone, the next
+// league size or the next label makes a new maximum, and a static reservation
+// answers a growing box by clipping its last child in silence.
 $auctionHeightMobile = 214px
 
 $successColor = green
@@ -85,6 +101,42 @@ $button_border_radius = 4px
 // Every control taking this must also set `box-sizing: border-box`, or a border
 // makes the outer box 2px taller than the number says.
 $control_height = 36px
+
+// THE FLOATING CONTROL'S HEIGHT, shared by the nav menu button and the
+// auction's commissioner controls. It is not $control_height: a floating button
+// sits ON TOP of content rather than on a row with an input, so what it owes is
+// a thumb target and as little of the screen as that takes. The number matters
+// beyond its own box because the commissioner controls stack directly above the
+// menu button and offset themselves BY it -- see auction_chrome_bottom() below.
+$floating_action_height = 38px
+
+// THE FLOATING CONTROLS' OFFSET OFF THE FOOT OF THE AUCTION, as one expression
+// with one variable term, called by menu.styl for the menu button and by
+// auction-commissioner-controls.styl for the dial that sits above it.
+//
+// THE CHROME'S HEIGHT IS MEASURED, NOT ASSUMED. auction-controls.js publishes
+// `--auction-controls-height` from a ResizeObserver, following
+// --auction-side-height in auction.js and --app-banner-height in
+// league-pause-notice.js. $chrome is the fallback for the zone the caller is in,
+// and it is only ever reached before the observer's first frame or if the
+// auction chrome is not mounted.
+//
+// $extra is what the caller wants ABOVE the chrome. The menu button passes 8px;
+// the commissioner controls pass that same 8px plus the button's own height plus
+// another gap, so "above the menu button" is arithmetic on one shared height
+// rather than a second constant that has to be remembered when the first moves.
+auction_chrome_bottom($chrome, $extra)
+  s('calc(var(--auction-controls-height, %s) + %s)', $chrome, $extra)
+
+// The same, plus the side rail. Below 800px the rail stacks BETWEEN the chrome
+// and the board and it does not scroll, so a floating control offset by the
+// chrome alone lands on a row the layout can never move out from under it.
+auction_chrome_side_bottom($chrome, $extra)
+  s(
+    'calc(var(--auction-controls-height, %s) + var(--auction-side-height, 0px) + %s)',
+    $chrome,
+    $extra
+  )
 
 // THE WIDTH OF A SHORT FORM FIELD, and the companion to $control_height above:
 // one number for the axis a text input is measured on, so a username box and

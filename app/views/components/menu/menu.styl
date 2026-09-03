@@ -19,24 +19,14 @@
 // pill and a 40px circle. None of those five appears anywhere else on this
 // site, and there was no MUI component underneath any of it.
 //
-// THE FLOATING BUTTON'S REAL CONSTRAINT IS THAT IT FLOATS OVER EVERYTHING —
-// tables, the auction, the players list and the prose pages, all on the same
-// #f0f0f0 surface. That is exactly what makes $prose_ink the one paint that
-// works: a filled ink rectangle is the darkest thing on the surface, so it
-// neither washes out nor shouts. Every lighter treatment fails — an outlined
-// or white button dissolves into the surface — and the accent red is the site's
-// ONE accent, which cannot be spent on a control that is on screen at all
-// times. The accent goes on HOVER instead, which is what prose_action_fill()
-// already does for the landing call to action and for every prose submit
-// button.
-//
-// prose_action_fill() itself is deliberately not called here. Half of it fits
-// and half does not: a floating action button carries fixed positioning, a
-// shadow, an icon slot and label-scale type, so calling the mixin would emit
-// four declarations this rule immediately overrides. It is the same paint,
-// named from the same variables, rather than a shim over the mixin.
+// THE PAINT MOVED TO prose_floating_action() in app/styles/prose-form.styl, and
+// the argument for it moved with it. It is a mixin now because the auction's
+// commissioner controls sit directly above this button and have to be the same
+// object; the reasoning about why $prose_action and why the accent only on
+// hover is worth reading there before changing either caller.
 .main__menu-button
   position fixed
+  prose_floating_action()
   // POSITION LIVES HERE, NOT IN A STYLE OBJECT. menu.js used to set bottom and
   // left/right inline, and an inline style beats a stylesheet rule — so the
   // .auction__live offsets at the foot of this file could never apply and the
@@ -46,61 +36,7 @@
   // wrong edge until something else re-rendered it.
   bottom 16px
   left 16px
-  display inline-flex
-  align-items center
-  // 38px and 14/16px of padding, down from 46px and 24/26px. This control is on
-  // screen at ALL times on every page, and the label is five characters at 11px
-  // -- the old box was mostly air, and on a phone that air sits on top of
-  // content the layout cannot move out from under it.
-  height 38px
-  // The label is the whole control — there is no hamburger beside it. A mark
-  // and a word both saying "menu" is the same thing twice, and at label scale
-  // the glyph was the larger of the two, so the word was arguing with an icon
-  // that outweighed it.
-  //
-  // Asymmetric on purpose: the wide tracking below leaves a trailing space
-  // after the final letter, which sits the label left of the button's centre
-  // under equal padding. THE GAP STAYS 2px WHATEVER THE PADDING IS, because it
-  // answers the trailing space rather than the box: `letter-spacing 0.16em` at
-  // `font-size 11px` is 1.76px, so 2px is the correction at any size. Scaling
-  // the asymmetry down with the padding would have under-corrected it.
-  padding 0 14px 0 16px
-  border none
-  border-radius 3px
-  // $prose_action, the same graphite as the landing call to action and every
-  // prose submit — a filled block wants a lighter paint than a letterform, so
-  // this is deliberately not the near-black $prose_ink.
-  background $prose_action
-  color $prose_paper
-  // The site's label voice — prose_eyebrow()'s mono at small size with wide
-  // tracking — rather than MUI Button's sans at 14px. Uppercase survives the
-  // rewrite because it belongs to both languages; the face, the size and the
-  // tracking are what separated them.
-  font-family $prose_mono
-  font-size 11px
-  font-weight $prose_bold
-  letter-spacing 0.16em
-  text-transform uppercase
-  cursor pointer
   z-index $z_floating_action
-  // ONE layer, not Material's three. The contrast against both surfaces is
-  // already doing the separating, so the shadow only has to lift the object
-  // off the page.
-  box-shadow 0 6px 20px rgba(23, 24, 26, 0.18)
-  transition background 120ms ease, box-shadow 120ms ease, transform 120ms ease
-  &:hover
-    background $prose_accent
-    box-shadow 0 8px 24px rgba(193, 18, 31, 0.24)
-  &:active
-    transform translateY(1px)
-  // Ink rather than the accent ring the other two get, because THIS button
-  // repaints to the accent on hover — an accent ring on an accent fill is no
-  // ring at all for anyone who tabs to a button the pointer is resting on. The
-  // offset leaves a gap of surface showing, so the ring reads in every state:
-  // against the graphite fill, against the accent one, and against the page.
-  &:focus-visible
-    outline 2px solid $prose_ink
-    outline-offset 3px
 
 // TIER THREE, bare. The quietest control in the menu: an info affordance
 // beside a warning, which should not read as a button until it is reached for.
@@ -333,13 +269,19 @@
 // single row fits. auction-controls.styl, page.styl and
 // auction-commissioner-controls.styl move with it or the chrome and the page
 // disagree about where the chrome ends.
+// THE CHROME'S HEIGHT IS READ, NOT ASSUMED. auction_chrome_bottom() resolves to
+// a calc over `--auction-controls-height`, which auction-controls.js publishes
+// from a ResizeObserver; the constant passed in is only the fallback for the
+// frame before the observer runs. The bar wraps below 536px and the chrome grows
+// with it, so a fixed offset here puts the button inside the chrome on exactly
+// the screens with the least room to spare.
 @media (min-width 1160px)
   .auction__live .main__menu-button
-    bottom $auctionHeightDesktop + 8px
+    bottom auction_chrome_bottom($auctionHeightDesktop, 8px)
 
 @media (max-width 1159px)
   .auction__live .main__menu-button
-    bottom $auctionHeightMobile + 8px
+    bottom auction_chrome_bottom($auctionHeightMobile, 8px)
 
 @media (max-width 800px)
   // The drawer comes in from the right on a phone, so the button that opens it
@@ -367,10 +309,7 @@
   // MUST STAY BELOW the max-width 1159px rule: both are 0,2,0 and the cascade
   // decides on source order, so reordering these silently drops the rail term.
   .auction__live .main__menu-button
-    bottom s(
-      'calc(%s + var(--auction-side-height, 0px) + 8px)',
-      $auctionHeightMobile
-    )
+    bottom auction_chrome_side_bottom($auctionHeightMobile, 8px)
 
 @media (pointer: fine)
   .menu__links a:hover

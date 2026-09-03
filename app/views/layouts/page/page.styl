@@ -27,13 +27,23 @@
 // THE BAND THE AUCTION CHROME OCCUPIES, reserved here so the page's own scroll
 // ends above it. 1160 rather than 800: that is where the bid bar gains its
 // `max-width 1120px` cap and stops stacking, and the chrome is a different
-// height either side of it. auction-controls.styl sets the matching height and
-// menu.styl offsets the floating button by it -- the three move together or the
-// page and the chrome disagree about where the chrome ends.
+// height either side of it.
+//
+// THE RESERVATION IS THE CHROME'S MEASURED HEIGHT, not a constant that has to be
+// kept in step with one. auction-controls.js publishes
+// `--auction-controls-height` from a ResizeObserver and auction_chrome_bottom()
+// wraps the read; the constants below are the fallback for the frame before that
+// observer runs, and for a page where the chrome is not mounted at all.
+//
+// A constant was wrong rather than merely brittle. Below 536px the bid bar's
+// actions row wraps and the chrome grows past 214px, and a static reservation
+// does not report that -- `.auction__controls` is `position fixed`, so the
+// surplus comes out of its own last child and surfaces as the team strip
+// clipped, not as a layout that ran out of room.
 @media (min-width 1160px)
   .auction__live .page
-    margin-bottom $auctionHeightDesktop
+    margin-bottom auction_chrome_bottom($auctionHeightDesktop, 0px)
 
 @media (max-width 1159px)
   .auction__live .page
-    margin-bottom $auctionHeightMobile
+    margin-bottom auction_chrome_bottom($auctionHeightMobile, 0px)

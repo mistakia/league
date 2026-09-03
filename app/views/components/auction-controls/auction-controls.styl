@@ -28,13 +28,25 @@
   .auction__teams
     justify-content center
 
+// `min-height`, NOT `height`, and this box publishes what it actually measures.
+// A definite height does not grow for its content, so once the bid bar's actions
+// row wraps below 536px the surplus came out of the LAST CHILD -- the team strip
+// -- rather than out of the box, which reads as a clipped chip row instead of as
+// chrome that needs more room. The floor keeps the resting height these numbers
+// were tuned for and lets the one zone that needs more take it.
+//
+// auction-controls.js observes this element and publishes
+// `--auction-controls-height`; page.styl reserves the band from that property
+// and menu.styl offsets both floating buttons off it. The constants are the
+// fallback for the frame before the observer runs, so they must stay equal to
+// the resting height rather than to a maximum.
 @media (min-width 1160px)
   .auction__controls
     transition margin 225ms cubic-bezier(0, 0, 0.2, 1) 0ms
-    height $auctionHeightDesktop
+    min-height $auctionHeightDesktop
   .menu__open .auction__controls
     margin-left $menuWidth
 
 @media (max-width 1159px)
   .auction__controls
-    height $auctionHeightMobile
+    min-height $auctionHeightMobile

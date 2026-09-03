@@ -1,14 +1,97 @@
+// THE COMMISSIONER'S CONTROLS SIT DIRECTLY ABOVE THE NAV MENU BUTTON, and this
+// file's whole job is that they are the same object as it. The paint, the
+// height, the radius, the tracking and the focus ring all come from
+// prose_floating_action() in app/styles/prose-form.styl, which menu.styl calls
+// too -- see the argument there for why $prose_action and why the accent only on
+// hover.
+//
+// WHAT THIS REPLACED: a MUI SpeedDial (`.MuiSpeedDial-root.MuiSpeedDial-directionUp`)
+// with a MUI Backdrop and two SpeedDialActions, positioned by
+// `bottom ($auctionHeightMobile + 48 + 8 + 16)` unconditionally and `bottom
+// 160px` above 1160px. Both were hand-summed constants that had stopped
+// describing anything -- 48 was a FAB height the menu button has not had since it
+// went to 38, and 160 was the desktop chrome before it was 164.
+//
+// NOTHING HERE IS HAND-SUMMED NOW. auction_chrome_bottom() reads the chrome's
+// MEASURED height off `--auction-controls-height`, which auction-controls.js
+// publishes from a ResizeObserver, and the offset above the menu button is
+// arithmetic on $floating_action_height rather than a second copy of it. Move
+// the menu button's height and this follows; move the chrome and both follow.
+
+// THE MENU BUTTON'S OWN OFFSET, PLUS THE MENU BUTTON, PLUS A GAP -- in that
+// order, because that is what "above the menu button" means as arithmetic. The
+// leading 8px is the gap menu.styl passes for the button itself; the trailing
+// 8px is the gap between the two controls.
+$commissioner_controls_offset = 8px + $floating_action_height + 8px
+
+// Not inside the stack, so the stack's z-index does not have to sit above a
+// child of its own. Fixed to the viewport rather than to the control.
+.commissioner-controls__backdrop
+  position fixed
+  inset 0
+  background rgba(0, 0, 0, 0.5)
+  z-index $z_overlay_backdrop
+  -webkit-tap-highlight-color transparent
+
+// A COLUMN ANCHORED BY ITS BOTTOM, which is what makes the actions open UPWARD
+// without any of them knowing how many there are. The toggle is the last child,
+// so its bottom edge is the offset below and everything else grows off the top.
+.commissioner-controls__stack
+  position fixed
+  z-index $z_overlay_panel
+  display flex
+  flex-direction column
+  // `stretch`, so the actions and the toggle share one width -- the widest
+  // label's. A ragged right edge on a stack of three buttons in a corner reads
+  // as three controls rather than as one menu.
+  align-items stretch
+  gap 8px
+
+.commissioner-controls__actions
+  display flex
+  flex-direction column
+  gap 8px
+
+.commissioner-controls__toggle
+.commissioner-controls__action
+  prose_floating_action()
+  // The asymmetric padding prose_floating_action() carries corrects a label sat
+  // left of centre by its own trailing letter-space, which is a shrink-to-fit
+  // problem. These boxes are stretched to a shared width instead, so the label
+  // is centred outright and the correction has nothing to correct.
+  justify-content center
+
 .auction__commissioner-controls
-  .MuiBackdrop-root
-    z-index $z_overlay_backdrop
+  @media (min-width 1160px)
+    .commissioner-controls__stack
+      left 16px
+      bottom auction_chrome_bottom(
+        $auctionHeightDesktop,
+        $commissioner_controls_offset
+      )
 
-  .MuiSpeedDial-root.MuiSpeedDial-directionUp
-    absolute bottom ($auctionHeightMobile + 48 + 8 + 16) right 16px
-    z-index $z_overlay_panel
+  @media (max-width 1159px)
+    .commissioner-controls__stack
+      left 16px
+      bottom auction_chrome_bottom(
+        $auctionHeightMobile,
+        $commissioner_controls_offset
+      )
 
-  .tooltip-label-pause-on-disconnect
-    width 176px
-
-@media screen and (min-width 1160px)
-  .auction__commissioner-controls .MuiSpeedDial-root.MuiSpeedDial-directionUp
-    bottom 160px
+  // THE SAME EDGE THE MENU BUTTON MOVES TO, and for the same reason menu.styl
+  // gives: below 800 the drawer comes in from the right, so the control that
+  // opens it sits on that edge and under the thumb rather than across the screen
+  // from it. This one is not that control, but it is stacked on top of it, and a
+  // pair that swaps sides at a breakpoint is not a pair.
+  //
+  // MUST STAY BELOW the max-width 1159px block. Both are the same specificity
+  // and the cascade decides on source order, so reordering these silently drops
+  // the side rail term -- exactly the note menu.styl carries over its own copy.
+  @media (max-width 800px)
+    .commissioner-controls__stack
+      left auto
+      right 16px
+      bottom auction_chrome_side_bottom(
+        $auctionHeightMobile,
+        $commissioner_controls_offset
+      )

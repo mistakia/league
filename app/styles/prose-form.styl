@@ -306,6 +306,78 @@ prose_action_fill()
     outline 2px solid $prose_accent
     outline-offset 3px
 
+// THE FLOATING CONTROL, and the reason it is a mixin is that there are now two
+// of them stacked in the same corner of the auction: the nav menu button and the
+// commissioner controls above it. Two floating buttons a gap apart have to be
+// the same object or the pair reads as two unrelated widgets that happened to
+// land together, which is exactly what it read as while one was this paint and
+// the other was MUI's SpeedDial.
+//
+// DELIBERATELY NOT prose_action_fill(), for the reason menu.styl gave before
+// this moved: half of that mixin fits and half does not. A floating control
+// carries its own geometry, a shadow and label-scale type, so calling it would
+// emit four declarations every caller immediately overrides. This is the same
+// paint named from the same variables rather than a shim over the mixin.
+//
+// THE REAL CONSTRAINT IS THAT IT FLOATS OVER EVERYTHING — tables, the auction,
+// the players list and the prose pages, all on the same $backgroundColor
+// surface. $prose_action is the one fill that works: light enough not to shout,
+// dark enough that it never dissolves into the ground the way an outlined or
+// white button does. The accent is the site's ONE accent and cannot be spent on
+// a control that is on screen at all times, so it goes on HOVER — the same
+// bargain prose_action_fill() makes for the landing call to action.
+//
+// The horizontal padding is ASYMMETRIC ON PURPOSE. The wide tracking below
+// leaves a trailing space after the final letter, which sits a label left of the
+// box's centre under equal padding. THE GAP STAYS 2px WHATEVER THE PADDING IS,
+// because it answers the trailing space rather than the box: 0.16em at 11px is
+// 1.76px, so 2px is the correction at any size. It is inert on a caller that
+// centres its label in a stretched box, which is what the stacked commissioner
+// actions do.
+prose_floating_action()
+  display inline-flex
+  align-items center
+  // 38px, and the label is the whole control — there is no glyph beside it. A
+  // mark and a word both saying the same thing is that thing twice, and at label
+  // scale the glyph is the larger of the two, so the word ends up arguing with
+  // an icon that outweighs it.
+  height $floating_action_height
+  padding 0 14px 0 16px
+  border none
+  border-radius 3px
+  background $prose_action
+  color $prose_paper
+  // The site's label voice — prose_eyebrow()'s mono at small size with wide
+  // tracking — rather than MUI Button's sans at 14px. Uppercase survives because
+  // it belongs to both languages; the face, the size and the tracking are what
+  // separated them.
+  font-family $prose_mono
+  font-size 11px
+  font-weight $prose_bold
+  letter-spacing 0.16em
+  text-transform uppercase
+  white-space nowrap
+  cursor pointer
+  // ONE layer, not Material's three. The contrast against both surfaces is
+  // already doing the separating, so the shadow only has to lift the object off
+  // the page.
+  box-shadow 0 6px 20px rgba(23, 24, 26, 0.18)
+  transition background 120ms ease, box-shadow 120ms ease, transform 120ms ease
+  &:hover
+    background $prose_accent
+    box-shadow 0 8px 24px rgba(193, 18, 31, 0.24)
+  &:active
+    transform translateY(1px)
+  // Ink rather than the accent ring the drawer's own buttons get, because THIS
+  // button repaints to the accent on hover — an accent ring on an accent fill is
+  // no ring at all for anyone who tabs to a button the pointer is resting on.
+  // The offset leaves a gap of surface showing, so the ring reads in every
+  // state: against the graphite fill, against the accent one, and against the
+  // page.
+  &:focus-visible
+    outline 2px solid $prose_ink
+    outline-offset 3px
+
 // The disabled state lives HERE and not in the fill above, because only a
 // control that can be disabled can have one — an anchor cannot, so putting it
 // in the shared paint emitted four lines of CSS the landing page's call to

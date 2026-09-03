@@ -1,14 +1,27 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Backdrop from '@mui/material/Backdrop'
-import SpeedDial from '@mui/material/SpeedDial'
-import SpeedDialIcon from '@mui/material/SpeedDialIcon'
-import SpeedDialAction from '@mui/material/SpeedDialAction'
-
-import Icon from '@components/icon'
 
 import './auction-commissioner-controls.styl'
 
+/**
+ * Pause, resume, and auto-pause, for the commissioner of a live auction.
+ *
+ * NO MATERIAL, AND NOT MERELY NO MATERIAL PAINT. This was a MUI SpeedDial with a
+ * MUI Backdrop and two SpeedDialActions -- a blue circular FAB with a three-layer
+ * elevation shadow and floating tooltip labels, none of which appears anywhere
+ * else on this site. Restyling it was possible and was the wrong shape of fix:
+ * the geometry that had to go (a 56px circle, a 40px action circle, a tooltip
+ * that is really a label) is structural in those components, so overriding it
+ * meant fighting three stylesheets to arrive at a rectangle. Three plain buttons
+ * express it directly, and the package drops three imports off a repo that
+ * ratchets @mui/material per package.
+ *
+ * IT IS THE SAME OBJECT AS THE NAV MENU BUTTON, sitting directly above it --
+ * same paint, same 38px, same 3px radius, from prose_floating_action(). Two
+ * floating controls a gap apart in one corner have to agree or they read as two
+ * unrelated widgets that happened to land together, which is what a blue circle
+ * over a graphite rectangle read as.
+ */
 export default class AuctionCommissionerControls extends React.Component {
   constructor(props) {
     super(props)
@@ -16,84 +29,91 @@ export default class AuctionCommissionerControls extends React.Component {
     this.state = { open: false }
   }
 
-  handleOpen = () => {
-    this.setState({ open: true })
+  componentDidMount() {
+    document.addEventListener('keydown', this.handle_key_down)
   }
 
-  handleClose = () => {
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handle_key_down)
+  }
+
+  // The SpeedDial closed on Escape and nothing else here would. It is a document
+  // listener rather than a handler on the wrapper because the backdrop takes the
+  // click but never the focus, so a keystroke after opening the stack does not
+  // necessarily land inside it.
+  handle_key_down = (event) => {
+    if (event.key === 'Escape' && this.state.open) {
+      this.setState({ open: false })
+    }
+  }
+
+  handle_toggle = () => {
+    this.setState(({ open }) => ({ open: !open }))
+  }
+
+  handle_close = () => {
     this.setState({ open: false })
   }
 
-  handlePause = () => {
-    this.props.pause()
+  // Every action closes the stack behind it, which is what SpeedDialAction did.
+  // A commissioner who has just paused the auction wants to see the auction.
+  handle_action = (action) => () => {
+    action()
+    this.handle_close()
   }
-
-  handleResume = () => {
-    this.props.resume()
-  }
-
-  handleRewind = () => {}
 
   render = () => {
     const { open } = this.state
-    const { isPaused, pause_on_team_disconnect } = this.props
-    let action
-    if (isPaused) {
-      action = (
-        <SpeedDialAction
-          icon={<Icon name='play' />}
-          tooltipTitle='Resume'
-          tooltipOpen
-          onClick={this.handleResume}
-        />
-      )
-    } else {
-      action = (
-        <SpeedDialAction
-          icon={<Icon name='pause' />}
-          tooltipTitle='Pause'
-          tooltipOpen
-          onClick={this.handlePause}
-        />
-      )
-    }
+    const {
+      isPaused,
+      pause_on_team_disconnect,
+      pause,
+      resume,
+      toggle_pause_on_team_disconnect
+    } = this.props
+
     return (
       <div className='auction__commissioner-controls'>
-        <Backdrop open={open} />
-        <SpeedDial
-          ariaLabel='auction-commissioner-controls'
-          icon={<SpeedDialIcon />}
-          onClose={this.handleClose}
-          onOpen={this.handleOpen}
-          open={open}
-        >
-          {action}
-          <SpeedDialAction
-            icon={
-              pause_on_team_disconnect ? (
-                <Icon name='remove-moderator' />
-              ) : (
-                <Icon name='safety-check' />
-              )
-            }
-            tooltipTitle={
-              pause_on_team_disconnect
-                ? 'Disable Auto-Pause'
-                : 'Enable Auto-Pause'
-            }
-            tooltipOpen
-            onClick={this.props.toggle_pause_on_team_disconnect}
-            classes={{
-              staticTooltipLabel: 'tooltip-label-pause-on-disconnect'
-            }}
+        {open && (
+          <div
+            className='commissioner-controls__backdrop'
+            onClick={this.handle_close}
           />
-          {/* <SpeedDialAction
-              icon={<Icon name='previous' />}
-              tooltipTitle='Rewind'
-              tooltipOpen
-              onClick={this.handleRewind}
-              /> */}
-        </SpeedDial>
+        )}
+        <div className='commissioner-controls__stack'>
+          {open && (
+            <div className='commissioner-controls__actions'>
+              <button
+                type='button'
+                className='commissioner-controls__action'
+                onClick={this.handle_action(isPaused ? resume : pause)}
+              >
+                {isPaused ? 'Resume' : 'Pause'}
+              </button>
+              {/* The label names the state this will PUT the auction in, not the
+                  state it is in. The SpeedDial's tooltip said the same thing;
+                  the difference is that a label under a thumb is read before the
+                  tap rather than after it. */}
+              <button
+                type='button'
+                className='commissioner-controls__action'
+                onClick={this.handle_action(toggle_pause_on_team_disconnect)}
+              >
+                {pause_on_team_disconnect
+                  ? 'Disable auto-pause'
+                  : 'Enable auto-pause'}
+              </button>
+            </div>
+          )}
+          <button
+            type='button'
+            className='commissioner-controls__toggle'
+            aria-expanded={open}
+            onClick={this.handle_toggle}
+          >
+            Commish
+          </button>
+        </div>
       </div>
     )
   }
