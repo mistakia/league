@@ -31,8 +31,12 @@ describe('SCRIPTS generate-player-snaps', function () {
 
   const offense_pid = 'SNAP-OFFN-900001'
   const defense_pid = 'SNAP-DEFN-900002'
+  // Populates the SECOND game in the wrong-game block below, so that game has
+  // team totals of its own. Unused by every other test in this file.
+  const filler_pid = 'SNAP-FILL-900003'
   const offense_gsis_it_id = 990001
   const defense_gsis_it_id = 990002
+  const filler_gsis_it_id = 990003
 
   const player_row = ({
     pid,
@@ -187,6 +191,12 @@ describe('SCRIPTS generate-player-snaps', function () {
           last_name: 'defense',
           gsis_it_player_id: defense_gsis_it_id,
           primary_position: 'LB'
+        }),
+        player_row({
+          pid: filler_pid,
+          last_name: 'filler',
+          gsis_it_player_id: filler_gsis_it_id,
+          primary_position: 'WR'
         })
       ])
       .onConflict('pid')
@@ -247,7 +257,9 @@ describe('SCRIPTS generate-player-snaps', function () {
     await db('nfl_plays').where({ esbid }).del()
     await db('player_gamelogs').where({ esbid }).del()
     await db('nfl_games').where({ esbid }).del()
-    await db('player').whereIn('pid', [offense_pid, defense_pid]).del()
+    await db('player')
+      .whereIn('pid', [offense_pid, defense_pid, filler_pid])
+      .del()
   })
 
   it('executes its insert against the database', async () => {
@@ -407,5 +419,136 @@ describe('SCRIPTS generate-player-snaps', function () {
     expect(rows[0].snaps_offense).to.equal(plays.length)
     // A column the writer does not name must survive the merge.
     expect(rows[0].targets).to.equal(7)
+  })
+
+  describe('a player with snaps in one game and a gamelog in ANOTHER', function () {
+    // The measured production defect, end to end. Until 2026-09-03 this writer
+    // looked the gamelog up by player across the WHOLE week, so a player whose
+    // gamelog sat in a different game of the same week got a brand new row at
+    // the snap's esbid carrying the other game's opponent and NO team -- the
+    // insert never named nfl_team, so the row took the column DEFAULT of '' on
+    // a NOT NULL column.
+    //
+    // It happened twice, to pid CALE-JOHN-027832 in 2024 preseason, and those
+    // two rows were the only findings the team-abbreviation conformance check
+    // reported. Asserting the ABSENCE of a row is the whole point here: the
+    // defect's signature is a row that should not exist.
+    const other_esbid = 2025090701
+    const other_nfl_team = 'MIA'
+    const third_nfl_team = 'NYJ'
+
+    beforeEach(async () => {
+      await db('nfl_snaps').where({ esbid: other_esbid }).del()
+      await db('nfl_plays').where({ esbid: other_esbid }).del()
+      await db('player_gamelogs').where({ esbid: other_esbid }).del()
+      await db('nfl_games').where({ esbid: other_esbid }).del()
+
+      await db('nfl_games').insert({
+        esbid: other_esbid,
+        season_year,
+        week,
+        season_type,
+        home_nfl_team: other_nfl_team,
+        away_nfl_team: third_nfl_team
+      })
+
+      // The other game needs PLAYS AND SNAPS of its own, and this is the part
+      // that makes the case reproduce at all. The script looks its team totals
+      // up by the gamelog's team and skips the player when there are none -- so
+      // an empty other game makes the writer skip for the WRONG reason and every
+      // assertion below passes under the defect too. In production the other
+      // game was a real one whose team had snaps that week, and that is what let
+      // the bad row through. Verified by control: with these rows absent, the
+      // pre-fix pairing leaves this whole block green.
+      await db('nfl_plays').insert(
+        plays.map((play) => ({
+          ...play_row(play),
+          esbid: other_esbid,
+          offense_nfl_team: other_nfl_team,
+          defense_nfl_team: third_nfl_team
+        }))
+      )
+
+      await db('nfl_snaps').insert(
+        plays.map(({ play_id }) => ({
+          esbid: other_esbid,
+          play_id,
+          gsis_it_player_id: filler_gsis_it_id,
+          season_year
+        }))
+      )
+
+      // The filler's own gamelog, so he is written rather than skipped and the
+      // other game's team totals are reached the same way the real one's are.
+      await db('player_gamelogs').insert({
+        esbid: other_esbid,
+        pid: filler_pid,
+        season_year,
+        nfl_team: other_nfl_team,
+        opponent_nfl_team: third_nfl_team,
+        player_position: 'WR'
+      })
+
+      // The offense player's ONLY gamelog this week now sits in the other game.
+      // His snaps stay in `esbid`, exactly as the production case had it.
+      await db('player_gamelogs').where({ esbid, pid: offense_pid }).del()
+      await db('player_gamelogs').insert({
+        esbid: other_esbid,
+        pid: offense_pid,
+        season_year,
+        nfl_team: other_nfl_team,
+        opponent_nfl_team: third_nfl_team,
+        player_position: 'WR'
+      })
+    })
+
+    after(async () => {
+      await db('nfl_snaps').where({ esbid: other_esbid }).del()
+      await db('nfl_plays').where({ esbid: other_esbid }).del()
+      await db('player_gamelogs').where({ esbid: other_esbid }).del()
+      await db('nfl_games').where({ esbid: other_esbid }).del()
+    })
+
+    it('writes NO row at the snap game rather than one with an empty team', async () => {
+      await run()
+
+      const row = await db('player_gamelogs')
+        .where({ esbid, pid: offense_pid, season_year })
+        .first()
+
+      expect(
+        row,
+        'a row was minted at the snap game from another game gamelog'
+      ).to.equal(undefined)
+    })
+
+    it('leaves the gamelog in the OTHER game untouched', async () => {
+      await run()
+
+      const row = await db('player_gamelogs')
+        .where({ esbid: other_esbid, pid: offense_pid, season_year })
+        .first()
+
+      // The green above is worthless if the run did nothing at all, so this
+      // pairs it: the other row must still be intact and unstamped with snaps
+      // from a game it does not belong to.
+      expect(row).to.not.equal(undefined)
+      expect(row.nfl_team).to.equal(other_nfl_team)
+      expect(row.snaps_offense).to.equal(null)
+    })
+
+    it('still writes the defense player, whose gamelog IS in the snap game', async () => {
+      await run()
+
+      // The discriminator. Without it, a writer that had simply stopped writing
+      // anything would pass both assertions above.
+      const row = await db('player_gamelogs')
+        .where({ esbid, pid: defense_pid, season_year })
+        .first()
+
+      expect(row).to.not.equal(undefined)
+      expect(row.snaps_defense).to.equal(defense_play_ids.length)
+      expect(row.nfl_team).to.equal(defense_nfl_team)
+    })
   })
 })

@@ -3,7 +3,6 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { groupBy } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -99,7 +98,15 @@ const generate_player_snaps_for_week = async ({
   // Grouped per (player, GAME) rather than per player. A week can hold more
   // than one game for the same player, and grouping by player alone both merged
   // their snaps and took the esbid from whichever game sorted first.
-  const nfl_snap_rows_by_player_game = groupBy(nfl_snap_rows, snap_group_key)
+  // Grouped by reduce rather than by the shared `groupBy`, which indexes with
+  // `x[key]` and so takes a property NAME only -- handed a function it puts
+  // every row under the single key `undefined`, which reads as one enormous
+  // group rather than as an error.
+  const nfl_snap_rows_by_player_game = nfl_snap_rows.reduce((groups, row) => {
+    const key = snap_group_key(row)
+    ;(groups[key] = groups[key] || []).push(row)
+    return groups
+  }, {})
   log(
     `found ${Object.keys(nfl_snap_rows_by_player_game).length} player-games of snaps`
   )
