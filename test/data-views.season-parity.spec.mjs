@@ -59,6 +59,23 @@ const current_dir = path.dirname(fileURLToPath(import.meta.url))
 // a count or a mean. Their CTE already carried the two accumulator columns
 // under these exact names, so everything else reproduced byte for byte and only
 // the OUTER recombination changed.
+// The TOUCHDOWN regeneration moved five entries, and unlike the ones above it
+// is a bug fix rather than a migration: all five counted `is_touchdown`, which
+// is true for ANY touchdown on the play including one scored by the DEFENSE.
+// So a quarterback was credited with the pick-six thrown against him and a
+// running back with the fumble the defense returned. Measured over 2024 REG
+// alone: 845 passing touchdowns counted against a true 809, across 21 players
+// (Joe Burrow 46 against a true 43 -- one pick-six and two fumble returns), and
+// 522 rushing against a true 511 across 11. The receiving column's
+// `is_completion` guard nearly closed it and still admitted one.
+//
+// Each now counts the flag that names the scorer's role -- `is_passing_touchdown`,
+// `is_rushing_touchdown`, or their disjunction for the combined column. Verified
+// against production rather than against the previous render: the fixed passing
+// column reproduces the real 2024 leaders (Burrow 43, Mayfield and Jackson 41,
+// Goff 37, Darnold 35), and the two independent routes agree exactly -- total
+// fixed passing touchdowns 809 equals total fixed receiving touchdowns 809,
+// which they must, and did not before.
 const golden = JSON.parse(
   fs.readFileSync(
     path.join(current_dir, 'fixtures/data-views-season-render-golden.json'),

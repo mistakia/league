@@ -278,7 +278,7 @@ export default {
       accumulators: {
         value: {
           aggregate: 'sum',
-          expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
+          expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
       combine_accumulators: 'identity'
@@ -416,7 +416,7 @@ export default {
       accumulators: {
         numerator: {
           aggregate: 'sum',
-          expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
+          expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
         },
         denominator: {
           aggregate: 'sum',
@@ -739,7 +739,7 @@ export default {
       accumulators: {
         value: {
           aggregate: 'sum',
-          expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
+          expr: `CASE WHEN is_rushing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
       combine_accumulators: 'identity'
@@ -1196,7 +1196,7 @@ export default {
       accumulators: {
         value: {
           aggregate: 'sum',
-          expr: `CASE WHEN is_completion = true AND is_touchdown = true THEN 1 ELSE 0 END`
+          expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
       combine_accumulators: 'identity'
@@ -1209,7 +1209,7 @@ export default {
       accumulators: {
         value: {
           aggregate: 'sum',
-          expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
+          expr: `CASE WHEN is_passing_touchdown = true OR is_rushing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
       combine_accumulators: 'identity'

@@ -21,6 +21,14 @@
 //
 //   NODE_ENV=production node scripts/data-view-benchmark-ground-truth.mjs
 //   NODE_ENV=production node scripts/data-view-benchmark-ground-truth.mjs --check
+//   NODE_ENV=production node scripts/data-view-benchmark-ground-truth.mjs --probe
+//
+// The two verification modes answer different questions and neither substitutes
+// for the other. `--check` asks whether the expected values still match the SQL.
+// `--probe` asks whether the data-view REGISTRY can express an answer that
+// satisfies the assertion at all -- run it after adding or regenerating any
+// instruction, because an unsatisfiable assertion fails a run in the exact shape
+// of a wrong agent answer and gets read as one.
 //
 // `--check` recomputes and diffs against the committed file without writing,
 // so a scheduled run can report drift rather than silently re-baselining. The
@@ -68,6 +76,51 @@ const MEASURE_TOLERANCE = 0.02
  * stat, a filtered population, and a derived rate. `capability` records which,
  * so a failure can be read as "rates are broken" rather than as one bad row.
  */
+/**
+ * Build a player-grain reference table_state -- the shape a competent agent
+ * produces for "top N <position> by <stat> in <year>".
+ *
+ * @param {object} params
+ * @returns {object}
+ */
+const player_reference = ({
+  measure_column,
+  position,
+  year,
+  extra_columns = [],
+  minimum = null
+}) => ({
+  row_grain: ['player'],
+  prefix_columns: ['player_name', 'player_position', 'player_nfl_teams'],
+  columns: [
+    { column_id: measure_column, params: { year: [year] } },
+    ...extra_columns.map((column_id) => ({
+      column_id,
+      params: { year: [year] }
+    }))
+  ],
+  where: [
+    {
+      column_id: 'player_position',
+      operator: 'IN',
+      value: [position],
+      params: {}
+    },
+    ...(minimum
+      ? [
+          {
+            column_id: minimum.column_id,
+            operator: '>=',
+            value: minimum.value,
+            params: { year: [minimum.year] }
+          }
+        ]
+      : [])
+  ],
+  sort: [{ column_id: measure_column, desc: true }],
+  row_axes: []
+})
+
 const INSTRUCTIONS = [
   {
     instruction_id: 'qb-passing-yards-2023',
@@ -285,6 +338,119 @@ const derive_entry = async (entry) => {
 }
 
 /**
+ * A registry answer to each instruction, for `--probe` only.
+ *
+ * WHAT THIS CATCHES THAT `--check` CANNOT. `--check` proves the expected values
+ * still match the SQL. It says nothing about whether the data-view REGISTRY can
+ * express an answer that satisfies the assertion -- and twice now it could not,
+ * each time in the shape of a wrong agent answer:
+ *
+ *   - the team assertion guessed its identity key from a player row, so every
+ *     team run would have failed with "no team in row" (league c2cd9f013)
+ *   - the passing-touchdown assertion could not be satisfied by any table_state,
+ *     because the registry column counted `is_touchdown` and credited a
+ *     quarterback with the pick-six thrown against him
+ *
+ * Both were found by hand-building a state and grading it. That is what this
+ * automates. These are NOT written to instructions.json and the agent never sees
+ * them -- `derive_entry` picks its output fields explicitly.
+ *
+ * A probe failure means the benchmark is broken, not that a run was wrong.
+ */
+const REFERENCE_TABLE_STATES = {
+  'qb-passing-yards-2023': player_reference({
+    measure_column: 'player_pass_yards_from_plays',
+    position: 'QB',
+    year: 2023
+  }),
+  'wr-receiving-yards-2023': player_reference({
+    measure_column: 'player_receiving_yards_from_plays',
+    position: 'WR',
+    year: 2023,
+    extra_columns: ['player_targets_from_plays', 'player_receptions_from_plays']
+  }),
+  'rb-rushing-yards-2024': player_reference({
+    measure_column: 'player_rush_yards_from_plays',
+    position: 'RB',
+    year: 2024,
+    extra_columns: ['player_rush_touchdowns_from_plays']
+  }),
+  'qb-passing-touchdowns-2024': player_reference({
+    measure_column: 'player_pass_touchdowns_from_plays',
+    position: 'QB',
+    year: 2024
+  }),
+  'te-receiving-yards-2023': player_reference({
+    measure_column: 'player_receiving_yards_from_plays',
+    position: 'TE',
+    year: 2023
+  }),
+  'wr-receptions-min-targets-2023': player_reference({
+    measure_column: 'player_receptions_from_plays',
+    position: 'WR',
+    year: 2023,
+    extra_columns: ['player_targets_from_plays'],
+    minimum: { column_id: 'player_targets_from_plays', value: 100, year: 2023 }
+  }),
+  'wr-yards-per-reception-2023': player_reference({
+    measure_column: 'player_receiving_yards_per_reception_from_plays',
+    position: 'WR',
+    year: 2023,
+    extra_columns: ['player_receptions_from_plays'],
+    minimum: {
+      column_id: 'player_receptions_from_plays',
+      value: 50,
+      year: 2023
+    }
+  }),
+  'team-passing-yards-2024': {
+    row_grain: ['team'],
+    prefix_columns: ['team_code', 'team_name'],
+    columns: [
+      { column_id: 'team_pass_yards_from_plays', params: { year: [2024] } }
+    ],
+    where: [],
+    sort: [{ column_id: 'team_pass_yards_from_plays', desc: true }],
+    row_axes: []
+  }
+}
+
+/**
+ * Grade every reference table_state against its own assertion.
+ *
+ * @param {object} instruction_set
+ * @returns {Promise<boolean>} whether every assertion is satisfiable
+ */
+const probe_instruction_set = async (instruction_set) => {
+  const { check_correctness } = await import('./data-view-benchmark-run.mjs')
+  let all_satisfiable = true
+
+  for (const entry of instruction_set.entries) {
+    const table_state = REFERENCE_TABLE_STATES[entry.instruction_id]
+    if (!table_state) {
+      console.error(
+        `  ${entry.instruction_id}: NO REFERENCE table_state -- assertion is unprobed`
+      )
+      all_satisfiable = false
+      continue
+    }
+    const result = await check_correctness({ table_state, entry })
+    if (result.correct) {
+      console.log(
+        `  ${entry.instruction_id}: satisfiable (${result.returned_rows} rows)`
+      )
+      continue
+    }
+    all_satisfiable = false
+    console.error(
+      `  ${entry.instruction_id}: UNSATISFIABLE -- ${result.reason}`
+    )
+  }
+
+  return all_satisfiable
+}
+
+/**
  * @returns {Promise<object>}
  */
 export const derive_instruction_set = async () => {
@@ -303,7 +469,23 @@ export const derive_instruction_set = async () => {
 
 const main = async () => {
   const check_only = process.argv.includes('--check')
+  const probe_only = process.argv.includes('--probe')
   const derived = await derive_instruction_set()
+
+  if (probe_only) {
+    console.log(
+      `probing ${derived.entry_count} assertions against the registry`
+    )
+    const all_satisfiable = await probe_instruction_set(derived)
+    if (!all_satisfiable) {
+      console.error(
+        'at least one assertion cannot be satisfied by any table_state. Fix the assertion or the column before spending a run: a run against it fails in the shape of a wrong answer.'
+      )
+      process.exit(1)
+    }
+    console.log('every assertion is reachable through the registry')
+    return
+  }
 
   // `generated_at` is excluded from the comparison deliberately -- it differs on
   // every run and would report drift on a file that is identical in substance.
