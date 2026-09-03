@@ -115,4 +115,74 @@ else
   fail "private submodule is not initialized; the hosts deploy it."
 fi
 
-echo "preflight-deploy: clean tree, HEAD == origin/master ($(git rev-parse --short HEAD)), private pushed"
+# (4) the API host's pm2 environment carries LEAGUE_REDIS_HOST
+#
+# server.mjs refuses to start without it, because Redis backs the data-view
+# result cache, the data_view_sql:enabled kill switch and all three generation
+# spend limits, and each of those fails OPEN and silently when Redis is absent.
+#
+# The gate exists because `yarn deploy` reloads pm2, and a RELOAD re-executes
+# the app with the environment pm2 already holds -- it does not re-read
+# server.pm2.config.js. So a deploy that first ships the refusal to a process
+# started before LEAGUE_REDIS_HOST was pinned there takes the API down at the
+# moment it reloads, and the config file naming the variable is no defense.
+#
+# The check reports which of FOUR states it found, rather than testing the
+# variable directly. `pm2 jlist | grep -q` collapses "variable absent" and
+# "pm2 could not run" into the same empty output, and pm2 CANNOT RUN in a
+# non-interactive ssh session unless nvm is sourced first: /usr/local/bin/pm2
+# exists and `command -v pm2` finds it, but its shebang resolves `node` through
+# PATH and node lives under ~/.nvm, so it dies with "env: 'node': No such file
+# or directory". A grep alone therefore reports a confident ABSENT for a probe
+# that never ran -- measured against this host, where the positive control
+# (BASE_INSTANCE_KEY_FILE, which IS in that environment) also read as absent.
+#
+# The oracle is pm2's exit status and a non-empty jlist, not the grep. The nvm
+# incantation is the same one the `load:main` deploy script uses.
+if [ -n "${SKIP_REDIS_ENV_GATE:-}" ]; then
+  echo "preflight-deploy: skipping the pm2 LEAGUE_REDIS_HOST check (SKIP_REDIS_ENV_GATE set)"
+else
+  redis_env_state=$(ssh -o BatchMode=yes -o ConnectTimeout=10 league '
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    jlist=$(pm2 jlist 2>/dev/null) || { echo NO_PM2; exit 0; }
+    [ -n "$jlist" ] || { echo NO_PM2; exit 0; }
+    case "$jlist" in
+    *LEAGUE_REDIS_HOST*) echo PRESENT ;;
+    *) echo ABSENT ;;
+    esac' 2>/dev/null) || redis_env_state=UNREACHABLE
+
+  case "$redis_env_state" in
+  PRESENT) ;;
+  NO_PM2)
+    fail \
+      "pm2 could not be run on the API host over a non-interactive ssh" \
+      "session, so this gate cannot read the running process environment." \
+      "It refuses rather than reporting a clean result it did not obtain."
+    ;;
+  UNREACHABLE | '')
+    fail \
+      "could not reach the API host to read the running pm2 environment." \
+      "" \
+      "Set SKIP_REDIS_ENV_GATE=1 only once you have confirmed LEAGUE_REDIS_HOST" \
+      "is in the running process another way."
+    ;;
+  *)
+    fail \
+      "the running pm2 'server' process has no LEAGUE_REDIS_HOST in its environment." \
+      "" \
+      "A pm2 RELOAD does not re-read server.pm2.config.js, so this deploy would" \
+      "restart the API into code that refuses to start without that variable." \
+      "Pick it up with a delete-then-start on the host, which is the only pm2" \
+      "operation that re-reads the config file:" \
+      "" \
+      "  ssh league 'cd /root/league && pm2 delete server && \\" \
+      "    pm2 start server.pm2.config.js --env production'" \
+      "" \
+      "A delete-then-start of 'server' drops every live websocket, so it is a" \
+      "deploy-window operation -- not something to run under an active auction."
+    ;;
+  esac
+fi
+
+echo "preflight-deploy: clean tree, HEAD == origin/master ($(git rev-parse --short HEAD)), private pushed, pm2 redis env present"

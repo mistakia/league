@@ -12,12 +12,24 @@ import {
   start_generation_drainer_if_configured,
   escalate_drainer_not_started
 } from '#libs-server/data-views/generation/generation-drainer.mjs'
+import {
+  assert_redis_configured,
+  escalate_redis_unreachable
+} from '#libs-server/redis_adapter.mjs'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 const IS_PROD = process.env.NODE_ENV === 'production'
 
 const logger = debug('server')
 const argv = yargs(hideBin(process.argv)).argv
+
+// Before anything binds a port. Redis backs the data-view result cache, the
+// data_view_sql:enabled kill switch and all three generation spend limits, and
+// each of those fails OPEN and silently when it is missing -- so an API that
+// came up without it would look healthy for its whole lifetime while enforcing
+// nothing. Thrown at module scope rather than inside main() so it exits
+// non-zero instead of becoming a rejected promise the catch below cannot see.
+assert_redis_configured({ is_production: IS_PROD })
 
 install_process_handlers({
   service_name: 'league-server',
@@ -63,6 +75,14 @@ const main = async () => {
     logger: create_logger('server:generation-drainer', {
       service: 'league-server'
     })
+  })
+
+  // Configuration was already proven above; this is the other half -- whether
+  // the configured Redis actually answers. Reported and not fatal, because
+  // reachability is the half that flaps and a blip must not refuse to serve.
+  await escalate_redis_unreachable({
+    is_production: IS_PROD,
+    logger: create_logger('server:redis', { service: 'league-server' })
   })
 
   if (argv.clean && process.env.NODE_ENV === 'development') {

@@ -182,7 +182,13 @@ export {
 export {
   redis_client,
   RedisCacheAdapter,
-  redis_cache
+  redis_cache,
+  assert_redis_configured,
+  escalate_redis_unreachable,
+  describe_redis_readiness,
+  is_redis_configured,
+  REDIS_HOST_ENV,
+  REDIS_PORT_ENV
 } from './redis_adapter.mjs'
 export * as auction_elections from './auction-elections.mjs'
 export * as auction_settlement from './auction-settlement.mjs'
