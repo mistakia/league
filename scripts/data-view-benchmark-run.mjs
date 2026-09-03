@@ -57,7 +57,8 @@ import db from '#db'
 import { execute_data_view_request } from '#libs-server/data-views/execute-data-view-request.mjs'
 import {
   derive_transcript_metrics,
-  parse_transcript
+  parse_transcript,
+  row_identity
 } from '#libs-server/data-views/generation/benchmark-metrics.mjs'
 import { is_main } from '#libs-server'
 
@@ -313,35 +314,6 @@ export const read_transcript = async ({ session_id, log = () => {} }) => {
     }
     await sleep(TRANSCRIPT_SETTLE_POLL_MS)
   }
-}
-
-const IDENTITY_KEY_CANDIDATES = {
-  pid: ['pid', 'player_id'],
-  team: [
-    'team',
-    'nfl_team',
-    'team_abbreviation',
-    'abbreviation',
-    'offense_nfl_team'
-  ]
-}
-
-/**
- * Pull the identity out of one result row.
- *
- * @param {object} row
- * @param {string} identity_key
- * @returns {string|null}
- */
-const row_identity = (row, identity_key) => {
-  for (const candidate of IDENTITY_KEY_CANDIDATES[identity_key] || [
-    identity_key
-  ]) {
-    if (row[candidate] !== undefined && row[candidate] !== null) {
-      return String(row[candidate])
-    }
-  }
-  return null
 }
 
 /**

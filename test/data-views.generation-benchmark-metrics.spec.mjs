@@ -5,7 +5,8 @@ import * as chai from 'chai'
 import {
   classify_tool_call,
   derive_transcript_metrics,
-  parse_transcript
+  parse_transcript,
+  row_identity
 } from '#libs-server/data-views/generation/benchmark-metrics.mjs'
 
 const { expect } = chai
@@ -278,6 +279,41 @@ describe('data-view generation benchmark metrics', function () {
       // confident.
       const metrics = derive_transcript_metrics(two_turn_transcript)
       expect(metrics.provider_error).to.equal(null)
+    })
+  })
+
+  describe('row identity resolution', function () {
+    // Every one of these keys was taken off a REAL result row. The first
+    // version of this list was guessed and named five plausible things, none of
+    // which was `team_code` -- so every team assertion failed with "no team in
+    // row", which is the same shape as a genuinely wrong answer and would have
+    // been read as one.
+    it('finds a player identity', function () {
+      expect(row_identity({ pid: 'TUAX-TAGO-005436' }, 'pid')).to.equal(
+        'TUAX-TAGO-005436'
+      )
+    })
+
+    it('finds a team identity under the name results actually use', function () {
+      expect(row_identity({ team_code: 'CIN' }, 'team')).to.equal('CIN')
+    })
+
+    it('tolerates the positional suffix the serializer appends', function () {
+      expect(
+        row_identity(
+          { team_code_0: 'DET', team_name_0: 'Detroit Lions' },
+          'team'
+        )
+      ).to.equal('DET')
+    })
+
+    it('returns null when the row has no identity of that grain', function () {
+      // The control. A player-grain row answering a team question must NOT
+      // resolve to something -- that is how the benchmark catches a view built
+      // at the wrong grain, which production returns without any error.
+      expect(
+        row_identity({ pid: 'X', team_pass_yds_from_plays_0: 4918 }, 'team')
+      ).to.equal(null)
     })
   })
 

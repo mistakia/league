@@ -94,6 +94,38 @@ export const classify_tool_call = (block) => {
   return 'other'
 }
 
+// What the identity of a row is CALLED in a result set, per row grain.
+//
+// Measured against real result rows rather than guessed, because the first
+// version of this list was guessed and every team assertion failed with "no
+// team in row" -- the key is `team_code`, which was not among the five plausible
+// names. A grain whose identity cannot be found reports as a wrong answer,
+// which is the same shape as a real failure and would have been read as one.
+export const IDENTITY_KEY_CANDIDATES = {
+  pid: ['pid', 'player_id'],
+  team: ['team_code', 'team', 'nfl_team', 'team_abbreviation']
+}
+
+/**
+ * Pull the identity out of one result row.
+ *
+ * Tolerates the positional `_0` suffix the result serializer appends, so a
+ * candidate matches whether it arrives as `team_code` or `team_code_0`.
+ *
+ * @param {object} row
+ * @param {string} identity_key
+ * @returns {string|null}
+ */
+export const row_identity = (row, identity_key) => {
+  const candidates = IDENTITY_KEY_CANDIDATES[identity_key] || [identity_key]
+  for (const candidate of candidates) {
+    for (const key of [candidate, `${candidate}_0`]) {
+      if (row[key] !== undefined && row[key] !== null) return String(row[key])
+    }
+  }
+  return null
+}
+
 /**
  * Everything the transcript knows about one run.
  *
@@ -225,6 +257,7 @@ export const parse_transcript = (body) =>
 
 export default {
   classify_tool_call,
+  row_identity,
   derive_transcript_metrics,
   parse_transcript,
   PROVIDER_ERROR_PATTERNS
