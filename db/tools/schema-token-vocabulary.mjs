@@ -813,6 +813,7 @@ const english_words = [
   'separation',
   'sequence',
   'series',
+  'session',
   'set',
   'settings',
   'settled',

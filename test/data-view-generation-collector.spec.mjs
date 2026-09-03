@@ -120,7 +120,7 @@ describe('data view generation collector', function () {
       expect(jobs[0].status).to.equal('completed')
     })
 
-    it('stops asking once a trajectory is recorded', async function () {
+    it('stops asking once the trajectory is recorded AND the session is torn down', async function () {
       const generation_id = await dispatch_one()
       await complete_generation_job({
         generation_id,
@@ -128,6 +128,15 @@ describe('data view generation collector', function () {
         generation_branch: 'registry',
         trajectory: { tool_call_count: 9, total_tokens: 100 }
       })
+
+      // A trajectory alone no longer retires a job. The session behind it can
+      // still be sitting at an idle prompt, and that is the more expensive of
+      // the two things left outstanding.
+      expect(await select_collectable_jobs()).to.have.lengthOf(1)
+
+      await db('data_view_generation_jobs')
+        .where({ generation_id })
+        .update({ session_termination_requested_at: db.fn.now() })
       expect(await select_collectable_jobs()).to.have.lengthOf(0)
     })
 
@@ -222,6 +231,131 @@ describe('data view generation collector', function () {
       // interval on the server clock; the collector must not overwrite it with
       // a figure measured on another host.
       expect(job.duration_milliseconds).to.not.equal(null)
+    })
+  })
+
+  // Tearing the agent session down when the job is terminal.
+  //
+  // The load-bearing case is the FIRST one: base launches every generation as an
+  // interactive REPL and retired its headless one-shot, so a healthy agent that
+  // has answered sits at awaiting_user forever. That is not a terminal session
+  // status, so without this teardown the trajectory gate never opens and a
+  // successful run records no cost at all -- which is exactly what production
+  // did on 2026-09-03.
+  describe('tearing down the session behind a terminal job', function () {
+    const recording_killer = (result = { killed: true, reason: 'ok' }) => {
+      const calls = []
+      return {
+        calls,
+        kill_session: async ({ thread_id }) => {
+          calls.push(thread_id)
+          return result
+        }
+      }
+    }
+
+    it('kills the session and stamps the attempt', async function () {
+      const generation_id = await dispatch_one()
+      await complete_generation_job({
+        generation_id,
+        result: { table_state: {} },
+        generation_branch: 'registry'
+      })
+      const { calls, kill_session } = recording_killer()
+
+      await collect_job({
+        job: await get_generation_job(generation_id),
+        read_thread: reader(ended_thread({ session_status: 'awaiting_user' })),
+        kill_session
+      })
+
+      expect(calls).to.deep.equal(['thread-1'])
+      const job = await get_generation_job(generation_id)
+      expect(job.session_termination_requested_at).to.not.equal(null)
+    })
+
+    it('does not kill it twice, however many passes run', async function () {
+      const generation_id = await dispatch_one()
+      await complete_generation_job({
+        generation_id,
+        result: { table_state: {} },
+        generation_branch: 'registry'
+      })
+      const { calls, kill_session } = recording_killer()
+
+      // Three passes stands in for the 720 a 5-second drainer would make across
+      // the one-hour trajectory window.
+      for (let i = 0; i < 3; i++) {
+        await collect_job({
+          job: await get_generation_job(generation_id),
+          read_thread: reader(
+            ended_thread({ session_status: 'awaiting_user' })
+          ),
+          kill_session
+        })
+      }
+
+      expect(calls).to.deep.equal(['thread-1'])
+    })
+
+    it('stamps even when base REFUSES, since a retried refusal is the same runaway', async function () {
+      const generation_id = await dispatch_one()
+      await complete_generation_job({
+        generation_id,
+        result: { table_state: {} },
+        generation_branch: 'registry'
+      })
+      const { calls, kill_session } = recording_killer({
+        killed: false,
+        reason: 'base answered 503'
+      })
+
+      await collect_job({
+        job: await get_generation_job(generation_id),
+        read_thread: reader(ended_thread({ session_status: 'awaiting_user' })),
+        kill_session
+      })
+      await collect_job({
+        job: await get_generation_job(generation_id),
+        read_thread: reader(ended_thread({ session_status: 'awaiting_user' })),
+        kill_session
+      })
+
+      expect(calls).to.deep.equal(['thread-1'])
+      const job = await get_generation_job(generation_id)
+      expect(job.session_termination_requested_at).to.not.equal(null)
+    })
+
+    // The negative control: a run still in flight must keep its session.
+    it('leaves a LIVE job alone', async function () {
+      const generation_id = await dispatch_one()
+      const { calls, kill_session } = recording_killer()
+
+      await collect_job({
+        job: await get_generation_job(generation_id),
+        read_thread: reader(ended_thread({ session_status: 'awaiting_user' })),
+        kill_session
+      })
+
+      expect(calls).to.deep.equal([])
+      const job = await get_generation_job(generation_id)
+      expect(job.session_termination_requested_at).to.equal(null)
+    })
+
+    it('picks up a terminal job that owes only a teardown', async function () {
+      const generation_id = await dispatch_one()
+      await complete_generation_job({
+        generation_id,
+        result: { table_state: {} },
+        generation_branch: 'registry'
+      })
+      // Trajectory already recorded, so the old selection would have dropped it.
+      await db('data_view_generation_jobs')
+        .where({ generation_id })
+        .update({ tool_call_count: 9 })
+
+      const rows = await select_collectable_jobs()
+      expect(rows.map((r) => r.generation_id)).to.include(generation_id)
     })
   })
 })

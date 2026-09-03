@@ -298,6 +298,7 @@ export interface DataViewGenerationJobsRow {
   total_tokens: number | null
   duration_milliseconds: number | null
   inference_provider: string | null
+  session_termination_requested_at: Date | null
 }
 
 export interface DataViewQueriesRow {

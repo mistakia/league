@@ -222,6 +222,30 @@ export const record_generation_trajectory = async ({
     })
 
 /**
+ * Stamp that league has attempted to tear down this generation's agent session.
+ *
+ * Stamped on the ATTEMPT, not on its success. A refusal that kept being retried
+ * is the same 5-second runaway the column exists to prevent, and league cannot
+ * act later on whether base happened to be reachable at that instant.
+ *
+ * Guarded on the column still being null so two drainers racing the same
+ * terminal job cannot both fire a teardown.
+ *
+ * @param {object} params
+ * @param {string} params.generation_id
+ * @param {object} [params.connection]
+ * @returns {Promise<number>} rows stamped -- 0 means someone else got there
+ */
+export const mark_generation_session_termination_requested = async ({
+  generation_id,
+  connection = db
+}) =>
+  connection('data_view_generation_jobs')
+    .where({ generation_id })
+    .whereNull('session_termination_requested_at')
+    .update({ session_termination_requested_at: connection.fn.now() })
+
+/**
  * Claim the oldest queued job for dispatch, atomically.
  *
  * FOR UPDATE SKIP LOCKED on the subselect is the whole mechanism, matching

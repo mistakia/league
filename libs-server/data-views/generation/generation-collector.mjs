@@ -4,12 +4,14 @@ import db from '#db'
 import {
   fail_generation_job,
   record_generation_trajectory,
+  mark_generation_session_termination_requested,
   LIVE_STATUSES
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
 import { record_generation_spend } from '#libs-server/data-views/generation/generation-limits.mjs'
 import {
   get_base_session_token,
   reset_base_session_token,
+  kill_generation_session,
   BaseSessionError
 } from '#libs-server/data-views/generation/base-session-client.mjs'
 
@@ -133,10 +135,13 @@ export const read_generation_thread = async ({
  *
  * Two populations, and they are different questions. A `running` job is asked
  * "did the session end", because nothing else can tell league that. A finished
- * one with no tool_call_count is asked "what did it cost" -- the emission
- * closed the row before league knew, so the trajectory is still outstanding.
+ * one is asked "what did it cost" and "is its session still up" -- the emission
+ * closed the row before league knew either.
+ *
  * `tool_call_count IS NULL` is exactly "no trajectory recorded" and needs no
- * column of its own.
+ * column of its own. The teardown DOES need one: it is an action rather than a
+ * value, so nothing on the row would otherwise say it had happened, and a
+ * 5-second drainer would repeat it for the whole hour-long window.
  *
  * @returns {Promise<Array<object>>}
  */
@@ -147,7 +152,16 @@ export const select_collectable_jobs = async () =>
       builder.where('status', 'running').orWhere((finished) =>
         finished
           .whereIn('status', ['completed', 'failed', 'expired'])
-          .whereNull('tool_call_count')
+          // Either half is reason to look at a finished job: it still owes a
+          // trajectory, or its session has not been torn down. They are separate
+          // because the teardown is what MAKES the trajectory readable -- see
+          // collect_job -- so a job needing the reap has not yet reached the
+          // point where a trajectory could have been recorded.
+          .where((needs) =>
+            needs
+              .whereNull('tool_call_count')
+              .orWhereNull('session_termination_requested_at')
+          )
           .where(
             'completed_at',
             '>',
@@ -167,9 +181,51 @@ export const select_collectable_jobs = async () =>
  */
 export const collect_job = async ({
   job,
-  read_thread = read_generation_thread
+  read_thread = read_generation_thread,
+  kill_session = kill_generation_session
 }) => {
   const thread = await read_thread({ thread_id: job.thread_id })
+
+  // TEAR THE SESSION DOWN THE MOMENT THE JOB IS TERMINAL, and do it before
+  // anything below reads the session's status.
+  //
+  // This is not tidying -- it is what makes the rest of this module work. A
+  // generation is one-shot, but base launches every session as an interactive
+  // REPL, so a healthy agent that has answered sits at an idle prompt at
+  // `awaiting_user` FOREVER. That is not in TERMINAL_SESSION_STATUSES, so the
+  // `session_is_over` gate below would never open and no trajectory would ever
+  // be recorded for a successful run. Killing the session is what drives it to a
+  // terminal status; the NEXT pass then records the trajectory.
+  //
+  // It also stops the runaway on the other side. An expired job's agent keeps
+  // running after the deadline sweep closes league's row -- measured 2026-09-03
+  // still thinking twenty minutes in, spending GPU and tokens on an answer the
+  // emission route would refuse.
+  //
+  // Stamped whether or not base obliged, because a refusal retried every 5
+  // seconds for an hour is its own runaway.
+  if (
+    !LIVE_STATUSES.includes(job.status) &&
+    !job.session_termination_requested_at
+  ) {
+    const claimed = await mark_generation_session_termination_requested({
+      generation_id: job.generation_id
+    })
+    // 0 rows means a concurrent drainer claimed the teardown; leave it to them
+    // rather than firing a second kill at the same thread.
+    if (claimed) {
+      const { killed, reason } = await kill_session({
+        thread_id: job.thread_id
+      })
+      if (!killed) {
+        log(
+          'session teardown for %s did not take: %s',
+          job.generation_id,
+          reason
+        )
+      }
+    }
+  }
 
   if (!thread) {
     // Base has no such thread. For a live job that is terminal -- the session
@@ -258,12 +314,16 @@ export const collect_job = async ({
  * @param {(params: object) => Promise<object|null>} [params.read_thread]
  * @returns {Promise<{collected: number}>}
  */
-export const collect_once = async ({ read_thread } = {}) => {
+export const collect_once = async ({ read_thread, kill_session } = {}) => {
   const jobs = await select_collectable_jobs()
   let collected = 0
   for (const job of jobs) {
     try {
-      await collect_job({ job, ...(read_thread ? { read_thread } : {}) })
+      await collect_job({
+        job,
+        ...(read_thread ? { read_thread } : {}),
+        ...(kill_session ? { kill_session } : {})
+      })
       collected += 1
     } catch (error) {
       // One unreadable thread must not stop the pass. The next pass retries it,

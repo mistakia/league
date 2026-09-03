@@ -2583,6 +2583,7 @@ CREATE TABLE public.data_view_generation_jobs (
     total_tokens integer,
     duration_milliseconds integer,
     inference_provider character varying(100),
+    session_termination_requested_at timestamp with time zone,
     CONSTRAINT data_view_generation_jobs_generation_branch_check CHECK (((generation_branch IS NULL) OR ((generation_branch)::text = ANY (ARRAY[('registry'::character varying)::text, ('query'::character varying)::text, ('refusal'::character varying)::text])))),
     CONSTRAINT data_view_generation_jobs_status_check CHECK (((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('dispatched'::character varying)::text, ('running'::character varying)::text, ('completed'::character varying)::text, ('failed'::character varying)::text, ('expired'::character varying)::text]))),
     CONSTRAINT data_view_generation_jobs_tool_call_count_check CHECK (((tool_call_count IS NULL) OR (tool_call_count >= 0))),
@@ -2609,6 +2610,13 @@ COMMENT ON COLUMN public.data_view_generation_jobs.principal_key IS 'Rate-limit 
 --
 
 COMMENT ON COLUMN public.data_view_generation_jobs.inference_provider IS 'Which inference provider served the agent, read off the base thread record rather than self-reported by the container.';
+
+
+--
+-- Name: COLUMN data_view_generation_jobs.session_termination_requested_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.data_view_generation_jobs.session_termination_requested_at IS 'When league last asked base to tear down this generation''s agent session. Set on the request, not on its success, so a refusal cannot loop.';
 
 
 --

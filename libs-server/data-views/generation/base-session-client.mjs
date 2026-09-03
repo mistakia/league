@@ -323,12 +323,80 @@ export const dispatch_generation_session = async ({
   return { thread_id, job_id }
 }
 
+/**
+ * Tear down the agent session behind a finished generation.
+ *
+ * A generation is one-shot -- league sends one instruction and there is never a
+ * second turn -- but base launches every session as an interactive REPL, so the
+ * agent sits at an idle prompt after answering and nothing reclaims it. Base
+ * deliberately retired its headless one-shot path, so asking the session to exit
+ * itself is not available; an external teardown is the whole remaining lever.
+ *
+ * Two costs make this worth a network call rather than a cleanup someone runs
+ * later. An idle REPL holds a container slot the next run needs, and -- measured
+ * 2026-09-03 -- an EXPIRED job leaves its agent running: the deadline sweep
+ * closes league's row while the session keeps thinking, spending GPU and tokens
+ * on an answer the delivery door will refuse.
+ *
+ * Idempotent, and deliberately never throws. This runs after a job has already
+ * reached its terminal state, so a failure here must not change the answer the
+ * user gets; it reports and the caller records the attempt either way. The
+ * generation identity OWNS the threads it creates, which is what authorizes the
+ * call.
+ *
+ * @param {object} params
+ * @param {string} params.thread_id
+ * @param {(url: string, init: object) => Promise<Response>} [params.fetch_impl]
+ * @returns {Promise<{killed: boolean, reason: string}>}
+ */
+export const kill_generation_session = async ({
+  thread_id,
+  fetch_impl = fetch
+}) => {
+  const base_url = process.env.BASE_API_URL
+  if (!base_url) {
+    return { killed: false, reason: 'BASE_API_URL is not set' }
+  }
+
+  const post = async (token) =>
+    fetch_impl(`${base_url.replace(/\/$/, '')}/api/repl/${thread_id}/kill`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: '{}',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    })
+
+  try {
+    let response = await post(await get_base_session_token())
+    // Same 401 retry as dispatch, for the same reason: a rotated identity key
+    // invalidates every token base ever issued, and a cached one outlives it.
+    if (response.status === 401) {
+      reset_base_session_token()
+      response = await post(await get_base_session_token({ force: true }))
+    }
+    if (!response.ok) {
+      const text = await response.text()
+      return {
+        killed: false,
+        reason: `base answered ${response.status}: ${text.slice(0, 200)}`
+      }
+    }
+    return { killed: true, reason: 'base tore the session down' }
+  } catch (error) {
+    return { killed: false, reason: error.message }
+  }
+}
+
 export default {
   BaseSessionError,
   build_generation_prompt,
   build_session_request,
   dispatch_generation_session,
   get_base_session_token,
+  kill_generation_session,
   reset_base_session_token,
   resolve_identity_key_path
 }
