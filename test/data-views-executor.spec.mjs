@@ -164,6 +164,78 @@ describe('data view admission gate and instrumentation', function () {
     expect(get_admission_state().active_request_count).to.equal(0)
   })
 
+  it('refuses a request whose signal was already aborted before it arrived', async function () {
+    // An already-aborted signal never fires its abort listener, so a gate that
+    // only subscribes admits and EXECUTES the request. Asserted on both sides of
+    // the gate, because the two arms are different code: the free-slot fast path
+    // and the queued path.
+    let executed = false
+    const aborted = new AbortController()
+    aborted.abort()
+
+    const on_free_gate = await expect_throws(
+      execute_data_view_request({
+        request_id: 'v',
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: 'k-pre-aborted-free',
+        signal: aborted.signal,
+        run_query: async () => {
+          executed = true
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
+    )
+    expect(on_free_gate.code).to.equal('ABORTED')
+
+    const holder_gate = make_gate()
+    const holders = Array.from(
+      { length: get_admission_state().max_concurrent_queries },
+      (_, i) =>
+        execute_data_view_request({
+          request_id: `h${i}`,
+          params: sample_params(),
+          user_id: null,
+          path: 'socket',
+          cache_key: `k-pre-aborted-holder-${i}`,
+          run_query: async () => {
+            await holder_gate.promise
+            return empty_result()
+          },
+          cache_get: async () => null
+        })
+    )
+    await sleep(20)
+
+    const on_full_gate = await expect_throws(
+      execute_data_view_request({
+        request_id: 'v2',
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: 'k-pre-aborted-queued',
+        signal: aborted.signal,
+        run_query: async () => {
+          executed = true
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
+    )
+    expect(on_full_gate.code).to.equal('ABORTED')
+    expect(
+      get_admission_state().waiting_request_count,
+      'the refused request left nothing in the queue'
+    ).to.equal(0)
+
+    holder_gate.release()
+    await Promise.all(holders)
+    expect(executed, 'neither aborted request ran its query').to.equal(false)
+    expect(get_admission_state().active_request_count).to.equal(0)
+  })
+
   it('fires a heartbeat while a request is still waiting for a slot', async function () {
     const cap = get_admission_state().max_concurrent_queries
     const heartbeats = []

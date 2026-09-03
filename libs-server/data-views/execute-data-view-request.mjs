@@ -133,7 +133,21 @@ export const get_admission_state = () => ({
 
 // Test seam: zeroes the gate so a spec can assert deltas rather than
 // accumulating counters. Not part of the runtime contract.
+//
+// Valid only against a QUIESCENT gate, and it now says so rather than obliging
+// the caller to know. Zeroing while a request is still in flight leaves that
+// request's release to decrement from zero, and since the split a negative
+// per-class count is worse than the old inflated total: `active.bulk` at -1
+// reads as room under the sub-cap, so two exports run against a cap of 1 and
+// the invariant fails silently in the direction of the bug this gate exists to
+// prevent. A spec that leaks an in-flight request should fail here, naming
+// itself, rather than corrupt the next one.
 export const reset_admission_state = () => {
+  if (active_total() > 0) {
+    throw new Error(
+      `reset_admission_state called with ${active_total()} request(s) in flight; await them first`
+    )
+  }
   admission.active.interactive = 0
   admission.active.bulk = 0
   admission.waiting = []
@@ -400,6 +414,19 @@ const pump_waiters = () => {
 // behind another export. It would not have run at this instant either way.
 const acquire_slot = (signal, admission_class) => {
   admission.counters.arrivals++
+  // An ALREADY-aborted signal never fires its abort listener, so without this
+  // the waiter below is queued, never rejected, and then admitted and executed
+  // for a client that has moved on -- it burns a slot and a knex connection to
+  // produce a result nobody reads. The socket path reaches it: the controller
+  // is minted before an await on the cache, and a second request from the same
+  // client aborts the first during that await, so the signal arrives here
+  // already aborted.
+  if (signal && signal.aborted) {
+    admission.counters.superseded_waiters++
+    return Promise.reject(
+      Object.assign(new Error('request superseded'), { code: 'ABORTED' })
+    )
+  }
   if (can_admit(admission_class)) {
     take_slot(admission_class)
     return Promise.resolve()
