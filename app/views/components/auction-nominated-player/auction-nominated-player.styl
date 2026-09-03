@@ -1,25 +1,49 @@
 // `min-width 0` on every link in this chain, not just the leaf. A flex item
 // defaults to `min-width auto`, which refuses to shrink below its content, so a
 // shortfall becomes OVERFLOW of the ancestor rather than compression here. The
-// leaf already carried it and that was not enough: measured in the 70px bar,
-// `.auction__bid-info` ran 487px of content in a 407px box and the details
-// group's right edge sat 79px past where `.auction__bid-actions` begins, so
-// `BYE` and `AGE` rendered underneath the bid controls. The two intermediate
-// boxes were the ones refusing to shrink; the leaf could not compress while its
-// parents would not.
-// `overflow hidden` as well as `min-width 0`, because the two answer different
-// halves. `min-width 0` lets the BOX shrink; without `overflow hidden` the
-// TEXT inside it still paints at full width over whatever follows, and the
-// symptom is identical to not having shrunk at all -- measured at a 1280px
-// viewport, this box was 224px wide holding 264px of name, printing "PICKETT"
-// straight through "MARKET $0". A box-overlap check cannot see it either: the
-// boxes tile perfectly while the ink does not. Clipped, the name truncates on
-// `.player__name-top`, which already carries `text-overflow: ellipsis`.
+// leaf already carried it and that was not enough: measured in the 70px bar
+// back when this group still carried four columns, `.auction__bid-info` ran
+// 487px of content in a 407px box and the details group's right edge sat 79px
+// past where `.auction__bid-actions` begins, so `BYE` and `AGE` rendered
+// underneath the bid controls. The two intermediate boxes were the ones
+// refusing to shrink; the leaf could not compress while its parents would not.
+//
+// A HORIZONTAL CLIP, NOT `overflow hidden`, AND THE DIFFERENCE IS THE WHOLE
+// REASON THIS RULE IS ODD-LOOKING.
+//
+// What has to be clipped is the NAME, sideways: `min-width 0` lets this box
+// shrink, but without a clip the text inside still paints at full width over
+// whatever follows, and the symptom is identical to not having shrunk at all --
+// measured at a 1280px viewport, this box was 224px wide holding 264px of name,
+// printing "PICKETT" straight through "MARKET $0". A box-overlap check cannot
+// see it either: the boxes tile perfectly while the ink does not.
+//
+// What must NOT be clipped is the headshot, upward: above 800px it is 131px
+// tall in a 70px bar and rises out of the chrome on purpose. It is a sibling of
+// the name inside this box, so `overflow hidden` cannot tell the two apart --
+// it cut the large headshot off flat at the bar's top edge.
+//
+// `clip-path` separates the axes, which `overflow` cannot: setting one axis of
+// `overflow` to hidden forces the other from `visible` to `auto`, so
+// `overflow-x hidden; overflow-y visible` is not a thing that exists. The inset
+// takes the right, bottom and left edges at the border box and opens the top
+// edge far enough that nothing will reach it.
+//
+// THE CLIP HAS TO LIVE AT THIS LEVEL and cannot move down onto the name block.
+// player-name.styl gives `.player__name-lead` `flex 0 0 auto`, so it is sized
+// to its content and never smaller -- and a box that is never smaller than its
+// content has nothing to clip. Making it shrinkable so it could clip itself is
+// what an earlier draft of this did, and it inverted the shrink order: the
+// details group is `flex 1 1 0%`, a basis of ZERO, so all of the shortfall came
+// out of the name instead. Measured that way at 1440px, the widest desktop
+// here, the name block was 96px and "ADAM PRENTICE" rendered as "ADAM PREN".
+// The name is the subject of this surface; it takes the width it needs and the
+// details divide the rest.
 .nominated__player
   display flex
   flex 1
   min-width 0
-  overflow hidden
+  clip-path inset(-999px 0 0 0)
 
   .player__headshot
     border-radius 0
@@ -31,13 +55,21 @@
   // Each detail clips its OWN ink. The group above having `overflow hidden` is
   // not enough and the distinction is easy to get wrong: that one stops the
   // group painting outside itself, while this stops each item painting over the
-  // item beside it. At 900px the four labels want about 170px inside a 132px
-  // group -- wrapped, which is what they do at that width -- and without this
-  // the shortfall came out as MARKET printed through LIVE VALUE rather than as
-  // either one being cut off.
+  // item beside it. Measured at 900px with the four columns this group used to
+  // carry, the labels wanted about 170px inside a 132px group -- wrapped, which
+  // is what they do at that width -- and without this the shortfall came out as
+  // MARKET printed through LIVE VALUE rather than as either one being cut off.
+  // Two columns is more room, not a different rule: the squeeze zone below
+  // 1160px still runs the group out of space.
+  // `flex 0 1 auto` for the same reason the group above takes it: a basis of 0
+  // makes each column claim an equal share of whatever the group was given
+  // rather than the width its own label and value need, so `Market` and
+  // `Live value` would divide the group between them however little either had
+  // to say. Content-sized, the group's own width means something, which is what
+  // lets it hand the surplus to the name.
   .selected__player-header-item
     min-width 0
-    flex 1 1 0
+    flex 0 1 auto
     overflow hidden
 
 // `overflow hidden` as well as `min-width 0`, the same pairing argued for at
@@ -47,8 +79,20 @@
 // to expose it -- at a 900px viewport the labels printed through each other and
 // through the headshot ("ARKETVA...", "$0$0") while every box still tiled
 // perfectly, so a box-overlap check read clean.
+// `flex 0 1 auto`, NOT `flex 1`, AND DROPPING COLUMNS DOES NOTHING WITHOUT IT.
+// `flex 1` is `flex 1 1 0%`, which GROWS to an equal share of the player half
+// whatever it is holding -- so removing `Bye` and `Age` freed exactly nothing
+// the first time: this group kept all 284px of its 1440px share and the two
+// survivors simply spread out over it, while the name next door still had 104px
+// for the 178px it needs. Measured before and after the columns came out,
+// `details_box` was 284px both times.
+//
+// Sized to content instead, this group takes what its two columns actually
+// need and `.nominated__player` -- which is still `flex 1` -- absorbs the whole
+// remainder, which is where the name lives. Shrink stays at 1 so the squeeze
+// zone below 1160px compresses the details rather than pushing the bar wide.
 .nominated__player-details
-  flex 1
+  flex 0 1 auto
   display flex
   min-width 0
   overflow hidden
@@ -62,19 +106,19 @@
     display block
     padding-bottom 6px
 
-// `Live value` is the only two-word label in this group, and wrapping it puts
-// its amount a line below MARKET, BYE and AGE -- the four sit on one baseline or
-// the group reads as broken. So it does not wrap, but only from 1024px up.
+// `Live value` is the two-word label of the pair, and wrapping it puts its
+// amount a line below MARKET -- the two sit on one baseline or the group reads
+// as broken. So it does not wrap, but only from 1024px up.
 //
 // THE FLOOR IS NOT CAUTION, IT IS A ZONE THAT IS ALREADY BROKEN. Between the
-// 799px breakpoint that stacks the bar and roughly 1160px where the bar gains
-// its cap, the four labels want about 170px inside a 132px group and the
-// shortfall comes out as overlapping ink -- that is true of the old one-word
-// `Auction` too, so it is a defect this label inherits rather than causes.
-// Holding nowrap above 1024 keeps the squeeze zone exactly as it was instead of
-// making it worse, and measured at 1024, 1160, 1280 and 1440 the group needs no
-// more room than it already has: `.auction__bar-body` scrollWidth equals its
-// clientWidth at every one, so nothing is pushed past the viewport.
+// 800px breakpoint that stacks the bar and roughly 1160px where the bar gains
+// its cap, the group is squeezed harder than it can answer and the shortfall
+// comes out as overlapping ink -- that was true of the old one-word `Auction`
+// too, so it is a defect this label inherits rather than causes. Dropping `Bye`
+// and `Age` bought the group about 142px, which is enough from 1280px up and
+// nowhere near enough at 1024, where the player half has 233px in total.
+// Holding nowrap above 1024 keeps that zone exactly as it was instead of making
+// it worse.
 @media (min-width 1024px)
   .nominated__player-details label
     white-space nowrap
@@ -90,10 +134,10 @@
 // election amount in $accentColor a few inches to the right, and a second
 // accented number beside `Market` would read as though the two were related.
 //
-// `flex 0 0 auto` rather than the `flex 1 1 0` its three neighbours keep. The
-// padding and border have to come out of somewhere, and taking it from an equal
-// share would squeeze the two-word label into the box it just gained; sized to
-// content it takes what it needs and the other three divide the rest.
+// `flex 0 0 auto` rather than the `flex 1 1 0` its neighbour keeps. The padding
+// and border have to come out of somewhere, and taking it from an equal share
+// would squeeze the two-word label into the box it just gained; sized to
+// content it takes what it needs and `Market` gets the rest.
 // QUALIFIED BY THE PARENT ON PURPOSE, and it is not style. `padding` here
 // competes with `.selected__player-header-item` in selected-player.styl, which
 // sets `padding 4px 12px` and which this element also carries -- both selectors
@@ -106,9 +150,8 @@
 // `align-self center` rather than the default `stretch`. An item with no
 // visible box did not care that it was stretched; this one did -- boxed, it ran
 // the full height of the details group, leaving 6px above its rule and 20px
-// below. Centred it sits the way its three neighbours' contents already do,
-// which is what makes the four read as one row rather than three values and a
-// panel.
+// below. Centred it sits the way `Market` beside it already does, which is what
+// makes the pair read as one row rather than a value and a panel.
 .nominated__player-details .nominated__detail-live
   flex 0 0 auto
   align-self center
@@ -134,7 +177,15 @@
 // player half is 69px tall with a 64px headshot, with a 56px one, and with no
 // headshot at all. Sized larger it would start driving the bar's height and
 // buy back the original problem.
-@media (max-width 799px)
+//
+// 800, THE AUCTION'S ONE BREAKPOINT. The question this rule answers is what
+// sits above the bar: at 800 and below that is the side rail, which does not
+// scroll, so a covered row is unreadable for good; above it, the scrolling
+// player board, where the overflow costs nothing. The rail is what changes at
+// 800, and the bar, the controls and the menu button were moved onto that same
+// boundary so there is no width where half the layout has switched and half has
+// not. `getHeadshotWidth()` in auction-nominated-player.js tests the same 800.
+@media (max-width 800px)
   .auction__nominated-player .player__name-headshot
     overflow hidden
     flex 0 0 auto

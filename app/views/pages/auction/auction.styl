@@ -42,23 +42,13 @@
   .auction__menu
     flex-direction column
 
+  // NO BOTTOM PADDING FOR THE FLOATING MENU BUTTON. Reserving a strip of this
+  // rail for a `position fixed` control means the rail gives up height it does
+  // have to a control that is not in its layout -- and on a phone that height
+  // is the scarcest thing on the screen. The button moves up out of the way
+  // instead; the offset is in menu.styl, which is where its position already
+  // lives.
   .auction__side
     flex 0 0 auto
     border-left none
-    // ROOM FOR THE FLOATING MENU BUTTON, which is `position fixed` and is
-    // therefore not part of any layout that could make room for it on its own.
-    // Below 799px it sits at `bottom $auctionHeightMobile + 8px` -- just clear
-    // of the auction chrome -- and the page reserves exactly
-    // $auctionHeightMobile for that chrome, so the button lands squarely on
-    // whatever this rail ends with. Measured at 768 it covered 9% of the
-    // standing elections row and 11% at 600, taking the `open spots` count with
-    // it.
-    //
-    // A floating button over CONTENT is normal and is what it does on every
-    // other page. What makes it a defect here is that this rail does not
-    // scroll: the covered row cannot be moved out from under the button, so the
-    // count is simply never readable. The clearance is the button's own
-    // footprint above the chrome -- its 8px offset plus its 46px height -- and
-    // 8px again so the row does not sit flush against it.
-    padding-bottom 62px
     border-top 1px solid rgba(0, 0, 0, 0.12)

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
@@ -11,6 +11,30 @@ import AuctionSettlementStatus from '@components/auction-settlement-status'
 import AuctionBlockCalendar from '@components/auction-block-calendar'
 
 import './auction.styl'
+
+// THE SIDE RAIL'S HEIGHT, PUBLISHED SO A FIXED CONTROL CAN CLEAR IT. Below
+// 800px the rail stacks under the board and the floating menu button floats
+// over its last row -- and the rail DOES NOT SCROLL, so a covered row cannot be
+// moved out from under the button and is simply never readable. Measured at
+// 768, 600 and 400 the rail is exactly its three rows with no slack anywhere in
+// it, so there is no offset inside the rail that covers nothing; the button has
+// to clear the rail entirely and sit over the board, which does scroll and
+// where a floating button is what it does on every other page.
+//
+// MEASURED RATHER THAN A CONSTANT, for the same reason the pause banner is:
+// the rail is 115px at 768 and 145px at 400, and the settlement status inside
+// it names every team still to answer, so its wrap -- and the rail's height --
+// grows with the league and has no single correct px value. ResizeObserver
+// keeps it honest across re-wraps, elections arriving, and rotation.
+//
+// Follows --app-banner-height in league-pause-notice.js, including removing the
+// property on unmount so a stale rail height cannot outlive the auction page.
+const sync_side_height = (side) => {
+  document.documentElement.style.setProperty(
+    '--auction-side-height',
+    `${side.offsetHeight}px`
+  )
+}
 
 export default function AuctionPage({
   transactions,
@@ -30,6 +54,20 @@ export default function AuctionPage({
   // `default_expanded` once -- remounts rather than keeping a desktop-open
   // panel open after a rotation into the phone layout.
   const is_narrow = useMediaQuery('(max-width: 800px)')
+  const side_ref = useRef(null)
+
+  useLayoutEffect(() => {
+    const side = side_ref.current
+    if (!side) return undefined
+
+    sync_side_height(side)
+    const observer = new ResizeObserver(() => sync_side_height(side))
+    observer.observe(side)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--auction-side-height')
+    }
+  }, [is_hosted_league])
 
   useEffect(() => {
     load_league()
@@ -79,7 +117,7 @@ export default function AuctionPage({
           <AuctionTargets />
         </div>
         {is_hosted_league && (
-          <div className='auction__side'>
+          <div className='auction__side' ref={side_ref}>
             {/* Never collapsible. It is one line, and in election mode it is
                 the auction's only forcing function -- a manager has to see who
                 the board is waiting on without opening anything. */}

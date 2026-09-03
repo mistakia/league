@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import NFLTeamBye from '@components/nfl-team-bye'
-import PlayerAge from '@components/player-age'
 import PlayerName from '@components/player-name'
 
 import './auction-nominated-player.styl'
 
 // PlayerHeadshot derives its HEIGHT from the width it is given --
-// `round(width * 70 / 96)` -- so a width is really a height here, and 96 is the
-// only one that lands on the 70px the bid bar is tall. It was 180 and 150,
-// which render 131px and 109px, and a MUI avatar does not clip: both spilled
-// out of the bar and over the player board beneath it.
+// `round(width * 70 / 96)` -- so a width is really a height here. 180 renders
+// 131px in a 70px bar, and OVERFLOWING THE BAR IS THE POINT: the player's head
+// rises out of the chrome onto the board above it, which is the one place on
+// this screen the nominated player is the subject rather than a row. It goes
+// UPWARD because `.player__name-headshot` aligns its contents `flex-end`, so
+// the picture's feet stay on the bar's floor and the surplus goes out the top.
 //
 // THE SIZE MUST BE SET HERE, NOT IN THE STYLESHEET. PlayerHeadshot passes width
 // and height to the avatar as an INLINE style, which outranks any rule short of
@@ -20,18 +20,25 @@ import './auction-nominated-player.styl'
 // and is silently ignored. Measured that way: the wrapper obeyed the stylesheet
 // at 64px while the image inside stayed 150x109.
 //
-// 88 below the breakpoint, which renders 88x64. The narrow layout used to pull
-// the headshot out of the bar into a 100px circle floated ABOVE it, and 150 was
-// sized for that circle; the float has since been removed (it covered the
-// standing elections and live blocks rows beneath it), so the headshot now sits
-// inside the bar in a 64px round window. 88 is the width whose derived height
-// is exactly that window, so the picture fills it and the crop takes 12px off
-// either side instead of the top of the player's head.
-const BAR_HEADSHOT_WIDTH = 96
+// 88 below the breakpoint, which renders 88x64. Narrow, the headshot sits
+// INSIDE the bar in a 64px round window rather than overflowing it, because
+// what sits above the bar there is the side rail, which does not scroll -- a
+// covered row cannot be moved out from under the picture, so it is simply never
+// readable. Above the breakpoint the thing above the bar is the player board,
+// which scrolls, and the overflow costs nothing. 88 is the width whose derived
+// height is exactly that 64px window, so the picture fills it and the crop
+// takes 12px off either side instead of the top of the player's head.
+//
+// THE BREAKPOINT IS 800, the auction's one boundary -- the width the side rail
+// stops being a rail at, and now also the width the bar, the controls and the
+// menu button switch at. That is what makes the two sizes mean something: the
+// large headshot belongs to the layout that has a SCROLLING board above the
+// bar, and that is exactly the layout this boundary separates.
+const BAR_HEADSHOT_WIDTH = 180
 const NARROW_HEADSHOT_WIDTH = 88
 
 const getHeadshotWidth = () =>
-  window.innerWidth > 799 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
+  window.innerWidth > 800 ? BAR_HEADSHOT_WIDTH : NARROW_HEADSHOT_WIDTH
 
 export default function AuctionNominatedPlayer({
   player_map,
@@ -76,14 +83,15 @@ export default function AuctionNominatedPlayer({
         <div className='selected__player-header-item nominated__detail-live'>
           <label>Live value</label>${auction_adjusted_salary}
         </div>
-        <div className='selected__player-header-item'>
-          <label>Bye</label>
-          <NFLTeamBye nfl_team={player_map.get('team')} />
-        </div>
-        <div className='selected__player-header-item'>
-          <label>Age</label>
-          <PlayerAge date={player_map.get('date_of_birth')} />
-        </div>
+        {/* NO `Bye` OR `Age`. Neither is a bidding input -- a bye week and an
+            age do not change what a player is worth in the next thirty
+            seconds, and both are on the player's own row in the board directly
+            above this bar. What they cost is the thing this surface exists to
+            name: the four of them wanted 284px of a player half that has 569px
+            at 1440px and 233px at 1024px, and with the headshot at its full
+            180px the shortfall came out of the PLAYER'S NAME, which rendered as
+            "ADAM PREN". Two columns instead of four frees about 142px and the
+            name is whole again from 1280px up. */}
       </div>
     </div>
   )

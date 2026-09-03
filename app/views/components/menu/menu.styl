@@ -48,7 +48,11 @@
   left 16px
   display inline-flex
   align-items center
-  height 46px
+  // 38px and 14/16px of padding, down from 46px and 24/26px. This control is on
+  // screen at ALL times on every page, and the label is five characters at 11px
+  // -- the old box was mostly air, and on a phone that air sits on top of
+  // content the layout cannot move out from under it.
+  height 38px
   // The label is the whole control — there is no hamburger beside it. A mark
   // and a word both saying "menu" is the same thing twice, and at label scale
   // the glyph was the larger of the two, so the word was arguing with an icon
@@ -56,8 +60,11 @@
   //
   // Asymmetric on purpose: the wide tracking below leaves a trailing space
   // after the final letter, which sits the label left of the button's centre
-  // under equal padding.
-  padding 0 24px 0 26px
+  // under equal padding. THE GAP STAYS 2px WHATEVER THE PADDING IS, because it
+  // answers the trailing space rather than the box: `letter-spacing 0.16em` at
+  // `font-size 11px` is 1.76px, so 2px is the correction at any size. Scaling
+  // the asymmetry down with the padding would have under-corrected it.
+  padding 0 14px 0 16px
   border none
   border-radius 3px
   // $prose_action, the same graphite as the landing call to action and every
@@ -310,11 +317,18 @@
   padding 6px
   font-size 10px
 
-@media (min-width 800px)
+// 801/800 THROUGHOUT THE AUCTION, which is the side rail's boundary. It used to
+// be 800/799 here and in auction-main-bid.styl and auction-controls.styl while
+// the rail, the page's own `is_narrow` and the teams strip all switched at 800 —
+// so at EXACTLY 800px the rail was already stacked under the board while the
+// controls were still their desktop height and this button used the desktop
+// offset, landing it on the rail. One boundary, no 1px column where half the
+// layout has changed and half has not.
+@media (min-width 801px)
   .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
 
-@media (max-width 799px)
+@media (max-width 800px)
   // The drawer comes in from the right on a phone, so the button that opens it
   // sits on that edge too — and under the thumb rather than across the screen
   // from it. Same specificity as the base rule, so it wins on source order.
@@ -322,8 +336,23 @@
     left auto
     right 16px
 
+  // CLEARS THE WHOLE SIDE RAIL, not just the auction chrome. Stacked, the rail
+  // sits between the chrome and the board, and it DOES NOT SCROLL — measured at
+  // 768, 600 and 400 it is exactly its three rows with no slack, so any offset
+  // that leaves the button inside it covers a row that can never be moved out
+  // from under it. At the old $auctionHeightMobile + 8px that row was the
+  // standing elections summary, and 83% of its disclosure chevron.
+  //
+  // The rail's height is not a constant — 115px at 768, 145px at 400, and the
+  // settlement status inside it names every team still to answer, so it grows
+  // with the league. auction.js measures it and publishes
+  // --auction-side-height; the fallback of 0px degrades to the old behaviour
+  // rather than to something wild if the property is ever missing.
   .auction__live .main__menu-button
-    bottom $auctionHeightMobile + 8px
+    bottom s(
+      'calc(%s + var(--auction-side-height, 0px) + 8px)',
+      $auctionHeightMobile
+    )
 
 @media (pointer: fine)
   .menu__links a:hover
