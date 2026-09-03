@@ -1,5 +1,7 @@
 // @ts-check
-import { ProxyAgent, fetch as undiciFetch } from 'undici'
+import { Agent, ProxyAgent, fetch as undiciFetch } from 'undici'
+import net from 'node:net'
+import tls from 'node:tls'
 import debug from 'debug'
 
 import db from '#db'
@@ -101,6 +103,82 @@ const sleep = (ms, signal) =>
     }
     signal?.addEventListener('abort', on_abort, { once: true })
   })
+
+/**
+ * An undici connector that reaches the origin over an HTTP CONNECT tunnel and
+ * then negotiates ALPN itself, so HTTP/2 survives the proxy.
+ *
+ * This exists because `ProxyAgent` CANNOT do it. Measured against
+ * `cloudflare.com/cdn-cgi/trace`, which reports the protocol it saw: a direct
+ * `Agent({ allowH2: true })` negotiates `http/2`, and the same request through
+ * `ProxyAgent` reports `http/1.1` whether `allowH2` is set or not, and whether
+ * or not a `clientFactory` forces it onto the pooled client. The option is
+ * accepted by the type and does nothing on that path, which is the shape that
+ * makes it worth writing down: the downgrade is silent and looks like a choice
+ * nobody made.
+ *
+ * That matters wherever a vendor fingerprints the connection. A session minted
+ * in a browser over HTTP/2 and replayed over HTTP/1.1 is a mismatch the vendor
+ * can see and nothing else on our side explains.
+ *
+ * @param {ProxyConfig} proxy
+ * @returns {import('undici').buildConnector.connector}
+ */
+const build_tunneling_h2_connector =
+  (proxy) =>
+  /** @type {import('undici').buildConnector.connector} */
+  (opts, callback) => {
+    const { hostname } = opts
+    const port = Number(opts.port) || 443
+
+    const socket = net.connect(
+      { host: proxy.host, port: Number(proxy.port) },
+      () => {
+        // Credentials go on the wire and never into a log line or an error --
+        // `proxy_display_label` is what renders the routing half for humans.
+        const auth = proxy.username
+          ? `Proxy-Authorization: Basic ${Buffer.from(
+              `${proxy.username}:${proxy.password}`
+            ).toString('base64')}\r\n`
+          : ''
+        socket.write(
+          `CONNECT ${hostname}:${port} HTTP/1.1\r\nHost: ${hostname}:${port}\r\n${auth}\r\n`
+        )
+      }
+    )
+
+    socket.once('error', (err) => callback(err, null))
+
+    let head = ''
+    const on_data = (/** @type {Buffer} */ chunk) => {
+      // latin1 so the byte offsets of the header terminator survive; the body
+      // that follows is binary and belongs to TLS, not to us.
+      head += chunk.toString('latin1')
+      if (!head.includes('\r\n\r\n')) return
+
+      socket.removeListener('data', on_data)
+
+      const status = Number(head.split(' ')[1])
+      if (status !== 200) {
+        socket.destroy()
+        callback(
+          new Error(
+            `proxy CONNECT to ${hostname}:${port} refused with status ${status}`
+          ),
+          null
+        )
+        return
+      }
+
+      const tls_socket = tls.connect(
+        { socket, servername: hostname, ALPNProtocols: ['h2', 'http/1.1'] },
+        () => callback(null, tls_socket)
+      )
+      tls_socket.once('error', (err) => callback(err, null))
+    }
+
+    socket.on('data', on_data)
+  }
 
 // Parse proxy strings into proxy URLs
 // Format: host:port or host:port:username:password
@@ -644,6 +722,11 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
  * @param {boolean} [options.requires_proxy=false] - Fail CLOSED rather than
  *   falling back to direct egress. See the block comment at the resolution site.
  * @param {string} [options.proxy_pool='default']
+ * @param {boolean} [options.allow_h2=false] - Negotiate HTTP/2 to the ORIGIN
+ *   over the proxy tunnel via ALPN, instead of undici's HTTP/1.1 default.
+ *   Opt-in: it changes the wire protocol, so it belongs to call sites whose
+ *   vendor fingerprints the connection rather than being switched on globally.
+ *   Only reaches the proxied path -- the direct fallback uses the global fetch.
  * @param {ResponseBodyMethod} [options.response_type] - Absent returns the raw
  *   `Response`; otherwise the named body method is invoked and its result
  *   returned.
@@ -664,6 +747,7 @@ export async function fetch_with_retry({
   use_proxy = false,
   requires_proxy = false,
   proxy_pool = 'default',
+  allow_h2 = false,
   response_type,
   timeout_ms = 30000,
   signal
@@ -742,10 +826,19 @@ export async function fetch_with_retry({
             `Attempt ${attempt + 1}/${max_retries + 1} for ${url} via proxy ${proxy_display_label(current_proxy.key)} (pool: ${current_proxy.pool_name})`
           )
           proxies_tried.push(proxy_display_label(current_proxy.key))
-          const proxyAgent = new ProxyAgent(current_proxy.connection_string)
+          // Two different dispatchers, because ProxyAgent cannot negotiate
+          // HTTP/2 to the origin -- see build_tunneling_h2_connector. The
+          // default stays ProxyAgent so this change reaches only the call sites
+          // that ask for h2.
+          const dispatcher = allow_h2
+            ? new Agent({
+                allowH2: true,
+                connect: build_tunneling_h2_connector(current_proxy)
+              })
+            : new ProxyAgent(current_proxy.connection_string)
           response = await undiciFetch(url, {
             ...attempt_options,
-            dispatcher: proxyAgent
+            dispatcher
           })
         } else {
           // No proxy available, fall back to direct
