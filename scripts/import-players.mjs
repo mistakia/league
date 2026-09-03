@@ -12,6 +12,7 @@ import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import fetch_json from '#libs-server/fetch-json.mjs'
 
 const log = debug('import:nfl:players')
 enable_debug_namespaces('import:nfl:players,get-player,update-player')
@@ -23,14 +24,14 @@ const run = async () => {
 
   log('fetching team ids')
   // get team ids
-  const data = await fetch(
+  const data = await fetch_json(
     `${api_url}/v1/teams?s=%7B%22%24query%22%3A%7B%22season%22%3A2020%7D,%22%24take%22%3A40%7D&fs=%7Bid,season,fullName,nickName,abbr,teamType,conference%7Babbr%7D,division%7Babbr%7D%7D`,
     {
       headers: {
         authorization: `Bearer ${token}`
       }
     }
-  ).then((res) => res.json())
+  )
 
   const teams = data.data.filter((t) => t.teamType === 'TEAM')
   // iterate through each team and update players
@@ -45,11 +46,11 @@ const run = async () => {
     )
     const url = `${api_url}/v1/teams/${id}?s=${s}&fs=${fs}`
     log(url)
-    const rosterData = await fetch(url, {
+    const rosterData = await fetch_json(url, {
       headers: {
         authorization: `Bearer ${token}`
       }
-    }).then((res) => res.json())
+    })
 
     // iterate through players and make updates
     for (const item of rosterData.roster.data) {

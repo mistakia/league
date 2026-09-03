@@ -7,6 +7,7 @@ import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import fetch_json from '#libs-server/fetch-json.mjs'
 
 const MFL_USER_AGENT = 'TEFLONMFLCLIENT'
 
@@ -21,11 +22,11 @@ const run = async ({ dry = false } = {}) => {
   const missing = []
 
   const URL = `https://api.myfantasyleague.com/${current_season.year}/export?TYPE=players&DETAILS=1&JSON=1`
-  const result = await fetch(URL, {
+  const result = await fetch_json(URL, {
     headers: {
       'User-Agent': MFL_USER_AGENT
     }
-  }).then((res) => res.json())
+  })
 
   const fields = {}
   const inserts = []

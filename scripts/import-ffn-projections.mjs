@@ -14,6 +14,7 @@ import {
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import fetch_json from '#libs-server/fetch-json.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -71,7 +72,7 @@ const run = async ({ dry = false } = {}) => {
   for (const position of ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']) {
     const url = getURL(position)
     log(url)
-    const data = await fetch(url).then((res) => res.json())
+    const data = await fetch_json(url)
 
     for (const item of data.Projections) {
       const params = {

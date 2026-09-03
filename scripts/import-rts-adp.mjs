@@ -19,6 +19,7 @@ import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import require_served_response from '#libs-server/require-served-response.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -39,6 +40,8 @@ const fetch_rts_data = async (url) => {
       Accept: 'application/json'
     }
   })
+
+  require_served_response(response, url)
 
   const data = await response.json()
   return data.player_list

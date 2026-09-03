@@ -17,6 +17,7 @@ import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import fetch_json from '#libs-server/fetch-json.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -31,11 +32,9 @@ const BATCH_SIZE = 500
 const fetch_mfl_data = async (url) => {
   log(`fetching ${url}`)
 
-  const response = await fetch(url, {
+  const data = await fetch_json(url, {
     method: 'GET'
   })
-
-  const data = await response.json()
   // MFL returns no `player` key for an empty result set (e.g. IS_PPR=0 standard
   // before any standard mocks exist), and a bare object (not an array) when a
   // single player is returned. Normalize both so callers always get an array.

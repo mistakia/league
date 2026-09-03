@@ -8,6 +8,7 @@ import {
 import db from '#db'
 import * as cache from './cache.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
+import require_served_response from '#libs-server/require-served-response.mjs'
 
 const log = debug('fanatics')
 enable_debug_namespaces('fanatics')
@@ -93,6 +94,7 @@ export const get_league_info = async ({ ignore_cache = false } = {}) => {
   const fanatics_config = await get_fanatics_config()
   const url = `${fanatics_config.api_url}/page/league/364899?channel=AMELCO_DC_MASTER&segment=AMELCO_DC&stateCode=DC&tab=schedule&dma=511`
   const res = await fetch_http2(url)
+  require_served_response(res, url)
   const data = await res.json()
 
   if (data) {
@@ -122,6 +124,7 @@ export const get_event_info = async ({
   const fanatics_config = await get_fanatics_config()
   const url = `${fanatics_config.api_url}/page/event/${event_id}?channel=AMELCO_DC_MASTER&segment=AMELCO_DC&stateCode=DC&isTournament=false&dma=511`
   const res = await fetch_http2(url)
+  require_served_response(res, url)
   const data = await res.json()
 
   if (data) {
@@ -145,6 +148,7 @@ const get_wagers_info = async ({
       sessionToken: session_token
     }
   })
+  require_served_response(res, url)
   const data = await res.json()
   return data
 }

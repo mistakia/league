@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import * as cache from './cache.mjs'
 import { current_season } from '#constants'
+import fetch_json from '#libs-server/fetch-json.mjs'
 
 const log = debug('sleeper')
 
@@ -34,8 +35,7 @@ export const get_sleeper_projections = async ({
     `fetching sleeper projections for year: ${year}, positions: ${positions.join(', ')}`
   )
   const url = `${sleeper_config.api_url}/projections/nfl/${year}?season_type=regular&${positions.map((p) => `positions[]=${p}`).join('&')}&order_by=${order_by}`
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await fetch_json(url)
 
   if (data && data.length) {
     await cache.set({ key: cache_key, value: data })

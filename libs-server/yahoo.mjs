@@ -2,6 +2,7 @@ import debug from 'debug'
 import { fetch as fetch_http2 } from 'fetch-h2'
 
 import db from '#db'
+import require_served_response from '#libs-server/require-served-response.mjs'
 
 const log = debug('yahoo')
 
@@ -26,6 +27,8 @@ export const get_yahoo_adp = async () => {
       'Accept-Language': 'en-US,en;q=0.9'
     }
   })
+
+  require_served_response(response, url)
 
   const data = await response.json()
   return data.fantasy_content.league.players
