@@ -50,7 +50,6 @@ export default function AuctionBlockCalendar({
   leagueId
 }) {
   const [selected_hour, set_selected_hour] = useState(null)
-  const [show_legend, set_show_legend] = useState(false)
   // The grid only changes on a slot boundary, so it is rebuilt by the minute
   // while nothing else re-renders it.
   const now = useClockSeconds(1000)
@@ -159,26 +158,16 @@ export default function AuctionBlockCalendar({
 
   const body = (
     <>
-      {/* THE RULES ARE READ ONCE AND THE GRID IS READ EVERY VISIT, so the two
-          do not deserve the same standing permanent room in the side rail.
-          This is three lines of prose above a 168-cell grid in a narrow
-          column, and after the first read it is pure vertical cost between the
-          header and the thing a manager actually came for. */}
-      <button
-        type='button'
-        className='auction__block-calendar-legend-toggle'
-        aria-expanded={show_legend}
-        onClick={() => set_show_legend(!show_legend)}
-      >
-        {show_legend ? 'Hide how blocks convene' : 'How blocks convene'}
-      </button>
-      {show_legend && (
-        <div className='auction__block-calendar-legend'>
-          A block convenes when all {denominator} teams with an open roster spot
-          opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
-          hour to see its four 15-minute slots.
-        </div>
-      )}
+      {/* The rules sit above the grid permanently. Collapsing them behind a
+          toggle saved three lines once the grid had been read, which saved the
+          vertical cost for the manager already returning every visit -- but
+          anonymity of the convening rule has a cost nobody noticed, so the
+          legend stays. */}
+      <div className='auction__block-calendar-legend'>
+        A block convenes when all {denominator} teams with an open roster spot
+        opt in, at least {auction_block_notice_minutes} minutes ahead. Pick an
+        hour to see its four 15-minute slots.
+      </div>
 
       <div className='auction__block-calendar-grid'>
         <div className='auction__block-calendar-row auction__block-calendar-axis'>

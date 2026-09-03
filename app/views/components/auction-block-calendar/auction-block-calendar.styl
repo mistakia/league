@@ -44,24 +44,6 @@ $grid_open_fill = #e6e6e6
   font-size 11px
   opacity 0.85
 
-// A text affordance rather than a Button: it discloses three lines of prose in
-// a narrow rail, and the app's small Button carries a min-width and a border
-// that would make the toggle louder than the rules it reveals.
-.auction__block-calendar-legend-toggle
-  display block
-  padding 4px 0
-  border none
-  background none
-  font-family inherit
-  font-size 10px
-  text-transform uppercase
-  letter-spacing 0.5px
-  color $accentColor
-  cursor pointer
-
-  &:hover
-    text-decoration underline
-
 .auction__block-calendar-legend
   font-size 11px
   line-height 1.4
@@ -140,8 +122,11 @@ $grid_open_fill = #e6e6e6
     background mix($accentColor, white, 25%)
     color darken($accentColor, 20%)
 
+  // The rings are 1px so the density number in the cell keeps the space
+  // around it; at 2px the inset ring pressed against a 9px numeral in a
+  // ten-pixel cell.
   &.mine
-    box-shadow inset 0 0 0 2px $accentColor
+    box-shadow inset 0 0 0 1px $accentColor
 
   &.finalized
     background $successColor
@@ -152,10 +137,10 @@ $grid_open_fill = #e6e6e6
     color white
 
   &.now
-    border-top 2px solid $textColorDark
+    border-top 1px solid $textColorDark
 
   &.selected
-    box-shadow inset 0 0 0 2px $textColorDark
+    box-shadow inset 0 0 0 1px $textColorDark
 
 // The key. The grid is six states in ten-pixel cells, which no amount of
 // colour choice makes self-evident.
@@ -188,7 +173,7 @@ $grid_open_fill = #e6e6e6
 
   &.mine
     background $grid_open_fill
-    box-shadow inset 0 0 0 2px $accentColor
+    box-shadow inset 0 0 0 1px $accentColor
 
   &.finalized
     background $successColor
