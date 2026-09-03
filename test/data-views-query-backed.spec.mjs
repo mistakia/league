@@ -472,17 +472,52 @@ describe('data views -- query backed', function () {
         column_annotations: JSON.stringify({ c: { column_title: 'C' } })
       })
 
+      // MEMBERSHIP, not equality, in both directions. Both assertions used to
+      // compare the whole collected array, which made this case a claim about
+      // the ENTIRE TABLE rather than about this row -- any unreferenced query
+      // another spec file left behind would land in the same sweep. The subject
+      // is `fresh_id`, and scoping to it costs nothing: a broken grace period
+      // still puts fresh_id in the first array, and a broken query still keeps
+      // it out of the second.
       const { collected } = await sweep_unreferenced_data_view_queries()
-      expect(collected).to.eql([])
+      expect(collected).to.not.include(fresh_id)
 
-      // And the same sweep with no floor DOES collect it -- otherwise this
-      // assertion cannot tell a working grace period from a broken query.
+      // And the same sweep with no floor DOES collect it -- otherwise the
+      // assertion above cannot tell a working grace period from a broken query.
       const { collected: with_no_floor } =
         await sweep_unreferenced_data_view_queries({
           min_age_hours: 0,
           dry_run: true
         })
-      expect(with_no_floor).to.eql([fresh_id])
+
+      // SELF-DIAGNOSING, because this assertion has failed inside a full
+      // `yarn test:isolated` run while passing in isolation (bulletin #613) and
+      // the failure carried no evidence at all -- just "expected [] to include
+      // <uuid>", which is equally consistent with the row being absent, the row
+      // being referenced, and the cutoff comparison being wrong. Scoping the
+      // assertions to fresh_id did NOT fix it; that change was worth making on
+      // its own and is not a fix for this.
+      //
+      // Reading the row back and printing it with the cutoff separates those
+      // three at the moment of failure, so the next full run names the cause
+      // instead of leaving the next reader to theorise from an empty array.
+      if (!with_no_floor.includes(fresh_id)) {
+        const row = await db('data_view_queries')
+          .where({ query_id: fresh_id })
+          .first()
+        const referencing = await db('user_data_views')
+          .where({ query_id: fresh_id })
+          .count({ n: '*' })
+        throw new Error(
+          `the no-floor sweep did not collect the row it was given. ` +
+            `row_present=${Boolean(row)} ` +
+            `created_at=${row ? new Date(row.created_at).toISOString() : 'n/a'} ` +
+            `node_now=${new Date().toISOString()} ` +
+            `referencing_views=${referencing[0].n} ` +
+            `collected_count=${with_no_floor.length}`
+        )
+      }
+      expect(with_no_floor).to.include(fresh_id)
     })
   })
 })
