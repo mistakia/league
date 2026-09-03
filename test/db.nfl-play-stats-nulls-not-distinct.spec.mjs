@@ -1,64 +1,37 @@
 /* global describe it before after */
 
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import * as chai from 'chai'
 
 import db from '#db'
 
 const expect = chai.expect
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const MIGRATION_PATH = path.join(
-  __dirname,
-  '..',
-  'db',
-  'adhoc',
-  '2026-09-03-nfl-play-stats-nulls-not-distinct.sql'
-)
-
-// The unique index on nfl_play_stats is a STANDARD unique index, so NULLs are
-// distinct and every row with a null player_name escapes it. That is not merely
-// permissive -- import-plays-nfl-v1 re-imports a game by invalidating it and
-// re-inserting with onConflict(...).merge(), and a conflict that is never
-// detected appends a new row instead of merging, stranding the prior copy at
-// is_valid false. Production carries 296,443 such groups.
+// idx_24719_play_stat was a STANDARD unique index on
+// (esbid, play_id, stat_id, player_name), so NULLs were distinct and every row
+// with a null player_name escaped it. That is not merely permissive:
+// import-plays-nfl-v1 re-imports a game by invalidating it and re-inserting
+// with onConflict(...).merge(), and a conflict that is never detected appends a
+// new row instead of merging, stranding the prior copy at is_valid false. Every
+// re-import minted another copy of every team-level stat row -- 296,443
+// duplicate key groups and 496,129 excess rows in production by the time it was
+// found, all of them with a null player_name and none with a non-null one.
 //
-// The remediation is a merge-forward rather than a dedupe, because the stranded
-// copies hold columns the survivor does not (192,827 groups where the valid row
-// has a null nfl_team_id and a stranded copy has one). GROUP_MERGE_FORWARD below
-// is that case, and it is the one a plain keep-the-valid-row delete gets wrong.
+// db/adhoc/2026-09-03-nfl-play-stats-nulls-not-distinct.sql merged those forward
+// and rebuilt the index NULLS NOT DISTINCT. What is guarded here is the INDEX
+// INVARIANT rather than that one-time migration: the migration cannot be
+// re-executed against a schema that already carries the fixed index, but the
+// index can be dropped and recreated without NULLS NOT DISTINCT by anyone
+// editing the schema, and nothing else would notice until the duplicates came
+// back.
 
-// db:exec owns the STATUS banner and rewrites it on apply; strip it so this test
-// runs the same file whatever state that header is in.
-const load_migration = () =>
-  fs
-    .readFileSync(MIGRATION_PATH, 'utf8')
-    .split('\n')
-    .filter((line) => !line.startsWith('-- STATUS:'))
-    .join('\n')
-
-const GROUP_MERGE_FORWARD = 99200001 // 1 valid + 2 stranded, stranded holds nfl_team_id
-const GROUP_NO_VALID = 99200002 // 0 valid -- the 25,282-group case
-const GROUP_TWO_VALID = 99200003 // 2 identical valid -- the 17-group case
-const GROUP_NAMED = 99200004 // non-null player_name control
-const GROUP_SINGLETON = 99200005 // null player_name, not duplicated -- control
-
-const ALL_ESBIDS = [
-  GROUP_MERGE_FORWARD,
-  GROUP_NO_VALID,
-  GROUP_TWO_VALID,
-  GROUP_NAMED,
-  GROUP_SINGLETON
-]
-
-const TEAM_ID = '10041200-2021-6fbf-aaa9-8b50898d954e'
+const ESBID = 99200001
+const PLAY_ID = 1
+const STAT_ID = 5
 
 const stat_row = (overrides) => ({
-  play_id: 1,
-  stat_id: 5,
+  esbid: ESBID,
+  play_id: PLAY_ID,
+  stat_id: STAT_ID,
   nfl_team: 'KC',
   player_name: null,
   stat_yards: 0,
@@ -69,178 +42,91 @@ const stat_row = (overrides) => ({
   ...overrides
 })
 
-describe('DB nfl_play_stats NULLS NOT DISTINCT migration', function () {
-  this.timeout(60000)
-
+describe('DB nfl_play_stats unique index NULLS NOT DISTINCT', function () {
   before(async () => {
-    await db('nfl_play_stats').whereIn('esbid', ALL_ESBIDS).del()
-    await db('nfl_play_stats').insert([
-      // The merge-forward case: the current row lost nfl_team_id, and only the
-      // stranded copies still carry it.
-      stat_row({ esbid: GROUP_MERGE_FORWARD, is_valid: true }),
-      stat_row({
-        esbid: GROUP_MERGE_FORWARD,
-        is_valid: false,
-        nfl_team_id: TEAM_ID
-      }),
-      stat_row({
-        esbid: GROUP_MERGE_FORWARD,
-        is_valid: false,
-        smart_player_id: 'SMART-1'
-      }),
-
-      stat_row({ esbid: GROUP_NO_VALID, is_valid: false }),
-      stat_row({ esbid: GROUP_NO_VALID, is_valid: false }),
-
-      stat_row({ esbid: GROUP_TWO_VALID, is_valid: true }),
-      stat_row({ esbid: GROUP_TWO_VALID, is_valid: true }),
-
-      // Controls: neither is a duplicate, so the migration must not touch them.
-      stat_row({ esbid: GROUP_NAMED, player_name: 'A.Player' }),
-      stat_row({ esbid: GROUP_SINGLETON, nfl_team_id: TEAM_ID })
-    ])
+    await db('nfl_play_stats').where({ esbid: ESBID }).del()
+    await db('nfl_play_stats').insert(stat_row({}))
   })
 
   after(async () => {
-    await db('nfl_play_stats').whereIn('esbid', ALL_ESBIDS).del()
-    await db.raw(
-      'drop table if exists nulls_not_distinct_backup_20260903_nfl_play_stats'
-    )
+    await db('nfl_play_stats').where({ esbid: ESBID }).del()
   })
 
-  it('the duplicate shape exists before the migration runs', async () => {
-    // The premise. Without this the whole spec could pass against a table that
-    // never held a duplicate, which is the vacuous-input trap.
-    const rows = await db('nfl_play_stats')
-      .whereIn('esbid', ALL_ESBIDS)
-      .whereNull('player_name')
-      .count('* as n')
-      .groupBy('esbid', 'play_id', 'stat_id')
-      .havingRaw('count(*) > 1')
-
-    expect(
-      rows.length,
-      'fixture must contain three duplicate groups or the migration has nothing to prove'
-    ).to.equal(3)
-  })
-
-  it('applies, collapsing duplicates and carrying merged values forward', async () => {
-    await db.transaction(async (trx) => {
-      await trx.raw(load_migration())
-    })
-
-    const remaining = await db('nfl_play_stats')
-      .whereIn('esbid', ALL_ESBIDS)
-      .count('* as n')
-      .groupBy('esbid', 'play_id', 'stat_id', 'player_name')
-      .havingRaw('count(*) > 1')
-    expect(remaining.length, 'no duplicate key group may survive').to.equal(0)
-
-    // The assertion the merge-forward exists for: a plain keep-the-valid-row
-    // delete passes every other check in this spec and fails this one.
-    const merged = await db('nfl_play_stats')
-      .where({ esbid: GROUP_MERGE_FORWARD })
-      .first()
-    expect(merged.is_valid, 'the valid row must be the survivor').to.equal(true)
-    expect(
-      merged.nfl_team_id,
-      'nfl_team_id lived only on a stranded copy and must be carried forward'
-    ).to.equal(TEAM_ID)
-    expect(
-      merged.smart_player_id,
-      'smart_player_id lived only on a stranded copy and must be carried forward'
-    ).to.equal('SMART-1')
-
-    const no_valid = await db('nfl_play_stats')
-      .where({ esbid: GROUP_NO_VALID })
-      .select()
-    expect(
-      no_valid.length,
-      'an all-invalid group collapses to one row'
-    ).to.equal(1)
-    expect(
-      no_valid[0].is_valid,
-      'collapsing must not invent validity a group never had'
-    ).to.equal(false)
-
-    const two_valid = await db('nfl_play_stats')
-      .where({ esbid: GROUP_TWO_VALID })
-      .select()
-    expect(two_valid.length, 'identical valid copies collapse to one').to.equal(
-      1
+  it('declares the index NULLS NOT DISTINCT', async () => {
+    // Read from the live catalog rather than from schema.postgres.sql, so this
+    // fails on the database the suite actually runs against.
+    const { rows } = await db.raw(
+      "select indexdef from pg_indexes where indexname = 'idx_24719_play_stat'"
     )
 
-    // Controls: untouched rows stay exactly as inserted.
-    const named = await db('nfl_play_stats')
-      .where({ esbid: GROUP_NAMED })
-      .select()
-    expect(named.length, 'a non-null player_name row is out of scope').to.equal(
-      1
-    )
-    expect(named[0].player_name).to.equal('A.Player')
-
-    const singleton = await db('nfl_play_stats')
-      .where({ esbid: GROUP_SINGLETON })
-      .first()
+    expect(rows.length, 'the play-stat unique index must exist').to.equal(1)
     expect(
-      singleton.nfl_team_id,
-      'a non-duplicated null-player_name row must be left alone'
-    ).to.equal(TEAM_ID)
+      rows[0].indexdef,
+      'a standard unique index lets every null-player_name row escape it'
+    ).to.match(/NULLS NOT DISTINCT/)
   })
 
-  it('the rebuilt index now rejects a duplicate null player_name', async () => {
-    // The behavioral proof, and the reason NULLS NOT DISTINCT is the fix rather
-    // than a one-time cleanup: before the migration this insert succeeded
-    // silently and minted the 296,443rd duplicate group.
+  it('rejects a second row with the same key and a null player_name', async () => {
+    // The behavioral half. The declaration test above would still pass if the
+    // index existed but did not cover the rows it names, so this one inserts.
     let thrown = null
     try {
-      await db('nfl_play_stats').insert(
-        stat_row({ esbid: GROUP_TWO_VALID, is_valid: true })
-      )
+      await db('nfl_play_stats').insert(stat_row({ stat_yards: 3 }))
     } catch (err) {
       thrown = err
     }
 
     expect(
       thrown,
-      'a second null-player_name row on an existing key must now violate the unique index'
+      'a duplicate null-player_name row must violate the unique index -- before the fix this insert silently succeeded'
     ).to.be.an('error')
-    expect(
-      String(thrown.message),
-      'it must be the play-stat unique index that refuses'
-    ).to.match(/idx_24719_play_stat|duplicate key/)
+    expect(String(thrown.message)).to.match(/idx_24719_play_stat|duplicate key/)
   })
 
-  it('onConflict merge now reaches a null player_name row', async () => {
-    // What the index gap actually broke. With NULLS distinct this merge never
-    // found its target and appended a row instead; the count is the tell.
-    const before_count = await db('nfl_play_stats')
-      .where({ esbid: GROUP_MERGE_FORWARD })
-      .count('* as n')
-      .first()
+  it('still admits a genuinely different key that differs only in player_name', async () => {
+    // The control for the test above, and the reason NULLS NOT DISTINCT is
+    // narrower than it sounds: it makes two NULLs equal, it does not make a null
+    // equal to a name. Without this, an index that rejected EVERYTHING would
+    // pass the rejection test and look correct.
+    await db('nfl_play_stats').insert(stat_row({ player_name: 'A.Player' }))
+
+    const rows = await db('nfl_play_stats').where({ esbid: ESBID }).select()
+    expect(
+      rows.length,
+      'a non-null player_name is a different key and must still insert'
+    ).to.equal(2)
+  })
+
+  it('lets onConflict merge reach a null player_name row', async () => {
+    // What the index gap actually broke, and the reason this is a schema fix
+    // rather than a one-time cleanup: with NULLS distinct this merge never found
+    // its target and appended a row instead.
+    const before_rows = await db('nfl_play_stats')
+      .where({ esbid: ESBID })
+      .whereNull('player_name')
+      .select()
+    expect(
+      before_rows.length,
+      'one null-player_name row to merge onto'
+    ).to.equal(1)
 
     await db('nfl_play_stats')
-      .insert(
-        stat_row({
-          esbid: GROUP_MERGE_FORWARD,
-          is_valid: true,
-          stat_yards: 17
-        })
-      )
+      .insert(stat_row({ stat_yards: 17, is_valid: false }))
       .onConflict(['esbid', 'play_id', 'stat_id', 'player_name'])
       .merge()
 
-    const after = await db('nfl_play_stats')
-      .where({ esbid: GROUP_MERGE_FORWARD })
+    const after_rows = await db('nfl_play_stats')
+      .where({ esbid: ESBID })
+      .whereNull('player_name')
       .select()
 
     expect(
-      after.length,
+      after_rows.length,
       'the merge must update in place rather than append a duplicate'
-    ).to.equal(Number(before_count.n))
+    ).to.equal(1)
     expect(
-      after[0].stat_yards,
-      'the merge must actually have written through to the existing row'
+      after_rows[0].stat_yards,
+      'the merge must have written through to the existing row'
     ).to.equal(17)
   })
 })
