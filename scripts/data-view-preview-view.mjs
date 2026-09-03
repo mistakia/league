@@ -27,6 +27,7 @@ const PREVIEW_ROW_CAP = 25
 
 run_agent_tool({
   tool: 'preview_view',
+  input_keys: ['table_state', 'limit'],
   run: async (input) => {
     // This tool opens a database connection, so it is one of the two that
     // genuinely need the sandbox credential. Asserted here rather than at

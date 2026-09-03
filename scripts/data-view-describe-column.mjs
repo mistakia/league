@@ -27,6 +27,7 @@ import {
 
 run_agent_tool({
   tool: 'describe_column',
+  input_keys: ['column_id', 'param_keys'],
   run: async (input) =>
     describe_column({
       column_id: require_input(input, 'column_id'),

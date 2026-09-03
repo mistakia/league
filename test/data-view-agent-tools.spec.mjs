@@ -9,6 +9,7 @@ import os from 'os'
 import * as chai from 'chai'
 
 import describe_column from '#libs-server/data-views/generation/describe-column.mjs'
+import { AGENT_INSTRUCTIONS } from '#libs-server/data-views/generation/generate-data-view.mjs'
 import { get_data_view_generation_catalog } from '#libs-server/data-views/generation/build-data-view-generation-catalog.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -134,6 +135,88 @@ describe('data view agent tools', function () {
       )
       expect(code).to.not.equal(0)
       expect(read_refusal(stderr).code).to.equal('missing_parameter')
+    })
+
+    it('refuses an UNRECOGNIZED key by name, listing what it accepts', async function () {
+      // Measured 2026-09-03: a real run called search_columns with `phrase`
+      // instead of `query`. Every tool here read the key it wanted, got
+      // undefined, and answered that honestly -- match_count 0 and EXIT 0, which
+      // says "the registry has no such column" rather than "you named the
+      // parameter wrong". The agent could not tell those apart and spent two
+      // calls, an `ls scripts/` and two source reads finding the spelling. This
+      // is the same fail-open shape the file header forbids, arriving through
+      // the key rather than through the value.
+      const { code, stdout, stderr } = await run_tool(
+        'data-view-search-columns.mjs',
+        { phrase: 'passing yards', grain: 'player' }
+      )
+      expect(code).to.not.equal(0)
+      expect(stdout.trim()).to.equal('')
+      const refusal = read_refusal(stderr)
+      expect(refusal.code).to.equal('unknown_parameter')
+      expect(refusal.error).to.include('phrase')
+      // Naming the offending key is not enough on its own -- the agent still has
+      // to guess the right one. The accepted set is what makes this recoverable
+      // in the SAME turn.
+      expect(refusal.error).to.include('query')
+    })
+
+    it('quotes the site of a JSON syntax error rather than only its offset', async function () {
+      // A byte offset is not a diagnostic when the payload is one line of a Bash
+      // command the agent cannot look at. The run that provoked this spent eight
+      // turns locating a single surplus brace -- including a Write call the
+      // profile does not carry -- against an error that already knew where it
+      // was.
+      const surplus_brace =
+        '{"query":"passing yards","grain":"player"}},"limit":5}'
+      const { code, stderr } = await run_tool(
+        'data-view-search-columns.mjs',
+        surplus_brace
+      )
+      expect(code).to.not.equal(0)
+      const refusal = read_refusal(stderr)
+      expect(refusal.code).to.equal('invalid_json')
+      expect(refusal.error).to.include('^')
+      expect(refusal.error).to.include('grain')
+    })
+
+    it('states every accepted key in AGENT_INSTRUCTIONS', async function () {
+      // The refusal above tells the agent the spelling AFTER it has spent a
+      // turn. The contract is what stops it spending the turn at all, and the
+      // two drift apart silently: adding a key to a script leaves the prompt
+      // describing a tool that no longer exists, and nothing else would notice.
+      const declared = new Map()
+      for (const script of fs
+        .readdirSync(path.join(repo_root, 'scripts'))
+        .filter((name) => /^data-view-[a-z-]+\.mjs$/.test(name))) {
+        const source = fs.readFileSync(
+          path.join(repo_root, 'scripts', script),
+          'utf8'
+        )
+        const match = /input_keys:\s*\[([^\]]*)\]/.exec(source)
+        if (!match) continue
+        declared.set(
+          script,
+          match[1]
+            .split(',')
+            .map((key) => key.trim().replace(/^'|'$/g, ''))
+            .filter(Boolean)
+        )
+      }
+
+      // Guard the guard: a regex that matched nothing would pass this test by
+      // asserting over an empty set.
+      expect(declared.size).to.equal(6)
+
+      for (const [script, keys] of declared) {
+        expect(keys.length, `${script} declares no keys`).to.be.above(0)
+        for (const key of keys) {
+          expect(
+            AGENT_INSTRUCTIONS,
+            `${script} accepts "${key}" but AGENT_INSTRUCTIONS never names it`
+          ).to.include(key)
+        }
+      }
     })
   })
 

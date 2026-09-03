@@ -29,6 +29,7 @@ const AGENT_ROW_CAP = 50
 
 run_agent_tool({
   tool: 'run_sql',
+  input_keys: ['sql_text', 'limit'],
   run: async (input) => {
     // The other of the two tools that open a connection. See preview_view for
     // why this is asserted here rather than at config import.

@@ -22,6 +22,7 @@ import {
 
 run_agent_tool({
   tool: 'emit',
+  input_keys: ['emission', 'tool_calls'],
   run: async (input) => {
     const { ok, branch, errors } = validate_emission({
       emission: require_input(input, 'emission'),

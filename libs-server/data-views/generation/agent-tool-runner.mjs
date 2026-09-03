@@ -75,11 +75,46 @@ const read_stdin = async () => {
 }
 
 /**
+ * Quote the neighbourhood of a JSON syntax error.
+ *
+ * A POSITION IS NOT A DIAGNOSTIC WHEN THE AGENT CANNOT SEE ITS OWN INPUT. The
+ * payload arrives as one line of a Bash command, so "position 502" names a byte
+ * the agent has no way to look at -- measured 2026-09-03, a run spent eight
+ * turns finding a single surplus brace by writing the payload to a file and
+ * then byte-slicing it back out, having first tried a Write tool the profile
+ * does not carry. Echoing the window costs a few dozen characters and replaces
+ * all of it.
+ *
+ * @param {string} raw
+ * @param {string} message - the JSON.parse message, which carries the offset
+ * @returns {string} '' when no offset can be read, so the caller degrades to
+ *   the bare message rather than to a wrong window
+ */
+const quote_json_error_site = (raw, message) => {
+  const match = /at position (\d+)/.exec(message)
+  if (!match) return ''
+
+  const position = Number(match[1])
+  if (!Number.isFinite(position) || position > raw.length) return ''
+
+  const start = Math.max(0, position - 40)
+  const end = Math.min(raw.length, position + 40)
+  const window = raw.slice(start, end)
+  const caret = `${' '.repeat(position - start)}^`
+
+  return `\n${window}\n${caret} here`
+}
+
+/**
  * Read the tool's single JSON input from stdin, falling back to argv.
  *
+ * @param {object} [opts]
+ * @param {string[]} [opts.input_keys] - every key this tool accepts. Supplying
+ *   it turns an unrecognized key into a NAMED refusal; omitting it accepts
+ *   anything, which is the behaviour that cost a run four wasted turns.
  * @returns {Promise<object>}
  */
-export const read_tool_input = async () => {
+export const read_tool_input = async ({ input_keys } = {}) => {
   const from_stdin = await read_stdin()
   const raw = from_stdin || (process.argv[2] || '').trim()
 
@@ -96,12 +131,31 @@ export const read_tool_input = async () => {
   } catch (error) {
     throw new AgentToolError(
       'invalid_json',
-      `input is not valid JSON: ${error.message}`
+      `input is not valid JSON: ${error.message}${quote_json_error_site(raw, error.message)}`
     )
   }
 
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new AgentToolError('invalid_input', 'input must be a JSON object')
+  }
+
+  // AN UNRECOGNIZED KEY IS A REFUSAL, NOT A DEFAULT. Reading input.query off an
+  // object that carries `phrase` yields undefined, and every tool here then
+  // answers that undefined honestly -- search_columns returned match_count 0 and
+  // EXIT 0, which says "the registry has no such column" rather than "you named
+  // the parameter wrong". The agent cannot tell those apart, and on 2026-09-03
+  // it spent two calls, an `ls scripts/` and two source reads discovering the
+  // key was spelled `query`. This file's own header forbids exactly that shape.
+  if (input_keys) {
+    const unknown = Object.keys(parsed).filter(
+      (key) => !input_keys.includes(key)
+    )
+    if (unknown.length) {
+      throw new AgentToolError(
+        'unknown_parameter',
+        `unrecognized input key(s): ${unknown.join(', ')}. This tool accepts: ${input_keys.join(', ')}`
+      )
+    }
   }
 
   return parsed
@@ -116,11 +170,13 @@ export const read_tool_input = async () => {
  * @param {object} opts
  * @param {string} opts.tool - the tool's name, echoed on both channels so a
  *   refusal read out of a mixed log names which tool refused
+ * @param {string[]} [opts.input_keys] - every key this tool accepts; anything
+ *   else is refused by name rather than silently ignored
  * @param {(input: object) => Promise<object>} opts.run
  */
-export const run_agent_tool = async ({ tool, run }) => {
+export const run_agent_tool = async ({ tool, input_keys, run }) => {
   try {
-    const input = await read_tool_input()
+    const input = await read_tool_input({ input_keys })
     const result = await run(input)
     process.stdout.write(`${JSON.stringify({ tool, ...result }, null, 2)}\n`)
     process.exit(0)

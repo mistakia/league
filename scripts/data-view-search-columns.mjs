@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 import { search_columns } from '#libs-server/data-views/generation/search-columns.mjs'
-import { run_agent_tool } from '#libs-server/data-views/generation/agent-tool-runner.mjs'
+import {
+  run_agent_tool,
+  require_input
+} from '#libs-server/data-views/generation/agent-tool-runner.mjs'
 
 // search_columns -- find the columns an instruction phrase is about.
 //
@@ -19,9 +22,13 @@ import { run_agent_tool } from '#libs-server/data-views/generation/agent-tool-ru
 
 run_agent_tool({
   tool: 'search_columns',
+  input_keys: ['query', 'limit', 'min_score_ratio', 'grain'],
   run: async (input) => {
+    // A query that matches nothing is a real answer (see above). A query that
+    // was never supplied is not, and answering it with an empty list says the
+    // registry is missing a column when the caller in fact named the key wrong.
     const { match_count, returned_count, columns } = search_columns({
-      query: input.query,
+      query: require_input(input, 'query'),
       limit: input.limit,
       min_score_ratio: input.min_score_ratio,
       grain: input.grain

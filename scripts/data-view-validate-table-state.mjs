@@ -24,6 +24,7 @@ import {
 
 run_agent_tool({
   tool: 'validate_table_state',
+  input_keys: ['table_state'],
   run: async (input) => {
     const { ok, errors, table_state } = resolve_generated_table_state({
       table_state: require_input(input, 'table_state')
