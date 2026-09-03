@@ -30,7 +30,7 @@ export default function AuctionMainBid({
   is_initialized,
   isComplete,
   isLocked,
-  isEligible,
+  auction_capacity,
   isAboveCap,
   isNominating,
   isCommish,
@@ -119,6 +119,41 @@ export default function AuctionMainBid({
     nominate(value)
   }
 
+  // WHY this team cannot take the open player, as a button label and as a
+  // sentence. `auction_capacity` is null when there is no nomination or the
+  // board has no map for it -- unknown, which both readers below treat as no
+  // finding rather than as a refusal.
+  //
+  // The order is the order a manager can act on: a full roster and a position
+  // limit are settled for the rest of the auction, and only the budget term can
+  // still move (by a trade, or by the price falling on the next player).
+  const is_structurally_ineligible = Boolean(
+    auction_capacity && !auction_capacity.is_eligible
+  )
+
+  const ineligible_button_label = () => {
+    if (!is_structurally_ineligible) return null
+    if (!auction_capacity.has_roster_space) return 'Roster Full'
+    if (!auction_capacity.has_position_capacity)
+      return `${auction_capacity.position} Limit`
+    return 'Cap Short'
+  }
+
+  // Said in full for the election control, because the whole point of the line
+  // is that no answer is owed: an ineligible team is not in the outstanding set
+  // the nomination is waiting on, so declining and setting a maximum are both
+  // actions that cannot change what happens to this player.
+  const ineligible_election_reason = () => {
+    if (!is_structurally_ineligible) return null
+    if (!auction_capacity.has_roster_space) {
+      return 'Roster full — no decline or maximum needed.'
+    }
+    if (!auction_capacity.has_position_capacity) {
+      return `At your ${auction_capacity.position} limit — no decline or maximum needed.`
+    }
+    return `Cap $${auction_capacity.available_cap} is under the $${auction_capacity.current_price} price — no decline or maximum needed.`
+  }
+
   const classNames = []
   let action = null
   let disabled = false
@@ -142,18 +177,28 @@ export default function AuctionMainBid({
           Winning Bid
         </Button>
       )
+    } else if (is_structurally_ineligible) {
+      // BEFORE the cap check, and it used to be after it. `Ineligible` said
+      // only that the roster had no room and was reached only once the price
+      // had passed the cap, so a manager with a full roster read `Exceeded CAP`
+      // and went looking for budget to free up -- an answer to a question that
+      // was not the one holding them out. The label names the term that
+      // actually applies.
+      disabled = true
+      action = (
+        <Button small disabled>
+          {ineligible_button_label()}
+        </Button>
+      )
     } else if (isAboveCap) {
+      // Eligible, and cannot RAISE: `bid + 1` is past the cap while the cap
+      // still covers the price on the board. That team can still win at the
+      // current price under the tiebreak, which is why this is a separate state
+      // from the one above and not a worse version of it.
       disabled = true
       action = (
         <Button small disabled>
           Exceeded CAP
-        </Button>
-      )
-    } else if (!isEligible) {
-      disabled = true
-      action = (
-        <Button small disabled>
-          Ineligible
         </Button>
       )
     } else {
@@ -292,7 +337,11 @@ export default function AuctionMainBid({
                   Drawn on its own condition rather than the bid clock's — see
                   `show_election_control` above. */}
               {show_election_control && (
-                <AuctionElectionControl pid={nominated_pid} compact />
+                <AuctionElectionControl
+                  pid={nominated_pid}
+                  compact
+                  ineligible_reason={ineligible_election_reason()}
+                />
               )}
             </div>
             {is_running && (
@@ -320,7 +369,7 @@ AuctionMainBid.propTypes = {
   is_initialized: PropTypes.bool,
   isComplete: PropTypes.bool,
   isLocked: PropTypes.bool,
-  isEligible: PropTypes.bool,
+  auction_capacity: PropTypes.object,
   isAboveCap: PropTypes.bool,
   isNominating: PropTypes.bool,
   isCommish: PropTypes.bool,

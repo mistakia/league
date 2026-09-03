@@ -29,7 +29,8 @@ import {
   calculate_live_projection,
   optimizeStandingsLineup,
   get_playoff_seeding,
-  compare_playoff_seed
+  compare_playoff_seed,
+  get_auction_team_capacity
 } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
@@ -353,28 +354,59 @@ export const get_auction_info_for_position = createSelector(
   }
 )
 
-export const is_nominated_player_eligible = createSelector(
+/**
+ * The viewing team's capacity for the OPEN NOMINATION.
+ *
+ * The predicate is `get_auction_team_capacity` in libs-shared -- the same one
+ * the server settles on, called here with this client's own roster rather than
+ * restated. It is what puts a team in the outstanding set, so a team failing it
+ * is a team the auction is not waiting on: it has nothing to decline and no
+ * maximum that can change what happens to this player.
+ *
+ * `has_cap_space` IS NOT the bid bar's `isAboveCap`, and the two must not be
+ * merged. `isAboveCap` asks whether this team can RAISE the price (`bid + 1`
+ * within the cap); this asks whether it can still win at the price already on
+ * the board, which a team holding exactly that much can under the nomination
+ * tiebreak. Merging them would take the election control away from a team whose
+ * election still decides the player.
+ *
+ * Null when there is no nomination or the board carries no map for it. That is
+ * unknown capacity, which is not the same answer as a refusal, and a caller
+ * that renders a refusal for it is stating something it has not been told.
+ */
+export const get_nominated_player_auction_capacity = createSelector(
   (state) => state.getIn(['auction', 'nominated_pid']),
+  (state) => state.getIn(['auction', 'bid']),
   get_player_maps,
   get_current_team_roster_record,
   get_current_league,
-  (pid, playerMaps, roster, league) => {
+  (pid, bid, playerMaps, roster, league) => {
     if (!pid) {
-      return false
+      return null
     }
 
     const player_map = playerMaps.get(pid)
     if (!player_map) {
-      return false
+      return null
     }
 
-    const pos = player_map.get('primary_position')
-    if (!pos) {
-      return false
+    const position = player_map.get('primary_position')
+    if (!position) {
+      return null
     }
 
     const roster_for_team = new Roster({ roster: roster.toJS(), league })
-    return roster_for_team.has_bench_space_for_position(pos)
+    const current_price = bid || 0
+
+    return {
+      position,
+      current_price,
+      ...get_auction_team_capacity({
+        roster: roster_for_team,
+        player_position: position,
+        current_price
+      })
+    }
   }
 )
 

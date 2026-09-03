@@ -245,6 +245,20 @@ $election_control_content_max_width = 720px
     row-gap 6px
     white-space nowrap
 
+  // Present in the strip ONLY when it carries the ineligibility reason -- the
+  // component renders no note here otherwise, which is what keeps the bar's
+  // "no fourth sentence" rule intact for every other state. A bound rather than
+  // a basis, because the line is the widest thing the control can hold and the
+  // actions row is already the one that has to give when the bar wraps.
+  .auction-election-control__note
+    font-size 10px
+    max-width 320px
+
+// The reason a control is dead is not a footnote about a control that works, so
+// it does not take the 0.6 grey the explanatory notes do.
+.auction-election-control.ineligible .auction-election-control__note
+  color rgba(0, 0, 0, 0.78)
+
 // THE PHONE LAYOUT OF THE COMPACT STRIP, and it is a different shape rather than
 // a smaller one. Paired with the `max-width 535px` block in auction-main-bid.styl
 // -- the two are one layout written in two files because the boxes they place
@@ -295,6 +309,24 @@ $election_control_content_max_width = 720px
     // a nudge off the baseline the two now share.
     label
       padding-bottom 0
+
+  // ITS OWN FULL-WIDTH ROW, created implicitly. The body that held it is
+  // dissolved above, so the note is an item of the bar's grid directly, and
+  // spanning every column is what puts it under the buttons rather than beside
+  // them. The row is implicit rather than named in the template so that a bar
+  // with no note pays no `row-gap` for it -- see auction-main-bid.styl.
+  //
+  // `width 0` with `min-width 100%` is not a tidier `width 100%`. The grid's
+  // columns are `max-content`, and a spanning item contributes its own
+  // max-content size to the tracks it spans -- so the sentence would size the
+  // button columns to its own length inside a container that scrolls one way
+  // only, putting the stepper off the left edge where nothing can reach it. A
+  // definite `width 0` makes that contribution nothing; the `min-width`
+  // resolves against the finished area and fills the row back out.
+  .auction-election-control.compact .auction-election-control__note
+    grid-column 1 / -1
+    width 0
+    min-width 100%
 
   .auction-election-control.compact .auction-election-control__form
     grid-area form

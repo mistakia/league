@@ -8,7 +8,7 @@ import {
   getCurrentTeamRoster,
   get_current_league,
   get_auction_state,
-  is_nominated_player_eligible
+  get_nominated_player_auction_capacity
 } from '@core/selectors'
 import { notification_actions } from '@core/notifications'
 import { get_free_agent_period } from '#libs-shared'
@@ -19,9 +19,9 @@ const map_state_to_props = createSelector(
   get_auction_state,
   get_app,
   getCurrentTeamRoster,
-  is_nominated_player_eligible,
+  get_nominated_player_auction_capacity,
   get_current_league,
-  (auction, app, roster, isEligible, league) => {
+  (auction, app, roster, auction_capacity, league) => {
     const faPeriod = get_free_agent_period(league)
     const now = dayjs()
     const isEnded = now.isAfter(faPeriod.end)
@@ -45,7 +45,7 @@ const map_state_to_props = createSelector(
       availableCap: roster.availableCap,
       isAboveCap: auction.bid >= roster.availableCap,
       nominated_pid: auction.nominated_pid,
-      isEligible,
+      auction_capacity,
       isStarted,
       free_agency_period_start: faPeriod.start,
       league,

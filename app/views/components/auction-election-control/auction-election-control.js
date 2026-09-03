@@ -37,8 +37,23 @@ export default function AuctionElectionControl({
   available_cap,
   is_election_window_open,
   select_player,
+  ineligible_reason = null,
   compact = false
 }) {
+  // WHY EVERY WRITE HERE IS OFF, in the caller's words. The control does not
+  // decide this: eligibility is a question about the OPEN NOMINATION -- roster
+  // space, position room and the cap against the price on the board -- and the
+  // bid bar is the only call site that has a nomination to ask about. The
+  // drawer renders this control on any free agent at any time and passes
+  // nothing, which is right: an election on a player nobody has nominated is
+  // exactly the standing instruction this control exists to take.
+  //
+  // A team failing that predicate is not in the outstanding set, so the auction
+  // is not waiting on it -- there is nothing to decline and no maximum that can
+  // change the outcome. The buttons stay, disabled, rather than disappearing:
+  // an absent control reads as a bug on a bar that was offering one a second
+  // ago, and it answers no question about why.
+  const is_ineligible = Boolean(ineligible_reason)
   const has_election = Boolean(election)
   const is_decline = has_election && election.get('maximum_bid') === null
   const maximum_bid = has_election ? election.get('maximum_bid') : null
@@ -71,6 +86,7 @@ export default function AuctionElectionControl({
   const withdraw = () => withdraw_auction_election({ leagueId, teamId, pid })
 
   const handle_set = () => {
+    if (is_ineligible) return
     const parsed = Number(draft)
     if (!Number.isInteger(parsed) || parsed < 0) return
     submit(parsed)
@@ -99,6 +115,7 @@ export default function AuctionElectionControl({
   // auction-settlement-status leaving the bar for the side rail on the same
   // day, which returned the ~260px basis it had been holding.
   if (compact) class_names.push('compact')
+  if (is_ineligible) class_names.push('ineligible')
   if (is_settled) class_names.push('settled')
   else if (is_decline) class_names.push('declined')
   else if (has_election) class_names.push('maximum')
@@ -121,6 +138,10 @@ export default function AuctionElectionControl({
   // named here rather than only in the standing-elections panel.
   const render_note = () => {
     if (is_settled) return 'This player has been settled.'
+    // Ahead of every other line, and it replaces rather than joins them. Each
+    // of the others explains how a write here will be honored; there is no
+    // write here to explain.
+    if (is_ineligible) return ineligible_reason
     if (is_decline) {
       return 'You will not bid. Revocable until this player settles.'
     }
@@ -159,9 +180,10 @@ export default function AuctionElectionControl({
                   inputMode='numeric'
                   placeholder='0'
                   value={draft}
+                  disabled={is_ineligible}
                   onChange={(event) => set_draft(event.target.value)}
                 />
-                <Button small onClick={handle_set}>
+                <Button small disabled={is_ineligible} onClick={handle_set}>
                   {has_election && !is_decline ? 'Update' : 'Set maximum'}
                 </Button>
               </>
@@ -172,11 +194,15 @@ export default function AuctionElectionControl({
                 another team bidding. This is the one button the bar keeps: it
                 is the action the retired pass occupied that slot to perform. */}
             {is_decline ? (
-              <Button small onClick={withdraw}>
+              <Button small disabled={is_ineligible} onClick={withdraw}>
                 Undo decline
               </Button>
             ) : (
-              <Button small onClick={() => submit(null)}>
+              <Button
+                small
+                disabled={is_ineligible}
+                onClick={() => submit(null)}
+              >
                 Decline
               </Button>
             )}
@@ -190,18 +216,29 @@ export default function AuctionElectionControl({
                 This is an affordance, not a write -- it dispatches
                 select_player and nothing else. */}
             {compact && (
-              <Button small onClick={() => select_player(pid)}>
+              <Button
+                small
+                disabled={is_ineligible}
+                onClick={() => select_player(pid)}
+              >
                 {has_election && !is_decline ? 'Change maximum' : 'Set maximum'}
               </Button>
             )}
             {!compact && has_election && !is_decline && (
-              <Button small onClick={withdraw}>
+              <Button small disabled={is_ineligible} onClick={withdraw}>
                 Withdraw
               </Button>
             )}
           </div>
         )}
-        {!compact && (
+        {/* THE ONE LINE THE COMPACT STRIP DOES TAKE. The bar suppresses this
+            note because the surrounding bar already names the player, the price
+            and the clock and the note would be a fourth sentence -- but that
+            argument is about a note explaining a control the manager can see is
+            there. Two disabled buttons and no reason is the state this change
+            exists to remove, so the strip carries the line for exactly the case
+            that produced it. */}
+        {(!compact || is_ineligible) && (
           <div className='auction-election-control__note'>{render_note()}</div>
         )}
       </div>
@@ -219,5 +256,6 @@ AuctionElectionControl.propTypes = {
   available_cap: PropTypes.number,
   is_election_window_open: PropTypes.bool,
   select_player: PropTypes.func,
+  ineligible_reason: PropTypes.string,
   compact: PropTypes.bool
 }

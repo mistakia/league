@@ -68,6 +68,10 @@ A team that leaves an eligible set never re-enters it, and completeness once rea
 
 Auction completion is DERIVED from an exhausted nomination rotation with the period end as the backstop. Do not add a column for it.
 
+**The eligible-set predicate has ONE home, and the bid bar reads it too.** `get_auction_team_capacity` in `libs-shared` takes a `Roster`, a position and the current price and returns the three terms plus their conjunction; `get_team_auction_capacity` in `libs-server/auction-settlement.mjs` is that call plus a roster read, and `get_nominated_player_auction_capacity` in `app/core/selectors.js` is that call against the client's own roster. The client needs the same answer the server settles on — a team outside the eligible set is not one the auction waits on, so it has nothing to decline and no maximum that can change the outcome, and offering it a bid, a decline or a `Set maximum` is offering a control that cannot do anything. A second client-side copy would be the three-disagreeing-comparisons defect again, in a tier no server spec can see.
+
+Two things about that shared function. **The terms are reported separately on purpose** — the bar picks its wording from which one failed, and `Exceeded CAP` on a manager whose roster is full sends them looking for budget to free up. And **`has_cap_space` is not the bar's `isAboveCap`**: the first asks whether a team can still win at the price on the board (`>=`, which a team holding exactly the price can, under the tiebreak), the second whether it can RAISE (`bid + 1`). Collapsing them takes the election control away from a team whose election still decides the player.
+
 ## Two writers, one open player, and they can disagree
 
 Inside a live block the bid clock is NOT the only thing that can close the open

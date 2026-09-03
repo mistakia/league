@@ -1,5 +1,5 @@
 import db from '#db'
-import { Roster } from '#libs-shared'
+import { Roster, get_auction_team_capacity } from '#libs-shared'
 import {
   current_season,
   roster_slot_types,
@@ -101,21 +101,14 @@ export const get_active_auction_nomination = async ({
 /**
  * A team's capacity for one player at settlement time.
  *
- * The three terms are the league's existing acquisition predicate, verbatim
- * from process-restricted-free-agency-bid.mjs, with the current price in place
- * of the bid amount. `isEligibleForSlot` on a BENCH slot delegates to
- * `has_bench_space_for_position`, which is `!isFull && has_position_capacity`,
- * so it already subsumes the roster-space term -- but the space term is kept
- * separate because the resolver reports roster_full and position_limit as
- * different outcomes and a manager needs to be told which one applied.
- *
- * The budget comparison is `>=`, not `>`. min_bid is $0 and 36% of historical
- * wins went for exactly $0, so a team with an open roster spot participates at
- * $0 regardless of remaining budget; the strict form would silently exclude a
- * $0-cap team from every free player, which is a change from all five prior
- * auctions and simply wrong, since matching $0 can win under the nomination
- * tiebreak. Three disagreeing comparisons existed in the socket before this;
- * the bid path's `>=` is the one kept.
+ * THE ROSTER READ, and nothing else. The predicate itself is
+ * `get_auction_team_capacity` in libs-shared, where the bid bar reaches it too:
+ * the client has to decide whether to offer a manager a bid, a decline or a
+ * maximum at all, and that is the same question this one answers, asked of the
+ * same three terms. A second copy on the client would be the shape of the
+ * three-disagreeing-comparisons defect this design removed -- so the rule, its
+ * `>=` budget comparison and the argument for both live in one module and this
+ * one supplies the roster.
  */
 export const get_team_auction_capacity = async ({
   tid,
@@ -126,23 +119,7 @@ export const get_team_auction_capacity = async ({
   const roster_row = await getRoster({ tid })
   const roster = new Roster({ roster: roster_row, league })
 
-  const is_eligible_for_slot = roster.isEligibleForSlot({
-    slot: roster_slot_types.BENCH,
-    pos: player_position
-  })
-
-  return {
-    available_space: roster.availableSpace,
-    available_cap: roster.availableCap,
-    is_eligible_for_slot,
-    // The three terms together. `is_eligible_for_slot` and `available_space` are
-    // reported separately above because the resolver distinguishes position_limit
-    // from roster_full and a manager needs to be told which one applied.
-    is_eligible:
-      is_eligible_for_slot &&
-      roster.availableSpace >= 1 &&
-      roster.availableCap >= current_price
-  }
+  return get_auction_team_capacity({ roster, player_position, current_price })
 }
 
 export const get_auction_team_capacities = async ({

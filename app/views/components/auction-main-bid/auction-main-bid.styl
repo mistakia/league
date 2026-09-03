@@ -386,6 +386,13 @@
   .auction__bid-actions .auction__main-action
     display grid
     grid-template-columns max-content max-content
+    // Two rows only, and the election control's note deliberately gets no area
+    // of its own here even though it becomes an item of THIS grid at this width
+    // (its body is `display contents` below 535px). A declared third row is a
+    // declared third `row-gap` -- 6px added to a bar with none to give, in every
+    // state, to reserve space for a line that appears in one. The note spans the
+    // columns from its own stylesheet instead, which creates the row implicitly
+    // and only when the note exists.
     grid-template-areas 'state state' 'stepper form'
     justify-content start
     align-items center
