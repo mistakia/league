@@ -729,12 +729,18 @@ observations:
     hidden, as on the auction page: clipped overflow does not scroll, so scrollWidth equals
     clientWidth while an element runs past both viewport edges. Measure the rect against the
     viewport.
+  - >-
+    [bug] get_auction_info_for_position filters on a pos prop that NO caller passes
+    (app/core/selectors.js:300) -- selected-player, auction-nominated-player and
+    auction-target-header all connect it with no pos, so the filter passes every player and the
+    auction rate is computed league-wide despite the name; fixing it would move every auction price
+    on screen.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-03T03:15:41.613Z'
+updated_at: '2026-09-03T18:28:52.407Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
