@@ -15152,6 +15152,19 @@ export interface NgsProspectScoresIndexRow {
   updated_at: Date | null
 }
 
+export interface NullsNotDistinctBackup20260903NflPlayStatsRow {
+  esbid: number | null
+  play_id: number | null
+  nfl_team: string | null
+  player_name: string | null
+  stat_id: number | null
+  stat_yards: number | null
+  gsis_player_id: string | null
+  smart_player_id: string | null
+  nfl_team_id: string | null
+  is_valid: boolean | null
+}
+
 export interface PercentilesRow {
   percentile_key: string
   field: string
