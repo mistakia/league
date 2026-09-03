@@ -143,7 +143,13 @@ export function* join_auction({ type }) {
     type,
     payload: { lid: leagueId, clientId }
   }
-  send(message)
+  // A REGISTRATION, so it may wait for the socket to open. AuctionControls
+  // sends this from a mount effect that routinely wins the race against the
+  // first connect, and on a first load nothing else would re-drive it -- there
+  // is no close, so no WEBSOCKET_RECONNECTED and no `rejoin_auction`. The
+  // server refuses a repeat on the same socket, and supersedes one from the
+  // same user on a new socket, so a redundant join costs nothing.
+  send(message, { queue_until_open: true })
 }
 
 /**

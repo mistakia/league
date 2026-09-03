@@ -10,10 +10,16 @@ export function* register() {
   if (!current_season.is_regular_season) return
   const updated = yield select(getScoreboardUpdated)
   console.log(`register scoreboard ${updated}`)
-  send({
-    type: scoreboard_actions.SCOREBOARD_REGISTER,
-    payload: { updated }
-  })
+  // A REGISTRATION, for the same reason as the auction join: it lives on the
+  // socket, it is idempotent, and on a first load it can be written before the
+  // socket opens with nothing else to re-drive it.
+  send(
+    {
+      type: scoreboard_actions.SCOREBOARD_REGISTER,
+      payload: { updated }
+    },
+    { queue_until_open: true }
+  )
 }
 
 export function* reregister() {
