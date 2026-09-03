@@ -22,12 +22,26 @@ export default async function handle_season_args_for_script({
   season_type = 'REG',
   season_only = false
 }) {
+  // Every `script_function` return value, in invocation order. This helper used
+  // to discard them, which made a script's outcome unreachable from its own
+  // `main()`: an importer that reports upstream published nothing by returning
+  // `{ skipped: true }` had no way to tell `report_job` about it, so a run that
+  // wrote nothing and a run that worked produced identical ledger rows. Callers
+  // that ignore the return value are unaffected.
+  const results = []
+
+  const run_script_function = async (args) => {
+    const result = await script_function(args)
+    results.push(result)
+    return result
+  }
+
   const process_year_week = async ({
     season_year,
     week,
     current_season_type
   }) => {
-    await script_function({
+    await run_script_function({
       season_year,
       week,
       season_type: current_season_type,
@@ -46,7 +60,7 @@ export default async function handle_season_args_for_script({
 
     if (season_only) {
       // For season-only scripts, call the script function once per year
-      await script_function({
+      await run_script_function({
         season_year,
         season_type: current_season_type,
         ...script_args
@@ -80,9 +94,9 @@ export default async function handle_season_args_for_script({
   }
 
   if (argv.all) {
-    const results = await year_query({ season_type })
+    const year_rows = await year_query({ season_type })
 
-    let season_years = results.map((r) => r.season_year)
+    let season_years = year_rows.map((r) => r.season_year)
     if (argv.start) {
       season_years = season_years.filter(
         (season_year) => season_year >= argv.start
@@ -119,7 +133,7 @@ export default async function handle_season_args_for_script({
   } else if (argv.week) {
     if (season_only) {
       // For season-only scripts, ignore week and process the year
-      await script_function({
+      await run_script_function({
         season_year: default_season_year,
         season_type,
         ...script_args
@@ -142,7 +156,7 @@ export default async function handle_season_args_for_script({
   } else {
     if (season_only) {
       // For season-only scripts, process the default year
-      await script_function({
+      await run_script_function({
         season_year: default_season_year,
         season_type,
         ...script_args
@@ -167,4 +181,6 @@ export default async function handle_season_args_for_script({
   if (post_all_function) {
     await post_all_function({ ...script_args })
   }
+
+  return results
 }

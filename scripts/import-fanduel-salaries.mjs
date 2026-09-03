@@ -10,7 +10,8 @@ import {
   fanduel,
   find_player_row,
   updatePlayer,
-  wait
+  wait,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
@@ -35,13 +36,28 @@ const import_fanduel_salaries = async ({
   // get slates
   const fanduel_slate_data = await fanduel.get_dfs_fixtures({ ignore_cache })
 
+  // An empty upstream is handled GRACEFULLY and never thrown on -- no date can
+  // be put on when FanDuel opens a board, so an absent slate is not a failure.
+  // What must not happen is a run that writes nothing being indistinguishable
+  // from a run that worked: on 2026-09-01 four runs took this path, logged one
+  // line, exited 0 and recorded is_successful true while player_salaries held
+  // zero FANDUEL rows for the whole 2026 season.
+  //
+  // So the two empty shapes are reported SEPARATELY, because they point at
+  // different owners. No fixture lists at all is FanDuel serving us nothing,
+  // which is usually a session or credential breakage on our side. Fixture
+  // lists that carry no NFL slate is FanDuel serving another sport's board,
+  // which is a genuinely quiet week. Both return a distinguishable skip that
+  // main() reports, in the shape import-fftoday-projections.mjs established.
   if (
     !fanduel_slate_data ||
     !fanduel_slate_data.fixture_lists ||
     !fanduel_slate_data.fixture_lists.length
   ) {
-    log('No fanduel slates found')
-    return
+    console.log(
+      'fanduel returned no fixture lists at all; nothing to import, skipping. This is upstream serving us nothing rather than a quiet board — check the session and credentials before treating it as expected.'
+    )
+    return { skipped: true, no_fixture_lists: true }
   }
 
   const game_description_names = ['NFL Main', 'NFL Single Game']
@@ -50,6 +66,13 @@ const import_fanduel_salaries = async ({
       fixture.sport === 'NFL' &&
       game_description_names.includes(fixture.game_description_name)
   )
+
+  if (!filtered_fanduel_slates.length) {
+    console.log(
+      `fanduel published ${fanduel_slate_data.fixture_lists.length} fixture list(s), none of them an NFL slate of interest; nothing to import, skipping`
+    )
+    return { skipped: true, no_nfl_slates: true }
+  }
 
   log(`Found ${filtered_fanduel_slates.length} fanduel slates of interest`)
 
@@ -175,18 +198,26 @@ const import_fanduel_salaries = async ({
 
   if (dry_run) {
     log(salary_inserts[0])
-    return
+    return { skipped: true, dry_run: true }
   }
 
-  if (salary_inserts.length > 0) {
-    await db('player_salaries')
-      .insert(salary_inserts)
-      .onConflict(['pid', 'esbid', 'source_contest_id'])
-      .merge()
-    log(`Inserted ${salary_inserts.length} salary records`)
-  } else {
-    log('No salary records to insert')
+  // Slates were found and processed, and they produced nothing. Unlike an empty
+  // upstream this is NOT graceful: FanDuel published a board and we resolved
+  // none of it, which means player matching or game matching has broken. It
+  // throws so report_job records the failure and the exit code carries it.
+  if (!salary_inserts.length) {
+    throw_if_shortfall(
+      `fanduel salaries: processed ${filtered_fanduel_slates.length} NFL slate(s) and produced 0 salary rows. Upstream published a board; player or game matching has broken.`
+    )
   }
+
+  await db('player_salaries')
+    .insert(salary_inserts)
+    .onConflict(['pid', 'esbid', 'source_contest_id'])
+    .merge()
+  console.log(`Inserted ${salary_inserts.length} salary records`)
+
+  return { skipped: false, rows_inserted: salary_inserts.length }
 }
 
 const process_matched_player = async ({
@@ -248,12 +279,13 @@ const process_matched_player = async ({
 
 const main = async () => {
   let error
+  let job_reason = null
   try {
     const argv = initialize_cli()
     const dry_run = argv.dry
     const ignore_cache = argv.ignore_cache
 
-    await handle_season_args_for_script({
+    const results = await handle_season_args_for_script({
       argv,
       script_name: 'import-fanduel-salaries',
       script_function: import_fanduel_salaries,
@@ -261,6 +293,25 @@ const main = async () => {
       script_args: { dry_run, ignore_cache },
       season_only: true
     })
+
+    // A skip stays SUCCESSFUL — an upstream that has published nothing is not a
+    // failure and pages nobody — but it carries its reason onto the ledger row,
+    // so a run that wrote nothing is no longer identical to a run that worked.
+    // Volume is judged separately and from outside the run by the
+    // `dfs-salary-source-week-coverage` data check, because a run that returns
+    // early can never reach an oracle of its own.
+    const skipped = results.filter((result) => result && result.skipped)
+    if (skipped.length && skipped.length === results.length) {
+      job_reason = `imported nothing: ${skipped
+        .map((result) =>
+          result.no_fixture_lists
+            ? 'fanduel returned no fixture lists at all'
+            : result.no_nfl_slates
+              ? 'fanduel published no NFL slate of interest'
+              : 'dry run'
+        )
+        .join('; ')}`
+    }
   } catch (err) {
     error = err
     log(error)
@@ -268,6 +319,7 @@ const main = async () => {
 
   await report_job({
     job_type: job_types.IMPORT_FANDUEL_DFS_SALARIES,
+    job_reason,
     error
   })
 

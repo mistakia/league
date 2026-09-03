@@ -25,6 +25,7 @@
     "libs-server/player-cache.mjs",
     "libs-server/player-pid-references.mjs",
     "libs-server/projection-source-week-coverage.mjs",
+    "libs-server/source-week-write-coverage.mjs",
     "libs-server/proxy-manager.mjs",
     "libs-server/resolve-canonical-player.mjs",
     "libs-server/rotowire/index.mjs",
