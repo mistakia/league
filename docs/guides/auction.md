@@ -17,6 +17,26 @@ The subsystem's design, its evidence, and the incidents behind each rule live in
 
 **And a JOIN is per SOCKET, so a reconnect is a new client the auction has never heard of.** Broadcasts still arrive — those are filtered on the league id the connection query string carries — so the board looks live while the server has no message handlers for that socket and every bid it sends is dropped with no error, the team reads as disconnected, and `pause_on_team_disconnect` holds the whole league. `rejoin_auction` re-sends `AUCTION_JOIN` on `WEBSOCKET_RECONNECTED`, guarded on this client having joined, because `_send_auction_init` broadcasts rather than replies and every client in the league sees one whenever anybody joins.
 
+Three things make that rejoin actually land, and each was missing once:
+
+- **A repeated `clientId` is a RECONNECT, not a duplicate.** It is a uuid minted once per page load, so every socket a tab opens carries the same one. `join` refuses a repeat from a DIFFERENT user and supersedes one from the same user — new handlers, a fresh `AUCTION_INIT`, the old socket terminated, and no second entry in `_connected`. The close handler checks it still owns the client id before deregistering anything, because the replaced socket's close arrives after the reconnect by definition and used to remove the presence the live socket was standing on.
+- **A deliberate socket swap is still a new socket.** `connect_auth` replaces the connection on sign-in, and `closeWS` detaches `onclose` on purpose, so that swap dispatches no `WEBSOCKET_CLOSE` and the reconnect loop never runs. It puts `WEBSOCKET_RECONNECTED` itself, after `connect`. Without it the join sent by AuctionControls' mount effect could go out on the socket about to be discarded — or on the pre-auth one, which `api/sockets/index.mjs` drops unread — and nothing ever re-sent it.
+- **A browser socket carries no heartbeat, so `api/index.mjs` pings.** A phone that changes network sends no FIN; the connection stays ESTABLISHED here until TCP gives up. The client's own `KEEPALIVE` cannot answer this — it is one-directional, and a backgrounded tab whose timers are frozen stops sending it while still connected. A protocol ping is answered by the socket rather than by script, which is what separates a frozen tab from a dead connection.
+
+## Pausing is a LIVE-mode verb
+
+`pause()` refuses in election mode, and that refusal is the invariant rather than a convenience. Election mode has no clock to stop, so a pause would only hide the board from whoever is connected while elections kept settling over REST — and `_paused` is force-cleared just once, in `_load_league`, so anything that set it afterwards set it for good. Three paths did: a team disconnecting under auto-pause, the commissioner's `AUCTION_PAUSE`, and `_refresh_league_pause`. Each drove a live election-mode auction into refusing every socket write with `auction is paused` while the whole league rendered that string.
+
+**The league-wide pause is a separate flag and loses nothing.** `_league_paused` is what `bid` and `nominate` consult first, and LeaguePauseNotice states it on every route. Do not collapse the two.
+
+**Score a change here by calling `pause()`, never by assigning `_paused`.** The spec that was supposed to hold this line set the flag by hand and asserted the guard read it back, which is the guard's first line restated — true of any auction whose flag happens to be clear, and blind to every path that sets it.
+
+## `isPaused` on the client is not the same question as "is it paused"
+
+The reducer opens `isPaused` true so no control is offered before the auction is known, which is right. What it cannot do is distinguish that from a real pause, and both the bid bar and the status rail named the second one — so every manager read `Auction is paused` for the length of a page load, and a client whose `AUCTION_INIT` never arrived read it until they reloaded. `is_initialized`, set by `AUCTION_INIT` alone, is the answered/unanswered bit. Anything new that reads `isPaused` for display has to check it first.
+
+**A decline is a REST write and must not be drawn on a socket flag.** `AuctionElectionControl` in the bid bar renders on `show_election_control`, which carries no pause term: `/auction-elections` has no pause check and needs none, since a maximum is accepted for the whole free agency period. Binding it to `is_running` is what turned one wrong `isPaused` into two symptoms — a board claiming a pause, and the one control that would still have worked missing from it.
+
 ## Mode is derived, never stored
 
 `libs-server/auction-modes.mjs` is the single answer to "which mode is in force". `live` inside a finalized block and from the final block to the period end; `election` everywhere else.

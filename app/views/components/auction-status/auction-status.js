@@ -26,6 +26,7 @@ export default function AuctionStatus({
   nominating_team_id,
   my_team_id,
   isPaused,
+  is_initialized,
   isComplete,
   isStarted,
   free_agency_period_start,
@@ -40,6 +41,12 @@ export default function AuctionStatus({
     line = 'Auction is complete.'
   } else if (!isStarted) {
     line = `Auction begins ${free_agency_period_start.format('MMMM D, ha')}.`
+  } else if (!is_initialized) {
+    // The panel exists to be readable without opening anything, which makes a
+    // wrong line worse here than anywhere else on the page. `isPaused` defaults
+    // true, so this branch said `Auction is paused.` until AUCTION_INIT landed
+    // and forever if it never did.
+    line = 'Loading the auction…'
   } else if (isPaused) {
     line = 'Auction is paused.'
   } else if (auction_mode === 'live') {
@@ -83,6 +90,7 @@ AuctionStatus.propTypes = {
   nominating_team_id: PropTypes.number,
   my_team_id: PropTypes.number,
   isPaused: PropTypes.bool,
+  is_initialized: PropTypes.bool,
   isComplete: PropTypes.bool,
   isStarted: PropTypes.bool,
   free_agency_period_start: PropTypes.object,

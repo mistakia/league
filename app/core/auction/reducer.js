@@ -16,6 +16,24 @@ const initialState = new Record({
   // reconnect saga tell a manager who dropped out of a block from a visitor who
   // never opened the page.
   is_joined: false,
+  // Whether AUCTION_INIT has landed, and therefore whether any field below is
+  // the server's answer rather than this record's opening guess.
+  //
+  // `isPaused` CANNOT CARRY THIS, and that is the defect it existed as. It
+  // defaults true so the controls stay hidden until the auction is known, which
+  // is right -- but "nothing has told us yet" and "the commissioner paused the
+  // auction" then render as the same screen, and that screen says `Auction is
+  // paused` in the bid bar and the status rail. Every manager sees it for the
+  // load, and a client that never gets its AUCTION_INIT -- a swapped socket, a
+  // reconnect the server refused, a phone tab the browser discarded and
+  // reloaded -- sees it for as long as the tab stays open, on an auction that is
+  // running fine for everyone else. It is not a stale reading; it is a default
+  // being reported as a fact.
+  //
+  // Cleared only by AUCTION_INIT, which is the one message that carries the
+  // whole board. That message BROADCASTS rather than replies, so a client that
+  // missed its own also recovers on the next manager to join.
+  is_initialized: false,
   isPaused: true,
   isLocked: false,
   isComplete: false,
@@ -252,6 +270,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
     case auction_actions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
+        is_initialized: true,
         bid:
           latest && latest.type === transaction_types.AUCTION_BID
             ? latest.player_salary

@@ -18,6 +18,27 @@ export function* connect_auth() {
   // disconnect any existing connection and connect with auth
   yield call(disconnect)
   yield call(connect)
+
+  // A DELIBERATE SWAP IS STILL A NEW SOCKET, and every per-socket registration
+  // on the server died with the old one.
+  //
+  // Only an UNEXPECTED drop announced itself before this. `closeWS` detaches
+  // `onclose` on purpose -- see service.js -- so the swap here dispatches no
+  // WEBSOCKET_CLOSE, the reconnect loop never runs, and WEBSOCKET_RECONNECTED
+  // was never put. That is the auction join lost on sign-in: AuctionControls
+  // sends AUCTION_JOIN from a mount effect keyed on `is_logged_in`, so on the
+  // ordering where the effect wins the race the join goes out on the socket
+  // this function is about to discard -- or on the pre-auth one, where
+  // `api/sockets/index.mjs` drops it unread because the connection carries no
+  // user. Either way the authenticated socket that replaced it was never
+  // joined, so no AUCTION_INIT ever arrived and the board sat at its
+  // `isPaused` default reading `Auction is paused` on a running auction.
+  //
+  // `rejoin_auction` is guarded on this client having joined, so this is a
+  // no-op for the ordinary sign-in that precedes opening the auction page, and
+  // the redundant join on the ordering where the effect already reached the new
+  // socket is refused by the same-socket branch in `Auction.join`.
+  yield put(wsActions.reconnected())
 }
 
 const RECONNECT_BASE_DELAY = 1000

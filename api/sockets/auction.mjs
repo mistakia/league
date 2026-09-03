@@ -175,9 +175,38 @@ export default class Auction {
    * the clock.
    */
   async join({ ws, user_id, onclose, client_id }) {
-    // Prevent duplicate client connections
-    if (this._connected_client_ids[client_id]) {
-      this.logger(`client_id ${client_id} already connected`)
+    // A RECONNECT REUSES THE CLIENT ID, AND THAT IS NOT A DUPLICATE.
+    //
+    // `clientId` is a uuid minted once per page load, so every socket the tab
+    // opens over its life carries the same one. This branch used to return on
+    // any repeat, which is the whole of a manager locked out of a live auction:
+    // there is no protocol heartbeat behind a browser socket, so a phone
+    // changing networks leaves the old connection ESTABLISHED on this side for
+    // as long as TCP takes to notice, while the client reconnects in about a
+    // second and rejoins with the id the corpse still holds. The refusal costs
+    // the new socket its message handlers and its AUCTION_INIT, so the board
+    // keeps arriving on broadcasts -- those filter on the league id in the
+    // query string -- while every bid and nomination is dropped in silence and
+    // the client sits at its `isPaused` default reading `Auction is paused`.
+    //
+    // So a repeat from the SAME user supersedes rather than refuses. A repeat
+    // from a different user is still refused: a client id is not a credential
+    // and two users sharing one is a defect, not a reconnect.
+    const superseded = this._connected_client_ids[client_id]
+    if (superseded && superseded.user_id !== user_id) {
+      this.logger(
+        `client_id ${client_id} is held by user_id ${superseded.user_id}; refusing user_id ${user_id}`
+      )
+      return
+    }
+
+    // THE SAME SOCKET JOINING TWICE IS THE ONE REPEAT THAT MUST STILL REFUSE.
+    // Both the mount effect and the reconnect saga can send AUCTION_JOIN for
+    // one socket, and `_setup_message_handlers` adds a listener per call -- so
+    // a second pass here would double every bid and nomination that socket
+    // sends rather than merely re-initialising it.
+    if (superseded && superseded.ws === ws) {
+      this.logger(`client_id ${client_id} already joined on this socket`)
       return
     }
 
@@ -196,14 +225,38 @@ export default class Auction {
     // Track user connections. Keyed by team, so a commissioner with no team in
     // the league is deliberately absent from it: `pause_on_team_disconnect`
     // counts TEAMS present, and an entry under no team would hold the league.
-    if (tid) {
+    //
+    // A SUPERSEDING JOIN ADDS NOTHING HERE. The entry the previous socket made
+    // is still standing and its close is guarded out below, so pushing again
+    // would leave this team two presences and one socket -- and the team would
+    // then read as connected for the whole auction after the manager closed the
+    // tab, which is the auto-pause denominator silently wrong in the direction
+    // that never fires.
+    if (tid && !superseded) {
       if (this._connected[tid]) {
         this._connected[tid].push(user_id)
       } else {
         this._connected[tid] = [user_id]
       }
     }
-    this._connected_client_ids[client_id] = user_id
+
+    // OVERWRITTEN BEFORE THE OLD SOCKET IS TOUCHED, because this map is what
+    // the close handler reads to decide whether it still owns the client id.
+    // Terminating first would run that handler against an entry still naming
+    // the dead socket, which is the deregistration this whole branch exists to
+    // avoid.
+    this._connected_client_ids[client_id] = { user_id, ws }
+
+    if (superseded) {
+      this.logger(`client_id ${client_id} superseded by a new socket`)
+      // `terminate` rather than `close`: the socket being replaced is one this
+      // side has no reason to believe is still reachable, and a close handshake
+      // waits for a peer that is frequently gone. Optional because the stubs in
+      // the suite stand in for a transport rather than implementing it.
+      if (typeof superseded.ws?.terminate === 'function') {
+        superseded.ws.terminate()
+      }
+    }
 
     this.logger(`user_id ${user_id} joined as team_id ${tid}`)
 
@@ -272,7 +325,31 @@ export default class Auction {
     }
   }
 
+  /**
+   * Stop the auction's own clock.
+   *
+   * ELECTION MODE HAS NO CLOCK TO PAUSE, AND THIS REFUSES RATHER THAN PRETENDS.
+   * `_load_league` force-clears `_paused` for exactly that reason, but it runs
+   * once at socket setup while this runs whenever a team drops, a commissioner
+   * taps Pause, or a league pause is read -- so `_paused` went back to true
+   * afterwards and nothing in election mode ever cleared it again. There is no
+   * bid clock to restart, so `start()` is not reached on any normal path; the
+   * auction simply stopped accepting nominations and bids with `auction is
+   * paused`, and every client in the league rendered that string over a board
+   * that was still settling elections over REST.
+   *
+   * The league-wide pause is NOT weakened by refusing here. `_league_paused` is
+   * its own flag, `bid` and `nominate` consult it ahead of this one, and
+   * LeaguePauseNotice already states it on every route -- so the pause still
+   * refuses every write it always did, without the auction claiming a state it
+   * has no clock to be in.
+   */
   pause() {
+    if (this._election_mode) {
+      this.logger('refusing to pause -- election mode has no clock to pause')
+      return
+    }
+
     if (this._paused) return
 
     this.logger('pausing auction')
@@ -1403,6 +1480,22 @@ export default class Auction {
 
   _setup_close_handler(ws, tid, user_id, onclose, client_id) {
     ws.on('close', () => {
+      // A SUPERSEDED SOCKET OWNS NOTHING AND MUST DEREGISTER NOTHING.
+      //
+      // The socket a reconnect replaced closes late and out of order -- that
+      // lateness is the whole reason the supersession in `join` exists -- and
+      // its close would otherwise remove the presence the LIVE socket is
+      // standing on: the team drops out of `_connected`, auto-pause fires on a
+      // manager who is sitting right there, and the client id the live socket
+      // registered under is deleted. `onclose` is skipped with it, because the
+      // auction is plainly still in use by the socket that took this one's
+      // place.
+      const current = this._connected_client_ids[client_id]
+      if (current && current.ws !== ws) {
+        this.logger(`ignoring close of a superseded socket for ${client_id}`)
+        return
+      }
+
       // Remove user from connected list. A commissioner who manages no team in
       // this league was never added to it -- see `join` -- so there is nothing
       // to remove and no team whose disconnect could pause the league.
@@ -1723,8 +1816,9 @@ export default class Auction {
    * is the property the whole lever rests on. A property that holds only because
    * the UI declines to offer a button is not a property.
    *
-   * Inert on the mainline: election mode force-clears `_paused`, so this never
-   * fires while the auction is running normally.
+   * Inert on the mainline, and `pause()` is what makes that true rather than
+   * `_load_league`. The force-clear at setup only ever established the state
+   * once; refusing to pause at all in election mode is what keeps it.
    */
   _refuse_while_paused(action, user_id) {
     if (!this._paused) return false
@@ -1744,8 +1838,11 @@ export default class Auction {
    *
    * `_paused` is the auction's own clock; `_league_paused` is the league's. The
    * auction is additionally driven into its own paused state here so the timers
-   * stop and every connected client sees AUCTION_PAUSED, but the two flags stay
-   * separate because only one of them survives election mode.
+   * stop and every connected client sees AUCTION_PAUSED -- in LIVE mode, where
+   * there are timers to stop. `pause()` refuses in election mode, and the
+   * refusal costs this nothing: the return value below is what `bid` and
+   * `nominate` consult, ahead of `_refuse_while_paused`, and LeaguePauseNotice
+   * states the pause on every route without the auction claiming a clock state.
    *
    * Re-read rather than cached at the three write paths below: the commissioner
    * pauses over HTTP, in a different process, so a flag set at connect time

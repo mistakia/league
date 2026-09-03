@@ -59,6 +59,19 @@ $commissioner_controls_offset = 8px + $floating_action_height + 8px
   flex-direction column
   gap 8px
 
+// The stack's one non-control. It takes the same box as an action so the column
+// keeps its shared width, and deliberately not the same paint: it is a sentence
+// explaining why there is no button here, and a graphite rectangle that reads as
+// a button but does not respond to a tap is the confusion this replaced.
+.commissioner-controls__note
+  max-width 220px
+  padding 8px 10px
+  border-radius 3px
+  background rgba(0, 0, 0, 0.72)
+  color #fff
+  font-size 11px
+  line-height 1.4
+
 .commissioner-controls__toggle
 .commissioner-controls__action
   prose_floating_action()

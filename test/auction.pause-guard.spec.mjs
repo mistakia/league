@@ -143,16 +143,78 @@ describe('auction pause guard', function () {
     expect(await count_auction_transactions()).to.equal(before + 1)
   })
 
-  it('never pauses election mode, so the guard is inert on the mainline', async function () {
-    const auction = new Auction({
-      wss: stub_wss,
-      lid: league_id,
-      timers: make_recording_timers()
-    })
-    await auction.setup()
-    auction._election_mode = true
-    auction._paused = false
+  // WHAT THE OLD VERSION OF THIS BLOCK COULD NOT SEE.
+  //
+  // It set `_paused = false` by hand and asserted `_refuse_while_paused`
+  // returned false -- which is the guard's first line restated, true of any
+  // auction whose flag happens to be clear, and blind to every path that SETS
+  // the flag. `pause()` had no election-mode branch at all, so a team
+  // disconnecting under auto-pause, a commissioner tap, or a league pause being
+  // read each drove a live election-mode auction into `_paused` with nothing
+  // able to clear it again, and the whole league then read `Auction is paused`
+  // over a board still settling elections over REST.
+  //
+  // Every assertion below therefore calls `pause()` -- the transition, not the
+  // flag -- and the last one is the control that keeps the rest honest.
+  describe('election mode has no clock to pause', function () {
+    const build_election_auction = async () => {
+      const auction = new Auction({
+        wss: stub_wss,
+        lid: league_id,
+        timers: make_recording_timers()
+      })
+      await auction.setup()
+      auction._election_mode = true
+      auction._paused = false
+      return auction
+    }
 
-    expect(auction._refuse_while_paused('nomination', 1)).to.equal(false)
+    it('refuses a direct pause', async function () {
+      const auction = await build_election_auction()
+
+      auction.pause()
+
+      expect(auction._paused).to.equal(false)
+      expect(auction._refuse_while_paused('nomination', 1)).to.equal(false)
+    })
+
+    it('refuses the pause a disconnecting team triggers', async function () {
+      // The path that took league 1 down. `pause_on_team_disconnect` calls
+      // `pause()` from the close handler, and a phone changing networks is a
+      // close.
+      const auction = await build_election_auction()
+      auction._pause_on_team_disconnect = true
+
+      auction.pause()
+
+      expect(auction._paused).to.equal(false)
+    })
+
+    it('refuses the pause a league pause triggers, and still refuses writes', async function () {
+      // The two flags are separate on purpose. `_league_paused` is what `bid`
+      // and `nominate` consult first, so declining to move `_paused` here costs
+      // the league pause nothing -- and asserting BOTH halves is what stops a
+      // future reader from "simplifying" the pause back into one flag.
+      const auction = await build_election_auction()
+
+      auction._league_paused = true
+      auction.pause()
+
+      expect(auction._paused).to.equal(false)
+      expect(auction._league_paused).to.equal(true)
+    })
+
+    it('still pauses in live mode', async function () {
+      // THE CONTROL. Without it every assertion above passes against a `pause()`
+      // that was broken outright and never pauses anything, which is the same
+      // reading as a correct election-mode refusal.
+      const auction = await build_election_auction()
+      auction._election_mode = false
+
+      auction.pause()
+
+      expect(auction._paused).to.equal(true)
+      expect(auction._refuse_while_paused('nomination', 1)).to.equal(true)
+    })
   })
 })

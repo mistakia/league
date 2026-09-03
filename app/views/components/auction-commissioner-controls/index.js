@@ -8,6 +8,7 @@ import AuctionCommissionerControls from './auction-commissioner-controls'
 
 const map_state_to_props = createSelector(get_auction_state, (auction) => ({
   isPaused: auction.isPaused,
+  auction_mode: auction.auction_mode,
   pause_on_team_disconnect: auction.pause_on_team_disconnect
 }))
 

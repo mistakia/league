@@ -37,6 +37,7 @@ const map_state_to_props = createSelector(
       nominating_team_id: auction.nominating_team_id,
       my_team_id: app.teamId,
       isPaused: auction.isPaused,
+      is_initialized: auction.is_initialized,
       isComplete: auction.isComplete || isEnded,
       isStarted,
       free_agency_period_start: faPeriod.start,

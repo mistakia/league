@@ -85,4 +85,76 @@ describe('auction rejoin on websocket reconnect', function () {
       )
     })
   })
+
+  // A DELIBERATE SWAP IS ALSO A NEW SOCKET, and it was the one nothing
+  // announced.
+  //
+  // `connect_auth` replaces the connection on sign-in, and `closeWS` detaches
+  // `onclose` on purpose -- so that swap dispatches no WEBSOCKET_CLOSE, the
+  // reconnect loop never runs, and WEBSOCKET_RECONNECTED was never put. The
+  // rejoin above therefore covered every dropped connection EXCEPT the one that
+  // happens on every sign-in, which is the ordering that loses the auction join
+  // outright: AuctionControls sends AUCTION_JOIN from an effect keyed on
+  // `is_logged_in`, and on the ordering where the effect wins it goes out on the
+  // socket about to be discarded.
+  //
+  // A source gate for the same reason as the block above -- `@core/ws/sagas`
+  // reaches `@core/store`, which reads `window` at module scope.
+  describe('the deliberate socket swap', function () {
+    const ws_sagas_source = fs.readFileSync(
+      path.join(repo_root, 'app/core/ws/sagas.js'),
+      'utf8'
+    )
+
+    // SCOPED TO ONE FUNCTION, and the first draft of this block was not.
+    //
+    // `reconnect()` has ALWAYS ended in `yield put(wsActions.reconnected())` --
+    // that is the announcement for an unexpected drop, which was never the
+    // missing half. A file-wide `include` therefore matched that line and passed
+    // with the fix deleted, and the ordering assertion passed with it because
+    // `reconnect()` sits later in the file than `connect_auth`'s `call(connect)`.
+    // Both read exactly like a fix under test. The mutation run is what said
+    // otherwise.
+    //
+    // The first `\n}\n` after a top-level signature is its closing brace, since
+    // everything nested is indented.
+    const body_of = (signature) => {
+      const start = ws_sagas_source.indexOf(signature)
+      expect(start, `${signature} is still declared`).to.be.above(-1)
+      const end = ws_sagas_source.indexOf('\n}\n', start)
+      expect(end, `${signature} has a closing brace`).to.be.above(start)
+      return ws_sagas_source.slice(start, end)
+    }
+
+    const connect_auth_body = body_of('export function* connect_auth()')
+
+    it('cuts the body of connect_auth and nothing else', function () {
+      // THE CONTROL ON THE SLICE. Every assertion below is only worth what this
+      // one is: if the slice ran past its function it would swallow
+      // `reconnect()` and go green on that function's announcement, which is the
+      // exact false pass this block already produced once.
+      expect(connect_auth_body).to.include('yield call(disconnect)')
+      expect(
+        connect_auth_body,
+        'the slice must not reach reconnect(), whose put is not the one under test'
+      ).to.not.include('while (!isOpen())')
+    })
+
+    it('announces the new socket after an auth swap', function () {
+      expect(connect_auth_body).to.include('yield put(wsActions.reconnected())')
+    })
+
+    it('announces it AFTER connecting, not before', function () {
+      // Order is the whole property. Put ahead of `connect` and the rejoin
+      // sends AUCTION_JOIN into the socket being torn down, which is the defect
+      // restated rather than fixed.
+      const connect_at = connect_auth_body.indexOf('yield call(connect)')
+      const put_at = connect_auth_body.indexOf(
+        'yield put(wsActions.reconnected())'
+      )
+
+      expect(connect_at).to.be.above(-1)
+      expect(put_at).to.be.above(connect_at)
+    })
+  })
 })

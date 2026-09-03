@@ -27,6 +27,7 @@ export default function AuctionMainBid({
   nominate,
   selected_pid,
   isPaused,
+  is_initialized,
   isComplete,
   isLocked,
   isEligible,
@@ -123,7 +124,7 @@ export default function AuctionMainBid({
   let disabled = false
   if (!league.free_agency_period_start || !isStarted || isComplete) {
     action = null
-  } else if (isPaused) {
+  } else if (!is_initialized || isPaused) {
     action = null
   } else if (isLocked) {
     disabled = true
@@ -186,6 +187,11 @@ export default function AuctionMainBid({
         {free_agency_period_start.format('dddd, MMMM D YYYY, ha')}
       </div>
     )
+  } else if (!is_initialized) {
+    // NOT `Auction is paused`, which is what this said for the whole of every
+    // load and forever on a client whose AUCTION_INIT never arrived. The
+    // auction's state is unknown here, and saying so is the only honest line.
+    main = <div className='auction__text'>Loading auction…</div>
   } else if (isPaused) {
     main = <div className='auction__text'>Auction is paused</div>
   } else if (nominated_pid) {
@@ -202,7 +208,25 @@ export default function AuctionMainBid({
     )
   }
 
-  const is_running = isStarted && !isComplete && !isPaused
+  const is_running = isStarted && !isComplete && is_initialized && !isPaused
+
+  // AN ELECTION IS NOT A SOCKET WRITE, so a socket pause is not a reason to
+  // take it away.
+  //
+  // Declining posts to `/auction-elections` over REST, which has no pause check
+  // and needs none -- a maximum is accepted for the whole free agency period,
+  // including hours when no auction clock is running at all. Rendering it under
+  // `is_running` bound it to the bid clock anyway, so a manager whose client
+  // believed the auction was paused lost the one control that would still have
+  // worked, on the one player it was needed for. That is the second half of
+  // what team 6 hit: the board said paused, and the Decline button was not
+  // absent because declining was refused, but because the same flag drew both.
+  const show_election_control =
+    is_election_mode &&
+    Boolean(nominated_pid) &&
+    isStarted &&
+    !isComplete &&
+    is_initialized
 
   return (
     <div className='auction__bar'>
@@ -230,9 +254,9 @@ export default function AuctionMainBid({
           )}
           {main}
         </div>
-        {is_running && (
+        {(is_running || show_election_control) && (
           <div className='auction__bid-actions'>
-            {!is_election_mode && (
+            {is_running && !is_election_mode && (
               <div className='auction__main-timer'>
                 <Timer
                   expiration={timer}
@@ -244,29 +268,39 @@ export default function AuctionMainBid({
               {/* `small` and `disabled` are on each button rather than on
                   the group. The group propagates nothing — see
                   button-group.js. */}
-              <ButtonGroup className={classNames.join(' ')}>
-                {(!nominated_pid || !isWinningBid) && (
-                  <Button small disabled={disabled} onClick={handle_down_click}>
-                    <Icon name='remove' />
-                  </Button>
-                )}
-                {action}
-                {(!nominated_pid || !isWinningBid) && (
-                  <Button small disabled={disabled} onClick={handle_up_click}>
-                    <Icon name='add' />
-                  </Button>
-                )}
-              </ButtonGroup>
+              {is_running && (
+                <ButtonGroup className={classNames.join(' ')}>
+                  {(!nominated_pid || !isWinningBid) && (
+                    <Button
+                      small
+                      disabled={disabled}
+                      onClick={handle_down_click}
+                    >
+                      <Icon name='remove' />
+                    </Button>
+                  )}
+                  {action}
+                  {(!nominated_pid || !isWinningBid) && (
+                    <Button small disabled={disabled} onClick={handle_up_click}>
+                      <Icon name='add' />
+                    </Button>
+                  )}
+                </ButtonGroup>
+              )}
               {/* Where the pass button used to sit. A decline is the same
-                  action the pass was, and a maximum is the one it never had. */}
-              {is_election_mode && nominated_pid && (
+                  action the pass was, and a maximum is the one it never had.
+                  Drawn on its own condition rather than the bid clock's — see
+                  `show_election_control` above. */}
+              {show_election_control && (
                 <AuctionElectionControl pid={nominated_pid} compact />
               )}
             </div>
-            <div className='auction__main-input'>
-              <label>Enter Bid</label>
-              <input type='number' value={value} onChange={handle_change} />
-            </div>
+            {is_running && (
+              <div className='auction__main-input'>
+                <label>Enter Bid</label>
+                <input type='number' value={value} onChange={handle_change} />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -283,6 +317,7 @@ AuctionMainBid.propTypes = {
   nominate: PropTypes.func,
   selected_pid: PropTypes.string,
   isPaused: PropTypes.bool,
+  is_initialized: PropTypes.bool,
   isComplete: PropTypes.bool,
   isLocked: PropTypes.bool,
   isEligible: PropTypes.bool,

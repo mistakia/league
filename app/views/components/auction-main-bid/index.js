@@ -30,6 +30,7 @@ const map_state_to_props = createSelector(
 
     return {
       isPaused: auction.isPaused,
+      is_initialized: auction.is_initialized,
       isComplete: auction.isComplete || isEnded,
       isCommish: app.userId === league.commissioner_user_id,
       isLocked: auction.isLocked,

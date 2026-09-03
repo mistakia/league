@@ -66,11 +66,21 @@ export default class AuctionCommissionerControls extends React.Component {
     const { open } = this.state
     const {
       isPaused,
+      auction_mode,
       pause_on_team_disconnect,
       pause,
       resume,
       toggle_pause_on_team_disconnect
     } = this.props
+
+    // BOTH CONTROLS HERE DRIVE ONE SERVER METHOD, and that method refuses in
+    // election mode -- there is no clock to stop, so pausing would only hide the
+    // board from whoever is connected while elections kept settling over REST.
+    // The refusal is the correct behavior and it belongs on the server, but a
+    // button that silently does nothing is its own defect: a commissioner taps
+    // Pause, the label does not flip, and the reasonable next move is to tap it
+    // again. Naming the reason is what turns a dead control into an answer.
+    const is_election_mode = auction_mode === 'election'
 
     return (
       <div className='auction__commissioner-controls'>
@@ -83,26 +93,37 @@ export default class AuctionCommissionerControls extends React.Component {
         <div className='commissioner-controls__stack'>
           {open && (
             <div className='commissioner-controls__actions'>
-              <button
-                type='button'
-                className='commissioner-controls__action'
-                onClick={this.handle_action(isPaused ? resume : pause)}
-              >
-                {isPaused ? 'Resume' : 'Pause'}
-              </button>
-              {/* The label names the state this will PUT the auction in, not the
-                  state it is in. The SpeedDial's tooltip said the same thing;
-                  the difference is that a label under a thumb is read before the
-                  tap rather than after it. */}
-              <button
-                type='button'
-                className='commissioner-controls__action'
-                onClick={this.handle_action(toggle_pause_on_team_disconnect)}
-              >
-                {pause_on_team_disconnect
-                  ? 'Disable auto-pause'
-                  : 'Enable auto-pause'}
-              </button>
+              {is_election_mode ? (
+                <div className='commissioner-controls__note'>
+                  Election mode has no clock to pause. Pause the league to stop
+                  it.
+                </div>
+              ) : (
+                <>
+                  <button
+                    type='button'
+                    className='commissioner-controls__action'
+                    onClick={this.handle_action(isPaused ? resume : pause)}
+                  >
+                    {isPaused ? 'Resume' : 'Pause'}
+                  </button>
+                  {/* The label names the state this will PUT the auction in, not
+                      the state it is in. The SpeedDial's tooltip said the same
+                      thing; the difference is that a label under a thumb is read
+                      before the tap rather than after it. */}
+                  <button
+                    type='button'
+                    className='commissioner-controls__action'
+                    onClick={this.handle_action(
+                      toggle_pause_on_team_disconnect
+                    )}
+                  >
+                    {pause_on_team_disconnect
+                      ? 'Disable auto-pause'
+                      : 'Enable auto-pause'}
+                  </button>
+                </>
+              )}
             </div>
           )}
           <button
@@ -123,6 +144,7 @@ AuctionCommissionerControls.propTypes = {
   pause: PropTypes.func,
   resume: PropTypes.func,
   isPaused: PropTypes.bool,
+  auction_mode: PropTypes.string,
   toggle_pause_on_team_disconnect: PropTypes.func,
   pause_on_team_disconnect: PropTypes.bool
 }
