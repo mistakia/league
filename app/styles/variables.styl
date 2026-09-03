@@ -9,7 +9,33 @@ $borderColorLight = lighten($borderColor, 90)
 
 $menuWidth = 240px
 $auctionHeightDesktop = 164px
-$auctionHeightMobile = 215px
+// THE WHOLE AUCTION CHROME, not just the bid bar: the bar plus the team strip
+// beneath it. Four places derive from it and they must agree or the chrome and
+// the page disagree about where one ends -- `.auction__controls` height, the
+// `.page` bottom margin that reserves the space, the floating menu button's
+// offset, and the commissioner controls'.
+//
+// 240 rather than 215 because the narrow bar is no longer a fixed height. It
+// takes 120px at 768 and 145px at 600, where the election controls wrap to two
+// lines, and the team strip wants 94 -- so the tallest the chrome gets is 239.
+// At 215 the strip was the thing that gave: it is the last child of a
+// fixed-height box, so the overflow came out as the `Nominating` label being
+// clipped off the chips at 600 and below, which reads as a missing label rather
+// than as a layout that ran out of room.
+//
+// It has to be the MAXIMUM over the widths, not the height at any one of them,
+// because the reservation is a static number while the thing it reserves for is
+// not: `.auction__controls` sits in the band this margin opens, so anything it
+// needs beyond this is taken out of its own last child rather than out of the
+// page. The cost of the extra 25px is 25px of board at narrow widths, and it is
+// only spent while an auction is live.
+//
+// DO NOT TUNE THIS BY WATCHING THE CLIP SHRINK. The strip REFLOWS under
+// pressure -- squeezed it reports 79, then 84, then 87 as it is given room, so
+// each increment closes less of the gap than it should and the sequence reads
+// as converging on a value below the real one. Measured with room to spare it
+// wants 94 flat at every narrow width, and that is the number to add the bar to.
+$auctionHeightMobile = 240px
 
 $successColor = green
 $yellowColor = #ff0

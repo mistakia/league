@@ -148,8 +148,12 @@
     min-height 120px
     align-items flex-start
 
+  // The 12px of top padding is the room the bid input's label paints into --
+  // see `.auction__main-input` below, whose label sits above its box and out of
+  // flow. Without it the label would print over the bottom of the player
+  // details, which end where this row begins.
   .auction__bid-actions
-    padding 0 16px 8px
+    padding 12px 16px 8px
     justify-content center
     width 100%
 
@@ -177,6 +181,47 @@
   .auction__main-timer
     border-radius 8px
     overflow hidden
+
+  // THE ONLY CONTROL ON THIS ROW WITH A VISIBLE BOX, so it is the only one
+  // whose top edge the eye can line up -- and it was the one that did not line
+  // up. `height 100%` stretched it to the whole row while its neighbours are
+  // 26px buttons, giving a 38px box whose top sat 5.8px above theirs at 768 and
+  // further at 600. Their CENTRES agreed the whole time, which is why a centre
+  // check reads clean and the defect is still plainly there in a screenshot.
+  //
+  // The extra 12px was never the number, it was the label: `.auction__main-input
+  // label` is absolutely positioned over the input's own `padding-top 12px`, so
+  // the box had to be tall enough to hold a caption drawn on top of it. Put the
+  // label in normal flow ABOVE the box and the box only has to hold the number,
+  // which is exactly the shape `Your election` / `$5` already uses two controls
+  // to the left. The label lands at that label's height and the box lands at
+  // the buttons' height, so the row reads as one line instead of four controls
+  // and a tall panel.
+  //
+  // Above 799px none of this applies: the bar is a single 70px row, the input
+  // fills its full height by design, and the label has the room to sit inside.
+  // THE LABEL MUST NOT COST HEIGHT, which is the whole difficulty. Putting it
+  // in normal flow above the box makes a 37px stack, and a 37px stack centred
+  // on a row of 26px buttons puts the box 5.7px BELOW them -- the same defect
+  // mirrored, which is what the first attempt at this shipped into the browser.
+  // The box can only land on the buttons' band if it is the only thing the
+  // layout sizes, so the label goes back out of flow and paints ABOVE the box
+  // rather than on top of it, and the row is given the padding to receive it.
+  .auction__main-input
+    height 26px
+    align-self center
+
+    label
+      // Directly above the box, not inside it. `bottom 100%` is relative to
+      // this same box, so the two move together if the height ever changes.
+      top auto
+      bottom 100%
+      right 0
+      padding-bottom 2px
+
+    input
+      height 26px
+      padding-top 0
 
 @media (max-width 400px)
   .auction__main-timer
