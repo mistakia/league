@@ -100,8 +100,9 @@ const apply_roster_override = ({ roster_pids, override }) => {
  *   Counterfactual roster changes keyed by team_id. Absent or empty is a strict
  *   no-op.
  * @param {number} [params.roster_week] - Week to read the roster POOL from.
- *   Defaults to `current_week`, which is what the pipeline runs on. Set it only
- *   to ask a counterfactual question of a different roster snapshot.
+ *   Defaults to the week the league itself serves as live
+ *   (`current_season.fantasy_season_week`, which is 0 in the preseason). Set it
+ *   only to ask a counterfactual question of a different roster snapshot.
  * @returns {Promise<object>} { team_id, player_ids: string[] }
  */
 export async function load_team_starters({
@@ -113,7 +114,7 @@ export async function load_team_starters({
   scoring_format_id,
   league,
   roster_overrides = null,
-  roster_week = current_week
+  roster_week = current_season.fantasy_season_week
 }) {
   // Validate current_week to prevent undefined comparison issues
   if (typeof current_week !== 'number' || current_week < 1) {
@@ -143,19 +144,30 @@ export async function load_team_starters({
     // Future week: compute optimal from current roster pool.
     //
     // The POOL week and the TARGET week are separate questions, which is why
-    // `roster_week` exists at all -- but they are not in conflict, so the
-    // default keeps them together and the pipeline is unaffected. `current_week`
-    // here is `active_fantasy_week`, floored to 1 because the branch above
-    // refuses a target week below 1, and in the preseason that names the week 1
-    // forward slice that generate-rosters materializes from week 0 and re-syncs
-    // nightly. That slice is the intended pool.
+    // `roster_week` exists as a parameter. The DEFAULT is the live roster week.
     //
-    // What the parameter buys is the counterfactual: week 0 is the snapshot
-    // `get-roster.mjs` reads, so it is what the league's cap, auction and poach
-    // paths act on RIGHT NOW, ahead of the next slice sync. Asking the forecast
-    // to run on it is a legitimate question -- an auction decision rests on the
-    // live roster, not on last night's slice -- and it is the caller's to ask
-    // rather than a default to change underneath the nightly forecast.
+    // It was `current_week` -- `active_fantasy_week`, floored to 1 because the
+    // branch above refuses a target week below 1. That floor is about the week
+    // being projected and says nothing about which snapshot is live, so in the
+    // preseason it named the week 1 forward slice: a nightly copy of week 0 that
+    // generate-rosters re-syncs at 23:55 local. The argument for keeping it was
+    // that the slice is the intended pool. It is not, and the reason is that the
+    // slice is a COPY -- it never holds an answer week 0 does not, so there is no
+    // state of the world where reading it is more correct, and one where it is
+    // less: every roster move between a sync and the next one is invisible to it.
+    //
+    // Measured on league 1, 2026-09-02, n=10000 over three seeds: reading the
+    // slice gave team 1 championship 0.155 and bye 0.343; reading week 0 gave
+    // 0.445 and 0.873. Four of that team's players were in a reserve or practice
+    // squad slot in the copy and active in week 0, and five of the ten teams
+    // disagreed. Note n matters here -- at n=2000 the week 0 arm ranged 0.21 to
+    // 0.49 across seeds and no single run of it is evidence of anything.
+    //
+    // `fantasy_season_week` is what `get-roster.mjs` serves, so the pool and the
+    // league's authoritative roster are the same row by construction. In-season
+    // the two expressions are equal, so this changes nothing once Week 1 starts;
+    // it only removes the preseason gap. `week` is not a candidate -- it keeps
+    // counting past the season's end onto a roster week never written.
     const player_ids = await calculate_optimal_starters({
       league_id,
       team_id,
