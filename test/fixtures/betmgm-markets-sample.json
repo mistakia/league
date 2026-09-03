@@ -1,0 +1,712 @@
+{
+  "option_markets": {
+    "spread_away_favorite": {
+      "id": 3531616,
+      "name": {
+        "value": "Spread"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "DecimalHandicap",
+          "type": "Decimal",
+          "value": "3.0000"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "2wayHandicap"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        }
+      ],
+      "options": [
+        {
+          "id": 5550099,
+          "name": {
+            "value": "Chicago Bears -3"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729128
+          },
+          "price": {
+            "id": 17318646,
+            "numerator": 1,
+            "denominator": 1,
+            "odds": 2,
+            "americanOdds": 100
+          }
+        },
+        {
+          "id": 5550100,
+          "name": {
+            "value": "Carolina Panthers +3"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729127
+          },
+          "price": {
+            "id": 17318647,
+            "numerator": 5,
+            "denominator": 6,
+            "odds": 1.83,
+            "americanOdds": -120
+          }
+        }
+      ]
+    },
+    "spread_home_favorite": {
+      "id": 3325908,
+      "name": {
+        "value": "Spread"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "DecimalHandicap",
+          "type": "Decimal",
+          "value": "-3.5000"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "2wayHandicap"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        }
+      ],
+      "options": [
+        {
+          "id": 5254442,
+          "name": {
+            "value": "San Francisco 49ers +3.5"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729024
+          },
+          "price": {
+            "id": 16712609,
+            "numerator": 9,
+            "denominator": 10,
+            "odds": 1.9,
+            "americanOdds": -110
+          }
+        },
+        {
+          "id": 5254443,
+          "name": {
+            "value": "Los Angeles Rams -3.5"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729023
+          },
+          "price": {
+            "id": 16712610,
+            "numerator": 93,
+            "denominator": 100,
+            "odds": 1.93,
+            "americanOdds": -108
+          }
+        }
+      ]
+    },
+    "total": {
+      "id": 3325909,
+      "name": {
+        "value": "Totals"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "DecimalValue",
+          "type": "Decimal",
+          "value": "48.5000"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "Over/Under"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        }
+      ],
+      "options": [
+        {
+          "id": 5254444,
+          "name": {
+            "value": "Over 48.5"
+          },
+          "parameters": {
+            "optionTypes": ["Over"]
+          },
+          "price": {
+            "id": 16712611,
+            "numerator": 93,
+            "denominator": 100,
+            "odds": 1.93,
+            "americanOdds": -108
+          }
+        },
+        {
+          "id": 5254445,
+          "name": {
+            "value": "Under 48.5"
+          },
+          "parameters": {
+            "optionTypes": ["Under"]
+          },
+          "price": {
+            "id": 16712612,
+            "numerator": 88,
+            "denominator": 100,
+            "odds": 1.88,
+            "americanOdds": -112
+          }
+        }
+      ]
+    },
+    "moneyline": {
+      "id": 3325910,
+      "name": {
+        "value": "Moneyline"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "2way"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        }
+      ],
+      "options": [
+        {
+          "id": 5254446,
+          "name": {
+            "value": "San Francisco 49ers"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729024
+          },
+          "price": {
+            "id": 16712613,
+            "numerator": 33,
+            "denominator": 20,
+            "odds": 2.65,
+            "americanOdds": 165
+          }
+        },
+        {
+          "id": 5254447,
+          "name": {
+            "value": "Los Angeles Rams"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729023
+          },
+          "price": {
+            "id": 16712614,
+            "numerator": 1,
+            "denominator": 2,
+            "odds": 1.5,
+            "americanOdds": -200
+          }
+        }
+      ]
+    },
+    "team_total": {
+      "id": 3531914,
+      "name": {
+        "value": "Los Angeles Rams: Total points"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "Over/Under"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        },
+        {
+          "key": "FixtureParticipant",
+          "type": "Long",
+          "value": "729023"
+        },
+        {
+          "key": "DecimalValue",
+          "type": "Decimal",
+          "value": "26.5"
+        }
+      ],
+      "options": [
+        {
+          "id": 5550710,
+          "name": {
+            "value": "Over 26.5"
+          },
+          "parameters": {
+            "optionTypes": ["Over"]
+          },
+          "price": {
+            "id": 17319257,
+            "numerator": 17,
+            "denominator": 20,
+            "odds": 1.85,
+            "americanOdds": -118
+          }
+        },
+        {
+          "id": 5550711,
+          "name": {
+            "value": "Under 26.5"
+          },
+          "parameters": {
+            "optionTypes": ["Under"]
+          },
+          "price": {
+            "id": 17319258,
+            "numerator": 98,
+            "denominator": 100,
+            "odds": 1.98,
+            "americanOdds": -102
+          }
+        }
+      ]
+    },
+    "first_half_moneyline": {
+      "id": 3531935,
+      "name": {
+        "value": "1st half moneyline"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "2way"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FirstHalf"
+        }
+      ],
+      "options": [
+        {
+          "id": 5550801,
+          "name": {
+            "value": "San Francisco 49ers"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729024
+          },
+          "price": {
+            "id": 17319348,
+            "numerator": 7,
+            "denominator": 5,
+            "odds": 2.4,
+            "americanOdds": 140
+          }
+        },
+        {
+          "id": 5550802,
+          "name": {
+            "value": "Los Angeles Rams"
+          },
+          "parameters": {
+            "optionTypes": ["Max"],
+            "fixtureParticipant": 729023
+          },
+          "price": {
+            "id": 17319349,
+            "numerator": 58,
+            "denominator": 100,
+            "odds": 1.58,
+            "americanOdds": -175
+          }
+        }
+      ]
+    },
+    "happening_band": {
+      "id": 3531933,
+      "name": {
+        "value": "Total points in the game (bands)"
+      },
+      "status": "Visible",
+      "parameters": [
+        {
+          "key": "MarketType",
+          "type": "String",
+          "value": "HappeningBand"
+        },
+        {
+          "key": "Happening",
+          "type": "String",
+          "value": "Point"
+        },
+        {
+          "key": "Period",
+          "type": "String",
+          "value": "FullTime"
+        }
+      ],
+      "options": [
+        {
+          "id": 5550792,
+          "name": {
+            "value": "0-20 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319339,
+            "numerator": 45,
+            "denominator": 1,
+            "odds": 46,
+            "americanOdds": 4500
+          }
+        },
+        {
+          "id": 5550793,
+          "name": {
+            "value": "21-30 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319340,
+            "numerator": 21,
+            "denominator": 2,
+            "odds": 11.5,
+            "americanOdds": 1050
+          }
+        },
+        {
+          "id": 5550794,
+          "name": {
+            "value": "31-40 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319341,
+            "numerator": 18,
+            "denominator": 5,
+            "odds": 4.6,
+            "americanOdds": 360
+          }
+        },
+        {
+          "id": 5550795,
+          "name": {
+            "value": "41-50 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319342,
+            "numerator": 21,
+            "denominator": 10,
+            "odds": 3.1,
+            "americanOdds": 210
+          }
+        },
+        {
+          "id": 5550796,
+          "name": {
+            "value": "51-60 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319343,
+            "numerator": 12,
+            "denominator": 5,
+            "odds": 3.4,
+            "americanOdds": 240
+          }
+        },
+        {
+          "id": 5550797,
+          "name": {
+            "value": "61-70 Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319344,
+            "numerator": 11,
+            "denominator": 2,
+            "odds": 6.5,
+            "americanOdds": 550
+          }
+        },
+        {
+          "id": 5550798,
+          "name": {
+            "value": "71+ Points"
+          },
+          "parameters": {
+            "optionTypes": ["Within"]
+          },
+          "price": {
+            "id": 17319345,
+            "numerator": 29,
+            "denominator": 2,
+            "odds": 15.5,
+            "americanOdds": 1450
+          }
+        }
+      ]
+    }
+  },
+  "game_markets": {
+    "season_player_prop": {
+      "id": 1512569796,
+      "templateId": 37615,
+      "categoryId": 1528,
+      "name": {
+        "value": "Jordan Love (GB): Regular season passing yards"
+      },
+      "visibility": "Visible",
+      "attr": "3525.5",
+      "player1": {
+        "value": "Jordan Love (GB)",
+        "short": "Jordan Love"
+      },
+      "results": [
+        {
+          "id": 2173419508,
+          "odds": 2,
+          "name": {
+            "value": "Over 3525.5"
+          },
+          "visibility": "Visible",
+          "totalsPrefix": "Over",
+          "numerator": 1,
+          "denominator": 1,
+          "americanOdds": 100,
+          "version": 10894289956
+        },
+        {
+          "id": 2173419509,
+          "odds": 1.83,
+          "name": {
+            "value": "Under 3525.5"
+          },
+          "visibility": "Visible",
+          "totalsPrefix": "Under",
+          "numerator": 5,
+          "denominator": 6,
+          "americanOdds": -120,
+          "version": 10894289956
+        }
+      ]
+    },
+    "season_leader": {
+      "id": 1539144930,
+      "templateId": 41301,
+      "categoryId": 1504,
+      "name": {
+        "value": "Regular Season Passing Yards Leader"
+      },
+      "visibility": "Visible",
+      "results": [
+        {
+          "id": 2242517403,
+          "odds": 8,
+          "name": {
+            "value": "Joe Burrow"
+          },
+          "visibility": "Visible",
+          "numerator": 7,
+          "denominator": 1,
+          "americanOdds": 700,
+          "playerId": 2854680
+        },
+        {
+          "id": 2242517404,
+          "odds": 9,
+          "name": {
+            "value": "Dak Prescott"
+          },
+          "visibility": "Visible",
+          "numerator": 8,
+          "denominator": 1,
+          "americanOdds": 800,
+          "playerId": 2792706
+        },
+        {
+          "id": 2242517405,
+          "odds": 9,
+          "name": {
+            "value": "Jared Goff"
+          },
+          "visibility": "Visible",
+          "numerator": 8,
+          "denominator": 1,
+          "americanOdds": 800,
+          "playerId": 2876114
+        }
+      ]
+    },
+    "division_winner": {
+      "id": 1454017806,
+      "templateId": 4348,
+      "categoryId": 1461,
+      "name": {
+        "value": "AFC East Division winner"
+      },
+      "visibility": "Visible",
+      "results": [
+        {
+          "id": -207617123,
+          "odds": 1.67,
+          "name": {
+            "value": "Bills"
+          },
+          "visibility": "Visible",
+          "numerator": 4,
+          "denominator": 6,
+          "americanOdds": -150,
+          "playerId": 2562015,
+          "version": 10784681756
+        },
+        {
+          "id": -207617122,
+          "odds": 36,
+          "name": {
+            "value": "Dolphins"
+          },
+          "visibility": "Visible",
+          "numerator": 35,
+          "denominator": 1,
+          "americanOdds": 3500,
+          "playerId": 2562021,
+          "version": 10614040625
+        },
+        {
+          "id": -207617121,
+          "odds": 2.45,
+          "name": {
+            "value": "Patriots"
+          },
+          "visibility": "Visible",
+          "numerator": 29,
+          "denominator": 20,
+          "americanOdds": 145,
+          "playerId": 2562022,
+          "version": 10784681756
+        }
+      ]
+    },
+    "winning_state": {
+      "id": 1522229341,
+      "templateId": 35289,
+      "categoryId": 1525,
+      "name": {
+        "value": "Super Bowl: Winning state"
+      },
+      "visibility": "Visible",
+      "results": [
+        {
+          "id": 2198207569,
+          "odds": 3.5,
+          "name": {
+            "value": "California"
+          },
+          "visibility": "Visible",
+          "numerator": 5,
+          "denominator": 2,
+          "americanOdds": 250,
+          "playerId": 2562152,
+          "version": 10738267854
+        },
+        {
+          "id": 2198207570,
+          "odds": 19,
+          "name": {
+            "value": "Florida"
+          },
+          "visibility": "Visible",
+          "numerator": 18,
+          "denominator": 1,
+          "americanOdds": 1800,
+          "playerId": 2562088,
+          "version": 10738267854
+        },
+        {
+          "id": 2198207571,
+          "odds": 10,
+          "name": {
+            "value": "Maryland/DC"
+          },
+          "visibility": "Visible",
+          "numerator": 9,
+          "denominator": 1,
+          "americanOdds": 900
+        }
+      ]
+    }
+  }
+}
