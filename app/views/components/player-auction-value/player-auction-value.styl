@@ -54,6 +54,11 @@
 // at 18px, but neither promises to, and a footnote pinned at 9px would stop
 // being a footnote the moment one of them changed.
 //
+// 0.5, not 0.55. Against 18px the two are 9px and 9.9px, and the drawer's own
+// label is 9px -- so 0.55 made the footnote fractionally LARGER than the label
+// it is subordinate to on one of the two surfaces, which is the hierarchy this
+// rule exists to state. 0.5 is at or under the label on both.
+//
 // `nowrap`, because `+$12 from $33` broken across two lines reads as two
 // separate annotations and doubles the item's height in a bar whose band is
 // 70px.
@@ -64,7 +69,7 @@
 // election a few inches away, so an under-market footnote in red would read as
 // an alert about the bid rather than as a direction.
 .player__auction-value-context
-  font-size 0.55em
+  font-size 0.5em
   font-weight 500
   line-height 1.2
   white-space nowrap

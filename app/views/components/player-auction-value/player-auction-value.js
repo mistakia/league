@@ -32,8 +32,8 @@ import './player-auction-value.styl'
  *
  * The size is the other half of the same fix. On the price's own line and in
  * the price's own size, the delta was a second figure of equal standing; below
- * it and smaller than even the label, it is unmistakably an annotation ON the
- * price rather than a companion to it.
+ * it, at or under the size of the label, it is unmistakably an annotation ON
+ * the price rather than a companion to it.
  *
  * `.selected__player-header-item` is the shared label-over-value item class,
  * carried here rather than by each caller, because every caller wants it -- the
