@@ -182,6 +182,58 @@ const bound_reason_for_argv = (reason) => {
   return `${reason.slice(0, keep)}\n... [${reason.length - keep * 2} characters elided to fit the argv limit] ...\n${reason.slice(-keep)}`
 }
 
+// The reason a wrapped job failed, stated on stderr in a form job-wrapper.sh
+// can find by name rather than by position.
+//
+// job-wrapper.sh builds a run report's `--reason` from `tail -c 500` of the
+// job's stderr, and BOTH halves of that are load-bearing here:
+//
+//   stderr -- ~190 scripts under scripts/ and private/scripts/ print their
+//   caught error with `console.log(error)` or a debug `log(error)`, both of
+//   which go to STDOUT, which the wrapper does not read. Fixing that script by
+//   script is 190 edits that each re-open on the next copy-paste.
+//
+//   the TAIL -- and this is the half that makes a per-script fix insufficient
+//   on its own. Every one of those scripts calls report_job AFTER logging its
+//   error, and this function writes to stderr on the way through: two retry
+//   lines plus the audit-insert line are 265 bytes before any err.message, so a
+//   single KnexTimeoutError round (~106 bytes each) overflows the 500-byte
+//   window and pushes the real error out of it. The chatter is a red herring by
+//   construction -- the audit insert's failure is CAUGHT and non-fatal -- and it
+//   wins the tail precisely when it is noisiest, which is during the database
+//   outage that caused the failure being reported. That is what happened to
+//   signals 128346 and 128347 on 2026-09-04: the reason field named a harmless
+//   condition, the real failure was absent, and triage read the wrong cause
+//   first.
+//
+// A named sentinel is immune to both. The wrapper greps for it and uses it in
+// preference to the tail, so ordering and volume stop mattering, and every
+// caller of report_job is fixed at once without touching any of them. Same
+// contract shape as the REAUTH_REQUIRED sentinel the wrapper already reads.
+//
+// Single line, because the wrapper takes one line: real error messages are
+// routinely multi-line (a postgres error puts the part naming the defect on a
+// later line), and a raw newline here would truncate the reason at the first
+// one and hide exactly that part.
+const FAILURE_SENTINEL = 'JOB_FAILURE_REASON'
+const SENTINEL_REASON_LIMIT = 1000
+export const emit_failure_sentinel = (
+  reason,
+  { write = (line) => console.error(line) } = {}
+) => {
+  const collapsed = String(reason ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!collapsed) return null
+  const bounded =
+    collapsed.length <= SENTINEL_REASON_LIMIT
+      ? collapsed
+      : `${collapsed.slice(0, SENTINEL_REASON_LIMIT)} ... [truncated]`
+  const line = `${FAILURE_SENTINEL}: ${bounded}`
+  write(line)
+  return line
+}
+
 export default async function report_job({
   job_type,
   job_success = true,
@@ -195,6 +247,12 @@ export default async function report_job({
   if (error) {
     job_reason = error.message
     job_success = false
+  }
+
+  // Before anything below can write to stderr, so the sentinel is present even
+  // if this function dies partway through.
+  if (!job_success) {
+    emit_failure_sentinel(job_reason)
   }
 
   const job_report_timestamp = new Date()
