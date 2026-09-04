@@ -464,7 +464,7 @@ const backfill_fanduel_salaries = async ({
     )
   }
 
-  // Graded per week, not in aggregate. Unlike the DraftKings backfill this does
+  // Graded per week, not in aggregate. As in the DraftKings backfill this does
   // NOT fail the run on an empty week: RotoWire's archive genuinely does not
   // reach every week, and a permanently-unavailable week would then make the job
   // red forever — the "chronically failing detector is an absent detector"

@@ -601,21 +601,28 @@ const backfill_draftkings_salaries = async ({
     )
   }
 
-  // A per-week floor rather than a global rate: a run that fills nine weeks and
-  // silently misses one should not read as a pass.
+  // Graded per week, not in aggregate — a run that fills nine weeks and silently
+  // misses one should not read as a clean pass. But an empty week does NOT fail
+  // the run, for the same reason as backfill-fanduel-salaries.mjs: draft group
+  // discovery is a bounded scan around an anchor, so a historical week whose
+  // groups fall outside any reachable anchor produces no rows every single time
+  // it is targeted. Failing on it makes a wide historical sweep exit 1 forever
+  // and — because this reports under the SCHEDULED importer's job type — pages
+  // that service for a week nobody can fill. Empty weeks are named loudly and
+  // the run still succeeds when it wrote rows overall.
   if (empty_weeks.length) {
     out(
-      `ORACLE FAIL: ${empty_weeks.length} week(s) produced no rows: ` +
+      `ORACLE PARTIAL: ${empty_weeks.length} of ${attempted.length} week(s) produced no rows: ` +
         empty_weeks.map((row) => row.week_label).join(', ')
     )
-    throw new Error(
-      `${empty_weeks.length} of ${attempted.length} targeted weeks produced no salary rows`
-    )
+  } else {
+    out(`ORACLE PASS: every targeted week produced rows`)
   }
 
   out(
-    `ORACLE PASS: every targeted week produced rows; ` +
-      `${thin_weeks.length ? `thin weeks (under 50% games): ${thin_weeks.map((r) => r.week_label).join(', ')}` : 'all weeks above 50% game coverage'}`
+    thin_weeks.length
+      ? `thin weeks (under 50% games): ${thin_weeks.map((r) => r.week_label).join(', ')}`
+      : 'all weeks with rows are above 50% game coverage'
   )
 
   return { targets: targets.length, results, total_rows }
