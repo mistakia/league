@@ -157,6 +157,13 @@ export const grade_player_gamelog_selection = ({
  * hits by the full gamelog count. Changing either is a change to the precompute
  * and to this function together, never to one of them.
  *
+ * A sample with NO games has no rate. Zero games is not zero hits, and returning
+ * 0 here is the same never-graded-versus-never-hit conflation the precompute
+ * fixed: it tells a caller the prop went 0-for-its-history when its history is
+ * empty. calculate_hit_rate in scripts/calculate-historical-hit-rates.mjs makes
+ * the same call, and the two must agree or the custom path and the stored
+ * defaults disagree on exactly the samples nobody can check.
+ *
  * @param {object} params - Named parameters
  * @param {object[]} params.player_gamelogs - The sample, already filtered by the caller
  * @param {string} params.market_type - Market type identifier
@@ -190,5 +197,5 @@ export const calculate_player_gamelog_hit_rate = ({
   ).length
   const total = results.length
 
-  return { hits, total, rate: total > 0 ? hits / total : 0, results }
+  return { hits, total, rate: total > 0 ? hits / total : null, results }
 }

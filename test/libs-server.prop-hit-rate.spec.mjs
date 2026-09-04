@@ -314,7 +314,11 @@ describe('LIBS-SERVER prop_hit_rate', function () {
       expect(results.map((r) => r.esbid)).to.deep.equal([1, 2, 3, 4])
     })
 
-    it('reports a rate of 0 for an empty sample rather than dividing by zero', function () {
+    // Zero games is not zero hits. This used to report 0, which reads on the tab
+    // as "the prop went 0-for-its-history" when the history is empty -- the same
+    // never-graded-versus-never-hit conflation as an ungradable sample, and the
+    // precompute makes the identical call, so the two must agree.
+    it('reports no rate for an empty sample rather than a rate of zero', function () {
       const { hits, total, rate } = calculate_player_gamelog_hit_rate({
         player_gamelogs: [],
         market_type: 'GAME_PASSING_YARDS',
@@ -323,7 +327,26 @@ describe('LIBS-SERVER prop_hit_rate', function () {
       })
       expect(hits).to.equal(0)
       expect(total).to.equal(0)
-      expect(rate).to.equal(0)
+      expect(rate).to.equal(null)
+    })
+
+    it('distinguishes an empty sample from a sample that never hit', function () {
+      const never_hit = calculate_player_gamelog_hit_rate({
+        player_gamelogs: [build_gamelog(0)],
+        market_type: 'GAME_PASSING_YARDS',
+        selection_metric_line: 300.5,
+        selection_type: 'OVER'
+      })
+      const no_games = calculate_player_gamelog_hit_rate({
+        player_gamelogs: [],
+        market_type: 'GAME_PASSING_YARDS',
+        selection_metric_line: 300.5,
+        selection_type: 'OVER'
+      })
+
+      expect(never_hit.rate).to.not.equal(no_games.rate)
+      expect(never_hit.rate).to.equal(0)
+      expect(no_games.rate).to.equal(null)
     })
   })
 })

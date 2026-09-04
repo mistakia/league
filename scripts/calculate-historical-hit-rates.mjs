@@ -51,7 +51,14 @@ const initialize_cli = () => {
       default: 1000,
       describe: 'Number of selections to process per batch'
     })
+    .option('dry_run', {
+      type: 'boolean',
+      default: false,
+      describe:
+        'Compute and report what would change without writing anything. Reports the stored-versus-computed transition matrix for overall_hit_rate_hard per market type, and the empty-sample count per window.'
+    })
     .example('$0 --missing_only', 'Process only missing hit rates')
+    .example('$0 --year 2024 --dry_run', 'Size a recompute before running it')
     .example(
       '$0 --market_types GAME_PASSING_YARDS',
       'Process specific market type'
@@ -76,8 +83,17 @@ enable_debug_namespaces('calculate-historical-hit-rates')
 // ungradable game both count against the denominator. That ruling is about
 // individual GAMES inside a gradable sample; this is the different case of a
 // SELECTION that cannot be graded at all.
+//
+// An EMPTY sample is the third case and the largest of the three. Zero games is
+// not zero hits: a rookie has no last_season games and a week-1 selection has no
+// current_season games, and storing 0.0000 tells the tab the prop went 0-for-its
+// history when its history is empty. Measured 2026-09-04 by dry run, per season:
+// last_season is empty for 109,936 of 961,142 selections in 2024 and 147,190 of
+// 1,077,380 in 2025, current_season for 53,996 and 42,782, and the overall
+// window for 5,011 and 3,599. This branch is shared by every market type rather
+// than confined to the ungraded ones, which is why it outweighs both cases above.
 export const calculate_hit_rate = ({ hits, total, ungradable }) => {
-  if (total === 0) return 0
+  if (total === 0) return null
   if (ungradable === total) return null
   return hits / total
 }
@@ -111,7 +127,7 @@ const record_ungradable = (market_type, error) => {
   ungradable_reasons.set(key, (ungradable_reasons.get(key) || 0) + 1)
 }
 
-const get_hits = ({
+export const get_hits = ({
   line,
   market_type,
   player_gamelogs,
@@ -141,20 +157,48 @@ const get_hits = ({
     return { hits, ungradable }
   }
 
+  // The same never-graded-versus-never-hit conflation, on the other branch, and
+  // it is the LARGER half. A market type with no case in selection-result.mjs
+  // reaches its `default`, which returns null, and `is_hit` collapses null to
+  // false -- so every game in the sample scores a loss and the selection stores
+  // a rate of exactly 0.0000 on a market nothing ever graded. Measured
+  // 2026-09-04: 47 market types and 84,843 stored rows, led by
+  // GAME_FIRST_TEAM_TOUCHDOWN_SCORER (20,947), GAME_TACKLES_ASSISTS (10,558)
+  // and GAME_PPR_FANTASY_POINTS (6,278).
+  //
+  // Whether the type is absent from market_type_mappings or mapped to NFL_PLAYS
+  // makes no difference here: neither reaches a case, so mapping status is not
+  // the mechanism and cannot be used to scope the repair.
+  //
+  // Counting a null as ungradable rather than as a miss is all-or-nothing per
+  // selection, because the market type is constant across a sample -- a type
+  // with no case makes every game ungradable and calculate_hit_rate returns no
+  // rate, and a type with a case never returns null here at all.
   const unsupported_market_types = new Set()
-  return {
-    hits: player_gamelogs.filter((player_gamelog) =>
-      selection_result.is_hit({
-        line,
+  let ungradable = 0
+  const hits = player_gamelogs.filter((player_gamelog) => {
+    const result = selection_result.get_selection_result({
+      line,
+      market_type,
+      player_gamelog,
+      strict,
+      selection_type,
+      unsupported_market_types
+    })
+
+    if (result === null) {
+      record_ungradable(
         market_type,
-        player_gamelog,
-        strict,
-        selection_type,
-        unsupported_market_types
-      })
-    ),
-    ungradable: 0
-  }
+        new Error('no case in selection-result.mjs')
+      )
+      ungradable += 1
+      return false
+    }
+
+    return result === 'WON'
+  })
+
+  return { hits, ungradable }
 }
 
 // The row this update must land on is identified by time_type as well. Both
@@ -217,14 +261,49 @@ const fetch_plays_by_esbid = async ({ esbids, apply_filters }) => {
   return results.flat()
 }
 
+// What a dry run measures. A recompute rewrites five hit-rate columns across
+// every selection in a season, so "run it and look at what moved" is only a
+// measurement AFTER the write has already happened. These two counters answer
+// the sizing question first, with nothing written.
+//
+// overall_transitions is the stored-versus-computed matrix for
+// overall_hit_rate_hard, keyed by market type, which is what says whether a
+// change reaches only the types it meant to reach.
+//
+// empty_samples counts, per window, the selections whose sample has no games at
+// all. That is the direct size of the calculate_hit_rate `total === 0` branch,
+// which returns 0 -- the same never-graded-versus-never-hit conflation, on a
+// branch every market type shares. The narrow windows are where it lives: a
+// rookie has no last_season games and a week-1 selection has no current_season
+// games, and both currently store 0.0000 rather than no rate.
+const overall_transitions = new Map()
+const empty_samples = new Map()
+
+const classify_rate = (rate) => {
+  if (rate === null || rate === undefined) return 'null'
+  return Number(rate) === 0 ? 'zero' : 'nonzero'
+}
+
+const record_transition = (market_type, stored, computed) => {
+  const key = `${market_type}\t${classify_rate(stored)} -> ${classify_rate(computed)}`
+  overall_transitions.set(key, (overall_transitions.get(key) || 0) + 1)
+}
+
+const record_empty_sample = (window_name) => {
+  empty_samples.set(window_name, (empty_samples.get(window_name) || 0) + 1)
+}
+
 const calculate_historical_hit_rates = async ({
   season_year = current_season.year,
   missing_only = false,
   current_week_only = false,
   market_types = null,
-  batch_size = 1000
+  batch_size = 1000,
+  dry_run = false
 } = {}) => {
-  log('Starting historical hit rate calculation')
+  log(
+    `Starting historical hit rate calculation${dry_run ? ' (DRY RUN -- nothing will be written)' : ''}`
+  )
 
   // Build base query for prop selections
   const prop_selections_query = db('prop_market_selections_index')
@@ -239,6 +318,10 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
+      // Carried so a dry run can compare what is stored against what would be
+      // written. Unused by an ordinary run, and grouped alongside every other
+      // selection-grain column so it does not change the query's grain.
+      'prop_market_selections_index.overall_hit_rate_hard',
       'nfl_games.season_type',
       'nfl_games.week',
       'nfl_games.season_year'
@@ -278,6 +361,7 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
+      'prop_market_selections_index.overall_hit_rate_hard',
       'nfl_games.season_type',
       'nfl_games.week',
       'nfl_games.season_year'
@@ -519,7 +603,9 @@ const calculate_historical_hit_rates = async ({
       }
 
       // Calculate rates for different time periods
-      const calculate_rates = (gamelogs) => {
+      const calculate_rates = (gamelogs, window_name) => {
+        if (dry_run && gamelogs.length === 0) record_empty_sample(window_name)
+
         const hits_soft = get_hits({
           line: selection.selection_metric_line,
           market_type: selection.market_type,
@@ -563,11 +649,24 @@ const calculate_historical_hit_rates = async ({
         }
       }
 
-      const current_season_rates = calculate_rates(current_season_gamelogs)
-      const last_five_rates = calculate_rates(last_five)
-      const last_ten_rates = calculate_rates(last_ten)
-      const last_season_rates = calculate_rates(last_season)
-      const overall_rates = calculate_rates(all_gamelogs)
+      const current_season_rates = calculate_rates(
+        current_season_gamelogs,
+        'current_season'
+      )
+      const last_five_rates = calculate_rates(last_five, 'last_five')
+      const last_ten_rates = calculate_rates(last_ten, 'last_ten')
+      const last_season_rates = calculate_rates(last_season, 'last_season')
+      const overall_rates = calculate_rates(all_gamelogs, 'overall')
+
+      if (dry_run) {
+        record_transition(
+          selection.market_type,
+          selection.overall_hit_rate_hard,
+          overall_rates.hit_rate_hard
+        )
+        processed_count++
+        continue
+      }
 
       // Prepare update data
       const update_data = {
@@ -607,10 +706,10 @@ const calculate_historical_hit_rates = async ({
 
     // Execute batch updates
     log(
-      `Executing ${batch_updates.length} updates for batch ${batch_index + 1}`
+      `${dry_run ? 'Would execute' : 'Executing'} ${batch_updates.length} updates for batch ${batch_index + 1}`
     )
 
-    for (const update of batch_updates) {
+    for (const update of dry_run ? [] : batch_updates) {
       await db('prop_market_selections_index')
         .where(update.where_clause)
         .update(update.update_data)
@@ -639,12 +738,52 @@ const calculate_historical_hit_rates = async ({
       0
     )
     log(
-      `Ungradable gamelog comparisons scored as misses: ${total_ungradable} across ${ungradable_reasons.size} reason(s)`
+      `Ungradable gamelog comparisons: ${total_ungradable} across ${ungradable_reasons.size} reason(s). A refusal counts against the denominator inside an otherwise gradable sample; a sample refused in FULL gets no rate at all.`
     )
     for (const [reason, count] of [...ungradable_reasons.entries()].sort(
       (a, b) => b[1] - a[1]
     )) {
       log(`  ${count} x ${reason}`)
+    }
+  }
+
+  if (dry_run) {
+    log('')
+    log('DRY RUN -- nothing was written.')
+    // Only class-CHANGING transitions are listed. A nonzero rate shifting to
+    // another nonzero rate is an ordinary recompute and would bury the signal;
+    // null/zero/nonzero crossings are what a blast-radius question is asking
+    // about, and a type appearing here that the change did not target is the
+    // regression the listing exists to surface.
+    log('overall_hit_rate_hard class changes, per market type:')
+    let class_changes = 0
+    for (const [key, count] of [...overall_transitions.entries()].sort(
+      (a, b) => b[1] - a[1]
+    )) {
+      const [market_type, transition] = key.split('\t')
+      const [stored, computed] = transition.split(' -> ')
+      if (stored === computed) continue
+      class_changes += count
+      log(`  ${count} x ${market_type}: ${transition}`)
+    }
+    log(
+      `  ${class_changes} of ${processed_count} selections change class${class_changes === 0 ? ' -- no rate crosses between null, zero and nonzero' : ''}`
+    )
+
+    log('')
+    log(
+      'Empty samples per window -- the size of the calculate_hit_rate `total === 0` branch, which stores 0 today:'
+    )
+    for (const window_name of [
+      'current_season',
+      'last_five',
+      'last_ten',
+      'last_season',
+      'overall'
+    ]) {
+      log(
+        `  ${window_name}: ${empty_samples.get(window_name) || 0} of ${processed_count} selections`
+      )
     }
   }
 
@@ -662,14 +801,17 @@ const calculate_historical_hit_rates = async ({
 
 const main = async () => {
   let error
+  let dry_run = false
   try {
     const argv = initialize_cli()
+    dry_run = argv.dry_run
     const result = await calculate_historical_hit_rates({
       season_year: argv.year,
       missing_only: argv.missing_only,
       current_week_only: argv.current_week_only,
       market_types: argv.market_types,
-      batch_size: argv.batch_size
+      batch_size: argv.batch_size,
+      dry_run: argv.dry_run
     })
     throw_if_shortfall(result?.shortfall)
   } catch (err) {
@@ -678,10 +820,14 @@ const main = async () => {
     console.error(error)
   }
 
-  await report_job({
-    job_type: job_types.PROCESS_MARKET_HIT_RATES,
-    error
-  })
+  // A dry run wrote nothing, so recording it as a completed job would tell the
+  // monitoring surface the hit rates are fresh when nothing was refreshed.
+  if (!dry_run) {
+    await report_job({
+      job_type: job_types.PROCESS_MARKET_HIT_RATES,
+      error
+    })
+  }
 
   process.exit(error ? 1 : 0)
 }
