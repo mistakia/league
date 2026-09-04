@@ -10,6 +10,10 @@ import {
   selection_result,
   throw_if_shortfall
 } from '#libs-server'
+import {
+  is_player_gamelog_market,
+  grade_player_gamelog_selection
+} from '#libs-server/prop-hit-rate.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { groupBy } from '#libs-shared'
 import { current_season, stat_countable_play_types } from '#constants'
@@ -63,6 +67,35 @@ const calculate_hit_rate = (hits, total) => {
   return total > 0 ? hits / total : 0
 }
 
+// Grading routes through settlement's own derivation for every market type
+// settlement grades from a player gamelog -- 33 of them, where
+// selection-result.mjs had a rule for 23. The other 10 fell to its `default`,
+// returned null, and `is_hit` read null as false, so a market that had never
+// been graded reported that it had never hit: 31,242 stored rows at exactly
+// 0.0000, four market types with a maximum rate of 0.0000 across every row.
+//
+// The 12 NFL_PLAYS types -- longest reception, longest rush, longest completion,
+// and the first-quarter and first-half yardage types -- still go through
+// selection-result.mjs. Settlement grades those by aggregating plays inside
+// NFLPlaysMarketHandler before calling the same pair, while this script instead
+// enriches the gamelog with two nfl_plays queries below and grades off that.
+// Converting them needs the plays aggregation and is its own increment, which is
+// why selection-result.mjs is still here.
+// Ungradable rows, by the reason the grader refused. Settlement's
+// determine_selection_result THROWS where selection-result.mjs quietly took a
+// branch -- most importantly on a null selection_type, which the old `compare`
+// treated as OVER and which 3,072 stored selections carry. Those rows score as
+// misses, matching the ruling that a PUSH and an ungradable game both count
+// against the denominator, but the count is reported at the end of the run
+// rather than absorbed. A refusal nobody can see is the defect this whole change
+// is about.
+const ungradable_reasons = new Map()
+
+const record_ungradable = (market_type, error) => {
+  const key = `${market_type}: ${error.message}`
+  ungradable_reasons.set(key, (ungradable_reasons.get(key) || 0) + 1)
+}
+
 const get_hits = ({
   line,
   market_type,
@@ -70,6 +103,25 @@ const get_hits = ({
   strict,
   selection_type
 }) => {
+  if (is_player_gamelog_market(market_type)) {
+    return player_gamelogs.filter((player_gamelog) => {
+      try {
+        return (
+          grade_player_gamelog_selection({
+            player_gamelog,
+            market_type,
+            selection_metric_line: line,
+            selection_type,
+            strict
+          }) === 'WON'
+        )
+      } catch (error) {
+        record_ungradable(market_type, error)
+        return false
+      }
+    })
+  }
+
   const unsupported_market_types = new Set()
   return player_gamelogs.filter((player_gamelog) =>
     selection_result.is_hit({
@@ -524,6 +576,24 @@ const calculate_historical_hit_rates = async ({
 
   if (missing_gamelogs_pids.size > 0) {
     log(`Unique players with missing gamelogs: ${missing_gamelogs_pids.size}`)
+  }
+
+  // Every grading refusal, by reason. These rows scored as misses; this is the
+  // only place that says so. Silence here means every selection graded cleanly,
+  // which is the claim worth being able to check.
+  if (ungradable_reasons.size > 0) {
+    const total_ungradable = [...ungradable_reasons.values()].reduce(
+      (sum, count) => sum + count,
+      0
+    )
+    log(
+      `Ungradable gamelog comparisons scored as misses: ${total_ungradable} across ${ungradable_reasons.size} reason(s)`
+    )
+    for (const [reason, count] of [...ungradable_reasons.entries()].sort(
+      (a, b) => b[1] - a[1]
+    )) {
+      log(`  ${count} x ${reason}`)
+    }
   }
 
   // Post-run oracle: if selections existed but none were processed, the run was a
