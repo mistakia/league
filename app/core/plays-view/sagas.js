@@ -9,7 +9,7 @@ import {
   api_delete_plays_view,
   api_get_plays_view
 } from '@core/api'
-import { send } from '@core/ws'
+import { send, wsActions } from '@core/ws'
 import { get_app, get_request_history } from '@core/selectors'
 import { plays_view_request_actions } from '@core/plays-view-request/actions'
 import { notification_actions } from '@core/notifications/actions'
@@ -151,6 +151,33 @@ export function* plays_view_changed({ payload }) {
   }
 }
 
+// `send` DROPS a message written while the socket is not open, returning false
+// and logging nothing the page reacts to (see @core/ws/service). A cold load
+// composes its first request from a mount effect that can win the race against
+// the socket opening, and nothing else would ever retransmit it: the reducer
+// keeps the view id rather than the params. The page then sits on its headers
+// indefinitely, and it does so SILENTLY -- the status pill renders only for a
+// `pending` that already carries a server-assigned queue position, so a request
+// that never reached the server displays nothing at all. Re-deriving the
+// request from the selected view is what makes the connection actually deliver
+// the page.
+//
+// WEBSOCKET_OPEN, not WEBSOCKET_RECONNECTED: `reconnected()` is put only by the
+// reconnect loop and by the post-auth socket swap, never for the FIRST connect
+// of the tab -- which is precisely the one a cold load races.
+export function* replay_in_flight_plays_view_request() {
+  const status = yield select((state) =>
+    state.getIn(['plays_view_request', 'status'])
+  )
+
+  if (status !== 'pending' && status !== 'processing') return
+
+  const data_view = yield select(get_selected_plays_view)
+  if (!data_view) return
+
+  yield call(handle_plays_view_request, { data_view })
+}
+
 export function* reset_plays_view_cache() {
   const data_view = yield select(get_selected_plays_view)
   yield call(handle_plays_view_request, { data_view, ignore_cache: true })
@@ -202,7 +229,23 @@ export function* handle_delete_plays_view({ payload }) {
   yield call(api_delete_plays_view, { view_id })
 }
 
-export function* load_plays_views() {
+export function* load_plays_views({ payload = {} } = {}) {
+  const { userId } = yield select(get_app)
+
+  // GET /api/plays/views is owner-scoped and requires a user. An anonymous
+  // visitor has no saved views to list, and waiting on a request that can only
+  // 401 left the page with NO view ever selected: the bootstrap that ends in
+  // the results request hangs off GET_PLAYS_VIEWS_FULFILLED, so /plays rendered
+  // its headers and an empty body indefinitely, with nothing in the console and
+  // no failed request the page reacted to. Restore straight from the browser
+  // instead, which is the only place an anonymous visitor's view state lives.
+  if (!userId) {
+    if (payload.restore_last_active) {
+      yield call(restore_browser_state_for_all_views, { data: [] })
+    }
+    return
+  }
+
   const request_history = yield select(get_request_history)
   if (request_history.has('GET_PLAYS_VIEWS')) {
     return
@@ -528,6 +571,20 @@ export function* watch_delete_plays_view_fulfilled_for_browser_cleanup() {
   )
 }
 
+export function* watch_websocket_open_for_plays_view_request() {
+  yield takeLatest(
+    wsActions.WEBSOCKET_OPEN,
+    replay_in_flight_plays_view_request
+  )
+}
+
+export function* watch_websocket_reconnected_for_plays_view_request() {
+  yield takeLatest(
+    wsActions.WEBSOCKET_RECONNECTED,
+    replay_in_flight_plays_view_request
+  )
+}
+
 export function* watch_selected_player_plays_request() {
   yield takeLatest(
     plays_views_actions.SELECTED_PLAYER_PLAYS_REQUEST,
@@ -561,5 +618,7 @@ export const plays_views_sagas = [
   fork(watch_post_plays_view_fulfilled_for_browser_mark),
   fork(watch_delete_plays_view_fulfilled_for_browser_cleanup),
   fork(watch_set_selected_plays_view_for_browser_persist),
+  fork(watch_websocket_open_for_plays_view_request),
+  fork(watch_websocket_reconnected_for_plays_view_request),
   fork(watch_selected_player_plays_request)
 ]

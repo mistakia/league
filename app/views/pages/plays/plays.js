@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Table from 'react-table/index.js'
@@ -37,68 +37,94 @@ export default function PlaysPage({
   const navigate = useNavigate()
   const { view_id } = useParams()
 
+  // The URL's own table state, when it carries one. Parsed here rather than
+  // inside the effect because the load effect below has to know whether the URL
+  // names the view to show before it asks the saga to restore the last active
+  // one.
+  const url_table_state = useMemo(() => {
+    if (view_id) return null
+
+    const parsed = parse_table_state_from_url(
+      new URLSearchParams(location.search)
+    )
+    const {
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot
+    } = parsed
+
+    const has_table_state =
+      columns.length ||
+      where.length ||
+      (prefix_columns.length && sort.length) ||
+      Object.keys(rank_aggregation || {}).length ||
+      Object.keys(scatter_plot_options || {}).length ||
+      disable_scatter_plot === true
+
+    return has_table_state ? parsed : null
+  }, [location.search, view_id])
+
   useEffect(() => {
-    // The saved-view list is owner-scoped and requires auth, so a logged-out
-    // visitor has nothing to list. A shared view still resolves for them
-    // through load_plays_view below, which fetches by view_id.
-    if (isLoggedIn) {
-      load_plays_views()
-    }
+    // Always call this, logged in or not. The saved-view LIST is owner-scoped
+    // and requires auth, but selecting a view is not the same job as listing
+    // one: default-view selection and browser-state restoration both hang off
+    // load_plays_views, so skipping it when logged out left an anonymous
+    // visitor with no view selected and therefore no results request -- the
+    // page rendered its headers over an empty body indefinitely, with nothing
+    // in the console and no failed request to react to. load_plays_views itself
+    // decides whether to call the API. This is the same hole /data-views had,
+    // fixed the same way; the two surfaces mirror each other deliberately.
+    load_plays_views({ restore_last_active: !view_id && !url_table_state })
     if (view_id) {
       load_plays_view(view_id)
     }
-  }, [isLoggedIn, load_plays_views, load_plays_view, view_id])
+  }, [load_plays_views, load_plays_view, view_id, url_table_state])
 
   useEffect(() => {
-    if (!view_id) {
-      const search_params = new URLSearchParams(location.search)
-      const {
-        columns,
-        prefix_columns,
-        where,
-        sort,
-        q,
-        rank_aggregation,
-        scatter_plot_options,
-        disable_scatter_plot,
-        view_name,
-        view_description
-      } = parse_table_state_from_url(search_params)
+    // Only handle URL-based table state initialization. Browser state
+    // restoration and default view selection are handled by the sagas.
+    if (!url_table_state) return
 
-      const has_table_state =
-        columns.length ||
-        where.length ||
-        (prefix_columns.length && sort.length) ||
-        Object.keys(rank_aggregation || {}).length ||
-        Object.keys(scatter_plot_options || {}).length ||
-        disable_scatter_plot === true
+    const {
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      q,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot,
+      view_name,
+      view_description
+    } = url_table_state
 
-      if (has_table_state) {
-        const next_table_state = {
-          columns,
-          sort,
-          where,
-          prefix_columns,
-          q,
-          rank_aggregation,
-          scatter_plot_options,
-          disable_scatter_plot
-        }
-        plays_view_changed(
-          {
-            view_id: generate_view_id(),
-            view_name,
-            view_description,
-            table_state: next_table_state,
-            saved_table_state: next_table_state
-          },
-          {
-            view_state_changed: true
-          }
-        )
-      }
+    const next_table_state = {
+      columns,
+      sort,
+      where,
+      prefix_columns,
+      q,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot
     }
-  }, [location, plays_view_changed, view_id])
+    plays_view_changed(
+      {
+        view_id: generate_view_id(),
+        view_name,
+        view_description,
+        table_state: next_table_state,
+        saved_table_state: next_table_state
+      },
+      {
+        view_state_changed: true
+      }
+    )
+  }, [url_table_state, plays_view_changed])
 
   const on_view_change = (data_view, view_change_params = {}) => {
     if (view_change_params.is_new_view) {
