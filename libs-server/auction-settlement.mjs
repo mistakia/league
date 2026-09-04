@@ -261,15 +261,13 @@ export const get_outstanding_election_team_ids = ({
     // reached through that gate and is written for the general statement, not
     // for a constructible input.
     //
-    // AND THE GUARANTEE IS "CANNOT IMPROVE ITS OWN CLAIM", NOT "CANNOT AFFECT
-    // ANYTHING". One thing does still move: electing at or above an existing
-    // equal bid pushes `amount_set_at` forward in `build_auction_claims`, which
-    // is the tiebreak input, so a discharged team settles on its BID timestamp
-    // rather than a later election one. That can only help the discharged team,
-    // and it is arguably the more correct reading -- the amount was committed
-    // when the money was actually bid. Stated here because the narrower
-    // guarantee is the true one and the next reader should not assume the
-    // stronger one.
+    // AND THE GUARANTEE IS EXACTLY "CANNOT IMPROVE ITS OWN CLAIM". It used to be
+    // narrower than that, because a later election at or above an equal bid
+    // pushed the single `amount_set_at` forward and the tiebreak read it, so a
+    // discharge quietly handed the team back its earlier BID instant. Claims now
+    // carry every commitment and the resolver ranks on the EARLIEST one covering
+    // the amount, so an election that cannot raise the claim cannot move the
+    // tiebreak either, and the discharge changes nothing at all.
     //
     // This reads only placed bids and roster-derived caps, both already public,
     // so the outstanding set stays broadcastable exactly as it is today.
@@ -312,35 +310,65 @@ export const build_auction_claims = ({
 }) => {
   const claims = new Map()
 
+  // A COMMITMENT IS `{ amount, at }`: this team was on record for at least this
+  // much at this instant. Every commitment is kept rather than folded into one
+  // timestamp, because which one applies depends on the CLAMPED amount and the
+  // caps are not here -- `resolve_auction_player` picks the earliest one that
+  // covers what it ranks the team on.
+  //
+  // That is what retires the two defects this shape replaces. A single
+  // `amount_set_at` was attached to the STATED maximum while the resolver ranked
+  // on `min(stated, available_cap)`, so a clamped claim carried the timestamp of
+  // an amount that never took effect. And the raise was guarded on a strict
+  // `<`, so a team that bid $5 and then elected $5 kept the later election
+  // instant and lost to a rival who had merely elected $5 in between -- losing a
+  // player to a team that committed second, having had real money on the wire
+  // first.
+  const add_commitment = ({ claim, amount, at }) => {
+    if (amount === null || amount === undefined) return
+    if (at === null || at === undefined) return
+    claim.commitments.push({ amount, at })
+  }
+
   for (const election of elections) {
-    claims.set(election.tid, {
+    const claim = {
       tid: election.tid,
       election_id: election.election_id,
       user_id: election.user_id,
       maximum_bid: election.maximum_bid,
-      amount_set_at: election.amount_set_at
+      commitments: []
+    }
+    add_commitment({
+      claim,
+      amount: election.maximum_bid,
+      at: election.amount_set_at
     })
+    claims.set(election.tid, claim)
   }
 
   for (const bid of bids) {
-    const existing = claims.get(bid.tid)
     const bound = bid.player_salary
-    if (!existing) {
-      claims.set(bid.tid, {
+    let claim = claims.get(bid.tid)
+    if (!claim) {
+      claim = {
         tid: bid.tid,
         election_id: null,
         user_id: bid.user_id,
-        maximum_bid: bound,
-        amount_set_at: bid.occurred_at
-      })
-      continue
+        maximum_bid: null,
+        commitments: []
+      }
+      claims.set(bid.tid, claim)
     }
-    if (existing.maximum_bid === null || existing.maximum_bid < bound) {
-      existing.maximum_bid = bound
-      existing.amount_set_at = bid.occurred_at
+    add_commitment({ claim, amount: bound, at: bid.occurred_at })
+    if (claim.maximum_bid === null || claim.maximum_bid < bound) {
+      claim.maximum_bid = bound
     }
   }
 
+  // The nominator is bound to its opening bid, and normally holds it as a real
+  // commitment because the nomination IS the first row in `bids`. This branch is
+  // the degenerate one where no bid was passed at all, so there is no instant to
+  // record and none is invented.
   const nominator = claims.get(nominating_team_id)
   if (!nominator) {
     claims.set(nominating_team_id, {
@@ -348,7 +376,7 @@ export const build_auction_claims = ({
       election_id: null,
       user_id: null,
       maximum_bid: opening_bid,
-      amount_set_at: null
+      commitments: []
     })
   } else if (
     nominator.maximum_bid === null ||

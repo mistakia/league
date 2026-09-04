@@ -27,11 +27,14 @@ const expect = chai.expect
 describe('auction election outcome coverage', function () {
   const NOMINATOR = 1
 
-  const claim = (tid, maximum_bid, amount_set_at = '2026-09-02') => ({
+  const claim = (tid, maximum_bid, committed_at = '2026-09-02') => ({
     tid,
     maximum_bid,
     user_id: 1,
-    amount_set_at: new Date(amount_set_at).toISOString()
+    commitments:
+      maximum_bid === null
+        ? []
+        : [{ amount: maximum_bid, at: new Date(committed_at).toISOString() }]
   })
 
   const open_roster = ({
