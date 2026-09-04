@@ -6,6 +6,7 @@ import hotkeys from 'hotkeys-js'
 import Menu from '@components/menu'
 import PageHead from '@components/page-head'
 import LeaguePauseNotice from '@components/league-pause-notice'
+import StaleBuildNotice from '@components/stale-build-notice'
 import Routes from '@views/routes'
 import Loading from '@components/loading'
 import ContextMenu from '@components/context-menu'
@@ -94,6 +95,13 @@ export default function App({
           write in the league, so a member who navigates away must not lose the
           explanation for why nothing lands. */}
       <LeaguePauseNotice />
+      {/* Every-route, for the same reason as the pause notice and one more: a
+          tab that never reloads is not a league-scoped condition, and the
+          public /data-views and /plays pages run the same stale bundle. Eager
+          rather than lazy — it has to establish the build this tab started on
+          at boot, and a lazy chunk that arrives after a deploy has already
+          landed would record the NEW build as its baseline and never nudge. */}
+      <StaleBuildNotice />
       <Suspense fallback={<Loading loading />}>
         <Routes />
       </Suspense>

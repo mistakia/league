@@ -1,0 +1,42 @@
+// A small chip in the top-right corner, out of flow.
+//
+// `fixed` rather than `sticky` deliberately: this must occupy NO layout space.
+// The pause banner is sticky because a paused league is a blocking condition
+// that has earned the vertical space; a bundle notice has not, and taking rows
+// away from an auction board on a phone to say something optional is the
+// opposite of subtle.
+//
+// Top-right is chosen by elimination. The bid bar is fixed to the BOTTOM and
+// the nav drawer comes from the LEFT, so the top-right corner is the only
+// region that is not somebody's control surface during an auction.
+//
+// Offset below the pause banner when there is one. `--app-banner-height` is
+// published by league-pause-notice.js from a ResizeObserver measurement and is
+// simply absent otherwise, so the fallback in `var()` is doing real work here
+// -- a `var()` naming an undeclared custom property with no fallback drops the
+// whole declaration and would leave this pinned under the banner.
+.stale-build-notice
+  position fixed
+  top calc(var(--app-banner-height, 0px) + 8px)
+  right 8px
+  z-index $z_stale_build_notice
+  display flex
+  align-items center
+  gap 6px
+  // Both halves of the shrink. `min-width: 0` lets the box shrink and
+  // `overflow-wrap` keeps the text inside it -- the box shrinking alone still
+  // paints the message at full width straight through whatever is beside it.
+  min-width 0
+  max-width calc(100vw - 16px)
+  overflow-wrap anywhere
+  padding 6px 8px
+  border 1px solid $borderColor
+  border-radius $button_border_radius
+  background #fff
+  box-shadow 0 1px 4px rgba(0, 0, 0, 0.15)
+  color $textColor
+  font-size 12px
+  line-height 1.3
+
+.stale-build-notice__message
+  min-width 0

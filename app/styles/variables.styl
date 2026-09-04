@@ -77,6 +77,13 @@ $smooth_transition = 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
 // poppers sit above dialogs rather than beside them: ten confirmation dialogs
 // here contain a Select or an Autocomplete.
 $z_page_chrome = 1000            // sticky table headers, fixed in-page notices
+// THE STALE-BUILD NUDGE, and its position in the order is the whole design of
+// it. Above $z_page_chrome so a sticky table header on the auction board or a
+// data view does not bury it. Below everything from $z_floating_action_backdrop
+// up, so it can never cover a dialog, a popper, the nav drawer or a floating
+// control: it is an OPTIONAL invitation to reload, and a manager mid-bid who
+// opens a confirmation must see the confirmation, not this.
+$z_stale_build_notice = 1025
 // A FLOATING ACTION'S OWN SCRIM, and it sits BELOW the button it belongs to
 // rather than above it. The pair has to land under $z_overlay_backdrop so that
 // opening the nav drawer covers a floating control rather than sliding out from
