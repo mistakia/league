@@ -50,6 +50,9 @@ function* handle_plays_view_request({
   const { columns } = data_view.table_state
 
   if (!columns.length) {
+    // See the same branch in @core/data-views/sagas: the reducer entered
+    // `pending` before this saga ran, and nothing else would move it off.
+    yield put(plays_view_request_actions.plays_view_request_skipped())
     return
   }
 

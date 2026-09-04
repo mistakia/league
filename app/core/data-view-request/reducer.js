@@ -1,5 +1,9 @@
 import { fromJS, List, Map } from 'immutable'
-import { data_views_actions } from '#app/core/data-views'
+// The actions module directly rather than the domain index: the index also
+// re-exports the sagas, which reach @core/store and therefore `window`, and that
+// puts this reducer out of reach of a spec for no benefit. Only the action types
+// are wanted here.
+import { data_views_actions } from '#app/core/data-views/actions.js'
 import { data_view_request_actions } from './actions'
 
 const initial_state = fromJS({
@@ -67,6 +71,26 @@ export function data_view_request_reducer(
 
       return state
     }
+
+    // A view change optimistically enters `pending` above, because the reducer
+    // runs before the saga and cannot see whether the request will actually be
+    // sent. When the saga declines to send one -- a view with no columns has
+    // nothing to ask for -- nothing else would ever move the slice off
+    // `pending`, so the page sat under a progress bar and a "Request queued..."
+    // banner forever. That is the state a brand-new view starts in, so the
+    // first thing a user saw after creating one was a load that never ended.
+    case data_view_request_actions.DATA_VIEW_REQUEST_SKIPPED:
+      return state.merge({
+        current_request: null,
+        position: null,
+        execution_id: null,
+        status: null,
+        result: List(),
+        metadata: null,
+        error: null,
+        is_invalid_request: false,
+        client_timeout: false
+      })
 
     case data_view_request_actions.DATA_VIEW_POSITION:
       return state.set('position', payload.position)

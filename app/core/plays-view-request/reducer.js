@@ -61,6 +61,20 @@ export function plays_view_request_reducer(
       return state
     }
 
+    // Mirrors DATA_VIEW_REQUEST_SKIPPED on the data-views slice, for the same
+    // defect: the view change above enters `pending` before the saga has
+    // decided whether to send anything, and a view with no columns sends
+    // nothing, so the page stayed under a progress bar indefinitely.
+    case plays_view_request_actions.PLAYS_VIEW_REQUEST_SKIPPED:
+      return state.merge({
+        current_request: null,
+        position: null,
+        status: null,
+        result: List(),
+        metadata: null,
+        error: null
+      })
+
     case plays_view_request_actions.PLAYS_VIEW_POSITION:
       if (payload.source && payload.source !== 'plays_page') {
         return state

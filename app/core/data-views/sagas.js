@@ -118,6 +118,11 @@ function* handle_data_view_request({
   const { columns } = data_view.table_state
 
   if (!columns.length) {
+    // The reducer already flipped the request slice to `pending` on the view
+    // change that brought us here -- reducers run before sagas, so it cannot
+    // know the request is about to be declined. Tell it, or the page renders a
+    // progress bar and a queue banner for a request that will never exist.
+    yield put(data_view_request_actions.data_view_request_skipped())
     return
   }
 

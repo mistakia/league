@@ -5,6 +5,7 @@ export const data_view_request_actions = {
   DATA_VIEW_RESULT: 'DATA_VIEW_RESULT',
   DATA_VIEW_ERROR: 'DATA_VIEW_ERROR',
   DATA_VIEW_REQUEST: 'DATA_VIEW_REQUEST',
+  DATA_VIEW_REQUEST_SKIPPED: 'DATA_VIEW_REQUEST_SKIPPED',
   DATA_VIEW_PARAM_OPTION_COUNTS_FULFILLED:
     'DATA_VIEW_PARAM_OPTION_COUNTS_FULFILLED',
   DATA_VIEW_PARAM_OPTION_COUNTS_SIGNATURE_SET:
@@ -12,6 +13,9 @@ export const data_view_request_actions = {
   data_view_request: (payload) => ({
     type: data_view_request_actions.DATA_VIEW_REQUEST,
     payload
+  }),
+  data_view_request_skipped: () => ({
+    type: data_view_request_actions.DATA_VIEW_REQUEST_SKIPPED
   }),
   param_option_counts_fulfilled: ({ target_param_name, counts }) => ({
     type: data_view_request_actions.DATA_VIEW_PARAM_OPTION_COUNTS_FULFILLED,

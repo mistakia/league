@@ -1,0 +1,67 @@
+// Literal values rather than stylus tokens, matching the sibling
+// data-view-notices.styl. An undefined stylus variable is emitted as a bare
+// ident and the declaration is silently discarded, so a token that does not
+// exist in this tree costs a rule with no error anywhere.
+.data-view-empty-state
+  max-width 620px
+  padding 4px 0
+  color rgba(0, 0, 0, 0.7)
+  font 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+
+  strong
+    font-weight 600
+    color rgba(0, 0, 0, 0.87)
+
+.data-view-empty-state__headline
+  font-size 15px
+  font-weight 600
+  color rgba(0, 0, 0, 0.87)
+  margin-bottom 4px
+
+.data-view-empty-state__lede
+  margin-bottom 12px
+
+.data-view-empty-state__toggle
+  display inline-flex
+  align-items center
+  gap 2px
+  margin-bottom 8px
+  padding 4px 8px 4px 10px
+  border 1px solid rgba(0, 0, 0, 0.23)
+  border-radius 4px
+  background transparent
+  color rgba(0, 0, 0, 0.7)
+  font-size 13px
+  font-weight 500
+  font-family inherit
+  cursor pointer
+  transition background-color 150ms ease
+
+  &:hover
+    background-color rgba(0, 0, 0, 0.05)
+
+.data-view-empty-state__chevron
+  font-size 18px
+  transition transform 150ms ease
+
+  &.-open
+    transform rotate(180deg)
+
+.data-view-empty-state__steps
+  margin 0 0 12px
+  padding-left 20px
+
+  li
+    margin-bottom 6px
+
+.data-view-empty-state__links
+  display flex
+  gap 16px
+  font-size 13px
+
+  a
+    color rgba(0, 0, 0, 0.7)
+    text-decoration underline
+
+    &:hover
+      color rgba(0, 0, 0, 0.87)

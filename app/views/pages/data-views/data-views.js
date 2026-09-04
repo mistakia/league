@@ -34,6 +34,7 @@ import DataViewFilterChips from '@components/data-view-filter-chips'
 import DataViewNotices from '@components/data-view-notices'
 import DataViewGenerationControl from '@components/data-view-generation-control'
 import DataViewHistoryControl from '@components/data-view-history-control'
+import DataViewEmptyState from '@components/data-view-empty-state'
 import {
   ROW_GRAIN_DEFAULTS,
   ROW_GRAIN_OPTIONS,
@@ -623,6 +624,17 @@ export default function DataViewsPage({
 
   const is_loading = is_request_in_flight && players.length === 0
 
+  const has_columns = Boolean(filtered_table_state.columns?.length)
+
+  // Someone with a saved view of their own has been here before, so the quick
+  // start opens collapsed for them. The component remembers an explicit
+  // expand/collapse and prefers it over this.
+  const has_saved_views = useMemo(
+    () =>
+      Boolean(user_id) && data_views.some((view) => view.user_id === user_id),
+    [data_views, user_id]
+  )
+
   const body = is_view_loading ? (
     <Loading loading />
   ) : (
@@ -644,6 +656,14 @@ export default function DataViewsPage({
             />
             <DataViewNotices />
           </>
+        }
+        empty_state={
+          // Suppressed on an error, where render_request_status() above is
+          // already saying what happened -- "no rows match this view" beside a
+          // failure banner reads as a second, contradictory explanation.
+          data_view_request.status === 'error' ? null : (
+            <DataViewEmptyState {...{ has_columns, has_saved_views }} />
+          )
         }
         clear_local_cache={() => set_cache_clear_dialog_open(true)}
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
