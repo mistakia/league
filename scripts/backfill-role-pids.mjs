@@ -101,6 +101,14 @@ const main = async () => {
   const argv = yargs(hideBin(process.argv))
     .option('start', { type: 'number', default: 2023 })
     .option('end', { type: 'number', default: 2025 })
+    .option('season_type', {
+      type: 'string',
+      describe: 'Restrict to one season type (REG, POST, PRE)'
+    })
+    .option('week', {
+      type: 'number',
+      describe: 'Restrict to one week (use with --season_type)'
+    })
     .option('dry', { type: 'boolean', default: false })
     .parse()
 
@@ -109,10 +117,18 @@ const main = async () => {
   log(`preloading player cache (all players)`)
   await preload_active_players({ all_players: true })
 
+  // Narrowing to one (season_type, week) is what makes this usable for a
+  // single flagged residual row. Without it the only way to repair one play is
+  // a multi-season sweep that re-reads play_stats for every week in range --
+  // disproportionate, and it churns weeks nobody asked about.
   const rows = await db('nfl_plays')
     .select('season_year', 'season_type', 'week')
     .where('season_year', '>=', argv.start)
     .where('season_year', '<=', argv.end)
+    .modify((qb) => {
+      if (argv.season_type) qb.where('season_type', argv.season_type)
+      if (argv.week != null) qb.where('week', argv.week)
+    })
     .groupBy('season_year', 'season_type', 'week')
     .orderBy([
       { column: 'season_year', order: 'asc' },
