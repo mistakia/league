@@ -268,7 +268,14 @@ export default function AuctionMainBid({
     disabled = !selected_pid
     action = (
       <div className='auction__nominate'>
-        {is_election_mode && (
+        {/* `isNominating` and NOT `isCommish`: a ceiling binds the team that
+            stated it, and the commissioner nominating out of turn nominates on
+            behalf of the team on the clock, so a ceiling typed here would be
+            another team's. The server refuses it; offering the control anyway
+            would be offering one that cannot work. The bound is also wrong --
+            `availableCap` here is the CURRENT team's, not the nominating
+            team's. */}
+        {is_election_mode && isNominating && (
           <input
             type='number'
             className='auction__nominate-maximum-bid'

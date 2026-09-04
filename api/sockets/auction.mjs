@@ -687,6 +687,28 @@ export default class Auction {
     // way to discharge itself in the same action.
     const nomination_maximum_bid = this._election_mode ? maximum_bid : null
 
+    // A CEILING BINDS ONLY THE TEAM THAT STATED IT, so only that team may state
+    // it. `_create_nomination_bid` writes the nomination for whichever team the
+    // ROTATION has on the clock, never for the team named in the request -- so
+    // the commissioner, who may nominate out of turn, would otherwise be writing
+    // an `auction_elections` row for ANOTHER team: discharging it from the
+    // outstanding set on a number it never chose, and binding it to pay up to
+    // that number. Nominating on another team's behalf was inert while a
+    // nomination was only a bid; a ceiling makes it a private instruction, and
+    // in this league the commissioner is a competing manager. See
+    // `get_team_auction_elections`, which refuses a commissioner variant for the
+    // same reason.
+    //
+    // REFUSED, not silently dropped. A manager who typed a ceiling and was told
+    // nothing would believe they had set one.
+    if (nomination_maximum_bid !== null && tid !== nominating_team_id) {
+      this.reply(user_id, 'cannot set a maximum bid for another team')
+      this.logger(
+        `refused a nomination ceiling from team ${tid} for team ${nominating_team_id}`
+      )
+      return
+    }
+
     // Validated HERE rather than inside `_validate_nomination`, which returns
     // true early for the commissioner, and against the DEFAULTED `value` rather
     // than the raw field. Only a ceiling that will actually be written is

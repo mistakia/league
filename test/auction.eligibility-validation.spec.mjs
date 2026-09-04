@@ -700,6 +700,67 @@ describe('auction eligibility validation', function () {
       ])
     })
 
+    it('refuses a ceiling from a team nominating on another team behalf', async function () {
+      // A CEILING IS A PRIVATE INSTRUCTION AND IT BINDS THE TEAM THAT STATED IT.
+      //
+      // `_create_nomination_bid` writes the nomination for whichever team the
+      // ROTATION has on the clock, never the team named in the request, and the
+      // commissioner may nominate out of turn -- so a ceiling attached to that
+      // nomination would be an `auction_elections` row for ANOTHER team,
+      // discharging it from the outstanding set on a number it never chose and
+      // binding it up to that number. Inert while a nomination was only a bid;
+      // a binding claim once the nomination can carry a ceiling.
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const [on_the_clock, out_of_turn] = auction._tids
+      expect(auction.nominating_team_id).to.equal(on_the_clock)
+      expect(on_the_clock, 'the two teams differ').to.not.equal(out_of_turn)
+
+      const target = await free_agent()
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0, maximum_bid: 180 },
+        { user_id: COMMISSIONER_USER_ID, tid: out_of_turn }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before)
+      expect(
+        await elections_for(target.pid),
+        'no election is written for a team that did not state one'
+      ).to.have.length(0)
+      expect(errors).to.deep.equal([
+        {
+          user_id: COMMISSIONER_USER_ID,
+          error: 'cannot set a maximum bid for another team'
+        }
+      ])
+    })
+
+    it('still lets the commissioner nominate out of turn WITHOUT a ceiling', async function () {
+      // THE CONTROL on the refusal above. The commissioner's out-of-turn
+      // nomination is an established power -- a separate spec in this file
+      // asserts it -- so the refusal must be scoped to the ceiling and must not
+      // have taken the power away.
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const [, out_of_turn] = auction._tids
+      const target = await free_agent()
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0 },
+        { user_id: COMMISSIONER_USER_ID, tid: out_of_turn }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before + 1)
+      expect(errors).to.deep.equal([])
+    })
+
     it('accepts a valid ceiling and records it as the nominator election', async function () {
       // THE CONTROL for all three refusals above. Without it they pass equally
       // against a validator that refuses every ceiling ever offered, which
