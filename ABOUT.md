@@ -741,12 +741,36 @@ observations:
     current_request is never set. plays_view_changed only fires from PLAYS_VIEW_CHANGED or
     SET_SELECTED_PLAYS_VIEW, and a first visit with no :view_id and no URL table state dispatches
     neither. Found while fixing the selected-player plays tab; not fixed.
+  - >-
+    [fix] 2026-09-04 The /plays cold-load defect had TWO stacked causes, each sufficient alone: the
+    page called load_plays_views only when logged in, so an anonymous visitor got no view selected
+    and therefore no request; and once selected, the composed request was DROPPED because @core/ws
+    send() returns false when the socket is not yet open and a mount effect races it. Fixed in
+    3be36394c by porting the data-views anonymous-restore remedy and replaying an in-flight request
+    on WEBSOCKET_OPEN.
+  - >-
+    [gotcha] WEBSOCKET_RECONNECTED is never put for a tab's FIRST connect, only by the reconnect
+    loop and the post-auth swap, so a replay watcher keyed on it misses exactly the connect a cold
+    load races.
+  - >-
+    [gotcha] /data-views does NOT have the cold-load socket race: its request send passes
+    queue_until_open with replace_key at data-views/sagas.js:163, so the send queue buffers and
+    flushes it. Reading only the RECONNECTED replay, or the timing-frame send at line 319, argues
+    the opposite.
+  - >-
+    [verification] A plays or data-view status pill is not an oracle for whether a request was sent:
+    it renders only for a pending that already carries a server-assigned queue position. Hook
+    WebSocket.prototype.send instead.
+  - >-
+    [verification] 2026-09-04 Verified on production at 1f477d99a (main.9409569f.js): anonymous
+    /plays cold load renders 75 data rows, was 2 header rows before; player drawer Plays tab renders
+    75 rows with week and description populated.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-04T06:41:18.550Z'
+updated_at: '2026-09-04T07:24:18.827Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
