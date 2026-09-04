@@ -84,19 +84,21 @@ export default function LandingPage() {
               together, so the site's own description of itself cannot drift
               from the one on GitHub. */}
           <p className='landing__deck'>{site_tagline}</p>
-          <div className='landing__hero-actions'>
-            <NavLink className='landing__cta' to={primary_action.to}>
-              {primary_action.label}
-            </NavLink>
+          {/* Text links, not buttons. A filled button is a conversion
+              affordance and this page is not selling anything — the two
+              destinations here are the first two entries of the directory
+              below, promoted to the top for a reader who does not want to
+              read the rest. */}
+          <p className='landing__hero-links'>
+            <NavLink to={primary_action.to}>{primary_action.label}</NavLink>
             <a
-              className='landing__cta landing__cta--secondary'
               href={secondary_action.href}
               target='_blank'
               rel='noopener noreferrer'
             >
               {secondary_action.label}
             </a>
-          </div>
+          </p>
         </header>
 
         {landing_sections.map((section) => (

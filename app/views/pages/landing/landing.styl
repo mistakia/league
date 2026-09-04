@@ -71,30 +71,18 @@
     margin-top 20px
     font-size 1.0625em
 
-.landing__hero-actions
+// The two promoted destinations, set as links rather than buttons. Mono at
+// label size so they read as the same kind of object as the directory entries
+// below — which is what they are, lifted to the top.
+.landing p.landing__hero-links
   display flex
   flex-wrap wrap
-  align-items center
-  gap 14px
-  margin-top 40px
-
-.landing a.landing__cta
-  prose_action_link()
-
-.landing a.landing__cta--secondary
-  prose_action_link_secondary()
-
-// Both buttons go full width on a phone. Two inline buttons of different
-// lengths stacked on a narrow screen read as a ragged left edge with no reason
-// for it; equal width states plainly that they are the two ways out of here.
-@media (max-width 640px)
-  .landing__hero-actions
-    display grid
-    grid-template-columns 1fr
-    gap 12px
-
-  .landing a.landing__cta
-    width 100%
+  gap 28px
+  margin 32px 0 0
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size 0.9375em
+  letter-spacing -0.01em
 
 // Spacing carries the hierarchy on a page with no boxes: sections are far
 // apart, entries within one are closer, the two lines of an entry closest.

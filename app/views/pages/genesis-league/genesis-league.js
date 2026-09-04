@@ -59,19 +59,14 @@ export default function GenesisLeaguePage() {
             The constitution, the full transaction record and the platform that
             enforces them are public.
           </p>
-          {/* The waitlist is the primary action and the league link is proof,
-              so they are not peers: one filled button, one quiet one. */}
-          <div className='genesis-league__hero-actions'>
-            <NavLink className='genesis-league__cta' to={questionnaire_path}>
-              Join the waitlist
-            </NavLink>
-            <NavLink
-              className='genesis-league__cta genesis-league__cta--secondary'
-              to={league_url}
-            >
-              Look at the league
-            </NavLink>
-          </div>
+          {/* Text links rather than buttons. The page's argument is that
+              everything it claims is checkable, and a filled call to action
+              is the register of something being sold — which is exactly what
+              the Footballguys staff sticky excludes. */}
+          <p className='genesis-league__hero-links'>
+            <NavLink to={questionnaire_path}>Join the waitlist</NavLink>
+            <NavLink to={league_url}>Look at the league</NavLink>
+          </p>
         </header>
 
         <Section title='The league'>
@@ -119,11 +114,9 @@ export default function GenesisLeaguePage() {
         </section>
 
         {/* The reader who gets this far has read the whole argument, and the
-            hero button is now several screens behind him. */}
+            hero link is now several screens behind him. */}
         <section className='genesis-league__closing'>
-          <NavLink className='genesis-league__cta' to={questionnaire_path}>
-            Join the waitlist
-          </NavLink>
+          <NavLink to={questionnaire_path}>Join the waitlist</NavLink>
         </section>
       </div>
     </div>

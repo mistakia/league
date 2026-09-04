@@ -306,36 +306,14 @@ prose_action_fill()
     outline 2px solid $prose_accent
     outline-offset 3px
 
-// THE SAME ACTION AS AN ANCHOR. prose_action_fill() paints a `button`, and an
-// anchor needs three things it does not carry: a box that centres its own
-// label, and the removal of the underline prose_page() gives every link, in
-// both rest and hover. Two prose pages now carry a call to action — the
-// landing page and the Genesis League pitch — and each had its own copy of
-// these five declarations, which is the drift this file exists to stop.
-//
-// The CALLER still qualifies the selector with its page class (`.landing
-// a.landing__cta`), because prose_page()'s anchor rules are (0,1,1) and win
-// over a bare class.
-prose_action_link()
-  prose_action_fill()
-  display inline-flex
-  align-items center
-  justify-content center
-  border-bottom none
-  &:hover
-    border-bottom none
-
-// The quiet half of a pair. Ink and a hairline rather than a fill, so that of
-// two actions sitting together only one asks to be clicked — the other is the
-// way out for a reader who is not ready to take it.
-prose_action_link_secondary()
-  background transparent
-  color $prose_ink
-  box-shadow inset 0 0 0 1px $prose_rule_strong
-  &:hover
-    background transparent
-    color $prose_accent
-    box-shadow inset 0 0 0 1px $prose_accent
+// NO ANCHOR-AS-BUTTON MIXIN LIVES HERE, deliberately. Both reading pages —
+// the landing page and the Genesis League pitch — carried a filled call to
+// action and both dropped it: a filled button is the register of something
+// being sold, and neither page sells anything. Their next steps are ordinary
+// text links now. prose_action_fill() below is for real form SUBMITS, which
+// is a different object; if a reading page ever wants a filled anchor again,
+// note that it needs the inline-flex box and the underline removal that
+// prose_page() otherwise forces on every link.
 
 // THE FLOATING CONTROL, and the reason it is a mixin is that there are now two
 // of them stacked in the same corner of the auction: the nav menu button and the
