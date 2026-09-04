@@ -21,6 +21,13 @@ import TeamCodeColumn from '@components/team-code-column'
 //
 // Percentile shading is otherwise implicit: every NUMBER column gets it. See
 // app/core/plays-view/derive-plays-percentile-stats.mjs.
+//
+// Only `columns` shade, never `prefix_columns` -- the selector walks the one
+// list, the same way the data-views page does. So the default view's numeric
+// prefix columns (play_year, play_week, play_quarter) render unshaded no matter
+// what these flags say, and disable_percentiles on the first two matters only
+// once someone adds them as ORDINARY columns, where it does fire. Worth knowing
+// before concluding from the default view that a flag is or is not working.
 
 const PlayFilmLinkCell = ({ value }) => <PlayFilmLink url={value} />
 
