@@ -67,7 +67,10 @@ const SCRATCH_PATH_PATTERN =
  *
  * - `provided-tool` — one of the data-view agent scripts.
  * - `build` — validate, preview or emit: the calls that converge on an answer.
- * - `contract-read` — reading generate-data-view.mjs. One is expected.
+ * - `contract-read` — reading generate-data-view.mjs. ZERO is expected: the
+ *   contract is carried in the profile's `append_system_prompt`, so an agent
+ *   reading the file is paying a turn for text already in its system prompt.
+ *   One per run WAS expected, back when the prompt told it to.
  * - `source-dive` — any other read of league source. Each is a defect signal:
  *   the agent went looking because a tool did not answer it, or contradicted
  *   something it had been told.
