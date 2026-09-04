@@ -10239,6 +10239,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-agent-timeline@mistakia/react-agent-timeline#495361fcba3fd1b075ea83ed8b098f43d1b08014":
+  version: 0.1.0
+  resolution: "react-agent-timeline@https://github.com/mistakia/react-agent-timeline.git#commit=495361fcba3fd1b075ea83ed8b098f43d1b08014"
+  peerDependencies:
+    prop-types: ^15
+    react: ^18 || ^19
+    react-dom: ^18 || ^19
+  checksum: 10/29b003887f337de4db936e5ed3c7af15fb71f15a0076018ff7a6fb0113b782d3c989ab08fae1a07fd9547def370560705d702a612e3161c298f9baaeee595b4f
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:18.3.1":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
@@ -10896,6 +10907,7 @@ __metadata:
     prettier-plugin-sql: "npm:^0.19.1"
     query-string: "npm:^9.1.1"
     react: "npm:18.3.1"
+    react-agent-timeline: "mistakia/react-agent-timeline#495361fcba3fd1b075ea83ed8b098f43d1b08014"
     react-dom: "npm:18.3.1"
     react-hot-loader: "npm:^4.13.1"
     react-immutable-proptypes: "npm:^2.2.0"

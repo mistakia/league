@@ -55,6 +55,13 @@ export default {
           priority: 30,
           reuseExistingChunk: true
         },
+        react_agent_timeline: {
+          test: /[\\/]node_modules[\\/]react-agent-timeline[\\/]/,
+          name: 'vendor-react-agent-timeline',
+          chunks: 'async',
+          priority: 30,
+          reuseExistingChunk: true
+        },
         react_virtualized: {
           test: /[\\/]node_modules[\\/]react-virtualized-compat[\\/]/,
           name: 'vendor-react-virtualized',
@@ -112,7 +119,7 @@ export default {
       },
       {
         test: /\.m?js$/,
-        exclude: /node_modules\/(?!react-table)/,
+        exclude: /node_modules\/(?!(react-table|react-agent-timeline))/,
         use: {
           loader: 'babel-loader',
           options: {
