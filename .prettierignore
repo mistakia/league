@@ -2,7 +2,14 @@ dist
 .yarn
 data
 tmp
+# Both files are written by sops, not by hand. Prettier drift on them is
+# permanent rather than a one-off: every `sops set` rewrites the envelope in
+# sops' own formatting, so a lint gate on them fails again after each edit.
+# config-production.json additionally must stay byte-identical to the copy live
+# on the production host, which is what lets that host's working tree go clean
+# on pull instead of needing a config rewrite during an auction.
 config/external-league-credentials-key.sops.json
+config/config-production.json
 
 # Generated from db/schema.postgres.sql by db/tools/generate-schema-types.mjs.
 # It must be ignored rather than merely left alone: `yarn prettier` is
