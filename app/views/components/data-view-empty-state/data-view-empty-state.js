@@ -78,41 +78,47 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
       <div className='data-view-empty-state__lede'>
         Open <strong>Columns</strong> and add a field to see data.
       </div>
-      <button
-        type='button'
-        className='data-view-empty-state__toggle'
-        aria-expanded={is_quick_start_expanded}
-        onClick={toggle_quick_start}
-      >
-        Quick start
-        <Icon
-          className='data-view-empty-state__chevron'
-          name='down'
-          small
-          flipped={is_quick_start_expanded}
-        />
-      </button>
-      {is_quick_start_expanded && (
-        <ol className='data-view-empty-state__steps'>
-          <li>
-            <strong>Columns</strong> — add the fields you want to see. Expand a
-            selected field to set its parameters, such as season or week.
-          </li>
-          <li>
-            <strong>Filter</strong> — add conditions that narrow which players
-            or teams come back.
-          </li>
-          <li>
-            <strong>Splits</strong> — break each row out by season or week.
-          </li>
-        </ol>
-      )}
-      {is_quick_start_expanded && (
-        <div className='data-view-empty-state__lede'>
-          Click a column header to sort. Save keeps the view on your account;
-          the menu beside it copies a share link and exports CSV.
-        </div>
-      )}
+      {/* The steps and the tip live INSIDE the disclosure element the toggle
+          heads, rather than beside it, so what the control owns is visible
+          from the layout alone whether it is open or closed. */}
+      <div className='data-view-empty-state__quick-start'>
+        <button
+          type='button'
+          className='data-view-empty-state__toggle'
+          aria-expanded={is_quick_start_expanded}
+          onClick={toggle_quick_start}
+        >
+          <span>Quick start</span>
+          <Icon
+            className='data-view-empty-state__chevron'
+            name='down'
+            small
+            flipped={is_quick_start_expanded}
+          />
+        </button>
+        {is_quick_start_expanded && (
+          <div className='data-view-empty-state__panel'>
+            <ol className='data-view-empty-state__steps'>
+              <li>
+                <strong>Columns</strong> — add the fields you want to see.
+                Expand a selected field to set its parameters, such as season or
+                week.
+              </li>
+              <li>
+                <strong>Filter</strong> — add conditions that narrow which
+                players or teams come back.
+              </li>
+              <li>
+                <strong>Splits</strong> — break each row out by season or week.
+              </li>
+            </ol>
+            <div className='data-view-empty-state__tip'>
+              Click a column header to sort. The view menu copies a share link
+              and exports CSV.
+            </div>
+          </div>
+        )}
+      </div>
       <div className='data-view-empty-state__links'>
         <Link to='/guides/data-views'>Data views guide</Link>
         <Link to='/glossary'>Glossary</Link>

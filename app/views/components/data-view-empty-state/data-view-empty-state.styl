@@ -2,65 +2,113 @@
 // data-view-notices.styl. An undefined stylus variable is emitted as a bare
 // ident and the declaration is silently discarded, so a token that does not
 // exist in this tree costs a rule with no error anywhere.
+//
+// react-table's own $rt_* tokens are exactly that here. Its stylesheets are
+// compiled by THIS app's stylus-loader, which injects app/styles/variables.styl
+// and nothing from the library, so every $rt_* declaration in the library is
+// dropped -- including the `padding $rt_space_xl $rt_space_lg` on the
+// .table-empty-state wrapper, which computes to 0px. This block therefore owns
+// its own padding and its own alignment rather than inheriting either.
+
+// Anchored left rather than centred in the table area. The wrapper is
+// `position: sticky; left: 0` inside a horizontal scroll container and is
+// `width: fit-content`, so centring a child would put it at the middle of the
+// SCROLL width -- off screen at any scroll offset on a wide table, which is
+// the exact failure the sticky rule exists to prevent.
 .data-view-empty-state
   max-width 620px
-  padding 4px 0
-  color rgba(0, 0, 0, 0.7)
-  font 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+  // Aligns the text with the first data column: the wrapper starts at the
+  // table's left edge, and the header row starts one row-number gutter in.
+  padding-left var(--rt-column-index-width, 30px)
+  padding-right 16px
+  padding-top 24px
+  padding-bottom 28px
+  color rgba(0, 0, 0, 0.62)
+  font 400 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 
   strong
     font-weight 600
     color rgba(0, 0, 0, 0.87)
 
 .data-view-empty-state__headline
-  font-size 15px
-  font-weight 600
+  margin-bottom 6px
   color rgba(0, 0, 0, 0.87)
-  margin-bottom 4px
+  font-size 17px
+  font-weight 600
+  line-height 1.35
+  letter-spacing -0.01em
 
 .data-view-empty-state__lede
-  margin-bottom 12px
+  margin-bottom 18px
+
+.data-view-empty-state__quick-start
+  margin-bottom 20px
+  border 1px solid rgba(0, 0, 0, 0.14)
+  border-radius 6px
+  // Keeps the toggle's hover tint inside the rounded corners.
+  overflow hidden
 
 .data-view-empty-state__toggle
-  display inline-flex
+  display flex
   align-items center
-  gap 2px
-  margin-bottom 8px
-  padding 4px 8px 4px 10px
-  border 1px solid rgba(0, 0, 0, 0.23)
-  border-radius 4px
-  background transparent
-  color rgba(0, 0, 0, 0.7)
-  font-size 13px
-  font-weight 500
+  justify-content space-between
+  gap 8px
+  width 100%
+  margin 0
+  padding 9px 12px
+  border 0
+  background-color rgba(0, 0, 0, 0.03)
+  color rgba(0, 0, 0, 0.78)
   font-family inherit
+  font-size 13px
+  font-weight 600
+  text-align left
   cursor pointer
   transition background-color 150ms ease
 
   &:hover
-    background-color rgba(0, 0, 0, 0.05)
+    background-color rgba(0, 0, 0, 0.07)
 
 // The turn-over on expand comes from Icon's own `flipped` prop
 // (icon.styl's .icon--flipped), not from a rotate rule here -- every
 // disclosure control in the app shares that one.
 .data-view-empty-state__chevron
-  margin-left 2px
+  flex-shrink 0
+  color rgba(0, 0, 0, 0.45)
+
+.data-view-empty-state__panel
+  padding 14px 14px 16px
+  border-top 1px solid rgba(0, 0, 0, 0.1)
 
 .data-view-empty-state__steps
-  margin 0 0 12px
+  margin 0
   padding-left 20px
 
   li
-    margin-bottom 6px
+    margin-bottom 10px
+
+    &:last-child
+      margin-bottom 0
+
+    &::marker
+      color rgba(0, 0, 0, 0.4)
+
+.data-view-empty-state__tip
+  margin-top 14px
+  color rgba(0, 0, 0, 0.55)
+  font-size 13px
 
 .data-view-empty-state__links
   display flex
-  gap 16px
+  gap 18px
   font-size 13px
 
   a
-    color rgba(0, 0, 0, 0.7)
+    color rgba(0, 0, 0, 0.6)
     text-decoration underline
+    text-decoration-color rgba(0, 0, 0, 0.25)
+    text-underline-offset 2px
 
     &:hover
       color rgba(0, 0, 0, 0.87)
+      text-decoration-color rgba(0, 0, 0, 0.6)
