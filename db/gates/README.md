@@ -84,6 +84,13 @@ conformance ratchet are in CI for that reason. The knex resolver qualifies on th
 same test: it resolves each column reference through the statement that binds it
 against the current schema file, so it carries no rename list and no base ref.
 
+`check-spa-stale-column-reads` passes the first half of that test and fails the
+second, so it stays out. It carries no base ref — its old-name universe is the
+checked-in rename maps rather than a schema diff, which is the whole point of it —
+but it reads the working tree of `app/`, and a sibling adding a legitimate SPA
+read of an adjudicated name would turn master red on a finding invisible in
+anyone else's diff. Run it by hand, or through `yarn check:cluster`.
+
 Everything else stays out. Those gates read the WORKING TREE and diff against a
 base ref, and their findings need per-site adjudication by someone who knows what
 the cluster did — a judgment CI cannot make. The cost of getting this wrong is

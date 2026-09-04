@@ -1,0 +1,157 @@
+{
+  "gate": "db/gates/check-spa-stale-column-reads.mjs",
+  "reviewed_at": "2026-09-04",
+  "reviewed_against": "schema at 3b3b25fce",
+  "note": "Keyed on (column, file) with a required reason, per db/gates/README.md. A name-keyed entry would be a stoplist. A NEW file reading an already-settled column is reported rather than inheriting the verdict, which is the point of listing files rather than columns.",
+  "adjudications": [
+    {
+      "column": "bench",
+      "files": [
+        "app/views/components/lineup/lineup.js",
+        "app/views/components/roster/roster.js",
+        "app/views/components/scoreboard-team/scoreboard-team.js"
+      ],
+      "verdict": "not-a-row-read",
+      "reason": "Roster.get bench() in libs-shared/roster.mjs -- a model getter grouping the client roster by slot, unrelated to the league_formats.bench -> bench_slot_count and player.bench -> bench_press_reps renames that put the name in the universe."
+    },
+    {
+      "column": "bid",
+      "files": [
+        "app/core/rosters/reducer.js",
+        "app/views/components/auction-main-bid/index.js",
+        "app/views/components/auction-status/index.js"
+      ],
+      "verdict": "not-a-row-read",
+      "reason": "Client vocabulary, not a row key. rosters/reducer.js reads the `bid` field of the add_restricted_free_agency_tag action creator (app/core/rosters/actions.js:162); auction-main-bid and auction-status read the auction slice, whose `bid` the reducer sets from payload.player_salary (app/core/auction/reducer.js:236)."
+    },
+    {
+      "column": "cap",
+      "files": [
+        "app/views/components/dashboard-team-summary-salary/dashboard-team-summary-salary.js",
+        "app/views/components/dashboard-team-summary-salary/index.js"
+      ],
+      "verdict": "locally-built-object",
+      "reason": "dashboard-team-summary-salary/index.js builds { team_id, cap: r.availableCap, name } in its own selector. The teams route sends salary_cap and this component never reads it."
+    },
+    {
+      "column": "col",
+      "files": ["app/core/plays-view/browser-storage.mjs"],
+      "verdict": "not-a-row-read",
+      "reason": "A plays-view column config object being round-tripped through browser storage. Unrelated to player.col -> college."
+    },
+    {
+      "column": "cov",
+      "files": [
+        "app/core/selectors.js",
+        "app/views/components/league-team/league-team.js",
+        "app/views/components/player-context-menu/player-context-menu.js",
+        "app/views/components/player-name/player-name.js",
+        "app/views/pages/league-home/league-home.js"
+      ],
+      "verdict": "not-a-row-read",
+      "reason": "Roster.get cov() (libs-shared/roster.mjs:217) and the reserve-eligibility object selectors.js builds beside it. The name entered the universe from nfl_plays.cov -> coverage_on_target, a different concept."
+    },
+    {
+      "column": "div",
+      "files": ["app/core/selectors.js"],
+      "verdict": "locally-built-object",
+      "reason": "selectors.js builds `values.div` as a division-keyed accumulator in the same function that reads it."
+    },
+    {
+      "column": "drops",
+      "files": [
+        "app/core/player-fields.js",
+        "app/core/players/default-players-views.js"
+      ],
+      "verdict": "computed-stat-key",
+      "reason": "A fantasy stat key produced by libs-shared/calculate-stats-from-plays.mjs:120 (addStat(pid, \"drops\", 1)), not a column. The player_college_*logs.drops -> dropped_passes rename does not reach it."
+    },
+    {
+      "column": "mbt",
+      "files": [
+        "app/core/player-fields.js",
+        "app/core/players/default-players-views.js"
+      ],
+      "verdict": "computed-stat-key",
+      "reason": "A fantasy stat key produced by libs-shared/calculate-stats-from-plays.mjs:75, derived FROM nfl_plays.missed_or_broken_tackle rather than named after it."
+    },
+    {
+      "column": "pname",
+      "files": [
+        "app/views/components/poach-confirmation/poach-confirmation.js",
+        "app/views/components/restricted-free-agency-confirmation/restricted-free-agency-confirmation.js",
+        "app/views/components/waiver-confirmation/waiver-confirmation.js"
+      ],
+      "verdict": "locally-built-object",
+      "reason": "Each confirmation dialog builds its own option list as { pname: player_map.get(\"short_name\"), ... } a few lines above the read."
+    },
+    {
+      "column": "position",
+      "files": [
+        "app/core/api/reducer.js",
+        "app/core/data-view-request/reducer.js",
+        "app/core/plays-view-request/reducer.js",
+        "app/core/selected-player-plays-request/reducer.js",
+        "app/views/components/auction-main-bid/auction-main-bid.js",
+        "app/views/components/selected-player-plays/selected-player-plays.js"
+      ],
+      "verdict": "not-a-row-read",
+      "reason": "A request parameter carried on redux actions and view-request slices, plus the locally built auction_capacity object. The name entered the universe from nfl_plays.position -> player_position, which none of these read."
+    },
+    {
+      "column": "timestamp",
+      "files": [
+        "app/core/selectors.js",
+        "app/views/components/league-team-value-over-time/index.js",
+        "app/views/components/league-teams-value-over-time/league-teams-value-over-time.js",
+        "app/views/components/selected-player-markets/selected-player-markets.js"
+      ],
+      "verdict": "client-normalized-key",
+      "reason": "league_team_daily_values sends observed_at and app/core/league-team-daily-values/reducer.js:29 normalizes it to `timestamp` at the client boundary, so every downstream read is of the normalized key. In selected-player-markets.js the reads are of the local combined_data objects the file builds, whose `timestamp` field is likewise assigned from selection.observed_at. NOTE this class is invisible to the gate: a client-side rename clears a name exactly as a server alias-back does, and only the adjudication records it."
+    },
+    {
+      "column": "value",
+      "files": [
+        "app/core/app/reducer.js",
+        "app/core/auction/reducer.js",
+        "app/core/auction/sagas.js",
+        "app/core/data-views-fields/row-grains.js",
+        "app/core/data-views/active-filter-summaries.mjs",
+        "app/core/data-views/data-view-notices.mjs",
+        "app/core/data-views/derive-auto-tags.js",
+        "app/core/data-views/format-param-scope.mjs",
+        "app/core/data-views/selectors.js",
+        "app/core/leagues/reducer.js",
+        "app/core/players/reducer.js",
+        "app/core/players/selectors.js",
+        "app/core/plays-view/sagas.js",
+        "app/core/selectors.js",
+        "app/core/stats/reducer.js",
+        "app/core/teams/reducer.js",
+        "app/core/worker/index.js",
+        "app/views/components/auction-target-header/auction-target-header.js",
+        "app/views/components/column-param-nfl-week-selector/nfl-week-selector-dynamic-values-section.js",
+        "app/views/components/column-param-nfl-week-selector/nfl-week-selector-summary.js",
+        "app/views/components/column-param-output/column-param-output.js",
+        "app/views/components/editable-league/editable-league.js",
+        "app/views/components/filter/index.js",
+        "app/views/components/league-teams-value-over-time/league-teams-value-over-time.js",
+        "app/views/components/players-time-period-filter/players-time-period-filter.js",
+        "app/views/components/poach-confirmation/poach-confirmation.js",
+        "app/views/components/restricted-free-agency-confirmation/restricted-free-agency-confirmation.js",
+        "app/views/components/selected-player-markets/selected-player-markets.js",
+        "app/views/components/selected-player-matchup-table/index.js",
+        "app/views/components/selected-player-schedule-time-period-filter/selected-player-schedule-time-period-filter.js",
+        "app/views/components/settings-team/settings-team.js",
+        "app/views/components/settings-teams-team/settings-teams-team.js",
+        "app/views/components/stat-qualifier-filter/stat-qualifier-filter.js",
+        "app/views/components/trade-slot-selector/trade-slot-selector.js",
+        "app/views/components/trade-team-summary/trade-team-summary.js",
+        "app/views/components/waiver-confirmation/waiver-confirmation.js",
+        "app/views/pages/auth/auth.js"
+      ],
+      "verdict": "not-a-row-read",
+      "reason": "Redux action payloads, MUI option/filter objects, Highcharts axis callbacks (`this.value`), DOM form field reads and locally built { value } records. `value` entered the universe from config.value -> config_value and transactions.value -> player_salary; no site here reads either table. The two roster.js sites that DID read a roster player as `.value` were the real instance in this class and were repointed to player_salary rather than adjudicated."
+    }
+  ]
+}

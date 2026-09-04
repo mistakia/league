@@ -293,6 +293,18 @@ const GATES = [
     oracle:
       'a read of `x.foo` where x is bound to a call, vs the key set the callee provably returns, resolved through the IMPORT EDGE or the same module — fails when it judges NOTHING, so a zero is a measurement rather than a narrowing'
   },
+  // The SPA-side counterpart to returned-property-reads, which declares `app/`
+  // out of its corpus. Deliberately NON-incremental: its old-name universe is
+  // the checked-in rename maps rather than a schema diff, because the defect it
+  // was written for survived precisely by outliving its cluster's base ref.
+  {
+    id: 'spa-stale-column-reads',
+    command: ['db/gates/check-spa-stale-column-reads.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'a SPA read of a column name that is retired in a rename map, dead in the current schema, and aliased back by NO producer — names one producer still puts on the wire are printed in a separate ALIAS-AMBIGUOUS tier the verdict explicitly does not cover'
+  },
   {
     id: 'private-tests',
     command: ['db/gates/check-private-tests.mjs'],

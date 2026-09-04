@@ -197,7 +197,7 @@ export default class Roster extends React.Component {
     }
 
     if (bench_count_max) {
-      const players = r.bench.sort((a, b) => b.value - a.value)
+      const players = r.bench.sort((a, b) => b.player_salary - a.player_salary)
       for (let i = 0; i < bench_count_max; i++) {
         const { pid } = players[i] || {}
         rows.push(
@@ -210,7 +210,9 @@ export default class Roster extends React.Component {
     }
 
     if (league.practice_squad_slot_count) {
-      const signed_players = r.practice_signed.sort((a, b) => b.value - a.value)
+      const signed_players = r.practice_signed.sort(
+        (a, b) => b.player_salary - a.player_salary
+      )
       for (let i = 0; i < ps_signed_count_max; i++) {
         const { pid } = signed_players[i] || {}
         rows.push(
