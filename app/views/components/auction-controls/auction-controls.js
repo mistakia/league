@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { Link } from 'react-router-dom'
 
 import AuctionTeam from '@components/auction-team'
 import AuctionMainBid from '@components/auction-main-bid'
@@ -34,7 +35,9 @@ export default function AuctionControls({
   join,
   load_league,
   is_logged_in,
-  auction_is_ended
+  auction_is_ended,
+  league_id,
+  league_name
 }) {
   const controls_ref = useRef(null)
 
@@ -72,8 +75,31 @@ export default function AuctionControls({
     teamItems.push(<AuctionTeam key={index} tid={tid} />)
   })
 
+  // WHAT THIS BAR IS, said on the bar itself. The chrome is a sibling of
+  // <Routes /> rather than part of the auction page, so it is pinned to the
+  // bottom of every route for the length of the free agency period -- the
+  // standings, the player list, a public data view. Without a name on it, a bid
+  // stepper and a countdown appear over an unrelated page with nothing saying
+  // which league it belongs to or where the board is.
+  //
+  // The name is the route to the board too. Reaching the auction page from
+  // here used to mean knowing it was under the league menu.
+  const label = (
+    <div className='auction__controls-label'>
+      {league_id ? (
+        <Link to={`/leagues/${league_id}/auction`}>Free Agency Auction</Link>
+      ) : (
+        <span>Free Agency Auction</span>
+      )}
+      {Boolean(league_name) && (
+        <span className='auction__controls-label-league'>{league_name}</span>
+      )}
+    </div>
+  )
+
   return (
     <div className='auction__controls' ref={controls_ref}>
+      {label}
       <AuctionMainBid />
       {Boolean(teamItems.length) && (
         <div className='auction__teams'>{teamItems}</div>
@@ -87,5 +113,7 @@ AuctionControls.propTypes = {
   join: PropTypes.func,
   load_league: PropTypes.func,
   is_logged_in: PropTypes.bool,
-  auction_is_ended: PropTypes.bool
+  auction_is_ended: PropTypes.bool,
+  league_id: PropTypes.number,
+  league_name: PropTypes.string
 }

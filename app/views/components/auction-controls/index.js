@@ -14,7 +14,9 @@ const map_state_to_props = createSelector(
   (auction, userId, league) => ({
     tids: auction.tids,
     is_logged_in: Boolean(userId),
-    auction_is_ended: auction.isComplete
+    auction_is_ended: auction.isComplete,
+    league_id: league.league_id,
+    league_name: league.name
   })
 )
 

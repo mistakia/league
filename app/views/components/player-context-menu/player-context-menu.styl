@@ -1,0 +1,25 @@
+// THE NOTE THAT SAYS WHY AN ACTION IS OFF. Two homes, because the menu and the
+// compact button row place it differently: inside the item in the menu, beside
+// the group in the row. Both are the same sentence and the same size as
+// auction-election-control's refusal note, which is the app's other place a
+// dead control explains itself.
+
+.player__context-menu-item
+  display flex
+  flex-direction column
+  gap 2px
+  // MUI's MenuItem is `white-space: nowrap`, so the note would run off the menu
+  // rather than wrap without this.
+  white-space normal
+
+.player__context-menu-note
+  font-size 11px
+  line-height 1.4
+  // The reason a control is dead is not a footnote about a control that works,
+  // so it takes the same weight auction-election-control gives its refusal note
+  // rather than the lighter grey of an explanatory one.
+  color rgba(0, 0, 0, 0.78)
+  // The menu is content-sized and the actions row it sits in on the selected
+  // player drawer scrolls horizontally, so the sentence needs a measure to wrap
+  // against in both.
+  max-width 240px

@@ -10,6 +10,39 @@
   background white
   z-index 1
 
+// WHAT THE CHROME IS, for the pages that are not the auction. A DEFINITE
+// height rather than padding around the text: the two fallback constants have
+// to stay equal to the resting height of this box (see the note at the foot of
+// this file), and a row whose height is derived from its line-height makes that
+// arithmetic something the next reader has to redo.
+.auction__controls-label
+  display flex
+  flex 0 0 auto
+  align-items center
+  gap 8px
+  height 24px
+  padding 0 8px
+  border-bottom 1px solid $borderColor
+  font-size 11px
+  text-transform uppercase
+  letter-spacing 0.5px
+  // The bar is chrome over someone else's page, so the label states itself
+  // without competing with the board beneath it.
+  color rgba(0, 0, 0, 0.78)
+  a
+    color inherit
+    text-decoration none
+    &:hover
+      text-decoration underline
+
+.auction__controls-label-league
+  text-transform none
+  letter-spacing 0
+  color rgba(0, 0, 0, 0.6)
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
 .auction__teams
   display flex
   flex-wrap nowrap

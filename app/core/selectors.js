@@ -1265,8 +1265,13 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       poach: false,
       rookieTag: false,
       restrictedFreeAgencyTag: false,
-      restrictedFreeAgencyBid: false
+      restrictedFreeAgencyBid: false,
+      release: false
     },
+    // WHY a release is refused, when the reason is one the manager cannot read
+    // off the roster. Null for the two long-standing refusals (a protected
+    // player, a locked starter), which the roster already says out loud.
+    release_block_reason: null,
     reserve: {
       reserve_short_term_eligible: false,
       reserve_long_term_eligible: false,
@@ -1297,6 +1302,39 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   status.starter = starting_lineup_slots.includes(playerSlot)
   status.locked = isPlayerLocked(state, { player_map })
   status.active = isSlotActive(playerSlot)
+
+  // Mirror of the free agency guard in `api/routes/teams/release.mjs`: an
+  // ACTIVE roster player can not be released between the period start and the
+  // period end. Rosters are fixed for the auction -- its completion is DERIVED
+  // from the active spots that remain -- so a release would move the count the
+  // auction is running on. Two exemptions are the route's, not conveniences: a
+  // practice squad release is untouched, since that player holds no active
+  // spot, and the commissioner override the route allows keeps the control
+  // live for the one user the server would still accept it from.
+  //
+  // The period is read here rather than through `is_free_agent_period`, which
+  // memoizes on the league alone and so freezes `current_season.now` at its
+  // first call. This answer changes on a wall-clock boundary with no action
+  // behind it, and a manager sitting on the roster page when the period ends
+  // would otherwise keep a disabled button until they reloaded.
+  const fa_period = league.free_agency_period_start
+    ? get_free_agent_period(league)
+    : null
+  const is_release_blocked_by_free_agency_period = Boolean(
+    fa_period &&
+    status.active &&
+    current_season.now.isAfter(fa_period.start) &&
+    current_season.now.isBefore(fa_period.end) &&
+    !get_is_commish(state)
+  )
+
+  status.release_block_reason = is_release_blocked_by_free_agency_period
+    ? 'Active roster players can not be released during the free agency auction period.'
+    : null
+  status.eligible.release =
+    !status.protected &&
+    !(status.locked && status.starter) &&
+    !is_release_blocked_by_free_agency_period
 
   const isFreeAgent = isPlayerFreeAgent(state, { player_map })
   status.fa = isFreeAgent

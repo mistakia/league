@@ -9,6 +9,8 @@ import ButtonGroup from '@components/button-group'
 
 import { current_season, roster_slot_types } from '#constants'
 
+import './player-context-menu.styl'
+
 export default function PlayerContextMenu({
   player_map,
   status,
@@ -231,9 +233,27 @@ export default function PlayerContextMenu({
 
   const items = []
 
-  const add = ({ disabled, label, ...params }) => {
-    if (disabled && hideDisabled) return
+  // A REFUSAL THE ROSTER DOES NOT EXPLAIN IS STATED, NOT HIDDEN. Most disabled
+  // items here answer their own question -- a protected player says so on the
+  // roster, a locked starter says so on the scoreboard -- but a rule that turns
+  // on the league calendar does not, so an item may carry a `note` naming why
+  // it is off.
+  //
+  // A note also survives `hideDisabled`, which exists to keep an inapplicable
+  // action out of the compact button row and would otherwise delete the only
+  // place the reason is said. That is the same argument
+  // auction-election-control makes for keeping its buttons disabled rather than
+  // dropping them: an action that was there yesterday and is absent today reads
+  // as a bug and answers nothing.
+  const notes = []
+
+  const add = ({ disabled, label, note, ...params }) => {
+    if (disabled && hideDisabled && !note) return
     if (buttonGroup) {
+      // The button row is a segmented control -- `.button-group > .button` is
+      // how its shared edges are drawn -- so the note cannot wrap the button
+      // and goes beside the group instead.
+      if (note) notes.push(note)
       items.push(
         <Button small {...{ disabled, ...params }}>
           {label}
@@ -242,7 +262,14 @@ export default function PlayerContextMenu({
     } else {
       items.push(
         <MenuItem dense {...{ disabled, ...params }}>
-          {label}
+          {note ? (
+            <div className='player__context-menu-item'>
+              <span>{label}</span>
+              <span className='player__context-menu-note'>{note}</span>
+            </div>
+          ) : (
+            label
+          )}
         </MenuItem>
       )
     }
@@ -384,10 +411,15 @@ export default function PlayerContextMenu({
       label: `${reserve_label_prefix} Reserve/COV`
     })
 
+    // `status.eligible.release` carries all three refusals -- a protected
+    // player, a locked starter, and the free agency auction period -- because
+    // the third is the server's rule and the client must not restate it here.
+    // Only the third gets a note; the other two are visible on the roster.
     add({
       key: 'release',
       onClick: handleRelease,
-      disabled: status.protected || (status.locked && status.starter),
+      disabled: !status.eligible.release,
+      note: status.release_block_reason,
       label: 'Release'
     })
   } else if (poachId) {
@@ -467,11 +499,20 @@ export default function PlayerContextMenu({
     return null
   }
 
-  return buttonGroup ? (
-    <ButtonGroup>{items}</ButtonGroup>
-  ) : (
-    <MenuList>{items}</MenuList>
-  )
+  if (buttonGroup) {
+    return (
+      <>
+        <ButtonGroup>{items}</ButtonGroup>
+        {notes.map((note, index) => (
+          <div className='player__context-menu-note' key={index}>
+            {note}
+          </div>
+        ))}
+      </>
+    )
+  }
+
+  return <MenuList>{items}</MenuList>
 }
 
 PlayerContextMenu.propTypes = {
