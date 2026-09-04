@@ -735,12 +735,18 @@ observations:
     auction-target-header all connect it with no pos, so the filter passes every player and the
     auction rate is computed league-wide despite the name; fixing it would move every auction price
     on screen.
+  - >-
+    [bug] 2026-09-04 The /plays page issues NO request on a cold load: measured on production and on
+    dev:live, it sits at zero data rows for 48s with the status pill never appearing, so
+    current_request is never set. plays_view_changed only fires from PLAYS_VIEW_CHANGED or
+    SET_SELECTED_PLAYS_VIEW, and a first visit with no :view_id and no URL table state dispatches
+    neither. Found while fixing the selected-player plays tab; not fixed.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-03T18:28:52.407Z'
+updated_at: '2026-09-04T06:41:18.550Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
