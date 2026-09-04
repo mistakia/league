@@ -143,15 +143,14 @@ const USER_BASE_ROOTS = [
   '--root',
   '../../../workflow/nfl',
   // text/nfl holds the six runnable query files under text/nfl/query/, which are
-  // the canonical SQL analysis sessions execute. text/nfl-betting is a SIBLING
-  // directory that text/nfl does not reach, and text/home-dynasty-league is a
-  // third root again -- all three were outside the corpus until the 2026-08-15
-  // pct conform, whose breaking SQL lived in every one of them and over which
-  // the gate returned green.
+  // the canonical SQL analysis sessions execute, and since the betting tree was
+  // nested under it as text/nfl/nfl-betting/ this one root reaches that SQL too
+  // -- it used to be a sibling root of its own. text/home-dynasty-league is a
+  // second root -- both were outside the corpus until the 2026-08-15 pct
+  // conform, whose breaking SQL lived in each of them and over which the gate
+  // returned green.
   '--root',
   '../../../text/nfl',
-  '--root',
-  '../../../text/nfl-betting',
   '--root',
   '../../../text/home-dynasty-league',
   // The user-base CLI tree, for GATE 3. It holds EXECUTABLE schema consumers --
