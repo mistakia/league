@@ -110,21 +110,78 @@ export const register_wrap = ({
   return wrap_cte_name
 }
 
+// Resolve the measure arguments `build_period_cte` needs for one column-def.
+//
+// Split out and awaited BEFORE the builder runs because a knex QueryBuilder is
+// thenable: returning one from an `async` function makes the awaiting caller
+// EXECUTE the query instead of receiving the builder. Keeping the builder
+// synchronous is what stops this wrap from firing its own CTE at the database
+// mid-construction.
+//
+// A COMBINED measure projects its ACCUMULATORS rather than its value, because
+// the wrap sums the numerator across years -- and summing a per-year combined
+// value is the sum-of-per-year-ratios class the contract makes unrepresentable.
+//
+// A ROLE-UNION measure (`plays_role_union`) has no top-level `measure_expr` at
+// all -- its per-play expressions live on the role attributions, one per role,
+// and `build_period_cte` dispatches on measure_source to consume them. Calling
+// `column_def.measure_expr(...)` unconditionally threw `measure_expr is not a
+// function` for every such column, which made fantasy-points-style columns
+// unrenderable under a per_team_play rate in multi-year-no-split mode.
+// `resolve_source_table` is likewise undefined for that source, so neither call
+// may be reached on this branch.
+const resolve_measure_args = async ({ column_def, params, identity_id }) => {
+  if (column_def.measure_source === 'plays_role_union') {
+    return {
+      measure_expr: null,
+      role_attributions: await column_def.role_attributions({
+        params,
+        identity_id
+      }),
+      game_conditional_expr: column_def.game_conditional_expr
+        ? await column_def.game_conditional_expr({ params, identity_id })
+        : null
+    }
+  }
+  if (column_def.combined_measure) {
+    return { accumulator_selects: column_def.accumulator_selects }
+  }
+  return {
+    measure_expr: column_def.measure_expr({
+      table_name: resolve_source_table(column_def.measure_source),
+      params,
+      identity_id
+    })
+  }
+}
+
 // Materialize all pending wrap CTEs. Called once from the dispatcher after
 // `flush_measure_batches` (the order matters only when a future revision
 // references the shared numerator CTE from inside the wrap; today each wrap
 // inlines its own numerator subquery and is order-independent).
-export const flush_per_team_play_wraps = ({ query_context }) => {
+//
+// Async only to resolve each entry's measure arguments; the builder it calls
+// stays synchronous for the thenable reason above.
+export const flush_per_team_play_wraps = async ({ query_context }) => {
   if (!query_context.per_team_play_wraps) return
   for (const [, entry] of query_context.per_team_play_wraps) {
     if (query_context.applied_output_ctes.has(entry.wrap_cte_name)) continue
-    const cte_query = build_wrap_cte_query({ query_context, entry })
+    const measure_args = await resolve_measure_args({
+      column_def: entry.column_def,
+      params: entry.params,
+      identity_id: entry.identity_id
+    })
+    const cte_query = build_wrap_cte_query({
+      query_context,
+      entry,
+      measure_args
+    })
     query_context.players_query.withMaterialized(entry.wrap_cte_name, cte_query)
     query_context.applied_output_ctes.add(entry.wrap_cte_name)
   }
 }
 
-const build_wrap_cte_query = ({ query_context, entry }) => {
+const build_wrap_cte_query = ({ query_context, entry, measure_args }) => {
   const { column_def, params, identity_id, rate_type_table_name, team_unit } =
     entry
 
@@ -132,25 +189,9 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
   // semantics as the batched aggregator path, with year grain forced on so
   // the wrap can join on year. measure_source defaults to 'plays' for
   // column-defs that omit it (see player-stats-from-plays).
-  //
-  // A COMBINED measure projects its ACCUMULATORS here rather than its value,
-  // because this wrap sums the numerator across years -- and summing a
-  // per-year combined value is the sum-of-per-year-ratios class the contract
-  // makes unrepresentable. The recombination below sums each accumulator and
-  // combines after, which is the same shape `select-string.mjs` uses for a
-  // year-offset window.
-  const combined_measure = column_def.combined_measure ?? null
   const numerator_subquery = build_period_cte({
     measure_source: column_def.measure_source,
-    ...(combined_measure
-      ? { accumulator_selects: column_def.accumulator_selects }
-      : {
-          measure_expr: column_def.measure_expr({
-            table_name: resolve_source_table(column_def.measure_source),
-            params,
-            identity_id
-          })
-        }),
+    ...measure_args,
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
@@ -185,7 +226,7 @@ const build_wrap_cte_query = ({ query_context, entry }) => {
     .select(
       db.raw(
         `${
-          combined_measure
+          column_def.combined_measure
             ? column_def.recombine_accumulators({ table_name: 'num_y' })
             : 'SUM(num_y.measure_total)'
         } AS numerator_sum`

@@ -2110,7 +2110,7 @@ export const get_data_view_results_query = async ({
   // attribution). Must run after flush_measure_batches in case a future
   // revision shares the batched numerator CTE; today each wrap inlines its
   // own (pid, year) numerator subquery and is order-independent.
-  flush_per_team_play_wraps({ query_context })
+  await flush_per_team_play_wraps({ query_context })
 
   // Reduce each per-period CTE to subject grain. MUST run after
   // flush_measure_batches: a summary selects FROM its period CTE, and a
