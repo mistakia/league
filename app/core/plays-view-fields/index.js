@@ -1,6 +1,15 @@
+import React from 'react'
+import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import { plays_view_fields_index, nfl_plays_column_params } from '#libs-shared'
+import PlayFilmLink from '@components/play-film-link'
+
+const PlayFilmLinkCell = ({ value }) => <PlayFilmLink url={value} />
+
+PlayFilmLinkCell.propTypes = {
+  value: PropTypes.string
+}
 
 const PLAYS_COLUMN_GROUPS = {
   CORE: { column_group_id: 'CORE', priority: 1 },
@@ -33,6 +42,12 @@ const play_boolean_field = (field) => ({
 
 const plays_view_fields = {
   // Core play fields
+  play_film_url: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
+    header_label: 'FILM',
+    size: 50,
+    component: React.memo(PlayFilmLinkCell)
+  }),
   play_esbid: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'ESBID',

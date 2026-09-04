@@ -1,4 +1,5 @@
 import db from '#db'
+import { nfl_pro_film_url_sql } from '#libs-server/plays-view/nfl-pro-film-url.mjs'
 
 const join_nfl_games = ({ query, join_state }) => {
   if (!join_state.nfl_games) {
@@ -116,5 +117,12 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.esbid as play_game_id'],
     main_where: () => 'nfl_plays.esbid'
+  },
+  // Derived, so there is no column to filter on -- omitting main_where is what
+  // keeps it out of the filter UI. Sorting works because the expression is
+  // reused verbatim as the sort column.
+  play_film_url: {
+    main_select: () => [nfl_pro_film_url_sql({ alias: 'play_film_url' })],
+    sort_column_name: nfl_pro_film_url_sql()
   }
 }

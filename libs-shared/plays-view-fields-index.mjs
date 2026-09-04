@@ -16,6 +16,8 @@ export default {
   play_year: 'The NFL season year',
   play_week: 'The NFL week number',
   play_game_id: 'The unique game identifier (ESBID)',
+  play_film_url:
+    'Link to the coaches film for this play on NFL Pro (requires an NFL Pro subscription). Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates.',
 
   // Outcome fields
   play_yds_gained: 'Total yards gained on the play',
