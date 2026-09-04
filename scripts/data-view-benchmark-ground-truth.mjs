@@ -268,6 +268,41 @@ const INSTRUCTIONS = [
     `
   },
   {
+    // THE ONLY EDIT CASE, and the only entry whose assertion an agent cannot
+    // satisfy by echoing what it was given. Every other instruction builds from
+    // nothing; production's slow path is a user amending the view already on
+    // screen, which is a longer prompt carrying a whole table_state and a
+    // different question -- keep the columns, add one, re-rank on it.
+    //
+    // The re-rank is what makes it gradeable. An edit that only ADDS a column
+    // leaves the leaders where they were, so returning the input unchanged
+    // scores correct and the case measures nothing; ranking on the new column
+    // means the expected leaders are the touchdown leaders and the input's
+    // yardage order fails.
+    instruction_id: 'qb-edit-add-touchdowns-2023',
+    instruction:
+      'add passing touchdowns for the same season, and rank by touchdowns instead of yards',
+    capability: 'edit of an existing view: added column plus a re-rank',
+    min_rows: 10,
+    input_table_state: player_reference({
+      measure_column: 'player_pass_yards_from_plays',
+      position: 'QB',
+      year: 2023
+    }),
+    sql: `
+      select p.passer_pid as pid, pl.first_name, pl.last_name,
+             count(*) filter (where p.is_passing_touchdown)::int as measure
+      from nfl_plays p
+      join player pl on pl.pid = p.passer_pid
+      where p.season_year = 2023 and p.season_type = 'REG'
+        and p.play_type = 'PASS'
+        and pl.primary_position = 'QB'
+      group by 1, 2, 3
+      order by measure desc, pid asc
+      limit ${LEADER_DEPTH}
+    `
+  },
+  {
     instruction_id: 'team-passing-yards-2024',
     instruction:
       'total passing yards by team in the 2024 regular season, ranked highest first',
@@ -332,6 +367,12 @@ const derive_entry = async (entry) => {
     identity_key,
     min_rows: entry.min_rows,
     measure_tolerance: MEASURE_TOLERANCE,
+    // Present on the edit case only. Absent means "build from nothing", which
+    // is what every other entry does, so the runner branches on presence rather
+    // than on a second flag naming the same thing.
+    ...(entry.input_table_state
+      ? { input_table_state: entry.input_table_state }
+      : {}),
     expected_leaders,
     ground_truth_sql: entry.sql.trim()
   }
@@ -403,6 +444,19 @@ const REFERENCE_TABLE_STATES = {
       year: 2023
     }
   }),
+  // The edit case's reference is the state AFTER the edit -- the input state
+  // with the touchdown column added and the sort moved onto it. Probing the
+  // input state instead would prove only that the view the user already has
+  // renders, which is not the assertion.
+  'qb-edit-add-touchdowns-2023': {
+    ...player_reference({
+      measure_column: 'player_pass_yards_from_plays',
+      position: 'QB',
+      year: 2023,
+      extra_columns: ['player_pass_touchdowns_from_plays']
+    }),
+    sort: [{ column_id: 'player_pass_touchdowns_from_plays', desc: true }]
+  },
   'team-passing-yards-2024': {
     row_grain: ['team'],
     prefix_columns: ['team_code', 'team_name'],

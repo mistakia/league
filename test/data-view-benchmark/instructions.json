@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-03T21:28:33.171Z",
+  "generated_at": "2026-09-04T16:00:52.336Z",
   "leader_depth": 5,
-  "entry_count": 8,
+  "entry_count": 9,
   "entries": [
     {
       "instruction_id": "qb-passing-yards-2023",
@@ -255,6 +255,73 @@
         }
       ],
       "ground_truth_sql": "select pid, first_name, last_name, measure from (\n        select p.target_pid as pid, pl.first_name, pl.last_name,\n               round(\n                 sum(p.yards_gained) filter (where p.is_completion)::numeric\n                 / nullif(count(*) filter (where p.is_completion), 0),\n                 2\n               )::float8 as measure,\n               count(*) filter (where p.is_completion)::int as receptions\n        from nfl_plays p\n        join player pl on pl.pid = p.target_pid\n        where p.season_year = 2023 and p.season_type = 'REG'\n          and p.play_type = 'PASS'\n          and pl.primary_position = 'WR'\n        group by 1, 2, 3\n      ) t\n      where receptions >= 50\n      order by measure desc, pid asc\n      limit 5"
+    },
+    {
+      "instruction_id": "qb-edit-add-touchdowns-2023",
+      "instruction": "add passing touchdowns for the same season, and rank by touchdowns instead of yards",
+      "capability": "edit of an existing view: added column plus a re-rank",
+      "identity_key": "pid",
+      "min_rows": 10,
+      "measure_tolerance": 0.02,
+      "input_table_state": {
+        "row_grain": ["player"],
+        "prefix_columns": [
+          "player_name",
+          "player_position",
+          "player_nfl_teams"
+        ],
+        "columns": [
+          {
+            "column_id": "player_pass_yards_from_plays",
+            "params": {
+              "year": [2023]
+            }
+          }
+        ],
+        "where": [
+          {
+            "column_id": "player_position",
+            "operator": "IN",
+            "value": ["QB"],
+            "params": {}
+          }
+        ],
+        "sort": [
+          {
+            "column_id": "player_pass_yards_from_plays",
+            "desc": true
+          }
+        ],
+        "row_axes": []
+      },
+      "expected_leaders": [
+        {
+          "identity": "DAKX-PRES-004203",
+          "measure": 36,
+          "label": "Dak Prescott"
+        },
+        {
+          "identity": "JORD-LOVE-001990",
+          "measure": 32,
+          "label": "Jordan Love"
+        },
+        {
+          "identity": "BROC-PURD-004112",
+          "measure": 31,
+          "label": "Brock Purdy"
+        },
+        {
+          "identity": "JARE-GOFF-002009",
+          "measure": 30,
+          "label": "Jared Goff"
+        },
+        {
+          "identity": "JOSH-ALLE-000098",
+          "measure": 29,
+          "label": "Josh Allen"
+        }
+      ],
+      "ground_truth_sql": "select p.passer_pid as pid, pl.first_name, pl.last_name,\n             count(*) filter (where p.is_passing_touchdown)::int as measure\n      from nfl_plays p\n      join player pl on pl.pid = p.passer_pid\n      where p.season_year = 2023 and p.season_type = 'REG'\n        and p.play_type = 'PASS'\n        and pl.primary_position = 'QB'\n      group by 1, 2, 3\n      order by measure desc, pid asc\n      limit 5"
     },
     {
       "instruction_id": "team-passing-yards-2024",

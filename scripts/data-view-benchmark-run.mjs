@@ -184,14 +184,26 @@ export const read_prefix_cache_counters = async () => {
  * setting it here would let a benchmark quietly measure a different deadline
  * than production uses.
  *
+ * `input_table_state` is stringified rather than passed as an object because
+ * the column is jsonb and knex would otherwise bind a JS object as a record
+ * literal; this matches what `enqueue_generation_job` in the production queue
+ * does with the same column.
+ *
  * @param {object} params
  * @param {string} params.instruction
+ * @param {object|null} [params.input_table_state] - the edit case
  * @returns {Promise<string>} generation_id
  */
-export const enqueue_generation_job = async ({ instruction }) => {
+export const enqueue_generation_job = async ({
+  instruction,
+  input_table_state = null
+}) => {
   const [row] = await db('data_view_generation_jobs')
     .insert({
       instruction,
+      input_table_state: input_table_state
+        ? JSON.stringify(input_table_state)
+        : null,
       user_id: BENCHMARK_USER_ID,
       principal_key: PRINCIPAL_KEY,
       status: 'queued'
@@ -481,7 +493,8 @@ export const run_one = async ({ entry, iteration, log }) => {
   const wall_start = Date.now()
 
   const generation_id = await enqueue_generation_job({
-    instruction: entry.instruction
+    instruction: entry.instruction,
+    input_table_state: entry.input_table_state || null
   })
   log(`  generation_id ${generation_id}`)
 
