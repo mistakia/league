@@ -91,7 +91,7 @@ export default function DraftPick({
           </div>
           {trade_count > 0 && (
             <div className='draft__pick-trades'>
-              <Icon name='repeat' />
+              <Icon name='repeat' small />
               <span>{trade_count}</span>
             </div>
           )}
