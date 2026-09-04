@@ -28,16 +28,91 @@ import {
   analyze_formatted_markets,
   log_failed_requests_summary,
   log_processing_summary,
-  unmapped_season_player_prop_subcategories,
+  unmapped_subcategories_by_offer_category,
+  unmapped_offer_categories,
   get_tracking_write_stats,
   reset_tracking_write_stats
 } from '#libs-server/draftkings/index.mjs'
+import {
+  known_unmapped_subcategory_ids,
+  known_unmapped_offer_category_ids
+} from '#libs-server/draftkings/draftkings-constants.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
 
 const signal_log = create_logger('import-draftkings-odds', {
   service: 'league-imports'
 })
+
+// Drains the market-type collector into at most two signals and clears it, so a
+// second run over clean data does not re-emit the first run's ids. Exported so
+// the emitting cases can be driven directly -- a gate whose silent case is the
+// only one ever exercised is indistinguishable from an emitter that cannot
+// fire.
+export const emit_unmapped_signals = async () => {
+  const novel_by_category = []
+  for (const [
+    offer_category_id,
+    subcategory_ids
+  ] of unmapped_subcategories_by_offer_category) {
+    const novel = [...subcategory_ids]
+      .filter((id) => !known_unmapped_subcategory_ids.has(id))
+      .sort((a, b) => a - b)
+    if (novel.length) {
+      novel_by_category.push({ offer_category_id, subcategory_ids: novel })
+    }
+  }
+  unmapped_subcategories_by_offer_category.clear()
+
+  const novel_categories = [...unmapped_offer_categories]
+    .filter((id) => !known_unmapped_offer_category_ids.has(id))
+    .sort((a, b) => a - b)
+  unmapped_offer_categories.clear()
+
+  const emissions = []
+
+  if (novel_by_category.length) {
+    const described = novel_by_category
+      .map(
+        ({ offer_category_id, subcategory_ids }) =>
+          `${offer_category_id}: ${subcategory_ids.join(', ')}`
+      )
+      .join('; ')
+    emissions.push(
+      signal_log.error(
+        new Error(
+          `DraftKings returned unmapped subcategoryIds under offer categories we model (${described}). Their markets are ingested with a null market_type and are invisible to consumers until mapped in draftkings-market-types.mjs, or ruled out of scope by adding the id to known_unmapped_subcategory_ids.`
+        ),
+        {
+          severity: 'low',
+          context: { unmapped_subcategories: novel_by_category }
+        }
+      )
+    )
+  }
+
+  if (novel_categories.length) {
+    emissions.push(
+      signal_log.error(
+        new Error(
+          `DraftKings published offer categories with no handler at all: ${novel_categories.join(', ')}. EVERY market under them is ingested with a null market_type. Add a handler in draftkings-market-types.mjs, or rule the family out of scope by adding the id to known_unmapped_offer_category_ids.`
+        ),
+        {
+          severity: 'low',
+          context: { unmapped_offer_category_ids: novel_categories }
+        }
+      )
+    )
+  }
+
+  for (const emitted of emissions) {
+    if (emitted?.promise) {
+      await emitted.promise
+    }
+  }
+
+  return emissions.length
+}
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -351,26 +426,22 @@ export const job = async () => {
     console.log(error)
   }
 
-  // Classification oracle, deliberately not fatal: a new season-long
-  // subcategory is drift to be wired up, not a failed run, and this importer
-  // drives the continuous live-odds worker. Without it a new subcategory only
-  // reaches a debug namespace that is off in production, so the selections land
-  // with a null market_type and no consumer can ever see them.
-  if (unmapped_season_player_prop_subcategories.size) {
-    const subcategory_ids = [
-      ...unmapped_season_player_prop_subcategories
-    ].sort()
-    const emitted = signal_log.error(
-      new Error(
-        `DraftKings offer category 1759 (season-long player totals) returned unmapped subcategoryIds: ${subcategory_ids.join(', ')}. Their markets are ingested with a null market_type and are invisible to consumers until mapped in draftkings-market-types.mjs.`
-      ),
-      { severity: 'low', context: { subcategory_ids } }
-    )
-    if (emitted?.promise) {
-      await emitted.promise
-    }
-    unmapped_season_player_prop_subcategories.clear()
-  }
+  // Classification oracle, deliberately not fatal: a newly published market
+  // shape is drift to be wired up, not a failed run, and this importer drives
+  // the continuous live-odds worker. Without it a new id only reaches a debug
+  // namespace that is off in production, so the selections land with a null
+  // market_type and no consumer can ever see them.
+  //
+  // Two arms, emitted as two signals because they are two different actions. An
+  // unmapped SUBCATEGORY under a category we handle needs a case added or the
+  // product ruled out of scope; an unmapped CATEGORY is a whole product family
+  // reaching no handler, which is what hid categories 526 and 527 for years.
+  //
+  // Both are gated on a declared set of ids already ruled out of scope. The
+  // collector records everything; only the signal is filtered. Ungated, the
+  // subcategory arm names the same 221 ids and the category arm the same 42 on
+  // every run, and a signal that repeats itself is one nobody reads.
+  await emit_unmapped_signals()
 
   await report_category_tracking_outcome()
 
