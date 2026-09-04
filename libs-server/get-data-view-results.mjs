@@ -2574,12 +2574,23 @@ export const should_disable_nested_loops = async ({
     // and a probe that silently answered false for every statement would look
     // exactly like a workload that no longer needs it. This line is the only
     // place that distinguishes them.
-    log(
-      `data view plan probe: ${carries_signature ? 'clamp signature present, disabling nested loops' : 'no clamp signature, keeping the default planner'} (probed in ${Date.now() - probe_started_at}ms)`
+    //
+    // console.log, not `log`: this line IS the audit trail for whether the arm
+    // fires, and the deployed server sets no DEBUG at all, so a `debug` line
+    // here is dark in exactly the environment it exists to report on. Same rule
+    // and same reason as log_data_view_telemetry. JSONL so the decision rate and
+    // the probe's own cost can be aggregated out of the log rather than eyeballed.
+    console.log(
+      `data-view-plan-probe: ${JSON.stringify({
+        disable_nested_loops: carries_signature,
+        probe_duration_ms: Date.now() - probe_started_at
+      })}`
     )
     return carries_signature
   } catch (error) {
-    log(`data view plan probe failed, using the default planner: ${error}`)
+    console.error(
+      `data-view-plan-probe failed, using the default planner: ${error}`
+    )
     return false
   }
 }

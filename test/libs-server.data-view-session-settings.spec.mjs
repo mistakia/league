@@ -166,4 +166,99 @@ describe('data view session settings', () => {
       expect(result).to.equal(false)
     })
   })
+
+  // The probe decision shipped first on the `data-views` debug namespace, and
+  // the deployed server sets no DEBUG at all -- so the one line written to prove
+  // the arm fires emitted nothing in the only environment anyone would ask. The
+  // whole fault was invisible to the specs above, which assert the RETURN value
+  // and never that the decision is reachable by a reader.
+  //
+  // This pins the carrier, not the wording: the decision must reach stdout with
+  // no DEBUG set. Asserting on `debug` being unused would pass against a line
+  // deleted outright, so it asserts the output exists instead.
+  describe('the decision is legible in production', () => {
+    const probe = (run_statement) =>
+      should_disable_nested_loops({
+        execution_query_string: 'select 1',
+        run_statement
+      })
+
+    const plan_response = (plan) => [
+      {},
+      {},
+      { rows: [{ 'QUERY PLAN': [{ Plan: plan }] }] }
+    ]
+
+    const signature_plan = {
+      'Node Type': 'Nested Loop',
+      'Plan Rows': 500,
+      'Join Filter': 'pgl.pid = player.pid',
+      Plans: [
+        {
+          'Node Type': 'Hash Join',
+          'Plan Rows': 1,
+          Plans: [{ 'Node Type': 'Seq Scan', 'Plan Rows': 100 }]
+        }
+      ]
+    }
+
+    const clean_plan = {
+      'Node Type': 'Hash Join',
+      'Plan Rows': 5000,
+      Plans: [{ 'Node Type': 'Seq Scan', 'Plan Rows': 100 }]
+    }
+
+    const capture_stdout = async (run) => {
+      const written = []
+      const original = console.log
+      console.log = (...args) => written.push(args.join(' '))
+      const debug_before = process.env.DEBUG
+      delete process.env.DEBUG
+      try {
+        await run()
+      } finally {
+        console.log = original
+        if (debug_before === undefined) delete process.env.DEBUG
+        else process.env.DEBUG = debug_before
+      }
+      return written
+    }
+
+    // Both arms, because a decision that is only logged when it fires cannot
+    // distinguish "the arm never fired" from "the probe never ran".
+    for (const [label, plan, expected] of [
+      ['disabling nested loops', signature_plan, true],
+      ['keeping the default planner', clean_plan, false]
+    ]) {
+      it(`records ${label} with no DEBUG set`, async () => {
+        const written = await capture_stdout(() =>
+          probe(() => Promise.resolve(plan_response(plan)))
+        )
+        const line = written.find((l) => l.includes('data-view-plan-probe'))
+        expect(line, 'the probe decision reached stdout').to.be.a('string')
+        const payload = JSON.parse(line.slice(line.indexOf('{')))
+        expect(payload.disable_nested_loops).to.equal(expected)
+        expect(payload.probe_duration_ms).to.be.a('number')
+      })
+    }
+
+    // The negative control: the assertions above would also pass against a
+    // probe that logged the same line unconditionally, so this proves the two
+    // arms actually differ in what they record.
+    it('records the two arms differently', async () => {
+      const [signature_line] = await capture_stdout(() =>
+        probe(() => Promise.resolve(plan_response(signature_plan)))
+      )
+      const [clean_line] = await capture_stdout(() =>
+        probe(() => Promise.resolve(plan_response(clean_plan)))
+      )
+      expect(
+        JSON.parse(signature_line.slice(signature_line.indexOf('{')))
+          .disable_nested_loops
+      ).to.not.equal(
+        JSON.parse(clean_line.slice(clean_line.indexOf('{')))
+          .disable_nested_loops
+      )
+    })
+  })
 })
