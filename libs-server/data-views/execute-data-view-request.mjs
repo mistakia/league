@@ -200,16 +200,10 @@ const data_view_query_signature = (params) => {
     .slice(0, 16)
 }
 
-// The signature is a HASH, and nothing anywhere stores its preimage. That was
-// found the expensive way: of 24 open slow_query signals triaged 2026-09-04,
-// only 9 could be resolved back to a shape at all. The other 15 were transient
-// client table states -- edited in the UI, never saved -- and by the time anyone
-// looked, the Postgres log and the pm2 telemetry log covering their window had
-// both rotated away and the saved views they were derived from had been
-// overwritten in place. 70,756 enumerated edit-neighbours of the surviving views
-// matched none of them. A signal whose shape cannot be recovered cannot be
-// diagnosed, only guessed at, so the triage window was silently bounded by log
-// retention rather than by anyone's decision.
+// The signature is a HASH and nothing stores its preimage, so a shape is
+// recoverable only from a saved view or a log -- and views are overwritten in
+// place while logs rotate. Triage was silently bounded by log retention that
+// way, losing most of one backlog before anyone looked.
 //
 // This descriptor is what makes the signal self-sufficient: it travels IN the
 // payload, so it outlives every log. It is deliberately not the canonical JSON
@@ -217,6 +211,9 @@ const data_view_query_signature = (params) => {
 // payload is read by humans and replicated. Distinct column ids collapse those
 // 181 columns to about ten, which is what a reader actually needs to name the
 // shape; `column_count` preserves the width the ids no longer show.
+//
+// Truncation needs no flag of its own: it is visible as
+// `distinct_column_id_count > column_ids.length`.
 const SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT = 40
 
 const shape_descriptor = (params) => {
@@ -235,13 +232,18 @@ const shape_descriptor = (params) => {
     return { kind: 'sql', query_id: query_id || null }
   }
 
+  // A column with no id is unnameable, so it is dropped from the list rather
+  // than carried as a null a reader has to interpret. `column_count` still
+  // counts it, which is where the discrepancy stays visible.
   const distinct_column_ids = [
     ...new Set(
       (columns || []).map((col) =>
         typeof col === 'string' ? col : col?.column_id
       )
     )
-  ].sort()
+  ]
+    .filter(Boolean)
+    .sort()
 
   return {
     kind: 'columns',
@@ -249,9 +251,7 @@ const shape_descriptor = (params) => {
     row_axes,
     column_count: (columns || []).length,
     distinct_column_id_count: distinct_column_ids.length,
-    column_ids: distinct_column_ids.slice(0, SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT),
-    column_ids_truncated:
-      distinct_column_ids.length > SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT
+    column_ids: distinct_column_ids.slice(0, SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT)
   }
 }
 
@@ -348,6 +348,11 @@ export const log_data_view_telemetry = (entry) => {
 // Emits a slow_query signal for a data-view execution past the threshold.
 // Fire-and-forget: emit_signal returns null on every failure path rather than
 // throwing.
+//
+// That covers the EMIT only. Assembling the payload reads the caller's raw
+// `params`, which can throw on a malformed request, so the call site wraps this
+// and the telemetry line after it in one guard -- reporting a slow query must
+// never be able to fail the query it is reporting on.
 //
 // There is deliberately NO auto-resolve arm. It lived here until it was found to
 // be unreachable in the case that mattered -- this function is only called on the
@@ -719,50 +724,68 @@ export async function execute_data_view_request({
       }
     }
 
-    report_slow_query({
-      params,
-      path,
-      total_ms,
-      admission_wait_duration_ms,
-      query_execution_duration_ms,
-      result_row_count,
-      user_id,
-      started_at,
-      signal_emitter,
-      emission_threshold_ms,
-      accepted_slow_queries
-    })
-
-    // Telemetry reads emitted_signal off the SAME effective threshold the
-    // emitter used, so an accepted shape reports false here rather than
-    // claiming a signal that was never sent.
-    const execution_signature = data_view_query_signature(params)
-
     admission.counters.completed++
-    log_data_view_telemetry({
-      event: 'execution',
-      execution_id: exec_id,
-      request_id,
-      path,
-      outcome:
-        data_view_results && data_view_results.length ? 'result' : 'empty',
-      admission_wait_duration_ms,
-      query_execution_duration_ms,
-      total_ms,
-      result_row_count,
-      signature: execution_signature,
-      emitted_signal: Boolean(
-        severity_for_total_ms(
-          total_ms,
-          effective_threshold_ms({
-            signature: execution_signature,
-            emission_threshold_ms,
-            accepted_slow_queries
-          })
-        )
-      ),
-      user_id: user_id ? 'signed-in' : 'anonymous'
-    })
+
+    // Everything from here to the return is REPORTING, and the query has already
+    // succeeded and been cached. It all runs inside the caller's try, so an
+    // exception raised in here is rethrown as a failed request even though the
+    // work was done and paid for -- the worst available outcome, and one no
+    // reader would expect from a telemetry block.
+    //
+    // Both statements below reach into the caller's `params` to derive a shape,
+    // and `params` is request-shaped rather than validated: `columns` arriving
+    // as a bare string is truthy and has no `.map`. So the guard wraps the whole
+    // region rather than any one call. The counter increment stays outside it,
+    // because admission accounting is not reporting and must stay true.
+    try {
+      report_slow_query({
+        params,
+        path,
+        total_ms,
+        admission_wait_duration_ms,
+        query_execution_duration_ms,
+        result_row_count,
+        user_id,
+        started_at,
+        signal_emitter,
+        emission_threshold_ms,
+        accepted_slow_queries
+      })
+
+      // Telemetry reads emitted_signal off the SAME effective threshold the
+      // emitter used, so an accepted shape reports false here rather than
+      // claiming a signal that was never sent.
+      const execution_signature = data_view_query_signature(params)
+
+      log_data_view_telemetry({
+        event: 'execution',
+        execution_id: exec_id,
+        request_id,
+        path,
+        outcome:
+          data_view_results && data_view_results.length ? 'result' : 'empty',
+        admission_wait_duration_ms,
+        query_execution_duration_ms,
+        total_ms,
+        result_row_count,
+        signature: execution_signature,
+        emitted_signal: Boolean(
+          severity_for_total_ms(
+            total_ms,
+            effective_threshold_ms({
+              signature: execution_signature,
+              emission_threshold_ms,
+              accepted_slow_queries
+            })
+          )
+        ),
+        user_id: user_id ? 'signed-in' : 'anonymous'
+      })
+    } catch (error) {
+      console.error(
+        `data-view-telemetry: reporting failed for execution ${exec_id}: ${error.message}`
+      )
+    }
 
     return {
       data_view_results,

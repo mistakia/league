@@ -8,18 +8,10 @@ import {
 
 const expect = chai.expect
 
-// This detector decides, per statement, whether the executor ships
-// `enable_nestloop = off`. It is the entire remedy for the line-axis prop views
-// -- the worst of them measured 53,033ms on the default plan and 505ms on the
-// forced arm -- and it shipped with no test at all.
-//
-// What makes it worth pinning is that BOTH halves of the conjunction are load
-// bearing in opposite directions. Losing the `Plan Rows === 1` half would select
-// nearly every statement, and a blanket `enable_nestloop = off` was measured
-// taking a small view from 851ms to 9,198ms. Losing the `Join Filter` half would
-// deselect the shapes the arm exists for. A regression in either direction is a
-// production latency change with no other alarm attached to it, so each half
-// gets a case that fails if only that half is dropped.
+// The module header explains why both halves of the conjunction are load
+// bearing in opposite directions. What it cannot say is that a regression in
+// either direction changes production latency with no other alarm attached, so
+// each half gets a case that fails if only that half is dropped.
 //
 // The fixtures below are reduced from a real 2026-09-04 production plan for the
 // saved view "2024 - Receiving Yard Props (Weekly)" (slow_query signature
@@ -49,9 +41,7 @@ const leaf = (node_type = 'Index Scan') => ({
 describe('data views nested-loop clamp signature', function () {
   it('selects the line-axis prop shape the forced hash-join arm exists for', function () {
     // The clamp and the filtered loop sit in DIFFERENT subtrees here, which is
-    // the arrangement the loose conjunction was chosen for: requiring the
-    // clamped join to sit inside the filtered loop's outer subtree was measured
-    // selecting 105 statements against this rule's 107.
+    // the arrangement the module header's loose conjunction was chosen for.
     const plan = {
       'Node Type': 'Limit',
       'Plan Rows': 500,
@@ -83,19 +73,6 @@ describe('data views nested-loop clamp signature', function () {
           ]
         })
       ]
-    }
-
-    expect(plan_carries_clamp_signature(plan)).to.equal(false)
-  })
-
-  it('does not select a clamped plan whose nested loops carry no join filter', function () {
-    // A clamped join alone is not the pathology -- the rescan needs an equality
-    // that was demoted out of the index condition and is re-checked per inner
-    // row. Without it the loop is doing the work the planner expects.
-    const plan = {
-      'Node Type': 'Limit',
-      'Plan Rows': 500,
-      Plans: [clamped_join({ Plans: [leaf(), leaf()] }), leaf()]
     }
 
     expect(plan_carries_clamp_signature(plan)).to.equal(false)

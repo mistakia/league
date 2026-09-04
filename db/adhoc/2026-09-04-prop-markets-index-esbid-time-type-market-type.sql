@@ -1,3 +1,11 @@
+-- STATUS: APPLIED 2026-09-04 against league_production
+--
+-- Applied by hand rather than through `yarn db:exec`, and it has to be: the
+-- wrapper runs --single-transaction, and CREATE INDEX CONCURRENTLY cannot run
+-- inside a transaction block. So the banner above was written by hand too,
+-- rather than rewritten in place by the script on success. Any future
+-- CONCURRENTLY file is in the same position.
+--
 -- Add market_type to the index every betting-market data-view column joins through.
 --
 -- `idx_prop_markets_index_esbid_time_type` covers (esbid, time_type) only, so a

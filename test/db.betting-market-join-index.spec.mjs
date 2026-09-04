@@ -9,20 +9,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schema_path = path.join(__dirname, '..', 'db', 'schema.postgres.sql')
 
 // Every betting-market data-view column joins `prop_markets_index` on
-// (esbid, time_type) and then restricts `market_type`. While the index carried
-// only the first two columns, that restriction was applied on the HEAP: on 2024
-// REG week 18 the two-column predicate matches 18,683 rows where adding
-// market_type gives 387, and each column in a view paid that 48x over-fetch
-// independently. The 181-column "2024 Weekly Game Props" view paid it 180 times
-// -- 1,197,670 shared buffer hits, about 9.4 GB of buffer traffic, to return 500
-// rows. Adding market_type took the same statement to 2,089 buffers.
+// (esbid, time_type) and then restricts `market_type`. Without market_type in
+// the index that restriction is applied on the HEAP, once per column;
+// db/adhoc/2026-09-04-prop-markets-index-esbid-time-type-market-type.sql carries
+// the measurement and is canonical for it.
 //
 // Nothing else would report the loss of that index column. The query stays
 // correct, every test stays green, and the only symptom is a slow_query signal
-// weeks later against a shape nobody can still reconstruct -- which is exactly
-// how these signals accumulated in the first place. So this asserts the
-// schema-level property rather than a wall-clock time, which would be flaky
-// against a shared host and could not run in CI at all.
+// weeks later. So this asserts the schema-level property rather than a
+// wall-clock time, which would be flaky against a shared host and could not run
+// in CI at all.
 const REQUIRED_PREFIX = ['esbid', 'time_type', 'market_type']
 
 const parse_indexes_on = (schema_text, table_name) => {

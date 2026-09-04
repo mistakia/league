@@ -580,7 +580,68 @@ describe('data view admission gate and instrumentation', function () {
       'player_name',
       'player_rush_yds_from_plays'
     ])
-    expect(shape.column_ids_truncated).to.equal(false)
+  })
+
+  it('returns the result when a malformed shape makes slow-query reporting throw', async function () {
+    // `columns` as a bare string is truthy and has no `.map`, so building the
+    // payload throws. The report is called synchronously inside the executor's
+    // own try, so before it was guarded this rethrew and failed a request whose
+    // query had already succeeded AND already been cached -- the worst shape of
+    // failure, since the work was done and paid for.
+    const emitted = []
+
+    const result = await execute_data_view_request({
+      request_id: 'v',
+      params: { columns: 'player_name', row_axes: [] },
+      user_id: 134,
+      path: 'socket',
+      cache_key: 'k-malformed-shape',
+      run_query: async () => {
+        await sleep(30)
+        return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+      },
+      signal_emitter: async (args) => emitted.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+
+    expect(result.data_view_results).to.eql([{ pid: 'x' }])
+    expect(emitted.length).to.equal(0)
+  })
+
+  it('drops a column that carries no id rather than naming it null', async function () {
+    const emitted = []
+
+    await execute_data_view_request({
+      request_id: 'v',
+      params: {
+        columns: [
+          'player_name',
+          { params: { year: [2024] } },
+          null,
+          { column_id: 'player_rush_yds_from_plays' }
+        ],
+        row_axes: []
+      },
+      user_id: 134,
+      path: 'socket',
+      cache_key: 'k-idless-column',
+      run_query: async () => {
+        await sleep(30)
+        return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+      },
+      signal_emitter: async (args) => emitted.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+
+    const { shape } = emitted[0].payload
+    expect(shape.column_ids).to.eql([
+      'player_name',
+      'player_rush_yds_from_plays'
+    ])
+    expect(shape.column_count).to.equal(4)
+    expect(shape.distinct_column_id_count).to.equal(2)
   })
 
   it('describes a sandboxed-SQL shape by query_id and never by its statement', async function () {
