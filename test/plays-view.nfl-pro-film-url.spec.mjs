@@ -15,8 +15,8 @@ const expect = chai.expect
   The URL is assembled in SQL, and every part of that assembly is a rule that was
   measured against the live film-room API rather than reasoned out -- the clock
   comes from the play description and not from game_clock_start, minutes are
-  zero-padded, playType is added for special teams only, and the whole thing is
-  NULL before the 2022 season. A change to any of them produces a URL that still
+  zero-padded, playType is sent for every play with sacks routed separately, and
+  the whole thing is NULL before the 2022 season. A change to any of them produces a URL that still
   looks like a URL and quietly resolves to the wrong play, or to no play, which
   is exactly the failure no reader would notice in a table cell.
 
@@ -38,6 +38,7 @@ const seed_play = async ({
   week = 1,
   quarter = 1,
   play_type = 'PASS',
+  is_sack = null,
   game_clock_start = null,
   play_description = null
 }) =>
@@ -49,6 +50,7 @@ const seed_play = async ({
     week,
     quarter,
     play_type,
+    is_sack,
     game_clock_start,
     play_description,
     updated: new Date()
@@ -154,17 +156,38 @@ describe('plays view / nfl pro film url', function () {
   })
 
   describe('playType', function () {
-    it('is absent for a scrimmage play', async function () {
-      // Adding playType to PASS and RUSH costs accuracy rather than gaining it:
-      // NFL Pro charts scrambles and sacks differently than we do, so the filter
-      // turns correct results into empty ones.
+    it('is sent for a scrimmage play too', async function () {
+      // What collides on a clock is usually a play of a different type -- the
+      // kickoff or extra point NFL Pro stamps with the same clock, which sorts
+      // first and wins. Restricting playType to special teams left 31 of 595
+      // plays opening the wrong clip; sending it everywhere left 4.
       await seed_play({
         play_id: 110,
         play_type: 'RUSH',
         play_description: '(14:54) J.Williams left tackle to PHI 46.'
       })
 
-      expect(await film_url(110)).to.not.include('playType')
+      expect(await film_url(110)).to.include('playType=play_type_rush')
+    })
+
+    it('routes a sack to its own filter value rather than to pass', async function () {
+      // A sack is a PASS in our play_type and play_type_sack in theirs. Sending
+      // play_type_pass for one is the single way this parameter returns an empty
+      // list instead of the play.
+      await seed_play({
+        play_id: 113,
+        play_type: 'PASS',
+        is_sack: true,
+        play_description: '(08:00) J.Hurts sacked at PHI 20 for -7 yards.'
+      })
+      await seed_play({
+        play_id: 114,
+        play_type: 'PASS',
+        play_description: '(07:00) J.Hurts pass short left to D.Goedert.'
+      })
+
+      expect(await film_url(113)).to.include('playType=play_type_sack')
+      expect(await film_url(114)).to.include('playType=play_type_pass')
     })
 
     it('splits FGXP into the extra point and field goal filters', async function () {
@@ -263,7 +286,8 @@ describe('plays view / nfl pro film url', function () {
       weekSlug: 'WEEK_5',
       gameId: String(esbid),
       quarter: '3',
-      gameClock: '07:23'
+      gameClock: '07:23',
+      playType: 'play_type_pass'
     })
   })
 })

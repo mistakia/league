@@ -8,14 +8,21 @@ import db from '#db'
 // narrows the filter to one play therefore IS a play-level URL.
 //
 // The pin is `gameClock`, an undocumented filter the film-room API honours but
-// the filter UI never exposes. Measured against two full 2025 games (297 plays,
-// 2026-09-04): 284 resolve to exactly the target play, 8 more return a 2-3 play
-// list containing it, and 5 return nothing because NFL Pro's film feed does not
-// carry that play at all. Nothing here can produce a dead link that our own data
-// says should have worked.
+// the filter UI never exposes.
 //
-// Four things that are not guessable, each of which was measured rather than
-// assumed:
+// MEASURED 2026-09-04 over 595 linked plays across four games and four seasons
+// (2022, 2024, 2025), by replaying each generated URL's query string against the
+// live film-room API: 584 resolve to exactly the target play, 7 more return a
+// short list whose FIRST play by sequence is the target -- which is the one the
+// page auto-plays, so those open correctly too -- and 4 open the wrong clip.
+// None return an empty list.
+//
+// The distinction between "the list contains the target" and "the target is
+// first" is the one that matters and is easy to get wrong: the page sorts by
+// (gameId, sequence) and plays plays[0], so a target sitting second in a
+// three-play list is a wrong clip, not a near miss.
+//
+// Four things that are not guessable, each measured rather than assumed:
 //
 //   1. `gameId` is our own esbid. No crosswalk -- the same value the NFL Pro
 //      playlist importer already sends as `gameId`.
@@ -26,11 +33,12 @@ import db from '#db'
 //      the exact-hit rate from 96% to 65%. The film feed's clock is the one in
 //      the `(MM:SS)` prefix of play_description. game_clock_start is only a
 //      fallback for the plays that carry no prefix (kickoffs, extra points).
-//   4. `playType` is added ONLY for special teams. An extra point shares its
-//      clock with the kickoff that follows it, and playType splits them. Adding
-//      it to PASS/RUSH instead COSTS accuracy: NFL Pro charts scrambles and
-//      sacks differently than we do, and 12 of 297 plays went from a correct
-//      result to zero results when playType was applied to every row.
+//   4. `playType` is sent for EVERY play, not just special teams. An earlier
+//      revision restricted it to special teams on the belief that filtering
+//      scrimmage plays by type cost accuracy; a controlled comparison over the
+//      full 595-play corpus refuted that outright -- restricted, 31 plays open
+//      the wrong clip, and unrestricted only 4, with zero empty results either
+//      way. See PLAY_TYPE_PARAM for the sack case that has to be routed.
 //
 // Film coverage starts at 2022 (pro.nfl.com publishes `filmSeasons` as the
 // current season plus four back). The floor is a constant rather than a rolling
@@ -70,10 +78,26 @@ const WEEK_SLUG = `case nfl_plays.season_type
   end
 end`
 
+// The tiebreaker, and it carries every play rather than only the special teams
+// ones. What collides on a clock is almost always a play of a DIFFERENT type:
+// NFL Pro stamps a kickoff, an extra point or a two-point try with the same
+// clock as the scrimmage play beside it, and the lower sequence sorts first, so
+// the scrimmage play is the one that loses. Filtering the scrimmage play by its
+// own type is what wins it back.
+//
+// A sack is a pass in our play_type and its own filter value in theirs, so it
+// has to be routed separately -- sending play_type_pass for a sack is the one
+// way this parameter returns nothing at all. is_sack NULL falls to the pass
+// branch, which is what the measurement covered.
 const PLAY_TYPE_PARAM = `case nfl_plays.play_type
   when 'KOFF' then '&playType=play_type_kickoff'
   when 'PUNT' then '&playType=play_type_punt'
   when 'CONV' then '&playType=play_type_two_point_conversion'
+  when 'RUSH' then '&playType=play_type_rush'
+  when 'PASS' then case
+    when nfl_plays.is_sack then '&playType=play_type_sack'
+    else '&playType=play_type_pass'
+  end
   when 'FGXP' then case
     when nfl_plays.play_description ilike '%extra point%' then '&playType=play_type_xp'
     else '&playType=play_type_field_goal'
