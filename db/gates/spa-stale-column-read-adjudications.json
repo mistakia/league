@@ -107,7 +107,7 @@
         "app/views/components/selected-player-markets/selected-player-markets.js"
       ],
       "verdict": "client-normalized-key",
-      "reason": "league_team_daily_values sends observed_at and app/core/league-team-daily-values/reducer.js:29 normalizes it to `timestamp` at the client boundary, so every downstream read is of the normalized key. In selected-player-markets.js the reads are of the local combined_data objects the file builds, whose `timestamp` field is likewise assigned from selection.observed_at. NOTE this class is invisible to the gate: a client-side rename clears a name exactly as a server alias-back does, and only the adjudication records it."
+      "reason": "league_team_daily_values sends observed_at and app/core/league-team-daily-values/reducer.js:29 normalizes it to `timestamp` at the client boundary, so every downstream read is of the normalized key. selected-player-markets.js is normalized on the SERVER instead: GET /players/:pid/markets reshapes each row rather than sending it verbatim, emitting `timestamp: row.observed_at` and `year: row.season_year`, so `timestamp` is the wire key there and `observed_at` never reaches the client. NOTE this class is invisible to the gate: a rename at either boundary clears a name exactly as a knex alias-back does, and only the adjudication records it."
     },
     {
       "column": "value",

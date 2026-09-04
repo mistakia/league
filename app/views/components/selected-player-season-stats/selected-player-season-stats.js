@@ -12,7 +12,7 @@ function SelectedPlayerSeasonStats({ player_seasonlogs, pos }) {
   const items = seasonlogs.map((seasonlog, index) => (
     <PlayerSelectedRow
       key={index}
-      games={seasonlog.games}
+      games={seasonlog.games_played}
       title={seasonlog.season_year}
       stats={seasonlog}
       pos={pos}

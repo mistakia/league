@@ -100,12 +100,20 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             return state.updateIn(
               [t.tid, current_season.year, current_season.week, 'players'],
               (arr) =>
+                // `rid` and `pos` come off the broadcast ITEM, not off its
+                // `transaction`. submit-acquisition.mjs pushes
+                // `{ pid, slot, rid, pos, transaction }` and the transaction it
+                // nests is a bare `transactions` row, which has neither column.
+                // Reading them off `t` left every player added by a live
+                // broadcast with an undefined position, so Roster's
+                // position-capacity and extension arithmetic skipped them until
+                // the next full roster load.
                 arr.push({
-                  rid: t.rid,
+                  rid: p.rid,
                   slot: p.slot,
                   pid: t.pid,
                   tag: t.tag,
-                  pos: t.pos,
+                  pos: p.pos,
                   user_id: t.user_id,
                   tid: t.tid,
                   lid: t.lid,

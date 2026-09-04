@@ -3086,11 +3086,16 @@ export function get_gamelog_for_player(
       : fixTeam(play.home_nfl_team)
     : null
 
+  // `player_position`, not `pos`: this object goes to the same `process` above,
+  // which reads `gamelog.player_position` because that is what the gamelogs
+  // route sends. Spelling it `pos` here left the plays-derived branch -- the
+  // one that scores a game while it is in progress -- passing an undefined
+  // position, which silently skips every position-specific scoring override.
   return process({
     pid,
     week,
     year,
-    pos,
+    player_position: pos,
     opp,
     ...stats
   })

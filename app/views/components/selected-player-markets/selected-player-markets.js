@@ -126,12 +126,18 @@ function create_table_data({ markets, is_alt_line, has_line }) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const key = `${market.source_id}_${selection.observed_at}_${market.season_year}_${market.week}_${selection.selection_type || 'DEFAULT'}`
+      // `timestamp` and `year`, not `observed_at`/`season_year`. This component
+      // is fed by GET /players/:pid/markets (api/routes/players.mjs), which
+      // does NOT send the row verbatim -- it reshapes each row into the wire
+      // vocabulary, `timestamp: row.observed_at` and `year: row.season_year`.
+      // The physical column names never reach the client. api/routes/markets.mjs
+      // DOES send `prop_markets_index.*`, but it feeds nothing here.
+      const key = `${market.source_id}_${selection.timestamp}_${market.year}_${market.week}_${selection.selection_type || 'DEFAULT'}`
       if (!combined_data[key]) {
         const data_point = {
           source: market.source_id,
-          timestamp: new Date(selection.observed_at).toLocaleString(),
-          year: market.season_year,
+          timestamp: new Date(selection.timestamp).toLocaleString(),
+          year: market.year,
           week: market.week,
           selection_type: selection.selection_type,
           current_season_hit_rate_hard: selection.current_season_hit_rate_hard,
@@ -312,7 +318,7 @@ function create_combined_data(markets) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const timestamp = new Date(selection.observed_at).getTime()
+      const timestamp = new Date(selection.timestamp).getTime()
       const type = selection.selection_name.toLowerCase().includes('over')
         ? 'over'
         : 'under'
@@ -436,7 +442,7 @@ function create_odds_only_chart({ markets }) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const timestamp = new Date(selection.observed_at).getTime()
+      const timestamp = new Date(selection.timestamp).getTime()
       const odds = selection.odds_american
       series_data.push([timestamp, odds])
     })
