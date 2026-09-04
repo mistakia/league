@@ -226,8 +226,8 @@ export const enqueue_generation_job = async ({
         : null,
       // Null means the identity's default, which is what production sends. The
       // sweep names one only when it is comparing.
-      harness,
-      model,
+      requested_harness: harness,
+      requested_model: model,
       user_id: BENCHMARK_USER_ID,
       principal_key: PRINCIPAL_KEY,
       status: 'queued'

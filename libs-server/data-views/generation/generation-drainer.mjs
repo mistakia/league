@@ -109,8 +109,8 @@ export const drain_once = async ({
       // Null on every production row. Set only by the benchmark, which sweeps
       // one axis at a time and cannot reach this process's env from the machine
       // it runs on.
-      harness: job.harness,
-      model: job.model
+      harness: job.requested_harness,
+      model: job.requested_model
     }))
   } catch (error) {
     if (is_retryable_dispatch_failure(error)) {

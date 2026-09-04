@@ -2584,8 +2584,8 @@ CREATE TABLE public.data_view_generation_jobs (
     duration_milliseconds integer,
     inference_provider character varying(100),
     session_termination_requested_at timestamp with time zone,
-    harness character varying(50),
-    model character varying(100),
+    requested_harness character varying(50),
+    requested_model character varying(100),
     CONSTRAINT data_view_generation_jobs_generation_branch_check CHECK (((generation_branch IS NULL) OR ((generation_branch)::text = ANY (ARRAY[('registry'::character varying)::text, ('query'::character varying)::text, ('refusal'::character varying)::text])))),
     CONSTRAINT data_view_generation_jobs_status_check CHECK (((status)::text = ANY (ARRAY[('queued'::character varying)::text, ('dispatched'::character varying)::text, ('running'::character varying)::text, ('completed'::character varying)::text, ('failed'::character varying)::text, ('expired'::character varying)::text]))),
     CONSTRAINT data_view_generation_jobs_tool_call_count_check CHECK (((tool_call_count IS NULL) OR (tool_call_count >= 0))),
@@ -2622,17 +2622,17 @@ COMMENT ON COLUMN public.data_view_generation_jobs.session_termination_requested
 
 
 --
--- Name: COLUMN data_view_generation_jobs.harness; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN data_view_generation_jobs.requested_harness; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.data_view_generation_jobs.harness IS 'Harness to dispatch this job on; NULL means the dispatching identity''s default. Set by the benchmark sweep, never by production callers.';
+COMMENT ON COLUMN public.data_view_generation_jobs.requested_harness IS 'Harness the caller asked to dispatch this job on; NULL means the dispatching identity''s default. Set by the benchmark sweep, never by production callers.';
 
 
 --
--- Name: COLUMN data_view_generation_jobs.model; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN data_view_generation_jobs.requested_model; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.data_view_generation_jobs.model IS 'Model to dispatch this job on; NULL means the dispatching identity''s default. Set by the benchmark sweep, never by production callers.';
+COMMENT ON COLUMN public.data_view_generation_jobs.requested_model IS 'Model the caller asked to dispatch this job on; NULL means the dispatching identity''s default. Set by the benchmark sweep, never by production callers.';
 
 
 --

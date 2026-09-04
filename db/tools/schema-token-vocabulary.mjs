@@ -402,6 +402,7 @@ const english_words = [
   'handle',
   'hands',
   'hard',
+  'harness',
   'has',
   'hash',
   'hawk',
