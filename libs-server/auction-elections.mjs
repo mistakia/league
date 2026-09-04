@@ -68,10 +68,11 @@ const get_live_election = async ({ trx, lid, season_year, pid, tid }) => {
  * would then wait on its own nominator until someone noticed.
  *
  * It takes `trx` rather than opening its own and it does NOT take the advisory
- * lock or settle. Both callers hold the lock across their own write and the
- * completeness check that follows it, which is the point of the lock; taking it
- * again here would say the ordering is this function's business when it is the
- * caller's.
+ * lock or settle. Each caller holds the lock for its own reason and decides its
+ * own ordering, and those reasons DIFFER -- see `_create_nomination_bid`, which
+ * holds it against a concurrent settlement rather than across a completeness
+ * check. Taking the lock here would say the ordering is this function's
+ * business when it is the caller's.
  */
 export const upsert_auction_election = async ({
   trx,
@@ -80,9 +81,10 @@ export const upsert_auction_election = async ({
   pid,
   tid,
   user_id,
-  maximum_bid,
-  now = new Date()
+  maximum_bid
 }) => {
+  const now = new Date()
+
   const existing = await get_live_election({ trx, lid, season_year, pid, tid })
 
   if (!existing) {

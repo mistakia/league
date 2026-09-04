@@ -159,6 +159,30 @@ const build_live_auction = async ({ user_ids }) => {
   return { auction, errors }
 }
 
+// The same auction in ELECTION mode, which is where the optional nomination
+// ceiling exists at all -- `nominate` discards it in live mode, so a ceiling
+// spec built on `build_live_auction` would assert against a value that was
+// thrown away and pass no matter what the validator did.
+const build_election_auction = async ({ user_ids }) => {
+  const { wss, errors } = make_recording_wss(user_ids)
+  const auction = new Auction({
+    wss,
+    lid: league_id,
+    timers: make_recording_timers()
+  })
+  await auction.setup()
+
+  auction._election_mode = true
+  auction.start()
+  expect(auction._paused, 'the auction is running').to.equal(false)
+  expect(
+    auction._league.commissioner_user_id,
+    'the fixture commissioner is user 1'
+  ).to.equal(COMMISSIONER_USER_ID)
+
+  return { auction, errors }
+}
+
 const roster_for = async (team_id) => {
   const league_row = await getLeague({ lid: league_id })
   return new Roster({
@@ -587,6 +611,116 @@ describe('auction eligibility validation', function () {
         nomination.tid,
         'the requested tid did not reach the bid'
       ).to.not.equal(out_of_turn)
+    })
+  })
+
+  // THE OPTIONAL NOMINATION CEILING, and the two ways its first version was
+  // reachable around its own validator.
+  //
+  // `submit_auction_election` refuses a maximum below zero. Splitting the
+  // election upsert out of that verb so a nomination could carry one moved the
+  // nomination path around that guard, and the guard was then restated in
+  // `_validate_nomination` -- which is exactly where it could not work, for two
+  // independent reasons this block asserts separately.
+  describe('nomination ceiling validation', function () {
+    const elections_for = async (pid) =>
+      knex('auction_elections').where({ lid: league_id, season_year, pid })
+
+    const free_agent = async () =>
+      selectPlayer({ pos: 'RB', random: false, exclude_rostered_players: true })
+
+    it('refuses a negative ceiling on a frame that omits the opening bid', async function () {
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const team_id = auction._tids[0]
+      const target = await free_agent()
+
+      // NO `value` FIELD. `nominate` defaults it to 0 for its own use, so a
+      // validator reading `message.value` raw compares against `undefined` --
+      // and every comparison with `undefined` is false, so `-5 < undefined`
+      // and `-5 > availableCap` both pass and the negative reaches the table.
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, maximum_bid: -5 },
+        { user_id: MANAGER_USER_ID, tid: team_id }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before)
+      expect(await elections_for(target.pid)).to.have.length(0)
+      expect(errors).to.deep.equal([
+        { user_id: MANAGER_USER_ID, error: 'invalid maximum bid' }
+      ])
+    })
+
+    it('refuses a negative ceiling from the COMMISSIONER', async function () {
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const team_id = auction._tids[0]
+      const target = await free_agent()
+
+      // THE BYPASS. `_validate_nomination` returns true immediately for the
+      // commissioner in election mode, so a ceiling check living after that
+      // return is skipped on the most ordinary path in the whole auction --
+      // and in this league the commissioner is a competing manager.
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 0, maximum_bid: -5 },
+        { user_id: COMMISSIONER_USER_ID, tid: team_id }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before)
+      expect(await elections_for(target.pid)).to.have.length(0)
+      expect(errors).to.deep.equal([
+        { user_id: COMMISSIONER_USER_ID, error: 'invalid maximum bid' }
+      ])
+    })
+
+    it('refuses a ceiling below the opening bid', async function () {
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const team_id = auction._tids[0]
+      const target = await free_agent()
+
+      const before = await count_auction_transactions()
+      await auction.nominate(
+        { pid: target.pid, value: 10, maximum_bid: 4 },
+        { user_id: MANAGER_USER_ID, tid: team_id }
+      )
+
+      expect(await count_auction_transactions()).to.equal(before)
+      expect(await elections_for(target.pid)).to.have.length(0)
+      expect(errors).to.deep.equal([
+        { user_id: MANAGER_USER_ID, error: 'invalid maximum bid' }
+      ])
+    })
+
+    it('accepts a valid ceiling and records it as the nominator election', async function () {
+      // THE CONTROL for all three refusals above. Without it they pass equally
+      // against a validator that refuses every ceiling ever offered, which
+      // would silently remove the feature rather than guard it.
+      this.timeout(60 * 1000)
+      const { auction, errors } = await build_election_auction({
+        user_ids: [1, 2]
+      })
+      const team_id = auction._tids[0]
+      const target = await free_agent()
+
+      await auction.nominate(
+        { pid: target.pid, value: 3, maximum_bid: 9 },
+        { user_id: MANAGER_USER_ID, tid: team_id }
+      )
+
+      expect(errors).to.deep.equal([])
+      const elections = await elections_for(target.pid)
+      expect(elections).to.have.length(1)
+      expect(elections[0].tid).to.equal(team_id)
+      expect(elections[0].maximum_bid).to.equal(9)
     })
   })
 

@@ -7,7 +7,7 @@ import WebSocket from 'ws'
 import server from '#api'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
-import { current_season, transaction_types } from '#constants'
+import { current_season } from '#constants'
 import { submit_auction_election } from '#libs-server/auction-elections.mjs'
 import {
   announce_auction_settlement,
@@ -17,6 +17,7 @@ import {
   format_nomination_complete_message,
   format_nomination_message
 } from '#libs-server/format-auction-discord-message.mjs'
+import { nominate_free_agent_running_back } from './utils/nominate-auction-player.mjs'
 import { user2 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -111,47 +112,8 @@ describe('auction settlement announcement', function () {
   // spot is eligible regardless of budget -- the draft fixture leaves teams over
   // the cap, and a priced nomination would disqualify them all before the
   // settlement under test ever happened.
-  // `maximum_bid` mirrors the socket's optional nomination ceiling. A nomination
-  // binds its nominator without discharging it, so a nominator that states no
-  // ceiling stays in the outstanding set and no later election can complete it.
-  const nominate_free_agent = async ({ tid, maximum_bid = null }) => {
-    const rostered = await knex('rosters_players')
-      .join('rosters', 'rosters.roster_id', 'rosters_players.roster_id')
-      .where('rosters.lid', league_id)
-      .pluck('rosters_players.pid')
-
-    const [player] = await knex('player')
-      .whereNot('current_nfl_team', 'INA')
-      .where('primary_position', 'RB')
-      .whereNotIn('pid', rostered.length ? rostered : [''])
-      .orderBy('pid')
-      .limit(1)
-    expect(player, 'an unrostered running back').to.exist
-
-    await knex('transactions').insert({
-      user_id: 1,
-      tid,
-      pid: player.pid,
-      lid: league_id,
-      type: transaction_types.AUCTION_BID,
-      player_salary: 0,
-      week: 0,
-      season_year,
-      occurred_at: new Date()
-    })
-
-    if (maximum_bid !== null) {
-      await submit_auction_election({
-        lid: league_id,
-        tid,
-        pid: player.pid,
-        user_id: 1,
-        maximum_bid
-      })
-    }
-
-    return player.pid
-  }
+  const nominate_free_agent = ({ tid, maximum_bid = null }) =>
+    nominate_free_agent_running_back({ lid: league_id, tid, maximum_bid })
 
   // Drives a real settlement to completion and hands back the settlement row.
   // Every team but the nominator and team 2 declines up front, then team 2's

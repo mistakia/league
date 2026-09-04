@@ -167,7 +167,7 @@ export const auction_actions = {
   // NOT that they declined -- a nominator cannot decline its own nomination.
   // Stating one is what discharges them from the outstanding set, because a
   // nomination binds its nominator without electing for them.
-  nominate: (value, maximum_bid = null) => ({
+  nominate: ({ value, maximum_bid = null }) => ({
     type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
       value,

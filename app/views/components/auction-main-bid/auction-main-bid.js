@@ -52,7 +52,7 @@ export default function AuctionMainBid({
   // from the outstanding set, so a nominator who states nothing here is the team
   // the auction waits on next, and can elect later from the standing-elections
   // control once they have seen the field react.
-  const [nomination_maximum, set_nomination_maximum] = useState('')
+  const [nomination_maximum_bid, set_nomination_maximum_bid] = useState('')
   const previous = useRef({ bidValue, nominated_pid })
 
   // Election mode carries no clock of any kind, so there is no timer to render
@@ -116,13 +116,13 @@ export default function AuctionMainBid({
     bid(value)
   }
 
-  const handle_nomination_maximum_change = (event) => {
+  const handle_nomination_maximum_bid_change = (event) => {
     const next = event.target.value
-    if (next === '') return set_nomination_maximum('')
+    if (next === '') return set_nomination_maximum_bid('')
     const parsed = Number(next)
     if (!Number.isInteger(parsed) || parsed < 0) return
     if (parsed > availableCap) return
-    set_nomination_maximum(next)
+    set_nomination_maximum_bid(next)
   }
 
   const handle_click_nominate = () => {
@@ -139,7 +139,7 @@ export default function AuctionMainBid({
     // would be raised back up by the server and the manager charged a number
     // they had explicitly capped under.
     const maximum =
-      nomination_maximum === '' ? null : Number(nomination_maximum)
+      nomination_maximum_bid === '' ? null : Number(nomination_maximum_bid)
     if (maximum !== null && maximum < value) {
       showNotification({
         message: 'maximum must be at or above your opening bid',
@@ -148,8 +148,8 @@ export default function AuctionMainBid({
       return
     }
 
-    nominate(value, maximum)
-    set_nomination_maximum('')
+    nominate({ value, maximum_bid: maximum })
+    set_nomination_maximum_bid('')
   }
 
   // WHY this team cannot take the open player, as a button label and as a
@@ -271,12 +271,12 @@ export default function AuctionMainBid({
         {is_election_mode && (
           <input
             type='number'
-            className='auction__nominate-maximum'
+            className='auction__nominate-maximum-bid'
             placeholder='Max (optional)'
             min={value}
             max={availableCap}
-            value={nomination_maximum}
-            onChange={handle_nomination_maximum_change}
+            value={nomination_maximum_bid}
+            onChange={handle_nomination_maximum_bid_change}
           />
         )}
         <Button small disabled={!selected_pid} onClick={handle_click_nominate}>

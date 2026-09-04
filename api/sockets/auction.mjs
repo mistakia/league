@@ -687,6 +687,22 @@ export default class Auction {
     // way to discharge itself in the same action.
     const nomination_maximum_bid = this._election_mode ? maximum_bid : null
 
+    // Validated HERE rather than inside `_validate_nomination`, which returns
+    // true early for the commissioner, and against the DEFAULTED `value` rather
+    // than the raw field. Only a ceiling that will actually be written is
+    // checked, so a discarded live-mode one cannot refuse a valid nomination.
+    if (
+      nomination_maximum_bid !== null &&
+      !(await this._validate_nomination_maximum_bid({
+        maximum_bid: nomination_maximum_bid,
+        opening_bid: value,
+        nominating_team_id,
+        user_id
+      }))
+    ) {
+      return
+    }
+
     const bid = await this._create_nomination_bid({
       pid,
       nominating_team_id,
@@ -783,6 +799,61 @@ export default class Auction {
     return true
   }
 
+  /**
+   * The optional nomination ceiling, checked on its own.
+   *
+   * SEPARATE FROM `_validate_nomination`, and that is the whole point. That
+   * method returns TRUE EARLY for the commissioner -- twice, once for election
+   * mode and once for an expired nomination clock -- so a check living after
+   * those returns is skipped on the most ordinary path there is. It also reads
+   * `message.value` raw while `nominate` defaults it to 0 separately, so a frame
+   * that omits `value` compares every ceiling against `undefined` and every
+   * comparison is false.
+   *
+   * Both of those made a NEGATIVE ceiling reachable, which `submit_auction_election`
+   * refuses outright. Splitting the election upsert out of that verb moved the
+   * nomination path around its guard, so the guard is restated here rather than
+   * assumed.
+   *
+   * @param {object} params
+   * @param {number} params.maximum_bid - already known to be non-null
+   * @param {number} params.opening_bid - the DEFAULTED opening bid, never the raw field
+   */
+  async _validate_nomination_maximum_bid({
+    maximum_bid,
+    opening_bid,
+    nominating_team_id,
+    user_id
+  }) {
+    if (!Number.isInteger(maximum_bid) || maximum_bid < 0) {
+      this.reply(user_id, 'invalid maximum bid')
+      this.logger(`nomination maximum ${maximum_bid} is not a whole dollar`)
+      return false
+    }
+
+    // Refused BELOW the opening bid rather than quietly raised. The nomination
+    // binds the nominator to its opening bid regardless, so `build_auction_claims`
+    // would raise a lower ceiling back up and the manager would be charged a
+    // number they had explicitly capped under -- a silent disagreement with what
+    // they typed.
+    if (maximum_bid < opening_bid) {
+      this.reply(user_id, 'invalid maximum bid')
+      this.logger(
+        `nomination maximum ${maximum_bid} is below the opening bid ${opening_bid}`
+      )
+      return false
+    }
+
+    const roster = await getRoster({ tid: nominating_team_id })
+    const roster_obj = new Roster({ roster, league: this._league })
+    if (maximum_bid > roster_obj.availableCap) {
+      this.reply(user_id, 'exceeds salary limit')
+      return false
+    }
+
+    return true
+  }
+
   // `user_id` is the SOCKET-AUTHENTICATED identity: what the commissioner
   // checks compare against, and where every refusal below is sent. The message
   // carries no identity at all, so there is nothing here for a client to claim.
@@ -852,33 +923,6 @@ export default class Auction {
     if (message.value > roster_obj.availableCap) {
       this.reply(user_id, 'exceeds salary limit')
       return false
-    }
-
-    // THE OPTIONAL CEILING. Absent is the ordinary case and means "not stated"
-    // rather than a decline -- the nominator simply stays outstanding and may
-    // elect later. Only a ceiling that was actually stated is checked.
-    //
-    // It is refused BELOW the opening bid rather than quietly raised. The
-    // nomination binds the nominator to its opening bid regardless, so
-    // `build_auction_claims` would raise a lower ceiling back up and the
-    // manager would be charged a number they had explicitly capped under -- a
-    // silent disagreement with what they typed.
-    if (message.maximum_bid !== null && message.maximum_bid !== undefined) {
-      if (
-        !Number.isInteger(message.maximum_bid) ||
-        message.maximum_bid < message.value
-      ) {
-        this.reply(user_id, 'invalid maximum bid')
-        this.logger(
-          `nomination maximum ${message.maximum_bid} is not a whole dollar at or above the opening bid ${message.value}`
-        )
-        return false
-      }
-
-      if (message.maximum_bid > roster_obj.availableCap) {
-        this.reply(user_id, 'exceeds salary limit')
-        return false
-      }
     }
 
     return true
@@ -1007,9 +1051,20 @@ export default class Auction {
    * If the bid committed and the election did not, the player would open and
    * then wait on the very team that nominated it, with the manager believing
    * they had already stated a maximum -- a stall that looks like the auction
-   * ignoring them. Under the league's advisory lock for the same reason
-   * `submit_auction_election` takes it: the election write and any completeness
-   * check that follows have to serialize against a concurrent settlement.
+   * ignoring them.
+   *
+   * THE ADVISORY LOCK IS HELD FOR A DIFFERENT REASON THAN `submit_auction_election`
+   * HOLDS IT, and saying otherwise would be an invariant documented against the
+   * wrong mechanism. That verb holds it across its write AND the completeness
+   * check it then runs in the same transaction. This one CANNOT: the lock is
+   * `pg_advisory_xact_lock`, so it releases at COMMIT, and `_settle_if_complete`
+   * runs afterwards in a transaction of its own that re-acquires it.
+   *
+   * What the lock does here is protect a concurrent SETTLEMENT from this write.
+   * `get_active_auction_nomination` resolves the open player from the newest
+   * AUCTION_BID row, so a nomination landing mid-settlement could otherwise move
+   * the open player out from under a settlement already resolving the previous
+   * one.
    *
    * `maximum_bid` is OPTIONAL and null means "not stated", NOT a decline. A
    * nominator cannot decline the player it nominated, so there is no decline to
