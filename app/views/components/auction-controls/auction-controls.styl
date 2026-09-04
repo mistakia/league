@@ -11,19 +11,24 @@
   z-index 1
 
 // WHAT THE CHROME IS, for the pages that are not the auction. A DEFINITE
-// height rather than padding around the text: the two fallback constants have
-// to stay equal to the resting height of this box (see the note at the foot of
-// this file), and a row whose height is derived from its line-height makes that
-// arithmetic something the next reader has to redo.
+// height rather than padding around the text: the two fallback constants are
+// built from `$auctionLabelHeight` (see the note at the foot of this file), and
+// a row whose height is derived from its line-height makes that arithmetic
+// something the next reader has to redo. The row carries no bottom rule -- the
+// ground change is the separation -- so the row and the box are one number.
 .auction__controls-label
   display flex
   flex 0 0 auto
   align-items center
+  justify-content center
   gap 8px
-  height 24px
+  height $auctionLabelHeight
   padding 0 8px
-  border-bottom 1px solid $borderColor
-  font-size 11px
+  // The app's ground rather than the bar's white: this row is a caption on the
+  // chrome, and setting it back from the board beneath it is what keeps it from
+  // reading as the first line of the bid bar.
+  background $backgroundColor
+  font-size 9px
   text-transform uppercase
   letter-spacing 0.5px
   // The bar is chrome over someone else's page, so the label states itself
@@ -83,3 +88,21 @@
 @media (max-width 1159px)
   .auction__controls
     min-height $auctionHeightMobile
+
+// THE PHONE DROPS THE LABEL. A phone gives the bar the raw viewport and the bid
+// stepper is what a manager came for; a caption naming the chrome is the line
+// that can go. The breakpoint is the bar's own phone breakpoint -- the one
+// auction-main-bid.styl and auction-election-control.styl already share -- so
+// the label disappears exactly when the bar changes shape rather than at a
+// third width nobody can find.
+//
+// The floor comes down with it. `$auctionHeightMobile` covers everything below
+// 1160px and so has to include the label, which is right for a tablet and would
+// otherwise hold 21px of empty band open under a phone's chrome for as long as
+// the auction runs -- a permanent gap rather than a first-frame one, since this
+// is the element's own min-height and not just the page's reservation.
+@media (max-width 535px)
+  .auction__controls-label
+    display none
+  .auction__controls
+    min-height $auctionHeightMobile - $auctionLabelHeight

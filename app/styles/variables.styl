@@ -16,10 +16,14 @@ $menuWidth = 240px
 // this file. What follows is the history of why a constant could not hold, kept
 // because the next session to see a round number here will otherwise try to
 // tune it again.
-// 164 + 25 for the `Free Agency Auction` label row the chrome now opens with:
-// a 24px box and the 1px rule under it, both definite in
-// auction-controls.styl so this stays arithmetic rather than a measurement.
-$auctionHeightDesktop = 189px
+// THE `Free Agency Auction` LABEL ROW the chrome opens with. 28px around a 9px
+// caption, and no rule beneath it -- the row's ground is what separates it from
+// the bid bar. Both constants below add it, and
+// auction-controls.styl subtracts it back on a phone, where the label is
+// hidden -- so it is a variable rather than a number written in three places
+// that then have to be kept in agreement.
+$auctionLabelHeight = 28px
+$auctionHeightDesktop = 164px + $auctionLabelHeight
 // THE WHOLE AUCTION CHROME, not just the bid bar: the bar plus the team strip
 // beneath it. Four places derive from it and they must agree or the chrome and
 // the page disagree about where one ends -- `.auction__controls` height, the
@@ -61,8 +65,11 @@ $auctionHeightDesktop = 189px
 // league size or the next label makes a new maximum, and a static reservation
 // answers a growing box by clipping its last child in silence.
 //
-// 239 = that 214 plus the same 25px label row as the desktop constant above.
-$auctionHeightMobile = 239px
+// The label row is added here for the same reason as above, and this constant
+// covers every width below 1160 -- a tablet shows the label, a phone does not,
+// so it carries the maximum and auction-controls.styl takes it back off below
+// the phone breakpoint.
+$auctionHeightMobile = 214px + $auctionLabelHeight
 
 $successColor = green
 $yellowColor = #ff0
