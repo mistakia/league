@@ -769,12 +769,16 @@ observations:
     [testing] 2026-09-04 One /plays cold-load row count cannot decide the websocket send-queue race
     on the dev server: 78 rows read identically with queue_until_open on and off, and the race is
     load-dependent.
+  - >-
+    [gotcha] 2026-09-04 Two deploy:all runs of one sha leave a bundle-hash mismatch: builds are not
+    reproducible and deploy:dist --delete removes the first bundle, so a remembered hash reads as a
+    failed deploy.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-04T07:41:46.753Z'
+updated_at: '2026-09-04T08:13:42.875Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
