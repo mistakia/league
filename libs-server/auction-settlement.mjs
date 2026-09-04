@@ -559,29 +559,36 @@ const persist_auction_settlement = async ({
   // AND THE BUDGET ONLY FALLS. The other half of monotonicity, and the half a
   // roster count cannot see: a team whose remaining cap ROSE across a settlement
   // re-enters eligible sets it had left, and completeness once reached would
-  // stop staying reached. Read through `trx` for the same reason the count is --
-  // a check that reads outside the transaction it guards reports the state
-  // before the write.
-  const [team_after] = await trx('teams')
-    .where({ team_id: winner_tid, season_year })
-    .select('salary_cap')
-  // Read through `trx`, which the comment above already required and this call
-  // did not do -- `getRoster` read the module pool until it took a `db_client`.
+  // stop staying reached.
   //
-  // THAT WAS NOT SHOWN TO CHANGE THIS GUARD'S BEHAVIOR, and the honest statement
-  // is that nobody has made it fire. Three attempts failed to construct an input
-  // that trips it: raising `teams.salary_cap` does not reach `availableCap`
-  // (Roster derives it from `league.salary_cap` minus ACTIVE player salaries,
-  // never from the teams row), zeroing the winner's transaction salaries moves
-  // nothing on a fixture team holding no salaried actives, and the one thing
-  // that plainly would raise the cap -- releasing a player -- is caught first by
-  // the roster-count guard above.
+  // WHAT THIS GUARD CAN AND CANNOT SEE, since it was carrying an open question:
   //
-  // So this is threaded for the CONNECTION reason, which stands on its own, and
-  // its reachability is left an open question rather than asserted either way.
-  // Do not read the correction as a repair; if you can build the input, add it
-  // as a spec, and if it is genuinely unreachable this guard should say so
-  // instead of implying a case it cannot detect.
+  // It cannot fire on THIS transaction's own writes, and that is arithmetic
+  // rather than an observation about fixtures. `availableCap` is
+  // `league.salary_cap` minus the salaries of the ACTIVE roster, and between the
+  // two reads this function adds exactly one active player and touches no other
+  // team's row: `cap_after` is `cap_before` minus that player's charge, and the
+  // charge is `price` (or `price` plus the extension step before the deadline),
+  // which `resolve_auction_player` floors at the opening bid and so at zero. A
+  // non-negative charge cannot raise the cap. The three earlier attempts to trip
+  // it failed for that reason and not for want of a better fixture.
+  //
+  // It CAN fire on a write this transaction did not make. Reads here are READ
+  // COMMITTED, so a roster change on the winner's team that commits between the
+  // two reads becomes visible to the second one. Two shapes, and only one
+  // reaches here: a RELEASE removes a roster row and the count guard above
+  // catches it first, but a RESERVE OR PRACTICE-SQUAD DESIGNATION moves an
+  // active player to a non-active slot, leaving the row count identical while
+  // the active salary total falls. `submit-reserve.mjs` and
+  // `submit-deactivate.mjs` are the two writers, neither refuses during the free
+  // agency period, and neither calls
+  // `reevaluate_auction_after_roster_change` -- so this guard is the only thing
+  // in the settlement path that can see that class at all.
+  //
+  // Read through `trx` because of the above: a check that reads outside the
+  // transaction it guards reports the state before the write. `getRoster` read
+  // the module pool until it took a `db_client`, which made `cap_after` the
+  // pre-update cap.
   const cap_after = new Roster({
     roster: await getRoster({ tid: winner_tid, db_client: trx }),
     league
@@ -591,9 +598,31 @@ const persist_auction_settlement = async ({
       `auction settlement raised team ${winner_tid}'s available cap: $${cap_before} -> $${cap_after}`
     )
   }
-  if (team_after && team_after.salary_cap > cap_before) {
+
+  // THE CHARGE LANDED, ON THE ROW IT WAS AIMED AT. An EQUALITY, not an
+  // inequality, and the difference is the whole value of the check.
+  //
+  // This asked whether `teams.salary_cap` had RISEN above `cap_before`, which
+  // is a state that cannot occur: this transaction is the only writer of that
+  // column anywhere in `api/` or `libs-server/`, it had just set it to
+  // `cap_before - price` twenty lines above, and `price` is non-negative -- so
+  // the check restated its own input and could only ever pass. Worse, it was
+  // written `team_after && ...`, so the one failure that IS reachable took the
+  // false branch: an `update` matching NO row is not an error in knex, and the
+  // `select` behind it then returns nothing, so a settlement that never charged
+  // the winner committed clean and silent.
+  // A MISSING ROW FAILS THIS RATHER THAN SKIPPING IT. `team_after` is undefined
+  // when the update matched nothing, and undefined is not the expected charge,
+  // so absence and a wrong value take the same branch. That is deliberately one
+  // named state instead of two: "the charge is not what this function computed"
+  // is the thing worth refusing, and which way it went wrong is in the message.
+  const [team_after] = await trx('teams')
+    .where({ team_id: winner_tid, season_year })
+    .select('salary_cap')
+  const charged = team_after ? team_after.salary_cap : null
+  if (charged !== cap_before - price) {
     throw new Error(
-      `auction settlement raised team ${winner_tid}'s salary cap: $${cap_before} -> $${team_after.salary_cap}`
+      `auction settlement did not charge team ${winner_tid}: expected $${cap_before - price}, found ${charged === null ? 'no teams row' : `$${charged}`}`
     )
   }
 }
