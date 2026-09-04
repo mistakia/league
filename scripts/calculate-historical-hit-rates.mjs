@@ -63,8 +63,23 @@ const initialize_cli = () => {
 const log = debug('calculate-historical-hit-rates')
 enable_debug_namespaces('calculate-historical-hit-rates')
 
-const calculate_hit_rate = (hits, total) => {
-  return total > 0 ? hits / total : 0
+// A sample in which NOTHING could be graded has no hit rate. It is unknown, not
+// zero, and writing zero is the original defect in a new place: the stored rate
+// then reads "this prop has never once hit" on a market nobody ever graded.
+//
+// The six GAME_ALT_* types are what surfaced this. Their selections carry no
+// selection_metric_line at all, so determine_selection_result refuses on every
+// game in every sample, and a recompute that scored those refusals as misses
+// wrote 22,444 rows of exactly 0.0000 where the column had previously been NULL.
+//
+// A PARTIAL refusal still scores as a miss, per the ruling that a PUSH and an
+// ungradable game both count against the denominator. That ruling is about
+// individual GAMES inside a gradable sample; this is the different case of a
+// SELECTION that cannot be graded at all.
+export const calculate_hit_rate = ({ hits, total, ungradable }) => {
+  if (total === 0) return 0
+  if (ungradable === total) return null
+  return hits / total
 }
 
 // Grading routes through settlement's own derivation for every market type
@@ -104,7 +119,8 @@ const get_hits = ({
   selection_type
 }) => {
   if (is_player_gamelog_market(market_type)) {
-    return player_gamelogs.filter((player_gamelog) => {
+    let ungradable = 0
+    const hits = player_gamelogs.filter((player_gamelog) => {
       try {
         return (
           grade_player_gamelog_selection({
@@ -117,22 +133,28 @@ const get_hits = ({
         )
       } catch (error) {
         record_ungradable(market_type, error)
+        ungradable += 1
         return false
       }
     })
+
+    return { hits, ungradable }
   }
 
   const unsupported_market_types = new Set()
-  return player_gamelogs.filter((player_gamelog) =>
-    selection_result.is_hit({
-      line,
-      market_type,
-      player_gamelog,
-      strict,
-      selection_type,
-      unsupported_market_types
-    })
-  )
+  return {
+    hits: player_gamelogs.filter((player_gamelog) =>
+      selection_result.is_hit({
+        line,
+        market_type,
+        player_gamelog,
+        strict,
+        selection_type,
+        unsupported_market_types
+      })
+    ),
+    ungradable: 0
+  }
 }
 
 // The row this update must land on is identified by time_type as well. Both
@@ -514,24 +536,30 @@ const calculate_historical_hit_rates = async ({
           selection_type: selection.selection_type
         })
 
-        const hit_rate_soft = calculate_hit_rate(
-          hits_soft.length,
-          gamelogs.length
-        )
-        const hit_rate_hard = calculate_hit_rate(
-          hits_hard.length,
-          gamelogs.length
-        )
+        const hit_rate_soft = calculate_hit_rate({
+          hits: hits_soft.hits.length,
+          total: gamelogs.length,
+          ungradable: hits_soft.ungradable
+        })
+        const hit_rate_hard = calculate_hit_rate({
+          hits: hits_hard.hits.length,
+          total: gamelogs.length,
+          ungradable: hits_hard.ungradable
+        })
 
+        // An edge is a rate minus a price. With no rate there is no edge, and
+        // subtracting from null yields a confident negative number instead.
         return {
           hit_rate_soft,
           hit_rate_hard,
-          edge_soft: implied_probability
-            ? hit_rate_soft - implied_probability
-            : null,
-          edge_hard: implied_probability
-            ? hit_rate_hard - implied_probability
-            : null
+          edge_soft:
+            implied_probability && hit_rate_soft !== null
+              ? hit_rate_soft - implied_probability
+              : null,
+          edge_hard:
+            implied_probability && hit_rate_hard !== null
+              ? hit_rate_hard - implied_probability
+              : null
         }
       }
 
