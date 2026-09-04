@@ -68,12 +68,21 @@
   &:hover
     color rgba(0, 0, 0, 0.87)
 
-// The turn-over on expand comes from Icon's own `flipped` prop
-// (icon.styl's .icon--flipped), not from a rotate rule here -- every
-// disclosure control in the app shares that one.
-.data-view-empty-state__chevron
+    .data-view-empty-state__toggle-action
+      color rgba(0, 0, 0, 0.6)
+      text-decoration-color rgba(0, 0, 0, 0.6)
+
+// Set like the links at the foot of this block rather than like the label
+// beside it: this half is the ACTION, and it is the only word here that does
+// something when clicked.
+.data-view-empty-state__toggle-action
   flex-shrink 0
-  color rgba(0, 0, 0, 0.45)
+  color rgba(0, 0, 0, 0.42)
+  font-weight 400
+  text-decoration underline
+  text-decoration-color rgba(0, 0, 0, 0.2)
+  text-underline-offset 2px
+  transition color 120ms ease
 
 .data-view-empty-state__panel
   padding 2px 0 10px

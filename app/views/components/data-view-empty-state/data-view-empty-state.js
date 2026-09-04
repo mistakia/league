@@ -3,8 +3,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
-import Icon from '@components/icon'
-
 import './data-view-empty-state.styl'
 
 // Whether the quick start is expanded, remembered across visits. Read and
@@ -92,13 +90,15 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
           aria-expanded={is_quick_start_expanded}
           onClick={toggle_quick_start}
         >
+          {/* A WORD, NOT A CHEVRON. The sprite glyph was the only drawn mark on
+              a surface made of type and rules, and at 13px it read as a
+              scanning artifact rather than as a control. "Show" and "Hide" say
+              what the arrow was pointing at, and they say it in the face
+              everything around them is set in. */}
           <span>Quick start</span>
-          <Icon
-            className='data-view-empty-state__chevron'
-            name='down'
-            small
-            flipped={is_quick_start_expanded}
-          />
+          <span className='data-view-empty-state__toggle-action'>
+            {is_quick_start_expanded ? 'Hide' : 'Show'}
+          </span>
         </button>
         {is_quick_start_expanded && (
           <div className='data-view-empty-state__panel'>
