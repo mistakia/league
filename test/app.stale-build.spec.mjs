@@ -17,6 +17,12 @@ import {
   reset_stale_build_state,
   should_invite_reload
 } from '@core/stale-build'
+import {
+  IMMUTABLE_DIST_CACHE_CONTROL,
+  MUTABLE_DIST_ASSET,
+  MUTABLE_DIST_CACHE_CONTROL,
+  dist_cache_control
+} from '#libs-server/dist-cache-control.mjs'
 
 const expect = chai.expect
 const repo_root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -306,6 +312,60 @@ describe('stale build notice', function () {
       expect(RECHECK_DELAYS_MS).to.be.an('array')
       expect(RECHECK_DELAYS_MS.length).to.be.below(8)
       expect(Object.isFrozen(RECHECK_DELAYS_MS)).to.equal(true)
+    })
+  })
+
+  describe('the header the server sends for the manifest', function () {
+    it('does not claim the one MUTABLE file under dist is immutable', function () {
+      // `immutable` is not a cosmetic inaccuracy here -- browsers act on it.
+      // Measured against production: a repeated default fetch reported
+      // transferSize 0 and never touched the network.
+      const header = dist_cache_control(
+        `/root/league/dist/${MUTABLE_DIST_ASSET}`
+      )
+
+      expect(header).to.equal(MUTABLE_DIST_CACHE_CONTROL)
+      expect(header).to.not.include('immutable')
+      expect(header).to.include('must-revalidate')
+    })
+
+    it('still caches every content-hashed asset forever', function () {
+      // THE CONTROL. Relaxing the whole mount would satisfy the assertion above
+      // and throw away the caching that every hashed chunk depends on.
+      for (const asset of [
+        '/root/league/dist/main.7c6837e4.js',
+        '/root/league/dist/5453.9c112e32.chunk.js',
+        '/root/league/dist/main.a1b2c3d4.css'
+      ]) {
+        expect(dist_cache_control(asset)).to.equal(IMMUTABLE_DIST_CACHE_CONTROL)
+        expect(dist_cache_control(asset)).to.include('immutable')
+      }
+    })
+
+    it('keys on the BASENAME, not on a substring of the path', function () {
+      // A directory that merely contains the name must not flip the policy,
+      // and the real call site is handed an absolute path by express.static.
+      expect(dist_cache_control('/dist/build-manifest.json.map')).to.equal(
+        IMMUTABLE_DIST_CACHE_CONTROL
+      )
+      expect(dist_cache_control('/build-manifest.json/main.abc.js')).to.equal(
+        IMMUTABLE_DIST_CACHE_CONTROL
+      )
+    })
+
+    it('is what api/index.mjs actually applies to the mount', function () {
+      // The unit tests above prove the POLICY. This proves it is wired, since a
+      // correct helper nobody calls is the same as no fix at all.
+      const source = fs.readFileSync(
+        path.join(repo_root, 'api/index.mjs'),
+        'utf8'
+      )
+      expect(source).to.include("from '#libs-server/dist-cache-control.mjs'")
+      expect(source).to.include('dist_cache_control(file_path)')
+      // The old unconditional literal must be gone from the mount.
+      expect(source).to.not.include(
+        "res.set('Cache-Control', 'public, max-age=31536000, immutable')"
+      )
     })
   })
 

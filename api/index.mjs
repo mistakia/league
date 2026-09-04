@@ -23,6 +23,7 @@ import { install_websocket_heartbeat } from './sockets/websocket-heartbeat.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
 import { create_render_html_middleware } from '#libs-server/middleware/render-html.mjs'
+import { dist_cache_control } from '#libs-server/dist-cache-control.mjs'
 import {
   create_response_validation_middleware,
   is_response_validation_enabled
@@ -212,9 +213,12 @@ api.use(
   '/dist',
   express.static(path.join(__dirname, '../', 'dist'), {
     fallthrough: false,
-    setHeaders: (res, path) => {
-      // Set Cache-Control to cache forever
-      res.set('Cache-Control', 'public, max-age=31536000, immutable')
+    // Cache forever, EXCEPT for the one file here that is not content-hashed.
+    // The policy lives in libs-server so it can be asserted without a built
+    // bundle on disk — CI never runs `yarn build`. The parameter is
+    // deliberately not named `path`, which would shadow the imported module.
+    setHeaders: (res, file_path) => {
+      res.set('Cache-Control', dist_cache_control(file_path))
     }
   }),
   (err, req, res, next) => {
