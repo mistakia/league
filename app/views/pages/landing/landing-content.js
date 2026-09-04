@@ -161,7 +161,7 @@ export const landing_sections = [
         description: 'What it does today, and how to contribute.'
       },
       {
-        label: 'Built with agents',
+        label: 'Built with Base',
         href: base_url,
         description:
           'The platform is developed with agent sessions running on Base, the system that directs and records them.'
