@@ -184,7 +184,7 @@
     "prettier-plugin-sql": "^0.19.1",
     "query-string": "^9.1.1",
     "react": "18.3.1",
-    "react-agent-timeline": "mistakia/react-agent-timeline#495361fcba3fd1b075ea83ed8b098f43d1b08014",
+    "react-agent-timeline": "mistakia/react-agent-timeline#a60f358cf9fdf057908e60c1758653756c47b6df",
     "react-dom": "18.3.1",
     "react-hot-loader": "^4.13.1",
     "react-immutable-proptypes": "^2.2.0",
