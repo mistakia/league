@@ -4,6 +4,22 @@ import { roster_slot_types } from './roster-constants.mjs'
 
 export const fantasy_positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 
+// league_team_seasonlogs column for each position's starter points. The
+// 2026-08-16 position-code conformance (db/adhoc/2026-08-16-conform-position-code-tokens.sql)
+// moved these to full-word tokens, and concatenating from the short abbreviation
+// (as this list did until it broke the seasonlogs INSERT: `column
+// "starter_points_dst" ... does not exist` on the 2026-09-01/02 finalize runs)
+// points the writer at columns that no longer exist. Same shape and reason as
+// max_roster_league_columns in roster-constants.mjs.
+export const starter_points_league_columns = {
+  QB: 'starter_points_quarterback',
+  RB: 'starter_points_running_back',
+  WR: 'starter_points_wide_receiver',
+  TE: 'starter_points_tight_end',
+  K: 'starter_points_kicker',
+  DST: 'starter_points_defense_special_teams'
+}
+
 // These three lists are derived, not authored. libs-shared/scoring-columns.mjs
 // is the single source; adding a scoring metric there adds it here, to
 // SCORING_COLUMNS, and to the settings labels at once.
@@ -503,7 +519,7 @@ export const fantasy_team_stats = [
   'draft_order_index',
 
   ...Object.values(roster_slot_types).map((s) => `starter_slot_${s}_points`),
-  ...fantasy_positions.map((p) => `starter_points_${p.toLowerCase()}`)
+  ...Object.values(starter_points_league_columns)
 ]
 
 // Finish placements have no meaningful zero -- an unplayed season is "no

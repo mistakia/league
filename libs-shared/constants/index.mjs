@@ -42,7 +42,8 @@ export {
   create_empty_extended_stats,
   nfl_team_stats,
   fantasy_team_stats,
-  create_empty_fantasy_team_stats
+  create_empty_fantasy_team_stats,
+  starter_points_league_columns
 } from './stats-constants.mjs'
 
 // Player status constants

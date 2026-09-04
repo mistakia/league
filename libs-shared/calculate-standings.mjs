@@ -1,5 +1,9 @@
 import debug from 'debug'
-import { current_season, create_empty_fantasy_team_stats } from '#constants'
+import {
+  current_season,
+  create_empty_fantasy_team_stats,
+  starter_points_league_columns
+} from '#constants'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
 import get_playoff_seeding from './get-playoff-seeding.mjs'
@@ -88,8 +92,10 @@ const calculateStandings = ({
         if (starter_pids.includes(pid)) {
           const starter = startingPlayers.find((p) => p.pid === pid)
           total = points.total + total
-          teamStats[tid].stats[`starter_points_${pos.toLowerCase()}`] +=
-            points.total
+          const starter_points_col = starter_points_league_columns[pos]
+          if (starter_points_col) {
+            teamStats[tid].stats[starter_points_col] += points.total
+          }
           teamStats[tid].stats[`starter_slot_${starter.slot}_points`] +=
             points.total
         }

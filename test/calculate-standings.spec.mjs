@@ -1,11 +1,16 @@
 /* global describe before after it */
 
 import * as chai from 'chai'
+import { readFileSync } from 'fs'
 import MockDate from 'mockdate'
 import dayjs from 'dayjs'
 
 import { calculateStandings } from '#libs-shared'
 import season_dates from '#libs-shared/season-dates.mjs'
+import {
+  create_empty_fantasy_team_stats,
+  starter_points_league_columns
+} from '#constants'
 
 const expect = chai.expect
 
@@ -251,5 +256,37 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
     })
 
     expect(result[1].incomplete_optimal_lineup_weeks.has(1)).to.equal(true)
+  })
+})
+
+describe('seasonlogs starter_points columns', () => {
+  // Regression for the 2026-08-16 position-code conformance (db/adhoc/
+  // 2026-08-16-conform-position-code-tokens.sql): the seasonlogs INSERT broke
+  // with `column "starter_points_dst" ... does not exist` on the 2026-09-01/02
+  // finalize runs because the stats keys were still concatenated from the short
+  // position abbreviations. The keys must equal the long-token map AND exist in
+  // the schema of record -- either one alone drifts again.
+  const schema = readFileSync(
+    new URL('../db/schema.postgres.sql', import.meta.url),
+    'utf8'
+  )
+  const table_def = schema.slice(
+    schema.indexOf('CREATE TABLE public.league_team_seasonlogs'),
+    schema.indexOf(
+      ');',
+      schema.indexOf('CREATE TABLE public.league_team_seasonlogs')
+    )
+  )
+
+  it('seeds exactly the long-token starter_points columns the schema defines', () => {
+    const expected = Object.values(starter_points_league_columns).sort()
+    const seeded = Object.keys(create_empty_fantasy_team_stats()).filter((k) =>
+      k.startsWith('starter_points_')
+    )
+    expect(seeded.sort()).to.deep.equal(expected)
+    expect(seeded).not.to.include('starter_points_dst')
+    for (const col of seeded) {
+      expect(table_def).to.include(`\n    ${col} `)
+    }
   })
 })
