@@ -2,7 +2,10 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { inject_reducer } from '@core/store'
-import { getSelectedPlayer } from '@core/selectors'
+import {
+  getSelectedPlayer,
+  get_player_seasonlogs_for_selected_player
+} from '@core/selectors'
 import { plays_views_actions } from '@core/plays-view'
 import { selected_player_plays_request_reducer } from '@core/selected-player-plays-request/reducer'
 
@@ -15,9 +18,11 @@ inject_reducer(
 
 const map_state_to_props = createSelector(
   getSelectedPlayer,
+  get_player_seasonlogs_for_selected_player,
   (state) => state.get('selected_player_plays_request'),
-  (player_map, selected_player_plays_request) => ({
+  (player_map, player_seasonlogs, selected_player_plays_request) => ({
     player_map,
+    player_seasonlogs,
     selected_player_plays_request
   })
 )

@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import { List } from 'immutable'
 import Table from 'react-table/index.js'
 
 import plays_view_fields from '@core/plays-view-fields'
+import { current_season } from '#constants'
 
 import './selected-player-plays.styl'
 
@@ -59,45 +61,102 @@ const get_default_columns_for_position = (pos) => {
   }
 }
 
+// The plays view defaults its year to the last COMPLETED NFL season when the
+// request carries no play_year (see libs-server/plays-view/
+// get-plays-view-results.mjs), which is the right default for the plays page
+// and the wrong one here: a player whose last snap was two seasons ago gets an
+// empty table with nothing saying why. Seasonlogs are the player's own record
+// of which seasons they have stats in, and the parent drawer already loads
+// them for its header, so the newest one is free.
+const get_default_year = (player_seasonlogs) => {
+  const years = player_seasonlogs
+    .map((seasonlog) => Number(seasonlog.season_year))
+    .filter(Boolean)
+
+  return years.size ? years.max() : current_season.last_completed_season_year
+}
+
+const build_default_table_state = ({ pos, year }) => ({
+  columns: get_default_columns_for_position(pos),
+  prefix_columns: ['play_week', 'play_desc'],
+  where: [
+    {
+      column_id: 'play_year',
+      operator: '=',
+      value: String(year)
+    }
+  ],
+  sort: [
+    { column_id: 'play_week', desc: true },
+    { column_id: 'play_game_timestamp', desc: true },
+    { column_id: 'play_sequence', desc: false }
+  ]
+})
+
 export default function SelectedPlayerPlays({
   player_map,
+  player_seasonlogs = new List(),
   selected_player_plays_request,
   send_plays_request
 }) {
   const pid = player_map.get('pid')
   const pos = player_map.get('primary_position')
+  const pid_column = get_pid_column_for_position(pos)
 
-  const columns = useMemo(() => get_default_columns_for_position(pos), [pos])
-  const table_state = {
-    columns,
-    prefix_columns: ['play_desc'],
-    sort: [{ column_id: 'play_sequence', desc: true }],
-    where: []
-  }
+  const default_year = useMemo(
+    () => get_default_year(player_seasonlogs),
+    [player_seasonlogs]
+  )
+
+  const default_table_state = useMemo(
+    () => build_default_table_state({ pos, year: default_year }),
+    [pos, default_year]
+  )
+
+  const [table_state, set_table_state] = useState(default_table_state)
+
+  // Reset to the defaults whenever the player (or the season we resolved for
+  // them) changes. The drawer is reused across players, so a table state left
+  // over from the last one would carry that player's position columns and
+  // season filter into this one.
+  useEffect(() => {
+    set_table_state(default_table_state)
+  }, [pid, default_table_state])
 
   useEffect(() => {
     if (!pid) return
 
-    const pid_column = get_pid_column_for_position(pos)
+    // The pid filter is the identity of this table rather than a filter the
+    // user chose, so it is re-asserted on every request instead of living in
+    // table_state where the filter manager could drop it.
+    const where = [
+      ...(table_state.where || []).filter(
+        (item) => item.column_id !== pid_column
+      ),
+      {
+        column_id: pid_column,
+        operator: '=',
+        value: pid
+      }
+    ]
 
     send_plays_request({
-      columns,
-      prefix_columns: ['play_desc'],
-      where: [
-        {
-          column_id: pid_column,
-          operator: '=',
-          value: pid
-        }
-      ],
-      sort: [{ column_id: 'play_sequence', desc: true }],
+      columns: table_state.columns,
+      prefix_columns: table_state.prefix_columns,
+      where,
+      sort: table_state.sort,
       source: 'selected_player'
     })
-  }, [pid, pos, send_plays_request, columns])
+  }, [pid, pid_column, table_state, send_plays_request])
+
+  const on_view_change = useCallback((data_view) => {
+    set_table_state(data_view.table_state)
+  }, [])
 
   const plays = selected_player_plays_request.get('result').toJS()
   const status = selected_player_plays_request.get('status')
   const position = selected_player_plays_request.get('position')
+  const metadata = selected_player_plays_request.get('metadata')
 
   const is_loading = status === 'pending' || status === 'processing'
 
@@ -124,6 +183,14 @@ export default function SelectedPlayerPlays({
       )
     }
 
+    if (!is_loading && !plays.length) {
+      return (
+        <div className='selected-player-plays__status'>
+          No plays for the selected season
+        </div>
+      )
+    }
+
     return null
   }
 
@@ -137,12 +204,14 @@ export default function SelectedPlayerPlays({
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={plays}
+        metadata={metadata}
         table_state={table_state}
-        saved_table_state={table_state}
+        saved_table_state={default_table_state}
+        on_view_change={on_view_change}
         all_columns={plays_view_fields}
         is_loading={is_loading}
         total_rows_fetched={plays.length}
-        total_row_count={plays.length}
+        total_row_count={metadata?.total_count || plays.length}
         disable_rank_aggregation
         disable_edit_view
       />
@@ -152,6 +221,7 @@ export default function SelectedPlayerPlays({
 
 SelectedPlayerPlays.propTypes = {
   player_map: ImmutablePropTypes.map,
+  player_seasonlogs: ImmutablePropTypes.list,
   selected_player_plays_request: ImmutablePropTypes.map,
   send_plays_request: PropTypes.func
 }

@@ -1,3 +1,8 @@
+// Horizontal scroll only. Vertical scroll belongs to the drawer's tab panel
+// (.base-TabPanel-root in selected-player.styl), which is the bounded flex item
+// in that chain. The table's column and filter managers open as `fixed`
+// surfaces (react-table's use_expanding_control_anchor), so this container no
+// longer clips them.
 .selected-player-plays
   width 100%
   overflow-x auto
