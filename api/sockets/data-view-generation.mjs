@@ -11,7 +11,8 @@ import {
   LIVE_STATUSES
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
 import { assert_generation_admissible } from '#libs-server/data-views/generation/generation-limits.mjs'
-import { read_generation_progress } from '#libs-server/data-views/generation/generation-progress.mjs'
+import { read_generation_timeline } from '#libs-server/data-views/generation/generation-timeline-backfill.mjs'
+import { add_generation_timeline_listener } from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
 import { send_websocket_message } from './utils.mjs'
 
 const log = debug('data-view-generation-socket')
@@ -61,17 +62,16 @@ const get_watchers = (ws) => {
  * fields ARE included, because the cost of a run is something the user paid for
  * and should be able to see.
  *
- * `progress` is passed in rather than read here, because this function is pure
- * projection and its callers already differ on whether they have one: the
- * watcher reads it every tick, the ACCEPTED frame has nothing to report yet.
+ * WHAT A RUN IS DOING RIGHT NOW IS NOT ON THIS FRAME, and that is deliberate.
+ * It used to be, as a `{step_count, tool}` pair paraphrased into prose for the
+ * user; the agent's real session timeline replaced it outright and arrives on
+ * its own two frames. A projection carrying both would be two vocabularies for
+ * one question.
  *
  * @param {object} job
- * @param {object} [progress] - {step_count, tool} from generation-progress
  * @returns {object}
  */
-export const project_generation_job = (job, progress = null) => ({
-  progress_step_count: progress?.step_count ?? null,
-  progress_tool: progress?.tool ?? null,
+export const project_generation_job = (job) => ({
   generation_id: job.generation_id,
   status: job.status,
   instruction: job.instruction,
@@ -151,25 +151,103 @@ const send_error = (
   })
 
 /**
+ * Send the timeline backfill for a job, when it has a thread to read.
+ *
+ * EVERY ATTACH PATH RUNS THIS -- first load, refresh, socket reconnect, league
+ * API restart. League persists no timeline of its own, so there is one read
+ * path and no separate resume path that can rot.
+ *
+ * Between `queued` and `dispatched` there is no `thread_id` and therefore no
+ * timeline. That is every run's first seconds rather than an edge case, and it
+ * is a silent no-op: the control renders the status word alone until entries
+ * exist.
+ *
+ * @param {object} params
+ * @param {object} params.ws
+ * @param {object} params.job
+ * @param {(params: {thread_id: string}) => Promise<{entries: Array<object>,
+ *   timeline_window: object|null, is_redacted: boolean}>} [params.read_timeline]
+ *   - injected by the spec
+ * @returns {Promise<boolean>} whether a frame was sent
+ */
+export const send_timeline_backfill = async ({
+  ws,
+  job,
+  read_timeline = read_generation_timeline
+}) => {
+  if (!job.thread_id) return false
+  try {
+    const { entries, timeline_window, is_redacted } = await read_timeline({
+      thread_id: job.thread_id
+    })
+    send_websocket_message(ws, 'DATA_VIEW_GENERATION_TIMELINE_BACKFILL', {
+      generation_id: job.generation_id,
+      entries,
+      timeline_window,
+      is_redacted
+    })
+    return true
+  } catch (error) {
+    // A timeline league cannot read is a degraded panel, never a failed
+    // generation. The job's own status, result and trajectory all travel on the
+    // UPDATE frame and are unaffected.
+    log('timeline backfill failed for %s: %s', job.generation_id, error.message)
+    return false
+  }
+}
+
+/**
+ * Relay a generation's live timeline entries onto this socket.
+ *
+ * The browser cannot reach base, so league subscribes on its behalf (in the
+ * drainer, at the job's lifetime) and forwards here. Returns an unsubscribe the
+ * watcher calls when it stops.
+ *
+ * @param {object} params
+ * @param {object} params.ws
+ * @param {string} params.generation_id
+ * @param {(params: {generation_id: string, listener: (entry: object) => void})
+ *   => (() => void)} [params.add_listener] - injected by the spec
+ * @returns {() => void}
+ */
+export const relay_timeline_entries = ({
+  ws,
+  generation_id,
+  add_listener = add_generation_timeline_listener
+}) =>
+  add_listener({
+    generation_id,
+    listener: (entry) => {
+      if (ws.readyState !== 1) return
+      send_websocket_message(ws, 'DATA_VIEW_GENERATION_TIMELINE_ENTRY', {
+        generation_id,
+        entry
+      })
+    }
+  })
+
+/**
  * Poll one job until it reaches a terminal state, sending a frame whenever its
- * status or its PROGRESS changes, and one final frame.
+ * status changes, and one final frame.
  *
  * Frames on CHANGE rather than on every tick, because a run is minutes long and
  * a client does not need 300 identical `running` frames to learn that nothing
  * happened.
  *
- * PROGRESS IS THE SECOND CHANGE AXIS, and adding it is what makes the panel
- * move. Status alone reaches `running` within seconds and then never changes
- * again for up to fifteen minutes, so a client watching only that cannot tell a
- * run doing useful work from one wedged on a broken tool -- which is exactly
- * what happened on 2026-09-04. The step count is monotonic within a run, so
- * comparing it is enough and no timestamp needs to be trusted.
+ * STATUS IS THE ONLY AXIS HERE NOW, and that is not a regression. It used to
+ * need a second one, because status reaches `running` within seconds and then
+ * never moves again for up to fifteen minutes, so a client watching only status
+ * could not tell a working run from one wedged on a broken tool. The timeline
+ * answers that question directly and continuously, on its own frames, instead of
+ * through a step counter this poll had to diff.
+ *
+ * THE POLL REMAINS THE BACKSTOP. Terminal state and the audited trajectory
+ * arrive here and must never depend on a websocket to base staying up.
  *
  * @param {object} params
  * @param {object} params.ws
  * @param {string} params.generation_id
  * @param {(generation_id: string) => Promise<object|undefined>} [params.read_job]
- * @param {(params: object) => Promise<object|null>} [params.read_progress]
  * @param {number} [params.interval_ms]
  * @returns {Promise<void>}
  */
@@ -177,15 +255,15 @@ export const watch_generation_job = async ({
   ws,
   generation_id,
   read_job = get_generation_job,
-  read_progress = read_generation_progress,
   interval_ms = POLL_INTERVAL_MS
 }) => {
   const watchers = get_watchers(ws)
   const watcher = { stopped: false }
   watchers.set(generation_id, watcher)
 
+  const stop_relay = relay_timeline_entries({ ws, generation_id })
+
   let last_status = null
-  let last_step_count = null
   try {
     for (;;) {
       if (watcher.stopped || ws.readyState !== 1) return
@@ -203,17 +281,21 @@ export const watch_generation_job = async ({
         return
       }
 
-      const progress = await read_progress({ generation_id })
-      const step_count = progress?.step_count ?? null
-
-      if (job.status !== last_status || step_count !== last_step_count) {
+      if (job.status !== last_status) {
+        const had_thread = Boolean(last_status)
         last_status = job.status
-        last_step_count = step_count
         send_websocket_message(
           ws,
           'DATA_VIEW_GENERATION_UPDATE',
-          project_generation_job(job, progress)
+          project_generation_job(job)
         )
+        // The first status change that carries a thread_id is when a run's
+        // timeline becomes readable at all -- `queued` has none. Backfilling
+        // on that transition is what starts the panel without waiting for the
+        // next live entry, which on a slow first tool call is many seconds.
+        if (!had_thread && job.thread_id) {
+          await send_timeline_backfill({ ws, job })
+        }
       }
 
       if (!LIVE_STATUSES.includes(job.status)) return
@@ -221,6 +303,7 @@ export const watch_generation_job = async ({
       await new Promise((resolve) => setTimeout(resolve, interval_ms))
     }
   } finally {
+    stop_relay()
     watchers.delete(generation_id)
   }
 }
@@ -312,7 +395,8 @@ export const handle_generation_collect = async ({
   user_id,
   payload,
   read_job = get_generation_job,
-  watch = watch_generation_job
+  watch = watch_generation_job,
+  read_timeline = read_generation_timeline
 }) => {
   const admission = await require_generation_principal({ user_id })
   if (!admission.admitted) {
@@ -343,18 +427,21 @@ export const handle_generation_collect = async ({
     return null
   }
 
-  // With progress, so a client that reloaded mid-run sees which step it is on
-  // rather than waiting up to a poll interval for the watcher's first frame.
   send_websocket_message(
     ws,
     'DATA_VIEW_GENERATION_UPDATE',
-    project_generation_job(
-      job,
-      await read_generation_progress({ generation_id })
-    )
+    project_generation_job(job)
   )
 
-  // Still live: resume watching. Already finished: the frame above WAS the
+  // THE BACKFILL IS SENT FOR EVERY COLLECT, LIVE OR FINISHED, and the finished
+  // case is the one worth stating: a run that completed while the tab was
+  // closed has no watcher to start and no live entries left to send, so this
+  // read is the ONLY thing that puts its timeline on screen. It also covers the
+  // archived-thread read path, which is a different one inside base than the
+  // live read.
+  await send_timeline_backfill({ ws, job, read_timeline })
+
+  // Still live: resume watching. Already finished: the frames above WERE the
   // collect, which is the whole reconnect-and-collect contract.
   if (LIVE_STATUSES.includes(job.status)) {
     watch({ ws, generation_id }).catch((error) =>
@@ -383,7 +470,9 @@ export default {
   handle_generation_collect,
   handle_generation_request,
   project_generation_job,
+  relay_timeline_entries,
   require_generation_principal,
+  send_timeline_backfill,
   stop_generation_watchers,
   watch_generation_job
 }

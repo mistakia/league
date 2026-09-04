@@ -16,6 +16,7 @@ import {
   resolve_identity_key_path,
   BaseSessionError
 } from '#libs-server/data-views/generation/base-session-client.mjs'
+import { open_generation_timeline_feed } from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
 
 const log = debug('data-views:generation-drainer')
 
@@ -131,6 +132,23 @@ export const drain_once = async ({
   // agent had started for every job base then refused, and the refusal path
   // above returns the row to `queued` -- a row cannot be both.
   await mark_generation_job_running({ generation_id, thread_id })
+
+  // The live timeline feed is opened HERE, at the moment `thread_id` first
+  // exists, and it is owned by the job rather than by any browser connection.
+  // A feed opened by the socket instead would be torn down and re-established
+  // by every refresh, and the entries emitted in that window would be lost from
+  // the live tail. The feed is an optimization over the REST backfill, so a
+  // failure to open it must not fail the dispatch that just succeeded.
+  try {
+    open_generation_timeline_feed({ generation_id, thread_id })
+  } catch (error) {
+    log(
+      'could not open the timeline feed for %s: %s',
+      generation_id,
+      error.message
+    )
+  }
+
   return { drained: true, generation_id, outcome: 'running', thread_id }
 }
 

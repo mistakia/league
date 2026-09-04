@@ -77,13 +77,36 @@
   text-overflow ellipsis
   white-space nowrap
 
-.data-view-generation__progress
-  // Pushed to the end of the status row so the step reads as the trailing
-  // detail rather than competing with the status word on the left.
-  flex-shrink 0
-  margin-left auto
-  font-variant-numeric tabular-nums
-  opacity 0.85
+.data-view-generation__timeline
+  // COLLAPSED IS ONE ROW; EXPANDED IS A LIST, and the panel sits in a controls
+  // strip that must not grow with it. A fifteen-minute run can hold hundreds of
+  // entries, so the expanded region scrolls inside a bounded box rather than
+  // pushing the table down the page.
+  //
+  // The bound is on the CONTENT wrapper rather than on the package's own
+  // element: the component is presentational and owns no layout, which is what
+  // lets base and league frame it differently.
+  min-width 0
+  max-height 260px
+  overflow-y auto
+  border 1px solid $borderColor
+  border-radius 4px
+  padding 4px 6px
+
+  // Collapsed, the box is a single row and a scrollbar or a fixed height would
+  // both be wrong. :has is what lets the frame follow the component's own
+  // expansion state without league mirroring it into a second class.
+  &:not(:has(.rat-timeline-expanded))
+    max-height none
+    overflow-y visible
+
+.data-view-generation__timeline-redacted
+  // A masked timeline is structurally identical to a real one -- same entries,
+  // same types, same counts -- so without a word here a permission failure
+  // reads as an ordinary quiet run.
+  margin-bottom 4px
+  color rgb(95, 33, 32)
+  font-size 12px
 
 .data-view-generation__explanation,
 .data-view-generation__refusal

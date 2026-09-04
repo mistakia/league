@@ -12,6 +12,7 @@ import {
   handle_generation_request,
   handle_generation_collect,
   project_generation_job,
+  relay_timeline_entries,
   require_generation_principal,
   stop_generation_watchers,
   watch_generation_job
@@ -396,44 +397,193 @@ describe('data view generation socket', function () {
       ])
     })
 
-    it('frames on a PROGRESS change while the status stays running', async function () {
-      // The defect this covers: status reaches `running` in the first seconds
-      // and never moves again, so a watcher keyed on status alone goes silent
-      // for the rest of the run. The control paired with it is the previous
-      // test, which holds progress absent and still expects three frames — so
-      // one of the two must fail if the change axis is wrong.
-      const ws = fake_socket()
-      const steps = [null, 1, 1, 2, 3]
-      let call = 0
-      const read_job = async (generation_id) => ({
-        generation_id,
-        status: call < steps.length ? 'running' : 'completed',
+    it('carries NO progress paraphrase on the job frame any more', async function () {
+      // The retired mechanism, pinned as absent. It shipped a {step_count,
+      // tool} pair that the client rendered as invented prose; the agent's real
+      // timeline replaced it and a field nothing populates is worse than no
+      // field.
+      //
+      // Anchored on the projection's OWN KEYS rather than on a value, because
+      // `payload.progress_step_count` reads undefined both when the field is
+      // gone and when it is present and null.
+      const projected = project_generation_job({
+        generation_id: 'g1',
+        status: 'running',
         instruction: 'x',
         queued_at: new Date(),
         deadline_at: new Date()
       })
-      const read_progress = async () => {
-        const step_count = steps[Math.min(call++, steps.length - 1)]
-        return step_count ? { step_count, tool: `tool_${step_count}` } : null
-      }
+      expect(Object.keys(projected)).to.not.include('progress_step_count')
+      expect(Object.keys(projected)).to.not.include('progress_tool')
+    })
 
-      await watch_generation_job({
+    it('sends a timeline BACKFILL on collect, carrying entry content', async function () {
+      // The load-bearing assertion is on CONTENT, not on shape. base's REST
+      // read fails by MASKING: a denied read returns 200 with the same entry
+      // count, the same types, the same ordering and the same content lengths.
+      // Asserting `entries.length > 0` would pass against a fully masked
+      // timeline.
+      const ws = fake_socket()
+      const job = await enqueue_generation_job({
+        instruction: 'timeline backfill',
+        user_id: GENERATION_USER_ID
+      })
+      await db('data_view_generation_jobs')
+        .where({ generation_id: job.generation_id })
+        .update({ thread_id: 'thread-backfill', status: 'running' })
+
+      await handle_generation_collect({
         ws,
-        generation_id: 'g1',
-        read_job,
-        read_progress,
-        interval_ms: 1
+        user_id: 1,
+        payload: { generation_id: job.generation_id },
+        watch: async () => {},
+        read_timeline: async ({ thread_id }) => ({
+          entries: [
+            {
+              id: 'e1',
+              type: 'tool_call',
+              content: `searched columns for ${thread_id}`,
+              ordering: { timeline_index: 0, timeline_epoch: 1 }
+            }
+          ],
+          timeline_window: { epoch: 1 },
+          is_redacted: false
+        })
       })
 
-      const updates = ws.frames_of('DATA_VIEW_GENERATION_UPDATE')
-      // The repeated 1 sends no frame; every distinct step does. The trailing
-      // 3 is the terminal frame, which the status change sends while progress
-      // stands still — the two axes are independent and either one is enough.
+      const [backfill] = ws.frames_of('DATA_VIEW_GENERATION_TIMELINE_BACKFILL')
+      expect(backfill, 'no backfill frame was sent').to.exist
+      expect(backfill.payload.generation_id).to.equal(job.generation_id)
+      expect(backfill.payload.entries[0].content).to.equal(
+        'searched columns for thread-backfill'
+      )
+      expect(backfill.payload.is_redacted).to.equal(false)
+    })
+
+    it('sends NO backfill for a job that has no thread yet', async function () {
+      // Every run's first seconds, between `queued` and `dispatched`. A read
+      // issued here would be a request for a thread that does not exist.
+      const ws = fake_socket()
+      const job = await enqueue_generation_job({
+        instruction: 'not dispatched',
+        user_id: GENERATION_USER_ID
+      })
+
+      let read_calls = 0
+      await handle_generation_collect({
+        ws,
+        user_id: 1,
+        payload: { generation_id: job.generation_id },
+        watch: async () => {},
+        read_timeline: async () => {
+          read_calls += 1
+          return { entries: [], timeline_window: null, is_redacted: false }
+        }
+      })
+
+      expect(read_calls).to.equal(0)
       expect(
-        updates.map((frame) => frame.payload.progress_step_count)
-      ).to.deep.equal([null, 1, 2, 3, 3])
-      expect(updates[1].payload.progress_tool).to.equal('tool_1')
-      expect(updates[1].payload.status).to.equal('running')
+        ws.frames_of('DATA_VIEW_GENERATION_TIMELINE_BACKFILL')
+      ).to.have.length(0)
+    })
+
+    it('marks a MASKED backfill as redacted rather than as content', async function () {
+      // The redaction hazard, and the reason it needs its own frame field: a
+      // masked timeline is structurally identical to a real one, so nothing
+      // else on the wire distinguishes a permission failure from a quiet run.
+      const ws = fake_socket()
+      const job = await enqueue_generation_job({
+        instruction: 'masked',
+        user_id: GENERATION_USER_ID
+      })
+      await db('data_view_generation_jobs')
+        .where({ generation_id: job.generation_id })
+        .update({ thread_id: 'thread-masked', status: 'running' })
+
+      await handle_generation_collect({
+        ws,
+        user_id: 1,
+        payload: { generation_id: job.generation_id },
+        watch: async () => {},
+        read_timeline: async () => ({
+          entries: [
+            {
+              id: 'e1',
+              type: 'tool_call',
+              content: '████████',
+              is_redacted: true,
+              ordering: { timeline_index: 0 }
+            }
+          ],
+          timeline_window: null,
+          is_redacted: true
+        })
+      })
+
+      const [backfill] = ws.frames_of('DATA_VIEW_GENERATION_TIMELINE_BACKFILL')
+      expect(backfill.payload.is_redacted).to.equal(true)
+      expect(backfill.payload.entries[0].is_redacted).to.equal(true)
+    })
+
+    it('does not fail a collect when the timeline cannot be read', async function () {
+      // A timeline league cannot read is a degraded panel, never a failed
+      // generation: status, result and trajectory all travel on the UPDATE
+      // frame and are unaffected.
+      const ws = fake_socket()
+      const job = await enqueue_generation_job({
+        instruction: 'unreadable timeline',
+        user_id: GENERATION_USER_ID
+      })
+      await db('data_view_generation_jobs')
+        .where({ generation_id: job.generation_id })
+        .update({ thread_id: 'thread-broken', status: 'running' })
+
+      const collected = await handle_generation_collect({
+        ws,
+        user_id: 1,
+        payload: { generation_id: job.generation_id },
+        watch: async () => {},
+        read_timeline: async () => {
+          throw new Error('base refused a timeline read with 500')
+        }
+      })
+
+      expect(collected).to.exist
+      expect(ws.frames_of('DATA_VIEW_GENERATION_UPDATE')).to.have.length(1)
+      expect(
+        ws.frames_of('DATA_VIEW_GENERATION_TIMELINE_BACKFILL')
+      ).to.have.length(0)
+    })
+
+    it('relays a live timeline ENTRY onto the socket', async function () {
+      const ws = fake_socket()
+      let emit = null
+      const stop = relay_timeline_entries({
+        ws,
+        generation_id: 'g-live',
+        add_listener: ({ listener }) => {
+          emit = listener
+          return () => {
+            emit = null
+          }
+        }
+      })
+
+      emit({
+        id: 'e9',
+        type: 'tool_result',
+        content: 'ran the query',
+        ordering: { timeline_index: 4 }
+      })
+
+      const [frame] = ws.frames_of('DATA_VIEW_GENERATION_TIMELINE_ENTRY')
+      expect(frame.payload.generation_id).to.equal('g-live')
+      expect(frame.payload.entry.content).to.equal('ran the query')
+
+      // The unsubscribe must actually detach, or a closed browser socket keeps
+      // receiving entries for the rest of the run.
+      stop()
+      expect(emit).to.equal(null)
     })
 
     it('names a vanished row rather than polling an empty result forever', async function () {

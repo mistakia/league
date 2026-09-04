@@ -31,7 +31,6 @@
 // is the signal; the last stderr line is the reason.
 
 import { assert_sandbox_credentials } from '#config'
-import { report_progress } from '#libs-server/data-views/generation/report-progress.mjs'
 
 export class AgentToolError extends Error {
   constructor(code, message) {
@@ -178,13 +177,12 @@ export const read_tool_input = async ({ input_keys } = {}) => {
 export const run_agent_tool = async ({ tool, input_keys, run }) => {
   try {
     const input = await read_tool_input({ input_keys })
-    // BEFORE the work, not after, because the point of it is to name what the
-    // user is currently waiting on. Reported after a slow tool it would say
-    // "previewing" at the moment previewing finished. It is inside the try but
-    // cannot throw (see report-progress.mjs) and its result is deliberately
-    // unread: a beacon that could refuse a tool call would be a new way for
-    // generation to fail in exchange for a status line.
-    await report_progress({ tool })
+    // NO PROGRESS BEACON HERE ANY MORE. This used to POST a {thread_id, tool}
+    // pair to league before every tool call, to drive a paraphrased status
+    // line. Base already records every tool call on the session's own timeline,
+    // which league now reads directly -- so the beacon was a second, lossier
+    // account of something already written down, and the container is one fewer
+    // network call from being able to fail.
     const result = await run(input)
     process.stdout.write(`${JSON.stringify({ tool, ...result }, null, 2)}\n`)
     process.exit(0)

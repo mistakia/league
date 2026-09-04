@@ -14,6 +14,7 @@ import {
   kill_generation_session,
   BaseSessionError
 } from '#libs-server/data-views/generation/base-session-client.mjs'
+import { close_generation_timeline_feed } from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
 
 const log = debug('data-views:generation-collector')
 
@@ -217,6 +218,15 @@ export const collect_job = async ({
   //
   // Stamped whether or not base obliged, because a refusal retried every 5
   // seconds for an hour is its own runaway.
+  if (!LIVE_STATUSES.includes(job.status)) {
+    // The live feed dies with the run, on the SAME condition as the session
+    // teardown but outside its claim guard. The teardown is claimed so exactly
+    // one drainer fires the kill; closing a local socket has no such
+    // contention, and gating it on the claim would leave the feed open forever
+    // on every pass that lost the race.
+    close_generation_timeline_feed({ generation_id: job.generation_id })
+  }
+
   if (
     !LIVE_STATUSES.includes(job.status) &&
     !job.session_termination_requested_at

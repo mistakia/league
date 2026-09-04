@@ -1,9 +1,10 @@
 // Client actions for agentic data view generation.
 //
-// THREE OF THESE ARE SERVER FRAMES, NOT ACTION CREATORS. The websocket service
+// FIVE OF THESE ARE SERVER FRAMES, NOT ACTION CREATORS. The websocket service
 // dispatches every inbound message straight into the store as an action
 // (`store.dispatch(message)` in app/core/ws/service.js), so
-// DATA_VIEW_GENERATION_ACCEPTED, _UPDATE and _ERROR arrive already shaped as
+// DATA_VIEW_GENERATION_ACCEPTED, _UPDATE, _ERROR, _TIMELINE_BACKFILL and
+// _TIMELINE_ENTRY arrive already shaped as
 // `{type, payload}` and need only a reducer case. They are named here so the
 // reducer switches on a constant rather than on a string literal, and so the
 // wire vocabulary is readable in one place beside the two the client sends.
@@ -17,6 +18,14 @@ export const data_view_generation_actions = {
   DATA_VIEW_GENERATION_ACCEPTED: 'DATA_VIEW_GENERATION_ACCEPTED',
   DATA_VIEW_GENERATION_UPDATE: 'DATA_VIEW_GENERATION_UPDATE',
   DATA_VIEW_GENERATION_ERROR: 'DATA_VIEW_GENERATION_ERROR',
+  // The agent's session timeline, in two frames. The BACKFILL is a window the
+  // server read from base and is sent on every attach; the ENTRY is one live
+  // event relayed as base emits it. They overlap by construction -- an attach
+  // races a tail already in flight -- and the reducer de-duplicates on
+  // ordering.timeline_index rather than trusting arrival order.
+  DATA_VIEW_GENERATION_TIMELINE_BACKFILL:
+    'DATA_VIEW_GENERATION_TIMELINE_BACKFILL',
+  DATA_VIEW_GENERATION_TIMELINE_ENTRY: 'DATA_VIEW_GENERATION_TIMELINE_ENTRY',
 
   // --- client triggers (outbound) ---
   DATA_VIEW_GENERATION_SUBMIT: 'DATA_VIEW_GENERATION_SUBMIT',

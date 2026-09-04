@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
+import AgentSessionTimeline from 'react-agent-timeline'
 
 import './data-view-generation-control.styl'
 
@@ -21,35 +22,19 @@ const STATUS_LABEL = {
 
 const LIVE_STATUSES = ['submitting', 'queued', 'dispatched', 'running']
 
-// What each agent tool is doing, in the user's terms rather than the tool's.
+// Every word the shared timeline component renders comes from here. The package
+// is presentational and deliberately ships no domain vocabulary of its own, so
+// a label it does not receive is a label that does not exist.
 //
-// The tool names are the contract between league and the agent and are not
-// written for a reader — `describe_column` and `validate_table_state` name
-// internals a user has no model of. An unmapped tool falls back to nothing
-// rather than to its raw name, so adding a seventh tool degrades to the plain
-// status word instead of leaking a symbol into the panel.
-const TOOL_LABEL = {
-  search_columns: 'Searching for the right stats',
-  describe_column: 'Checking how that stat is measured',
-  validate_table_state: 'Checking the view is valid',
-  preview_view: 'Previewing the results',
-  run_sql: 'Running a custom query',
-  emit: 'Finishing up'
-}
-
-/**
- * The live line under the status word: which step, and what it is doing.
- *
- * Returns '' when there is no progress to show, which is the ordinary state for
- * the first few seconds of a run and for any run whose Redis progress key has
- * expired. The caller renders nothing rather than an empty step.
- */
-const describe_progress = ({ progress_step_count, progress_tool }) => {
-  if (!progress_step_count) return ''
-  const label = TOOL_LABEL[progress_tool]
-  return label
-    ? `Step ${progress_step_count} · ${label}`
-    : `Step ${progress_step_count}`
+// THIS IS NOT THE OLD TOOL PARAPHRASE COMING BACK. What was removed mapped six
+// TOOL NAMES onto invented prose and showed only that — `describe_column`
+// became "Checking how that stat is measured", which is a guess about what the
+// agent meant rather than a record of what it did. These are chrome around the
+// agent's own words.
+const TIMELINE_LABELS = {
+  empty: 'Waiting for the agent to start',
+  expand: 'Show the full run',
+  collapse: 'Show less'
 }
 
 /**
@@ -95,6 +80,10 @@ export default function DataViewGenerationControl({
 }) {
   const [instruction, set_instruction] = useState('')
   const [is_open, set_is_open] = useState(false)
+  // Collapsed by default. Expansion is the USER's state and deliberately not
+  // reset when entries arrive -- a timeline that re-collapsed itself on every
+  // live entry would be unreadable for exactly the run worth reading.
+  const [is_timeline_expanded, set_is_timeline_expanded] = useState(false)
 
   // Re-attach to a run this browser started before a reload. Runs once: the
   // stored id is read at mount and the server answers with an UPDATE frame that
@@ -120,6 +109,11 @@ export default function DataViewGenerationControl({
 
   const status = generation.status
   const is_live = LIVE_STATUSES.includes(status)
+  // The store holds this as an Immutable List that index.js converts with
+  // toJS(), so it is a plain array here. Defaulted because a run that has not
+  // reached `dispatched` has no thread and therefore no timeline at all --
+  // every run's first seconds, not an edge case.
+  const timeline_entries = generation.timeline_entries ?? []
 
   const on_submit = (event) => {
     event.preventDefault()
@@ -189,11 +183,6 @@ export default function DataViewGenerationControl({
               {generation.instruction}
             </span>
           )}
-          {is_live && describe_progress(generation) && (
-            <span className='data-view-generation__progress'>
-              {describe_progress(generation)}
-            </span>
-          )}
           {generation.tool_call_count !== null && (
             <span className='data-view-generation__trajectory'>
               {generation.tool_call_count} tool calls
@@ -202,6 +191,28 @@ export default function DataViewGenerationControl({
                 : ''}
             </span>
           )}
+        </div>
+      )}
+
+      {/* THE AGENT'S OWN TIMELINE, not a paraphrase of it. Rendered whenever
+          there is anything to show — including for a FINISHED run, so a user
+          who returns to a completed generation can still read how it got
+          there. */}
+      {timeline_entries.length > 0 && (
+        <div className='data-view-generation__timeline'>
+          {generation.timeline_is_redacted && (
+            <div className='data-view-generation__timeline-redacted'>
+              This run&apos;s timeline could not be read in full.
+            </div>
+          )}
+          <AgentSessionTimeline
+            entries={timeline_entries}
+            labels={TIMELINE_LABELS}
+            is_expanded={is_timeline_expanded}
+            on_toggle_expanded={() =>
+              set_is_timeline_expanded(!is_timeline_expanded)
+            }
+          />
         </div>
       )}
 

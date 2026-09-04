@@ -6,7 +6,7 @@ import { data_view_generation_actions } from '@core/data-view-generation/actions
 
 const expect = chai.expect
 
-// Three of this reducer's five cases are SERVER FRAMES, dispatched into the
+// Five of this reducer's seven cases are SERVER FRAMES, dispatched into the
 // store verbatim by the websocket service. So the spec drives them as the wire
 // shapes api/sockets/data-view-generation.mjs actually sends
 // (project_generation_job, plus queue_depth on ACCEPTED and error_code/message
@@ -25,6 +25,23 @@ const update = (payload) => ({
 const error = (payload) => ({
   type: data_view_generation_actions.DATA_VIEW_GENERATION_ERROR,
   payload
+})
+const backfill = (payload) => ({
+  type: data_view_generation_actions.DATA_VIEW_GENERATION_TIMELINE_BACKFILL,
+  payload
+})
+const timeline_entry = (payload) => ({
+  type: data_view_generation_actions.DATA_VIEW_GENERATION_TIMELINE_ENTRY,
+  payload
+})
+
+// An entry in the shape base actually emits: content plus the dense ordering
+// key the reducer sorts and de-duplicates on.
+const entry_at = (index, content) => ({
+  id: `e${index}`,
+  type: 'tool_call',
+  content,
+  ordering: { timeline_index: index, timeline_epoch: 1 }
 })
 
 describe('data view generation reducer', function () {
@@ -184,5 +201,144 @@ describe('data view generation reducer', function () {
     )
     expect(state.get('generation_id')).to.equal(null)
     expect(state.get('status')).to.equal(null)
+  })
+
+  describe('the agent session timeline', function () {
+    const with_run = (generation_id) =>
+      data_view_generation_reducer(
+        undefined,
+        accepted({ generation_id, status: 'running' })
+      )
+
+    it('holds backfilled entries with their CONTENT', function () {
+      let state = with_run('gen-t1')
+      state = data_view_generation_reducer(
+        state,
+        backfill({
+          generation_id: 'gen-t1',
+          entries: [entry_at(0, 'searched columns')],
+          timeline_window: { epoch: 1 },
+          is_redacted: false
+        })
+      )
+      // On CONTENT, not on length. A masked timeline has the same entry count
+      // as a real one, so a count assertion passes against a redacted read.
+      expect(state.getIn(['timeline_entries', 0, 'content'])).to.equal(
+        'searched columns'
+      )
+      expect(state.get('timeline_is_redacted')).to.equal(false)
+    })
+
+    it('DE-DUPLICATES a backfill that overlaps a live tail', function () {
+      // The defect this covers: an attach issues a backfill while entries are
+      // already arriving live, so the same timeline_index arrives twice. Taking
+      // arrival order would render the overlap twice.
+      let state = with_run('gen-t2')
+      state = data_view_generation_reducer(
+        state,
+        backfill({
+          generation_id: 'gen-t2',
+          entries: [entry_at(0, 'first'), entry_at(1, 'second')],
+          timeline_window: { epoch: 1 },
+          is_redacted: false
+        })
+      )
+      state = data_view_generation_reducer(
+        state,
+        timeline_entry({
+          generation_id: 'gen-t2',
+          entry: entry_at(1, 'second')
+        })
+      )
+      state = data_view_generation_reducer(
+        state,
+        timeline_entry({ generation_id: 'gen-t2', entry: entry_at(2, 'third') })
+      )
+
+      expect(
+        state
+          .get('timeline_entries')
+          .map((e) => e.getIn(['ordering', 'timeline_index']))
+          .toJS()
+      ).to.deep.equal([0, 1, 2])
+    })
+
+    it('ORDERS by timeline_index, not by arrival', function () {
+      // An in-order fixture cannot distinguish the two rules and would pass
+      // against either, so this one arrives deliberately scrambled.
+      let state = with_run('gen-t3')
+      state = data_view_generation_reducer(
+        state,
+        timeline_entry({ generation_id: 'gen-t3', entry: entry_at(2, 'third') })
+      )
+      state = data_view_generation_reducer(
+        state,
+        timeline_entry({ generation_id: 'gen-t3', entry: entry_at(0, 'first') })
+      )
+      state = data_view_generation_reducer(
+        state,
+        timeline_entry({
+          generation_id: 'gen-t3',
+          entry: entry_at(1, 'second')
+        })
+      )
+
+      expect(
+        state
+          .get('timeline_entries')
+          .map((e) => e.get('content'))
+          .toJS()
+      ).to.deep.equal(['first', 'second', 'third'])
+    })
+
+    it('IGNORES a frame for a different run', function () {
+      // Guarded exactly as UPDATE is: a watcher still relaying the previous
+      // generation would otherwise put its timeline over the new run's.
+      let state = with_run('gen-t4')
+      state = data_view_generation_reducer(
+        state,
+        backfill({
+          generation_id: 'gen-OTHER',
+          entries: [entry_at(0, 'not ours')],
+          timeline_window: null,
+          is_redacted: false
+        })
+      )
+      expect(state.get('timeline_entries').size).to.equal(0)
+    })
+
+    it('carries a MASKED backfill through as redacted', function () {
+      let state = with_run('gen-t5')
+      state = data_view_generation_reducer(
+        state,
+        backfill({
+          generation_id: 'gen-t5',
+          entries: [
+            { ...entry_at(0, '\u2588\u2588\u2588'), is_redacted: true }
+          ],
+          timeline_window: null,
+          is_redacted: true
+        })
+      )
+      expect(state.get('timeline_is_redacted')).to.equal(true)
+    })
+
+    it('clears the timeline on dismiss', function () {
+      let state = with_run('gen-t6')
+      state = data_view_generation_reducer(
+        state,
+        backfill({
+          generation_id: 'gen-t6',
+          entries: [entry_at(0, 'searched columns')],
+          timeline_window: null,
+          is_redacted: false
+        })
+      )
+      state = data_view_generation_reducer(
+        state,
+        data_view_generation_actions.dismiss_data_view_generation()
+      )
+      expect(state.get('timeline_entries').size).to.equal(0)
+    })
   })
 })
