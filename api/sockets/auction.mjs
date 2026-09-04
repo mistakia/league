@@ -427,7 +427,14 @@ export default class Auction {
         const player_info = await this._validate_player(bid, trx)
         if (!player_info) return { refused: true }
 
-        const roster = await getRoster({ tid })
+        // THROUGH `trx`, because this runs under the league advisory lock.
+        // `getRoster` issues several queries, so on the module pool the lock
+        // holder asks for a connection the teams queued on its lock are already
+        // holding -- the same deadlock the settlement path had, needing one
+        // connection here rather than N. It was closed in
+        // `libs-server/auction-settlement.mjs` and left open here, which is the
+        // instance-not-class miss this subsystem keeps producing.
+        const roster = await getRoster({ tid, db_client: trx })
         const roster_obj = new Roster({ roster, league: this._league })
 
         if (

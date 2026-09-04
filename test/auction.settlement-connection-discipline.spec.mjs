@@ -152,21 +152,35 @@ describe('auction settlement acquires no connection under the league lock', func
   // The whole discrimination. A settlement that never leaves its own connection
   // finishes in well under a second here; one that reaches for the pool cannot
   // get a connection at all and sits until knex's default 60s
-  // `acquireConnectionTimeout`. Ten seconds separates those two by an order of
-  // magnitude in both directions, so this is a verdict rather than a race.
-  const within_ten_seconds = async (promise, label) => {
+  // `acquireConnectionTimeout`.
+  //
+  // THE BUDGET IS 25s RATHER THAN THE OBVIOUS 10s, because 10s flaked. Observed
+  // twice in a row on a host running several suites at once, then passing
+  // immediately afterwards on a quiet one -- these cases hold the entire pool
+  // open, so they are the most load-sensitive thing in the file. 25s still sits
+  // far above a healthy sub-second run and far below the 60s knex timeout a
+  // genuine deadlock waits out, so it keeps the verdict while removing the race.
+  // The elapsed time is reported either way, because a failure at ~25s under
+  // load and a failure at ~25s from a real deadlock are the same assertion and
+  // the reader needs to be able to tell them apart.
+  const SETTLE_BUDGET_MS = 25 * 1000
+  const within_budget = async (promise, label) => {
+    const started = Date.now()
     let timer
     const deadline = new Promise((_resolve, reject) => {
       timer = setTimeout(
         () =>
           reject(
             new Error(
-              `${label}: still blocked after 10s with the pool empty, which is ` +
-                'the deadlock this fix removes -- the settlement asked for a ' +
-                'connection while holding the league lock'
+              `${label}: still blocked after ${Date.now() - started}ms with the ` +
+                'pool empty. Either the settlement asked for a connection while ' +
+                'holding the league lock, which is the deadlock this fix ' +
+                'removes, or this host is loaded enough that a healthy ' +
+                'sub-second settlement missed the budget -- re-run on a quiet ' +
+                'host before concluding the former'
             )
           ),
-        10 * 1000
+        SETTLE_BUDGET_MS
       )
     })
     try {
@@ -197,7 +211,7 @@ describe('auction settlement acquires no connection under the league lock', func
       // blocks outright.
       for (let i = 0; i < pool_max() - 1; i++) await hold_one_connection()
 
-      const { settlement } = await within_ten_seconds(
+      const { settlement } = await within_budget(
         settle_auction_player_if_complete({
           lid: league_id,
           season_year,
@@ -243,7 +257,7 @@ describe('auction settlement acquires no connection under the league lock', func
     // one connection rather than the N the roster reads needed.
     for (let i = 0; i < pool_max() - 1; i++) await hold_one_connection()
 
-    const { settlement } = await within_ten_seconds(
+    const { settlement } = await within_budget(
       // No `league` and no `trx`: the settlement resolves and opens both.
       settle_auction_player_if_complete({ lid: league_id, season_year }),
       'settlement resolving its own league under a drained pool'
@@ -285,10 +299,29 @@ describe('auction settlement acquires no connection under the league lock', func
     }
 
     it('issues no query on the module pool', function () {
-      // Anchored on the query CALL FORM `db(` rather than the bare token, so
-      // the `db_client = db` defaults and the import do not read as violations.
-      // The leading class excludes `db_client(`, `trx.db(` and similar.
-      const pool_queries = locked_region_source().match(/[^_.\w]db\(/g) || []
+      // Anchored on the query CALL FORM rather than the bare token, so the
+      // `db_client = db` defaults and the import do not read as violations.
+      //
+      // TWO FORMS, because one pattern could not see the second and said so
+      // confidently. `[^_.\w]db\(` excludes anything preceded by a dot BY
+      // CONSTRUCTION -- which is what keeps `trx.db(` out, and which also made
+      // it blind to `db.raw(`, the exact call form this module uses for the
+      // advisory lock itself. An injected `await db.raw('SELECT 1')` inside the
+      // locked region left all three ratchet cases green.
+      //
+      // ONE EXEMPTION, and it is exact rather than a hole in the pattern.
+      // `db.transaction(run)` is the call that ACQUIRES the single connection
+      // the whole region then runs on -- it is necessarily on the module pool,
+      // because there is no transaction yet to run it on. It sits inside the
+      // anchors because the region spans `run` through the end of
+      // `persist_auction_settlement`. Exempted as a literal so that any OTHER
+      // `db.transaction(` under the lock, which would be a second transaction
+      // opened while holding the first, still trips this.
+      const region = locked_region_source().replace('db.transaction(run)', '')
+      const pool_queries = [
+        ...(region.match(/[^_.\w]db\(/g) || []),
+        ...(region.match(/[^_.\w]db\.(raw|transaction|select|from)\(/g) || [])
+      ]
 
       expect(
         pool_queries,
@@ -311,10 +344,19 @@ describe('auction settlement acquires no connection under the league lock', func
         'get_active_auction_nomination'
       ]
 
+      // MATCHED TO THE CLOSING PAREN, NOT TO A FLAT OBJECT LITERAL.
+      // `\\(\\{[^}]*\\}\\)` requires the argument to be one brace-delimited
+      // literal with no nested brace, so `getRoster(roster_args)` and
+      // `getRoster({ tid, opts: { a: 1 } })` both slipped past it entirely --
+      // injected into the locked region, all three ratchet cases stayed green.
+      // Taking everything up to the first `)` that ends the line is coarser and
+      // cannot miss an argument shape.
       const unthreaded = []
+      let matched_calls = 0
       for (const helper of client_taking_helpers) {
         const calls =
-          region.match(new RegExp(`\\b${helper}\\(\\{[^}]*\\}\\)`, 'g')) || []
+          region.match(new RegExp(`\\b${helper}\\([^;]*?\\)`, 'gs')) || []
+        matched_calls += calls.length
         for (const call of calls) {
           if (!call.includes('db_client') && !call.includes('trx')) {
             unthreaded.push(call)
@@ -322,10 +364,106 @@ describe('auction settlement acquires no connection under the league lock', func
         }
       }
 
+      // THE STALENESS FLOOR, which the file this replaced carried and this one
+      // dropped. A rename or a refactor that stops any of these names appearing
+      // makes the loop above iterate over nothing and report a confident pass;
+      // the deleted spec guarded exactly that and the omission was not
+      // deliberate. Note it does NOT require every enumerated helper to be
+      // present -- `getLeague` is correctly absent from the locked region since
+      // it was hoisted out -- only that the enumeration as a whole still finds
+      // the calls it is scanning.
+      expect(
+        matched_calls,
+        'no enumerated helper matched anywhere in the locked region; the ' +
+          'patterns have gone stale and this check is certifying nothing'
+      ).to.be.greaterThan(0)
+
       expect(
         unthreaded,
         'a database helper called under the lock without the lock holder’s ' +
           'own client reads the shared pool and can deadlock against its waiters'
+      ).to.deep.equal([])
+    })
+
+    // THE SOCKET HOLDS THE SAME LOCK, and scoping this file to
+    // `auction-settlement.mjs` is how a live instance of the very defect it
+    // guards survived a full review of it.
+    //
+    // `sold()` in `api/sockets/auction.mjs` takes `lock_auction_for_league` and
+    // then called `getRoster({ tid })` with no client -- a module-pool
+    // acquisition while holding the league lock, the identical shape closed in
+    // the settlement module and left open here. It needs one connection rather
+    // than N, so it is likelier to survive than the settlement case was, but the
+    // failure is the same one. Found only because a reviewer's unrelated finding
+    // sent me into this function.
+    //
+    // Enumerated from the LOCK rather than from a file list, so a third locked
+    // region added anywhere in these two modules is covered without an edit
+    // here.
+    it('threads a client through every locked region in the socket too', function () {
+      const source = fs.readFileSync(
+        path.join(repo_root, 'api/sockets/auction.mjs'),
+        'utf8'
+      )
+
+      // EACH TRANSACTION CALLBACK, BRACE-MATCHED. A first attempt bounded the
+      // region at the NEXT `db.transaction(`, which for the last lock in the
+      // file means everything to the end of it -- so it swept up five unrelated
+      // reads from `_auto_nominate`, `_calculate_eligible_teams` and
+      // `_calculate_team_capacities`, none of which hold any lock. An
+      // over-scanning ratchet is not harmless: five false positives teach the
+      // next reader to widen the exemption list until the check means nothing.
+      //
+      // The matcher is naive about braces inside strings and template literals.
+      // That is acceptable here because a miscount can only END the region
+      // early, which under-scans and is caught by the floor below rather than
+      // producing a false accusation.
+      const transaction_bodies = []
+      for (const match of source.matchAll(/db\.transaction\(/g)) {
+        const open = source.indexOf('{', match.index)
+        if (open === -1) continue
+        let depth = 0
+        let close = open
+        for (let i = open; i < source.length; i++) {
+          if (source[i] === '{') depth++
+          else if (source[i] === '}') {
+            depth--
+            if (depth === 0) {
+              close = i
+              break
+            }
+          }
+        }
+        transaction_bodies.push(source.slice(open, close))
+      }
+
+      const locked_regions = transaction_bodies.filter((body) =>
+        body.includes('lock_auction_for_league')
+      )
+
+      expect(
+        locked_regions.length,
+        'the socket no longer takes the league lock inside any transaction; ' +
+          'this check cannot locate what it guards and is certifying nothing'
+      ).to.be.greaterThan(0)
+
+      const unthreaded = []
+      for (const region of locked_regions) {
+        for (const helper of ['getRoster', 'getLeague']) {
+          const calls =
+            region.match(new RegExp(`\\b${helper}\\([^;]*?\\)`, 'gs')) || []
+          for (const call of calls) {
+            if (!call.includes('db_client') && !call.includes('trx')) {
+              unthreaded.push(call)
+            }
+          }
+        }
+      }
+
+      expect(
+        unthreaded,
+        'a roster or league read under the socket’s league lock must use the ' +
+          'lock holder’s own client, for the same reason the settlement path does'
       ).to.deep.equal([])
     })
 
@@ -343,7 +481,23 @@ describe('auction settlement acquires no connection under the league lock', func
       // The mixed-client hazard, which is worse than either client alone: a
       // roster assembled from BOTH the transaction and the pool would combine a
       // pre-write player list with post-write salaries.
-      const body = source.slice(source.indexOf('export default async function'))
+      //
+      // THE ANCHOR IS CHECKED BEFORE IT IS USED, because `indexOf` returns -1 on
+      // a miss and `slice(-1)` is the LAST CHARACTER of the file rather than an
+      // error. Converting this export to a `const get_roster = async (...) =>`
+      // form, which is an ordinary refactor, made the scan run over one
+      // character and return a confident empty list -- with a real
+      // `db('rosters')` injected alongside it and the case still green. The
+      // sibling anchors above already guard this way; the omission here was an
+      // inconsistency, not a judgement.
+      const body_start = source.indexOf('export default async function')
+      expect(
+        body_start,
+        'getRoster no longer opens with `export default async function`; this ' +
+          'scan cannot locate the body and is vacuous until re-anchored'
+      ).to.be.greaterThan(-1)
+
+      const body = source.slice(body_start)
       const pool_queries = body.match(/[^_.\w]db\(/g) || []
       expect(
         pool_queries,

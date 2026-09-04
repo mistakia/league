@@ -11,6 +11,8 @@ import {
 } from '#libs-server/auction-settlement.mjs'
 import { get_auction_settlement_status } from '#libs-server/auction-elections.mjs'
 import getLeague from '#libs-server/get-league.mjs'
+import getRoster from '#libs-server/get-roster.mjs'
+import { Roster, get_auction_team_capacity } from '#libs-shared'
 import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 import { selectPlayer } from './utils/index.mjs'
 
@@ -169,6 +171,13 @@ describe('an election that cannot improve its own claim discharges', function ()
     // whose cap equals the price falls out of the eligible set. That also
     // settles the live case and it silently removes a team whose election is
     // the only thing that could put it in contention.
+    //
+    // THIS CASE ALONE DOES NOT CONTROL THAT, and saying it did was the file's
+    // own overclaim. Every fixture here hand-injects `{ is_eligible: true }`,
+    // so none of them calls `get_auction_team_capacity` and none can see a
+    // change to its `>=`. Mutating that operator to `>` left this whole spec
+    // green, including the case named for it. The real control lives in the
+    // DB-backed block below, which drives the predicate itself.
     it('keeps a team at exactly the price that has NOT bid', function () {
       const outstanding = get_outstanding_election_team_ids({
         capacities: capacities_with_cap([[4, 1]]),
@@ -335,6 +344,62 @@ describe('an election that cannot improve its own claim discharges', function ()
         lid: league_id
       })
       expect(settlement, 'so the player must not settle').to.equal(null)
+    })
+
+    // THE CONTROL FOR REJECTED ALTERNATIVE TWO, driving the real predicate
+    // instead of a fixture that asserts its answer.
+    //
+    // Every case in `the rule itself` hand-injects `{ is_eligible: true }`, so
+    // none of them calls `get_auction_team_capacity` and none can see a change
+    // to the `>=` in its `has_cap_space`. Mutating that operator to `>` left
+    // this whole spec green including the case named for it, which is a control
+    // that certifies nothing. This one reddens under that mutation and nothing
+    // else here does.
+    //
+    // The `>=` is the deliberate bit: a team holding EXACTLY the price can
+    // still win at it under the tiebreak, so tightening it drops that team out
+    // of the eligible set entirely -- a worse thing than the discharge this
+    // file is about, because the team stops being asked at all rather than
+    // being found to have nothing to add.
+    it('reports a team whose cap is exactly the price as still eligible', async function () {
+      this.timeout(60 * 1000)
+      const league_row = await getLeague({ lid: league_id })
+      const tids = await all_team_ids()
+      const roster = new Roster({
+        roster: await getRoster({ tid: tids[0] }),
+        league: league_row
+      })
+
+      const capacity = get_auction_team_capacity({
+        roster,
+        player_position: 'RB',
+        // The team's entire remaining budget IS the price. `>=` admits it, `>`
+        // does not, and admitting it is what leaves its election able to decide
+        // the player.
+        current_price: roster.availableCap
+      })
+
+      expect(
+        roster.availableCap,
+        'the fixture must leave a cap above zero, or >= and > agree and this ' +
+          'control cannot discriminate'
+      ).to.be.above(0)
+      expect(
+        capacity.has_cap_space,
+        'a team holding exactly the price can still win at it under the tiebreak'
+      ).to.equal(true)
+      expect(capacity.is_eligible).to.equal(true)
+
+      // The paired reading. One dollar above its cap and the same team is out,
+      // which is what makes the assertion above about the boundary rather than
+      // about the predicate being permissive.
+      const above = get_auction_team_capacity({
+        roster,
+        player_position: 'RB',
+        current_price: roster.availableCap + 1
+      })
+      expect(above.has_cap_space).to.equal(false)
+      expect(above.is_eligible).to.equal(false)
     })
   })
 })

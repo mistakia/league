@@ -24,23 +24,44 @@ import knex from '#db'
  * @param {() => Promise<any>} run
  * @returns {Promise<{result: any, reads: number[]}>} reads in issue order
  */
+const ROSTER_READ = /from "rosters" where "tid" = /
+
+/**
+ * Start recording, and hand back the stopper.
+ *
+ * The form a spec wants when the reads span lifecycle hooks rather than one
+ * awaited block — a `beforeEach` starts it, an `afterEach` stops it. Both forms
+ * exist because both are needed and a second copy of the pattern is how the
+ * regex above ends up with two versions, one of which is wrong.
+ *
+ * @param {(tid: number) => void} on_read
+ * @returns {() => void} stop, safe to call more than once
+ */
+export const record_roster_reads = (on_read) => {
+  const record = (query) => {
+    if (ROSTER_READ.test(query.sql)) on_read(Number(query.bindings[0]))
+  }
+  knex.on('query', record)
+
+  let stopped = false
+  return () => {
+    if (stopped) return
+    stopped = true
+    knex.removeListener('query', record)
+  }
+}
+
 export const count_roster_reads = async (run) => {
   const reads = []
-  const record = (query) => {
-    if (/from "rosters" where "tid" = /.test(query.sql)) {
-      reads.push(Number(query.bindings[0]))
-    }
-  }
-
-  knex.on('query', record)
+  // REMOVED IN A `finally`. A listener left attached outlives the spec and
+  // keeps appending to an array nobody reads, which turns a later assertion
+  // about read counts into an unexplained inflated number.
+  const stop = record_roster_reads((tid) => reads.push(tid))
   try {
     const result = await run()
     return { result, reads }
   } finally {
-    // REMOVED IN A `finally`. A listener left attached outlives the spec and
-    // keeps appending to an array nobody reads, which turns a later assertion
-    // about read counts into an unexplained inflated number.
-    knex.removeListener('query', record)
+    stop()
   }
 }
 

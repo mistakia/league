@@ -12,6 +12,7 @@ import {
 } from '#libs-server/auction-elections.mjs'
 import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 import { selectPlayer } from './utils/index.mjs'
+import { record_roster_reads } from './utils/count-roster-reads.mjs'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
@@ -37,22 +38,7 @@ const season_year = current_season.year
 // settlement outcome is only the control beside it.
 describe('auction settlement reads only the capacities it consumes', function () {
   let observed_roster_reads = []
-
-  const record_query = (query) => {
-    // `getRoster` opens with `select * from "rosters" where "tid" = $1 ...`, so
-    // the tid is the first binding. Matched on the FROM clause and the tid
-    // predicate TOGETHER, because a bare `rosters` substring also matches every
-    // `rosters_players` query, whose first binding is not a tid at all -- and
-    // because an earlier attempt at this anchored on `from "rosters"` with a
-    // trailing word boundary, which can never match after a closing quote and
-    // reported a confident zero read for every team.
-    //
-    // Every read is pushed rather than a set being built, so a team read TWICE
-    // is visible rather than collapsed.
-    if (/from "rosters" where "tid" = /.test(query.sql)) {
-      observed_roster_reads.push(Number(query.bindings[0]))
-    }
-  }
+  let stop_recording = () => {}
 
   before(async function () {
     this.timeout(60 * 1000)
@@ -81,11 +67,13 @@ describe('auction settlement reads only the capacities it consumes', function ()
       .update({ player_salary: 0 })
 
     observed_roster_reads = []
-    knex.on('query', record_query)
+    stop_recording = record_roster_reads((tid) =>
+      observed_roster_reads.push(tid)
+    )
   })
 
   afterEach(function () {
-    knex.removeListener('query', record_query)
+    stop_recording()
     MockDate.reset()
   })
 

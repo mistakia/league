@@ -739,10 +739,17 @@ const persist_auction_settlement = async ({
   // inequality, and the difference is the whole value of the check.
   //
   // This asked whether `teams.salary_cap` had RISEN above `cap_before`, which
-  // is a state that cannot occur: this transaction is the only writer of that
-  // column anywhere in `api/` or `libs-server/`, it had just set it to
-  // `cap_before - price` twenty lines above, and `price` is non-negative -- so
-  // the check restated its own input and could only ever pass. Worse, it was
+  // is a state that cannot occur: this transaction had just set the column to
+  // `cap_before - price` twenty lines above and `price` is non-negative, so the
+  // check restated its own input and could only ever pass.
+  //
+  // AND NOTHING ELSE CAN MOVE IT UNDERNEATH US, but the reason is the LOCK, not
+  // sole authorship. An earlier version of this comment claimed this transaction
+  // was the only writer of the column anywhere in `api/` or `libs-server/`; that
+  // is false. `_update_team_capacity` in `api/sockets/auction.mjs` writes it too,
+  // from `sold()`. What makes the read safe is that `sold()` takes the same
+  // per-league advisory lock this settlement holds, so the two serialize and
+  // neither can commit inside the other's window. Worse, it was
   // written `team_after && ...`, so the one failure that IS reachable took the
   // false branch: an `update` matching NO row is not an error in knex, and the
   // `select` behind it then returns nothing, so a settlement that never charged
