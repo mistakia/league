@@ -91,6 +91,32 @@
  *     `observed_at` and the reducer renames it to `timestamp` before anything
  *     reads it. Those surface as findings and are settled in the adjudications
  *     file, which is the right place for them -- the reason names the reducer.
+ *   - A route that RESHAPES its rows in JS clears a name the same way, and
+ *     `collect_alias_backs` cannot see it: that function matches knex aliases
+ *     and `select_as`, so a producer that selects a column under its physical
+ *     name and then renames it while building the response object reads as
+ *     unaliased. `GET /players/:pid/markets` does exactly this -- it selects
+ *     `observed_at` and `season_year`, then emits `timestamp:` and `year:` --
+ *     so `timestamp` is the wire key there and the physical names never reach
+ *     the client at all.
+ *
+ *     THIS BLIND SPOT HAS ALREADY COST A REGRESSION, which is why it is worth
+ *     more than a bullet. Resolving a site means finding the route that feeds
+ *     THAT COMPONENT, and a route whose name matches the table is a decoy: on
+ *     2026-09-04, `3b3b25fce` repointed four reads in selected-player-markets
+ *     onto `observed_at`/`season_year` after reading `api/routes/markets.mjs`,
+ *     which does send `prop_markets_index.*` verbatim but feeds nothing in the
+ *     SPA. Every repointed read became undefined and the chart lost its x
+ *     axis. Trace the saga and `app/core/api/service.js` URL to the route, and
+ *     read what the handler EMITS rather than what it selects.
+ *
+ *   - The ALIAS-AMBIGUOUS tier was walked by hand on 2026-09-04 -- all of it,
+ *     283 sites across 11 names. Five stale reads came out of it and are fixed;
+ *     the per-name verdicts for everything left standing are in the message of
+ *     the commit that repointed them (`git log db/gates/`). The tier still
+ *     prints in full on every run because the gate genuinely cannot judge it,
+ *     so a reader seeing that wall should check that message before re-deriving
+ *     it. Sites added after that date are of course unreviewed.
  *
  * ACCEPTANCE TEST -- run as a PAIR, because a red proves nothing until the
  * unperturbed case is shown to be green. Verified 2026-09-04:
