@@ -163,16 +163,24 @@ describe('auction settlement acquires no connection under the league lock', func
   // The elapsed time is reported either way, because a failure at ~25s under
   // load and a failure at ~25s from a real deadlock are the same assertion and
   // the reader needs to be able to tell them apart.
+  //
+  // MEASURED WITH `performance.now()`, NOT `Date.now()`. `MockDate.set` in this
+  // file's `before()` freezes `Date.now` for the whole block, so an elapsed
+  // figure computed from it is ALWAYS 0 -- the first version of this message
+  // reported "still blocked after 0ms", which is worse than reporting nothing
+  // because it reads as a measurement. MockDate does not touch `performance.now`
+  // or `setTimeout`, so the timer still fires on real time and the figure is
+  // real.
   const SETTLE_BUDGET_MS = 25 * 1000
   const within_budget = async (promise, label) => {
-    const started = Date.now()
+    const started = performance.now()
     let timer
     const deadline = new Promise((_resolve, reject) => {
       timer = setTimeout(
         () =>
           reject(
             new Error(
-              `${label}: still blocked after ${Date.now() - started}ms with the ` +
+              `${label}: still blocked after ${Math.round(performance.now() - started)}ms with the ` +
                 'pool empty. Either the settlement asked for a connection while ' +
                 'holding the league lock, which is the deadlock this fix ' +
                 'removes, or this host is loaded enough that a healthy ' +
@@ -295,7 +303,34 @@ describe('auction settlement acquires no connection under the league lock', func
       ).to.be.greaterThan(-1)
       expect(end, 'the end anchor has gone stale').to.be.greaterThan(start)
 
-      return source.slice(start, end)
+      const region = source.slice(start, end)
+
+      // POSITIVE CONTAINMENT, because the two guards above assert only that the
+      // anchors were FOUND. The region holds the settlement write path purely
+      // because `persist_auction_settlement` happens to sit textually between
+      // them: move that function below the sweep export -- a pure code move with
+      // no behavior change -- and the whole write path leaves the scanned span
+      // while both guards still pass and every case here goes green. Measured,
+      // with a `db('teams')` injected into the moved function to prove the scan
+      // had stopped seeing it.
+      //
+      // So name something only that function contains. A sentinel is cruder than
+      // parsing and is the right trade for a ratchet: it fails loudly on the
+      // reorder rather than certifying a region that no longer holds what it
+      // says.
+      expect(
+        region,
+        'the locked region no longer contains the settlement write path; the ' +
+          'anchors still resolve but they now span the wrong code, so every ' +
+          'check below is scanning something other than what it names'
+      ).to.include('persist_auction_settlement')
+      expect(
+        region,
+        'the locked region no longer reaches the cap charge, which is the last ' +
+          'write it must cover'
+      ).to.include("update('salary_cap'")
+
+      return region
     }
 
     it('issues no query on the module pool', function () {

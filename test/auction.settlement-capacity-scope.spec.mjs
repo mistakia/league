@@ -33,9 +33,16 @@ const season_year = current_season.year
 // COUNTED, NOT REASONED. The saving above was argued from the source before it
 // was ever measured, so these cases watch the actual `rosters` queries knex
 // issues and assert WHICH TEAMS were read. A claim about work not done is
-// invisible to an outcome assertion: every case here would still pass with the
-// narrowing reverted, which is why the read set is the assertion and the
-// settlement outcome is only the control beside it.
+// invisible to an OUTCOME assertion -- every settlement result here is identical
+// with the narrowing reverted -- which is why the read set is the assertion and
+// the settlement outcome is only the control beside it.
+//
+// Only ONE case is a control for the narrowing itself: `skips a team that
+// declined and holds no bid`, which asserts read-set EQUALITY. The other three
+// assert `.to.include(...)`, which a wider scope still satisfies, so they guard
+// the correctness traps rather than the saving. An earlier version of this
+// header said every case would survive the revert, which reads as though the
+// equality case is not a control when it is the only one that is.
 describe('auction settlement reads only the capacities it consumes', function () {
   let observed_roster_reads = []
   let stop_recording = () => {}

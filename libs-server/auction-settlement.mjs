@@ -586,10 +586,18 @@ const persist_auction_settlement = async ({
   const roster_before = new Roster({ roster: roster_row, league })
   const cap_before = roster_before.availableCap
 
-  // Counted through `trx`, not through `getRoster`. getRoster reads the module
-  // connection, so it cannot see this transaction's own uncommitted insert --
-  // an invariant check that reads outside the transaction it is guarding always
-  // reports the state before the write and is therefore worthless.
+  // COUNTED RAW, NOT THROUGH `getRoster`, and the reason is the JOIN rather than
+  // the connection. This comment used to say `getRoster` reads the module
+  // connection and cannot see this transaction's uncommitted insert; that
+  // stopped being true when `getRoster` took a `db_client`, and the call four
+  // lines above passes `trx`.
+  //
+  // The real reason outlives that one. `getRoster` INNER-joins its player list
+  // against the salary-in-force transaction (`get-roster.mjs` says so outright:
+  // a player with no team transaction is dropped), so `roster.players.length` is
+  // not a count of `rosters_players` rows and never was. Simplifying this to
+  // `roster_before.players.length` would silently weaken the guard to "one more
+  // player that happens to have a salary", which is a different claim.
   const count_roster_rows = async () => {
     const [row] = await trx('rosters_players')
       .where({ roster_id: roster_row.roster_id })
@@ -667,6 +675,24 @@ const persist_auction_settlement = async ({
     occurred_at
   })
 
+  // OUTCOMES ARE WRITTEN ONTO ELECTIONS, SO A WINNER THAT NEVER ELECTED GETS
+  // NONE -- and since the inert-claim discharge, that is reachable.
+  //
+  // A team whose placed bid already reached its cap is discharged without
+  // electing, and it can then WIN on that binding bid. `resolve_auction_player`
+  // computes `WON` for it and this loop has no row to write it to, so the
+  // election table records nothing about that sale. Before the discharge every
+  // eligible team had elected by the time anything settled, so every contender
+  // had a row and the question never came up.
+  //
+  // LEFT THAT WAY DELIBERATELY. The alternative is inserting an
+  // `auction_elections` row for a team that never submitted one, and in a sealed
+  // second-price league that means fabricating a maximum the manager never
+  // stated -- a far worse thing than a silent ledger. `auction_elections` is a
+  // record of ELECTIONS and their outcomes, not of sales; the sale itself is the
+  // AUCTION_PROCESSED row and the roster row, both written above. Nothing reads
+  // this column to find winners -- `is_winning_auction_election_outcome` only
+  // labels a row a caller already holds.
   const settled_at = occurred_at
   for (const election of elections) {
     const outcome = outcomes.get(election.tid)
@@ -743,13 +769,21 @@ const persist_auction_settlement = async ({
   // `cap_before - price` twenty lines above and `price` is non-negative, so the
   // check restated its own input and could only ever pass.
   //
-  // AND NOTHING ELSE CAN MOVE IT UNDERNEATH US, but the reason is the LOCK, not
-  // sole authorship. An earlier version of this comment claimed this transaction
-  // was the only writer of the column anywhere in `api/` or `libs-server/`; that
-  // is false. `_update_team_capacity` in `api/sockets/auction.mjs` writes it too,
-  // from `sold()`. What makes the read safe is that `sold()` takes the same
-  // per-league advisory lock this settlement holds, so the two serialize and
-  // neither can commit inside the other's window. Worse, it was
+  // AND NOTHING ELSE CAN MOVE IT UNDERNEATH US, but the reason is the ROW LOCK
+  // this UPDATE already took, not sole authorship. An earlier version of this
+  // comment claimed this transaction was the only writer of the column anywhere
+  // in `api/` or `libs-server/`; that is false -- `_update_team_capacity` in
+  // `api/sockets/auction.mjs` writes it too, from `sold()`.
+  //
+  // The UPDATE twenty lines above holds an exclusive lock on that `teams` row
+  // until this transaction commits, and the SELECT below runs inside the same
+  // transaction. So no other writer can have changed the row in between: it
+  // would block. That is why the equality can only fail when the UPDATE matched
+  // NO row, which is exactly the failure this was rewritten to catch.
+  //
+  // The advisory lock also serializes the two auction writers and is true, but
+  // it is incidental here -- the row lock holds even against a writer that takes
+  // no advisory lock at all, which `scripts/drive-auction-end-to-end.mjs` is. Worse, it was
   // written `team_after && ...`, so the one failure that IS reachable took the
   // false branch: an `update` matching NO row is not an error in knex, and the
   // `select` behind it then returns nothing, so a settlement that never charged
