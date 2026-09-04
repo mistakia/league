@@ -35,7 +35,7 @@ If your idea genuinely needs one of these, say so in the report and explain why.
 
 Feature ideas are welcome and are ruled on by the maintainer alone, against what xo.football is deliberately for and deliberately not. A declined idea is recorded with the reason, so nobody has to re-argue it later and you get a real answer rather than silence.
 
-Check the [roadmap](https://github.com/users/mistakia/projects/3/views/1) first — your idea may already be planned, in which case the question is timing, not fit.
+Check the [roadmap](https://base.tint.space/task?tag=user%3Atag%2Fleague-xo-football.md) first — your idea may already be planned, in which case the question is timing, not fit. Signed out, the statuses are readable and most titles are not.
 
 ## Your data
 

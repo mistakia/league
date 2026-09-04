@@ -32,7 +32,9 @@ Actively developed, and looking for people to build and test it. [Join the Disco
 
 ## Contributing
 
-[Roadmap](https://github.com/users/mistakia/projects/3/views/1) · [How to contribute](docs/contributing.md)
+[Roadmap](https://base.tint.space/task?tag=user%3Atag%2Fleague-xo-football.md) · [How to contribute](docs/contributing.md)
+
+Built with [Base](https://base.tint.space), the system the agent sessions that develop this platform run on.
 
 Reporting a bug works signed out, from any page.
 
