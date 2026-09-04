@@ -611,7 +611,17 @@ export function* persist_selected_view_to_browser({ payload }) {
   try {
     const { data_view_id } = payload
     if (!data_view_id) return
-    if (DEFAULT_VIEW_IDS.has(data_view_id)) return
+
+    // A BUILT-IN view is recorded here too. It used to be skipped along with the
+    // rest of its storage, but that conflated two different things: its STATE is
+    // in code and must never be cached, while "which view was I last on" is
+    // identity and is exactly as true of a built-in as of a saved view. Skipping
+    // it left the last-active record pointing at whatever the user had opened
+    // BEFORE, so visiting a built-in view and coming back returned them
+    // somewhere else entirely. Its table_state is deliberately not stored --
+    // caching a copy would pin the state a release shipped and then outlive it.
+    const is_default_view = DEFAULT_VIEW_IDS.has(data_view_id)
+
     // The name rides along so the next page load can label the view it restores
     // from localStorage. Without it the view selector renders nameless until the
     // saved-view list arrives, which is the flicker this restore exists to
@@ -628,7 +638,8 @@ export function* persist_selected_view_to_browser({ payload }) {
     yield call(save_last_active_view, {
       view_id: data_view_id,
       view_name: view ? view.get('view_name') : undefined,
-      table_state: view ? view.get('table_state') : undefined
+      table_state:
+        is_default_view || !view ? undefined : view.get('table_state')
     })
   } catch (error) {
     console.error('Error persisting selected view to browser:', error)

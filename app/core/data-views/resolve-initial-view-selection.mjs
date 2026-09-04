@@ -41,10 +41,24 @@ export default function resolve_initial_view_selection({
 }) {
   const view_id = last_active && last_active.view_id
 
-  // Nothing remembered, or a built-in view, which carries its state in code.
-  // Either way the default is the answer and it is available now.
-  if (!view_id || default_view_ids.has(view_id)) {
+  // Nothing remembered: the default is the answer and it is available now.
+  if (!view_id) {
     return { type: 'default', view_id: default_view_id }
+  }
+
+  // A remembered BUILT-IN view. Select that view, not the default one -- they
+  // are not the same view, and conflating them is what made the page stop
+  // returning users to where they left off. A built-in carries its state in
+  // code, so it needs no restore and is selectable at mount like the default.
+  //
+  // The bug this replaces was worse than one wrong frame, because the early
+  // path sets initial_selection_applied and the post-fetch
+  // restore_last_active_view_if_default declines to run once it is set. So
+  // answering `default` here did not merely paint the wrong view first -- it
+  // disabled the path that used to correct it, and the remembered view never
+  // loaded at all.
+  if (default_view_ids.has(view_id)) {
+    return { type: 'default', view_id }
   }
 
   const table_state =

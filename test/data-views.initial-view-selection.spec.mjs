@@ -56,14 +56,34 @@ describe('data-views initial view selection', function () {
     expect(selection.view_id).to.equal(DEFAULT_VIEW_ID)
   })
 
-  it('selects the default when the remembered view is a built-in one', function () {
+  it('selects the REMEMBERED built-in view, not the default one', function () {
+    // These are two different views and the page must not confuse them. It did:
+    // answering with default_view_id here sent a user whose last view was a
+    // built-in to a different view entirely, and because the early path sets
+    // initial_selection_applied, the post-fetch restore that used to correct it
+    // declined to run — so the remembered view never loaded at all.
     const selection = resolve({
       last_active: { view_id: 'SEASON_FANTASY_POINTS' },
       snapshot: null
     })
 
     expect(selection.type).to.equal('default')
-    expect(selection.view_id).to.equal(DEFAULT_VIEW_ID)
+    expect(selection.view_id).to.equal('SEASON_FANTASY_POINTS')
+    expect(selection.view_id).to.not.equal(DEFAULT_VIEW_ID)
+  })
+
+  it('ignores a snapshot for a built-in view rather than restoring it', function () {
+    // A built-in's state lives in code and is never snapshotted. If a stale one
+    // exists from an older build, selecting the view is right and restoring the
+    // cached state over it is not.
+    const selection = resolve({
+      last_active: { view_id: 'SEASON_FANTASY_POINTS' },
+      snapshot: { table_state: make_table_state() }
+    })
+
+    expect(selection.type).to.equal('default')
+    expect(selection.view_id).to.equal('SEASON_FANTASY_POINTS')
+    expect(selection.table_state).to.equal(undefined)
   })
 
   it('defers when the remembered view has no local state', function () {
