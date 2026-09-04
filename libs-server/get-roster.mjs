@@ -51,12 +51,39 @@ export const build_roster_players_query = ({
     .orderBy('transactions.occurred_at', 'desc')
     .orderBy('transactions.transaction_id', 'desc')
 
+/**
+ * A team's roster, with the salary, extension and restricted-free-agency state
+ * that `Roster` needs to compute available cap.
+ *
+ * `db_client` DEFAULTS TO THE MODULE POOL AND MUST BE THE CALLER'S `trx` WHEN
+ * THE CALLER HOLDS A TRANSACTION. Two independent reasons, and both have bitten:
+ *
+ * - A CHECK THAT READS OUTSIDE THE TRANSACTION IT GUARDS reports the state
+ *   BEFORE the write, so it can never fire. `persist_auction_settlement`'s
+ *   budget-only-falls invariant was exactly that -- its comment claimed it read
+ *   through `trx` while this function read the pool, so `cap_after` was always
+ *   the pre-update cap and the guard was dead.
+ * - CONNECTIONS, not just visibility. This issues several queries per call, and
+ *   the auction settlement path calls it once per team while holding the
+ *   league's advisory lock. On the module pool that means the lock holder is
+ *   acquiring connections the teams BLOCKED ON ITS LOCK are already holding, so
+ *   a league at pool size deadlocks until knex's acquire timeout rolls the
+ *   settlement back -- and election mode has no clock to retry it.
+ *
+ * Follows the `db_client = db` convention already used by
+ * `get_active_auction_nomination` and `auction-blocks.mjs`.
+ */
 export default async function ({
   tid,
   week = current_season.fantasy_season_week,
-  year = current_season.year
+  year = current_season.year,
+  db_client = db
 }) {
-  const rows = await db('rosters').where({ tid, season_year: year, week })
+  const rows = await db_client('rosters').where({
+    tid,
+    season_year: year,
+    week
+  })
   const roster_row = rows[0]
 
   if (!roster_row) {
@@ -64,7 +91,7 @@ export default async function ({
   }
 
   const players = await build_roster_players_query({
-    db,
+    db: db_client,
     roster_id: roster_row.roster_id,
     tid,
     year: roster_row.season_year,
@@ -77,7 +104,7 @@ export default async function ({
     const pids = players.map((p) => p.pid)
 
     // TODO - get extension count for player
-    const transactions = await db('transactions')
+    const transactions = await db_client('transactions')
       .where('tid', tid)
       .whereIn('pid', pids)
       .where('type', transaction_types.EXTENSION)
@@ -92,7 +119,7 @@ export default async function ({
     // Own-player bids only, and only live ones -- this `bid` becomes the player's
     // cap charge through `getExtensionAmount`, so a settled bid must not reach it.
     const bids = await build_active_restricted_free_agency_bids_query({
-      db,
+      db: db_client,
       tid
     })
       .join(
@@ -108,7 +135,7 @@ export default async function ({
 
     if (bids.length) {
       // Get conditional releases for all restricted free agency bids
-      const restricted_free_agency_releases = await db(
+      const restricted_free_agency_releases = await db_client(
         'restricted_free_agency_releases'
       ).whereIn(
         'restricted_free_agency_bid_id',
@@ -145,7 +172,7 @@ export default async function ({
       // Tag state is a property of the AUCTION, so it is read off the
       // nomination. Reading `announced` off a bid row was only ever correct for
       // the nominating team's own bid; every competing bid carried a null.
-      const nominations = await db('restricted_free_agency_nominations')
+      const nominations = await db_client('restricted_free_agency_nominations')
         .select(
           'player_id',
           'original_team_id',

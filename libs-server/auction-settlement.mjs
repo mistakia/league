@@ -114,19 +114,36 @@ export const get_team_auction_capacity = async ({
   tid,
   league,
   player_position,
-  current_price
+  current_price,
+  db_client = db
 }) => {
-  const roster_row = await getRoster({ tid })
+  const roster_row = await getRoster({ tid, db_client })
   const roster = new Roster({ roster: roster_row, league })
 
   return get_auction_team_capacity({ roster, player_position, current_price })
 }
 
+/**
+ * Every team's capacity for the open player.
+ *
+ * `db_client` MUST BE THE CALLER'S `trx` WHEN THE CALLER HOLDS THE LEAGUE LOCK.
+ * This is a roster read PER TEAM and each one issues several queries, so on the
+ * module pool a settlement holding the advisory lock acquires connections that
+ * the teams blocked on that lock are themselves holding. At league size that
+ * exhausts the pool, and the deadlock resolves only when knex's acquire timeout
+ * fires and rolls the settlement back -- leaving the player open with no clock
+ * to retry it, which is the stall the whole design exists to prevent.
+ *
+ * The reads stay SEQUENTIAL rather than becoming `Promise.all`, deliberately: on
+ * one transaction connection they serialize regardless, and concurrency here is
+ * what would reintroduce the multi-connection shape this parameter removes.
+ */
 export const get_auction_team_capacities = async ({
   team_ids,
   league,
   player_position,
-  current_price
+  current_price,
+  db_client = db
 }) => {
   const capacities = new Map()
   for (const tid of team_ids) {
@@ -136,7 +153,8 @@ export const get_auction_team_capacities = async ({
         tid,
         league,
         player_position,
-        current_price
+        current_price,
+        db_client
       })
     )
   }
@@ -325,7 +343,11 @@ export const settle_auction_player_if_complete = async ({
       team_ids,
       league,
       player_position: player_row.primary_position,
-      current_price: nomination.current_price
+      current_price: nomination.current_price,
+      // Through `trx`, because this runs under the league's advisory lock. On
+      // the module pool the lock holder would be acquiring connections held by
+      // the very teams waiting on its lock.
+      db_client: trx
     })
 
     const outstanding = get_outstanding_election_team_ids({
@@ -412,7 +434,7 @@ const persist_auction_settlement = async ({
   elections,
   nomination
 }) => {
-  const roster_row = await getRoster({ tid: winner_tid })
+  const roster_row = await getRoster({ tid: winner_tid, db_client: trx })
   const roster_before = new Roster({ roster: roster_row, league })
   const cap_before = roster_before.availableCap
 
@@ -531,8 +553,25 @@ const persist_auction_settlement = async ({
   const [team_after] = await trx('teams')
     .where({ team_id: winner_tid, season_year })
     .select('salary_cap')
+  // Read through `trx`, which the comment above already required and this call
+  // did not do -- `getRoster` read the module pool until it took a `db_client`.
+  //
+  // THAT WAS NOT SHOWN TO CHANGE THIS GUARD'S BEHAVIOR, and the honest statement
+  // is that nobody has made it fire. Three attempts failed to construct an input
+  // that trips it: raising `teams.salary_cap` does not reach `availableCap`
+  // (Roster derives it from `league.salary_cap` minus ACTIVE player salaries,
+  // never from the teams row), zeroing the winner's transaction salaries moves
+  // nothing on a fixture team holding no salaried actives, and the one thing
+  // that plainly would raise the cap -- releasing a player -- is caught first by
+  // the roster-count guard above.
+  //
+  // So this is threaded for the CONNECTION reason, which stands on its own, and
+  // its reachability is left an open question rather than asserted either way.
+  // Do not read the correction as a repair; if you can build the input, add it
+  // as a spec, and if it is genuinely unreachable this guard should say so
+  // instead of implying a case it cannot detect.
   const cap_after = new Roster({
-    roster: await getRoster({ tid: winner_tid }),
+    roster: await getRoster({ tid: winner_tid, db_client: trx }),
     league
   }).availableCap
   if (cap_after > cap_before) {
