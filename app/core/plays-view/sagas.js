@@ -25,6 +25,14 @@ import {
   plays_view_browser_storage_load_metadata
 } from './browser-storage.mjs'
 
+// The view a shared /u/<hash> link hydrated, or null on a normal mount. Set from
+// the page's load_plays_views payload. Mirrors the data-views saga: the resolver
+// puts the shared state in the store before the page mounts and leaves the
+// address bar on the short URL, so the restores below cannot see that a view has
+// already been chosen and would overwrite it -- with the recipient's own stored
+// edits, since a share link deliberately keeps the sender's view_id.
+let short_link_view_id = null
+
 const get_selected_plays_view_id = (state) =>
   state.getIn(['app', 'selected_plays_view_id'])
 
@@ -227,6 +235,8 @@ export function* handle_delete_plays_view({ payload }) {
 }
 
 export function* load_plays_views({ payload = {} } = {}) {
+  short_link_view_id = payload.short_link_view_id || null
+
   const { userId } = yield select(get_app)
 
   // GET /api/plays/views is owner-scoped and requires a user. An anonymous
@@ -394,6 +404,10 @@ function* collect_all_view_ids(server_data) {
 
 function* restore_view_states_from_browser(view_ids) {
   for (const view_id of view_ids) {
+    // The shared link IS this view's state right now; a stored snapshot under
+    // the same id is the recipient's own older edits, not what was shared.
+    if (view_id === short_link_view_id) continue
+
     const snapshot = yield call(
       plays_view_browser_storage_get_latest_snapshot,
       view_id
@@ -416,6 +430,9 @@ function* restore_view_states_from_browser(view_ids) {
 }
 
 function* restore_last_active_view_if_default(all_view_ids) {
+  // A shared link already chose the view, without going through this path.
+  if (short_link_view_id) return
+
   const current_selected_id = yield select(get_selected_plays_view_id)
 
   if (current_selected_id !== default_plays_view_view_id) {

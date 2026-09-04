@@ -30,6 +30,7 @@ export default function PlaysPage({
   load_plays_views,
   user_username,
   plays_view_request,
+  short_link_view_id,
   reset_plays_view_cache,
   load_plays_view,
   percentiles
@@ -79,11 +80,26 @@ export default function PlaysPage({
     // in the console and no failed request to react to. load_plays_views itself
     // decides whether to call the API. This is the same hole /data-views had,
     // fixed the same way; the two surfaces mirror each other deliberately.
-    load_plays_views({ restore_last_active: !view_id && !url_table_state })
+    //
+    // A shared /u/<hash> link is the third way the view can already be chosen,
+    // and the only one invisible from the URL: the resolver hydrates the view
+    // into the store before this page mounts and keeps the address bar on the
+    // short URL, so without short_link_view_id both the restore below and the
+    // post-fetch browser-snapshot restore land on top of the shared view.
+    load_plays_views({
+      restore_last_active: !view_id && !url_table_state && !short_link_view_id,
+      short_link_view_id
+    })
     if (view_id) {
       load_plays_view(view_id)
     }
-  }, [load_plays_views, load_plays_view, view_id, url_table_state])
+  }, [
+    load_plays_views,
+    load_plays_view,
+    view_id,
+    url_table_state,
+    short_link_view_id
+  ])
 
   useEffect(() => {
     // Only handle URL-based table state initialization. Browser state
@@ -275,6 +291,7 @@ PlaysPage.propTypes = {
   load_plays_views: PropTypes.func,
   user_username: PropTypes.string,
   plays_view_request: PropTypes.object,
+  short_link_view_id: PropTypes.string,
   reset_plays_view_cache: PropTypes.func,
   load_plays_view: PropTypes.func,
   percentiles: PropTypes.object

@@ -23,11 +23,20 @@ export default function ShortUrlResolver({
   const { hash } = useParams()
   const [status, set_status] = useState(STATUS_LOADING)
   const [target, set_target] = useState(null)
+  // The view this link hydrated into the store, handed to the page below so its
+  // own mount bootstrap knows a view has already been chosen. The address bar
+  // stays at /u/<hash> deliberately (a resolved data-view URL can run to tens of
+  // kilobytes, which a reload would hand back to the server as a request line it
+  // rejects with 431), so the page cannot see the choice in the URL the way it
+  // does for /data-views?<state> -- without this it restores the last-active
+  // view over the link the user just opened.
+  const [hydrated_view_id, set_hydrated_view_id] = useState(null)
 
   useEffect(() => {
     let cancelled = false
     set_status(STATUS_LOADING)
     set_target(null)
+    set_hydrated_view_id(null)
 
     const { abort, request } = get_shortened_url({ hash })
 
@@ -77,13 +86,14 @@ export default function ShortUrlResolver({
               scatter_plot_options: parsed.scatter_plot_options,
               disable_scatter_plot: parsed.disable_scatter_plot
             }
+            // Preserve the URL's view_id so re-shortening from a /u/<hash>
+            // page produces the same canonical URL (and same hash) as the
+            // original shorten. Fall back to a fresh id if the URL had none.
+            const view_id = parsed.view_id || generate_view_id()
+            set_hydrated_view_id(view_id)
             data_view_changed(
               {
-                // Preserve the URL's view_id so re-shortening from a /u/<hash>
-                // page produces the same canonical URL (and same hash) as the
-                // original shorten. Fall back to a fresh id if the URL had
-                // none.
-                view_id: parsed.view_id || generate_view_id(),
+                view_id,
                 view_name: parsed.view_name,
                 view_search_column_id: parsed.view_search_column_id,
                 view_description: parsed.view_description,
@@ -113,9 +123,11 @@ export default function ShortUrlResolver({
               scatter_plot_options: parsed.scatter_plot_options,
               disable_scatter_plot: parsed.disable_scatter_plot
             }
+            const view_id = parsed.view_id || generate_view_id()
+            set_hydrated_view_id(view_id)
             plays_view_changed(
               {
-                view_id: parsed.view_id || generate_view_id(),
+                view_id,
                 view_name: parsed.view_name,
                 view_description: parsed.view_description,
                 table_state: next_table_state,
@@ -152,10 +164,10 @@ export default function ShortUrlResolver({
   }
 
   if (target === 'plays') {
-    return <PlaysPage />
+    return <PlaysPage short_link_view_id={hydrated_view_id} />
   }
 
-  return <DataViewsPage />
+  return <DataViewsPage short_link_view_id={hydrated_view_id} />
 }
 
 ShortUrlResolver.propTypes = {

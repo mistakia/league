@@ -97,6 +97,7 @@ export default function DataViewsPage({
   load_data_views,
   user_username,
   data_view_request,
+  short_link_view_id,
   is_socket_connected,
   reset_data_view_cache,
   load_data_view,
@@ -161,11 +162,26 @@ export default function DataViewsPage({
     // page rendered its headers over an empty body indefinitely, with nothing
     // in the console and no failed request to react to. load_data_views itself
     // decides whether to call the API.
-    load_data_views({ restore_last_active: !view_id && !url_table_state })
+    //
+    // A shared /u/<hash> link is the third way the view can already be chosen,
+    // and the only one invisible from the URL: the resolver hydrates the view
+    // into the store before this page mounts and keeps the address bar on the
+    // short URL, so without short_link_view_id both the restore below and the
+    // post-fetch browser-snapshot restore land on top of the shared view.
+    load_data_views({
+      restore_last_active: !view_id && !url_table_state && !short_link_view_id,
+      short_link_view_id
+    })
     if (view_id) {
       load_data_view(view_id)
     }
-  }, [load_data_views, load_data_view, view_id, url_table_state])
+  }, [
+    load_data_views,
+    load_data_view,
+    view_id,
+    url_table_state,
+    short_link_view_id
+  ])
 
   useLayoutEffect(() => {
     // Only handle URL-based table state initialization
@@ -767,6 +783,7 @@ DataViewsPage.propTypes = {
   load_data_views: PropTypes.func,
   user_username: PropTypes.string,
   data_view_request: PropTypes.object,
+  short_link_view_id: PropTypes.string,
   is_socket_connected: PropTypes.bool,
   reset_data_view_cache: PropTypes.func,
   load_data_view: PropTypes.func,

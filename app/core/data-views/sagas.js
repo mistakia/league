@@ -89,10 +89,23 @@ const DEFAULT_VIEW_IDS = new Set(Object.keys(default_data_views))
 // view_state_changed -- so the page issues the same query twice.
 let initial_selection_applied = false
 
+// The view a shared /u/<hash> link hydrated, or null on a normal mount. Set from
+// the page's load_data_views payload, so it is re-decided on every mount rather
+// than latched for the page load: navigating from a short link to /data-views
+// clears it and the browser restores resume.
+//
+// It exists because the browser's stored copy of a view is not the shared one. A
+// share link keeps the sender's view_id (that is what makes re-shortening
+// idempotent), so if the recipient has their own edits stored under that id, the
+// snapshot restore below would put THEIR table state on the link they just
+// opened -- the same view name, silently different columns and filters.
+let short_link_view_id = null
+
 // Test seam only. Nothing in the app resets this: within one page load the
 // first selection happens once.
 export const reset_initial_view_selection = () => {
   initial_selection_applied = false
+  short_link_view_id = null
 }
 
 // Install quota-exceeded callback at module load (before any saga runs) so
@@ -494,6 +507,8 @@ export function* apply_initial_view_selection() {
 }
 
 export function* load_data_views({ payload = {} } = {}) {
+  short_link_view_id = payload.short_link_view_id || null
+
   // A direct link to a view, or a URL carrying its own table state, names the
   // view to show -- restoring the last active one would query a view the user
   // did not ask for and then be overwritten.
@@ -662,6 +677,9 @@ function* collect_all_view_ids(server_data) {
 function* restore_view_states_from_browser(view_ids) {
   for (const view_id of view_ids) {
     if (DEFAULT_VIEW_IDS.has(view_id)) continue
+    // The shared link IS this view's state right now; a stored snapshot under
+    // the same id is the recipient's own older edits, not what was shared.
+    if (view_id === short_link_view_id) continue
 
     const snapshot = yield call(load_latest_snapshot, view_id)
     if (!snapshot || !is_valid_table_state(snapshot.table_state)) continue
@@ -688,6 +706,8 @@ function* restore_view_states_from_browser(view_ids) {
 function* restore_last_active_view_if_default(all_view_ids) {
   // The early path already chose, and choosing again re-issues its query.
   if (initial_selection_applied) return
+  // A shared link chose too, and it did so without going through the early path.
+  if (short_link_view_id) return
 
   const current_selected_id = yield select(get_selected_data_view_id)
   if (current_selected_id !== default_data_view_view_id) return
