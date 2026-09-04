@@ -80,6 +80,10 @@ describe('an election that cannot improve its own claim discharges', function ()
     it('discharges a bidder whose bid already reaches its cap', function () {
       // Team 1 bid exactly its cap. No maximum it could state raises
       // min(max(M, 1), 1) above 1, so it is waiting on nothing.
+      //
+      // Bid, cap and price all equal -- a tapped-out LEADER, which is the only
+      // shape this check fires on downstream of the eligibility gate, and the
+      // shape League 1 stalled two hours on.
       const outstanding = get_outstanding_election_team_ids({
         capacities: capacities_with_cap([
           [1, 1],
@@ -92,11 +96,32 @@ describe('an election that cannot improve its own claim discharges', function ()
       expect(outstanding).to.deep.equal([2])
     })
 
-    it('discharges a bidder whose bid EXCEEDS its cap', function () {
-      // A cap can fall below a standing bid when the team wins an earlier
-      // player. The clamp still makes the election inert, and `>=` covers it.
+    // THE `>` HALF OF `>=` IS UNREACHABLE, and this case says so rather than
+    // pretending otherwise.
+    //
+    // An earlier version of this spec asserted that a bid of $8 against a $3 cap
+    // is discharged here, with `is_eligible` hand-set to true. That state cannot
+    // occur. Bids are non-decreasing -- the socket refuses one at or below the
+    // current price and an engine bid is floored at it -- so `current_price` is
+    // the highest bid on the board, and `is_eligible` already requires
+    // `available_cap >= current_price`. A team eligible at all therefore has
+    // `available_cap >= current_price >= its own bid`, so a bid can never
+    // strictly exceed the cap of a team this check still sees.
+    //
+    // Which made that fixture a contradiction asserting a reachable-looking
+    // outcome, and a spec that pins a rule on an impossible input certifies
+    // nothing about the rule. This is the honest version: the shape IS handled,
+    // but by the ELIGIBILITY gate one line earlier rather than by the new check,
+    // so the fixture says `is_eligible: false` the way the real predicate would.
+    it('leaves a bid above the cap to the eligibility gate, which fires first', function () {
+      const capacities = new Map([
+        // What `get_auction_team_capacity` actually produces for a team whose
+        // cap is below the price: not eligible.
+        [1, { is_eligible: false, available_cap: 3 }]
+      ])
+
       const outstanding = get_outstanding_election_team_ids({
-        capacities: capacities_with_cap([[1, 3]]),
+        capacities,
         elections: [],
         bids: [bid(1, 8)]
       })

@@ -71,11 +71,19 @@ Two properties that look like details and are not:
 - **A proxy step does not reset the bid clock. Only a human bid does.** A fully-proxied player settles one bid clock after nomination however many teams wanted them, which is what makes a large final block tractable. **The SERVER owns the countdown and announces it as `AUCTION_TIMER` whenever the running clock changes** — a bid broadcast is not a clock event. The client used to rebuild the countdown from a duration on every `AUCTION_BID`, so a proxy step put a fresh clock on screen while the sale was seconds away, and a reconnecting client got no countdown at all because `AUCTION_INIT` carried durations and no expiry.
 - **Supersession binds a claim DOWNWARD and is socket state**, in `_manual_bids`. From the transaction log an engine bid and a human bid are the same row by design, so only the live socket can tell them apart; `build_auction_claims` stays raise-only for the REST paths that cannot.
 
-## Only an election discharges
+## An election discharges, and so does a claim no election could improve
 
-Completeness is the only thing that settles a player in election mode, and it counts ELECTIONS and nothing else. `get_outstanding_election_team_ids` in `libs-server/auction-settlement.mjs` is the whole rule: an eligible team is outstanding until it has a live `auction_elections` row, whatever else it has done.
+Completeness is the only thing that settles a player in election mode. `get_outstanding_election_team_ids` in `libs-server/auction-settlement.mjs` is the whole rule, and it discharges an eligible team on exactly two grounds: a live `auction_elections` row, or a placed bid that already reaches that team's `available_cap`.
 
 **A bid does not discharge, and neither does a nomination.** This is the distinction the original conflated — it seeded the outstanding set with the nominating team and every team holding a bid, so any bid discharged its bidder permanently, with no argument recorded anywhere for why.
+
+**The second ground is a refinement of the first, not a softening of it.** A team's whole influence on a settlement is its claim: `build_auction_claims` makes that `max(election_maximum, highest_bid)` and `resolve_auction_player` takes `min(claim, available_cap)`. So for a team holding bid B against cap C, not electing gives `min(B, C)` and electing M gives `min(max(M, B), C)` — and when `B >= C` those are the same number for every M, because `max(M, B) >= B >= C` and both clamp. Waiting on such a team is waiting on an input that cannot move the winner or the price. League 1 held a player open for two hours on exactly one: a team leading at $1 against a $1 cap, whose eventual $1 election changed nothing.
+
+**Compare against the CAP, never against the current price.** Discharging a team whose bid merely meets the price is discharging the LEADER, and that reintroduces the defect below: a leader at $5 holding a $50 cap would settle away to a rival's $30 election at $6, never having been asked whether it would go above $5. The eligibility gate does not save you there — `available_cap >= current_price` passes comfortably at 50 against 5 — so the cap comparison is the only thing standing between the two rules.
+
+Two things about its reach. Because bids are non-decreasing (the socket refuses one at or below the current price, and an engine bid is floored at it) and eligibility already requires `available_cap >= current_price`, the surviving reachable case is the one where **bid, cap and price are all equal** — so in practice this discharges a tapped-out leader. The `>` half of the `>=` is unreachable through that gate and is written for the general statement rather than for a case you can construct. And **the guarantee is "cannot improve its own claim", not "cannot affect anything"**: electing at or above an equal existing bid pushes `amount_set_at` forward in `build_auction_claims`, which is a tiebreak input, so a discharged team settles on its BID timestamp instead. That can only help the discharged team, and it is arguably the more correct reading, since the amount was committed when the money was bid.
+
+**It reads only placed bids and roster-derived caps.** Both are already public, so the outstanding set stays broadcastable exactly as it is. That is the property separating this from gating on the implied clearing price, which would leak sealed maxima and is deliberately not shipped here.
 
 The two are different kinds of statement, and the difference is the price:
 
@@ -88,7 +96,7 @@ The two are different kinds of statement, and the difference is the price:
 
 **Binding is the other axis and it still counts bids.** `build_auction_claims` owns it: a placed bid binds its bidder, a nomination binds its nominator to the opening bid, and that is why every nominated player still sells and there is no `unsold` outcome. Do not read "nominating is bidding" as "nominating is electing".
 
-**A nomination may carry an optional ceiling.** `nominate` accepts a `maximum_bid`, and the socket writes the bid and that election in ONE transaction under the league's advisory lock — a nomination whose election was lost would open a player that waits on its own nominator. It is optional: absent means the nominator has not stated a ceiling and stays outstanding, free to elect later. It is election-mode only, refused below the opening bid, and it is NOT a decline — a nominator cannot decline the player it nominated.
+**A nomination may carry an optional ceiling.** `nominate` accepts a `maximum_bid`, and the socket writes the bid and that election in ONE transaction under the league's advisory lock — a nomination whose election was lost would open a player that waits on its own nominator. It is optional: absent means the nominator has not stated a ceiling and stays outstanding, free to elect later — unless its opening bid already reaches its own cap, which discharges it under the second ground above. It is election-mode only, refused below the opening bid, and it is NOT a decline — a nominator cannot decline the player it nominated.
 
 ## Eligibility must stay monotone
 

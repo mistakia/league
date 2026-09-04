@@ -245,7 +245,21 @@ export const get_outstanding_election_team_ids = ({
     // would settle away to a rival's $30 election at $6, never having been asked
     // whether it would go above $5. Under the cap comparison a team is
     // discharged only when it could not have bid higher whatever it did, so no
-    // team loses an answer that could have mattered.
+    // team loses an answer that could have mattered. The eligibility gate above
+    // does NOT cover that case for you -- `available_cap >= current_price`
+    // passes comfortably at 50 against 5 -- so this comparison is the only thing
+    // standing between the two rules.
+    //
+    // WHAT IT ACTUALLY REACHES IS NARROWER THAN THE RULE, and the difference is
+    // worth knowing before you extend it. Bids are non-decreasing (the socket
+    // refuses one at or below the current price, and an engine bid is floored at
+    // it), so `current_price` is the highest bid on the board; eligibility
+    // already required `available_cap >= current_price`. Any team still being
+    // inspected here therefore satisfies `available_cap >= current_price >= its
+    // own bid`, so the surviving case where this fires is the one where all
+    // three are EQUAL -- a tapped-out leader. The `>` half of the `>=` cannot be
+    // reached through that gate and is written for the general statement, not
+    // for a constructible input.
     //
     // AND THE GUARANTEE IS "CANNOT IMPROVE ITS OWN CLAIM", NOT "CANNOT AFFECT
     // ANYTHING". One thing does still move: electing at or above an existing
