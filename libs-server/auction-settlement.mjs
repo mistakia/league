@@ -311,6 +311,19 @@ export const settle_auction_player_if_complete = async ({
   league: provided_league,
   trx: provided_trx
 } = {}) => {
+  // RESOLVED BEFORE THE TRANSACTION OPENS, and that placement is the point.
+  // `getLeague` reads the MODULE POOL and issues several queries, so resolving
+  // it inside the locked region makes the lock holder ask for a connection the
+  // teams queued on its lock are already holding -- the same deadlock the
+  // per-team roster reads had, needing only one connection instead of N.
+  //
+  // Hoisted rather than pushed onto the callers. Two of the four passed no
+  // `league` (`withdraw_auction_election` and
+  // `reevaluate_auction_after_roster_change`), and fixing those two would leave
+  // the next caller free to reintroduce it. Resolving it here means no caller
+  // can get it wrong.
+  const league = provided_league || (await getLeague({ lid }))
+
   const run = async (trx) => {
     await lock_auction_for_league({ trx, lid })
 
@@ -321,7 +334,6 @@ export const settle_auction_player_if_complete = async ({
     })
     if (!nomination) return null
 
-    const league = provided_league || (await getLeague({ lid }))
     const players = await trx('player').where('pid', nomination.pid)
     const player_row = players[0]
     if (!player_row) {

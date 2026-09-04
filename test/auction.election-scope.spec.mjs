@@ -82,6 +82,26 @@ describe('auction election scope', function () {
       .get(`/api/leagues/${league_id}/auction-elections?teamId=${teamId}`)
       .set('Authorization', `Bearer ${token}`)
 
+  const write_election = ({ teamId, pid, maximum_bid, token }) =>
+    chai_request
+      .execute(server)
+      .post(`/api/leagues/${league_id}/auction-elections`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ teamId, pid, maximum_bid, leagueId: league_id })
+
+  const withdraw_election = ({ teamId, pid, token }) =>
+    chai_request
+      .execute(server)
+      .delete(`/api/leagues/${league_id}/auction-elections`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ teamId, pid, leagueId: league_id })
+
+  const live_elections_for = (tid, pid) =>
+    knex('auction_elections')
+      .where({ lid: league_id, season_year, tid, pid })
+      .whereNull('withdrawn_at')
+      .whereNull('settled_at')
+
   it("refuses the commissioner a rival team's standing maximums", async function () {
     this.timeout(60 * 1000)
 
@@ -146,5 +166,92 @@ describe('auction election scope', function () {
     const election = res.body.find((row) => row.pid === pid)
     expect(election, 'the commissioner reads their own election').to.exist
     expect(election.maximum_bid).to.equal(12)
+  })
+
+  // THE WRITE SIDE, and the half this file's own header always claimed. It says
+  // "no election route grants a commissioner scope", which was true of the GET
+  // above and false of both write verbs: `verifyUserTeam` accepts the
+  // commissioner for EVERY team, and neither handler narrowed it.
+  it("refuses the commissioner writing a rival team's ceiling", async function () {
+    this.timeout(60 * 1000)
+
+    const pid = await free_agent()
+
+    // user1 is the commissioner and owns team 1. Team 2 is user2's, and has
+    // stated nothing on this player.
+    const res = await write_election({
+      teamId: 2,
+      pid,
+      maximum_bid: 180,
+      token: user1
+    })
+
+    expect(res.status, JSON.stringify(res.body)).to.equal(400)
+    expect(
+      await live_elections_for(2, pid),
+      'no election is written for a team that did not state one'
+    ).to.have.length(0)
+  })
+
+  it('serves a manager writing their OWN ceiling', async function () {
+    // THE CONTROL. Without it the refusal above passes equally against a route
+    // that refuses every election, which would take the feature out rather than
+    // scope it.
+    this.timeout(60 * 1000)
+
+    const pid = await free_agent()
+    const res = await write_election({
+      teamId: 2,
+      pid,
+      maximum_bid: 180,
+      token: user2
+    })
+
+    expect(res.status, JSON.stringify(res.body)).to.equal(200)
+    expect(await live_elections_for(2, pid)).to.have.length(1)
+  })
+
+  it("refuses the commissioner withdrawing a rival team's election", async function () {
+    // SHARPER THAN THE WRITE. This verb SETTLES the player in the same
+    // transaction, so withdrawing a rival's ceiling can take their proxy out of
+    // the running and hand the player to the commissioner's own team below it.
+    this.timeout(60 * 1000)
+
+    const pid = await free_agent()
+    await submit_auction_election({
+      lid: league_id,
+      tid: 2,
+      pid,
+      user_id: 2,
+      maximum_bid: 50,
+      season_year
+    })
+
+    const res = await withdraw_election({ teamId: 2, pid, token: user1 })
+
+    expect(res.status, JSON.stringify(res.body)).to.equal(400)
+    expect(
+      await live_elections_for(2, pid),
+      "the rival's election survives"
+    ).to.have.length(1)
+  })
+
+  it('serves a manager withdrawing their OWN election', async function () {
+    this.timeout(60 * 1000)
+
+    const pid = await free_agent()
+    await submit_auction_election({
+      lid: league_id,
+      tid: 2,
+      pid,
+      user_id: 2,
+      maximum_bid: 50,
+      season_year
+    })
+
+    const res = await withdraw_election({ teamId: 2, pid, token: user2 })
+
+    expect(res.status, JSON.stringify(res.body)).to.equal(200)
+    expect(await live_elections_for(2, pid)).to.have.length(0)
   })
 })

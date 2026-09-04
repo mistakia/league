@@ -245,12 +245,28 @@ router.post('/?', async (req, res) => {
     }
 
     try {
-      await verifyUserTeam({
+      const team = await verifyUserTeam({
         userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
       })
+
+      // OWNERSHIP, NOT AUTHORIZATION -- the same narrowing the GET above
+      // carries, for the same reason and on the write side, where it matters
+      // more. `verifyUserTeam` accepts the COMMISSIONER for every team in the
+      // league, and in this league the commissioner is a competing manager. An
+      // election is a private instruction that BINDS the team it names: writing
+      // one for another team discharges it from the outstanding set on a
+      // ceiling it never chose and binds it through `build_auction_claims` to
+      // pay up to that number.
+      //
+      // The socket refuses the same thing on the nomination path. This is the
+      // route that carries most elections, so closing one without the other
+      // fixed the instance and left the class open.
+      if (team.user_id !== req.auth.userId) {
+        return res.status(400).send({ error: 'invalid teamId' })
+      }
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
@@ -361,12 +377,22 @@ router.delete('/?', async (req, res) => {
     }
 
     try {
-      await verifyUserTeam({
+      const team = await verifyUserTeam({
         userId: req.auth.userId,
         leagueId,
         teamId,
         requireLeague: true
       })
+
+      // OWNERSHIP, NOT AUTHORIZATION. Withdrawing is the sharper half of the
+      // same hole: this verb SETTLES the player in the same transaction, so a
+      // commissioner withdrawing another team's ceiling can take that team's
+      // proxy out of the running and win the player below it. Withdrawing a
+      // DECLINE runs the other way -- it puts the team back in the outstanding
+      // set and stalls the player, with no clock to recover.
+      if (team.user_id !== req.auth.userId) {
+        return res.status(400).send({ error: 'invalid teamId' })
+      }
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
