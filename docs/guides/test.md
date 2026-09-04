@@ -62,6 +62,18 @@ LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=54XX TZ=America/New_York NODE_ENV=test T
 
 **This is not a mocha quirk — EVERY `.bin` shim is broken in a worktree, and `prettier` and `eslint` fail the same way with a different missing path.** Both die on `Cannot find module '../package.json'`, which reads as a corrupt install rather than the same hardlink problem, so it gets rediscovered per tool. The real entrypoints are `node node_modules/prettier/bin/prettier.cjs` and `node node_modules/eslint/bin/eslint.js`. Reach for `node node_modules/<pkg>/<bin-path>` for anything you would otherwise run through `npx` or a `yarn` script in a worktree.
 
+**A worktree is also the escape hatch when a SIBLING has broken the shared tree, and you can get one without any install.** The shared checkout is mid-refactor at any given moment, and a sibling holding a staged deletion of a module something still imports takes suite LOAD down for every session — the run dies with one `ERR_MODULE_NOT_FOUND` and zero tests, naming a file you never touched. Reverting their work is not yours to do, and waiting is not always an option when you need a green before deploying. Take a worktree at `HEAD`, copy in only your own changed files, and run there.
+
+The install is the part worth knowing, because `sandbox-install yarn install` takes minutes and is unnecessary: borrow the main checkout's. Symlink `node_modules` at the shared root and copy the two files yarn reads to believe the install is real —
+
+```bash
+git worktree add -f "$worktree_root/league/<slug>" HEAD
+ln -s /Users/trashman/node-modules/league/node_modules "$worktree_root/league/<slug>/node_modules"
+cp -R repository/active/league/.yarn repository/active/league/.yarnrc.yml "$worktree_root/league/<slug>/"
+```
+
+Two traps. The `node_modules` root is nested — the path is `<root>/league/node_modules`, not `<root>/league`, and linking one level high fails much later with a confusing `findPackageLocation` error. And without `.yarn/install-state.gz` every `yarn` script dies on `Couldn't find the node_modules state file - running an install might help`, which reads as a missing install rather than a missing state file. With both in place `yarn test:isolated` runs unmodified — the `.bin` shim problem above does not arise, because the shims come from the main checkout's install. Used 2026-09-04 to get a 7,018-passing full-suite run while the shared tree could not load at all.
+
 **And when your change ADDS a dependency, install it in the MAIN checkout as soon as the merge lands — otherwise every sibling's next suite run dies at module load on a package their `node_modules` does not have.** The worktree install only covers the worktree; the shared checkout is where siblings run, and the failure there is an `ERR_MODULE_NOT_FOUND` naming a package that is correctly in `package.json`, which reads as a broken lockfile rather than a missing install. One `sandbox-install yarn install` in `repository/active/league` closes it. Seen 2026-08-18 landing `express-openapi-validator`.
 
 To run one spec against an already-running DB:
