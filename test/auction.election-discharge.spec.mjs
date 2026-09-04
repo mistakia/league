@@ -11,6 +11,7 @@ import {
 } from '#libs-server/auction-elections.mjs'
 import { get_outstanding_election_team_ids } from '#libs-server/auction-settlement.mjs'
 import { selectPlayer } from './utils/index.mjs'
+import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -68,7 +69,14 @@ describe('only an election discharges a team from the outstanding set', function
     return teams.map((team) => team.team_id).sort((a, b) => a - b)
   }
 
-  const write_bid = async ({ pid, tid, value }) =>
+  // A COMPETING BID, which is the one thing `nominate_auction_player` does not
+  // express and should not. The shared helper opens a nomination -- the first
+  // bid on a player, optionally with the nominator's ceiling -- and every
+  // nomination in this file goes through it. This is a LATER bid from a team
+  // that did not nominate, and the distinction between the two is the whole
+  // subject of the spec, so naming them the same thing is how a reader ends up
+  // nominating with this.
+  const write_competing_bid = async ({ pid, tid, value }) =>
     knex('transactions').insert({
       user_id: 1,
       tid,
@@ -139,15 +147,14 @@ describe('only an election discharges a team from the outstanding set', function
 
       // Team 1 nominates and states its ceiling inline, so the nominator is not
       // what holds this open. Team 2 bids and elects nothing.
-      await write_bid({ pid, tid: 1, value: 0 })
-      await submit_auction_election({
+      await nominate_auction_player({
         lid: league_id,
-        tid: 1,
         pid,
-        user_id: 1,
+        tid: 1,
+        value: 0,
         maximum_bid: 0
       })
-      await write_bid({ pid, tid: 2, value: 5 })
+      await write_competing_bid({ pid, tid: 2, value: 5 })
 
       let settlement = null
       for (const tid of team_ids.filter((tid) => tid !== 1 && tid !== 2)) {
@@ -194,12 +201,11 @@ describe('only an election discharges a team from the outstanding set', function
       const pid = await free_agent()
       const team_ids = await all_team_ids()
 
-      await write_bid({ pid, tid: 1, value: 0 })
-      await submit_auction_election({
+      await nominate_auction_player({
         lid: league_id,
-        tid: 1,
         pid,
-        user_id: 1,
+        tid: 1,
+        value: 0,
         maximum_bid: 0
       })
 
@@ -207,7 +213,7 @@ describe('only an election discharges a team from the outstanding set', function
       // revocation going forward and cannot unwind money already bid, so team 2
       // still holds a binding claim at $7 -- discharging and binding are
       // separate axes and this is the case that tells them apart.
-      await write_bid({ pid, tid: 2, value: 7 })
+      await write_competing_bid({ pid, tid: 2, value: 7 })
 
       let settlement = null
       for (const tid of team_ids.filter((tid) => tid !== 1)) {
@@ -236,7 +242,15 @@ describe('only an election discharges a team from the outstanding set', function
       // No inline ceiling. The nominator is bound to its $3 opening bid and can
       // still be outbid off its own nomination, so until it names a maximum the
       // auction does not know its position at any price above $3.
-      await write_bid({ pid, tid: 1, value: 3 })
+      // `maximum_bid: null` is the helper saying the nominator stated NO
+      // ceiling, which is exactly the case under test.
+      await nominate_auction_player({
+        lid: league_id,
+        pid,
+        tid: 1,
+        value: 3,
+        maximum_bid: null
+      })
 
       let settlement = null
       for (const tid of team_ids.filter((tid) => tid !== 1)) {
