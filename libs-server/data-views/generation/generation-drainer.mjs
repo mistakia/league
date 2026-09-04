@@ -66,7 +66,8 @@ export const is_retryable_dispatch_failure = (error) =>
  *
  * @param {object} [params]
  * @param {(job: {generation_id: string, instruction: string,
- *   input_table_state: object|null}) => Promise<{thread_id: string}>}
+ *   input_table_state: object|null, harness: string|null,
+ *   model: string|null}) => Promise<{thread_id: string}>}
  *   [params.dispatch] - injected by the spec
  * @returns {Promise<{drained: boolean, generation_id?: string, outcome?: string}>}
  */
@@ -104,7 +105,12 @@ export const drain_once = async ({
     ;({ thread_id } = await dispatch({
       generation_id,
       instruction: job.instruction,
-      input_table_state: job.input_table_state
+      input_table_state: job.input_table_state,
+      // Null on every production row. Set only by the benchmark, which sweeps
+      // one axis at a time and cannot reach this process's env from the machine
+      // it runs on.
+      harness: job.harness,
+      model: job.model
     }))
   } catch (error) {
     if (is_retryable_dispatch_failure(error)) {

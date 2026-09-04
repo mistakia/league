@@ -299,6 +299,8 @@ export interface DataViewGenerationJobsRow {
   duration_milliseconds: number | null
   inference_provider: string | null
   session_termination_requested_at: Date | null
+  harness: string | null
+  model: string | null
 }
 
 export interface DataViewQueriesRow {

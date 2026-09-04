@@ -214,7 +214,9 @@ export const read_prefix_cache_counters = async () => {
  */
 export const enqueue_generation_job = async ({
   instruction,
-  input_table_state = null
+  input_table_state = null,
+  harness = null,
+  model = null
 }) => {
   const [row] = await db('data_view_generation_jobs')
     .insert({
@@ -222,6 +224,10 @@ export const enqueue_generation_job = async ({
       input_table_state: input_table_state
         ? JSON.stringify(input_table_state)
         : null,
+      // Null means the identity's default, which is what production sends. The
+      // sweep names one only when it is comparing.
+      harness,
+      model,
       user_id: BENCHMARK_USER_ID,
       principal_key: PRINCIPAL_KEY,
       status: 'queued'
@@ -586,7 +592,13 @@ export const await_generation_slot_free = async ({ log }) => {
  * @param {object} params
  * @returns {Promise<object>}
  */
-export const run_one = async ({ entry, iteration, log }) => {
+export const run_one = async ({
+  entry,
+  iteration,
+  log,
+  harness = null,
+  model = null
+}) => {
   log(`\n${entry.instruction_id} (run ${iteration})`)
   log(`  "${entry.instruction}"`)
 
@@ -601,7 +613,9 @@ export const run_one = async ({ entry, iteration, log }) => {
 
   const generation_id = await enqueue_generation_job({
     instruction: entry.instruction,
-    input_table_state: entry.input_table_state || null
+    input_table_state: entry.input_table_state || null,
+    harness,
+    model
   })
   log(`  generation_id ${generation_id}`)
 
@@ -638,6 +652,13 @@ export const run_one = async ({ entry, iteration, log }) => {
     instruction_id: entry.instruction_id,
     capability: entry.capability,
     iteration,
+    // What the sweep ASKED for, null when it asked for nothing. Distinct from
+    // `models` below, which is what the transcript says actually served the
+    // turns -- they disagree when a request falls back, and a sweep that
+    // recorded only one of them could not tell a real comparison from a silent
+    // reversion to the default.
+    requested_harness: harness,
+    requested_model: model,
     generation_id,
     thread_id: job.thread_id || null,
     session_id,
@@ -754,6 +775,16 @@ const main = async () => {
       describe:
         'runs per instruction. Run-to-run spread on one instruction was 8, 9, 11 turns, so a single run cannot rank a change'
     })
+    .option('harness', {
+      type: 'array',
+      describe:
+        'harness to dispatch on; repeatable, and every instruction runs once per value. Default: the identity default'
+    })
+    .option('model', {
+      type: 'array',
+      describe:
+        'model to dispatch on; repeatable, and every instruction runs once per value. Effort level rides on this axis -- it comes from the model registry entry reasoning_effort, not from a flag'
+    })
     .option('json', { type: 'boolean', default: false })
     .option('out', {
       type: 'string',
@@ -779,17 +810,36 @@ const main = async () => {
     )
   }
 
+  // The CROSS PRODUCT of the two configuration axes, with `null` standing for
+  // "whatever the identity defaults to". A sweep that named neither runs exactly
+  // as it always did, one arm of `[null]` x `[null]`, so the default invocation
+  // is unchanged.
+  const harness_arm = argv.harness?.length ? argv.harness : [null]
+  const model_arm = argv.model?.length ? argv.model : [null]
+  const arms = harness_arm.flatMap((harness) =>
+    model_arm.map((model) => ({ harness, model }))
+  )
+
   log(
-    `benchmark: ${selected.length} instruction(s) x ${argv.repeat} run(s), serialized`
+    `benchmark: ${selected.length} instruction(s) x ${argv.repeat} run(s) x ${arms.length} arm(s), serialized`
   )
   log(`assertions derived ${instruction_set.generated_at}`)
 
   const rows = []
-  for (let iteration = 1; iteration <= argv.repeat; iteration++) {
-    for (const entry of selected) {
-      const row = await run_one({ entry, iteration, log })
-      rows.push(row)
-      if (argv.out) fs.appendFileSync(argv.out, `${JSON.stringify(row)}\n`)
+  // ARM OUTERMOST, iteration next, instruction innermost. Contention drifts over
+  // a sweep -- it climbed from 10 to 14 across one 2026-09-04 sitting -- so
+  // interleaving the arms would hand each one a different slice of that drift
+  // and read the difference as a property of the harness.
+  for (const { harness, model } of arms) {
+    if (harness || model) {
+      log(`\narm: harness=${harness || 'default'} model=${model || 'default'}`)
+    }
+    for (let iteration = 1; iteration <= argv.repeat; iteration++) {
+      for (const entry of selected) {
+        const row = await run_one({ entry, iteration, log, harness, model })
+        rows.push(row)
+        if (argv.out) fs.appendFileSync(argv.out, `${JSON.stringify(row)}\n`)
+      }
     }
   }
 

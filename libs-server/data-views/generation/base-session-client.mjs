@@ -238,10 +238,17 @@ export const build_generation_prompt = ({
  * identity gaining a second allowed profile cannot silently move generation
  * onto the other one.
  *
+ * `harness` and `model` are OMITTED from the body when null rather than sent as
+ * null. The route reads absence as "no operator choice" and applies the
+ * identity's default; an explicit null is a value it would have to interpret,
+ * and the two spellings are not the same request. Production always omits them.
+ *
  * @param {object} params
  * @param {string} params.generation_id - league's own key, carried as the slug
  * @param {string} params.instruction
  * @param {object|null} [params.input_table_state]
+ * @param {string|null} [params.harness] - null means the identity's default
+ * @param {string|null} [params.model] - null means the identity's default
  * @param {(url: string, init: object) => Promise<Response>} [params.fetch_impl]
  *   - injected by the spec
  * @returns {Promise<{thread_id: string, job_id: string}>}
@@ -250,6 +257,8 @@ export const dispatch_generation_session = async ({
   generation_id,
   instruction,
   input_table_state = null,
+  harness = null,
+  model = null,
   fetch_impl = fetch
 }) => {
   const base_url = process.env.BASE_API_URL
@@ -269,7 +278,9 @@ export const dispatch_generation_session = async ({
     prompt_correlation_id: crypto.randomUUID(),
     // Human-facing only. The league-side key stays generation_id; this just
     // makes a pane findable while a run is in flight.
-    session_slug: `data-view-generation-${generation_id.slice(0, 8)}`
+    session_slug: `data-view-generation-${generation_id.slice(0, 8)}`,
+    ...(harness ? { harness } : {}),
+    ...(model ? { model } : {})
   })
 
   const post = async (token) =>
