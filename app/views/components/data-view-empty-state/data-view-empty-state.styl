@@ -40,12 +40,11 @@
   &:hover
     background-color rgba(0, 0, 0, 0.05)
 
+// The turn-over on expand comes from Icon's own `flipped` prop
+// (icon.styl's .icon--flipped), not from a rotate rule here -- every
+// disclosure control in the app shares that one.
 .data-view-empty-state__chevron
-  font-size 18px
-  transition transform 150ms ease
-
-  &.-open
-    transform rotate(180deg)
+  margin-left 2px
 
 .data-view-empty-state__steps
   margin 0 0 12px

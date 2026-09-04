@@ -2,7 +2,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+
+import Icon from '@components/icon'
 
 import './data-view-empty-state.styl'
 
@@ -84,12 +85,11 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
         onClick={toggle_quick_start}
       >
         Quick start
-        <KeyboardArrowDownIcon
-          className={
-            is_quick_start_expanded
-              ? 'data-view-empty-state__chevron -open'
-              : 'data-view-empty-state__chevron'
-          }
+        <Icon
+          className='data-view-empty-state__chevron'
+          name='down'
+          small
+          flipped={is_quick_start_expanded}
         />
       </button>
       {is_quick_start_expanded && (
