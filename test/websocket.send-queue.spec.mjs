@@ -108,6 +108,7 @@ describe('websocket send queue', function () {
       fs.readFileSync(path.join(repo_root, relative), 'utf8')
 
     const auction_sagas = 'app/core/auction/sagas.js'
+    const plays_sagas = 'app/core/plays-view/sagas.js'
 
     // Bounded FORWARD from the declaration, never sliced to a token that also
     // appears earlier in the file: slicing backwards yields an empty string and
@@ -122,18 +123,18 @@ describe('websocket send queue', function () {
       return source.slice(start, end)
     }
 
-    it('is opted into in exactly three places in the tree', function () {
+    it('is opted into in exactly four places in the tree', function () {
       // Enumerated from the code that defines the class, not from the names
       // this session happened to look at. A further call site opting in -- for
       // a bid, a nomination, a commissioner control -- fails here whatever it
       // is called.
       //
-      // The data-view results request is the third member and the only one that
-      // is not a registration. It qualifies on the same terms: a read, carrying
-      // no board state, correct against whatever socket opens. It is here
-      // because the data-views page issues its first query from a mount effect,
-      // which routinely beats the socket open on a cold load -- and a dropped
-      // frame there hangs the page at `pending` with nothing to end it.
+      // The two results requests are the members that are not registrations.
+      // They qualify on the same terms: a read, carrying no board state,
+      // correct against whatever socket opens. They are here because both the
+      // data-views and the plays page issue their first query from a mount
+      // effect, which routinely beats the socket open on a cold load -- and a
+      // dropped frame there hangs the page at `pending` with nothing to end it.
       const files = []
       const walk = (dir) => {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -154,8 +155,70 @@ describe('websocket send queue', function () {
       expect(opted_in).to.deep.equal([
         auction_sagas,
         'app/core/data-views/sagas.js',
+        'app/core/plays-view/sagas.js',
         'app/core/scoreboard/sagas.js'
       ])
+    })
+
+    it('gives the two results requests DISTINCT replace keys', function () {
+      // A page request and a plays request are both queueable inside the same
+      // connect window, and a shared key would make whichever was written
+      // second silently evict the first -- one of the two pages then renders
+      // headers over an empty body, which is the exact defect the queue was
+      // added to close. Read as a set so a third results surface adopting an
+      // existing key fails here.
+      const keys = ['app/core/data-views/sagas.js', plays_sagas]
+        .map((relative) => read(relative))
+        .map((source) => /replace_key: [^\n]*'([a-z_]+)'/.exec(source))
+        .map((match, index) => {
+          expect(match, `results saga ${index} still passes a replace_key`).to
+            .not.be.null
+          return match[1]
+        })
+
+      expect(keys).to.deep.equal(['data_view_request', 'plays_view_request'])
+    })
+
+    it('does include the plays results request', function () {
+      // The page-level request, NOT the player drawer's Plays tab below it.
+      // The drawer opens only from a click on an already-rendered surface --
+      // nothing sets the selected player from a route or query param -- so it
+      // cannot be written inside the connect window and does not opt in.
+      const source = read(plays_sagas)
+      const start = source.indexOf('function* handle_plays_view_request(')
+      expect(
+        start,
+        'the plays request saga is still declared by this name'
+      ).to.be.above(-1)
+      const end = source.indexOf(
+        '\nfunction* handle_selected_player_plays_request(',
+        start
+      )
+      expect(end, 'the drawer saga still follows it').to.be.above(start)
+      const body = source.slice(start, end)
+
+      expect(body).to.include('PLAYS_VIEW_REQUEST')
+      expect(body).to.include('queue_until_open: true')
+    })
+
+    it('does not include the player drawer plays request', function () {
+      const source = read(plays_sagas)
+      const start = source.indexOf(
+        'function* handle_selected_player_plays_request('
+      )
+      expect(
+        start,
+        'the drawer saga is still declared by this name'
+      ).to.be.above(-1)
+      const end = source.indexOf('\nexport ', start + 1)
+      expect(end, 'the drawer saga is still followed by an export').to.be.above(
+        start
+      )
+      const body = source.slice(start, end)
+
+      expect(body).to.include('PLAYS_VIEW_REQUEST')
+      expect(body).to.include('send, {')
+      expect(body).to.not.include('queue_until_open')
     })
 
     it('does not include the bid', function () {

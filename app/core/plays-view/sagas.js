@@ -9,7 +9,7 @@ import {
   api_delete_plays_view,
   api_get_plays_view
 } from '@core/api'
-import { send, wsActions } from '@core/ws'
+import { send } from '@core/ws'
 import { get_app, get_request_history } from '@core/selectors'
 import { plays_view_request_actions } from '@core/plays-view-request/actions'
 import { notification_actions } from '@core/notifications/actions'
@@ -71,14 +71,38 @@ function* handle_plays_view_request({
     source: 'plays_page'
   }
 
-  yield call(send, {
-    type: 'PLAYS_VIEW_REQUEST',
-    payload: {
-      request_id: data_view.view_id,
-      params: opts,
-      ignore_cache
+  // Queued rather than dropped when the socket is still CONNECTING. `send`
+  // returns false and logs nothing the page reacts to for a frame written
+  // against a socket that is not open (see @core/ws/service), and this page
+  // composes its first request from a mount effect that routinely beats the
+  // socket open on a cold load. The reducer keeps the view id rather than the
+  // params, so nothing else would ever retransmit it and /plays sat on its
+  // headers SILENTLY -- the status pill renders only for a `pending` that
+  // already carries a server-assigned queue position, so a request that never
+  // reached the server displays nothing at all.
+  //
+  // Same terms as the data-views results request it mirrors (see
+  // @core/data-views/sagas and @core/ws/send-queue): a read, idempotent,
+  // carrying no board state, correct to deliver against whatever socket opens.
+  yield call(
+    send,
+    {
+      type: 'PLAYS_VIEW_REQUEST',
+      payload: {
+        request_id: data_view.view_id,
+        params: opts,
+        ignore_cache
+      }
+    },
+    {
+      queue_until_open: true,
+      // A replacing request supersedes whatever else is queued: it clears the
+      // results in the reducer too, so nothing queued before it is still
+      // wanted. An APPEND supersedes nothing -- two pages are both wanted, and
+      // dropping one leaves a hole in the table.
+      replace_key: append_results ? undefined : 'plays_view_request'
     }
-  })
+  )
 
   yield put(plays_view_request_actions.plays_view_request(opts))
 }
@@ -149,33 +173,6 @@ export function* plays_view_changed({ payload }) {
     const data_view = yield select(get_selected_plays_view)
     yield call(handle_plays_view_request, { data_view, append_results, offset })
   }
-}
-
-// `send` DROPS a message written while the socket is not open, returning false
-// and logging nothing the page reacts to (see @core/ws/service). A cold load
-// composes its first request from a mount effect that can win the race against
-// the socket opening, and nothing else would ever retransmit it: the reducer
-// keeps the view id rather than the params. The page then sits on its headers
-// indefinitely, and it does so SILENTLY -- the status pill renders only for a
-// `pending` that already carries a server-assigned queue position, so a request
-// that never reached the server displays nothing at all. Re-deriving the
-// request from the selected view is what makes the connection actually deliver
-// the page.
-//
-// WEBSOCKET_OPEN, not WEBSOCKET_RECONNECTED: `reconnected()` is put only by the
-// reconnect loop and by the post-auth socket swap, never for the FIRST connect
-// of the tab -- which is precisely the one a cold load races.
-export function* replay_in_flight_plays_view_request() {
-  const status = yield select((state) =>
-    state.getIn(['plays_view_request', 'status'])
-  )
-
-  if (status !== 'pending' && status !== 'processing') return
-
-  const data_view = yield select(get_selected_plays_view)
-  if (!data_view) return
-
-  yield call(handle_plays_view_request, { data_view })
 }
 
 export function* reset_plays_view_cache() {
@@ -571,20 +568,6 @@ export function* watch_delete_plays_view_fulfilled_for_browser_cleanup() {
   )
 }
 
-export function* watch_websocket_open_for_plays_view_request() {
-  yield takeLatest(
-    wsActions.WEBSOCKET_OPEN,
-    replay_in_flight_plays_view_request
-  )
-}
-
-export function* watch_websocket_reconnected_for_plays_view_request() {
-  yield takeLatest(
-    wsActions.WEBSOCKET_RECONNECTED,
-    replay_in_flight_plays_view_request
-  )
-}
-
 export function* watch_selected_player_plays_request() {
   yield takeLatest(
     plays_views_actions.SELECTED_PLAYER_PLAYS_REQUEST,
@@ -618,7 +601,5 @@ export const plays_views_sagas = [
   fork(watch_post_plays_view_fulfilled_for_browser_mark),
   fork(watch_delete_plays_view_fulfilled_for_browser_cleanup),
   fork(watch_set_selected_plays_view_for_browser_persist),
-  fork(watch_websocket_open_for_plays_view_request),
-  fork(watch_websocket_reconnected_for_plays_view_request),
   fork(watch_selected_player_plays_request)
 ]
