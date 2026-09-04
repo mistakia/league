@@ -622,9 +622,26 @@ export default function DataViewsPage({
 
   const is_fetching_more = is_request_in_flight && players.length > 0
 
-  const is_loading = is_request_in_flight && players.length === 0
-
   const has_columns = Boolean(filtered_table_state.columns?.length)
+
+  // The request slice starts at `status: null` and only reaches `pending` when
+  // the saga dispatches, so between mount and that dispatch a view WITH columns
+  // has no rows, no in-flight request and nothing marking it as loading -- and
+  // the table renders its empty state, which then says "no rows match this
+  // view" about a query that has not been asked yet.
+  //
+  // `status: null` alone cannot be read as loading, because it is also what
+  // DATA_VIEW_REQUEST_SKIPPED resets to, and that IS the settled state of a
+  // view with no columns -- the one case whose empty state must paint at once.
+  // `has_columns` is the discriminator: skipping is the only path to a null
+  // status that is final, and the saga skips exactly when there are no columns.
+  const has_settled_request =
+    data_view_request.status === 'completed' ||
+    data_view_request.status === 'error'
+
+  const is_loading =
+    players.length === 0 &&
+    (is_request_in_flight || (has_columns && !has_settled_request))
 
   // Someone with a saved view of their own has been here before, so the quick
   // start opens collapsed for them. The component remembers an explicit
