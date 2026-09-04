@@ -2,6 +2,7 @@
 import * as chai from 'chai'
 
 import { resolve_generated_table_state } from '#libs-server/data-views/generation/resolve-generated-table-state.mjs'
+import { SHAPE_PROMPT } from '#libs-server/data-views/generation/generate-data-view.mjs'
 import { table_state_validator } from '#libs-server/validators.mjs'
 
 const expect = chai.expect
@@ -180,6 +181,43 @@ describe('data-views generation / output contract agreement', function () {
         )
       })
     }
+  })
+
+  describe("the contract's own worked example", function () {
+    // The example is the shape the agent copies, so anything it models is
+    // effectively a rule. It used to carry `"threshold": null` under
+    // `aggregation: "rate"` -- legal there, because the count rule reads a falsy
+    // threshold as absent, and so never flagged. But it taught "threshold is
+    // always present, null when unused", and an agent generalising that onto
+    // `count` -- what any counting stat asks for -- lands exactly on the state
+    // that produced the misleading error.
+    //
+    // Parsed back out of the prompt text rather than imported as an object,
+    // because what the agent reads is the rendered JSON, and an assertion
+    // against the source object would pass while the prompt disagreed with it.
+    const example = JSON.parse(
+      SHAPE_PROMPT.slice(SHAPE_PROMPT.indexOf('{\n  "row_grain"'))
+    )
+
+    it('is admitted by both tools', function () {
+      const resolver = resolve_generated_table_state({
+        table_state: structuredClone(example)
+      })
+      expect(
+        resolver.ok,
+        `the worked example does not resolve: ${JSON.stringify(resolver.errors)}`
+      ).to.equal(true)
+
+      const executor = table_state_validator(structuredClone(example))
+      expect(
+        executor,
+        `the worked example does not validate: ${JSON.stringify(executor)}`
+      ).to.equal(true)
+    })
+
+    it('does not model a null threshold anywhere in the prompt', function () {
+      expect(SHAPE_PROMPT).to.not.match(/"threshold":\s*null/)
+    })
   })
 
   describe('the resolver names the failing field', function () {

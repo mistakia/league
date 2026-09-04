@@ -143,7 +143,8 @@ export const SHAPE_PROMPT = [
   '# Shape',
   '',
   'A param value is an ARRAY, even for a single value: {"year": [2024]}. Two exceptions:',
-  '- `output` is an OBJECT: {"period": "game", "aggregation": "rate", "threshold": null}. Use it whenever the instruction asks for a per-game or per-play rate rather than a total.',
+  '- `output` is an OBJECT: {"period": "game", "aggregation": "rate"}. Use it whenever the instruction asks for a per-game or per-play rate rather than a total, and omit it entirely for a plain season total.',
+  '  `aggregation` is `rate`, `mean` or `count`. `count` counts the periods clearing a bar, so it is the only one that takes a `threshold`, it REQUIRES one, and the threshold is an object: {"op": ">=", "value": 5}. `null` is not a threshold. Do not send `threshold` with `rate` or `mean`.',
   '- A value that depends on when the view is read is an object inside the array: {"nfl_week_id": [{"dynamic_type": "current_nfl_week"}]}.',
   '',
   'Filters go in `where`, and most views have them — a request naming a position, a threshold, or a season is asking for a filter, not just a column. Operators, most used first: IN, >=, IS NOT NULL, >, =, <, !=, <=.',
@@ -159,7 +160,12 @@ export const SHAPE_PROMPT = [
           column_id: 'player_receiving_yards_from_plays',
           params: {
             year: [2024],
-            output: { period: 'game', aggregation: 'rate', threshold: null }
+            // No `threshold` key, deliberately. Carrying it as null taught the
+            // shape "threshold is always present, null when unused", and an
+            // agent generalising that onto `aggregation: 'count'` -- which is
+            // what a counting stat asks for -- produced the one state the
+            // validator refused with an error that named the wrong field.
+            output: { period: 'game', aggregation: 'rate' }
           }
         },
         { column_id: 'player_games_played', params: { year: [2024] } }
