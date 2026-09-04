@@ -4,7 +4,20 @@ import { current_season } from '#constants'
 
 const v = new Validator({
   haltOnFirstError: true,
-  useNewCustomCheckerFunction: true
+  useNewCustomCheckerFunction: true,
+  // A custom checker's error carries only a `type`, and fastest-validator looks
+  // the prose up here. Without an entry it resolves to undefined, and
+  // get-data-view-results maps errors to `error.message` -- so an unregistered
+  // custom type reached the caller as the literal string "undefined" and the
+  // only readable complaint left in the array was some other rule's.
+  messages: {
+    outputCountRequiresThreshold:
+      "The '{field}' field uses aggregation 'count', which counts the periods meeting a threshold and so requires a 'threshold' of { op, value }. A null threshold is not one. For a plain season total, omit 'output' entirely.",
+    outputThresholdRequiresCount:
+      "The '{field}' field supplies a 'threshold', which only aggregation 'count' reads. Set aggregation to 'count' or drop the threshold.",
+    columnEntryShape:
+      "The '{field}' field must be a column id string or an object with a 'column_id'."
+  }
 })
 
 const league_id_schema = {
@@ -123,22 +136,100 @@ const params_with_output_schema = {
   }
 }
 
+// The `output` contract on its own, for the generation resolver.
+//
+// `validate_table_state` is the tool the generation agent is TOLD to trust, and
+// it used to green-light an `output` that the executor then refused -- so the
+// agent's own verification step confirmed a state that could not run. Exported
+// so the resolver checks the identical rules rather than a second transcription
+// of them, which is the only way the two verdicts cannot drift apart.
+//
+// Compiled under the key `output` rather than as a `$$root` schema so the
+// messages name a field. fastest-validator resolves `{field}` to the empty
+// string at the root, which rendered the prose as "The '' field uses
+// aggregation 'count'" -- readable to a human and one more thing for an agent
+// to wonder about.
+const output_param_wrapper_validator = v.compile({
+  output: { ...output_param_schema, optional: false }
+})
+
+/**
+ * Validate a column's `output` param against the executor's own contract.
+ *
+ * @param {object} output
+ * @returns {true|Array<{field: string, type: string, message: string}>} true
+ *   when valid, otherwise the errors with fields named relative to `output`
+ */
+export const validate_output_param = (output) =>
+  output_param_wrapper_validator({ output })
+
+const column_entry_object_validator = v.compile({
+  $$root: true,
+  type: 'object',
+  props: {
+    column_id: { type: 'string' },
+    params: params_with_output_schema
+  }
+})
+
+// A column entry is a bare id string or a `{ column_id, params }` object. Both
+// shapes are live in production saved views, and they are told apart by their
+// JS type alone.
+//
+// WRITTEN AS A DISCRIMINATING CHECK RATHER THAN A UNION, because a union runs
+// every branch and reports the LAST branch's complaint. An object entry whose
+// `params.output` was wrong therefore came back as "The 'columns[0]' field must
+// be a string" -- naming the branch that was never going to apply, describing a
+// shape the request was right not to use, and burying the real error. That
+// message is unrecoverable from: it says the request is the wrong TYPE, so
+// there is nothing in `output` to go look at. One generation agent read it,
+// concluded the contract it had been given was wrong, and spent 45 tool calls
+// and 1.79M input tokens reading league source before giving up.
+//
+// Dispatching on the type first means the errors returned are the ones from the
+// branch that actually applies, and only those.
+//
+// The dispatch is carried on the ARRAY rather than on `items`, because an
+// item-level custom check is handed the schema path (`columns[]`) and not the
+// runtime index, so its errors could not say WHICH column was wrong. Iterating
+// here keeps the index, which the union spelling did provide.
+const check_column_entries = ({ entries, errors, path }) => {
+  entries.forEach((entry, index) => {
+    const field = `${path}[${index}]`
+
+    if (typeof entry === 'string') return
+
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      errors.push({ type: 'columnEntryShape', field, actual: entry })
+      return
+    }
+
+    const result = column_entry_object_validator(entry)
+    if (result === true) return
+
+    for (const error of result) {
+      // Re-rooted onto the caller's path, and the resolved `message` dropped so
+      // the outer validator re-resolves the template against the field below --
+      // string surgery on an already-rendered message would go stale the moment
+      // a template changed.
+      const { message, ...rest } = error
+      errors.push({
+        ...rest,
+        field: error.field ? `${field}.${error.field}` : field
+      })
+    }
+  })
+}
+
 const columns_schema = {
   type: 'array',
-  items: [
-    {
-      type: 'object',
-      props: {
-        column_id: { type: 'string' },
-        params: params_with_output_schema
-      }
-    },
-    {
-      type: 'string'
+  custom(value, errors, schema, path) {
+    if (Array.isArray(value)) {
+      check_column_entries({ entries: value, errors, path })
     }
-  ]
+    return value
+  }
 }
-export const columns_validator = v.compile(columns_schema)
 
 const where_operator_schema = {
   type: 'string',

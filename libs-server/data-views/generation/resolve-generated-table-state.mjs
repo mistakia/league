@@ -67,6 +67,7 @@ import {
   get_data_view_generation_catalog,
   build_data_view_generation_catalog
 } from './build-data-view-generation-catalog.mjs'
+import { validate_output_param } from '#libs-server/validators.mjs'
 
 export const RESOLVER_ERROR_CODES = {
   malformed_table_state: 'malformed_table_state',
@@ -181,9 +182,30 @@ const check_params = ({ params, catalog_column, catalog, path, errors }) => {
 
     // `output` is the aggregation contract, not a filter param, and it is
     // declared by the column through `supports_output` rather than by the param
-    // registry. Checking it against the registry would reject every rate column
-    // in the corpus.
-    if (param_key === 'output') continue
+    // registry. Checking it against the REGISTRY would reject every rate column
+    // in the corpus -- so it is checked against its own schema instead, the
+    // same one the executor applies.
+    //
+    // It used to be skipped outright, and that was the defect: this resolver is
+    // what `validate_table_state` returns, and it green-lit an `output` that
+    // `preview_view` then refused. An agent that had just been told its
+    // candidate was valid got a flat rejection from the next tool, with no
+    // error naming `output` anywhere -- and the honest reading of that is that
+    // the tools disagree, which is what sent one generation session reading
+    // league source instead of fixing its own state.
+    if (param_key === 'output') {
+      const result = validate_output_param(value)
+      if (result !== true) {
+        for (const error of result) {
+          errors.push({
+            code: RESOLVER_ERROR_CODES.invalid_param_value,
+            path: `${path}.params.${error.field}`,
+            message: error.message
+          })
+        }
+      }
+      continue
+    }
 
     const definition = resolve_param_definition({
       catalog_column,
