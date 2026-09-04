@@ -44,15 +44,16 @@
 // A RULE, NOT A BOX. The tutorial is the least important thing here and a
 // bordered, tinted panel made it the heaviest -- on an empty page it outweighed
 // both the headline and the two controls the headline points at. A hairline and
-// a quiet toggle say "there is more here" without competing for the first look.
+// one quiet line say "there is more here" without competing for the first look.
 .data-view-empty-state__quick-start
   margin-bottom 18px
   border-top 1px solid rgba(0, 0, 0, 0.12)
 
-.data-view-empty-state__toggle
-  display flex
-  align-items center
-  gap 6px
+// Set like the links at the foot of this block, because that is what it is: a
+// word that reveals more reading. It is the whole control -- once the steps are
+// shown it is gone, and nothing takes its place.
+.data-view-empty-state__reveal
+  display block
   margin 0
   padding 9px 0
   border 0
@@ -60,32 +61,21 @@
   color rgba(0, 0, 0, 0.55)
   font-family inherit
   font-size 13px
-  font-weight 600
   text-align left
+  text-decoration underline
+  text-decoration-color rgba(0, 0, 0, 0.22)
+  text-underline-offset 2px
   cursor pointer
-  transition color 120ms ease
+  transition color 120ms ease, text-decoration-color 120ms ease
 
   &:hover
     color rgba(0, 0, 0, 0.87)
+    text-decoration-color rgba(0, 0, 0, 0.6)
 
-    .data-view-empty-state__toggle-action
-      color rgba(0, 0, 0, 0.6)
-      text-decoration-color rgba(0, 0, 0, 0.6)
-
-// Set like the links at the foot of this block rather than like the label
-// beside it: this half is the ACTION, and it is the only word here that does
-// something when clicked.
-.data-view-empty-state__toggle-action
-  flex-shrink 0
-  color rgba(0, 0, 0, 0.42)
-  font-weight 400
-  text-decoration underline
-  text-decoration-color rgba(0, 0, 0, 0.2)
-  text-underline-offset 2px
-  transition color 120ms ease
-
+// Matches the reveal line's own padding, so the block does not shift the links
+// below it when the steps replace the line.
 .data-view-empty-state__panel
-  padding 2px 0 10px
+  padding 10px 0 12px
 
 .data-view-empty-state__steps
   margin 0

@@ -1,55 +1,19 @@
-/* global localStorage */
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
 import './data-view-empty-state.styl'
 
-// Whether the quick start is expanded, remembered across visits. Read and
-// written directly rather than through localStorageAdapter, whose getItem is a
-// promise -- an async read cannot supply a first-render default, and a guide
-// that pops open one frame after the empty state has already drawn is worse
-// than one that was never offered.
-const QUICK_START_STORAGE_KEY = 'data_view_quick_start_expanded'
-
-const read_stored_preference = () => {
-  try {
-    const raw = localStorage.getItem(QUICK_START_STORAGE_KEY)
-    if (raw === null) return null
-    return raw === 'true'
-  } catch (error) {
-    // Storage can be unreadable (private mode, a full quota, a disabled
-    // third-party cookie policy). No preference is a fine answer here.
-    return null
-  }
-}
-
-const write_stored_preference = (is_expanded) => {
-  try {
-    localStorage.setItem(QUICK_START_STORAGE_KEY, String(is_expanded))
-  } catch (error) {
-    // Nothing depends on the write landing -- the guide simply reverts to its
-    // default on the next visit.
-  }
-}
-
-export default function DataViewEmptyState({ has_columns, has_saved_views }) {
-  // Expanded by default only for someone with no saved views of their own.
-  // Progressive disclosure is the point: a returning user creating their
-  // fifteenth view gets the one-line prompt and a control, not the tutorial,
-  // and an explicit choice outranks the heuristic in both directions.
-  const [is_quick_start_expanded, set_is_quick_start_expanded] = React.useState(
-    () => {
-      const stored = read_stored_preference()
-      return stored === null ? !has_saved_views : stored
-    }
-  )
-
-  const toggle_quick_start = () => {
-    const next = !is_quick_start_expanded
-    set_is_quick_start_expanded(next)
-    write_stored_preference(next)
-  }
+export default function DataViewEmptyState({ has_columns }) {
+  // ALWAYS COLLAPSED TO START, and there is deliberately no way back to
+  // collapsed once opened. This began as a real disclosure -- a remembered
+  // preference, a heuristic default keyed on whether the user had saved views
+  // of their own, and a Hide beside the Show -- which is a lot of machinery to
+  // decide the state of a three-item tutorial. The tutorial is read once and
+  // then it is scenery, so the only state worth having is the one that keeps it
+  // out of the way until asked for, and a Hide is a control for putting back
+  // something the user just asked to see.
+  const [is_quick_start_shown, set_is_quick_start_shown] = React.useState(false)
 
   if (has_columns) {
     return (
@@ -80,27 +44,8 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
         Open <strong>Columns</strong> and add a field, or{' '}
         <strong>describe a view</strong> and have it built for you.
       </div>
-      {/* The steps and the tip live INSIDE the disclosure element the toggle
-          heads, rather than beside it, so what the control owns is visible
-          from the layout alone whether it is open or closed. */}
       <div className='data-view-empty-state__quick-start'>
-        <button
-          type='button'
-          className='data-view-empty-state__toggle'
-          aria-expanded={is_quick_start_expanded}
-          onClick={toggle_quick_start}
-        >
-          {/* A WORD, NOT A CHEVRON. The sprite glyph was the only drawn mark on
-              a surface made of type and rules, and at 13px it read as a
-              scanning artifact rather than as a control. "Show" and "Hide" say
-              what the arrow was pointing at, and they say it in the face
-              everything around them is set in. */}
-          <span>Quick start</span>
-          <span className='data-view-empty-state__toggle-action'>
-            {is_quick_start_expanded ? 'Hide' : 'Show'}
-          </span>
-        </button>
-        {is_quick_start_expanded && (
+        {is_quick_start_shown ? (
           <div className='data-view-empty-state__panel'>
             <ol className='data-view-empty-state__steps'>
               <li>
@@ -121,6 +66,14 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
               and exports CSV.
             </div>
           </div>
+        ) : (
+          <button
+            type='button'
+            className='data-view-empty-state__reveal'
+            onClick={() => set_is_quick_start_shown(true)}
+          >
+            Show quick start
+          </button>
         )}
       </div>
       <div className='data-view-empty-state__links'>
@@ -132,6 +85,5 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
 }
 
 DataViewEmptyState.propTypes = {
-  has_columns: PropTypes.bool,
-  has_saved_views: PropTypes.bool
+  has_columns: PropTypes.bool
 }

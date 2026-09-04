@@ -659,15 +659,6 @@ export default function DataViewsPage({
     players.length === 0 &&
     (is_request_in_flight || (has_columns && !has_settled_request))
 
-  // Someone with a saved view of their own has been here before, so the quick
-  // start opens collapsed for them. The component remembers an explicit
-  // expand/collapse and prefers it over this.
-  const has_saved_views = useMemo(
-    () =>
-      Boolean(user_id) && data_views.some((view) => view.user_id === user_id),
-    [data_views, user_id]
-  )
-
   const body = is_view_loading ? (
     <Loading loading />
   ) : (
@@ -695,7 +686,7 @@ export default function DataViewsPage({
           // already saying what happened -- "no rows match this view" beside a
           // failure banner reads as a second, contradictory explanation.
           data_view_request.status === 'error' ? null : (
-            <DataViewEmptyState {...{ has_columns, has_saved_views }} />
+            <DataViewEmptyState {...{ has_columns }} />
           )
         }
         clear_local_cache={() => set_cache_clear_dialog_open(true)}
