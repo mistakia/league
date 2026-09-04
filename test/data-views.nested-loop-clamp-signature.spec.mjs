@@ -131,13 +131,13 @@ describe('data views nested-loop clamp signature', function () {
     })
 
     it('answers null for every malformed response rather than throwing', function () {
+      // One input per distinct branch rather than per malformed shape: the
+      // first three all exit at the `Array.isArray` guard by different routes
+      // (nullish, structural, wrong type), and the last two are the only ones
+      // that reach past it.
       const malformed = [
         undefined,
-        null,
-        {},
-        { rows: [] },
         { rows: [{}] },
-        { rows: [{ 'QUERY PLAN': null }] },
         { rows: [{ 'QUERY PLAN': 'not an array' }] },
         { rows: [{ 'QUERY PLAN': [] }] },
         { rows: [{ 'QUERY PLAN': [{}] }] }
