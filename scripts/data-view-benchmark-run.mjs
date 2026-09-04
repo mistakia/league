@@ -111,15 +111,32 @@ const TRANSCRIPT_SETTLE_POLL_MS = 3 * 1000
 // happens and only shows up as the next three instructions expiring.
 const REAP_ATTEMPTS = 3
 const REAP_RETRY_MS = 10 * 1000
+
+// Same transport race, read side. The thread record has to reach this host by
+// rsync before `base thread get` can answer, and a miss here silently costs the
+// run its turn and token columns rather than failing.
+const SESSION_ID_ATTEMPTS = 4
+const SESSION_ID_RETRY_MS = 8 * 1000
 const SLOT_WAIT_TIMEOUT_MS = 3 * 60 * 1000
 const SLOT_POLL_MS = 5 * 1000
 
-// The session_slug prefix `dispatch_generation_session` mints, which is how a
+// The session_slug `dispatch_generation_session` mints, which is how a
 // generation session is told apart from every other live thread in the running
 // list. Kept in step with base-session-client.mjs by nothing but this comment:
 // the runner cannot import from libs-server without dragging the dispatch path
 // into a script that must not dispatch.
-const GENERATION_SESSION_LABEL_PREFIX = 'data-view-generation-'
+//
+// THE WHOLE SLUG, NOT A BARE PREFIX. The slug is
+// `data-view-generation-${generation_id.slice(0, 8)}`, so the eight hex
+// characters are what make it a generation session -- and matching the prefix
+// alone matched the OPERATOR'S OWN session too. A tuning session labelled
+// `data-view-generation-latency-tuning` reads as a stranded generation session
+// holding the slot, so the runner waits the full three minutes on itself and
+// then records the run against a slot it believed was held. That cost a whole
+// sweep on 2026-09-04: nine instructions, zero rows, and the failure looked
+// like the stranded-session defect it was written to detect.
+export const GENERATION_SESSION_SLUG_PATTERN =
+  /data-view-generation-[0-9a-f]{8}\b/
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -281,23 +298,59 @@ export const await_job_completion = async ({ generation_id, log }) => {
  * records the THREAD, so this hop is required and there is no way to guess it
  * from the job row.
  *
- * @param {string} thread_id
+ * RETRIED, for the same reason `reap_stranded_session` is. A thread's
+ * `metadata.json` is rsync-transported rather than git-tracked, so the record is
+ * briefly unresolvable to THIS host right after the session is created --
+ * `base thread end` was already observed answering "Thread not found" for
+ * threads that resolve fine minutes later. A single read here failed the same
+ * way and returned null, and a null session id costs the run its ENTIRE
+ * transcript: no turns, no output tokens, which are the two columns a change is
+ * ranked on.
+ *
+ * That failure is invisible in the result. The row still says `completed` and
+ * still grades `correct`, so it reads as a successful run that merely happened
+ * to yield no metrics, rather than as a read this runner gave up on too early.
+ * Two of nine rows in the 2026-09-04 contract-in-prompt sweep were lost this
+ * way, and both threads carried a populated session_id when asked again.
+ *
+ * @param {object} params
+ * @param {string} params.thread_id
+ * @param {(message: string) => void} [params.log]
  * @returns {Promise<string|null>}
  */
-export const read_session_id = async ({ thread_id }) => {
-  const { ok, stdout } = await try_exec(
-    'base',
-    ['thread', 'get', thread_id, '--json'],
-    { cwd: USER_BASE_DIR }
-  )
-  if (!ok) return null
-  try {
-    const parsed = JSON.parse(stdout)
-    const thread = parsed.thread || parsed
-    return thread?.external_session?.session_id || null
-  } catch {
-    return null
+export const read_session_id = async ({ thread_id, log = () => {} }) => {
+  let last_reason = 'no attempt made'
+
+  for (let attempt = 1; attempt <= SESSION_ID_ATTEMPTS; attempt++) {
+    const { ok, stdout } = await try_exec(
+      'base',
+      ['thread', 'get', thread_id, '--json'],
+      { cwd: USER_BASE_DIR }
+    )
+
+    if (ok) {
+      try {
+        const parsed = JSON.parse(stdout)
+        const thread = parsed.thread || parsed
+        const session_id = thread?.external_session?.session_id
+        if (session_id) return session_id
+        last_reason = 'thread resolved but carries no external_session'
+      } catch {
+        last_reason = 'thread record did not parse as JSON'
+      }
+    } else {
+      last_reason = 'thread did not resolve on this host'
+    }
+
+    if (attempt < SESSION_ID_ATTEMPTS) {
+      await sleep(SESSION_ID_RETRY_MS)
+    }
   }
+
+  log(
+    `  no session id after ${SESSION_ID_ATTEMPTS} attempts (${last_reason}); this run yields no transcript metrics`
+  )
+  return null
 }
 
 /**
@@ -563,7 +616,7 @@ export const await_generation_slot_free = async ({ log }) => {
 
     const holder = stdout
       .split('\n')
-      .find((line) => line.includes(GENERATION_SESSION_LABEL_PREFIX))
+      .find((line) => GENERATION_SESSION_SLUG_PATTERN.test(line))
     if (!holder) {
       if (announced) log('  slot released')
       return { free: true, holder: null }
@@ -630,7 +683,7 @@ export const run_one = async ({
   let metrics = null
   let session_id = null
   if (job.thread_id) {
-    session_id = await read_session_id({ thread_id: job.thread_id })
+    session_id = await read_session_id({ thread_id: job.thread_id, log })
     if (session_id) {
       const records = await read_transcript({ session_id, log })
       if (records) metrics = derive_transcript_metrics(records)

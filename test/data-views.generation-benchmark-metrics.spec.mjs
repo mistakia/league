@@ -8,6 +8,7 @@ import {
   parse_transcript,
   row_identity
 } from '#libs-server/data-views/generation/benchmark-metrics.mjs'
+import { GENERATION_SESSION_SLUG_PATTERN } from '../scripts/data-view-benchmark-run.mjs'
 
 const { expect } = chai
 
@@ -379,6 +380,46 @@ describe('data-view generation benchmark metrics', function () {
       // right; dropping the transcript is not.
       const body = '{"type":"user"}\n{"type":"assistant"}\n{"type":"cost-st'
       expect(parse_transcript(body)).to.have.length(2)
+    })
+  })
+
+  // The line the slot detector reads out of `base thread list --running`, which
+  // is tab-separated with the label first and the thread uuid a few fields in.
+  const running_line = (label) =>
+    `${label}\trepl-11e8dd58-5877-4b45-a31c-af6f0c17754b\ttmux\t11e8dd58-5877-4b45-a31c-af6f0c17754b\trunning`
+
+  describe('telling a generation session from an operator session', function () {
+    it('matches the slug dispatch actually mints', function () {
+      // `data-view-generation-${generation_id.slice(0, 8)}` -- eight hex.
+      expect(
+        GENERATION_SESSION_SLUG_PATTERN.test(
+          running_line('data-view-generation-843a9b38')
+        )
+      ).to.equal(true)
+    })
+
+    it('does NOT match an operator session named after the same work', function () {
+      // The defect this pins. A bare `data-view-generation-` prefix match also
+      // matched the tuning session an operator was sitting in, so the runner
+      // read itself as a stranded session holding the profile's single slot,
+      // waited its full timeout, and produced a sweep of zero rows that looked
+      // exactly like the stranded-session defect it exists to detect.
+      expect(
+        GENERATION_SESSION_SLUG_PATTERN.test(
+          running_line('data-view-generation-latency-tuning')
+        )
+      ).to.equal(false)
+    })
+
+    it('does not match a shorter or longer hex tail', function () {
+      expect(
+        GENERATION_SESSION_SLUG_PATTERN.test(
+          running_line('data-view-generation-843a9b3')
+        )
+      ).to.equal(false)
+      expect(
+        GENERATION_SESSION_SLUG_PATTERN.test(running_line('unrelated-session'))
+      ).to.equal(false)
     })
   })
 })
