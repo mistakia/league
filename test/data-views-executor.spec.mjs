@@ -539,6 +539,73 @@ describe('data view admission gate and instrumentation', function () {
     expect(active_request_count).to.equal(0)
   })
 
+  it('carries a shape descriptor that resolves the signature without any log', async function () {
+    const emitted = []
+    const wide_params = {
+      ...sample_params(),
+      view_id: 'view-abc',
+      // Repeats collapse under `distinct`, which is the whole point: a
+      // 181-column production view names about ten distinct columns.
+      columns: [
+        { column_id: 'player_rush_yds_from_plays', params: { year: [2024] } },
+        { column_id: 'player_rush_yds_from_plays', params: { year: [2025] } },
+        { column_id: 'player_name', params: {} }
+      ],
+      row_axes: ['year', 'week', 'line']
+    }
+
+    await execute_data_view_request({
+      request_id: 'v',
+      params: wide_params,
+      user_id: 134,
+      path: 'socket',
+      cache_key: 'k-shape',
+      run_query: async () => {
+        await sleep(30)
+        return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+      },
+      signal_emitter: async (args) => emitted.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+
+    expect(emitted.length).to.equal(1)
+    const { shape } = emitted[0].payload
+    expect(shape.kind).to.equal('columns')
+    expect(shape.view_id).to.equal('view-abc')
+    expect(shape.row_axes).to.eql(['year', 'week', 'line'])
+    expect(shape.column_count).to.equal(3)
+    expect(shape.distinct_column_id_count).to.equal(2)
+    expect(shape.column_ids).to.eql([
+      'player_name',
+      'player_rush_yds_from_plays'
+    ])
+    expect(shape.column_ids_truncated).to.equal(false)
+  })
+
+  it('describes a sandboxed-SQL shape by query_id and never by its statement', async function () {
+    const emitted = []
+
+    await execute_data_view_request({
+      request_id: 'v',
+      params: { query_id: 'q-42', sql_text: 'select 1 /* secret */' },
+      user_id: 134,
+      path: 'socket',
+      cache_key: 'k-sql-shape',
+      run_query: async () => {
+        await sleep(30)
+        return { data_view_results: [{ pid: 'x' }], data_view_metadata: {} }
+      },
+      signal_emitter: async (args) => emitted.push(args),
+      cache_get: async () => null,
+      emission_threshold_ms: 10
+    })
+
+    expect(emitted.length).to.equal(1)
+    expect(emitted[0].payload.shape).to.eql({ kind: 'sql', query_id: 'q-42' })
+    expect(JSON.stringify(emitted[0].payload)).to.not.include('secret')
+  })
+
   it('emits a stable dedup key for repeated identical slow requests and emits nothing under target', async function () {
     const emitted = []
     const slow = async () => {

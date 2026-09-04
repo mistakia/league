@@ -200,6 +200,61 @@ const data_view_query_signature = (params) => {
     .slice(0, 16)
 }
 
+// The signature is a HASH, and nothing anywhere stores its preimage. That was
+// found the expensive way: of 24 open slow_query signals triaged 2026-09-04,
+// only 9 could be resolved back to a shape at all. The other 15 were transient
+// client table states -- edited in the UI, never saved -- and by the time anyone
+// looked, the Postgres log and the pm2 telemetry log covering their window had
+// both rotated away and the saved views they were derived from had been
+// overwritten in place. 70,756 enumerated edit-neighbours of the surviving views
+// matched none of them. A signal whose shape cannot be recovered cannot be
+// diagnosed, only guessed at, so the triage window was silently bounded by log
+// retention rather than by anyone's decision.
+//
+// This descriptor is what makes the signal self-sufficient: it travels IN the
+// payload, so it outlives every log. It is deliberately not the canonical JSON
+// the signature hashes -- that is ~20KB for a 181-column view, and a signal
+// payload is read by humans and replicated. Distinct column ids collapse those
+// 181 columns to about ten, which is what a reader actually needs to name the
+// shape; `column_count` preserves the width the ids no longer show.
+const SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT = 40
+
+const shape_descriptor = (params) => {
+  const {
+    sql_text,
+    query_id,
+    columns = [],
+    row_axes = [],
+    view_id
+  } = params || {}
+
+  // The sandboxed-SQL path hashes the statement, not a column set. The statement
+  // itself is not recorded here -- it is user-authored SQL of unbounded size,
+  // and query_id is enough to find it in data_view_queries.
+  if (sql_text || query_id) {
+    return { kind: 'sql', query_id: query_id || null }
+  }
+
+  const distinct_column_ids = [
+    ...new Set(
+      (columns || []).map((col) =>
+        typeof col === 'string' ? col : col?.column_id
+      )
+    )
+  ].sort()
+
+  return {
+    kind: 'columns',
+    view_id: view_id || null,
+    row_axes,
+    column_count: (columns || []).length,
+    distinct_column_id_count: distinct_column_ids.length,
+    column_ids: distinct_column_ids.slice(0, SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT),
+    column_ids_truncated:
+      distinct_column_ids.length > SHAPE_DESCRIPTOR_COLUMN_ID_LIMIT
+  }
+}
+
 // Accepted slow queries -- shapes that were measured, diagnosed, and knowingly
 // left slow because the only remaining fix costs something we declined to pay.
 //
@@ -343,7 +398,8 @@ const report_slow_query = ({
       total_ms,
       result_row_count,
       user_id: user_id || null,
-      started_at
+      started_at,
+      shape: shape_descriptor(params)
     },
     dedup_key,
     forensic_link: `postgres-log@${started_at}`
