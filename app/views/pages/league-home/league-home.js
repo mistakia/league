@@ -412,11 +412,14 @@ export default function LeagueHomePage({
             </Grid>
           </Grid>
         )}
-        <Grid item xs={12}>
+        {/* Odds and Dates pair on one row: the odds table draws ~610px of ink
+            and the dates list ~240px, so each alone left half a screen of the
+            row empty and pushed the charts a screen further down */}
+        <Grid item xs={12} md={7}>
           <LeagueOdds {...{ teams, leagueId }} />
         </Grid>
         {has_league_events && (
-          <Grid item xs={12} className='league-schedule'>
+          <Grid item xs={12} md={5} className='league-schedule'>
             <div className='section'>
               <div className='heading__section-title'>Dates</div>
               <LeagueScheduleList />

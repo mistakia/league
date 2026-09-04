@@ -13,7 +13,9 @@
 .league__home
   display flex
   flex-direction column
-  margin 14px auto 250px
+  // The foot only has to clear the floating menu button, which is 38px plus its
+  // own offset. 250px was a quarter-screen of nothing under the last section.
+  margin 14px auto 80px
 
   .MuiPaper-elevation1
     overflow hidden
@@ -33,6 +35,29 @@
   // right edge and none of the vertical gap a grid row would give it
   .copy-markdown-button-row
     padding 8px 0 0
+
+  // The sidebar accordion gives the schedule a whole drawer to itself; here it
+  // shares a row with the odds table and has to end near the same baseline, so
+  // the rows lose MUI's default list padding. Scoped to this page — the
+  // accordion keeps its own spacing.
+  .league-schedule .league__schedule-item
+    padding-top 2px
+    padding-bottom 2px
+
+  // The odds row: its lead cell is fixed at 250px, so in a narrower column the
+  // metric cells take the remainder rather than leaving it blank on the right
+  .table__cell.metric
+    flex 1 1 auto
+
+  // table.styl pins the lead cell to 25vw below 600px, which is sized for the
+  // eight-column standings table. This one has four columns, and at 25vw a
+  // phone cut "Chiffonnier Plantocracy" to "Chiffonnier Plan" — measured, not
+  // assumed. Three named classes beat table.styl's two inside its media query.
+  @media (max-width 599px)
+    .table__cell.text.lead-cell
+      flex 1 1 auto
+      width auto
+      min-width 0
 
   .league__home-link
     display inline-block

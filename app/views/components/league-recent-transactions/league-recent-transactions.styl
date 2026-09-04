@@ -1,8 +1,16 @@
-.league__recent-transaction
+// Twenty short rows of one fact each. At a 48px headshot and a 60px floor they
+// took most of a screen to say very little, so the row is sized to its content.
+//
+// The class is doubled with `.transaction--wide` on purpose. That class sets
+// `min-height: 60px` in transaction-row.styl for the transactions page, whose
+// virtualized list needs a fixed row height; at a bare class this rule ties it
+// at (0,1,0) and loses on chunk order, silently, with the CSS right there.
+.league__recent-transaction.transaction--wide
   display flex
+  align-items center
   border-bottom 1px solid $borderColor
   min-height fit-content
-  padding 6px 0
+  padding 2px 0
   .transaction__timestamp
     display flex
     align-items center
