@@ -3055,7 +3055,7 @@ export function get_gamelog_for_player(
   const process = (gamelog) => {
     const points = calculatePoints({
       stats: gamelog,
-      position: gamelog.pos,
+      position: gamelog.player_position,
       league
     })
 

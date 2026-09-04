@@ -68,7 +68,10 @@ export default function SelectedPlayerSchedule({
     const opp =
       team === game.home_nfl_team ? game.away_nfl_team : game.home_nfl_team
     const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], '-')
-    const rnk = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'rank'], '-')
+    const rnk = seasonlogs.getIn(
+      ['nfl_teams', opp, stat_key, 'points_rank'],
+      '-'
+    )
     const isHome = opp === game.away_nfl_team
     const label = (
       <PercentileMetric

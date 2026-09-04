@@ -54,7 +54,7 @@ const get_filtered_gamelogs_for_schedule = createSelector(
         // Filter by opponent and position
         if (
           gamelog.opponent_nfl_team !== opponent ||
-          gamelog.pos !== position
+          gamelog.player_position !== position
         ) {
           return false
         }

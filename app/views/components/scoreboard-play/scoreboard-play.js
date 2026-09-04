@@ -66,8 +66,8 @@ export default function ScoreboardPlay({ play, style, playerMaps }) {
           {dayjs.unix(play.time).format('ddd h:mm')}
         </div>
         <div className='scoreboard__play-info-play'>
-          {play.play.dwn}
-          {nth(play.play.dwn)} & {play.play.yards_to_go} -{' '}
+          {play.play.down_number}
+          {nth(play.play.down_number)} & {play.play.yards_to_go} -{' '}
           {play.play.yard_line_start}
         </div>
       </div>
