@@ -17,6 +17,11 @@ const expect = chai.expect
 // `enable_duplicate_column_ids` and under the bare `accessorKey` otherwise. No
 // plays table sets it, so the bare form is the correct one here -- and the
 // data-views page, which every plays change is tempted to copy, uses the other.
+// A FIXTURE, not a mirror of the real registry -- the flags here are chosen to
+// exercise each branch. In particular no production plays column currently sets
+// `reverse_percentiles` (every column that still shades is one where higher is
+// better), so these two cases are the only coverage the reversal path has, and
+// react-table's cell reads that flag independently of this helper.
 const fields = {
   play_epa: {
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER

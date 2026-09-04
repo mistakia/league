@@ -15,18 +15,36 @@ import TeamCodeColumn from '@components/team-code-column'
 //   reverse_percentiles  - bool, or a function of the column's params. Marks a
 //                          column where a LOWER value is the better one, so the
 //                          percentile shading colors it in the other direction
-//   disable_percentiles  - bool. Suppresses shading on a numeric column whose
-//                          value carries no magnitude (an identifier, a
-//                          calendar ordinal), where a percentile is noise
+//   disable_percentiles  - bool. Suppresses shading on a numeric column. See
+//                          the rule below for which ones
 //
-// Percentile shading is otherwise implicit: every NUMBER column gets it. See
-// app/core/plays-view/derive-plays-percentile-stats.mjs.
+// Percentile shading is implicit: every NUMBER column gets it unless it opts
+// out. See app/core/plays-view/derive-plays-percentile-stats.mjs.
+//
+// THE RULE FOR disable_percentiles: shade what the play PRODUCED, not the
+// circumstance it was run in. A percentile answers "how does this compare to
+// the others", which is a question worth asking of yards, EPA and CPOE, and
+// not of the down, the distance, the field position, the clock, the score, the
+// defensive alignment, or the pre-snap EP/WP/xpass expectations those inputs
+// produce. Shading the circumstance colors the situation rather than the
+// performance, and reads as signal when it is not. Roughly: the OUTCOME,
+// PASSING, RUSHING and RECEIVING groups shade; CORE, CONTEXT and PERSONNEL do
+// not. The groups are a good summary of the rule, not the mechanism -- EP, WP
+// and XPASS sit in OUTCOME and are opted out individually, because they are
+// inputs to EPA and WPA rather than results.
+//
+// NOTHING currently sets reverse_percentiles, because every column that still
+// shades is one where higher is better for the offense. The support stays
+// because react-table's cell reads the flag on its own to pick the color
+// direction: a future column that sets it and is NOT honored here would get a
+// flipped color over unflipped percentile points, which is worse than either
+// consistent answer.
 //
 // Only `columns` shade, never `prefix_columns` -- the selector walks the one
 // list, the same way the data-views page does. So the default view's numeric
 // prefix columns (play_year, play_week, play_quarter) render unshaded no matter
-// what these flags say, and disable_percentiles on the first two matters only
-// once someone adds them as ORDINARY columns, where it does fire. Worth knowing
+// what these flags say, and disable_percentiles on them matters only once
+// someone adds them as ORDINARY columns, where it does fire. Worth knowing
 // before concluding from the default view that a flag is or is not working.
 
 const PlayFilmLinkCell = ({ value }) => <PlayFilmLink url={value} />
@@ -130,27 +148,25 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'DWN',
     size: 40,
-    // First down is a better position to be in than fourth.
-    reverse_percentiles: true
+    disable_percentiles: true
   }),
   play_yards_to_go: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YTG',
     size: 40,
-    // Shorter to go is better for the offense.
-    reverse_percentiles: true
+    disable_percentiles: true
   }),
   play_ydl_100: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YDL',
     size: 40,
-    // Yards from the opponent end zone, so closer to zero is better.
-    reverse_percentiles: true
+    disable_percentiles: true
   }),
   play_quarter: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'QTR',
-    size: 40
+    size: 40,
+    disable_percentiles: true
   }),
   play_game_clock: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
@@ -227,12 +243,17 @@ const plays_view_fields = {
   play_ep: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
     header_label: 'EP',
-    fixed: 2
+    fixed: 2,
+    // The situation's expected points BEFORE the snap -- an input to EPA, not a
+    // result. EPA itself is the outcome and does shade.
+    disable_percentiles: true
   }),
   play_wp: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
     header_label: 'WP',
-    fixed: 3
+    fixed: 3,
+    // Pre-snap win probability, same as EP above; WPA is the outcome.
+    disable_percentiles: true
   }),
   play_cpoe: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
@@ -243,7 +264,10 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
     header_label: 'XPASS',
     fixed: 2,
-    size: 60
+    size: 60,
+    // How likely a pass WAS in this situation -- the expectation, not the call.
+    // play_pass_oe is the offense's deviation from it and does shade.
+    disable_percentiles: true
   }),
   play_pass_oe: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
@@ -393,25 +417,30 @@ const plays_view_fields = {
   // Context fields
   play_score_diff: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'SDIFF'
+    header_label: 'SDIFF',
+    disable_percentiles: true
   }),
   play_home_score: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'HSCR'
+    header_label: 'HSCR',
+    disable_percentiles: true
   }),
   play_away_score: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'ASCR'
+    header_label: 'ASCR',
+    disable_percentiles: true
   }),
   play_sec_rem_half: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'SRH',
-    size: 60
+    size: 60,
+    disable_percentiles: true
   }),
   play_sec_rem_gm: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'SRG',
-    size: 60
+    size: 60,
+    disable_percentiles: true
   }),
   play_home_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
@@ -460,17 +489,20 @@ const plays_view_fields = {
   play_box_defenders: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'BOX',
-    fixed: 1
+    fixed: 1,
+    disable_percentiles: true
   }),
   play_pass_rushers: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'RUSH',
-    fixed: 1
+    fixed: 1,
+    disable_percentiles: true
   }),
   play_blitzers: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'BLTZ',
-    fixed: 1
+    fixed: 1,
+    disable_percentiles: true
   }),
 
   // Situational fields
