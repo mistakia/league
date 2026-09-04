@@ -10,6 +10,7 @@ import {
 } from '#libs-shared/data-view-storage/storage.mjs'
 
 import { data_view_generation_actions } from './actions'
+import { may_apply_generation_to_view } from './view-authority'
 
 // The client half of the generation transport.
 //
@@ -54,9 +55,21 @@ export function* persist_accepted_generation({ payload }) {
  * saved statement rather than a display contract and a refusal is an
  * explanation, so both are rendered by the control and neither replaces the
  * user's view.
+ *
+ * THE RUN'S OWN VIEW IS THE AUTHORITY, not whichever view happens to be
+ * selected when the answer arrives. A generation takes up to fifteen minutes
+ * and the user is free to switch views inside that window, so applying to the
+ * current selection overwrites a view the run was never started from -- data
+ * loss on whatever the user is looking at. `persist_accepted_generation` has
+ * always captured `view_id` for this; nothing read it until now.
+ *
+ * The stored record must be read BEFORE clear_pending_generation, which is why
+ * the read moved above it.
  */
 export function* handle_generation_update({ payload }) {
   if (LIVE_STATUSES.includes(payload.status)) return
+
+  const pending = yield call(load_pending_generation)
 
   yield call(clear_pending_generation)
 
@@ -67,7 +80,7 @@ export function* handle_generation_update({ payload }) {
   if (!table_state) return
 
   const data_view = yield select(get_selected_data_view)
-  if (!data_view) return
+  if (!may_apply_generation_to_view({ pending, data_view })) return
 
   // Through data_view_changed rather than restore_data_view_table_state: the
   // restore action updates the store and fires NO request, so it would leave
