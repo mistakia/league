@@ -241,8 +241,6 @@ export const NOT_CLONED_REASONS = {
   poaches: 'same',
   admission_votes:
     'governance history, unrelated, four child tables keyed on the vote id',
-  restricted_free_agency_bids:
-    'a prior RFA cycle, unrelated to the free agency auction',
   draft: 'the rookie draft precedes free agency and does not affect the board'
 }
 
@@ -621,6 +619,119 @@ export const clone_league_board = async ({
       const { transaction_id, ...rest } = row
       return { ...rest, lid: to_lid, tid: map_tid(row.tid) }
     }),
+    on_progress
+  })
+
+  // THE RFA CYCLE COMES BECAUSE THE TRANSACTION LOG ABOVE REFERENCES IT.
+  // A RESTRICTED_FREE_AGENCY_TAG transaction is an ASSERTION that a successful
+  // bid exists to justify it, and `calculate-team-daily-ktc-value` enforces
+  // exactly that -- it reads the tag, looks up the signing by (pid, date), and
+  // throws when there is none. It has to look it up rather than trust the tag,
+  // because the tag names only the WINNING team and the replay needs the losing
+  // one, which lives on the nomination's `original_team_id`.
+  //
+  // Copying the tags without the bids was this file's own bug. It read as a
+  // clean separation -- an auction does not care about a prior RFA cycle -- but
+  // the tags were coming anyway as ordinary salary history, so the clone was
+  // publishing 115 assertions whose evidence it had deliberately withheld. The
+  // valuation job threw on the first one, and because its driver had no per-
+  // league isolation, league 1 went unpriced from 2026-08-31 to 2026-09-04.
+  //
+  // Dropping the tags instead would have been the other way to close it, and is
+  // worse: a tag carries `player_salary`, so `getRoster`'s salary join reads it
+  // to price the player, and the tags are load-bearing in the roster-asset
+  // lineage walk, super-priority resolution and acquisition lookup besides.
+  //
+  // Nominations and bids reference EACH OTHER -- `bids.nomination_id` one way,
+  // `nominations.winning_bid_id` the other -- so nominations land first with
+  // the back-reference held null, and it is filled once the bid ids exist.
+  await reconcile_sequence({
+    trx,
+    table: 'restricted_free_agency_nominations',
+    column: 'nomination_id'
+  })
+  await reconcile_sequence({
+    trx,
+    table: 'restricted_free_agency_bids',
+    column: 'bid_id'
+  })
+
+  const nominations = await trx('restricted_free_agency_nominations').where({
+    league_id: from_lid
+  })
+  const nomination_id_map = new Map()
+  on_progress({
+    table: 'restricted_free_agency_nominations',
+    copied: 0,
+    total: nominations.length
+  })
+  for (const nomination of nominations) {
+    const { nomination_id, winning_bid_id, ...rest } = nomination
+    const [inserted] = await trx('restricted_free_agency_nominations')
+      .insert({
+        ...rest,
+        league_id: to_lid,
+        original_team_id: map_tid(nomination.original_team_id),
+        winning_bid_id: null
+      })
+      .returning('nomination_id')
+    nomination_id_map.set(nomination_id, Number(inserted.nomination_id))
+  }
+  copied.restricted_free_agency_nominations = nominations.length
+
+  // Every bid comes, not just the successful ones. The successful bid is what
+  // the valuation job needs, but a cycle in which every bid won is not the
+  // cycle the source ran, and the RFA surfaces read the losing bids too.
+  const bids = await trx('restricted_free_agency_bids').where({
+    lid: from_lid
+  })
+  const bid_id_map = new Map()
+  on_progress({
+    table: 'restricted_free_agency_bids',
+    copied: 0,
+    total: bids.length
+  })
+  for (const bid of bids) {
+    const { bid_id, ...rest } = bid
+    const [inserted] = await trx('restricted_free_agency_bids')
+      .insert({
+        ...rest,
+        lid: to_lid,
+        tid: map_tid(bid.tid),
+        nomination_id:
+          bid.nomination_id === null
+            ? null
+            : nomination_id_map.get(bid.nomination_id)
+      })
+      .returning('bid_id')
+    bid_id_map.set(bid_id, Number(inserted.bid_id))
+  }
+  copied.restricted_free_agency_bids = bids.length
+
+  for (const nomination of nominations) {
+    if (nomination.winning_bid_id === null) continue
+    await trx('restricted_free_agency_nominations')
+      .where({ nomination_id: nomination_id_map.get(nomination.nomination_id) })
+      .update({
+        winning_bid_id: bid_id_map.get(nomination.winning_bid_id)
+      })
+  }
+
+  // Scoped through the bid rather than by a league column, which this table
+  // does not carry -- the same tier-2 derivation the reset gate uses.
+  const releases = await trx('restricted_free_agency_releases').whereIn(
+    'restricted_free_agency_bid_id',
+    Array.from(bid_id_map.keys())
+  )
+  copied.restricted_free_agency_releases = await insert_in_batches({
+    trx,
+    table: 'restricted_free_agency_releases',
+    rows: releases.map((row) => ({
+      ...row,
+      restricted_free_agency_bid_id: bid_id_map.get(
+        row.restricted_free_agency_bid_id
+      )
+    })),
     on_progress
   })
 

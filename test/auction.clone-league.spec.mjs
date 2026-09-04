@@ -454,6 +454,105 @@ describe('clone-league', function () {
       expect(history).to.have.length(3)
     })
 
+    // The exact lookup `calculate-team-daily-ktc-value` performs: it reads each
+    // RESTRICTED_FREE_AGENCY_TAG transaction, keys `${pid}__${date}` against the
+    // successful bids, and THROWS when there is no match. A clone that copies
+    // the tag without the bid publishes a league that job cannot price, which
+    // is what left league 1 unpriced for four days.
+    it('carries the bid that justifies every restricted free agency tag', async function () {
+      const { tid, pid } = seeded[0]
+      const losing_tid = seeded[1].tid
+      const processed = new Date()
+
+      const [nomination] = await knex('restricted_free_agency_nominations')
+        .insert({
+          league_id: source_lid,
+          player_id: pid,
+          season_year: season_year - 1,
+          original_team_id: losing_tid,
+          nominated_at: processed,
+          announced_at: processed,
+          processed_at: processed
+        })
+        .returning('nomination_id')
+
+      const [bid] = await knex('restricted_free_agency_bids')
+        .insert({
+          pid,
+          user_id: 1,
+          bid_amount: 12,
+          tid,
+          season_year: season_year - 1,
+          lid: source_lid,
+          is_successful: true,
+          submitted: processed,
+          processed,
+          nomination_id: nomination.nomination_id
+        })
+        .returning('bid_id')
+
+      await knex('restricted_free_agency_nominations')
+        .where({ nomination_id: nomination.nomination_id })
+        .update({ winning_bid_id: bid.bid_id })
+
+      await knex('transactions').insert({
+        user_id: 1,
+        tid,
+        pid,
+        lid: source_lid,
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
+        player_salary: 12,
+        week: roster_week,
+        season_year: season_year - 1,
+        occurred_at: processed
+      })
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+
+      const tags = await knex('transactions').where({
+        lid,
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG
+      })
+      expect(tags).to.have.length(1)
+
+      const signings = await knex('restricted_free_agency_bids')
+        .where({ lid, is_successful: true })
+        .join(
+          'restricted_free_agency_nominations',
+          'restricted_free_agency_nominations.nomination_id',
+          'restricted_free_agency_bids.nomination_id'
+        )
+        .select(
+          'restricted_free_agency_bids.pid',
+          'restricted_free_agency_bids.tid',
+          'restricted_free_agency_nominations.original_team_id',
+          knex.raw(
+            "TO_CHAR(restricted_free_agency_bids.processed, 'YYYY-MM-DD') AS date"
+          )
+        )
+      expect(signings).to.have.length(1)
+
+      // The key the valuation job builds, on both sides.
+      const tag_date = tags[0].occurred_at.toISOString().slice(0, 10)
+      expect(`${signings[0].pid}__${signings[0].date}`).to.equal(
+        `${tags[0].pid}__${tag_date}`
+      )
+
+      // Both team ids are the CLONE's, not the source's. The replay moves the
+      // player from original_team_id to tid, so a bid copied with the source's
+      // ids would name teams absent from the mirror's index and throw there
+      // instead -- the same failure one layer down.
+      const cloned_team_ids = await knex('teams')
+        .where({ lid, season_year })
+        .pluck('team_id')
+      expect(cloned_team_ids).to.include(signings[0].tid)
+      expect(cloned_team_ids).to.include(signings[0].original_team_id)
+      expect(signings[0].tid).to.not.equal(tid)
+      expect(signings[0].original_team_id).to.not.equal(losing_tid)
+    })
+
     it('enrolls the commissioner and nobody else', async function () {
       // The source has twelve owners, one per team, and only user 1 is its
       // commissioner. Asserting BOTH halves is what makes this a real check: a

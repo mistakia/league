@@ -5,7 +5,9 @@ import dayjs from 'dayjs'
 
 import knex from '#db'
 import { transaction_types } from '#constants'
-import calculate_team_daily_ktc_value from '#scripts/calculate-team-daily-ktc-value.mjs'
+import calculate_team_daily_ktc_value, {
+  price_every_league
+} from '#scripts/calculate-team-daily-ktc-value.mjs'
 import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
@@ -309,6 +311,54 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
 
       const result = await calculate_team_daily_ktc_value({ lid })
       expect(result.lid).to.equal(lid)
+    })
+  })
+
+  // The driver, not the replay. A league whose transaction log contradicts
+  // itself makes the replay THROW rather than return a shortfall, and before
+  // this was isolated that throw escaped the loop and cost every league after
+  // it -- which is how the auction mirror left league 1 unpriced for four days.
+  describe('one league failing', function () {
+    beforeEach(async function () {
+      await knex('leagues').whereIn('league_id', [901, 902]).del()
+      for (const league_id of [901, 902]) {
+        await knex('leagues').insert({
+          league_id,
+          commissioner_user_id: 1,
+          name: `league ${league_id}`,
+          is_hosted: true
+        })
+      }
+    })
+
+    it('prices the other leagues and reports the thrower', async function () {
+      const priced = []
+      const shortfalls = await price_every_league({
+        price: async ({ lid: league_lid }) => {
+          if (league_lid === 901) throw new Error('no rfa signing for X__Y')
+          priced.push(league_lid)
+          return { lid: league_lid, shortfall: null }
+        }
+      })
+
+      // The league AFTER the thrower still got priced -- the whole point.
+      expect(priced).to.include(902)
+      expect(priced).to.not.include(901)
+
+      // And the failure is still reported, so the run exits non-zero.
+      const thrown = shortfalls.filter((s) => s.includes('lid=901'))
+      expect(thrown).to.have.length(1)
+      expect(thrown[0]).to.contain('no rfa signing for X__Y')
+    })
+
+    it('reports a shortfall without swallowing it', async function () {
+      const shortfalls = await price_every_league({
+        price: async ({ lid: league_lid }) => ({
+          lid: league_lid,
+          shortfall: league_lid === 902 ? 'staleness on 902' : null
+        })
+      })
+      expect(shortfalls).to.include('staleness on 902')
     })
   })
 })

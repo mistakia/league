@@ -703,27 +703,51 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   return { lid, shortfall: shortfalls.length ? shortfalls.join('; ') : null }
 }
 
+/**
+ * Price every hosted, non-archived league, and return what fell short.
+ *
+ * ONE LEAGUE'S FAILURE MUST NOT COST EVERY OTHER LEAGUE ITS PRICING. The replay
+ * throws outright on a league whose transaction log contradicts itself -- an RFA
+ * tag with no backing bid, a transaction naming a team absent from the index --
+ * and before this was isolated, that throw escaped the whole loop. League 119
+ * (the auction mirror) did exactly that on 2026-08-31 and left league 1, the
+ * only league anyone reads, unpriced for four days.
+ *
+ * A throw is caught per league and recorded as a shortfall, so the run still
+ * ends non-zero and still reports; it just prices everyone else first. Extracted
+ * from `main` so a spec can drive it, because the isolation is the behavior and
+ * `main` ends in `process.exit`.
+ */
+export const price_every_league = async ({
+  price = calculate_team_daily_ktc_value
+} = {}) => {
+  const leagues = await db('leagues')
+    .select('league_id')
+    .where({ is_hosted: 1 })
+    .whereNull('archived_at')
+
+  const shortfalls = []
+  for (const league of leagues) {
+    try {
+      const result = await price({ lid: league.league_id })
+      if (result?.shortfall) shortfalls.push(result.shortfall)
+    } catch (err) {
+      shortfalls.push(`lid=${league.league_id} threw: ${err.message}`)
+    }
+  }
+  return shortfalls
+}
+
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const shortfalls = []
+    let shortfalls = []
     if (argv.lid) {
       const result = await calculate_team_daily_ktc_value({ lid: argv.lid })
       if (result?.shortfall) shortfalls.push(result.shortfall)
     } else {
-      // get all hosted leagues that are not archived
-      const leagues = await db('leagues')
-        .select('league_id')
-        .where({ is_hosted: 1 })
-        .whereNull('archived_at')
-
-      for (const league of leagues) {
-        const result = await calculate_team_daily_ktc_value({
-          lid: league.league_id
-        })
-        if (result?.shortfall) shortfalls.push(result.shortfall)
-      }
+      shortfalls = await price_every_league()
     }
     throw_if_shortfall(shortfalls.length > 0 ? shortfalls.join('; ') : null)
   } catch (err) {
