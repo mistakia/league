@@ -216,7 +216,7 @@ describe('auction settlement against a firing bid clock', function () {
     // A settlement transaction is OPEN -- the shape of a manager completing the
     // set over REST, or of a trade reaching the same call, while the block runs.
     const trx = await knex.transaction()
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id,
       league: league_record,
       trx
@@ -263,7 +263,7 @@ describe('auction settlement against a firing bid clock', function () {
     await elect_directly({ tid: nominator, pid, maximum_bid: 0 })
 
     const trx = await knex.transaction()
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id,
       league: league_record,
       trx

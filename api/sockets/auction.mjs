@@ -1242,13 +1242,6 @@ export default class Auction {
     const players = await db('player').where('pid', nomination.pid)
     if (!players.length) return []
 
-    const capacities = await get_auction_team_capacities({
-      team_ids: this._tids,
-      league: this._league,
-      player_position: players[0].primary_position,
-      current_price: nomination.current_price
-    })
-
     const elections = await db('auction_elections')
       .where({
         lid: this._lid,
@@ -1257,6 +1250,17 @@ export default class Auction {
       })
       .whereNull('withdrawn_at')
       .whereNull('settled_at')
+
+    // Only the teams that have not elected. An elected team is discharged
+    // before `get_outstanding_election_team_ids` looks at its capacity, so
+    // reading its roster computes a value the next line throws away.
+    const elected = new Set(elections.map((election) => election.tid))
+    const capacities = await get_auction_team_capacities({
+      team_ids: this._tids.filter((tid) => !elected.has(tid)),
+      league: this._league,
+      player_position: players[0].primary_position,
+      current_price: nomination.current_price
+    })
 
     return get_outstanding_election_team_ids({
       capacities,
@@ -1274,13 +1278,17 @@ export default class Auction {
    */
   async _settle_if_complete() {
     try {
-      const settlement = await settle_auction_player_if_complete({
-        lid: this._lid,
-        league: this._league
-      })
+      const { settlement, outstanding } =
+        await settle_auction_player_if_complete({
+          lid: this._lid,
+          league: this._league
+        })
 
       if (!settlement) {
-        return this._broadcast_settlement_status()
+        // The set the settle call just computed under the lock. Recomputing it
+        // here read every roster in the league a second time on the same
+        // action, and a non-settling action is what most actions are.
+        return this._broadcast_settlement_status(outstanding)
       }
 
       await this._reload_after_settlement()
@@ -1494,11 +1502,12 @@ export default class Auction {
     await this._calculate_team_capacities()
   }
 
-  async _broadcast_settlement_status() {
+  async _broadcast_settlement_status(outstanding) {
     this.broadcast({
       type: 'AUCTION_SETTLEMENT_STATUS',
       payload: {
-        outstanding_election_tids: await this._get_outstanding_election_tids()
+        outstanding_election_tids:
+          outstanding || (await this._get_outstanding_election_tids())
       }
     })
     return true

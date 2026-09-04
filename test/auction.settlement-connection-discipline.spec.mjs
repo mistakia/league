@@ -197,7 +197,7 @@ describe('auction settlement acquires no connection under the league lock', func
       // blocks outright.
       for (let i = 0; i < pool_max() - 1; i++) await hold_one_connection()
 
-      const settlement = await within_ten_seconds(
+      const { settlement } = await within_ten_seconds(
         settle_auction_player_if_complete({
           lid: league_id,
           season_year,
@@ -243,7 +243,7 @@ describe('auction settlement acquires no connection under the league lock', func
     // one connection rather than the N the roster reads needed.
     for (let i = 0; i < pool_max() - 1; i++) await hold_one_connection()
 
-    const settlement = await within_ten_seconds(
+    const { settlement } = await within_ten_seconds(
       // No `league` and no `trx`: the settlement resolves and opens both.
       settle_auction_player_if_complete({ lid: league_id, season_year }),
       'settlement resolving its own league under a drained pool'

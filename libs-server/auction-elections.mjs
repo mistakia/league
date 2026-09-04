@@ -202,16 +202,19 @@ export const submit_auction_election = async ({
       `team ${tid} elected ${normalized_maximum === null ? 'decline' : `$${normalized_maximum}`} on ${pid}`
     )
 
-    const settlement = is_active_nomination
+    // The outstanding set comes back with the settlement because the settle
+    // call has already computed it. Without a nomination there is nothing open,
+    // so nobody is outstanding.
+    const result = is_active_nomination
       ? await settle_auction_player_if_complete({
           lid,
           season_year,
           league,
           trx
         })
-      : null
+      : { settlement: null, outstanding: [] }
 
-    return { settlement }
+    return result
   })
 }
 
@@ -257,13 +260,11 @@ export const withdraw_auction_election = async ({
     // Withdrawing a maximum can COMPLETE a set rather than only reopen one: the
     // withdrawing team keeps its claim if it has a bid on record, and the
     // remaining claims may now be the whole eligible field.
-    const settlement = await settle_auction_player_if_complete({
+    return settle_auction_player_if_complete({
       lid,
       season_year,
       trx
     })
-
-    return { settlement }
   })
 }
 
@@ -327,17 +328,27 @@ export const get_auction_settlement_status = async ({
   const players = await db('player').where('pid', nomination.pid)
   const teams = await db('teams').where({ lid, season_year })
 
-  const capacities = await get_auction_team_capacities({
-    team_ids: teams.map((team) => team.team_id),
-    league,
-    player_position: players[0].primary_position,
-    current_price: nomination.current_price
-  })
-
+  // READ BEFORE THE CAPACITIES, because it decides which of them are needed.
   const elections = await db('auction_elections')
     .where({ lid, season_year, pid: nomination.pid })
     .whereNull('withdrawn_at')
     .whereNull('settled_at')
+
+  // ONLY THE TEAMS THAT HAVE NOT ELECTED. This answers one question -- who is
+  // the auction waiting on -- and `get_outstanding_election_team_ids` discharges
+  // an elected team before it ever looks at that team's capacity. Reading a
+  // roster to compute a value the next line skips is the whole of the waste, and
+  // it is not the same scope the settlement path needs: that one also reads
+  // CONTENDERS, because the resolver ranks them. This one ranks nothing.
+  const elected = new Set(elections.map((election) => election.tid))
+  const capacities = await get_auction_team_capacities({
+    team_ids: teams
+      .map((team) => team.team_id)
+      .filter((tid) => !elected.has(tid)),
+    league,
+    player_position: players[0].primary_position,
+    current_price: nomination.current_price
+  })
 
   return {
     nomination: {
@@ -371,16 +382,33 @@ export const get_auction_settlement_status = async ({
  * removed. It also gets withdrawal right for free: withdrawing a decline puts a
  * team BACK into the outstanding set, which no subtractive client rule could
  * express.
+ *
+ * `outstanding` IS THE SET THE CALLER ALREADY HAS, not a hint. Every write path
+ * that reaches here has just run `settle_auction_player_if_complete`, which
+ * computed this exact set under the league lock in order to decide whether to
+ * settle -- so recomputing it here read every roster a second time on the same
+ * request. Passing it is not merely cheaper: the value computed under the lock
+ * is the serialized truth as of the write being announced, whereas a recompute
+ * afterwards can pick up a LATER election and announce it under this request,
+ * whose own request will announce it again.
+ *
+ * Omitting it still works and still recomputes, for the callers that have no
+ * settle call behind them.
  */
 export const broadcast_auction_settlement_status = async ({
   broadcast,
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  outstanding
 }) => {
-  const status = await get_auction_settlement_status({ lid, season_year })
+  const outstanding_election_tids =
+    outstanding ||
+    (await get_auction_settlement_status({ lid, season_year }))
+      .outstanding_election_tids
+
   return broadcast(Number(lid), {
     type: 'AUCTION_SETTLEMENT_STATUS',
-    payload: { outstanding_election_tids: status.outstanding_election_tids }
+    payload: { outstanding_election_tids }
   })
 }
 

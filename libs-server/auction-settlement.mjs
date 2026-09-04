@@ -302,8 +302,21 @@ const get_live_elections = async ({ trx, lid, season_year, pid }) =>
  * league's advisory lock. Nothing else advances the auction in election mode --
  * no deadline, no timer, no commissioner nudge.
  *
- * @returns {Promise<null|{pid: string, winner_tid: number, price: number}>}
- *   null when the set is not yet complete or nothing is open.
+ * IT RETURNS THE OUTSTANDING SET AS WELL AS THE SETTLEMENT, and that is the
+ * whole reason the shape is a pair rather than a nullable settlement. This
+ * function computes the outstanding set on every call -- it is what decides
+ * whether to settle -- and then every caller threw it away and made
+ * `get_auction_settlement_status` or the socket's own helper compute it AGAIN,
+ * a second roster read per team on the far side of the same request. That is
+ * the common path, not the rare one: an election that does not complete the set
+ * is what most elections do, and the rule that only an election discharges
+ * raises how many of them a player takes.
+ *
+ * `outstanding` is empty both when the player settled and when nothing is open.
+ * Neither is a state the auction is waiting on anybody in, so the two coincide
+ * honestly rather than by accident.
+ *
+ * @returns {Promise<{settlement: null|{pid: string, winner_tid: number, price: number}, outstanding: number[]}>}
  */
 export const settle_auction_player_if_complete = async ({
   lid,
@@ -332,13 +345,16 @@ export const settle_auction_player_if_complete = async ({
       season_year,
       db_client: trx
     })
-    if (!nomination) return null
+    // NOTHING OPEN IS NOT THE SAME AS NOBODY OUTSTANDING, but it produces the
+    // same pair: there is no player for the auction to be waiting on anyone
+    // about, so the outstanding set is empty rather than unknown.
+    if (!nomination) return { settlement: null, outstanding: [] }
 
     const players = await trx('player').where('pid', nomination.pid)
     const player_row = players[0]
     if (!player_row) {
       log(`cannot settle unknown player ${nomination.pid}`)
-      return null
+      return { settlement: null, outstanding: [] }
     }
 
     const teams = await trx('teams').where({ lid, season_year })
@@ -423,7 +439,7 @@ export const settle_auction_player_if_complete = async ({
       log(
         `${nomination.pid} waiting on ${outstanding.length} team(s): ${outstanding.join(', ')}`
       )
-      return null
+      return { settlement: null, outstanding }
     }
 
     const { winner_tid, price, outcomes } = resolve_auction_player({
@@ -464,7 +480,10 @@ export const settle_auction_player_if_complete = async ({
     })
 
     log(`settled ${nomination.pid} to team ${winner_tid} at $${price}`)
-    return { pid: nomination.pid, winner_tid, price, outcomes }
+    return {
+      settlement: { pid: nomination.pid, winner_tid, price, outcomes },
+      outstanding: []
+    }
   }
 
   return provided_trx ? run(provided_trx) : db.transaction(run)
@@ -850,7 +869,7 @@ export const reevaluate_auction_after_roster_change = async ({
   trigger
 }) => {
   try {
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid,
       season_year
     })

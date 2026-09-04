@@ -10,6 +10,7 @@ import league from '#db/fixtures/league.mjs'
 import { current_season } from '#constants'
 import { submit_auction_election } from '#libs-server/auction-elections.mjs'
 import { nominate_free_agent_running_back } from './utils/nominate-auction-player.mjs'
+import { count_roster_reads } from './utils/count-roster-reads.mjs'
 import { user2 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -161,6 +162,61 @@ describe('auction election broadcasts', function () {
       const outstanding = message.payload.outstanding_election_tids
       expect(outstanding).to.not.include(2)
       expect(outstanding.length).to.be.at.least(1)
+    } finally {
+      socket.close()
+    }
+  })
+
+  it('answers a non-settling election with ONE capacity sweep, not two', async function () {
+    this.timeout(60 * 1000)
+
+    const pid = await nominate_free_agent({ tid: 1 })
+    const { socket, received } = await open_client()
+
+    try {
+      // COUNTED ACROSS THE BROADCAST, NOT ACROSS THE REQUEST. The route calls
+      // `res.send` and only THEN awaits the status broadcast, so the response
+      // resolving means the second sweep has not run yet -- a counter that stops
+      // there reports one sweep whatever the route does, which is how the first
+      // version of this case passed against its own control.
+      //
+      // The wait is what makes the window right: the broadcast is the last thing
+      // the handler does, so a message on the wire means every query it issues
+      // has been issued.
+      const { result, reads } = await count_roster_reads(async () => {
+        const res = await elect_over_rest({ teamId: 2, pid, token: user2 })
+        const message = await await_message(
+          received,
+          'AUCTION_SETTLEMENT_STATUS'
+        )
+        return { res, message }
+      })
+
+      expect(result.res.status, JSON.stringify(result.res.body)).to.equal(200)
+      expect(result.res.body.settlement, 'this election must not settle').to.not
+        .exist
+      expect(result.message, 'the status broadcast must have gone out').to.exist
+
+      // THE ROUTE, not the library, because the thing asserted is a hand-wired
+      // argument in the handler. `submit_auction_election` returns the
+      // outstanding set it computed under the lock and the route passes it on;
+      // forget that argument and `broadcast_auction_settlement_status`
+      // recomputes, which is a full roster sweep producing exactly the same
+      // broadcast. The wiring FAILS SOFT, so nothing about the response or the
+      // message can see it.
+      expect(reads.length, 'the request must read some rosters').to.be.above(0)
+
+      // Two sweeps overlap on every team that has not elected -- a non-empty set
+      // precisely because this did not settle -- so a recompute shows up as a
+      // team whose roster was read twice inside one request.
+      const read_twice = reads.filter(
+        (tid, index) => reads.indexOf(tid) !== index
+      )
+      expect(
+        read_twice,
+        'no team may have its roster read twice for one election: a second read ' +
+          'means the outstanding set was recomputed rather than threaded through'
+      ).to.deep.equal([])
     } finally {
       socket.close()
     }

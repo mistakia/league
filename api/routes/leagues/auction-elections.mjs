@@ -308,9 +308,12 @@ router.post('/?', async (req, res) => {
         logger
       })
     } else {
+      // The set `submit_auction_election` already computed under the lock,
+      // rather than a second sweep of every roster in the league.
       await broadcast_auction_settlement_status({
         broadcast,
-        lid: leagueId
+        lid: leagueId,
+        outstanding: result.outstanding
       })
     }
   } catch (error) {
@@ -427,7 +430,8 @@ router.delete('/?', async (req, res) => {
     } else {
       await broadcast_auction_settlement_status({
         broadcast,
-        lid: leagueId
+        lid: leagueId,
+        outstanding: result.outstanding
       })
     }
   } catch (error) {

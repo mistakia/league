@@ -6,6 +6,10 @@ import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types } from '#constants'
 import { settle_auction_player_if_complete } from '#libs-server/auction-settlement.mjs'
+import {
+  get_auction_settlement_status,
+  broadcast_auction_settlement_status
+} from '#libs-server/auction-elections.mjs'
 import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 import { selectPlayer } from './utils/index.mjs'
 
@@ -35,13 +39,16 @@ describe('auction settlement reads only the capacities it consumes', function ()
   let observed_roster_reads = []
 
   const record_query = (query) => {
-    // `getRoster` opens with `rosters` keyed on tid; the bindings carry it
-    // first. Anchored on the table in the SQL rather than on a call count, so a
-    // second read of the same team is visible rather than collapsed.
-    // `select * from "rosters" where "tid" = $1 ...`, so the tid is the first
-    // binding. Matched on the FROM clause and the tid predicate together: a
-    // bare `rosters` substring also matches every `rosters_players` query,
-    // whose first binding is not a tid at all.
+    // `getRoster` opens with `select * from "rosters" where "tid" = $1 ...`, so
+    // the tid is the first binding. Matched on the FROM clause and the tid
+    // predicate TOGETHER, because a bare `rosters` substring also matches every
+    // `rosters_players` query, whose first binding is not a tid at all -- and
+    // because an earlier attempt at this anchored on `from "rosters"` with a
+    // trailing word boundary, which can never match after a closing quote and
+    // reported a confident zero read for every team.
+    //
+    // Every read is pushed rather than a set being built, so a team read TWICE
+    // is visible rather than collapsed.
     if (/from "rosters" where "tid" = /.test(query.sql)) {
       observed_roster_reads.push(Number(query.bindings[0]))
     }
@@ -153,7 +160,7 @@ describe('auction settlement reads only the capacities it consumes', function ()
       await write_election({ pid, tid, maximum_bid: null })
     }
 
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id
     })
 
@@ -206,7 +213,7 @@ describe('auction settlement reads only the capacities it consumes', function ()
       await write_election({ pid, tid, maximum_bid: null })
     }
 
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id
     })
 
@@ -246,7 +253,7 @@ describe('auction settlement reads only the capacities it consumes', function ()
       await write_election({ pid, tid, maximum_bid: null })
     }
 
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id
     })
 
@@ -277,7 +284,7 @@ describe('auction settlement reads only the capacities it consumes', function ()
       await write_election({ pid, tid, maximum_bid: null })
     }
 
-    const settlement = await settle_auction_player_if_complete({
+    const { settlement } = await settle_auction_player_if_complete({
       lid: league_id
     })
 
@@ -292,5 +299,101 @@ describe('auction settlement reads only the capacities it consumes', function ()
       observed_roster_reads,
       'a team holding no election must be read, or it can never be found eligible'
     ).to.include(silent)
+  })
+
+  // THE SECOND SWEEP, which is the one a caller performs after the settle call
+  // has already answered the question.
+  //
+  // These are the cases most likely to pass while proving nothing, because the
+  // threading FAILS SOFT by design: `broadcast_auction_settlement_status`
+  // recomputes when it is handed no set, so a route that forgot to pass one
+  // still broadcasts the right answer and the only symptom is the work nobody
+  // sees. Every assertion here is therefore about reads not performed, and the
+  // agreement case is what stops "no reads" being satisfied by a wrong answer.
+  describe('the outstanding set the settle call already computed', function () {
+    const stage_incomplete_nomination = async () => {
+      const pid = await free_agent()
+      const tids = await all_team_ids()
+      const [nominator, silent, ...decliners] = tids
+
+      await nominate_auction_player({
+        lid: league_id,
+        pid,
+        tid: nominator,
+        value: 0
+      })
+      await write_election({ pid, tid: nominator, maximum_bid: 3 })
+      for (const tid of decliners) {
+        await write_election({ pid, tid, maximum_bid: null })
+      }
+      return { pid, nominator, silent }
+    }
+
+    it('comes back from the settle call and agrees with a fresh recompute', async function () {
+      this.timeout(60 * 1000)
+      const { silent } = await stage_incomplete_nomination()
+
+      const { settlement, outstanding } =
+        await settle_auction_player_if_complete({ lid: league_id })
+
+      expect(settlement, 'the set is incomplete').to.equal(null)
+
+      // THE AGREEMENT, without which "it did no reads" is satisfied by any
+      // wrong answer at all, including an empty list.
+      const status = await get_auction_settlement_status({ lid: league_id })
+      expect(
+        outstanding,
+        'the threaded set must be the set a recompute would produce'
+      ).to.deep.equal(status.outstanding_election_tids)
+      expect(outstanding).to.deep.equal([silent])
+    })
+
+    it('broadcasts without reading a single roster when it is handed the set', async function () {
+      this.timeout(60 * 1000)
+      await stage_incomplete_nomination()
+
+      const { outstanding } = await settle_auction_player_if_complete({
+        lid: league_id
+      })
+
+      const sent = []
+      observed_roster_reads = []
+      await broadcast_auction_settlement_status({
+        broadcast: (lid, message) => sent.push(message),
+        lid: league_id,
+        outstanding
+      })
+
+      expect(
+        observed_roster_reads,
+        'a broadcast handed the outstanding set must read no rosters at all'
+      ).to.deep.equal([])
+      expect(sent).to.have.length(1)
+      expect(sent[0].payload.outstanding_election_tids).to.deep.equal(
+        outstanding
+      )
+    })
+
+    it('still recomputes for a caller that has no set to give it', async function () {
+      this.timeout(60 * 1000)
+      const { silent } = await stage_incomplete_nomination()
+
+      const sent = []
+      observed_roster_reads = []
+      await broadcast_auction_settlement_status({
+        broadcast: (lid, message) => sent.push(message),
+        lid: league_id
+      })
+
+      // THE CONTROL FOR THE CASE ABOVE. Without it, "no roster reads" could be
+      // reporting a broadcast helper that never reads rosters under any
+      // argument, which would make the measurement blind to the thing it is
+      // supposed to be detecting.
+      expect(
+        observed_roster_reads,
+        'omitting the set must fall back to a recompute, which does read rosters'
+      ).to.not.deep.equal([])
+      expect(sent[0].payload.outstanding_election_tids).to.deep.equal([silent])
+    })
   })
 })

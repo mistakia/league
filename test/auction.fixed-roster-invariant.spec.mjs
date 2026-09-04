@@ -142,7 +142,9 @@ describe('auction settlement keeps rosters and budgets monotone', function () {
     }
 
     if (!settlement) {
-      settlement = await settle_auction_player_if_complete({ lid: league_id })
+      ;({ settlement } = await settle_auction_player_if_complete({
+        lid: league_id
+      }))
     }
     expect(settlement, 'the player settles').to.exist
     // The whole point of the two maximums. A $0 settlement cannot distinguish a
