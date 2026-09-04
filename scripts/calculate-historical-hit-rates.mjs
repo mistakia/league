@@ -83,6 +83,24 @@ const get_hits = ({
   )
 }
 
+// The row this update must land on is identified by time_type as well. Both
+// prop-market index tables are unique on their key INCLUDING time_type, so a
+// predicate without it matches BOTH the OPEN and the CLOSE row: the two carry
+// the same hit rate (the rate is a function of the line, not the price) but
+// different odds, so the later write silently overwrites the earlier row's
+// edge with an edge computed against the other row's odds. Measured 2026-09-04:
+// 26,710 of 27,421 sampled CLOSE rows carried their sibling's edge while only
+// 8,434 shared its odds.
+export const build_hit_rate_update_where_clause = (selection) => ({
+  source_id: selection.source_id,
+  source_market_id: selection.source_market_id,
+  source_selection_id: selection.source_selection_id,
+  time_type: selection.time_type,
+  selection_type: selection.selection_type,
+  selection_metric_line: selection.selection_metric_line,
+  selection_pid: selection.selection_pid
+})
+
 const calculate_historical_hit_rates = async ({
   season_year = current_season.year,
   missing_only = false,
@@ -103,6 +121,7 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_id',
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
       'nfl_games.season_type',
       'nfl_games.week',
@@ -111,16 +130,25 @@ const calculate_historical_hit_rates = async ({
     .whereNotNull('prop_market_selections_index.selection_pid')
     .whereNotNull('prop_markets_index.esbid')
     .where('prop_markets_index.season_year', season_year)
+    // time_type belongs in the join: both index tables are unique on the key
+    // INCLUDING time_type, so joining without it pairs every selection row with
+    // both the OPEN and the CLOSE market row and fans the result out 2x.
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
         '=',
         'prop_market_selections_index.source_id'
-      ).andOn(
-        'prop_markets_index.source_market_id',
-        '=',
-        'prop_market_selections_index.source_market_id'
       )
+        .andOn(
+          'prop_markets_index.source_market_id',
+          '=',
+          'prop_market_selections_index.source_market_id'
+        )
+        .andOn(
+          'prop_markets_index.time_type',
+          '=',
+          'prop_market_selections_index.time_type'
+        )
     })
     .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
     .groupBy(
@@ -132,6 +160,7 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_id',
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
       'nfl_games.season_type',
       'nfl_games.week',
@@ -465,14 +494,7 @@ const calculate_historical_hit_rates = async ({
       }
 
       batch_updates.push({
-        where_clause: {
-          source_id: selection.source_id,
-          source_market_id: selection.source_market_id,
-          source_selection_id: selection.source_selection_id,
-          selection_type: selection.selection_type,
-          selection_metric_line: selection.selection_metric_line,
-          selection_pid: selection.selection_pid
-        },
+        where_clause: build_hit_rate_update_where_clause(selection),
         update_data
       })
 

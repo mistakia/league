@@ -74,6 +74,22 @@ const is_hit = ({ actual_value, line, selection_type, strict, cushion }) => {
   return false
 }
 
+// (source_id, source_market_id, source_selection_id, time_type) is the unique
+// key of prop_market_selections_index, so naming all four targets exactly one
+// row. Without time_type the predicate matched BOTH the OPEN and the CLOSE row
+// and the later write clobbered the earlier row's edge with an edge computed
+// against the other row's odds. selection_pid is deliberately NOT added: this
+// query aliases it to `team`, so referencing selection.selection_pid here would
+// bind undefined and match nothing.
+export const build_team_hit_rate_update_where_clause = (selection) => ({
+  source_id: selection.source_id,
+  source_market_id: selection.source_market_id,
+  source_selection_id: selection.source_selection_id,
+  time_type: selection.time_type,
+  selection_type: selection.selection_type,
+  selection_metric_line: selection.selection_metric_line
+})
+
 const get_team_yardage_markets = async ({ season_year, current_week_only }) => {
   const query = db('prop_market_selections_index')
     .select(
@@ -85,6 +101,7 @@ const get_team_yardage_markets = async ({ season_year, current_week_only }) => {
       'prop_market_selections_index.source_id',
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
       'nfl_games.season_type',
       'nfl_games.week',
@@ -94,16 +111,25 @@ const get_team_yardage_markets = async ({ season_year, current_week_only }) => {
     .whereNotNull('prop_market_selections_index.selection_pid')
     .where('prop_markets_index.season_year', season_year)
     .whereIn('prop_markets_index.market_type', TEAM_YARDAGE_MARKET_TYPES)
+    // time_type belongs in the join: both index tables are unique on the key
+    // INCLUDING time_type, so joining without it pairs every selection row with
+    // both the OPEN and the CLOSE market row and fans the result out 2x.
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
         '=',
         'prop_market_selections_index.source_id'
-      ).andOn(
-        'prop_markets_index.source_market_id',
-        '=',
-        'prop_market_selections_index.source_market_id'
       )
+        .andOn(
+          'prop_markets_index.source_market_id',
+          '=',
+          'prop_market_selections_index.source_market_id'
+        )
+        .andOn(
+          'prop_markets_index.time_type',
+          '=',
+          'prop_market_selections_index.time_type'
+        )
     })
     .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
     .groupBy(
@@ -115,6 +141,7 @@ const get_team_yardage_markets = async ({ season_year, current_week_only }) => {
       'prop_market_selections_index.source_id',
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.time_type',
       'prop_market_selections_index.odds_american',
       'nfl_games.season_type',
       'nfl_games.week',
@@ -440,13 +467,7 @@ const calculate_team_historical_hit_rates = async ({
       }
 
       batch_updates.push({
-        where_clause: {
-          source_id: selection.source_id,
-          source_market_id: selection.source_market_id,
-          source_selection_id: selection.source_selection_id,
-          selection_type: selection.selection_type,
-          selection_metric_line: selection.selection_metric_line
-        },
+        where_clause: build_team_hit_rate_update_where_clause(selection),
         update_data
       })
 
