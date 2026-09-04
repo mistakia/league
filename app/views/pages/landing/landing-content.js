@@ -17,6 +17,14 @@
 export const github_url = 'https://github.com/mistakia/league'
 export const discord_url = 'https://discord.com/invite/azSX97Qj9Z'
 
+// Base, the system the agent sessions that build this platform run on. THE
+// ROOT AND NOT A SESSION: an individual thread is readable only to an account
+// that owns it, and an anonymous visitor gets the page with its body masked —
+// measured at 11,202 of 13,342 characters replaced by block glyphs, which
+// reads as a leak wall rather than as work in the open. The root renders in
+// the clear and is the only target here that does.
+export const base_url = 'https://base.tint.space'
+
 // The hero's two actions. The primary is the strongest thing the platform
 // ships and the one that needs no account; the secondary is the claim the
 // whole page rests on, which is checkable rather than assertable.
@@ -151,6 +159,12 @@ export const landing_sections = [
         label: 'About',
         to: '/about',
         description: 'What it does today, and how to contribute.'
+      },
+      {
+        label: 'Built with agents',
+        href: base_url,
+        description:
+          'The platform is developed with agent sessions running on Base, the system that directs and records them.'
       },
       // NO `/status` ENTRY, by operator ruling. The route exists and is
       // indexable, so the link gate would have accepted it — this is a decision
