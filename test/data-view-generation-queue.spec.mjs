@@ -325,6 +325,48 @@ describe('data view generation queue', function () {
       expect(collected.error_code).to.equal('deadline_exceeded')
     })
 
+    it('RESTARTS when the run begins, so queue wait does not eat the run budget', async function () {
+      // Measured 2026-09-04: a job sat twelve minutes behind a wedged session
+      // slot, dispatched with three minutes left on an enqueue-relative
+      // deadline, and was killed mid-work having already found the right
+      // column. The deadline bounds the agent, and the agent starts here.
+      const job = await enqueue()
+      await claim_next_generation_job()
+
+      // Age the row as a long queue wait would: nearly the whole budget gone
+      // before the agent exists.
+      const nearly_spent = new Date(Date.now() + 30 * 1000)
+      await db('data_view_generation_jobs')
+        .where({ generation_id: job.generation_id })
+        .update({ deadline_at: nearly_spent })
+
+      await mark_generation_job_running({
+        generation_id: job.generation_id,
+        thread_id: 'thread-deadline'
+      })
+
+      const running = await get_generation_job(job.generation_id)
+      const remaining_ms = new Date(running.deadline_at).getTime() - Date.now()
+      // The whole budget back, not the 30 seconds the row carried.
+      expect(remaining_ms).to.be.greaterThan(JOB_DEADLINE_MS - 60 * 1000)
+      expect(remaining_ms).to.be.at.most(JOB_DEADLINE_MS + 60 * 1000)
+    })
+
+    it('leaves a QUEUED job on its enqueue-relative deadline', async function () {
+      // The control for the test above, and the property that keeps "queued
+      // forever" impossible: only a job that actually started gets a fresh
+      // budget. A row that never dispatches is still swept.
+      const job = await enqueue()
+      await db('data_view_generation_jobs')
+        .where({ generation_id: job.generation_id })
+        .update({ deadline_at: new Date(Date.now() - 1000) })
+
+      expect(await expire_overdue_generation_jobs()).to.equal(1)
+      expect((await get_generation_job(job.generation_id)).status).to.equal(
+        'expired'
+      )
+    })
+
     it('leaves a job INSIDE its deadline alone', async function () {
       // The control. A sweep that expired everything would satisfy the case
       // above and destroy every run in flight.

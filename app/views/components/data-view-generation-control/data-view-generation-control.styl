@@ -77,6 +77,14 @@
   text-overflow ellipsis
   white-space nowrap
 
+.data-view-generation__progress
+  // Pushed to the end of the status row so the step reads as the trailing
+  // detail rather than competing with the status word on the left.
+  flex-shrink 0
+  margin-left auto
+  font-variant-numeric tabular-nums
+  opacity 0.85
+
 .data-view-generation__explanation,
 .data-view-generation__refusal
   padding 6px 10px

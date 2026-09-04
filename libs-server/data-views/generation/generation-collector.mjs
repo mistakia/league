@@ -184,10 +184,23 @@ export const collect_job = async ({
   read_thread = read_generation_thread,
   kill_session = kill_generation_session
 }) => {
-  const thread = await read_thread({ thread_id: job.thread_id })
-
   // TEAR THE SESSION DOWN THE MOMENT THE JOB IS TERMINAL, and do it before
-  // anything below reads the session's status.
+  // ANYTHING ELSE IN THIS FUNCTION -- including the thread read.
+  //
+  // The read used to come first, and that ordering silently disarmed the
+  // teardown for exactly the case it exists for. `read_thread` THROWS on an
+  // unreadable thread (a 401, a 5xx, base restarting), collect_once catches
+  // per job and moves on, and the kill below is never reached -- so the run
+  // this is meant to stop keeps running, and every later pass takes the same
+  // path. Measured 2026-09-04: an expired job's agent was still alive twenty
+  // minutes past its deadline with session_termination_requested_at NULL,
+  // spending GPU on an answer the delivery door would refuse, and holding the
+  // profile's single session slot so that every subsequent generation sat in
+  // `queued` and expired without ever dispatching. One dead run wedged the
+  // whole queue.
+  //
+  // Nothing below needs the thread in order to decide this: the job's own
+  // status is what says the run is over, and that comes from league's row.
   //
   // This is not tidying -- it is what makes the rest of this module work. A
   // generation is one-shot, but base launches every session as an interactive
@@ -226,6 +239,8 @@ export const collect_job = async ({
       }
     }
   }
+
+  const thread = await read_thread({ thread_id: job.thread_id })
 
   if (!thread) {
     // Base has no such thread. For a live job that is terminal -- the session

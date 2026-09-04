@@ -31,6 +31,7 @@
 // is the signal; the last stderr line is the reason.
 
 import { assert_sandbox_credentials } from '#config'
+import { report_progress } from '#libs-server/data-views/generation/report-progress.mjs'
 
 export class AgentToolError extends Error {
   constructor(code, message) {
@@ -177,19 +178,54 @@ export const read_tool_input = async ({ input_keys } = {}) => {
 export const run_agent_tool = async ({ tool, input_keys, run }) => {
   try {
     const input = await read_tool_input({ input_keys })
+    // BEFORE the work, not after, because the point of it is to name what the
+    // user is currently waiting on. Reported after a slow tool it would say
+    // "previewing" at the moment previewing finished. It is inside the try but
+    // cannot throw (see report-progress.mjs) and its result is deliberately
+    // unread: a beacon that could refuse a tool call would be a new way for
+    // generation to fail in exchange for a status line.
+    await report_progress({ tool })
     const result = await run(input)
     process.stdout.write(`${JSON.stringify({ tool, ...result }, null, 2)}\n`)
     process.exit(0)
   } catch (error) {
-    process.stderr.write(
-      `${JSON.stringify({
-        tool,
-        error: error.message,
-        code: error.code || 'tool_failed'
-      })}\n`
-    )
+    const { code, message } = name_tool_failure(error)
+    process.stderr.write(`${JSON.stringify({ tool, error: message, code })}\n`)
     process.exit(1)
   }
+}
+
+/**
+ * Give a failure a name the agent can act on.
+ *
+ * ONE MAPPING, AND IT EXISTS FOR ONE MESSAGE. knex reports an unreachable
+ * database as `Timeout acquiring a connection. The pool is probably full.`,
+ * which is a diagnosis rather than an observation and is wrong here: the
+ * sandbox pool holds at most two connections used serially, so it is never
+ * full. An agent reading "probably full" concludes the condition is transient
+ * and retries — measured 2026-09-04, four times across six minutes, against a
+ * route that was not coming back. Naming it as unreachable and saying plainly
+ * that retrying will not help is what turns a wedged run into one that emits
+ * the view it had already built.
+ *
+ * Everything else passes through unchanged. A mapping table here would be a
+ * second place for tool semantics to live.
+ *
+ * @param {Error} error
+ * @returns {{code: string, message: string}}
+ */
+export const name_tool_failure = (error) => {
+  if (/Timeout acquiring a connection/i.test(error.message || '')) {
+    return {
+      code: 'sandbox_database_unreachable',
+      message:
+        'the sandbox database did not answer within the connection timeout. ' +
+        'This is a broken route or a database that is down, NOT a busy pool, ' +
+        'and it will not clear by retrying. Emit the view you have, and say in ' +
+        'the explanation that it could not be previewed.'
+    }
+  }
+  return { code: error.code || 'tool_failed', message: error.message }
 }
 
 /**

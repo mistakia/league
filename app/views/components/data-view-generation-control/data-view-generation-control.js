@@ -21,6 +21,37 @@ const STATUS_LABEL = {
 
 const LIVE_STATUSES = ['submitting', 'queued', 'dispatched', 'running']
 
+// What each agent tool is doing, in the user's terms rather than the tool's.
+//
+// The tool names are the contract between league and the agent and are not
+// written for a reader — `describe_column` and `validate_table_state` name
+// internals a user has no model of. An unmapped tool falls back to nothing
+// rather than to its raw name, so adding a seventh tool degrades to the plain
+// status word instead of leaking a symbol into the panel.
+const TOOL_LABEL = {
+  search_columns: 'Searching for the right stats',
+  describe_column: 'Checking how that stat is measured',
+  validate_table_state: 'Checking the view is valid',
+  preview_view: 'Previewing the results',
+  run_sql: 'Running a custom query',
+  emit: 'Finishing up'
+}
+
+/**
+ * The live line under the status word: which step, and what it is doing.
+ *
+ * Returns '' when there is no progress to show, which is the ordinary state for
+ * the first few seconds of a run and for any run whose Redis progress key has
+ * expired. The caller renders nothing rather than an empty step.
+ */
+const describe_progress = ({ progress_step_count, progress_tool }) => {
+  if (!progress_step_count) return ''
+  const label = TOOL_LABEL[progress_tool]
+  return label
+    ? `Step ${progress_step_count} · ${label}`
+    : `Step ${progress_step_count}`
+}
+
 /**
  * What to say about a refusal.
  *
@@ -156,6 +187,11 @@ export default function DataViewGenerationControl({
           {is_live && generation.instruction && (
             <span className='data-view-generation__instruction'>
               {generation.instruction}
+            </span>
+          )}
+          {is_live && describe_progress(generation) && (
+            <span className='data-view-generation__progress'>
+              {describe_progress(generation)}
             </span>
           )}
           {generation.tool_call_count !== null && (

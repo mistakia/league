@@ -92,9 +92,28 @@ export const get_sandbox_db = (pool_name) => {
     connection.database = process.env.LEAGUE_DB_DATABASE
   }
 
+  // FAIL FAST WHEN THE DATABASE IS NOT THERE, because the agent tier is on a
+  // fifteen-minute clock and knex's default is sixty seconds of silence.
+  //
+  // An unreachable Postgres does not refuse — the packets are DROPPED, by a
+  // firewall or a dead host — so the client learns nothing until a timer fires,
+  // and knex reports it as `Timeout acquiring a connection. The pool is
+  // probably full`, which names the wrong cause and sends the reader to look
+  // for a connection leak. On 2026-09-04 the generation sandbox lost its route
+  // to the database and each preview_view cost 30 seconds; the agent read the
+  // pool message as transient, retried four times, and burned six minutes of a
+  // run whose retrieval had already finished correctly in thirty seconds.
+  //
+  // Eight seconds is far above any healthy acquire on this pool (a warm
+  // connection is single-digit milliseconds, a cold one two round trips) and
+  // far below the budget a run can afford to spend learning the same fact
+  // repeatedly. connectionTimeoutMillis is the pg-level half: without it the
+  // driver would still sit on the dropped SYN for the OS default, and knex
+  // would report its own timeout while the socket underneath stayed open.
   const pool = Knex({
     ...sandbox_config,
-    connection,
+    acquireConnectionTimeout: 8000,
+    connection: { connectionTimeoutMillis: 5000, ...connection },
     pool: {
       ...(sandbox_config.pool || {}),
       /**

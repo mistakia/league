@@ -274,6 +274,44 @@ describe('data view generation collector', function () {
       expect(job.session_termination_requested_at).to.not.equal(null)
     })
 
+    it('kills it even when the thread read THROWS, which is the runaway case', async function () {
+      // The ordering defect this covers: read_thread used to run first, so an
+      // unreachable base skipped the teardown entirely and collect_once
+      // swallowed the throw. The run it was meant to stop kept going, kept
+      // spending, and held the profile's only session slot -- so every later
+      // generation sat queued and expired without dispatching. Base being
+      // unreadable is exactly when a teardown matters most, so it must not be
+      // the condition that disarms it.
+      const generation_id = await dispatch_one()
+      await complete_generation_job({
+        generation_id,
+        result: { table_state: {} },
+        generation_branch: 'registry'
+      })
+      const { calls, kill_session } = recording_killer()
+
+      let threw = false
+      try {
+        await collect_job({
+          job: await get_generation_job(generation_id),
+          read_thread: async () => {
+            throw new Error('base refused a thread read with 503')
+          },
+          kill_session
+        })
+      } catch (error) {
+        threw = true
+      }
+
+      // The read still throws — collect_once is what swallows it per job, and
+      // this asserts the kill happened BEFORE the throw rather than that the
+      // throw went away.
+      expect(threw).to.equal(true)
+      expect(calls).to.deep.equal(['thread-1'])
+      const job = await get_generation_job(generation_id)
+      expect(job.session_termination_requested_at).to.not.equal(null)
+    })
+
     it('does not kill it twice, however many passes run', async function () {
       const generation_id = await dispatch_one()
       await complete_generation_job({

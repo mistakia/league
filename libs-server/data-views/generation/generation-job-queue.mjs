@@ -342,7 +342,27 @@ export const mark_generation_job_running = async ({
 }) =>
   connection('data_view_generation_jobs')
     .where({ generation_id, status: 'dispatched' })
-    .update({ status: 'running', thread_id, started_at: connection.fn.now() })
+    .update({
+      status: 'running',
+      thread_id,
+      started_at: connection.fn.now(),
+      // THE DEADLINE RESTARTS HERE, because it bounds the AGENT and the agent
+      // does not exist until now. Set at enqueue by the column default, it
+      // bounds queue wait plus run time together, so a job spends whatever the
+      // queue took out of the budget the run needs: measured 2026-09-04, a job
+      // that waited twelve minutes behind a wedged slot got three minutes of
+      // agent time and was killed mid-work with the right column already found.
+      // That reads to the user as a fifteen-minute failure and to an operator
+      // as a slow agent, and it is neither.
+      //
+      // The queue is NOT left unbounded by this. A row that never dispatches
+      // keeps its enqueue-relative deadline and the sweep still takes it, so
+      // "queued forever" remains impossible; what changes is only that a run
+      // which actually started gets the whole budget the constant promises.
+      deadline_at: connection.raw(
+        `now() + interval '${JOB_DEADLINE_MS} milliseconds'`
+      )
+    })
 
 /**
  * Complete a job with the agent's emitted envelope and its trajectory.

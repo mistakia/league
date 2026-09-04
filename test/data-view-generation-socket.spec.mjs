@@ -396,6 +396,46 @@ describe('data view generation socket', function () {
       ])
     })
 
+    it('frames on a PROGRESS change while the status stays running', async function () {
+      // The defect this covers: status reaches `running` in the first seconds
+      // and never moves again, so a watcher keyed on status alone goes silent
+      // for the rest of the run. The control paired with it is the previous
+      // test, which holds progress absent and still expects three frames — so
+      // one of the two must fail if the change axis is wrong.
+      const ws = fake_socket()
+      const steps = [null, 1, 1, 2, 3]
+      let call = 0
+      const read_job = async (generation_id) => ({
+        generation_id,
+        status: call < steps.length ? 'running' : 'completed',
+        instruction: 'x',
+        queued_at: new Date(),
+        deadline_at: new Date()
+      })
+      const read_progress = async () => {
+        const step_count = steps[Math.min(call++, steps.length - 1)]
+        return step_count ? { step_count, tool: `tool_${step_count}` } : null
+      }
+
+      await watch_generation_job({
+        ws,
+        generation_id: 'g1',
+        read_job,
+        read_progress,
+        interval_ms: 1
+      })
+
+      const updates = ws.frames_of('DATA_VIEW_GENERATION_UPDATE')
+      // The repeated 1 sends no frame; every distinct step does. The trailing
+      // 3 is the terminal frame, which the status change sends while progress
+      // stands still — the two axes are independent and either one is enough.
+      expect(
+        updates.map((frame) => frame.payload.progress_step_count)
+      ).to.deep.equal([null, 1, 2, 3, 3])
+      expect(updates[1].payload.progress_tool).to.equal('tool_1')
+      expect(updates[1].payload.status).to.equal('running')
+    })
+
     it('names a vanished row rather than polling an empty result forever', async function () {
       const ws = fake_socket()
       await watch_generation_job({

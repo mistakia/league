@@ -33,6 +33,7 @@ import {
   complete_generation_job,
   LIVE_STATUSES
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
+import { record_generation_progress } from '#libs-server/data-views/generation/generation-progress.mjs'
 
 const router = express.Router()
 
@@ -1805,6 +1806,53 @@ router.post('/generation-emission', async (req, res) => {
     })
 
     res.send({ generation_id: job.generation_id, branch })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+// The generation agent's progress beacon.
+//
+// AUTHENTICATED EXACTLY AS THE EMISSION IS, by a thread_id base minted and
+// league recorded against a job still in a live state. See the emission route
+// above; the pairing is unguessable for the same reason and the client never
+// learns a thread_id.
+//
+// WHAT IT DELIBERATELY DOES NOT DO. It writes no job-row column, completes
+// nothing, and cannot change a run's outcome -- it moves a Redis key with a
+// twenty-minute expiry and answers. So the worst a caller who somehow forged a
+// thread_id could do is make a status line count wrong, which is why this needs
+// none of the re-validation the emission route carries.
+//
+// 200 EVEN WHEN THE JOB IS GONE. The beacon fires before every tool call and
+// the container swallows every failure, so a 404 for a finished run would be a
+// refusal nobody reads, logged on both ends, for a condition that is ordinary
+// -- an agent still working through a tool when the deadline sweep closed its
+// row. `recorded` says which happened for anyone who does look.
+router.post('/generation-progress', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { thread_id, tool } = req.body || {}
+
+    if (!thread_id || typeof thread_id !== 'string') {
+      return res.status(400).send({ error: 'thread_id is required' })
+    }
+    if (!tool || typeof tool !== 'string') {
+      return res.status(400).send({ error: 'tool is required' })
+    }
+
+    const job = await get_generation_job_by_thread_id(thread_id)
+    if (!job || !LIVE_STATUSES.includes(job.status)) {
+      return res.send({ recorded: false })
+    }
+
+    const progress = await record_generation_progress({
+      generation_id: job.generation_id,
+      tool
+    })
+
+    res.send({ recorded: true, step_count: progress.step_count })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

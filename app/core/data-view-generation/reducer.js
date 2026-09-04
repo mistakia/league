@@ -33,7 +33,13 @@ const initial_state = fromJS({
   // What the run cost. Null until the job row carries it.
   tool_call_count: null,
   total_tokens: null,
-  duration_milliseconds: null
+  duration_milliseconds: null,
+  // WHERE THE RUN IS RIGHT NOW, as distinct from tool_call_count above, which
+  // is the finished run's audited cost and stays null until the job is over.
+  // These two move while it is still going and are gone once it ends -- they
+  // live in Redis with a 20-minute expiry, not on the job row.
+  progress_step_count: null,
+  progress_tool: null
 })
 
 // The frame fields that are simply mirrored. Listed rather than spread wholesale
@@ -49,7 +55,9 @@ const MIRRORED_FIELDS = [
   'error_message',
   'tool_call_count',
   'total_tokens',
-  'duration_milliseconds'
+  'duration_milliseconds',
+  'progress_step_count',
+  'progress_tool'
 ]
 
 const mirror_job = (state, payload) => {

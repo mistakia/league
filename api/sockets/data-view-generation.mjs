@@ -11,6 +11,7 @@ import {
   LIVE_STATUSES
 } from '#libs-server/data-views/generation/generation-job-queue.mjs'
 import { assert_generation_admissible } from '#libs-server/data-views/generation/generation-limits.mjs'
+import { read_generation_progress } from '#libs-server/data-views/generation/generation-progress.mjs'
 import { send_websocket_message } from './utils.mjs'
 
 const log = debug('data-view-generation-socket')
@@ -60,10 +61,17 @@ const get_watchers = (ws) => {
  * fields ARE included, because the cost of a run is something the user paid for
  * and should be able to see.
  *
+ * `progress` is passed in rather than read here, because this function is pure
+ * projection and its callers already differ on whether they have one: the
+ * watcher reads it every tick, the ACCEPTED frame has nothing to report yet.
+ *
  * @param {object} job
+ * @param {object} [progress] - {step_count, tool} from generation-progress
  * @returns {object}
  */
-export const project_generation_job = (job) => ({
+export const project_generation_job = (job, progress = null) => ({
+  progress_step_count: progress?.step_count ?? null,
+  progress_tool: progress?.tool ?? null,
   generation_id: job.generation_id,
   status: job.status,
   instruction: job.instruction,
@@ -143,17 +151,25 @@ const send_error = (
   })
 
 /**
- * Poll one job until it reaches a terminal state, sending a frame on every
- * status CHANGE and one final frame.
+ * Poll one job until it reaches a terminal state, sending a frame whenever its
+ * status or its PROGRESS changes, and one final frame.
  *
  * Frames on CHANGE rather than on every tick, because a run is minutes long and
  * a client does not need 300 identical `running` frames to learn that nothing
  * happened.
  *
+ * PROGRESS IS THE SECOND CHANGE AXIS, and adding it is what makes the panel
+ * move. Status alone reaches `running` within seconds and then never changes
+ * again for up to fifteen minutes, so a client watching only that cannot tell a
+ * run doing useful work from one wedged on a broken tool -- which is exactly
+ * what happened on 2026-09-04. The step count is monotonic within a run, so
+ * comparing it is enough and no timestamp needs to be trusted.
+ *
  * @param {object} params
  * @param {object} params.ws
  * @param {string} params.generation_id
  * @param {(generation_id: string) => Promise<object|undefined>} [params.read_job]
+ * @param {(params: object) => Promise<object|null>} [params.read_progress]
  * @param {number} [params.interval_ms]
  * @returns {Promise<void>}
  */
@@ -161,6 +177,7 @@ export const watch_generation_job = async ({
   ws,
   generation_id,
   read_job = get_generation_job,
+  read_progress = read_generation_progress,
   interval_ms = POLL_INTERVAL_MS
 }) => {
   const watchers = get_watchers(ws)
@@ -168,6 +185,7 @@ export const watch_generation_job = async ({
   watchers.set(generation_id, watcher)
 
   let last_status = null
+  let last_step_count = null
   try {
     for (;;) {
       if (watcher.stopped || ws.readyState !== 1) return
@@ -185,12 +203,16 @@ export const watch_generation_job = async ({
         return
       }
 
-      if (job.status !== last_status) {
+      const progress = await read_progress({ generation_id })
+      const step_count = progress?.step_count ?? null
+
+      if (job.status !== last_status || step_count !== last_step_count) {
         last_status = job.status
+        last_step_count = step_count
         send_websocket_message(
           ws,
           'DATA_VIEW_GENERATION_UPDATE',
-          project_generation_job(job)
+          project_generation_job(job, progress)
         )
       }
 
@@ -321,10 +343,15 @@ export const handle_generation_collect = async ({
     return null
   }
 
+  // With progress, so a client that reloaded mid-run sees which step it is on
+  // rather than waiting up to a poll interval for the watcher's first frame.
   send_websocket_message(
     ws,
     'DATA_VIEW_GENERATION_UPDATE',
-    project_generation_job(job)
+    project_generation_job(
+      job,
+      await read_generation_progress({ generation_id })
+    )
   )
 
   // Still live: resume watching. Already finished: the frame above WAS the
