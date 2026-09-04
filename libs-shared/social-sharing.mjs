@@ -13,16 +13,24 @@ import { current_season } from './constants/season-constants.mjs'
 export const site_name = 'xo.football'
 
 // The platform voice, for paths that are not about any one league — the
-// default social card, /status, shared links. README.md carries the same
-// sentence; the copy gate keeps the two in agreement.
+// landing page, the default social card, /status, shared links. README.md
+// carries the same sentence; the copy gate keeps the two in agreement.
 export const site_tagline =
   'An open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets.'
 
+// THE SITE DEFAULTS ARE THE PLATFORM'S VOICE, NOT THE GENESIS LEAGUE'S. These
+// two are both the copy for `/` AND the fallback for any route the table does
+// not name, so a league-flavoured default was wrong on both counts: it made
+// the site's front door and every unnamed path describe one tenant of the
+// platform rather than the platform. The Genesis League's own copy now lives
+// on its own route, /genesis-league.
 export const default_title =
-  'xo.football — a dynasty league and the platform it runs on'
+  'xo.football — fantasy football league management and NFL analytics'
 
-export const default_description =
-  'A ten-team dynasty league with a published constitution, verifiable random draws, and a custom-built platform.'
+// Deliberately the tagline itself rather than a second sentence saying the
+// same thing differently. One platform sentence, gated against README.md, used
+// wherever the site describes itself.
+export const default_description = site_tagline
 
 // Card paths and alts. The default card is what a route with no card of its
 // own shows; the league-surface card is what every /leagues/:lid/* route

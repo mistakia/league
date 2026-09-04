@@ -127,23 +127,28 @@ describe('LIBS-SHARED social meta copy', function () {
     }
   })
 
-  it('keeps the landing season count derived rather than hardcoded', function () {
+  // The league's season count lives on the GENESIS LEAGUE page, not on the
+  // landing page — the landing page speaks for the platform and states no
+  // league fact at all. These paths moved with the copy; the check is the same
+  // one, pointed at where the count actually is.
+  it('keeps the pitch page season count derived rather than hardcoded', function () {
     for (const file of [
-      'app/views/pages/landing/landing.js',
-      'app/views/pages/landing/landing-content.js'
+      'app/views/pages/genesis-league/genesis-league.js',
+      'app/views/pages/genesis-league/genesis-league-content.js'
     ]) {
       const source = readFileSync(path.join(repo_root, file), 'utf8')
       expect(source, `${file} hardcodes a season count`).to.not.match(
         hardcoded_season_count
       )
     }
-    const landing = readFileSync(
-      path.join(repo_root, 'app/views/pages/landing/landing.js'),
+    const pitch = readFileSync(
+      path.join(repo_root, 'app/views/pages/genesis-league/genesis-league.js'),
       'utf8'
     )
-    expect(landing, 'landing.js must use the shared season phrase').to.include(
-      'league_season_phrase'
-    )
+    expect(
+      pitch,
+      'genesis-league.js must use the shared season phrase'
+    ).to.include('league_season_phrase')
   })
 
   it('negative control: the recruiting scanner flags a planted claim', function () {

@@ -16,7 +16,6 @@ import {
 //   description    used for meta description, og:description, twitter:description
 //   robots         defaults to indexable_robots when omitted
 //   og_type        defaults to default_og_type when omitted
-//   canonical_path fixed canonical when the route is not its own canonical URL
 //   og_image       per-section social card; defaults to default_image_path
 //   og_image_alt   alt for that card, describing what is depicted for a reader
 //                  who cannot see it; defaults to default_image_alt
@@ -45,14 +44,33 @@ const plays_card = {
 
 export const page_routes = [
   {
+    // The platform's front door, so it takes the DEFAULT card rather than the
+    // front-door one: that card's alt describes the Genesis League's format
+    // and starting lineup, which belongs on /genesis-league and moved there
+    // with the copy. The default card's alt already describes this page — the
+    // wordmark above links to the site's surfaces — which is what it is.
     pattern: '/',
     title: default_title,
-    description: default_description,
-    ...front_door_card
+    description: default_description
   },
 
   // Documents. These are the pages a recruiting link points at, so they carry
   // real copy rather than a bare noun.
+  {
+    // The Genesis League's own front door, and the page a recruiting link
+    // actually points at now that `/` speaks for the platform. It takes the
+    // front-door card, which moved here from `/` with the copy.
+    //
+    // INDEXABLE, unlike /waitlist below. Describing the league is not
+    // advertising that a seat is open — the copy gate enforces the difference
+    // by token, and the call to action on this page leads to the waitlist
+    // rather than restating it.
+    pattern: '/genesis-league',
+    title: 'Genesis League',
+    description:
+      'A ten-team, half-PPR, superflex dynasty league with a salary cap, running since 2020, with a published constitution and a public transaction record.',
+    ...front_door_card
+  },
   {
     pattern: '/constitution',
     title: 'Genesis League Constitution',
@@ -104,14 +122,18 @@ export const page_routes = [
     ...data_views_card
   },
   {
-    // The SPA redirects /about to the landing page, so the canonical is the
-    // landing page rather than this path — otherwise the two compete as
-    // duplicate content for the same copy.
+    // /about serves the repo README, NOT the landing page. 1dc9c4fee did
+    // redirect it here and that was reverted deliberately — the README is
+    // written for contributors and the landing page for a reader deciding
+    // whether the site is worth his time, which are different audiences. This
+    // entry carried the redirect's title, description and canonical for as
+    // long as the redirect has been gone, so a crawler was told this page was
+    // a duplicate of `/` while it served entirely different content.
     pattern: '/about',
-    title: default_title,
-    description: default_description,
-    canonical_path: '/',
-    ...front_door_card
+    title: 'About',
+    description:
+      'What xo.football is, what it does today, and how to contribute to it.',
+    og_type: 'article'
   },
 
   // Public analytics surfaces.

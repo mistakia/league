@@ -5,29 +5,64 @@ import { NavLink } from 'react-router-dom'
 import PageLayout from '@layouts/page'
 
 import {
-  league_format,
-  league_url,
-  questionnaire_path
+  landing_sections,
+  primary_action,
+  secondary_action
 } from './landing-content'
-import {
-  league_founding_year,
-  league_name,
-  league_season_phrase,
-  site_name
-} from '#libs-shared/social-sharing.mjs'
+import { site_name, site_tagline } from '#libs-shared/social-sharing.mjs'
 
 import './landing.styl'
 
-const Section = ({ title, children }) => (
+// One row of the site graph. An entry with no `to` and no `href` is a
+// destination that does not exist yet — it renders as plain text carrying its
+// note, rather than as a link to nowhere. That is the only shape difference on
+// the page, and it is the honest one.
+const SectionLink = ({ label, description, to, href, note }) => {
+  const label_content = to ? (
+    <NavLink to={to}>{label}</NavLink>
+  ) : href ? (
+    <a href={href} target='_blank' rel='noopener noreferrer'>
+      {label}
+    </a>
+  ) : (
+    <span className='landing__link-label--inert'>{label}</span>
+  )
+
+  return (
+    <li className='landing__link'>
+      <p className='landing__link-label'>
+        {label_content}
+        {note && <span className='landing__link-note'>{note}</span>}
+      </p>
+      <p className='landing__link-description'>{description}</p>
+    </li>
+  )
+}
+
+SectionLink.propTypes = {
+  label: PropTypes.string,
+  description: PropTypes.string,
+  to: PropTypes.string,
+  href: PropTypes.string,
+  note: PropTypes.string
+}
+
+const Section = ({ title, blurb, links }) => (
   <section className='landing__section'>
     <h2 className='landing__section-title'>{title}</h2>
-    {children}
+    <p className='landing__section-blurb'>{blurb}</p>
+    <ul className='landing__links'>
+      {links.map((link) => (
+        <SectionLink key={link.label} {...link} />
+      ))}
+    </ul>
   </section>
 )
 
 Section.propTypes = {
   title: PropTypes.string,
-  children: PropTypes.node
+  blurb: PropTypes.string,
+  links: PropTypes.array
 }
 
 export default function LandingPage() {
@@ -35,96 +70,38 @@ export default function LandingPage() {
     <div className='landing-surface'>
       <div className='landing'>
         <header className='landing__hero'>
-          {/* The league has a name and the site has one, and a reader arriving
-              cold knows neither. It goes above the sentence rather than inside
-              it, so the sentence can stay the argument. */}
-          <p className='landing__eyebrow'>
-            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
-          </p>
-          {/* A statement of what this is, in the register of a masthead rather
-              than a pitch. The reader arriving here is deciding whether a
-              league is serious; a slogan argues that and a plain declaration
-              demonstrates it. The claims that support it come underneath, as
-              facts with dates on them. */}
-          <h1 className='landing__lede'>a home dynasty league.</h1>
-          {/* The season count is DERIVED, never typed. It goes in the deck
-              rather than the headline, which states what this is and stops —
-              but a league's age is the first thing that separates a real one
-              from a league founded last week, so the page has to say it.
-              test/libs-shared.social-meta-copy.spec.mjs asserts both halves:
-              that this file reads league_season_phrase, and that no season
-              count is hardcoded anywhere in the landing copy. */}
-          <p className='landing__deck'>
-            Founded in {league_founding_year}, now in {league_season_phrase}.
-            The constitution, the full transaction record and the platform that
-            enforces them are public.
-          </p>
-          {/* The waitlist is the primary action and the league link is proof,
-              so they are not peers: one filled button, one quiet one. */}
+          <p className='landing__eyebrow'>{site_name}</p>
+          {/* What this is, in the register of a masthead rather than a pitch.
+              The reader arriving cold is deciding whether the site is worth
+              his afternoon; a slogan argues that and a plain declaration
+              demonstrates it. */}
+          <h1 className='landing__lede'>
+            an open-source fantasy football platform.
+          </h1>
+          {/* The tagline is the SHARED one, read from the copy module rather
+              than typed here. README.md carries the same sentence and
+              test/libs-shared.social-meta-copy.spec.mjs holds the two
+              together, so the site's own description of itself cannot drift
+              from the one on GitHub. */}
+          <p className='landing__deck'>{site_tagline}</p>
           <div className='landing__hero-actions'>
-            <NavLink className='landing__cta' to={questionnaire_path}>
-              Join the waitlist
+            <NavLink className='landing__cta' to={primary_action.to}>
+              {primary_action.label}
             </NavLink>
-            <NavLink
+            <a
               className='landing__cta landing__cta--secondary'
-              to={league_url}
+              href={secondary_action.href}
+              target='_blank'
+              rel='noopener noreferrer'
             >
-              Look at the league
-            </NavLink>
+              {secondary_action.label}
+            </a>
           </div>
         </header>
 
-        <Section title='The league'>
-          {league_format.map((group) => (
-            <div className='landing__group' key={group.title}>
-              <h3 className='landing__group-title'>{group.title}</h3>
-              <ul className='landing__list'>
-                {group.items.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </Section>
-
-        <section className='landing__section'>
-          <div className='landing__trust'>
-            <div className='landing__trust-item'>
-              <h3>The constitution and every amendment to it</h3>
-              <p>
-                Adopted in {league_founding_year}. Each amendment is recorded
-                with the date it was introduced and the date it passed,
-                including those that were drafted and never ratified.
-              </p>
-              <NavLink to='/constitution'>Read the constitution</NavLink>
-            </div>
-
-            <div className='landing__trust-item'>
-              <h3>The platform is open source</h3>
-              <p>
-                I wrote this site for this league and its source is public. The
-                transaction rules, the cap arithmetic and the scoring are all
-                readable, so what the software does with a roster can be
-                inspected before you hold one.
-              </p>
-              <a
-                href='https://github.com/mistakia/league'
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                Read the source on GitHub
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* The reader who gets this far has read the whole argument, and the
-            hero button is now several screens behind him. */}
-        <section className='landing__closing'>
-          <NavLink className='landing__cta' to={questionnaire_path}>
-            Join the waitlist
-          </NavLink>
-        </section>
+        {landing_sections.map((section) => (
+          <Section key={section.title} {...section} />
+        ))}
       </div>
     </div>
   )

@@ -123,9 +123,21 @@ describe('LIBS-SHARED page meta', function () {
       ).to.equal(indexable_robots)
     })
 
-    it('honors a fixed canonical for a route that redirects', function () {
-      const meta = resolve_page_meta({ url_path: '/about', origin })
-      expect(meta.CANONICAL_URL).to.equal('https://xo.football/')
+    // Every route is its own canonical. This used to assert the opposite for
+    // /about, which claimed `/` on the strength of a redirect that had already
+    // been reverted — so the assertion was pinning a defect: the README page
+    // told crawlers it was a duplicate of the landing page while serving
+    // entirely different content. The override mechanism went with it.
+    it('makes each route its own canonical, including /about', function () {
+      expect(
+        resolve_page_meta({ url_path: '/about', origin }).CANONICAL_URL
+      ).to.equal('https://xo.football/about')
+      expect(
+        resolve_page_meta({ url_path: '/genesis-league', origin }).CANONICAL_URL
+      ).to.equal('https://xo.football/genesis-league')
+      expect(
+        resolve_page_meta({ url_path: '/', origin }).CANONICAL_URL
+      ).to.equal('https://xo.football/')
     })
 
     it('names the league when one is supplied', function () {

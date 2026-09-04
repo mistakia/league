@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Link, NavLink } from 'react-router-dom'
 
 import { DISCORD_URL } from '@core/constants'
-import { league_url } from '@pages/landing/landing-content'
+import { league_url } from '@pages/genesis-league/genesis-league-content'
 import Accordion from '@components/accordion'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'

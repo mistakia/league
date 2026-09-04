@@ -133,7 +133,13 @@ export const resolve_page_meta = ({ url_path, origin, league_name }) => {
     description: route.description,
     robots: route_robots(route),
     og_type: route_og_type(route),
-    canonical_url: absolute_url(origin, route.canonical_path || path_only),
+    // Every route is its own canonical. The one route that ever overrode this
+    // was /about, which claimed `/` as its canonical on the strength of a
+    // redirect that had already been reverted — so it told crawlers the README
+    // page was a duplicate of the landing page while the two served entirely
+    // different content. Nothing needs the override now, and a route that
+    // genuinely is a duplicate should say so at the point it is created.
+    canonical_url: absolute_url(origin, path_only),
     origin,
     image,
     image_alt

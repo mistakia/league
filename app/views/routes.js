@@ -47,6 +47,7 @@ const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 const ErrorTest = lazy(() => import('@components/error-test'))
 const ShortUrlResolverPage = lazy(() => import('@pages/short-url-resolver'))
 const LandingPage = lazy(() => import('@pages/landing'))
+const GenesisLeaguePage = lazy(() => import('@pages/genesis-league'))
 const WaitlistPage = lazy(() => import('@pages/waitlist'))
 const WaitlistSubmissionsPage = lazy(
   () => import('@pages/waitlist-submissions')
@@ -201,6 +202,10 @@ const Routes = ({ app }) => {
           contributors rather than for a prospective manager; the two are
           different audiences and the landing page serves the second, so this
           serves the first rather than being folded into it. */}
+      {/* The Genesis League pitch. It used to BE the landing page; the landing
+          page now speaks for the platform and links here, because the median
+          visitor is doing NFL research rather than looking for a league seat. */}
+      <Route path='/genesis-league' element={<GenesisLeaguePage />} />
       <Route path='/about' element={<MarkdownPage path='/README.md' />} />
       <Route
         path='/resources'

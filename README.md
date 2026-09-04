@@ -20,8 +20,8 @@ user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349
 
 ## Features
 
-- Host customizable dynasty leagues (e.g., [Genesis League](https://xo.football/leagues/1))
-- Integrate with platforms: Sleeper, ESPN, Yahoo, and more
+- Host customizable dynasty leagues with auctions, rookie drafts, waivers, restricted free agency and a salary cap (e.g., [Genesis League](https://xo.football/genesis-league)). Leagues are currently set up by the maintainer — there is no self-serve path to create one yet
+- Import an existing Sleeper or ESPN league — in development, not yet enabled in the app
 - Utilize data intelligence tools for fantasy football and betting markets ([create custom data views](https://xo.football/data-views))
 - Track diverse data sources:
   - Betting markets

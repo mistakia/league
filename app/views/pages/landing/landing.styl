@@ -1,9 +1,15 @@
 // The landing page is read by people with no account and no context, so it is
-// a single readable column of prose rather than the dense app chrome the rest
-// of the site uses. It shares its page language — measure, paper, type scale,
-// buttons — with the questionnaire it hands the reader to, because the two are
-// read one after another and a change of measure between them reads as a
-// change of site. That language lives in app/styles/prose-form.styl.
+// a single readable column of prose and links rather than the dense app chrome
+// the rest of the site uses. It shares its page language — measure, paper, type
+// scale, buttons — with the Genesis League pitch page it links to and with the
+// questionnaire beyond that, because they are read one after another and a
+// change of measure between them reads as a change of site. That language lives
+// in app/styles/prose-form.styl.
+//
+// NO BOXES AND NO ICONS. The page is a directory, and a directory drawn as a
+// grid of cards becomes a marketing page the moment there are three of them.
+// Hierarchy is carried by spacing and hairline rules, which is what lets a
+// twelve-entry list stay scannable without any of it shouting.
 
 .landing-surface
   prose_surface()
@@ -12,7 +18,6 @@
   prose_page()
 
   h2
-  h3
     font-family $prose_mono
     font-weight $prose_bold
     color $prose_ink
@@ -26,8 +31,7 @@
     letter-spacing normal
 
 // Qualified with the element, like the lede and the deck below: the `.landing
-// p` reset above is (0,1,1) and silently wins over a bare class, which is what
-// had the eyebrow rendering in the body face instead of the mono.
+// p` reset above is (0,1,1) and silently wins over a bare class.
 .landing p.landing__eyebrow
   prose_eyebrow()
 
@@ -53,7 +57,7 @@
   @media (max-width 640px)
     max-width none
 
-// The qualifying facts, in the body face so they read as the explanation of
+// The qualifying sentence, in the body face so it reads as the explanation of
 // the headline rather than as a second headline.
 .landing p.landing__deck
   margin 26px 0 0
@@ -74,31 +78,11 @@
   gap 14px
   margin-top 40px
 
-// The single call to action, and the one obvious next step on a page that is
-// otherwise all prose and links. Qualified with the page class so it wins over
-// the generic `.landing a` rules above.
 .landing a.landing__cta
-  prose_action_fill()
-  // The three things an ANCHOR needs that the shared paint does not carry: a
-  // box that centres its own label, and the removal of the underline
-  // prose_page() gives every link. A submit button needs none of them.
-  display inline-flex
-  align-items center
-  justify-content center
-  border-bottom none
-  &:hover
-    border-bottom none
+  prose_action_link()
 
-// The proof link beside the primary action. Same size and weight so the pair
-// reads as one row, ink instead of fill so only one of them asks to be clicked.
 .landing a.landing__cta--secondary
-  background transparent
-  color $prose_ink
-  box-shadow inset 0 0 0 1px $prose_rule_strong
-  &:hover
-    background transparent
-    color $prose_accent
-    box-shadow inset 0 0 0 1px $prose_accent
+  prose_action_link_secondary()
 
 // Both buttons go full width on a phone. Two inline buttons of different
 // lengths stacked on a narrow screen read as a ragged left edge with no reason
@@ -112,61 +96,38 @@
   .landing a.landing__cta
     width 100%
 
-// Spacing carries the hierarchy on a page with no rules or boxes: sections are
-// far apart, items within one are closer, lines within an item closer still.
+// Spacing carries the hierarchy on a page with no boxes: sections are far
+// apart, entries within one are closer, the two lines of an entry closest.
 .landing__section
   margin-top 72px
 
   @media (max-width 640px)
     margin-top 52px
 
-// The section is the parent of the groups inside it, so it is the larger of
-// the two: a group label set bigger than the section heading above it inverts
-// the hierarchy and the reader stops being able to tell which is which.
 .landing__section-title
-  margin 0 0 1.2em
+  margin 0 0 0.5em
   font-size 1.375em
   letter-spacing -0.02em
 
-.landing__group
-  margin-bottom 40px
+// One line under the heading saying what the group is for, so a reader can
+// skip a whole section without reading its entries. Muted, because it is
+// orientation rather than content.
+.landing p.landing__section-blurb
+  margin 0 0 2em
+  max-width 52ch
+  color $prose_muted
 
-  &:last-child
-    margin-bottom 0
-
-.landing__group-title
-  prose_section_title()
-
-// No disc. A filled bullet is a mark the page has no other use for, so the
-// items hang off the measure instead — the indent alone says they are a list,
-// and the text edge stays straight down the left like everything else.
-.landing__list
+.landing__links
   margin 0
   padding 0
   list-style none
 
-  li
-    position relative
-    margin-bottom 0.85em
-    padding-left 22px
-
-    &:last-child
-      margin-bottom 0
-
-    &:before
-      content ''
-      position absolute
-      left 0
-      top 0.72em
-      width 10px
-      height 1px
-      background $prose_rule_strong
-
-// The four claims. A hairline above each one separates them without drawing a
-// box around anything, which keeps the page reading as one column of paper.
-.landing__trust-item
-  padding-top 32px
-  margin-top 32px
+// A hairline above each entry separates them without drawing a box around
+// anything, which keeps the page reading as one column of paper. The first
+// entry takes none, so the rule never doubles up under the blurb.
+.landing__link
+  padding-top 24px
+  margin-top 24px
   border-top 1px solid $prose_rule
 
   &:first-child
@@ -174,18 +135,36 @@
     margin-top 0
     border-top none
 
-  h3
-    margin 0 0 0.5em
-    font-size 1.125em
-
-  p
-    margin-bottom 0.6em
-
-.landing__closing
+// The destination. Set in the mono at body size so the twelve of them form a
+// column the eye can run down, distinct from the descriptions beside them.
+.landing p.landing__link-label
+  margin 0 0 0.35em
   display flex
-  margin-top 72px
-  padding-top 40px
-  border-top 1px solid $prose_rule
+  flex-wrap wrap
+  align-items baseline
+  gap 10px
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size 1em
+  letter-spacing -0.01em
 
-  @media (max-width 640px)
-    margin-top 52px
+// An entry with no destination yet. Same type as its linked siblings so the
+// column stays even, in the muted ink so it does not read as clickable.
+.landing__link-label--inert
+  color $prose_muted
+
+// The one thing on the page that qualifies rather than names. Tiny, mono,
+// muted — it has to be legible beside the label without competing with it,
+// since its whole job is to stop a reader hunting for a link that is not there.
+.landing__link-note
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size 0.6875em
+  letter-spacing 0.06em
+  text-transform uppercase
+  color $prose_muted
+
+.landing p.landing__link-description
+  margin 0
+  max-width 62ch
+  color $prose_body

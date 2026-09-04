@@ -1,0 +1,176 @@
+// The Genesis League pitch page is read by people with no account and no context, so it is
+// a single readable column of prose rather than the dense app chrome the rest
+// of the site uses. It shares its page language — measure, paper, type scale,
+// buttons — with the questionnaire it hands the reader to, because the two are
+// read one after another and a change of measure between them reads as a
+// change of site. That language lives in app/styles/prose-form.styl.
+
+.genesis-league-surface
+  prose_surface()
+
+.genesis-league
+  prose_page()
+
+  h2
+  h3
+    font-family $prose_mono
+    font-weight $prose_bold
+    color $prose_ink
+    line-height 1.25
+    letter-spacing -0.01em
+
+  p
+    margin 0 0 1em
+    font-family inherit
+    line-height inherit
+    letter-spacing normal
+
+// Qualified with the element, like the lede and the deck below: the `.genesis-league
+// p` reset above is (0,1,1) and silently wins over a bare class, which is what
+// had the eyebrow rendering in the body face instead of the mono.
+.genesis-league p.genesis-league__eyebrow
+  prose_eyebrow()
+
+.genesis-league__hero
+  padding-bottom 48px
+  border-bottom 1px solid $prose_rule
+
+// The opening sentence is the page's headline, not its first paragraph: set at
+// display size in the mono that is this site's signature, at a measure short
+// enough to be taken in rather than read. Mono sets loose and even, so at this
+// size it needs negative tracking and tight leading — without them it reads as
+// a terminal dump, which is the failure mode of every mono headline.
+.genesis-league h1.genesis-league__lede
+  margin 0
+  max-width 26ch
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size clamp(25px, 3.1vw, 34px)
+  line-height 1.3
+  letter-spacing -0.025em
+  color $prose_ink
+
+  @media (max-width 640px)
+    max-width none
+
+// The qualifying facts, in the body face so they read as the explanation of
+// the headline rather than as a second headline.
+.genesis-league p.genesis-league__deck
+  margin 26px 0 0
+  max-width 46ch
+  font-size 1.125em
+  line-height 1.55
+  letter-spacing normal
+  color $prose_body
+
+  @media (max-width 640px)
+    margin-top 20px
+    font-size 1.0625em
+
+.genesis-league__hero-actions
+  display flex
+  flex-wrap wrap
+  align-items center
+  gap 14px
+  margin-top 40px
+
+// The single call to action, and the one obvious next step on a page that is
+// otherwise all prose and links. Qualified with the page class so it wins over
+// the generic `.genesis-league a` rules above.
+.genesis-league a.genesis-league__cta
+  prose_action_link()
+
+// The proof link beside the primary action. Same size and weight so the pair
+// reads as one row, ink instead of fill so only one of them asks to be clicked.
+.genesis-league a.genesis-league__cta--secondary
+  prose_action_link_secondary()
+
+// Both buttons go full width on a phone. Two inline buttons of different
+// lengths stacked on a narrow screen read as a ragged left edge with no reason
+// for it; equal width states plainly that they are the two ways out of here.
+@media (max-width 640px)
+  .genesis-league__hero-actions
+    display grid
+    grid-template-columns 1fr
+    gap 12px
+
+  .genesis-league a.genesis-league__cta
+    width 100%
+
+// Spacing carries the hierarchy on a page with no rules or boxes: sections are
+// far apart, items within one are closer, lines within an item closer still.
+.genesis-league__section
+  margin-top 72px
+
+  @media (max-width 640px)
+    margin-top 52px
+
+// The section is the parent of the groups inside it, so it is the larger of
+// the two: a group label set bigger than the section heading above it inverts
+// the hierarchy and the reader stops being able to tell which is which.
+.genesis-league__section-title
+  margin 0 0 1.2em
+  font-size 1.375em
+  letter-spacing -0.02em
+
+.genesis-league__group
+  margin-bottom 40px
+
+  &:last-child
+    margin-bottom 0
+
+.genesis-league__group-title
+  prose_section_title()
+
+// No disc. A filled bullet is a mark the page has no other use for, so the
+// items hang off the measure instead — the indent alone says they are a list,
+// and the text edge stays straight down the left like everything else.
+.genesis-league__list
+  margin 0
+  padding 0
+  list-style none
+
+  li
+    position relative
+    margin-bottom 0.85em
+    padding-left 22px
+
+    &:last-child
+      margin-bottom 0
+
+    &:before
+      content ''
+      position absolute
+      left 0
+      top 0.72em
+      width 10px
+      height 1px
+      background $prose_rule_strong
+
+// The four claims. A hairline above each one separates them without drawing a
+// box around anything, which keeps the page reading as one column of paper.
+.genesis-league__trust-item
+  padding-top 32px
+  margin-top 32px
+  border-top 1px solid $prose_rule
+
+  &:first-child
+    padding-top 0
+    margin-top 0
+    border-top none
+
+  h3
+    margin 0 0 0.5em
+    font-size 1.125em
+
+  p
+    margin-bottom 0.6em
+
+.genesis-league__closing
+  display flex
+  margin-top 72px
+  padding-top 40px
+  border-top 1px solid $prose_rule
+
+  @media (max-width 640px)
+    margin-top 52px
