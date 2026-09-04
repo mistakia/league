@@ -10,6 +10,8 @@ import {
 } from '@core/plays-view'
 import { plays_view_request_reducer } from '@core/plays-view-request/reducer'
 import plays_view_fields from '@core/plays-view-fields'
+import derive_plays_percentile_stats from '@core/plays-view/derive-plays-percentile-stats.mjs'
+import { calculatePercentiles } from '#libs-shared'
 
 import PlaysPage from './plays'
 
@@ -35,27 +37,68 @@ const get_selected_plays_view = createSelector(
   }
 )
 
+// The result rows, converted ONCE per result. `toJS` on a full result is the
+// most expensive thing this page does, and both the table and the percentiles
+// below want the same rows -- doing it in the combiner would convert them again
+// on every unrelated store change, and a second time for the percentiles.
+const get_plays_result_rows = createSelector(
+  (state) => state.getIn(['plays_view_request', 'result']),
+  (result) => result.toJS()
+)
+
+// The request slice MINUS its rows. The page reads current_request, status,
+// position and metadata off this and never the rows, which it takes from
+// `plays` -- so converting the whole slice meant a second full copy of the same
+// result on every render.
+const get_plays_view_request_props = createSelector(
+  (state) => state.get('plays_view_request'),
+  (plays_view_request) => plays_view_request.delete('result').toJS()
+)
+
+const get_plays_percentiles = createSelector(
+  get_plays_result_rows,
+  get_selected_plays_view,
+  (plays, selected_plays_view) => {
+    const { percentile_stat_keys, reverse_percentile_stats } =
+      derive_plays_percentile_stats({
+        table_state_columns: selected_plays_view.table_state.columns,
+        plays_view_fields
+      })
+
+    return calculatePercentiles({
+      items: plays,
+      stats: percentile_stat_keys,
+      reverse_percentile_stats
+    })
+  }
+)
+
 const map_state_to_props = createSelector(
   (state) => state.getIn(['app', 'userId']),
   get_selected_plays_view,
   get_plays_views,
   (state) => state.getIn(['app', 'user', 'username']),
-  (state) => state.get('plays_view_request'),
+  get_plays_view_request_props,
+  get_plays_result_rows,
+  get_plays_percentiles,
   (
     userId,
     selected_plays_view,
     plays_views,
     user_username,
-    plays_view_request
+    plays_view_request,
+    plays,
+    percentiles
   ) => ({
     user_id: userId,
-    plays: plays_view_request.get('result').toJS(),
+    plays,
     isLoggedIn: Boolean(userId),
     selected_plays_view,
     plays_view_fields,
     plays_views: plays_views.toList().toJS(),
     user_username,
-    plays_view_request: plays_view_request.toJS()
+    plays_view_request,
+    percentiles
   })
 )
 

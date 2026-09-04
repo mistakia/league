@@ -4,6 +4,23 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 import { plays_view_fields_index, nfl_plays_column_params } from '#libs-shared'
 import PlayFilmLink from '@components/play-film-link'
+import TeamCodeColumn from '@components/team-code-column'
+
+// Optional keys a field may carry, beyond the data_type/size/header_label the
+// factories below supply:
+//
+//   component            - React component rendering the cell, in place of the
+//                          plain-text path (react-table's table-cell.js
+//                          dispatches on it)
+//   reverse_percentiles  - bool, or a function of the column's params. Marks a
+//                          column where a LOWER value is the better one, so the
+//                          percentile shading colors it in the other direction
+//   disable_percentiles  - bool. Suppresses shading on a numeric column whose
+//                          value carries no magnitude (an identifier, a
+//                          calendar ordinal), where a percentile is noise
+//
+// Percentile shading is otherwise implicit: every NUMBER column gets it. See
+// app/core/plays-view/derive-plays-percentile-stats.mjs.
 
 const PlayFilmLinkCell = ({ value }) => <PlayFilmLink url={value} />
 
@@ -51,7 +68,9 @@ const plays_view_fields = {
   play_esbid: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'ESBID',
-    size: 90
+    size: 90,
+    // A game identifier, not a magnitude.
+    disable_percentiles: true
   }),
   play_timestamp: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
@@ -91,27 +110,35 @@ const plays_view_fields = {
   play_off_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'OFF',
-    size: 50
+    size: 60,
+    component: React.memo(TeamCodeColumn)
   }),
   play_def_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'DEF',
-    size: 50
+    size: 60,
+    component: React.memo(TeamCodeColumn)
   }),
   play_down: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'DWN',
-    size: 40
+    size: 40,
+    // First down is a better position to be in than fourth.
+    reverse_percentiles: true
   }),
   play_yards_to_go: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YTG',
-    size: 40
+    size: 40,
+    // Shorter to go is better for the offense.
+    reverse_percentiles: true
   }),
   play_ydl_100: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YDL',
-    size: 40
+    size: 40,
+    // Yards from the opponent end zone, so closer to zero is better.
+    reverse_percentiles: true
   }),
   play_quarter: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
@@ -126,19 +153,25 @@ const plays_view_fields = {
   play_sequence: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'SEQ',
-    size: 50
+    size: 50,
+    // Play ordering within a game, not a magnitude.
+    disable_percentiles: true
   }),
   play_year: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YEAR',
     size: 60,
-    column_params: nfl_plays_column_params
+    column_params: nfl_plays_column_params,
+    // A calendar ordinal, not a magnitude.
+    disable_percentiles: true
   }),
   play_week: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'WK',
     size: 40,
-    column_params: nfl_plays_column_params
+    column_params: nfl_plays_column_params,
+    // A calendar ordinal, not a magnitude.
+    disable_percentiles: true
   }),
   play_game_id: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
@@ -376,12 +409,14 @@ const plays_view_fields = {
   play_home_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'HOME',
-    size: 55
+    size: 60,
+    component: React.memo(TeamCodeColumn)
   }),
   play_away_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'AWAY',
-    size: 55
+    size: 60,
+    component: React.memo(TeamCodeColumn)
   }),
   play_goal_to_go: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],

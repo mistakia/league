@@ -5,7 +5,12 @@ import NFLTeamLogo from '@components/nfl-team-logo'
 
 import './team-code-column.styl'
 
-export default function TeamCodeColumn({ value }) {
+// `empty_team_label` is what the cell shows when the row names no team. It has
+// no default on purpose: "FA" is a fantasy free-agency reading of an absent
+// team, true of a player row and false of a play, which has no possession team
+// on a timeout or a penalty rather than a team that is a free agent. Callers
+// that mean free agency say so; everyone else renders blank.
+export default function TeamCodeColumn({ value, empty_team_label }) {
   const teams = Array.isArray(value)
     ? value.filter(Boolean)
     : value
@@ -13,7 +18,7 @@ export default function TeamCodeColumn({ value }) {
       : []
 
   if (!teams.length || (teams.length === 1 && teams[0] === 'INA')) {
-    return <div className='team-code-column'>FA</div>
+    return <div className='team-code-column'>{empty_team_label}</div>
   }
 
   if (teams.length === 1) {
@@ -38,5 +43,6 @@ export default function TeamCodeColumn({ value }) {
 }
 
 TeamCodeColumn.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  empty_team_label: PropTypes.string
 }

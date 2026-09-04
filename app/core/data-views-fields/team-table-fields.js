@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import TeamCodeColumn from '@components/team-code-column'
 import COLUMN_GROUPS from './column-groups.js'
@@ -6,6 +7,17 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import { build_nfl_team_values, nfl_team_value_groups } from '#constants'
 
 const team_code_column_values = build_nfl_team_values()
+
+// A player row with no team is a free agent, so this column says so. The
+// component itself renders blank without this, since an absent team does not
+// mean free agency everywhere it appears.
+const TeamCodeCell = ({ value }) => (
+  <TeamCodeColumn value={value} empty_team_label='FA' />
+)
+
+TeamCodeCell.propTypes = {
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.array])
+}
 
 export default {
   team_code: {
@@ -15,7 +27,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     player_value_path: 'team_code',
     column_groups: [COLUMN_GROUPS.NFL_TEAM],
-    component: React.memo(TeamCodeColumn),
+    component: React.memo(TeamCodeCell),
     column_values: team_code_column_values,
     column_value_groups: nfl_team_value_groups,
     operators: [

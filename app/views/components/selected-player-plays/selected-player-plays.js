@@ -5,7 +5,9 @@ import { List } from 'immutable'
 import Table from 'react-table/index.js'
 
 import plays_view_fields from '@core/plays-view-fields'
+import derive_plays_percentile_stats from '@core/plays-view/derive-plays-percentile-stats.mjs'
 import { current_season } from '#constants'
+import { calculatePercentiles } from '#libs-shared'
 
 import './selected-player-plays.styl'
 
@@ -153,12 +155,32 @@ export default function SelectedPlayerPlays({
     set_table_state(data_view.table_state)
   }, [])
 
-  const plays = selected_player_plays_request.get('result').toJS()
+  // Memoized on the Immutable list rather than converted inline, so the rows
+  // are a stable reference across renders. The percentile memo below depends on
+  // them, and a fresh array every render would defeat it.
+  const plays_result = selected_player_plays_request.get('result')
+  const plays = useMemo(() => plays_result.toJS(), [plays_result])
   const status = selected_player_plays_request.get('status')
   const position = selected_player_plays_request.get('position')
   const metadata = selected_player_plays_request.get('metadata')
 
   const is_loading = status === 'pending' || status === 'processing'
+
+  // The cohort here is this player's own plays, so the shading reads as "which
+  // of his snaps were the good ones" rather than as a league-wide comparison.
+  const percentiles = useMemo(() => {
+    const { percentile_stat_keys, reverse_percentile_stats } =
+      derive_plays_percentile_stats({
+        table_state_columns: table_state.columns,
+        plays_view_fields
+      })
+
+    return calculatePercentiles({
+      items: plays,
+      stats: percentile_stat_keys,
+      reverse_percentile_stats
+    })
+  }, [plays, table_state.columns])
 
   const render_status = () => {
     if (status === 'pending' && position) {
@@ -215,6 +237,7 @@ export default function SelectedPlayerPlays({
         is_loading={is_loading}
         total_rows_fetched={plays.length}
         total_row_count={metadata?.total_count || plays.length}
+        percentiles={percentiles}
         disable_rank_aggregation
         disable_edit_view
       />

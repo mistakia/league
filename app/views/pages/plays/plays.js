@@ -31,7 +31,8 @@ export default function PlaysPage({
   user_username,
   plays_view_request,
   reset_plays_view_cache,
-  load_plays_view
+  load_plays_view,
+  percentiles
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -246,6 +247,7 @@ export default function PlaysPage({
         }
         views={plays_views}
         delete_view={delete_plays_view}
+        percentiles={percentiles}
         disable_rank_aggregation
         disable_edit_view={!isLoggedIn}
         shorten_url={shorten_url}
@@ -274,5 +276,6 @@ PlaysPage.propTypes = {
   user_username: PropTypes.string,
   plays_view_request: PropTypes.object,
   reset_plays_view_cache: PropTypes.func,
-  load_plays_view: PropTypes.func
+  load_plays_view: PropTypes.func,
+  percentiles: PropTypes.object
 }
