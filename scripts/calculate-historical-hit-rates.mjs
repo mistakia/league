@@ -153,6 +153,48 @@ export const build_hit_rate_update_where_clause = (selection) => ({
   selection_pid: selection.selection_pid
 })
 
+// Postgres binds one parameter per esbid and cannot accept more than 65,535 in
+// a statement. It does not report the overflow as a limit: the 16-bit count
+// wraps, and a 74,368-esbid list failed with "bind message has 8832 parameter
+// formats but 0 parameters" (74368 - 65536 = 8832) and killed the whole run
+// before a single update. The gamelog list carries one row per player per game,
+// so it repeats each esbid once per player -- a season is about 285 distinct
+// games behind about 36,000 gamelog rows, and a run loads every season those
+// players ever played. Deduplicating is what makes the list small; chunking is
+// what keeps it bounded however many seasons a run spans. The cron survived only
+// because --current_week_only keeps the list to one week.
+export const NFL_PLAYS_ESBID_CHUNK_SIZE = 1000
+
+export const build_esbid_chunks = (esbids) =>
+  chunk_array({
+    items: [...new Set(esbids)],
+    chunk_size: NFL_PLAYS_ESBID_CHUNK_SIZE
+  })
+
+const fetch_plays_by_esbid = async ({ esbids, apply_filters }) => {
+  const chunks = build_esbid_chunks(esbids)
+
+  const results = await Promise.all(
+    chunks.map((chunk) =>
+      apply_filters(
+        db('nfl_plays')
+          .select(
+            'esbid',
+            'pass_yards',
+            'receiving_yards',
+            'rush_yards',
+            'passer_pid',
+            'target_pid',
+            'ball_carrier_pid'
+          )
+          .whereIn('esbid', chunk)
+      )
+    )
+  )
+
+  return results.flat()
+}
+
 const calculate_historical_hit_rates = async ({
   season_year = current_season.year,
   missing_only = false,
@@ -278,23 +320,14 @@ const calculate_historical_hit_rates = async ({
 
   log(`Loaded ${player_gamelogs.length} player gamelogs`)
 
+  const gamelog_esbids = player_gamelogs.map((g) => g.esbid)
+
   // Fetch first quarter stats if needed
-  const first_quarter_stats = await db('nfl_plays')
-    .select(
-      'esbid',
-      'pass_yards',
-      'receiving_yards',
-      'rush_yards',
-      'passer_pid',
-      'target_pid',
-      'ball_carrier_pid'
-    )
-    .whereIn(
-      'esbid',
-      player_gamelogs.map((g) => g.esbid)
-    )
-    .where('quarter', 1)
-    .whereIn('play_type', stat_countable_play_types)
+  const first_quarter_stats = await fetch_plays_by_esbid({
+    esbids: gamelog_esbids,
+    apply_filters: (query) =>
+      query.where('quarter', 1).whereIn('play_type', stat_countable_play_types)
+  })
 
   // Process first quarter stats into lookup
   const first_quarter_stats_by_game = first_quarter_stats.reduce(
@@ -334,22 +367,13 @@ const calculate_historical_hit_rates = async ({
   )
 
   // Fetch first half stats if needed (quarters 1 and 2)
-  const first_half_stats = await db('nfl_plays')
-    .select(
-      'esbid',
-      'pass_yards',
-      'receiving_yards',
-      'rush_yards',
-      'passer_pid',
-      'target_pid',
-      'ball_carrier_pid'
-    )
-    .whereIn(
-      'esbid',
-      player_gamelogs.map((g) => g.esbid)
-    )
-    .whereIn('quarter', [1, 2])
-    .whereIn('play_type', stat_countable_play_types)
+  const first_half_stats = await fetch_plays_by_esbid({
+    esbids: gamelog_esbids,
+    apply_filters: (query) =>
+      query
+        .whereIn('quarter', [1, 2])
+        .whereIn('play_type', stat_countable_play_types)
+  })
 
   // Process first half stats into lookup
   const first_half_stats_by_game = first_half_stats.reduce((acc, play) => {
