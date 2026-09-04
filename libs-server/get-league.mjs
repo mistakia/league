@@ -36,8 +36,8 @@ import {
  * The `leagues` columns the SYNTHETIC lid=0 league does not carry.
  *
  * `create_default_league()` supplies league configuration, not a `leagues`
- * row: of that table's 13 columns it produces three, and the `lid=0` branch
- * below adds `league_id`. The nine named here are therefore `undefined` on the
+ * row: of that table's 14 columns it produces three, and the `lid=0` branch
+ * below adds `league_id`. The ten named here are therefore `undefined` on the
  * default league and present on every real one — which is exactly the
  * absent-key shape that has repeatedly reached production through the SPA's
  * Immutable `Record`, so it is recorded in the type rather than left for a
@@ -61,7 +61,8 @@ import {
  *   | 'mfl_league_id'
  *   | 'fleaflicker_league_id'
  *   | 'salary_attribution_rule'
- *   | 'discord_announcements_webhook_url'} DefaultLeagueAbsentColumn
+ *   | 'discord_announcements_webhook_url'
+ *   | 'cloned_from_league_id'} DefaultLeagueAbsentColumn
  */
 
 /**

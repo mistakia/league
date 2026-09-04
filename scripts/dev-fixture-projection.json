@@ -194,7 +194,8 @@
       "sleeper_league_id": "NULL",
       "mfl_league_id": "NULL",
       "fleaflicker_league_id": "NULL",
-      "salary_attribution_rule": "keep"
+      "salary_attribution_rule": "keep",
+      "cloned_from_league_id": "keep"
     },
     "matchups": {
       "matchup_id": "keep",

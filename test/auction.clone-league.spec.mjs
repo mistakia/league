@@ -420,6 +420,40 @@ describe('clone-league', function () {
       expect(cloned.is_hosted).to.equal(true)
     })
 
+    it('records the league it was cloned from, generation by generation', async function () {
+      // `is_hosted` reads the SAME on both rows, which is why the discriminator
+      // had to be a new column rather than a predicate over the ones we had.
+      // Asserted as a pair below -- source true and copy true -- because that
+      // equality is the claim, and neither assertion alone states it.
+      const source = await knex('leagues')
+        .where({ league_id: source_lid })
+        .first()
+      expect(source.cloned_from_league_id).to.equal(null)
+      expect(source.is_hosted).to.equal(true)
+
+      const { lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: source_lid, season_year })
+      )
+      const first_generation = await knex('leagues')
+        .where({ league_id: lid })
+        .first()
+      expect(first_generation.cloned_from_league_id).to.equal(source_lid)
+      expect(first_generation.is_hosted).to.equal(true)
+
+      // Cloning the CLONE must name the clone. The league row is built by
+      // spreading the source's own columns, so an INHERITED value is the exact
+      // failure this half exists to catch -- and against one generation alone it
+      // is invisible, because there the inherited value and the correct one are
+      // the same number.
+      const { lid: second_lid } = await knex.transaction((trx) =>
+        clone_league({ trx, from_lid: lid, season_year })
+      )
+      const second_generation = await knex('leagues')
+        .where({ league_id: second_lid })
+        .first()
+      expect(second_generation.cloned_from_league_id).to.equal(lid)
+    })
+
     it('carries the salary history but not the current auction', async function () {
       // Both halves at once, because they pull opposite ways and a clone that
       // drops all transactions passes either one alone.

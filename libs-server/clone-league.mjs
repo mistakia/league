@@ -422,6 +422,18 @@ export const wipe_league = async ({
  *                               upstream identity
  *   archived_at                 a clone is live by definition
  *
+ * `cloned_from_league_id` is the one field SET rather than copied or cleared. It
+ * is the only thing in `leagues` that distinguishes a mirror -- `is_hosted` is
+ * true for a clone AND for the league it copies, and a live mirror's
+ * `archived_at` is null by the line above -- so a consumer that must not treat a
+ * clone as a real league has no other predicate to write. Why that mattered
+ * enough to add a column is in db/adhoc/2026-09-04-leagues-cloned-from-league-id.sql.
+ *
+ * Set to `from_lid` EXPLICITLY, never inherited through the spread above. Cloning
+ * a clone must record the league it was actually copied from; carrying the
+ * source's own value would make a second-generation mirror claim descent from the
+ * first one's parent and point provenance at a league it never read.
+ *
  * `seasons` is copied for EVERY year, not just the target one. A roster page and
  * the cap arithmetic behind it read the season row for the year they render, and
  * the rows are a handful.
@@ -452,7 +464,8 @@ export const clone_league_metadata = async ({
     sleeper_league_id: null,
     mfl_league_id: null,
     fleaflicker_league_id: null,
-    archived_at: null
+    archived_at: null,
+    cloned_from_league_id: from_lid
   }
   if (to_lid !== undefined) {
     row.league_id = to_lid

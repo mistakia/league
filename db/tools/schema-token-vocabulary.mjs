@@ -192,6 +192,7 @@ const english_words = [
   'claimed',
   'class',
   'clock',
+  'cloned',
   'close',
   'closed',
   'closes',

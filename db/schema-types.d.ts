@@ -2200,6 +2200,7 @@ export interface LeaguesRow {
   fleaflicker_league_id: number | null
   salary_attribution_rule: number
   discord_announcements_webhook_url: string | null
+  cloned_from_league_id: number | null
 }
 
 export interface ManagerWaitlistSubmissionsRow {

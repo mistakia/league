@@ -38,6 +38,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_head_coach_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_def_play_caller_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_format_player_projection_values_history DROP CONSTRAINT IF EXISTS lf_player_projection_values_history_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_cloned_from_league_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_format_player_seasonlogs DROP CONSTRAINT IF EXISTS league_format_player_seasonlogs_league_format_id_fkey;
@@ -5370,7 +5371,8 @@ CREATE TABLE public.leagues (
     mfl_league_id bigint,
     fleaflicker_league_id bigint,
     salary_attribution_rule smallint DEFAULT 0 NOT NULL,
-    discord_announcements_webhook_url character varying(255)
+    discord_announcements_webhook_url character varying(255),
+    cloned_from_league_id bigint
 );
 
 
@@ -5379,6 +5381,13 @@ CREATE TABLE public.leagues (
 --
 
 COMMENT ON COLUMN public.leagues.salary_attribution_rule IS 'Enum SALARY_ATTRIBUTION_RULE: 0=NO_CAP, 1=AUCTION_BUDGET, 2=START_TEAM_BEARS, 3=CONTRACT_FOLLOWS. v1 generator implements START_TEAM_BEARS only; other values raise coverage_warning and skip.';
+
+
+--
+-- Name: COLUMN leagues.cloned_from_league_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.leagues.cloned_from_league_id IS 'The league this one was copied from by clone_league_metadata, null when it is not a clone. Set to the IMMEDIATE source, so a clone of a clone names the clone.';
 
 
 --
@@ -59313,6 +59322,14 @@ ALTER TABLE ONLY public.league_formats
 
 ALTER TABLE ONLY public.league_team_player_seasonlogs
     ADD CONSTRAINT league_team_player_seasonlogs_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: leagues leagues_cloned_from_league_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leagues
+    ADD CONSTRAINT leagues_cloned_from_league_id_fkey FOREIGN KEY (cloned_from_league_id) REFERENCES public.leagues(league_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
