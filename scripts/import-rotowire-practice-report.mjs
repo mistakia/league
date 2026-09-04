@@ -68,6 +68,20 @@ const run = async () => {
     return { shortfall: null, in_season: false }
   }
 
+  // The rotowire feed returns [] until the Wednesday before week 1, so a
+  // regular season that has not kicked off means every run legitimately
+  // processes zero rows. week === 0 is not sufficient: week 1 is also
+  // pre-opener (the Sept 8-9 window here), so gate on the first FINAL REG
+  // game rather than the week counter.
+  const season_has_kicked_off = await db('nfl_games')
+    .where({ season_year: current_season.year, season_type: 'REG' })
+    .andWhere('status', 'like', 'FINAL%')
+    .limit(1)
+    .then((rows) => rows.length > 0)
+  if (!season_has_kicked_off) {
+    return { shortfall: null, in_season: false }
+  }
+
   const data = await fetch_with_retry({
     url,
     use_proxy: true,

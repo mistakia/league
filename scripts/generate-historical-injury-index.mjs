@@ -168,14 +168,23 @@ const generate_historical_injury_index = async ({
 
   let total_written = 0
   const shortfalls = []
+
+  // The rebuild spine is team_spans (player_gamelogs) joined to REG nfl_games,
+  // so a current season whose regular season has not kicked off has an empty
+  // spine by construction. is_offseason (week === 0) falls off two days before
+  // the opener (2026-09-08 vs a Sep 10 opener), so gate on the first FINAL REG
+  // game rather than the week counter.
+  const season_kicked_off = await db('nfl_games')
+    .where({ season_year: current_season.year, season_type: 'REG' })
+    .andWhere('status', 'like', 'FINAL%')
+    .limit(1)
+    .then((rows) => rows.length > 0)
+
   for (const y of years) {
-    // The rebuild spine is team_spans (player_gamelogs) joined to REG
-    // nfl_games, so a season whose regular season has not kicked off yet has
-    // an empty spine BY CONSTRUCTION -- the schedule is loaded but no REG
-    // gamelog exists to anchor a span. Zero rows there is the correct answer,
-    // not a shortfall. Scoped to the CURRENT season: zero rows for any
-    // historical year is still a real failure.
-    if (y === current_season.year && current_season.is_offseason) {
+    // See above -- an un-kicked current season produces zero rows for the
+    // CURRENT year only, and that is correct, not a shortfall. Zero rows for
+    // any historical year remains a real failure.
+    if (y === current_season.year && !season_kicked_off) {
       log(
         `skipping ${y}: regular season has not started, no REG gamelogs to build a spine from`
       )
