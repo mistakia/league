@@ -32,38 +32,77 @@ export const secondary_action = { label: 'Read the source', href: github_url }
 export const landing_sections = [
   {
     title: 'Research',
-    blurb:
-      'Public, and usable without an account. This is most of what the site is.',
+    blurb: 'Public, and usable without an account.',
     links: [
       {
         label: 'Data views',
         to: '/data-views',
         description:
-          'Build a table from projections, betting markets, play-by-play and league data, then filter, split and save it.'
+          'Tables built from projections, betting markets, play-by-play and league data, then filtered, split and saved.'
       },
       {
         label: 'Plays',
         to: '/plays',
         description:
-          'Search NFL play-by-play with situational, personnel and win-probability splits.'
+          'NFL play-by-play, searchable by situation, personnel and win probability.'
       },
       {
         label: 'Data views guide',
         to: '/guides/data-views',
-        description:
-          'How to choose columns, filter, split by season or week, and save a view.'
+        description: 'How to build, split and save one.'
       },
       {
         label: 'Glossary',
         to: '/glossary',
-        description:
-          'The statistics and abbreviations used across the site, defined.'
+        description: 'Every statistic and abbreviation used on the site.'
       },
       {
         label: 'Resources',
         to: '/resources',
         description:
-          'Where else to look: stats and research, projections, rankings, and trade tools.'
+          'Research, projections, rankings and trade tools elsewhere.'
+      }
+    ]
+  },
+  {
+    // NEITHER OF THE TWO LINKLESS ENTRIES CAN BECOME A LINK by choosing a
+    // better path: /login and /settings both carry private_robots, and
+    // test/app.landing-links.spec.mjs fails on a landing entry naming one.
+    // Their `note` is what says so to a reader.
+    title: 'Accounts',
+    blurb: 'An account saves your work.',
+    links: [
+      {
+        // NOT "a saved view gets a link" — a share link is generated for any
+        // view, account or not, and can be kept by hand. Keeping the view
+        // itself is the whole of what the account adds.
+        label: 'Saved views',
+        to: '/data-views',
+        description:
+          'Build and share views without an account. An account is what keeps them.'
+      },
+      {
+        // The entitlement is `users.data_view_generation_is_enabled`, NOT NULL
+        // DEFAULT false, and the control is hidden outright for an account
+        // without it — so "on request" is the literal mechanism rather than a
+        // softer word for unavailable.
+        label: 'Agent-built views',
+        description:
+          'Describe a table; an agent builds everything else — columns, filters, splits — and shows you what it ran.',
+        note: 'on request'
+      },
+      {
+        // MOVED HERE FROM `Leagues`, AND DELIBERATELY REFRAMED. The previous
+        // copy — "in development and not yet enabled" — described a door that
+        // is shut, which is the register of a private beta. The adapters are
+        // real and what does not exist is a connect flow a visitor can drive
+        // alone, so the sentence names the missing work rather than a gate.
+        // The `in development` note already carries the availability, so the
+        // description does not restate it — it says what the thing IS.
+        label: 'League import',
+        description:
+          'View and manage a league hosted on Sleeper, ESPN or elsewhere.',
+        note: 'in development'
       }
     ]
   },
@@ -76,55 +115,41 @@ export const landing_sections = [
         label: 'Genesis League',
         to: '/genesis-league',
         description:
-          'The dynasty league this was built for, and the reason any of it works. Published constitution, public transaction record.'
+          'The dynasty league this was built for. Published constitution, public transaction record.'
       },
       {
-        label: 'A league front office',
+        label: 'League front office',
         to: '/leagues/1',
         description:
-          'The league surfaces as a manager sees them: rosters, standings, matchups, trades and the live auction.'
-      },
-      {
-        // NO LINK, DELIBERATELY. The adapters for Sleeper and ESPN exist and
-        // are drivable by an operator, but there is no connect flow a visitor
-        // can reach and the settings surface says so out loud. Naming it with
-        // a link would send a reader to a dead end; naming it without one is
-        // the honest version, and the operator's call — the feature is weeks
-        // out, and the page will outlive the gap.
-        label: 'Importing an existing league',
-        description:
-          'Bringing a Sleeper or ESPN league across is in development and not yet enabled.',
-        note: 'in development'
+          'Rosters, standings, matchups, trades and the live auction, as a manager sees them.'
       }
+      // League import used to sit here. It moved to `Accounts` above, where it
+      // belongs beside the other capability that runs work on a reader's
+      // behalf — this section is about the leagues the platform HOSTS.
     ]
   },
   {
     title: 'The project',
-    blurb:
-      'Open source, actively developed, and looking for people to build and test it.',
+    blurb: 'Open source, and looking for people to build and test it.',
     links: [
       {
         label: 'Source on GitHub',
         href: github_url,
         description:
-          'The transaction rules, the cap arithmetic and the scoring are all readable before you rely on any of them.'
+          'The transaction rules, the cap arithmetic and the scoring, all readable.'
       },
       {
         label: 'About',
         to: '/about',
-        description:
-          'What the project is, what it does today, and how to contribute.'
+        description: 'What it does today, and how to contribute.'
       },
-      {
-        label: 'Status',
-        to: '/status',
-        description:
-          'Whether the imports, projections and jobs behind the site are running.'
-      },
+      // NO `/status` ENTRY, by operator ruling. The route exists and is
+      // indexable, so the link gate would have accepted it — this is a decision
+      // about what the front door promotes, not a constraint.
       {
         label: 'Discord',
         href: discord_url,
-        description: 'Questions, discussion, and where contributors coordinate.'
+        description: 'Questions, and where contributors coordinate.'
       }
     ]
   }

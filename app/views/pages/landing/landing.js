@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 
+import RouteDiagram from './route-diagram'
 import {
   landing_sections,
   primary_action,
@@ -49,8 +50,14 @@ SectionLink.propTypes = {
 
 const Section = ({ title, blurb, links }) => (
   <section className='landing__section'>
-    <h2 className='landing__section-title'>{title}</h2>
-    <p className='landing__section-blurb'>{blurb}</p>
+    {/* The heading and its blurb share one rail row, so the heading sits in
+        the label column above the entry labels and the blurb sits in the prose
+        column above their descriptions — the section head is then the first
+        row of the same worksheet rather than a caption floating over it. */}
+    <div className='landing__section-head'>
+      <h2 className='landing__section-title'>{title}</h2>
+      <p className='landing__section-blurb'>{blurb}</p>
+    </div>
     <ul className='landing__links'>
       {links.map((link) => (
         <SectionLink key={link.label} {...link} />
@@ -70,35 +77,42 @@ export default function LandingPage() {
     <div className='landing-surface'>
       <div className='landing'>
         <header className='landing__hero'>
-          <p className='landing__eyebrow'>{site_name}</p>
-          {/* What this is, in the register of a masthead rather than a pitch.
+          <div className='landing__hero-text'>
+            <p className='landing__eyebrow'>{site_name}</p>
+            {/* What this is, in the register of a masthead rather than a pitch.
               The reader arriving cold is deciding whether the site is worth
               his afternoon; a slogan argues that and a plain declaration
               demonstrates it. */}
-          <h1 className='landing__lede'>
-            an open-source fantasy football platform.
-          </h1>
-          {/* The tagline is the SHARED one, read from the copy module rather
+            <h1 className='landing__lede'>
+              an open-source fantasy football platform.
+            </h1>
+            {/* The tagline is the SHARED one, read from the copy module rather
               than typed here. README.md carries the same sentence and
               test/libs-shared.social-meta-copy.spec.mjs holds the two
               together, so the site's own description of itself cannot drift
               from the one on GitHub. */}
-          <p className='landing__deck'>{site_tagline}</p>
-          {/* Text links, not buttons. A filled button is a conversion
+            <p className='landing__deck'>{site_tagline}</p>
+            {/* Text links, not buttons. A filled button is a conversion
               affordance and this page is not selling anything — the two
               destinations here are the first two entries of the directory
               below, promoted to the top for a reader who does not want to
               read the rest. */}
-          <p className='landing__hero-links'>
-            <NavLink to={primary_action.to}>{primary_action.label}</NavLink>
-            <a
-              href={secondary_action.href}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              {secondary_action.label}
-            </a>
-          </p>
+            <p className='landing__hero-links'>
+              <NavLink to={primary_action.to}>{primary_action.label}</NavLink>
+              <a
+                href={secondary_action.href}
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                {secondary_action.label}
+              </a>
+            </p>
+          </div>
+          {/* Beside the text, not under it. AFTER it in the DOM so a screen
+              reader and a phone both reach the copy first — the phone layout
+              puts the mark above with column-reverse rather than by moving it
+              here. */}
+          <RouteDiagram />
         </header>
 
         {landing_sections.map((section) => (

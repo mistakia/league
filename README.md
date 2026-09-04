@@ -16,24 +16,24 @@ user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349
 
 # xo.football
 
-[xo.football](https://xo.football): An open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets. We're actively developing it and seeking contributors for development and testing. Interested? Join us on [Discord](https://discord.com/invite/azSX97Qj9Z).
+An open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets.
 
-## Features
+Actively developed, and looking for people to build and test it. [Join the Discord](https://discord.com/invite/azSX97Qj9Z).
 
-- Host customizable dynasty leagues with auctions, rookie drafts, waivers, restricted free agency and a salary cap (e.g., [Genesis League](https://xo.football/genesis-league)). Leagues are currently set up by the maintainer — there is no self-serve path to create one yet
-- Import an existing Sleeper or ESPN league — in development, not yet enabled in the app
-- Utilize data intelligence tools for fantasy football and betting markets ([create custom data views](https://xo.football/data-views))
-- Track diverse data sources:
-  - Betting markets
-  - Player projections
-  - Trade data
-  - League information
-- Calculate personalized fantasy football metrics based on your league settings and team composition
+## What it does
 
-### [Roadmap](https://github.com/users/mistakia/projects/3/views/1)
+**Dynasty leagues.** Auctions, rookie drafts, waivers, restricted free agency and a salary cap. [Genesis League](https://xo.football/genesis-league) is the one it was built for. Leagues are set up by the maintainer; there is no self-serve path yet.
 
-### Contributing
+**Data views.** [Tables](https://xo.football/data-views) built from betting markets, player projections, trade data and league data, then filtered, split and saved.
 
-Found a bug or have an idea? See [docs/contributing.md](docs/contributing.md) — reporting works signed out, from any page.
+**League-specific metrics.** Player value calculated against your league's settings and roster rather than a generic format.
+
+**League import.** Sleeper and ESPN adapters read both platforms. The connect flow you drive yourself is still being built.
+
+## Contributing
+
+[Roadmap](https://github.com/users/mistakia/projects/3/views/1) · [How to contribute](docs/contributing.md)
+
+Reporting a bug works signed out, from any page.
 
 </div>

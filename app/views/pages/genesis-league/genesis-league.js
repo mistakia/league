@@ -46,7 +46,7 @@ export default function GenesisLeaguePage() {
               league is serious; a slogan argues that and a plain declaration
               demonstrates it. The claims that support it come underneath, as
               facts with dates on them. */}
-          <h1 className='genesis-league__lede'>a home dynasty league.</h1>
+          <h1 className='genesis-league__lede'>the genesis dynasty league</h1>
           {/* The season count is DERIVED, never typed. It goes in the deck
               rather than the headline, which states what this is and stops —
               but a league's age is the first thing that separates a real one
@@ -87,9 +87,9 @@ export default function GenesisLeaguePage() {
             <div className='genesis-league__trust-item'>
               <h3>The constitution and every amendment to it</h3>
               <p>
-                Adopted in {league_founding_year}. Each amendment is recorded
-                with the date it was introduced and the date it passed,
-                including those that were drafted and never ratified.
+                Adopted in {league_founding_year}. Every amendment carries the
+                date it was introduced and the date it passed, including those
+                drafted and never ratified.
               </p>
               <NavLink to='/constitution'>Read the constitution</NavLink>
             </div>
@@ -97,10 +97,9 @@ export default function GenesisLeaguePage() {
             <div className='genesis-league__trust-item'>
               <h3>The platform is open source</h3>
               <p>
-                I wrote this site for this league and its source is public. The
-                transaction rules, the cap arithmetic and the scoring are all
-                readable, so what the software does with a roster can be
-                inspected before you hold one.
+                I wrote this site for this league and its source is public. What
+                the software does with a roster can be inspected before you hold
+                one.
               </p>
               <a
                 href='https://github.com/mistakia/league'

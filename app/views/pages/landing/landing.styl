@@ -15,7 +15,7 @@
   prose_surface()
 
 .landing
-  prose_page()
+  prose_page_wide()
 
   h2
     font-family $prose_mono
@@ -35,9 +35,83 @@
 .landing p.landing__eyebrow
   prose_eyebrow()
 
+// No rule of its own. The first section's band rule is the masthead rule — see
+// prose_section_band().
+//
+// THE MARK HANGS IN THE MARGIN, and the text does not move for it. Putting the
+// mark in a column of its own indents the headline past the page's own left
+// edge, which breaks the one alignment the whole page is built on — the lede,
+// every section label and every entry label share that edge, and the header is
+// the worst place to lose it.
+//
+// So it is taken OUT OF FLOW into the space left of the measure. The text block
+// keeps the full width it had before the mark existed, flush left.
+//
+// The mark comes AFTER the text in the DOM, so the copy is what a screen reader
+// reaches first; which side it paints on is a layout question.
 .landing__hero
-  padding-bottom 48px
-  border-bottom 1px solid $prose_rule
+  position relative
+  padding-bottom 0
+
+  // THE BREAKPOINT IS SET BY THE NAV DRAWER, NOT BY THE PAGE GUTTER, and that
+  // is the whole reason it is this high. The arithmetic that suggests itself —
+  // measure 880px, so the gutter is (viewport - 880) / 2, and the mark needs
+  // 104px plus a 32px gap, therefore 1160px — is answering the wrong question:
+  // the mark is not hanging into empty space, it is hanging into the column the
+  // app's drawer already occupies. Measured, the mark's left edge clears the
+  // drawer's right edge by 56px at 1440 and OVERLAPS it by 24px at 1280, so a
+  // 1160px rule paints the mark on top of the menu. 1400px is the narrowest
+  // width that still clears it.
+  //
+  // Anything narrower puts the mark back in the flow above the header, which is
+  // what the phone layout does and for the same reason: there is no room beside
+  // the text, and the text keeping its own left edge matters more than the mark
+  // keeping its position.
+  @media (min-width 1400px)
+    .route-diagram
+      position absolute
+      // `top 0` and not `top 6px`: the base rule already carries margin-top 6px,
+      // and an absolutely positioned box takes BOTH, which silently doubles the
+      // optical nudge that aligns the mark with the eyebrow.
+      top 0
+      right 100%
+      margin-right 32px
+
+  @media (max-width 1399px)
+    display flex
+    flex-direction column-reverse
+    align-items flex-start
+    gap 28px
+
+.landing__hero-text
+  min-width 0
+
+// `display block` is load-bearing — an inline svg sits on the text baseline and
+// carries a few pixels of descender gap beneath it.
+//
+// Sized by WIDTH alone, with the viewBox holding the aspect ratio, so the mark
+// cannot be stretched out of the proportions it was matched to.
+.route-diagram
+  display block
+  flex-shrink 0
+  width 104px
+  height auto
+  margin-top 6px
+
+  @media (max-width 640px)
+    width 68px
+    margin-top 0
+
+// A route is a stroked path and must not be filled, or the area between its
+// legs floods; a head is nothing but fill. One ink, two properties.
+.route-diagram__stroke
+  fill none
+  stroke $prose_rule_heavy
+  stroke-width 15
+
+.route-diagram__fill
+  fill $prose_rule_heavy
+  stroke none
 
 // The opening sentence is the page's headline, not its first paragraph: set at
 // display size in the mono that is this site's signature, at a measure short
@@ -47,6 +121,10 @@
 .landing h1.landing__lede
   margin 0
   max-width 26ch
+  // Balanced, so the headline never leaves one word alone on its second line.
+  // `text-wrap` degrades to `normal` where it is unsupported, so this is polish
+  // that cannot break a layout.
+  text-wrap balance
   font-family $prose_mono
   font-weight $prose_bold
   font-size clamp(25px, 3.1vw, 34px)
@@ -66,6 +144,7 @@
   line-height 1.55
   letter-spacing normal
   color $prose_body
+  text-wrap pretty
 
   @media (max-width 640px)
     margin-top 20px
@@ -84,26 +163,50 @@
   font-size 0.9375em
   letter-spacing -0.01em
 
-// Spacing carries the hierarchy on a page with no boxes: sections are far
-// apart, entries within one are closer, the two lines of an entry closest.
+// A rule opens each section and the spacing inside it carries the rest:
+// entries within a section are closer than the sections are to each other, and
+// the two lines of an entry closer still.
 .landing__section
-  margin-top 72px
+  prose_section_band()
+  margin-top 64px
+
+  &:first-of-type
+    prose_section_band(2px)
 
   @media (max-width 640px)
-    margin-top 52px
+    margin-top 48px
 
-.landing__section-title
-  margin 0 0 0.5em
-  font-size 1.375em
-  letter-spacing -0.02em
+// A standing label under the band rule, not a headline. The entries below are
+// set larger than it and that is the newspaper order — a section head names
+// where you are and the items are what you came to read. What separates it from
+// the muted labels elsewhere on the site is the ink and the rule above it,
+// which is enough and does not cost a fourth size in the type scale.
+// QUALIFIED WITH THE ELEMENT, like the eyebrow and the lede. The `.landing h2`
+// block above is (0,1,1) and silently beats a bare class — and it beats it on
+// exactly the four properties this label is trying to change (family, weight,
+// colour, tracking) while leaving font-size to come through, so an unqualified
+// rule here renders at the new SIZE in the old FACE and reads as a change that
+// landed.
+.landing h2.landing__section-title
+  prose_section_label()
 
 // One line under the heading saying what the group is for, so a reader can
 // skip a whole section without reading its entries. Muted, because it is
-// orientation rather than content.
+// orientation rather than content. It sits in the rail's prose column so the
+// section head and the entry labels below share one left edge.
 .landing p.landing__section-blurb
-  margin 0 0 2em
-  max-width 52ch
+  margin 0
   color $prose_muted
+
+.landing__section-head
+  prose_rail()
+  margin-bottom 40px
+
+  @media (max-width 640px)
+    margin-bottom 32px
+
+    .landing__section-title
+      margin-bottom 0.6em
 
 .landing__links
   margin 0
@@ -112,10 +215,11 @@
 
 // A hairline above each entry separates them without drawing a box around
 // anything, which keeps the page reading as one column of paper. The first
-// entry takes none, so the rule never doubles up under the blurb.
+// entry takes none, so the rule never doubles up under the band above it.
 .landing__link
-  padding-top 24px
-  margin-top 24px
+  prose_rail()
+  padding-top 20px
+  margin-top 20px
   border-top 1px solid $prose_rule
 
   &:first-child
@@ -123,18 +227,24 @@
     margin-top 0
     border-top none
 
-// The destination. Set in the mono at body size so the twelve of them form a
-// column the eye can run down, distinct from the descriptions beside them.
+// The destination, in the rail. Set in the mono so the twelve of them form a
+// column the eye can run down without reading a word of the prose beside them.
+// The note wraps under the label rather than beside it, since the rail is
+// sized for one and not for both.
 .landing p.landing__link-label
-  margin 0 0 0.35em
+  margin 0
   display flex
   flex-wrap wrap
   align-items baseline
-  gap 10px
+  gap 4px 10px
   font-family $prose_mono
   font-weight $prose_bold
-  font-size 1em
+  font-size 0.9375em
+  line-height 1.45
   letter-spacing -0.01em
+
+  @media (max-width 640px)
+    margin-bottom 0.35em
 
 // An entry with no destination yet. Same type as its linked siblings so the
 // column stays even, in the muted ink so it does not read as clickable.
@@ -152,7 +262,9 @@
   text-transform uppercase
   color $prose_muted
 
+// No max-width: the rail already holds the measure, and a second limit inside
+// it would only ever be the binding one at some width nobody chose.
 .landing p.landing__link-description
   margin 0
-  max-width 62ch
   color $prose_body
+  text-wrap pretty

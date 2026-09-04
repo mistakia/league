@@ -29,24 +29,24 @@ export const league_format = [
     title: 'Format',
     items: [
       `${league_team_count} teams, half-PPR, superflex.`,
-      'Dynasty with a salary cap. Players extend automatically up a fixed ladder each offseason, so the decision each year is who you let go.',
+      'Dynasty with a salary cap. Contracts extend up a fixed ladder each offseason, so the yearly decision is who you let go.',
       'One franchise tag, two restricted free agency nominations, and one rookie tag per year.'
     ]
   },
   {
     title: 'Offseason',
     items: [
-      'The offseason normally opens in May or June with restricted free agency, which runs about two weeks.',
-      'The rookie draft follows on a pick clock and takes a month or more.',
-      'The free agency auction comes last, in the days before the regular season, and FAAB waivers run Wednesdays from there on.'
+      'Restricted free agency opens it, usually May or June, and runs about two weeks.',
+      'The rookie draft follows on a pick clock, and takes a month or more.',
+      'The free agency auction comes last, days before the season. FAAB waivers run Wednesdays from there on.'
     ]
   },
   {
     title: 'Postseason',
     items: [
-      'Fourteen weeks of regular season decide six postseason places. The top two by all-play win percentage — how you would have done against every team every week — go straight to the championship round.',
-      'The wildcard is Week 15 alone. Four teams play it, and the two highest scoring advance.',
-      'The championship runs Weeks 16 and 17 across four teams, and the highest combined score over both weeks wins.'
+      'Fourteen regular season weeks decide six places. The top two by all-play win percentage — your record against every team every week — skip to the championship round.',
+      'The wildcard is Week 15 alone: four teams, and the two highest scoring advance.',
+      'The championship runs Weeks 16 and 17 across four teams, on combined score.'
     ]
   }
 ]

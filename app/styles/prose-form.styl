@@ -29,8 +29,19 @@ $prose_paper = #ffffff
 $prose_ink = #17181a
 $prose_body = #3d4045
 $prose_muted = #6b7075
-$prose_rule = #e3e4e6
+// THE HAIRLINE IS SET AGAINST THE GROUND, NOT AGAINST WHITE. These pages sit on
+// $backgroundColor (#f0f0f0), and #e3e4e6 — the value this was — is four steps
+// off it: the rules separating twelve directory entries were present in the DOM
+// and invisible on screen, which is the one thing a page whose whole structure
+// is rules cannot afford. This reads as a hairline on the grey ground and is
+// still a hairline on the white of a card or a dialog.
+$prose_rule = #d7d9dc
 $prose_rule_strong = #c9cbcf
+// The band rule. A hairline separates two things of the same kind; this one
+// says a new SECTION begins, which is the distinction a page with no boxes has
+// nothing else to make. Ink rather than a darker grey, because a grey heavy
+// rule reads as a hairline someone thickened rather than as a different object.
+$prose_rule_heavy = #17181a
 // A deep red rather than the app's pure `red`, which is the one colour on the
 // page and so the one that cannot afford to look like a default.
 $prose_accent = #c1121f
@@ -100,6 +111,22 @@ prose_page()
   @media (max-width 640px)
     padding 48px 22px 80px
 
+// THE READING PAGES ARE WIDER THAN THE FORM PAGES, and they are the exception
+// rather than a second opinion about the measure. 680px is a PROSE measure —
+// one column of running text at ~72 characters — and the questionnaire and the
+// ballot are exactly that, so they keep it. The front door and the pitch are
+// not: their body is a rail, and inside 680px the rail leaves the prose column
+// at 412px, which is a newspaper column's width being asked to carry ordinary
+// sentences. The wider page spends every added pixel on that column and none on
+// the rail, so the running text lands back at a real measure.
+//
+// The HERO does not widen with it — the lede stays at 26ch and the deck at 46ch
+// — so the top of the page reads at the same measure it always did and only the
+// worksheet below it grows.
+prose_page_wide()
+  prose_page()
+  max-width 880px
+
 // The line above a title: what this is, before what it says. Mono and tiny, so
 // it reads as a label rather than as the first sentence of the page.
 prose_eyebrow()
@@ -136,6 +163,75 @@ prose_section_title()
   letter-spacing 0.14em
   text-transform uppercase
   color $prose_muted
+
+// THE SECTION BAND. A reading page with no boxes has spacing and rules and
+// nothing else, and spacing alone cannot say which of two gaps is the bigger
+// break — 72px above a section and 24px above an entry are the same gesture at
+// different amounts, so a reader scrolling past the fold loses where one group
+// ended. The band rule is the newspaper answer: an ink rule spanning the
+// measure, the label tight under it, and everything down to the next rule
+// belongs to that label. Its weight is the whole point, so it takes
+// $prose_rule_heavy and the entries inside it keep the hairline.
+//
+// The FIRST band on a page takes the heavy weight and doubles as the masthead
+// rule. Giving the header its own rule as well puts two parallel rules sixty
+// pixels apart with nothing between them, which reads as a mistake rather than
+// as two levels of break — the header is separated from the page by the same
+// rule that opens the first section.
+prose_section_band(weight = 1px)
+  padding-top 20px
+  border-top weight solid $prose_rule_heavy
+
+// THE LABEL RAIL — the worksheet half of the language, and the one structure
+// these pages share. A directory entry and a group of league rules are the same
+// object: a short mono label naming a thing, and prose about it. Stacked, that
+// is twenty-odd left-aligned blocks the eye cannot tell apart; in a rail the
+// labels form a column of their own that can be read down without reading any
+// of the prose beside them.
+//
+// grid rather than flex, because the two cells have to share a baseline row and
+// a flex row makes the label's height depend on the prose next to it.
+//
+// 208px is set against the LONGEST label rather than the average: mono at
+// 0.9375em is about 9px a character, so the rail holds ~19 and the one
+// twenty-seven-character entry on the landing page takes two lines, which is
+// the right trade against a rail wide enough to strand every short label.
+//
+// It COLLAPSES rather than narrows at 640px. A rail that is a quarter of a
+// phone screen leaves the prose at a measure too short to read, and the label
+// above its own paragraph is what a worksheet does on a narrow page anyway.
+prose_rail()
+  display grid
+  grid-template-columns 208px 1fr
+  column-gap 28px
+
+  @media (max-width 640px)
+    display block
+
+// THE SECTION LABEL — the standing head under a band rule, and deliberately the
+// one label on these pages set in the SANS. Everything else at label scale is
+// mono, so the face itself is what marks a section head as a different kind of
+// object from the group labels and entry labels inside it; that is a distinction
+// weight and colour were being asked to carry alone.
+//
+// 700, WHICH IS A REAL WEIGHT HERE. $prose_bold is 600 because IBM Plex Mono
+// loads 300/400/500/600 and asking mono for 700 gets a synthesized smudge —
+// that constraint is the MONO's, not the page's. Inter loads 400/500/600/700
+// (see the font link in app/index.html), so a sans label at 700 is drawn rather
+// than faked, and it is the only place on these pages that can go heavier.
+//
+// Smaller than the mono labels it sits above, because Inter at 700 sets far
+// denser than Plex Mono at 600 — matching their point sizes would make the
+// section head the loudest thing on the page, which inverts the order the band
+// rule already establishes.
+prose_section_label()
+  margin 0
+  font-family $prose_sans
+  font-weight 700
+  font-size 0.6875em
+  letter-spacing 0.12em
+  text-transform uppercase
+  color $prose_ink
 
 prose_form()
   display flex

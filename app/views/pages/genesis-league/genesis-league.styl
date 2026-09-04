@@ -9,7 +9,7 @@
   prose_surface()
 
 .genesis-league
-  prose_page()
+  prose_page_wide()
 
   h2
   h3
@@ -31,9 +31,10 @@
 .genesis-league p.genesis-league__eyebrow
   prose_eyebrow()
 
+// No rule of its own. The first section's band rule is the masthead rule — see
+// prose_section_band().
 .genesis-league__hero
-  padding-bottom 48px
-  border-bottom 1px solid $prose_rule
+  padding-bottom 0
 
 // The opening sentence is the page's headline, not its first paragraph: set at
 // display size in the mono that is this site's signature, at a measure short
@@ -80,61 +81,75 @@
   font-size 0.9375em
   letter-spacing -0.01em
 
-// Spacing carries the hierarchy on a page with no rules or boxes: sections are
-// far apart, items within one are closer, lines within an item closer still.
+// A rule opens each section and the spacing inside it carries the rest: items
+// within a group are closer than the groups are to each other, and the groups
+// closer than the sections.
 .genesis-league__section
-  margin-top 72px
+  prose_section_band()
+  margin-top 64px
+
+  &:first-of-type
+    prose_section_band(2px)
 
   @media (max-width 640px)
-    margin-top 52px
+    margin-top 48px
 
-// The section is the parent of the groups inside it, so it is the larger of
-// the two: a group label set bigger than the section heading above it inverts
-// the hierarchy and the reader stops being able to tell which is which.
-.genesis-league__section-title
-  margin 0 0 1.2em
-  font-size 1.375em
-  letter-spacing -0.02em
-
-.genesis-league__group
+// The section is the parent of the groups inside it, and what separates them is
+// the FACE: the section head is sans under a band rule, a group label is mono
+// and grey in the rail. Sizing the parent larger was the old answer and it cost
+// a fourth step in the type scale to say something the two faces already say.
+// Qualified with the element for the same reason the eyebrow is: the
+// `.genesis-league h2, h3` block above is (0,1,1) and beats a bare class on
+// family, weight and tracking while letting font-size through, which renders as
+// a half-applied label.
+.genesis-league h2.genesis-league__section-title
+  prose_section_label()
   margin-bottom 40px
+
+  @media (max-width 640px)
+    margin-bottom 32px
+
+// Each group is a rail row: its label in the left column, its rules beside it.
+.genesis-league__group
+  prose_rail()
+  margin-bottom 36px
 
   &:last-child
     margin-bottom 0
 
 .genesis-league__group-title
   prose_section_title()
+  margin 0
 
-// No disc. A filled bullet is a mark the page has no other use for, so the
-// items hang off the measure instead — the indent alone says they are a list,
-// and the text edge stays straight down the left like everything else.
+  @media (max-width 640px)
+    margin-bottom 0.9em
+
+// NO MARK OF ANY KIND — no disc, and no dash either. The rail already names
+// the group these belong to, so a per-item mark states membership a second
+// time, and it cost the items a 22px indent that pushed them off the prose
+// column every other block on the page aligns to. The gap between items is
+// what says they are separate, so it is larger than a paragraph's.
 .genesis-league__list
   margin 0
   padding 0
   list-style none
 
   li
-    position relative
-    margin-bottom 0.85em
-    padding-left 22px
+    margin-bottom 1.1em
 
     &:last-child
       margin-bottom 0
 
-    &:before
-      content ''
-      position absolute
-      left 0
-      top 0.72em
-      width 10px
-      height 1px
-      background $prose_rule_strong
-
-// The four claims. A hairline above each one separates them without drawing a
-// box around anything, which keeps the page reading as one column of paper.
+// The claims. A hairline above each one separates them without drawing a box
+// around anything, which keeps the page reading as one column of paper.
+//
+// NOT A RAIL ROW, unlike the groups above. A rail label is a NAME — two or
+// three words the eye reads as a column — and these headings are whole
+// sentences, which in a 208px column set as four ragged lines beside a
+// paragraph and read as a layout failure rather than as an index.
 .genesis-league__trust-item
-  padding-top 32px
-  margin-top 32px
+  padding-top 28px
+  margin-top 28px
   border-top 1px solid $prose_rule
 
   &:first-child
@@ -142,22 +157,26 @@
     margin-top 0
     border-top none
 
+  // The same size as the landing page's entry labels, which is what this is:
+  // a mono line naming a thing, with prose about it underneath.
   h3
     margin 0 0 0.5em
-    font-size 1.125em
+    font-size 1em
 
   p
     margin-bottom 0.6em
 
+// The closing rule matches the masthead's rather than a section band's: it
+// closes the page the way the first one opened it.
 .genesis-league__closing
   display flex
-  margin-top 72px
-  padding-top 40px
-  border-top 1px solid $prose_rule
+  margin-top 64px
+  padding-top 36px
+  border-top 2px solid $prose_rule_heavy
   font-family $prose_mono
   font-weight $prose_bold
   font-size 0.9375em
   letter-spacing -0.01em
 
   @media (max-width 640px)
-    margin-top 52px
+    margin-top 48px

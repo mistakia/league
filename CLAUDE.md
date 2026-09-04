@@ -23,6 +23,7 @@ Two consequences worth stating outright. **This file must be true without verifi
 | Commit for production, push, or deploy                               | [docs/guides/ship.md](docs/guides/ship.md)           |
 | Run or write a test                                                  | [docs/guides/test.md](docs/guides/test.md)           |
 | Touch anything under `app/`                                          | [docs/guides/spa.md](docs/guides/spa.md)             |
+| Change how anything LOOKS — a `.styl` file, a token, a page's layout | [STYLE.md](STYLE.md)                                 |
 | Touch a data-view column, param, field factory or golden             | [docs/guides/data.md](docs/guides/data.md)           |
 | Touch anything under `api/`                                          | [docs/guides/api.md](docs/guides/api.md)             |
 | Touch `scripts/`, `jobs/` or a crontab                               | [docs/guides/scripts.md](docs/guides/scripts.md)     |
