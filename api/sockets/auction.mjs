@@ -8,6 +8,7 @@ import {
   transaction_types
 } from '#constants'
 import { getRoster, getLeague, sendNotifications } from '#libs-server'
+import { on_socket_message } from './utils.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { format_nomination_message } from '#libs-server/format-auction-discord-message.mjs'
 import {
@@ -1455,47 +1456,58 @@ export default class Auction {
    * describe the ACTION -- the player, the amount -- and never the actor.
    */
   _setup_message_handlers(ws, user_id, tid) {
-    ws.on('message', (msg) => {
-      let message
-      try {
-        message = JSON.parse(msg)
-      } catch (error) {
-        this.logger('Failed to parse message', error.toString())
-        return
-      }
-
-      switch (message.type) {
-        case 'AUCTION_PAUSE':
-          if (user_id !== this._league.commissioner_user_id) return
-          return this.pause()
-
-        case 'AUCTION_RESUME':
-          if (user_id !== this._league.commissioner_user_id) return
-          return this.start()
-
-        case 'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT':
-          if (user_id !== this._league.commissioner_user_id) return
-          this._pause_on_team_disconnect = !this._pause_on_team_disconnect
-          return this.broadcast({
-            type: 'AUCTION_CONFIG',
-            payload: {
-              pause_on_team_disconnect: this._pause_on_team_disconnect
-            }
-          })
-
-        case 'AUCTION_BID':
-          return this.bid(message.payload, { user_id, tid })
-
-        case 'AUCTION_SUBMIT_NOMINATION':
-          return this.nominate(message.payload, { user_id, tid })
-
-        case 'KEEPALIVE':
+    // Registered through `on_socket_message` because every arm below RETURNS a
+    // promise -- `bid`, `nominate`, `pause`, `start` all reach the database --
+    // and an EventEmitter discards what its listener returns. A rejection from
+    // any of them was an unhandled rejection, which `install_process_handlers`
+    // exits on, so one failing bid took down the whole API rather than that
+    // bid. A sync listener returning promises is the same defect as an `async`
+    // one and is easier to miss, since it carries no `async` keyword to grep.
+    on_socket_message(
+      ws,
+      (msg) => {
+        let message
+        try {
+          message = JSON.parse(msg)
+        } catch (error) {
+          this.logger('Failed to parse message', error.toString())
           return
+        }
 
-        default:
-          return console.log(`invalid message: ${message.type}`)
-      }
-    })
+        switch (message.type) {
+          case 'AUCTION_PAUSE':
+            if (user_id !== this._league.commissioner_user_id) return
+            return this.pause()
+
+          case 'AUCTION_RESUME':
+            if (user_id !== this._league.commissioner_user_id) return
+            return this.start()
+
+          case 'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT':
+            if (user_id !== this._league.commissioner_user_id) return
+            this._pause_on_team_disconnect = !this._pause_on_team_disconnect
+            return this.broadcast({
+              type: 'AUCTION_CONFIG',
+              payload: {
+                pause_on_team_disconnect: this._pause_on_team_disconnect
+              }
+            })
+
+          case 'AUCTION_BID':
+            return this.bid(message.payload, { user_id, tid })
+
+          case 'AUCTION_SUBMIT_NOMINATION':
+            return this.nominate(message.payload, { user_id, tid })
+
+          case 'KEEPALIVE':
+            return
+
+          default:
+            return console.log(`invalid message: ${message.type}`)
+        }
+      },
+      `auction:league:${this._lid}`
+    )
   }
 
   _setup_close_handler(ws, tid, user_id, onclose, client_id) {

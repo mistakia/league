@@ -6,7 +6,11 @@ import {
   log_data_view_telemetry
 } from '#libs-server/data-views/execute-data-view-request.mjs'
 import debug from 'debug'
-import { generate_client_id, send_websocket_message } from './utils.mjs'
+import {
+  generate_client_id,
+  on_socket_message,
+  send_websocket_message
+} from './utils.mjs'
 import {
   handle_generation_request,
   handle_generation_collect,
@@ -213,54 +217,58 @@ export default function handle_data_view_socket(wss) {
     ws.client_id = generate_client_id()
     log('New WebSocket connection', { client_id: ws.client_id, user_id })
 
-    ws.on('message', async (msg) => {
-      let message
-      try {
-        message = JSON.parse(msg)
-      } catch (error) {
-        log('Failed to parse message', { error: error.toString() })
-        return
-      }
+    on_socket_message(
+      ws,
+      async (msg) => {
+        let message
+        try {
+          message = JSON.parse(msg)
+        } catch (error) {
+          log('Failed to parse message', { error: error.toString() })
+          return
+        }
 
-      if (message.type === 'DATA_VIEW_REQUEST') {
-        const { request_id, params, ignore_cache } = message.payload
-        // handle_data_view_request catches internally and sends its own error
-        // frame; this catch is only a final log for a failure before it could
-        // (the socket layer itself throwing).
-        handle_data_view_request({
-          ws,
-          user_id,
-          request_id,
-          params,
-          ignore_cache
-        }).catch((error) => {
-          log('handle_data_view_request failed', {
+        if (message.type === 'DATA_VIEW_REQUEST') {
+          const { request_id, params, ignore_cache } = message.payload
+          // handle_data_view_request catches internally and sends its own error
+          // frame; this catch is only a final log for a failure before it could
+          // (the socket layer itself throwing).
+          handle_data_view_request({
+            ws,
+            user_id,
             request_id,
-            error: error.toString()
+            params,
+            ignore_cache
+          }).catch((error) => {
+            log('handle_data_view_request failed', {
+              request_id,
+              error: error.toString()
+            })
           })
-        })
-      } else if (message.type === 'DATA_VIEW_CLIENT_TIMING') {
-        handle_client_timing({ ws, payload: message.payload })
-      } else if (message.type === 'DATA_VIEW_GENERATION_REQUEST') {
-        // Both generation handlers send their own error frames; this catch is
-        // only a final log for a failure before they could.
-        handle_generation_request({
-          ws,
-          user_id,
-          payload: message.payload
-        }).catch((error) => {
-          log('handle_generation_request failed', { error: error.toString() })
-        })
-      } else if (message.type === 'DATA_VIEW_GENERATION_COLLECT') {
-        handle_generation_collect({
-          ws,
-          user_id,
-          payload: message.payload
-        }).catch((error) => {
-          log('handle_generation_collect failed', { error: error.toString() })
-        })
-      }
-    })
+        } else if (message.type === 'DATA_VIEW_CLIENT_TIMING') {
+          handle_client_timing({ ws, payload: message.payload })
+        } else if (message.type === 'DATA_VIEW_GENERATION_REQUEST') {
+          // Both generation handlers send their own error frames; this catch is
+          // only a final log for a failure before they could.
+          handle_generation_request({
+            ws,
+            user_id,
+            payload: message.payload
+          }).catch((error) => {
+            log('handle_generation_request failed', { error: error.toString() })
+          })
+        } else if (message.type === 'DATA_VIEW_GENERATION_COLLECT') {
+          handle_generation_collect({
+            ws,
+            user_id,
+            payload: message.payload
+          }).catch((error) => {
+            log('handle_generation_collect failed', { error: error.toString() })
+          })
+        }
+      },
+      'data-view-socket'
+    )
 
     ws.on('close', () => {
       log('WebSocket connection closed', { client_id: ws.client_id, user_id })

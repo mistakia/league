@@ -3,7 +3,11 @@ import get_plays_view_results, {
   get_plays_view_hash
 } from '#libs-server/plays-view/get-plays-view-results.mjs'
 import debug from 'debug'
-import { generate_client_id, send_websocket_message } from './utils.mjs'
+import {
+  generate_client_id,
+  on_socket_message,
+  send_websocket_message
+} from './utils.mjs'
 
 const log = debug('plays-view-socket')
 
@@ -204,26 +208,30 @@ export default function handle_plays_view_socket(wss) {
       ws.client_id = generate_client_id()
     }
 
-    ws.on('message', async (msg) => {
-      let message
-      try {
-        message = JSON.parse(msg)
-      } catch (error) {
-        log('Failed to parse message', { error: error.toString() })
-        return
-      }
+    on_socket_message(
+      ws,
+      async (msg) => {
+        let message
+        try {
+          message = JSON.parse(msg)
+        } catch (error) {
+          log('Failed to parse message', { error: error.toString() })
+          return
+        }
 
-      if (message.type === 'PLAYS_VIEW_REQUEST') {
-        const { request_id, params, ignore_cache } = message.payload
-        plays_view_queue.add_request({
-          ws,
-          request_id,
-          params,
-          user_id,
-          ignore_cache
-        })
-      }
-    })
+        if (message.type === 'PLAYS_VIEW_REQUEST') {
+          const { request_id, params, ignore_cache } = message.payload
+          plays_view_queue.add_request({
+            ws,
+            request_id,
+            params,
+            user_id,
+            ignore_cache
+          })
+        }
+      },
+      'plays-view-socket'
+    )
 
     ws.on('close', () => {
       if (!user_id) {
