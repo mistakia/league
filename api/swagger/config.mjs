@@ -777,9 +777,17 @@ const options = {
                 'Passing Props - Pass Yards O/U - Jayden Daniels Passing Yards O/U'
             },
             esbid: {
-              type: 'string',
+              // `db/index.mjs` registers `pg.types.setTypeParser(INT8, Number)`,
+              // so every bigint column reaches a response as a JS number and
+              // esbid has never once been served as a string. Nothing caught it
+              // because no test exercised an operation carrying this schema until
+              // test/players.markets-time-type-dedup.spec.mjs did -- the
+              // "coverage equals test hit-rate" case api/swagger/response-validation.mjs
+              // warns about. The CombinationOdds and NFLPlayCharted copies of
+              // esbid carry the same drift and are still held out.
+              type: 'integer',
               description: 'Game ID',
-              example: '2025012601'
+              example: 2025012601
             },
             open: {
               type: 'boolean',

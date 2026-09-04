@@ -804,15 +804,17 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                         example: "Kansas City Chiefs @ Buffalo Bills"
  *                       is_market_settled:
  *                         type: boolean
- *                         description: Whether the market has been settled
+ *                         description: >-
+ *                           Whether the market has been settled, read from the market's
+ *                           CLOSE observation when it has one. A market is returned once,
+ *                           with its OPEN and CLOSE selections together, so time_type is a
+ *                           property of each selection rather than of the market.
  *                         example: false
  *                       metric_result_value:
  *                         type: number
  *                         nullable: true
  *                         description: Actual result value (if market is settled)
  *                         example: 267.5
- *                       time_type:
- *                         $ref: '#/components/schemas/TimeTypeEnum'
  *                       timestamp:
  *                         type: string
  *                         format: date-time
@@ -927,14 +929,13 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     source_id: "DRAFTKINGS"
  *                     source_market_id: "mk_12345"
  *                     source_market_name: "Passing Props - Pass Yards O/U - Patrick Mahomes Passing Yards O/U"
- *                     esbid: "2024011401"
+ *                     esbid: 2024011401
  *                     source_event_id: "ev_67890"
  *                     source_event_name: "Kansas City Chiefs @ Buffalo Bills"
  *                     is_open: true
  *                     is_live: false
  *                     is_market_settled: false
  *                     metric_result_value: null
- *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-14T15:30:00Z"
  *                     year: 2024
  *                     week: 18
@@ -972,14 +973,13 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     source_id: "FANDUEL"
  *                     source_market_id: "mk_54321"
  *                     source_market_name: "Rushing Props - Christian McCaffrey Rushing Yards O/U"
- *                     esbid: "2024010701"
+ *                     esbid: 2024010701
  *                     source_event_id: "ev_98765"
  *                     source_event_name: "San Francisco 49ers @ Green Bay Packers"
  *                     is_open: false
  *                     is_live: false
  *                     is_market_settled: true
  *                     metric_result_value: 98.0
- *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-07T16:30:00Z"
  *                     year: 2024
  *                     week: 18
@@ -1144,14 +1144,25 @@ router.get('/:pid/markets/?', async (req, res) => {
           'prop_markets_index.source_id',
           '=',
           'prop_market_selections_index.source_id'
-        ).andOn(
-          'prop_markets_index.source_market_id',
-          '=',
-          'prop_market_selections_index.source_market_id'
         )
+          .andOn(
+            'prop_markets_index.source_market_id',
+            '=',
+            'prop_market_selections_index.source_market_id'
+          )
+          .andOn(
+            'prop_markets_index.time_type',
+            '=',
+            'prop_market_selections_index.time_type'
+          )
       })
       .leftJoin('nfl_games', 'prop_markets_index.esbid', 'nfl_games.esbid')
       .where('prop_market_selections_index.selection_pid', pid)
+      // CLOSE first, so the market-level fields below come from the market's
+      // final observation rather than from whichever row observed_at ranked
+      // first. OPEN and CLOSE disagree on is_market_settled for 55,541 market
+      // keys, and OPEN is the stale one in 99.4% of them.
+      .orderByRaw("prop_markets_index.time_type = 'CLOSE' desc")
       .orderBy('prop_markets_index.observed_at', 'desc')
 
     // Group selections by market
@@ -1169,7 +1180,6 @@ router.get('/:pid/markets/?', async (req, res) => {
           is_open: row.is_open,
           is_live: row.is_live,
           is_market_settled: row.is_market_settled,
-          time_type: row.time_type,
           timestamp: row.observed_at,
           year: row.season_year,
           week: row.week,
