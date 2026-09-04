@@ -4,7 +4,10 @@ import path from 'path'
 
 import * as chai from 'chai'
 
-import { may_apply_generation_to_view } from '@core/data-view-generation/view-authority'
+import {
+  may_apply_generation_to_view,
+  resolve_view_to_restore
+} from '@core/data-view-generation/view-authority'
 
 const expect = chai.expect
 
@@ -105,5 +108,96 @@ describe('data view generation view authority wiring', function () {
     expect(load_at).to.not.equal(-1)
     expect(clear_at).to.not.equal(-1)
     expect(load_at).to.be.lessThan(clear_at)
+  })
+})
+
+describe('which view is restored at mount', function () {
+  // View restoration and job restoration used to initialize independently, so a
+  // reload during a run could restore view B while re-attaching to a job started
+  // on view A -- and the answer would then be correctly refused, leaving the user
+  // watching a run whose result can never appear.
+  const default_view_id = 'DEFAULT'
+
+  it('prefers the PENDING run view over last-active', function () {
+    expect(
+      resolve_view_to_restore({
+        pending: { view_id: 'A' },
+        last_active: { view_id: 'B' },
+        all_view_ids: new Set(['A', 'B']),
+        default_view_id
+      })
+    ).to.equal('A')
+  })
+
+  it('falls back to last-active when there is no pending run', function () {
+    // The control for the case above. Without it, a rule that always returned
+    // last_active would pass nothing, and one that always returned pending
+    // would break every ordinary load.
+    expect(
+      resolve_view_to_restore({
+        pending: null,
+        last_active: { view_id: 'B' },
+        all_view_ids: new Set(['A', 'B']),
+        default_view_id
+      })
+    ).to.equal('B')
+  })
+
+  it('is unchanged when pending and last-active AGREE', function () {
+    expect(
+      resolve_view_to_restore({
+        pending: { view_id: 'A' },
+        last_active: { view_id: 'A' },
+        all_view_ids: new Set(['A']),
+        default_view_id
+      })
+    ).to.equal('A')
+  })
+
+  it('ignores a pending view that no longer EXISTS', function () {
+    // A stored id outlives the view it names -- deleted on another device, or
+    // never synced here. Selecting it would restore nothing at all.
+    expect(
+      resolve_view_to_restore({
+        pending: { view_id: 'GONE' },
+        last_active: { view_id: 'B' },
+        all_view_ids: new Set(['B']),
+        default_view_id
+      })
+    ).to.equal('B')
+  })
+
+  it('falls through to the default when neither stored id exists', function () {
+    expect(
+      resolve_view_to_restore({
+        pending: { view_id: 'GONE' },
+        last_active: { view_id: 'ALSO_GONE' },
+        all_view_ids: new Set(['B']),
+        default_view_id
+      })
+    ).to.equal(default_view_id)
+  })
+
+  it('falls through to the default with nothing stored at all', function () {
+    expect(
+      resolve_view_to_restore({
+        pending: null,
+        last_active: null,
+        all_view_ids: new Set(['B']),
+        default_view_id
+      })
+    ).to.equal(default_view_id)
+  })
+
+  it('ignores a pending record carrying a NULL view_id', function () {
+    // A run accepted with no view selected. There is no origin view to prefer.
+    expect(
+      resolve_view_to_restore({
+        pending: { view_id: null },
+        last_active: { view_id: 'B' },
+        all_view_ids: new Set(['B']),
+        default_view_id
+      })
+    ).to.equal('B')
   })
 })

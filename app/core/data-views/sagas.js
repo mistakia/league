@@ -51,9 +51,11 @@ import {
   clear_all,
   reconcile_server_views,
   get_all_stored_view_ids,
-  load_history
+  load_history,
+  load_pending_generation
 } from '#libs-shared/data-view-storage/storage.mjs'
 import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
+import { resolve_view_to_restore } from '@core/data-view-generation/view-authority'
 import deep_equal from '@core/utils/deep_equal'
 
 // nfl_plays_column_params is 51 KiB of static metadata used only inside the
@@ -691,18 +693,18 @@ function* restore_last_active_view_if_default(all_view_ids) {
   if (current_selected_id !== default_data_view_view_id) return
 
   const last_active = yield call(load_last_active_view)
+  // Read alongside last-active so the two resolve as ONE decision. A run still
+  // in flight names the view it was started from, and restoring that view is
+  // what stops a reload from re-attaching to a job whose answer would land on a
+  // view the user is not looking at.
+  const pending = yield call(load_pending_generation)
 
-  if (!last_active || !last_active.view_id) {
-    yield put(
-      data_views_actions.set_selected_data_view(default_data_view_view_id)
-    )
-    return
-  }
-
-  const view_exists = all_view_ids.has(last_active.view_id)
-  const view_id_to_select = view_exists
-    ? last_active.view_id
-    : default_data_view_view_id
+  const view_id_to_select = resolve_view_to_restore({
+    pending,
+    last_active,
+    all_view_ids,
+    default_view_id: default_data_view_view_id
+  })
 
   yield put(data_views_actions.set_selected_data_view(view_id_to_select))
 }

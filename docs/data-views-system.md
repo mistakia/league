@@ -1818,15 +1818,16 @@ Which representation comes back is the agent's choice, made by attempting the re
 
 ### The path a request takes
 
-| Step                    | Where                                                                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Instruction submitted   | `app/core/data-view-generation/` and `app/views/components/data-view-generation-control/`                                             |
-| Admitted, then queued   | `api/sockets/data-view-generation.mjs` (`require_generation_principal`), `libs-server/data-views/generation/generation-job-queue.mjs` |
-| Claimed and dispatched  | `generation-drainer.mjs`, `base-session-client.mjs`                                                                                   |
-| Agent runs, calls tools | `scripts/data-view-{search-columns,describe-column,validate-table-state,preview-view,run-sql,emit}.mjs` over `agent-tool-runner.mjs`  |
-| Result pushed back      | `data-view-emit.mjs` → `POST /api/data-views/generation-emission` → `deliver-emission.mjs`, `validate-emission.mjs`                   |
-| Cost and liveness read  | `generation-collector.mjs`, from base's thread record                                                                                 |
-| Delivered to the client | the same socket, on `generation_id`                                                                                                   |
+| Step                     | Where                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Instruction submitted    | `app/core/data-view-generation/` and `app/views/components/data-view-generation-control/`                                                               |
+| Admitted, then queued    | `api/sockets/data-view-generation.mjs` (`require_generation_principal`), `libs-server/data-views/generation/generation-job-queue.mjs`                   |
+| Claimed and dispatched   | `generation-drainer.mjs`, `base-session-client.mjs`                                                                                                     |
+| Agent runs, calls tools  | `scripts/data-view-{search-columns,describe-column,validate-table-state,preview-view,run-sql,emit}.mjs` over `agent-tool-runner.mjs`                    |
+| Result pushed back       | `data-view-emit.mjs` → `POST /api/data-views/generation-emission` → `deliver-emission.mjs`, `validate-emission.mjs`                                     |
+| Cost and liveness read   | `generation-collector.mjs`, from base's thread record                                                                                                   |
+| Progress shown to a user | the agent's own session timeline — `generation-timeline-backfill.mjs` (REST, every attach) and `generation-timeline-subscription.mjs` (websocket, live) |
+| Delivered to the client  | the same socket, on `generation_id`                                                                                                                     |
 
 **The job row is the audit record.** Its DDL, `db/adhoc/2026-09-02-create-data-view-generation-jobs.sql`, carries the reasoning for the whole shape — why a durable row rather than the in-process admission gate, and why the key is an opaque `generation_id` rather than a user.
 
@@ -1837,6 +1838,18 @@ Which representation comes back is the agent's choice, made by attempting the re
 - **The spend limits.** `generation-limits.mjs`: an hourly run count, an hourly token budget, and a per-job token ceiling distinct from the budget, all keyed on the principal the queue resolves and all held in Redis so none of them resets on a deploy.
 - **The kill switch.** Also Redis. It stops ADMISSION and DISPATCH. It cannot stop a run already inside a container — base's session-termination route takes a hook credential rather than the session token league dispatches with — so the honest guarantee is "no new run starts", with whatever is in flight bounded by its own `deadline_at`.
 - **The sandbox role.** The container holds `league_data_view_reader` and nothing else: no `sops` age identity, no `league_writer` credential, `NODE_ENV=sandbox` reading a plaintext credential-free config with the host and password overlaid from a read-only mounted file.
+
+### What a user sees while a run is in flight
+
+The agent's REAL session timeline, as base recorded it — collapsed to the latest event with something to say, expandable to the whole run, rendered by the shared `react-agent-timeline` package.
+
+This replaced a paraphrase, and the reason is worth keeping. The old surface was a `{step_count, tool}` pair in Redis, fed by a beacon the container POSTed before each tool call, and rendered through six hand-written labels mapping tool names onto prose. A run that spent six minutes retrying a broken tool was indistinguishable from one making progress, because nothing on the wire carried what the agent was actually doing. All of it is deleted: the Redis key, the beacon, its route, the projection fields and the label map.
+
+Three properties of the replacement decide how to change it safely.
+
+- **League reads those threads as their OWNER, not by clearance.** The `league-data-view-generation` identity is the `user_public_key` on every generation thread, so ownership short-circuits base's read decision before compartments are consulted. The `PRIVATE` compartment floor these threads sit on is real and simply does not apply to this caller — which is why no share token is involved.
+- **The REST read fails by MASKING, never by erroring.** A denied read returns 200 with the same entry count, the same type histogram, the same ordering and the same content LENGTHS as an authorized one; only the characters differ. Any check on this path must assert on entry CONTENT and compare two requests that must differ. base's `is_redacted` is envelope-level and is not set on entries, so `generation-timeline-backfill.mjs` stamps it down — without that the component's masked-rendering branch is unreachable and a permission failure paints block characters as though they were the agent's words.
+- **The socket carries liveness; the backfill carries truth.** Correctness never depends on the subscription: every attach path re-reads over REST, so a dropped socket closes its own gap at the next attach. The subscription is owned by the job lifecycle rather than the browser connection — opened by the drainer when it stamps `thread_id`, closed by the collector at terminal status — because a feed torn down by each refresh would lose whatever was emitted in between. The collector's own 5s poll keeps `timeline_limit=0`: that zero is a COST choice, not a permission one, and a poll running against every live job must not pull a transcript.
 
 ### What the agent may emit
 
