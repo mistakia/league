@@ -24,9 +24,16 @@ import db from '#db'
 //
 // Returning the raw timestamptz and letting the caller format it makes the two
 // sides use ONE formatter in ONE process, so they agree no matter which zone
-// that process runs in. Do not reintroduce a date string here: a correct
+// that process runs in. Do not reintroduce a date string HERE: a correct
 // rendering that merely picks the same zone by luck fails again the day the
 // host's zone changes, which is exactly how this arrived.
+//
+// That is a rule about THIS query, not a ban on TO_CHAR. The test is whether a
+// rendered day is later compared against one rendered somewhere else -- which
+// is true here and is why it broke. `calculate-team-daily-ktc-value` also
+// renders `keeptradecut_valuations.observed_at` in SQL, and that one is fine:
+// it is the publication day of an external feed, keyed against itself on both
+// sides of its own lookup, never against a node-rendered day.
 export default async function ({ lid, year = null }) {
   const restricted_free_agency_bids_query = db('restricted_free_agency_bids')
     .select(

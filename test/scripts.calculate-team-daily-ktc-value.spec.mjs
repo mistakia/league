@@ -464,16 +464,31 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
       expect(by_team.get(2)).to.equal(1000)
       expect(by_team.get(1)).to.equal(0)
 
-      const signings = await knex('restricted_free_agency_bids')
+      // THE INPUT HAS TO BE ABLE TO FAIL, and asserting that the instant spans
+      // SOME zone boundary is not enough to establish that. What the fix is
+      // about is the two RENDERERS disagreeing, so ask both of them, here,
+      // against whatever database this run is actually pointed at.
+      //
+      // That distinction is load-bearing rather than pedantic. `test:db:up`
+      // only starts a container when nothing is already serving the port, so
+      // the suite can land on a Postgres somebody else configured. Against one
+      // running `timezone = America/New_York` both renderers would agree, the
+      // pre-fix code would pass too, and this test would certify a fix it never
+      // exercised -- silently, and in the direction that looks like success.
+      const [rendered] = await knex('restricted_free_agency_bids')
         .where({ lid, is_successful: true })
-        .select('processed')
-      expect(signings).to.have.length(1)
+        .select(
+          'processed',
+          knex.raw("TO_CHAR(processed, 'YYYY-MM-DD') AS postgres_day")
+        )
+      const node_day = dayjs(rendered.processed).format('YYYY-MM-DD')
+      expect(
+        rendered.postgres_day,
+        'this database renders the fixture instant the same day node does, so the test cannot tell the fix from its absence'
+      ).to.not.equal(node_day)
 
-      // The input has to be able to fail: if these two agreed, the test would
-      // pass with or without the fix and prove nothing.
-      const node_day = dayjs(signings[0].processed).format('YYYY-MM-DD')
-      const utc_day = dayjs(signings[0].processed).toISOString().slice(0, 10)
-      expect(node_day).to.not.equal(utc_day)
+      // And the day the replay filed it under is node's, not postgres's.
+      expect(tag_day).to.equal(node_day)
     })
   })
 })
