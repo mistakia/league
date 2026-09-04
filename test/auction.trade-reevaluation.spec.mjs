@@ -18,6 +18,7 @@ import {
   get_auction_settlement_status
 } from '#libs-server/auction-elections.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
+import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 import { addPlayer } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -101,35 +102,12 @@ describe('auction re-evaluation on trade', function () {
     return rows
   }
 
-  // `maximum_bid` mirrors the socket's optional nomination ceiling. A nomination
-  // binds its nominator without discharging it, so a nominator that states no
-  // ceiling is a team the auction still waits on -- which matters more here than
-  // anywhere else, because a trade is the one thing that can put an INELIGIBLE
-  // nominator back into the eligible set and therefore back into the outstanding
-  // set it had silently left.
-  const nominate = async ({ pid, tid, value, maximum_bid = null }) => {
-    await knex('transactions').insert({
-      user_id: 1,
-      tid,
-      pid,
-      lid: league_id,
-      type: transaction_types.AUCTION_BID,
-      player_salary: value,
-      week: 0,
-      season_year,
-      occurred_at: new Date()
-    })
-
-    if (maximum_bid !== null) {
-      await submit_auction_election({
-        lid: league_id,
-        tid,
-        pid,
-        user_id: 1,
-        maximum_bid
-      })
-    }
-  }
+  // Delegates to the shared helper. A nomination binds its nominator without
+  // discharging it, which matters more here than anywhere else: a trade is the
+  // one thing that can put an INELIGIBLE nominator back into the eligible set,
+  // and therefore back into the outstanding set it had silently left.
+  const nominate = ({ pid, tid, value, maximum_bid = null }) =>
+    nominate_auction_player({ lid: league_id, pid, tid, value, maximum_bid })
 
   const processed_rows = (pid) =>
     knex('transactions').where({

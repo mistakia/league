@@ -19,6 +19,7 @@ import {
   get_active_auction_nomination,
   sweep_unnominated_auction_elections
 } from '#libs-server/auction-settlement.mjs'
+import { nominate_auction_player } from './utils/nominate-auction-player.mjs'
 import { selectPlayer } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -57,45 +58,18 @@ describe('auction settlement against postgres', function () {
       })
   })
 
-  // The nomination IS the opening bid, written to `transactions` exactly as the
-  // live socket writes it. There is no nomination-state table: the open player,
-  // the current price and the leader are the latest AUCTION_BID row.
-  //
-  // `maximum_bid` mirrors the socket's OPTIONAL nomination ceiling. Supplying it
-  // is what discharges the nominator, because a nomination binds its nominator
-  // without discharging it -- so a nomination written without one leaves the
-  // nominating team in the outstanding set and nothing can settle until it
-  // elects. Most specs below want the player to settle and so state it; the
-  // completeness specs omit it deliberately, and that is the case under test.
-  const nominate = async ({
-    pid,
-    tid,
-    value = 0,
-    user_id = 1,
-    maximum_bid = null
-  }) => {
-    await knex('transactions').insert({
-      user_id,
-      tid,
-      pid,
+  // Delegates to the shared helper: a nomination binds its nominator without
+  // discharging it, so `maximum_bid` is what lets the player settle at all, and
+  // that rule belongs in one place rather than re-hand-rolled per spec.
+  const nominate = ({ pid, tid, value = 0, user_id = 1, maximum_bid = null }) =>
+    nominate_auction_player({
       lid: league_id,
-      type: transaction_types.AUCTION_BID,
-      player_salary: value,
-      week: 0,
-      season_year,
-      occurred_at: new Date()
+      pid,
+      tid,
+      value,
+      user_id,
+      maximum_bid
     })
-
-    if (maximum_bid !== null) {
-      await submit_auction_election({
-        lid: league_id,
-        tid,
-        pid,
-        user_id,
-        maximum_bid
-      })
-    }
-  }
 
   const free_agent = async (exclude_pids = []) => {
     const player = await selectPlayer({
