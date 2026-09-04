@@ -107,6 +107,7 @@ export {
   waiver_type_display_names,
   transaction_types,
   transaction_type_display_names,
+  acquisition_transaction_types,
   player_tag_types,
   player_tag_display_names,
   tag_limit_season_columns

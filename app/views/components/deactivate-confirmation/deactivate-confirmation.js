@@ -9,7 +9,7 @@ import Select from '@mui/material/Select'
 
 import Modal from '@components/modal'
 import Button from '@components/button'
-import { current_season, transaction_types } from '#constants'
+import { acquisition_transaction_types, transaction_types } from '#constants'
 
 export default function DeactivateConfirmation({
   onClose,
@@ -35,20 +35,40 @@ export default function DeactivateConfirmation({
 
     deactivate({
       deactivate_pid,
-      release_pid
+      // Only release when the dialog actually asked for one. The selector is
+      // hidden the moment space is available, and `isDraftedRookie` can now go
+      // from false to true mid-dialog when the player's transactions finish
+      // loading -- so a selection made against the empty initial list must not
+      // ride along and drop a player nobody chose to drop.
+      release_pid: hasPracticeSquadSpace ? '' : release_pid
     })
 
     onClose()
   }
 
   const player_transactions = player_map.get('transactions', new List())
-  const isDraftedRookie = Boolean(
-    player_transactions.filter(
-      (t) =>
-        t.type === transaction_types.DRAFT &&
-        t.season_year === current_season.year
-    )
+
+  // Mirrors submit-deactivate.mjs, which exempts a drafted rookie from needing
+  // practice squad space. Its rule is "a DRAFT among the transactions since
+  // this team acquired the player", and since DRAFT is itself an acquisition
+  // type, that holds exactly when the most recent acquisition WAS the draft.
+  //
+  // This was `Boolean(player_transactions.filter(...))`, which is true for
+  // EVERY player: filter returns a List, and every object is truthy. So
+  // isDraftedRookie was never false, hasPracticeSquadSpace was never false --
+  // `hasOpenPracticeSquadSlot()` was never even called, being short-circuited
+  // past -- and both branches below were unreachable. A manager with a full
+  // practice squad got no warning, no release selector, and a server rejection
+  // they had no way to act on.
+  //
+  // The route sends these newest-first, the same order the server slices in.
+  const most_recent_acquisition = player_transactions.find(
+    (t) =>
+      t.tid === team.roster.tid &&
+      acquisition_transaction_types.includes(t.type)
   )
+  const isDraftedRookie =
+    most_recent_acquisition?.type === transaction_types.DRAFT
   const hasPracticeSquadSpace =
     isDraftedRookie || team.roster.hasOpenPracticeSquadSlot()
 

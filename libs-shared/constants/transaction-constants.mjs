@@ -80,6 +80,24 @@ export const transaction_type_display_names = {
   20: 'Trade Vetoed'
 }
 
+// The types by which a team ACQUIRES a player. Everything between one of these
+// and the next belongs to a single spell on that team's roster, which is the
+// window get-transactions-since-acquisition.mjs returns and the window the
+// practice squad's drafted-rookie exemption is judged over.
+//
+// Shared because the deactivate confirmation dialog mirrors that judgement to
+// decide whether to offer a release, and a copy of this list that drifts from
+// the server's would silently change which players the UI asks the manager to
+// drop.
+export const acquisition_transaction_types = [
+  transaction_types.ROSTER_ADD,
+  transaction_types.TRADE,
+  transaction_types.POACHED,
+  transaction_types.AUCTION_PROCESSED,
+  transaction_types.DRAFT,
+  transaction_types.PRACTICE_ADD
+]
+
 export const player_tag_types = {
   REGULAR: 1,
   FRANCHISE: 2,
