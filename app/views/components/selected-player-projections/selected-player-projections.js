@@ -48,9 +48,14 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     )
     const projections_by_week = groupBy(filtered_projections, 'week')
 
+    // `current_season.week` is the fantasy counter, and it is 0 from the end of
+    // one season until the next regular season starts. No projection row is
+    // ever week 0, so filtering on it rendered an empty tab for every player
+    // through the whole preseason -- and silently, since `projections` was
+    // non-empty and the no-projections branch above never fired.
     for (const week_key in projections_by_week) {
       const week = Number(week_key)
-      if (week !== current_season.week) continue
+      if (week !== current_season.active_fantasy_week) continue
 
       const average_projections = player_map.getIn(
         ['projection', `${week}`],
