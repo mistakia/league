@@ -93,6 +93,34 @@ export const team_game_market_types = {
   GAME_FIRST_QUARTER_MONEYLINE: 'GAME_FIRST_QUARTER_MONEYLINE',
   GAME_FIRST_QUARTER_TOTAL: 'GAME_FIRST_QUARTER_TOTAL',
 
+  // Second, third and fourth quarter moneylines. DraftKings publishes these
+  // under offer category 527 and has done throughout 2025 -- roughly 2,000
+  // markets each since 2025-08-01. Only the moneyline is added: DraftKings'
+  // non-alternate quarter spreads and totals appear in the corpus but nothing
+  // since 2025-08-01, so they are historical and get no constant.
+  GAME_SECOND_QUARTER_MONEYLINE: 'GAME_SECOND_QUARTER_MONEYLINE',
+  GAME_THIRD_QUARTER_MONEYLINE: 'GAME_THIRD_QUARTER_MONEYLINE',
+  GAME_FOURTH_QUARTER_MONEYLINE: 'GAME_FOURTH_QUARTER_MONEYLINE',
+
+  // Period-scoped ALTERNATE game lines -- the cross of GAME_ALT_SPREAD and
+  // GAME_ALT_TOTAL above with the periods already declared here. DraftKings
+  // publishes all ten under offer categories 526 (halves) and 527 (quarters).
+  //
+  // These stay in team_game_market_types and therefore OUT of
+  // ladder_market_types, which unions the three player ALT groups only. That is
+  // correct: they are GAME grain and carry no player pid, so the player-scoped
+  // line row axis returns no row for them regardless of depth.
+  GAME_FIRST_QUARTER_ALT_SPREAD: 'GAME_FIRST_QUARTER_ALT_SPREAD',
+  GAME_FIRST_QUARTER_ALT_TOTAL: 'GAME_FIRST_QUARTER_ALT_TOTAL',
+  GAME_SECOND_QUARTER_ALT_SPREAD: 'GAME_SECOND_QUARTER_ALT_SPREAD',
+  GAME_SECOND_QUARTER_ALT_TOTAL: 'GAME_SECOND_QUARTER_ALT_TOTAL',
+  GAME_THIRD_QUARTER_ALT_SPREAD: 'GAME_THIRD_QUARTER_ALT_SPREAD',
+  GAME_THIRD_QUARTER_ALT_TOTAL: 'GAME_THIRD_QUARTER_ALT_TOTAL',
+  GAME_FIRST_HALF_ALT_SPREAD: 'GAME_FIRST_HALF_ALT_SPREAD',
+  GAME_FIRST_HALF_ALT_TOTAL: 'GAME_FIRST_HALF_ALT_TOTAL',
+  GAME_SECOND_HALF_ALT_SPREAD: 'GAME_SECOND_HALF_ALT_SPREAD',
+  GAME_SECOND_HALF_ALT_TOTAL: 'GAME_SECOND_HALF_ALT_TOTAL',
+
   GAME_TEAM_TOTAL: 'GAME_TEAM_TOTAL',
   GAME_ALT_TEAM_TOTAL: 'GAME_ALT_TEAM_TOTAL',
 
@@ -286,6 +314,8 @@ export const player_first_quarter_prop_types = {
   GAME_FIRST_QUARTER_RECEPTIONS: 'GAME_FIRST_QUARTER_RECEPTIONS',
   GAME_FIRST_QUARTER_RUSHING_ATTEMPTS: 'GAME_FIRST_QUARTER_RUSHING_ATTEMPTS',
   GAME_FIRST_QUARTER_PASSING_ATTEMPTS: 'GAME_FIRST_QUARTER_PASSING_ATTEMPTS',
+  GAME_FIRST_QUARTER_PASSING_COMPLETIONS:
+    'GAME_FIRST_QUARTER_PASSING_COMPLETIONS',
   GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS:
     'GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS',
   GAME_FIRST_QUARTER_PASSING_RUSHING_YARDS:

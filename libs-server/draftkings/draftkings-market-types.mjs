@@ -14,6 +14,42 @@ import { ALTERNATE_MARKET_TYPE_IDS } from './draftkings-constants.mjs'
 
 const log = debug('draft-kings:market-types')
 
+// What fell through the mapper on this run, at the two granularities that are
+// different actions to take.
+//
+// An unmapped SUBCATEGORY under an offer category we model means the category
+// handler exists and does not recognise the product -- add a case, or rule the
+// product out of scope by adding its id to known_unmapped_subcategory_ids. That
+// is how SEASON_RECEPTIONS (18435) sat unclassified while DraftKings published
+// 43 markets for it.
+//
+// An unmapped CATEGORY means an entire product family reaches no handler at all
+// and every market under it returns null. Categories 526 (Halves) and 527
+// (Quarters) stayed dark this way across 89,950 markets, because the collector
+// used to be wired only to one handler's default arm and an unmodelled category
+// never reaches a handler. DraftKings publishes a handful of new categories a
+// year, so this arm needs no allowlist.
+//
+// The importer drains both and emits them as separate signals. `debug` output
+// is not read in production and never was.
+export const unmapped_subcategories_by_offer_category = new Map()
+export const unmapped_offer_categories = new Set()
+
+const unmapped_subcategory = (offerCategoryId, subcategoryId) => {
+  log(
+    `unknown offerCategoryId ${offerCategoryId} subcategoryId ${subcategoryId}`
+  )
+
+  if (!unmapped_subcategories_by_offer_category.has(offerCategoryId)) {
+    unmapped_subcategories_by_offer_category.set(offerCategoryId, new Set())
+  }
+  unmapped_subcategories_by_offer_category
+    .get(offerCategoryId)
+    .add(subcategoryId)
+
+  return null
+}
+
 export const get_market_type_offer_634 = (subcategoryId) => {
   switch (subcategoryId) {
     case 7512:
@@ -41,8 +77,7 @@ export const get_market_type_offer_634 = (subcategoryId) => {
       return player_prop_types.SEASON_LEADER_INTERCEPTIONS
 
     default:
-      log(`unknown offercategoryId 634 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(634, subcategoryId)
   }
 }
 
@@ -118,9 +153,13 @@ export const get_market_type_offer_1000 = (subcategoryId) => {
     case 18526:
       return player_prop_types.GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS
 
+    // Total 1Q Pass Completions. Arrives here rather than under the Quarters
+    // offer category, despite being a quarter-scoped product.
+    case 19111:
+      return player_prop_types.GAME_FIRST_QUARTER_PASSING_COMPLETIONS
+
     default:
-      log(`unknown offercategoryId 1000 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1000, subcategoryId)
   }
 }
 
@@ -171,8 +210,15 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
     case 14880:
       return player_prop_types.GAME_LONGEST_RUSH
 
+    // Rush Yards - 1Q O/U (15008) and Rush + Rec Yards - 1Q (18525), both found
+    // by the 2026-09-04 sweep for unmapped subcategories whose type already
+    // existed. 702 and 974 markets since 2025-08-01.
     case 18488:
+    case 15008:
       return player_prop_types.GAME_FIRST_QUARTER_RUSHING_YARDS
+
+    case 18525:
+      return player_prop_types.GAME_FIRST_QUARTER_RUSHING_RECEIVING_YARDS
 
     case 18491:
       return player_prop_types.GAME_RUSHING_YARDS
@@ -186,12 +232,14 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
     case 16820:
       return player_prop_types.GAME_RUSHING_ATTEMPTS
 
+    // Total 1Q Rush Attempts. DraftKings re-keyed this product without
+    // retiring 18524; both arrive under this category and mean the same thing.
     case 18524:
+    case 19117:
       return player_prop_types.GAME_FIRST_QUARTER_RUSHING_ATTEMPTS
 
     default:
-      log(`unknown offercategoryId 1001 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1001, subcategoryId)
   }
 }
 
@@ -201,8 +249,7 @@ export const get_market_type_offer_1002 = (subcategoryId) => {
       return player_prop_types.GAME_TACKLES_ASSISTS
 
     default:
-      log(`unknown offercategoryId 1002 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1002, subcategoryId)
   }
 }
 
@@ -228,8 +275,7 @@ export const get_market_type_offer_1003 = ({ subcategoryId, marketTypeId }) => {
       return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
 
     default:
-      log(`unknown offercategoryId 1003 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1003, subcategoryId)
   }
 }
 
@@ -245,8 +291,7 @@ export const get_market_type_offer_1163 = (subcategoryId) => {
       return player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
 
     default:
-      log(`unknown offercategoryId 1163 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1163, subcategoryId)
   }
 }
 
@@ -287,8 +332,19 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
     case 16574:
       return player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
 
+    // DraftKings publishes the longest-reception product under three
+    // subcategories at once -- 14881, plus an "O/U" and a bare form added
+    // later. All three are the same metric.
     case 14881:
+    case 15948:
+    case 16924:
       return player_prop_types.GAME_LONGEST_RECEPTION
+
+    // Rec Yards - 1Q O/U. Found by the 2026-09-04 sweep for unmapped
+    // subcategories whose type already existed: 1,764 markets since 2025-08-01,
+    // ingested with a null market_type against a type declared all along.
+    case 15006:
+      return player_prop_types.GAME_FIRST_QUARTER_RECEIVING_YARDS
 
     case 18498:
     case 18502:
@@ -301,8 +357,7 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
       return player_prop_types.GAME_FIRST_QUARTER_RECEPTIONS
 
     default:
-      log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1342, subcategoryId)
   }
 }
 
@@ -348,9 +403,7 @@ export const get_market_type_offer_1759 = (subcategoryId) => {
       return player_prop_types.SEASON_DEFENSE_SACKS
 
     default:
-      log(`unknown offercategoryId 1759 subcategoryId ${subcategoryId}`)
-      unmapped_season_player_prop_subcategories.add(subcategoryId)
-      return null
+      return unmapped_subcategory(1759, subcategoryId)
   }
 }
 
@@ -384,8 +437,7 @@ export const get_market_type_offer_1595 = (subcategoryId) => {
       return player_prop_types.SEASON_LEADER_INTERCEPTIONS
 
     default:
-      log(`unknown offercategoryId 1595 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1595, subcategoryId)
   }
 }
 
@@ -419,8 +471,7 @@ export const get_market_type_offer_787 = (subcategoryId) => {
       return awards_prop_types.MVP_AND_SUPER_BOWL_WINNER
 
     default:
-      log(`unknown offercategoryId 787 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(787, subcategoryId)
   }
 }
 
@@ -454,8 +505,7 @@ export const get_market_type_offer_529 = (subcategoryId) => {
       return futures_types.CHAMPION_SPECIALS
 
     default:
-      log(`unknown offercategoryId 529 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(529, subcategoryId)
   }
 }
 
@@ -483,8 +533,7 @@ export const get_market_type_offer_1286 = (subcategoryId) => {
       return team_season_types.TEAM_WINLESS_SEASON
 
     default:
-      log(`unknown offercategoryId 1286 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1286, subcategoryId)
   }
 }
 
@@ -497,8 +546,7 @@ export const get_market_type_offer_1076 = (subcategoryId) => {
       return team_season_types.TEAM_TO_MISS_PLAYOFFS
 
     default:
-      log(`unknown offercategoryId 1076 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(1076, subcategoryId)
   }
 }
 
@@ -535,8 +583,7 @@ export const get_market_type_offer_528 = (subcategoryId) => {
       return game_props_types.GAME_OVERTIME
 
     default:
-      log(`unknown subcategory for offer category 528: ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(528, subcategoryId)
   }
 }
 
@@ -555,8 +602,7 @@ export const get_market_type_offer_820 = (subcategoryId) => {
       return division_specials_types.DIVISION_LEADER_RUSHING_YARDS
 
     default:
-      log(`unknown subcategory for offer category 820: ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(820, subcategoryId)
   }
 }
 
@@ -579,8 +625,8 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
         return team_game_market_types.GAME_ALT_TOTAL
 
       default:
-        log(`unknown betOfferTypeId ${betOfferTypeId}`)
-        return null
+        log(`unknown offerCategoryId 492 betOfferTypeId ${betOfferTypeId}`)
+        return unmapped_subcategory(492, subcategoryId)
     }
   }
 
@@ -604,7 +650,83 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
     return team_game_market_types.GAME_ALT_TOTAL
   }
 
-  return null
+  return unmapped_subcategory(492, subcategoryId)
+}
+
+// Offer categories 526 (Halves) and 527 (Quarters) had NO handler until
+// 2026-09-04. Absent from the dispatcher's switch, every market under them fell
+// to its default arm and returned null -- 89,950 markets across 2023-2025, the
+// largest live gap among shapes the taxonomy already models.
+//
+// The sixteen subcategories below are the complete set arriving under the two
+// categories since 2025-08-01, read back from source_market_name, which embeds
+// the vendor's own categoryId beside the subcategoryId. Three of them already
+// had types; the other thirteen are period-scoped crosses of axes the taxonomy
+// already carries.
+//
+// Two further first-quarter player subcategories were once thought to belong
+// here. They do not: 19111 arrives under category 1000 and 19117 under 1001,
+// both of which have handlers, so their cases live there.
+export const get_market_type_offer_526 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 4631:
+      return team_game_market_types.GAME_FIRST_HALF_MONEYLINE
+
+    case 4641:
+      return team_game_market_types.GAME_SECOND_HALF_MONEYLINE
+
+    case 13582:
+      return team_game_market_types.GAME_FIRST_HALF_ALT_SPREAD
+
+    case 13583:
+      return team_game_market_types.GAME_SECOND_HALF_ALT_SPREAD
+
+    case 13584:
+      return team_game_market_types.GAME_FIRST_HALF_ALT_TOTAL
+
+    case 13585:
+      return team_game_market_types.GAME_SECOND_HALF_ALT_TOTAL
+
+    default:
+      return unmapped_subcategory(526, subcategoryId)
+  }
+}
+
+export const get_market_type_offer_527 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 4632:
+      return team_game_market_types.GAME_FIRST_QUARTER_MONEYLINE
+
+    case 4642:
+      return team_game_market_types.GAME_SECOND_QUARTER_MONEYLINE
+
+    case 4643:
+      return team_game_market_types.GAME_THIRD_QUARTER_MONEYLINE
+
+    case 4644:
+      return team_game_market_types.GAME_FOURTH_QUARTER_MONEYLINE
+
+    case 13525:
+      return team_game_market_types.GAME_FIRST_QUARTER_ALT_SPREAD
+
+    case 13526:
+      return team_game_market_types.GAME_FIRST_QUARTER_ALT_TOTAL
+
+    case 16078:
+      return team_game_market_types.GAME_SECOND_QUARTER_ALT_SPREAD
+
+    case 15707:
+      return team_game_market_types.GAME_SECOND_QUARTER_ALT_TOTAL
+
+    case 16079:
+      return team_game_market_types.GAME_THIRD_QUARTER_ALT_SPREAD
+
+    case 15708:
+      return team_game_market_types.GAME_THIRD_QUARTER_ALT_TOTAL
+
+    default:
+      return unmapped_subcategory(527, subcategoryId)
+  }
 }
 
 const get_market_type_offer_530 = (subcategoryId) => {
@@ -613,8 +735,7 @@ const get_market_type_offer_530 = (subcategoryId) => {
       return team_game_market_types.GAME_ALT_TEAM_TOTAL
 
     default:
-      log(`unknown offercategoryId 530 subcategoryId ${subcategoryId}`)
-      return null
+      return unmapped_subcategory(530, subcategoryId)
   }
 }
 
@@ -638,6 +759,12 @@ export const get_market_type = ({
   switch (offerCategoryId) {
     case 492:
       return get_market_type_offer_492({ subcategoryId, betOfferTypeId })
+
+    case 526:
+      return get_market_type_offer_526(subcategoryId)
+
+    case 527:
+      return get_market_type_offer_527(subcategoryId)
 
     case 529:
       return get_market_type_offer_529(subcategoryId)
@@ -689,6 +816,7 @@ export const get_market_type = ({
 
     default:
       log(`unknown offerCategoryId ${offerCategoryId}`)
+      unmapped_offer_categories.add(offerCategoryId)
       return null
   }
 }
