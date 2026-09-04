@@ -14,7 +14,10 @@ import {
   kill_generation_session,
   BaseSessionError
 } from '#libs-server/data-views/generation/base-session-client.mjs'
-import { close_generation_timeline_feed } from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
+import {
+  close_generation_timeline_feed,
+  open_generation_timeline_feed
+} from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
 
 const log = debug('data-views:generation-collector')
 
@@ -218,6 +221,31 @@ export const collect_job = async ({
   //
   // Stamped whether or not base obliged, because a refusal retried every 5
   // seconds for an hour is its own runaway.
+  // RE-OPEN THE LIVE FEED FOR A RUN THAT ALREADY HAD ONE, which is what makes
+  // it survive an API restart. The drainer opens a feed at the moment it stamps
+  // `thread_id`, and that is the only other place one is opened -- so a job
+  // already running when this process restarted would go the whole rest of its
+  // run with no live tail. A deploy mid-run is exactly when that bites, and it
+  // is invisible: the REST backfill still serves a correct timeline on every
+  // attach, so the panel looks right and merely stops moving.
+  //
+  // Idempotent, so this is a no-op on every pass of a job whose feed is already
+  // open -- which is nearly all of them.
+  if (LIVE_STATUSES.includes(job.status) && job.thread_id) {
+    try {
+      open_generation_timeline_feed({
+        generation_id: job.generation_id,
+        thread_id: job.thread_id
+      })
+    } catch (error) {
+      log(
+        'could not reopen the timeline feed for %s: %s',
+        job.generation_id,
+        error.message
+      )
+    }
+  }
+
   if (!LIVE_STATUSES.includes(job.status)) {
     // The live feed dies with the run, on the SAME condition as the session
     // teardown but outside its claim guard. The teardown is claimed so exactly

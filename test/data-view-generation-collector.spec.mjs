@@ -16,6 +16,10 @@ import {
   derive_total_tokens,
   select_collectable_jobs
 } from '#libs-server/data-views/generation/generation-collector.mjs'
+import {
+  close_generation_timeline_feed,
+  has_generation_timeline_feed
+} from '#libs-server/data-views/generation/generation-timeline-subscription.mjs'
 
 process.env.NODE_ENV = 'test'
 
@@ -394,6 +398,64 @@ describe('data view generation collector', function () {
 
       const rows = await select_collectable_jobs()
       expect(rows.map((r) => r.generation_id)).to.include(generation_id)
+    })
+  })
+
+  describe('the live timeline feed across a restart', function () {
+    // The drainer opens a feed at the moment it stamps thread_id, and that is
+    // the only other place one is opened. So a job already running when this
+    // process restarts would spend the REST of its run with no live tail --
+    // and a deploy mid-run is exactly when that happens. It is invisible
+    // without this test: the REST backfill still serves a correct timeline on
+    // every attach, so the panel looks right and merely stops moving.
+    const running_job = (generation_id) => ({
+      generation_id,
+      status: 'running',
+      thread_id: `thread-${generation_id}`,
+      session_termination_requested_at: null
+    })
+
+    it('REOPENS a feed for a live job that has none', async function () {
+      const generation_id = '11111111-1111-4111-8111-111111111111'
+      close_generation_timeline_feed({ generation_id })
+      expect(
+        has_generation_timeline_feed(generation_id),
+        'precondition: no feed yet'
+      ).to.equal(false)
+
+      await collect_job({
+        job: running_job(generation_id),
+        // A live session, so the collector takes no terminal branch.
+        read_thread: async () => ({ session_status: 'running' }),
+        kill_session: async () => ({ killed: false, reason: 'not called' })
+      })
+
+      expect(has_generation_timeline_feed(generation_id)).to.equal(true)
+      close_generation_timeline_feed({ generation_id })
+    })
+
+    it('CLOSES the feed once the job is terminal', async function () {
+      // The control for the reopen above. Without it, a collector that opened
+      // unconditionally would pass that test and then leak a websocket per
+      // finished run for the life of the process.
+      const generation_id = '22222222-2222-4222-8222-222222222222'
+      await collect_job({
+        job: running_job(generation_id),
+        read_thread: async () => ({ session_status: 'running' }),
+        kill_session: async () => ({ killed: false, reason: 'not called' })
+      })
+      expect(
+        has_generation_timeline_feed(generation_id),
+        'precondition: feed open while running'
+      ).to.equal(true)
+
+      await collect_job({
+        job: { ...running_job(generation_id), status: 'completed' },
+        read_thread: async () => ({ session_status: 'ended' }),
+        kill_session: async () => ({ killed: true, reason: 'torn down' })
+      })
+
+      expect(has_generation_timeline_feed(generation_id)).to.equal(false)
     })
   })
 })
