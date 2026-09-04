@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 
 import { Roster } from '#libs-shared'
 import {
+  active_roster_slots,
   current_season,
   reserve_slots,
   roster_slot_types,
@@ -12,6 +13,7 @@ import getRoster from './get-roster.mjs'
 import getTransactionsSinceAcquisition from './get-transactions-since-acquisition.mjs'
 import getTransactionsSinceFreeAgent from './get-transactions-since-free-agent.mjs'
 import sendNotifications from './send-notifications.mjs'
+import { is_auction_in_progress } from './auction-completion.mjs'
 import db from '#db'
 
 export default async function ({
@@ -52,6 +54,35 @@ export default async function ({
   // is false for a reserve player, so nothing else here stops the move.
   if (reserve_slots.includes(roster.get(deactivate_pid).slot)) {
     throw new Error('reserve players can not be placed on the practice squad')
+  }
+
+  // Rosters are fixed for the free agency auction, and this is the SECOND of the
+  // two slot changes that can break that -- `submit-reserve.mjs` is the first
+  // and refuses for the same reason. Moving an active-roster player to the
+  // practice squad leaves the `rosters_players` row count identical while
+  // `availableSpace` and `availableCap` both RISE, because `Roster` derives both
+  // from the ACTIVE slots alone. A team that had dropped out of an open player's
+  // eligible set can therefore re-enter it, and the settlement's cap
+  // monotonicity guard is the only thing downstream that can see it -- only for
+  // the winner, and only inside the settling transaction.
+  //
+  // REFUSED RATHER THAN HOOKED INTO `reevaluate_auction_after_roster_change`.
+  // That call settles a nomination whose eligible set is now complete, which is
+  // the right answer for a change that only ever REMOVES capacity; this one adds
+  // it, so re-evaluating would faithfully record a set that should never have
+  // grown. Monotonicity is the assumption second-price settlement rests on, and
+  // the freeze is what makes `is_auction_complete` monotone in the first place.
+  //
+  // The source slot has to be checked, not just the auction: a player already on
+  // reserve is caught above, and this path is otherwise reachable only from an
+  // active slot, but the guard states the condition it actually depends on.
+  if (
+    active_roster_slots.includes(roster.get(deactivate_pid).slot) &&
+    (await is_auction_in_progress({ lid: leagueId }))
+  ) {
+    throw new Error(
+      'active roster players can not be moved to the practice squad during the free agency auction'
+    )
   }
 
   const player_rows = await db('player').where('pid', deactivate_pid).limit(1)

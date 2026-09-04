@@ -105,7 +105,13 @@ A team that leaves an eligible set never re-enters it, and completeness once rea
 - A trade and a commissioner-override release call `reevaluate_auction_after_roster_change`.
 - Free agency waivers, poaching waivers and poaching CLAIMS all hold until the auction completes. Practice-squad waivers deliberately do not — a practice add consumes no active spot and no cap.
 
-**A SLOT CHANGE IS A THIRD LEVER AND NOTHING HOOKS IT.** The two above are the ones the design enumerates, and both REMOVE a roster row. `submit-reserve.mjs` and `submit-deactivate.mjs` move an active player to a reserve or practice-squad slot instead, which leaves the row count identical while `availableCap` and `availableSpace` both RISE — `Roster` derives them from the ACTIVE slots alone. Neither refuses during the free agency period, and neither calls `reevaluate_auction_after_roster_change`, so a team that had dropped out of the eligible set can re-enter it with nothing recomputed. This is unfixed and is recorded rather than closed; the settlement's cap-monotonicity guard is the only thing in the path that can see it, and only for the winner and only inside the settling transaction.
+**A SLOT CHANGE IS A THIRD LEVER, AND IT IS REFUSED RATHER THAN HOOKED.** The two above both REMOVE a roster row. `submit-reserve.mjs` and `submit-deactivate.mjs` move an active player to a reserve or practice-squad slot instead, which leaves the row count identical while `availableCap` and `availableSpace` both RISE — `Roster` derives them from the ACTIVE slots alone — so a team that had dropped out of an eligible set re-enters it. Both now refuse an ACTIVE-slot player while `is_auction_in_progress`.
+
+**The refusal is not interchangeable with a `reevaluate_auction_after_roster_change` call, and picking the wrong one here is silent.** That call is right for a change that only ever REMOVES capacity: it settles a nomination whose eligible set is now complete. A slot change ADDS capacity, so re-evaluating would faithfully record a set that should never have grown, and the completeness guarantee would still be gone. Monotonicity is what second-price settlement rests on, and the freeze is also what makes `is_auction_complete` monotone — it derives completion from open active spots, which only stays true while nothing may add one back.
+
+**Check the SOURCE SLOT, not just the auction.** A practice squad activation into reserve moves no active roster row and cannot change either quantity, so gating it on the auction alone would refuse a move that was never a threat. `is_auction_in_progress` says the same thing at its own definition.
+
+The settlement's cap-monotonicity guard remains the last line rather than the control: it sees this class only for the winner, and only inside the settling transaction.
 
 Auction completion is DERIVED from an exhausted nomination rotation with the period end as the backstop. Do not add a column for it.
 

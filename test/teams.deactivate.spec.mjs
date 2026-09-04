@@ -1,4 +1,4 @@
-/* global describe before beforeEach it */
+/* global describe before beforeEach afterEach it */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
@@ -484,6 +484,90 @@ describe('API /teams - deactivate', function () {
         })
 
       await error(request, 'player is not eligible, had competing waivers')
+    })
+  })
+
+  // The sibling half of `teams.reserve.spec.mjs`'s freeze block, and the two
+  // cases are a PAIR on purpose: the same request, the same roster, the same
+  // player, differing only in whether the clock sits inside the free agency
+  // period. A refusal on its own cannot distinguish the auction guard from any
+  // of the eight eligibility checks above it, all of which produce the same
+  // shape of 400.
+  describe('free agency auction freeze', function () {
+    const league_id = 1
+    const season_year = current_season.year
+
+    const put_league_in_auction_window = async () => {
+      await knex('seasons')
+        .where({ lid: league_id, season_year })
+        .update({
+          free_agency_period_start: regular_season_start
+            .clone()
+            .subtract('2', 'months')
+            .toDate(),
+          free_agency_period_end: regular_season_start.clone().toDate()
+        })
+    }
+
+    const draft_player_to_bench = async () => {
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        teamId: 1,
+        leagueId: league_id,
+        userId: 1,
+        player,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
+        value: 2
+      })
+      return player
+    }
+
+    const deactivate_request = (player) =>
+      chai_request
+        .execute(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          deactivate_pid: player.pid,
+          leagueId: league_id
+        })
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+      await put_league_in_auction_window()
+    })
+
+    afterEach(function () {
+      MockDate.reset()
+    })
+
+    it('rejects moving an active roster player to the practice squad during the auction', async () => {
+      // One month before the season: inside the window set above.
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'month').toISOString()
+      )
+      const player = await draft_player_to_bench()
+
+      await error(
+        deactivate_request(player),
+        'active roster players can not be moved to the practice squad during the free agency auction'
+      )
+    })
+
+    it('moves an active roster player to the practice squad once the auction period is over', async () => {
+      // One week after the season starts, so the same request now sits past
+      // `free_agency_period_end`. This is the control: it must SUCCEED, or the
+      // case above proves only that deactivation is broken.
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await draft_player_to_bench()
+
+      const res = await deactivate_request(player)
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(roster_slot_types.PSD)
     })
   })
 })

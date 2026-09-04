@@ -742,10 +742,16 @@ const persist_auction_settlement = async ({
   // catches it first, but a RESERVE OR PRACTICE-SQUAD DESIGNATION moves an
   // active player to a non-active slot, leaving the row count identical while
   // the active salary total falls. `submit-reserve.mjs` and
-  // `submit-deactivate.mjs` are the two writers, neither refuses during the free
-  // agency period, and neither calls
-  // `reevaluate_auction_after_roster_change` -- so this guard is the only thing
-  // in the settlement path that can see that class at all.
+  // `submit-deactivate.mjs` are the two writers, and both now REFUSE an
+  // active-slot player while `is_auction_in_progress` -- refuse rather than
+  // re-evaluate, because a change that ADDS capacity cannot be repaired by
+  // recomputing the set it grew.
+  //
+  // This guard is kept as the last line rather than deleted with the hole it
+  // covered. It is the only thing in the settlement path that can see this class
+  // at all, it reads the winner's cap under `trx` and so costs one query, and a
+  // future writer that moves a slot without consulting the freeze would
+  // otherwise land silently.
   //
   // Read through `trx` because of the above: a check that reads outside the
   // transaction it guards reports the state before the write. `getRoster` read
