@@ -84,7 +84,16 @@ function* handle_plays_view_request({
 }
 
 function* handle_selected_player_plays_request({ payload }) {
-  const { columns, where, sort, params, group_by, offset, limit } = payload
+  const {
+    columns,
+    prefix_columns,
+    where,
+    sort,
+    params,
+    group_by,
+    offset,
+    limit
+  } = payload
 
   if (!columns || !columns.length) {
     return
@@ -92,8 +101,11 @@ function* handle_selected_player_plays_request({ payload }) {
 
   const request_id = `selected_player_${where?.[0]?.value || 'unknown'}`
 
+  // prefix_columns has to reach the server like any other column list: it was
+  // dropped here, so the pinned columns rendered as headers over empty cells.
   const opts = {
     columns,
+    prefix_columns,
     where,
     sort,
     params,

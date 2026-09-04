@@ -183,7 +183,10 @@ export default function SelectedPlayerPlays({
       )
     }
 
-    if (!is_loading && !plays.length) {
+    // Gated on `completed`, not on `!is_loading`: a null status means the
+    // request never ran, and claiming "no plays" for that reads as an answer
+    // when it is the absence of one.
+    if (status === 'completed' && !plays.length) {
       return (
         <div className='selected-player-plays__status'>
           No plays for the selected season
