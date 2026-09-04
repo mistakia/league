@@ -275,6 +275,22 @@ export const clear_view = (view_id) => {
     delete metadata.view_access_times[view_id]
     save_metadata(metadata)
   }
+
+  // A revert is what calls this, and it means "throw away my local edits to this
+  // view". The last-active record caches that same state to select the view
+  // before the first paint, so leaving it would restore on the next page load
+  // exactly what the user just reverted away from -- with no history entry left
+  // to explain where it came from. Drop the cached state and keep the identity,
+  // which is still correct: the view IS the one they were last on.
+  const last_active = read_json(LAST_ACTIVE_KEY)
+  if (
+    last_active &&
+    last_active.view_id === view_id &&
+    last_active.table_state
+  ) {
+    delete last_active.table_state
+    write_json(LAST_ACTIVE_KEY, last_active)
+  }
 }
 
 export const clear_all = () => {
@@ -308,8 +324,21 @@ export const reconcile_server_views = ({ server_view_ids, redux_view_ids }) => {
 // next page load can name the view it restores before the server list arrives,
 // and a record written without one (or by an older build) restores exactly the
 // same view.
-export const save_last_active_view = ({ view_id, view_name }) => {
-  write_json(LAST_ACTIVE_KEY, { view_id, view_name, timestamp: Date.now() })
+//
+// `table_state` is the view's state as of the moment it was made active, and it
+// is what lets the NEXT page load select this view on its first frame. The
+// snapshot history cannot serve that: it is written only on an EDIT, so a view
+// the user merely SELECTED has no local state at all and the page had to wait
+// for GET /api/data-views to learn what the view contains -- the default-view
+// frame this record exists to remove. Stored only when valid, so a caller
+// without state in hand degrades to the old behavior rather than writing a
+// record that would restore garbage.
+export const save_last_active_view = ({ view_id, view_name, table_state }) => {
+  const record = { view_id, view_name, timestamp: Date.now() }
+  if (is_valid_table_state(table_state)) {
+    record.table_state = sanitize_table_state(table_state)
+  }
+  write_json(LAST_ACTIVE_KEY, record)
 }
 
 export const load_last_active_view = () => read_json(LAST_ACTIVE_KEY)

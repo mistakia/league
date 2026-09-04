@@ -236,6 +236,24 @@ describe('data-view-storage storage module', function () {
       const metadata = JSON.parse(mockStorage.getItem('data_view_metadata'))
       expect(metadata.view_access_times).to.not.have.property('v1')
     })
+
+    it('drops the cached table_state on the last-active record for that view', () => {
+      // A revert is what calls clear_view. Leaving the cached state would
+      // restore, on the next page load, exactly what the user reverted away
+      // from -- and the history that would explain it is gone.
+      save_last_active_view({ view_id: 'v1', table_state: make_state() })
+      clear_view('v1')
+      const result = load_last_active_view()
+      expect(result.view_id).to.equal('v1')
+      expect(result).to.not.have.property('table_state')
+    })
+
+    it('leaves the cached table_state of a DIFFERENT view alone', () => {
+      const table_state = make_state()
+      save_last_active_view({ view_id: 'v2', table_state })
+      clear_view('v1')
+      expect(load_last_active_view().table_state).to.deep.equal(table_state)
+    })
   })
 
   describe('clear_all', () => {
@@ -325,6 +343,22 @@ describe('data-view-storage storage module', function () {
 
     it('returns null when unset', () => {
       expect(load_last_active_view()).to.be.null
+    })
+
+    it('round-trips the table_state that lets the next load select before paint', () => {
+      const table_state = make_state()
+      save_last_active_view({ view_id: 'v-active', table_state })
+      expect(load_last_active_view().table_state).to.deep.equal(table_state)
+    })
+
+    it('omits an invalid table_state rather than storing it', () => {
+      // Degrade to the pre-cache behavior — defer to the server — rather than
+      // write a record that would restore garbage onto the first frame.
+      save_last_active_view({
+        view_id: 'v-active',
+        table_state: { columns: 'not-an-array' }
+      })
+      expect(load_last_active_view()).to.not.have.property('table_state')
     })
   })
 

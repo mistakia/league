@@ -593,9 +593,13 @@ export function* persist_table_state_to_browser({ payload }) {
     })
 
     if (is_new_view) {
+      // save_last_active_view writes the whole record, so the state has to be
+      // passed here too -- omitting it would erase the cache the selection path
+      // reads before the first paint.
       yield call(save_last_active_view, {
         view_id,
-        view_name: data_view.view_name
+        view_name: data_view.view_name,
+        table_state
       })
     }
   } catch (error) {
@@ -612,10 +616,19 @@ export function* persist_selected_view_to_browser({ payload }) {
     // from localStorage. Without it the view selector renders nameless until the
     // saved-view list arrives, which is the flicker this restore exists to
     // remove, moved one field over.
+    //
+    // The table_state rides along for the same reason, one level deeper: the
+    // snapshot history is written only on an EDIT, so a saved view the user
+    // selected and never modified had NO local state, and the page could not
+    // select it before the first paint however early it looked. Recording the
+    // state at selection time is what closes that -- it is the state the user
+    // is looking at, so it is the state they expect to come back to. Stored as
+    // a plain object by the reducer, so no conversion here.
     const view = yield select(get_data_view_by_id, { view_id: data_view_id })
     yield call(save_last_active_view, {
       view_id: data_view_id,
-      view_name: view ? view.get('view_name') : undefined
+      view_name: view ? view.get('view_name') : undefined,
+      table_state: view ? view.get('table_state') : undefined
     })
   } catch (error) {
     console.error('Error persisting selected view to browser:', error)

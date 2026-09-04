@@ -79,6 +79,58 @@ describe('data-views initial view selection', function () {
     expect(selection.view_id).to.equal(undefined)
   })
 
+  it('restores from the last-active record when there is no snapshot', function () {
+    // The gap that kept the original defect alive after the first fix. A
+    // snapshot is written only on an EDIT, so a saved view the user SELECTED
+    // and never modified had no local state and deferred to the server -- which
+    // is the default-view frame, unchanged. The last-active record caches the
+    // state the view had when it was made active, so this case resolves now.
+    const table_state = make_table_state()
+    const selection = resolve({
+      last_active: { view_id: 'saved-1', view_name: 'My View', table_state },
+      snapshot: null
+    })
+
+    expect(selection.type).to.equal('restore')
+    expect(selection.view_id).to.equal('saved-1')
+    expect(selection.table_state).to.deep.equal(table_state)
+  })
+
+  it('prefers the snapshot over the last-active record', function () {
+    // The snapshot is the EDITED state; the cached one is what the view held
+    // before those edits. Restoring the older of the two would silently discard
+    // the user's unsaved work on the first frame.
+    const snapshot_state = make_table_state({ columns: ['player_age'] })
+    const cached_state = make_table_state({ columns: ['player_height'] })
+    const selection = resolve({
+      last_active: { view_id: 'saved-1', table_state: cached_state },
+      snapshot: { table_state: snapshot_state }
+    })
+
+    expect(selection.type).to.equal('restore')
+    expect(selection.table_state).to.deep.equal(snapshot_state)
+  })
+
+  it('falls back to the last-active record when the snapshot is corrupt', function () {
+    const table_state = make_table_state()
+    const selection = resolve({
+      last_active: { view_id: 'saved-1', table_state },
+      snapshot: { table_state: { columns: 'not-an-array' } }
+    })
+
+    expect(selection.type).to.equal('restore')
+    expect(selection.table_state).to.deep.equal(table_state)
+  })
+
+  it('defers when the cached last-active state is not valid either', function () {
+    const selection = resolve({
+      last_active: { view_id: 'saved-1', table_state: { columns: 'nope' } },
+      snapshot: null
+    })
+
+    expect(selection.type).to.equal('defer')
+  })
+
   it('defers on a snapshot whose table_state is not valid', function () {
     // The control for the test above: a stored snapshot is not automatically
     // usable, and a corrupt one must take the same path as an absent one rather
