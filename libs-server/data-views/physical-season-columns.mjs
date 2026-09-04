@@ -64,22 +64,6 @@ const TABLES_WITHOUT_SEAS_TYPE = new Set([
 // then leaves the (year, seas_type) predicates to do the pruning on their own.
 const TABLES_WITH_NFL_WEEK_ID = new Set(['nfl_games', 'nfl_plays'])
 
-// The physical `week` column nfl_week_id is GENERATED from. Only tables listed
-// here may have their composite week predicate emitted in the decomposed
-// (year, seas_type, week) form -- see apply_scope_to_query for why that form is
-// preferred and when it is provably the same restriction.
-//
-// Not derivable from TABLES_WITH_NFL_WEEK_ID, and the third name here is why:
-// nfl_plays_current_week carries the physical `week` without carrying the
-// generated composite. The fallback for an unregistered name is "keep the
-// composite", which is always correct on its own, so an omission costs an
-// estimate rather than a request.
-const TABLES_WITH_WEEK = new Set([
-  'nfl_games',
-  'nfl_plays',
-  'nfl_plays_current_week'
-])
-
 export const physical_year_column = (table_name) =>
   PHYSICAL_YEAR_COLUMN[table_name] || 'year'
 
@@ -97,9 +81,6 @@ export const physical_has_seas_type = (table_name) =>
 
 export const physical_has_nfl_week_id = (table_name) =>
   TABLES_WITH_NFL_WEEK_ID.has(table_name)
-
-export const physical_has_week = (table_name) =>
-  TABLES_WITH_WEEK.has(table_name)
 
 // The PROJECTION half of the boundary, single-sourced for the same reason the
 // predicate half is. apply_scope_to_query has defaulted its predicate columns
@@ -180,5 +161,3 @@ export const physical_table_names = () => Object.keys(PHYSICAL_YEAR_COLUMN)
 export const tables_without_seas_type = () => new Set(TABLES_WITHOUT_SEAS_TYPE)
 
 export const tables_with_nfl_week_id = () => new Set(TABLES_WITH_NFL_WEEK_ID)
-
-export const tables_with_week = () => new Set(TABLES_WITH_WEEK)
