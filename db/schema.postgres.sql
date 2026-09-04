@@ -242,7 +242,6 @@ DROP INDEX IF EXISTS public.idx_prop_markets_raw_history_market;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_source_event_id;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type_market_type;
-DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_events_raw_history_event;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
@@ -33435,13 +33434,6 @@ CREATE UNIQUE INDEX idx_prop_market_events_raw_history_event ON public.prop_mark
 --
 
 CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_selections_index USING btree (selection_pid, source_market_id, source_id, time_type);
-
-
---
--- Name: idx_prop_markets_index_esbid_time_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_markets_index_esbid_time_type ON public.prop_markets_index USING btree (esbid, time_type) WHERE (esbid IS NOT NULL);
 
 
 --

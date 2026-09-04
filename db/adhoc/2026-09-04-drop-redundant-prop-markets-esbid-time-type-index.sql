@@ -1,0 +1,33 @@
+-- STATUS: APPLIED 2026-09-04 against league_production
+--
+-- Applied by hand rather than through `yarn db:exec`, for the same reason as
+-- 2026-09-04-prop-markets-index-esbid-time-type-market-type.sql: the wrapper
+-- runs --single-transaction and CONCURRENTLY cannot run inside a transaction
+-- block, so the banner above was written by hand rather than rewritten in place
+-- by the script on success.
+--
+-- Drop the two-column index that today's three-column index strictly contains.
+--
+-- `idx_prop_markets_index_esbid_time_type` is (esbid, time_type) WHERE esbid IS
+-- NOT NULL, an exact prefix of idx_prop_markets_index_esbid_time_type_market_type
+-- with the same partial predicate. Keeping both means every write that misses
+-- HOT pays two btree inserts to answer one question.
+--
+-- The companion file deferred this drop to after League 1's auction ends
+-- 2026-09-08, because a plain DROP INDEX needs an ACCESS EXCLUSIVE lock.
+-- CONCURRENTLY removes that constraint entirely, so the reason to wait did not
+-- survive contact with the right verb.
+--
+-- Verified dead before dropping, on the plan rather than on the scan counter:
+-- the cumulative idx_scan on both indexes was frozen across three samples 45s
+-- apart, so the counter could not distinguish "still preferred" from "idle".
+-- EXPLAIN answers it directly -- the planner chose the three-column index for
+-- the BARE two-column predicate, as an Index Only Scan:
+--
+--   Index Only Scan using idx_prop_markets_index_esbid_time_type_market_type
+--     Index Cond: ((esbid = ...) AND (time_type = 'CLOSE'::time_type))
+--
+-- so the prefix workload gets cheaper on the drop, not more expensive: 18 MB
+-- scanned where the dropped index was 31 MB.
+
+DROP INDEX CONCURRENTLY IF EXISTS public.idx_prop_markets_index_esbid_time_type;
