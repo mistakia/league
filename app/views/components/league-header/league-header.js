@@ -62,7 +62,11 @@ export default function LeagueHeader({ league }) {
           strangers alike rather than only for the people who are not in it */}
       <Stack direction='row' spacing={1} className='league__chips'>
         {Boolean(league.number_teams) && (
-          <Chip variant='outlined' label={`${league.number_teams} Teams`} />
+          <Chip
+            variant='outlined'
+            size='small'
+            label={`${league.number_teams} Teams`}
+          />
         )}
         {isHalfPPR && <Chip size='small' label='Half PPR' />}
         {isFullPPR && <Chip size='small' label='Full PPR' />}
