@@ -16,6 +16,7 @@ import {
   validate_and_get_league,
   require_commissioner,
   require_league_not_paused,
+  remove_league_credential_fields,
   handle_error
 } from './middleware.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
@@ -410,7 +411,7 @@ router.get('/:leagueId/?', async (req, res) => {
 
     const seasons = await db('seasons').where('lid', leagueId)
     league.years = seasons.map((s) => s.season_year)
-    res.send(league)
+    res.send(remove_league_credential_fields(league))
   } catch (err) {
     handle_error(err, logger, res)
   }
@@ -489,7 +490,7 @@ router.get('/:leagueId/seasons/:year', async (req, res) => {
       return res.status(400).send({ error: 'league not found for this year' })
     }
 
-    res.send(league_with_year)
+    res.send(remove_league_credential_fields(league_with_year))
   } catch (err) {
     handle_error(err, logger, res)
   }

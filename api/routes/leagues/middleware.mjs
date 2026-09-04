@@ -63,6 +63,48 @@ export async function validate_and_get_league(leagueId, res) {
 }
 
 /**
+ * The `leagues` columns that are CREDENTIALS, and so must never reach a client.
+ *
+ * A Discord webhook URL is a bearer credential: anyone holding the URL can post
+ * to that channel, with no key and no login. Both of these were readable by an
+ * anonymous caller until 2026-09-04, because `getLeague` selects the whole
+ * `leagues` row and the two routes below sent it wholesale — and `/leagues`
+ * mounts above the blanket 401 in `api/index.mjs`. Nothing in the SPA ever
+ * showed them (`app/core/leagues/league.js` declares neither), so the exposure
+ * was on the wire only and invisible from the UI.
+ *
+ * The list is the single point of truth: a credential column added to `leagues`
+ * later is stripped by naming it here, with no second edit at the send sites.
+ * It is typed as the literal key union rather than `string[]`, so a name that
+ * is not a `leagues` column fails the type check here instead of silently
+ * deleting nothing.
+ *
+ * Stripped at the RESPONSE boundary rather than inside `getLeague`, because the
+ * server-side consumers are the ones that need the values —
+ * `libs-server/send-notifications.mjs` reads `league.discord_webhook_url` to
+ * post, and `scripts/announce-draft-slate.mjs` reads the announcements one.
+ * Removing them upstream would break notifications silently.
+ */
+/** @type {ReadonlyArray<'discord_webhook_url' | 'discord_announcements_webhook_url'>} */
+export const league_credential_fields = Object.freeze([
+  'discord_webhook_url',
+  'discord_announcements_webhook_url'
+])
+
+/**
+ * A copy of the league object safe to send to a client.
+ * @param {League} league - League object
+ * @returns {League} The league without any credential column
+ */
+export function remove_league_credential_fields(league) {
+  const client_league = { ...league }
+  for (const field of league_credential_fields) {
+    delete client_league[field]
+  }
+  return client_league
+}
+
+/**
  * Require user to be league commissioner
  * @param {League} league - League object
  * @param {number} userId - User ID
