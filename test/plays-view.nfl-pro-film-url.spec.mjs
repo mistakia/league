@@ -147,6 +147,21 @@ describe('plays view / nfl pro film url', function () {
       expect(await film_url(101)).to.include('gameClock=03:01')
     })
 
+    it('reads a sub-minute prefix, which carries no minutes at all', async function () {
+      // Under a minute the description reads `(:52)`, not `(0:52)`. Requiring a
+      // leading digit did not merely mis-clock those plays -- it failed the
+      // filmable gate, so they got no link and never entered the denominator of
+      // any accuracy figure. That silently excluded 9.5% of prefixed plays.
+      await seed_play({
+        play_id: 103,
+        yards_to_go: 10,
+        play_description:
+          '(:52) (Shotgun) J.Winston pass deep middle to C.Olave.'
+      })
+
+      expect(await film_url(103)).to.include('gameClock=00:52')
+    })
+
     it('falls back to game_clock_start when the description has no prefix', async function () {
       await seed_play({
         play_id: 102,

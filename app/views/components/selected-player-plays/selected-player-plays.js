@@ -78,7 +78,7 @@ const get_default_year = (player_seasonlogs) => {
 
 const build_default_table_state = ({ pos, year }) => ({
   columns: get_default_columns_for_position(pos),
-  prefix_columns: ['play_week', 'play_desc'],
+  prefix_columns: ['play_film_url', 'play_week', 'play_desc'],
   where: [
     {
       column_id: 'play_year',

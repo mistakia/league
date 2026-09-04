@@ -10,16 +10,24 @@ import db from '#db'
 // The pin is `gameClock`, an undocumented filter the film-room API honours but
 // the filter UI never exposes.
 //
-// MEASURED 2026-09-04 over 595 linked plays across four games and four seasons
+// MEASURED 2026-09-04 over 651 linked plays across four games and four seasons
 // (2022, 2024, 2025), by replaying each generated URL's query string against the
-// live film-room API: every one opens the target play. 588 resolve to exactly
-// one play, and 7 return a short list whose FIRST play by sequence is the
-// target, which is the one the page auto-plays. None open the wrong clip and
-// none return an empty list.
+// live film-room API: 649 resolve to exactly one play, 1 returns a short list
+// whose FIRST play by sequence is the target (the one the page auto-plays), and
+// 1 opens the wrong clip. None return an empty list. 99.85%.
 //
-// That is 100% of a corpus, not a guarantee. The corpus is four games, and the
-// clock and distance values it leans on come from our own charting, which can
-// disagree with NFL Pro's on a play no game here contained.
+// WATCH THE DENOMINATOR. An earlier revision measured 595 linked plays at 100%,
+// and the difference is not an improvement in accuracy -- it is 56 plays that
+// used to get NO LINK AT ALL and so never entered the corpus. Under a minute the
+// description reads `(:52)` with no minutes, which failed a clock pattern that
+// required a leading digit, and a play with no link cannot be a miss. 9.5% of
+// prefixed plays were excluded that way. A rate measured only over the rows a
+// rule accepted will always flatter the rule.
+//
+// Still a corpus, not a guarantee: four games, and the clock and distance values
+// it leans on are our own charting, which can disagree with NFL Pro's on a play
+// no game here contained. A separate twelve-game holdout scored 99.12% before
+// the fixes below.
 //
 // The distinction between "the list contains the target" and "the target is
 // first" is the one that matters and is easy to get wrong: the page sorts by
@@ -78,7 +86,7 @@ const FILM_PLAYS_URL = `'https://pro.nfl.com/film/plays' || chr(63) || 'season='
 // only reliable check is on the SHAPE of what came out.
 const FILM_CLOCK = `nullif(
   coalesce(
-    substring(nfl_plays.play_description from '^\\((\\d{1,2}:\\d{2})\\)'),
+    substring(nfl_plays.play_description from '^\\((\\d{0,2}:\\d{2})\\)'),
     case
       when nfl_plays.game_clock_start ~ '^\\d{1,2}:\\d{2}$'
       then nfl_plays.game_clock_start
@@ -183,7 +191,7 @@ end`
 // a guard into a pass-through silently, which is how 13 malformed links reached
 // the holdout.
 const IS_FILMABLE_PLAY = `coalesce(
-  nfl_plays.play_description ~ '^\\(\\d{1,2}:\\d{2}\\)'
+  nfl_plays.play_description ~ '^\\(\\d{0,2}:\\d{2}\\)'
   or nfl_plays.play_type in ('KOFF', 'PUNT', 'FGXP', 'CONV'),
   false
 )`
