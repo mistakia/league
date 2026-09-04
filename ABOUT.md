@@ -765,12 +765,16 @@ observations:
     [verification] 2026-09-04 Verified on production at 1f477d99a (main.9409569f.js): anonymous
     /plays cold load renders 75 data rows, was 2 header rows before; player drawer Plays tab renders
     75 rows with week and description populated.
+  - >-
+    [testing] 2026-09-04 One /plays cold-load row count cannot decide the websocket send-queue race
+    on the dev server: 78 rows read identically with queue_until_open on and off, and the race is
+    load-dependent.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-04T07:24:18.827Z'
+updated_at: '2026-09-04T07:41:46.753Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
