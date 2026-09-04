@@ -26859,7 +26859,7 @@ CREATE TABLE public.prop_markets_history (
 --
 
 CREATE TABLE public.prop_markets_index (
-    market_type character varying(50),
+    market_type character varying(100),
     source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
@@ -28496,7 +28496,7 @@ CREATE TABLE public.weekly_market_selections_analysis_cache (
     nfl_team character varying(3),
     player_position character varying(4),
     opponent_nfl_team character varying(3),
-    market_type character varying(50),
+    market_type character varying(100),
     esbid bigint,
     CONSTRAINT weekly_market_selections_analysis_cache_player_position_vocabul CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
