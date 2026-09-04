@@ -4,19 +4,34 @@ import db from '#db'
 // the team that LOSES the player on a cross-team win, and callers read it off
 // the returned object -- so it must be projected here, where the table is
 // named, or no grep of `restricted_free_agency_bids` will ever reach them.
+// THE CALENDAR DAY IS NOT DERIVED HERE, and that is the whole point.
+//
+// This used to project `TO_CHAR(processed, 'YYYY-MM-DD') AS date`, which
+// renders in the POSTGRES session timezone (`Etc/UTC` in production). Its only
+// consumer, calculate-team-daily-ktc-value, matched that string against a day
+// it derived from `transactions.occurred_at` with `dayjs(...).format(...)` --
+// which renders in the NODE PROCESS timezone. Two formatters, two zones, one
+// equality comparison between them.
+//
+// A signing and the tag transaction that records it are the same event seconds
+// apart, so the two agree on the day in ANY single zone and disagree only when
+// the event falls between midnight in one zone and midnight in the other. The
+// league host resolves America/New_York, so a bid processed at 00:46 UTC is
+// the 9th to postgres and the 8th to node, the lookup misses, and the job
+// throws `no restricted free agency signing found`. Two of league 1's tags sit
+// in that window; the failure was latent only because an unrelated league
+// threw earlier in the same run.
+//
+// Returning the raw timestamptz and letting the caller format it makes the two
+// sides use ONE formatter in ONE process, so they agree no matter which zone
+// that process runs in. Do not reintroduce a date string here: a correct
+// rendering that merely picks the same zone by luck fails again the day the
+// host's zone changes, which is exactly how this arrived.
 export default async function ({ lid, year = null }) {
   const restricted_free_agency_bids_query = db('restricted_free_agency_bids')
     .select(
       'restricted_free_agency_bids.*',
-      'restricted_free_agency_nominations.original_team_id',
-      // `processed` is timestamptz, so it goes straight to TO_CHAR. The
-      // TO_TIMESTAMP wrapper that converted it from epoch seconds now has no
-      // matching signature at all -- `function to_timestamp(timestamp with
-      // time zone) does not exist` -- which fails the whole statement rather
-      // than just this projection.
-      db.raw(
-        "TO_CHAR(restricted_free_agency_bids.processed, 'YYYY-MM-DD') AS date"
-      )
+      'restricted_free_agency_nominations.original_team_id'
     )
     .leftJoin(
       'restricted_free_agency_nominations',

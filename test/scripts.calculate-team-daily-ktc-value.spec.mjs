@@ -361,4 +361,119 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
       expect(shortfalls).to.include('staleness on 902')
     })
   })
+
+  // THE ONE INSTANT THE REST OF THIS FILE DELIBERATELY AVOIDS.
+  //
+  // The dates at the top are "chosen well away from a DST transition so the
+  // node-local transaction dates and the UTC-session observation dates name the
+  // same calendar day" -- which is an accurate description of a blind spot. Every
+  // other test here picks local noon, where no timezone can disagree about the
+  // day, so none of them could ever have caught a lookup that compares a
+  // postgres-rendered date against a node-rendered one.
+  //
+  // A restricted free agency tag is matched to the bid that justifies it on
+  // (pid, calendar day). The signing's day used to be rendered by postgres in
+  // the SESSION timezone while the transaction's was rendered by dayjs in the
+  // PROCESS timezone, so any signing between midnight in one zone and midnight
+  // in the other resolved to two different days and the lookup missed. In
+  // production that threw `no restricted free agency signing found` on two of
+  // league 1's tags and left the whole league unpriced.
+  //
+  // 02:30Z is 21:30 the PREVIOUS day in America/New_York, which is the zone this
+  // suite runs in. So this is the case, and it fails outright without the fix.
+  describe('a signing whose instant falls on different days in different zones', function () {
+    const tag_instant = '2024-03-01T02:30:00Z'
+    const pid = 'PLAY-ONE-000001'
+
+    // The day the replay files this transaction under, derived the same way the
+    // replay derives it rather than written as a literal. It is 2024-02-29 --
+    // the day BEFORE the instant's UTC date, which is the whole point of the
+    // case and the reason a hand-written `day_one` here would miss.
+    const tag_day = dayjs(tag_instant).format('YYYY-MM-DD')
+
+    beforeEach(async function () {
+      await knex('restricted_free_agency_bids').where({ lid }).del()
+      await knex('restricted_free_agency_nominations')
+        .where({ league_id: lid })
+        .del()
+
+      // Team 2 wins the player away from team 1, so both sides of the transfer
+      // are exercised rather than a same-team re-signing that never reads
+      // original_team_id.
+      await knex('restricted_free_agency_nominations').insert({
+        nomination_id: 9001,
+        league_id: lid,
+        player_id: pid,
+        season_year: year,
+        original_team_id: 1,
+        nominated_at: tag_instant,
+        announced_at: tag_instant,
+        processed_at: tag_instant,
+        winning_bid_id: 9001
+      })
+      await knex('restricted_free_agency_bids').insert({
+        bid_id: 9001,
+        pid,
+        user_id: 1,
+        bid_amount: 10,
+        tid: 2,
+        season_year: year,
+        lid,
+        is_successful: true,
+        submitted: tag_instant,
+        processed: tag_instant,
+        // Load-bearing: original_team_id reaches the replay only through the
+        // nomination, joined on this column. Leaving it null makes the losing
+        // team resolve to null and the run throws for an unrelated reason.
+        nomination_id: 9001
+      })
+
+      await knex('transactions').insert({
+        transaction_id: 9001,
+        user_id: 1,
+        tid: 2,
+        lid,
+        pid,
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
+        player_salary: 10,
+        week: 1,
+        season_year: year,
+        occurred_at: tag_instant
+      })
+      await insert_valuation({
+        pid,
+        date: tag_day,
+        keeptradecut_value: 1000
+      })
+    })
+
+    it('resolves the signing rather than throwing on the day it renders as', async function () {
+      // Before the fix this rejects with `no restricted free agency signing
+      // found for PLAY-ONE-000001__2024-02-29` -- the node-rendered day --
+      // while the signing sits in the index under the postgres-rendered
+      // 2024-03-01.
+      await calculate_team_daily_ktc_value({ lid })
+
+      // Not-throwing is necessary and not sufficient: a refactor that turned
+      // the missing-signing throw into a `continue` would keep this green while
+      // every cross-team transfer silently stopped moving the player. So assert
+      // the transfer the signing encodes actually happened -- team 2 won the
+      // player and carries his value, team 1 lost him and carries none.
+      const rows = await get_rows(tag_day)
+      const by_team = new Map(rows.map((row) => [row.tid, row.ktc_value]))
+      expect(by_team.get(2)).to.equal(1000)
+      expect(by_team.get(1)).to.equal(0)
+
+      const signings = await knex('restricted_free_agency_bids')
+        .where({ lid, is_successful: true })
+        .select('processed')
+      expect(signings).to.have.length(1)
+
+      // The input has to be able to fail: if these two agreed, the test would
+      // pass with or without the fix and prove nothing.
+      const node_day = dayjs(signings[0].processed).format('YYYY-MM-DD')
+      const utc_day = dayjs(signings[0].processed).toISOString().slice(0, 10)
+      expect(node_day).to.not.equal(utc_day)
+    })
+  })
 })

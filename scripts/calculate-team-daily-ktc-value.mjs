@@ -263,7 +263,15 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     await get_restricted_free_agency_signings({ lid })
   const restricted_free_agency_index = {}
   for (const restricted_free_agency_signing of restricted_free_agency_signings) {
-    const rfa_sign_key = `${restricted_free_agency_signing.pid}__${restricted_free_agency_signing.date}`
+    // Formatted HERE, with the same dayjs call that derives `tran_date` from
+    // the transaction below, so the two sides of the lookup cannot disagree
+    // about which calendar day an instant falls on. The query deliberately
+    // returns the raw timestamptz rather than a rendered date -- see
+    // get-restricted-free-agency-signings.mjs for the failure that caused.
+    const signed_on = dayjs(restricted_free_agency_signing.processed).format(
+      'YYYY-MM-DD'
+    )
+    const rfa_sign_key = `${restricted_free_agency_signing.pid}__${signed_on}`
     restricted_free_agency_index[rfa_sign_key] = restricted_free_agency_signing
   }
 

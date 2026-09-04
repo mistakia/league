@@ -776,8 +776,31 @@ export const capture_league_configuration = async ({ trx, lid }) => {
   return { league: league_row, seasons }
 }
 
-export const restore_league_configuration = async ({ trx, configuration }) => {
-  await trx('leagues').insert(configuration.league)
+/**
+ * `cloned_from_league_id` is the ONE field restore does not preserve, and the
+ * reason is that it is provenance rather than configuration.
+ *
+ * Everything else here is deliberately the target's own -- that is the whole
+ * point of capture-and-restore, per the docstring above. But a `--sync` makes
+ * the target a copy of `from_lid` just as surely as a `--create` does, and
+ * `clone_league_metadata` (which sets the marker) runs only on the create path.
+ * Restoring the captured row verbatim therefore left the marker at whatever the
+ * target already carried: null for a real league being turned into a mirror,
+ * which is the case the column exists to catch, and a STALE parent for a clone
+ * re-synced from a different source.
+ *
+ * So it is re-asserted from the source on every sync. Provenance is a fact about
+ * what just happened, not a setting the operator configured.
+ */
+export const restore_league_configuration = async ({
+  trx,
+  configuration,
+  from_lid
+}) => {
+  await trx('leagues').insert({
+    ...configuration.league,
+    cloned_from_league_id: from_lid
+  })
   for (const season of configuration.seasons) {
     await trx('seasons').insert(season)
   }
@@ -845,7 +868,7 @@ export const clone_league = async ({
   }
 
   const { lid } = configuration
-    ? await restore_league_configuration({ trx, configuration })
+    ? await restore_league_configuration({ trx, configuration, from_lid })
     : await clone_league_metadata({ trx, from_lid, to_lid, name })
 
   const { copied } = await clone_league_board({

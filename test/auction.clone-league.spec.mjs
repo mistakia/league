@@ -454,6 +454,48 @@ describe('clone-league', function () {
       expect(second_generation.cloned_from_league_id).to.equal(lid)
     })
 
+    it('marks a league synced into as a clone, not just one created as one', async function () {
+      // --sync is the OTHER way a league becomes a mirror, and it does not go
+      // through clone_league_metadata at all: it captures the target's own
+      // configuration, wipes, and restores it. Restoring the captured row
+      // verbatim left the marker at whatever the target already carried, so
+      // syncing into an existing REAL league produced an unmarked mirror -- the
+      // exact case the column exists to catch, reached by the path the
+      // create-side test above cannot see.
+      const target_lid = 902
+      await knex('leagues').where({ league_id: target_lid }).del()
+      await knex('leagues').insert({
+        league_id: target_lid,
+        commissioner_user_id: 1,
+        name: 'not a clone yet',
+        is_hosted: true
+      })
+      const before = await knex('leagues')
+        .where({ league_id: target_lid })
+        .first()
+      expect(before.cloned_from_league_id).to.equal(null)
+
+      await knex.transaction((trx) =>
+        clone_league({
+          trx,
+          from_lid: source_lid,
+          to_lid: target_lid,
+          season_year
+        })
+      )
+
+      const after = await knex('leagues')
+        .where({ league_id: target_lid })
+        .first()
+      expect(after.cloned_from_league_id).to.equal(source_lid)
+
+      // And the sync still preserved the configuration it is supposed to --
+      // otherwise this test would pass on a restore that simply re-copied the
+      // source's whole row, which is the thing capture-and-restore exists to
+      // prevent.
+      expect(after.name).to.equal('not a clone yet')
+    })
+
     it('carries the salary history but not the current auction', async function () {
       // Both halves at once, because they pull opposite ways and a clone that
       // drops all transactions passes either one alone.
