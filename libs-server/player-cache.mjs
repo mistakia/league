@@ -270,12 +270,30 @@ class PlayerCache {
   // Private methods
 
   /**
+   * Reads the whole player table with no statement timeout.
+   *
+   * `SET LOCAL` inside a transaction, never a plain `SET` on the pool. A plain
+   * `SET` outlives the statement and stays on that pooled connection, so every
+   * later query knex routes to it also runs with no statement timeout at all --
+   * the one bound the primary actually enforces, removed silently for an
+   * arbitrary share of unrelated traffic.
+   *
+   * @returns {Promise<PlayerRow[]>}
+   * @private
+   */
+  async _select_all_players_untimed() {
+    return db.transaction(async (trx) => {
+      await trx.raw('SET LOCAL statement_timeout = 0')
+      return trx('player').select('*')
+    })
+  }
+
+  /**
    * Fetches all players from database
    * @private
    */
   async _fetch_all_players() {
-    await db.raw('SET statement_timeout = 0')
-    const players = await db('player').select('*')
+    const players = await this._select_all_players_untimed()
     // Clean formatted names to remove null bytes
     return players.map((player) => ({
       ...player,
@@ -288,8 +306,7 @@ class PlayerCache {
    * @private
    */
   async _fetch_active_players() {
-    await db.raw('SET statement_timeout = 0')
-    const all_players = await db('player').select('*')
+    const all_players = await this._select_all_players_untimed()
 
     // Clean formatted names and filter for active players
     return all_players

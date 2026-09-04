@@ -211,25 +211,32 @@ class PlayCache {
    * @private
    */
   async _fetch_plays({ years, weeks, esbids, all_plays }) {
-    await db.raw('SET statement_timeout = 0')
-    const query = db('nfl_plays').select('*')
+    // `SET LOCAL` inside a transaction, never a plain `SET` on the pool. A
+    // plain `SET` outlives the statement and stays on that pooled connection,
+    // so every later query knex routes to it also runs with no statement
+    // timeout at all -- the one bound the primary actually enforces, removed
+    // silently for an arbitrary share of unrelated traffic.
+    return db.transaction(async (trx) => {
+      await trx.raw('SET LOCAL statement_timeout = 0')
+      const query = trx('nfl_plays').select('*')
 
-    if (all_plays) {
+      if (all_plays) {
+        return await query
+      }
+
+      if (esbids.length > 0) {
+        query.whereIn('esbid', esbids)
+      } else {
+        if (years.length > 0) {
+          query.whereIn('season_year', years)
+        }
+        if (weeks.length > 0) {
+          query.whereIn('week', weeks)
+        }
+      }
+
       return await query
-    }
-
-    if (esbids.length > 0) {
-      query.whereIn('esbid', esbids)
-    } else {
-      if (years.length > 0) {
-        query.whereIn('season_year', years)
-      }
-      if (weeks.length > 0) {
-        query.whereIn('week', weeks)
-      }
-    }
-
-    return await query
+    })
   }
 
   /**
