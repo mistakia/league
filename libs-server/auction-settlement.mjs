@@ -351,8 +351,60 @@ export const settle_auction_player_if_complete = async ({
       pid: nomination.pid
     })
 
+    // BUILT BEFORE THE CAPACITIES, because it decides which of them are worth
+    // reading. Pure, so the move costs nothing.
+    const claims = build_auction_claims({
+      elections,
+      bids: nomination.bids,
+      opening_bid: nomination.opening_bid,
+      nominating_team_id: nomination.nominating_team_id
+    })
+
+    // ONLY THE TEAMS WHOSE CAPACITY IS ACTUALLY READ.
+    //
+    // A roster read is several queries and this ran one per team in the league,
+    // but only two consumers ever look at the result, and between them they skip
+    // most of the board in a typical settlement:
+    //
+    // - `get_outstanding_election_team_ids` checks eligibility only for teams
+    //   holding NO election. A team that has elected is discharged before its
+    //   capacity is consulted.
+    // - `resolve_auction_player` filters DECLINES out before it touches
+    //   `rosters` at all. A decline never competes, so its capacity decides
+    //   nothing.
+    //
+    // The overlap is the whole saving: a team that declined has elected AND is
+    // not a contender, so nothing reads it. In a settlement that is most of the
+    // league, since a settlement happens exactly when everyone has elected.
+    //
+    // DERIVED FROM `claims`, NOT FROM "elections with a null maximum". The two
+    // sets differ, and the difference is two cases that would silently lose
+    // their capacity and be disqualified as `ROSTER_FULL` by the `!roster`
+    // branch in the resolver:
+    //
+    // - A team that declined and ALSO holds a bid. `build_auction_claims` raises
+    //   a null claim to the bound amount, so it is a real contender.
+    // - The nominating team, which is raised to the opening bid whatever its
+    //   election says.
+    //
+    // Reading the requirement off the claim set means neither has to be
+    // remembered here, and a third such rule added to `build_auction_claims`
+    // is picked up rather than missed.
+    const elected = new Set(elections.map((election) => election.tid))
+    const contends = new Set(
+      claims
+        .filter(
+          (claim) =>
+            claim.maximum_bid !== null && claim.maximum_bid !== undefined
+        )
+        .map((claim) => claim.tid)
+    )
+    const capacity_team_ids = team_ids.filter(
+      (tid) => !elected.has(tid) || contends.has(tid)
+    )
+
     const capacities = await get_auction_team_capacities({
-      team_ids,
+      team_ids: capacity_team_ids,
       league,
       player_position: player_row.primary_position,
       current_price: nomination.current_price,
@@ -373,13 +425,6 @@ export const settle_auction_player_if_complete = async ({
       )
       return null
     }
-
-    const claims = build_auction_claims({
-      elections,
-      bids: nomination.bids,
-      opening_bid: nomination.opening_bid,
-      nominating_team_id: nomination.nominating_team_id
-    })
 
     const { winner_tid, price, outcomes } = resolve_auction_player({
       claims,
