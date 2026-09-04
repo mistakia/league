@@ -200,10 +200,25 @@ prose_section_band(weight = 1px)
 // It COLLAPSES rather than narrows at 640px. A rail that is a quarter of a
 // phone screen leaves the prose at a measure too short to read, and the label
 // above its own paragraph is what a worksheet does on a narrow page anyway.
+// THE TWO CELLS SIT ON ONE BASELINE, which is the whole gesture a ruled
+// worksheet makes and the one thing the rail was not doing. The label is set
+// smaller than the prose beside it and in a different face, so aligning the two
+// BOXES leaves their first baselines 3px apart on a landing entry, 7px on a
+// Genesis group and 9px under a section head — three different amounts of not
+// quite right, which reads as a row that never settled.
+//
+// `align-items baseline` rather than a padding on each label: the offset is a
+// function of two fonts' metrics and three type sizes, so a hardcoded nudge is
+// three magic numbers that are wrong the moment any of the five inputs moves.
+// Grid baseline alignment is what this is for, and it costs one declaration.
+//
+// Inert below 640px, where the rail is `display block` and the label sits above
+// its own paragraph rather than beside it.
 prose_rail()
   display grid
   grid-template-columns 208px 1fr
   column-gap 28px
+  align-items baseline
 
   @media (max-width 640px)
     display block

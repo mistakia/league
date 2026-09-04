@@ -108,14 +108,27 @@ A **208px** label column, a **28px** gutter, prose filling the rest. Collapses t
 208px is set against the _longest_ label, not the average. A directory entry and a group of league
 rules are the same object — a short mono label naming a thing, and prose about it — and in a rail
 the labels form a column that can be read down without reading any of the prose beside them.
+Because they are the same object they take the same treatment on both pages: a mono label in the
+rail, prose beside it, and a hairline above each row but the first.
+
+**The two cells sit on one baseline**, via `align-items: baseline` on the grid. The label is
+smaller than the prose and in a different face, so aligning the boxes left their first baselines
+3px apart on a landing entry, 7px on a Genesis group and 9px under a section head. Grid baseline
+alignment rather than a padding on each label: the offset is a function of two fonts' metrics and
+three type sizes, so a hardcoded nudge is wrong the moment any of the five inputs moves.
 
 ### The rules — three weights
 
-| Weight            | Where                                          | Says                                        |
-| ----------------- | ---------------------------------------------- | ------------------------------------------- |
-| 2px ink           | `prose_section_band(2px)` on the first section | Masthead. The header has no rule of its own |
-| 1px ink           | `prose_section_band()`                         | A new section begins                        |
-| 1px `$prose_rule` | Between entries                                | Two things of the same kind                 |
+| Weight            | Where                                                    | Says                                        |
+| ----------------- | -------------------------------------------------------- | ------------------------------------------- |
+| 2px ink           | `prose_section_band(2px)`, and the last rule on the page | Masthead. The header has no rule of its own |
+| 1px ink           | `prose_section_band()`                                   | A new section begins                        |
+| 1px `$prose_rule` | Between entries                                          | Two things of the same kind                 |
+
+**A page is bracketed by the heavy weight top and bottom.** The 2px rule that opens the first
+section closes the last one too, so a reader reaching the end sees the directory finish rather than
+run out. On the landing page the closing rule carries no copy at all (`.landing__end`) — a footer
+of links there would repeat the directory it is closing.
 
 The header does **not** carry its own rule. Giving it one puts two parallel rules sixty pixels
 apart with nothing between them, which reads as a mistake rather than as two levels of break.
@@ -172,6 +185,11 @@ Every one of these has already shipped a broken page. Full accounts in
   `.landing__section-title`. Worse, it wins _selectively_: it sets family, weight, colour and
   tracking but no `font-size`, so an unqualified rule renders at the new size in the old face and
   reads as a change that landed. Qualify with the element — `.landing h2.landing__section-title`.
+  This has now shipped twice. The second was `.genesis-league__group-title`, where `.genesis-league
+h3` won on colour, tracking and line-height while letting `font-size` and `text-transform`
+  through: the group labels rendered uppercase at the right size in near-black at `-0.01em`, which
+  is the section head's own voice rather than the muted rail label they are meant to be. Nothing
+  was missing from the page and nothing was misaligned, so it survived a design pass unnoticed.
 - **An undefined stylus variable emits a bare ident**, and an unimported mixin emits nothing at
   all. Both look like a clean build.
 - **`-$var` is not negation** inside a multi-value property. Bind the negative to its own variable.

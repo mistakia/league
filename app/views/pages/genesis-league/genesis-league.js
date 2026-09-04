@@ -82,35 +82,47 @@ export default function GenesisLeaguePage() {
           ))}
         </Section>
 
-        <section className='genesis-league__section'>
-          <div className='genesis-league__trust'>
-            <div className='genesis-league__trust-item'>
-              <h3>The constitution and every amendment to it</h3>
+        {/* THE SAME OBJECT AS THE SECTION ABOVE — a mono label in the rail and
+            prose beside it. These two were full-measure blocks under
+            sentence-long mono headings, which put a second measure on the page
+            and left the band rule opening onto no section head at all. As rail
+            rows their labels join the one column that runs the length of the
+            page: FORMAT, OFFSEASON, POSTSEASON, CONSTITUTION, OPEN SOURCE. */}
+        <Section title="What's public">
+          <div className='genesis-league__group'>
+            <h3 className='genesis-league__group-title'>Constitution</h3>
+            <div className='genesis-league__group-body'>
               <p>
                 Adopted in {league_founding_year}. Every amendment carries the
                 date it was introduced and the date it passed, including those
                 drafted and never ratified.
               </p>
-              <NavLink to='/constitution'>Read the constitution</NavLink>
+              <p className='genesis-league__group-link'>
+                <NavLink to='/constitution'>Read the constitution</NavLink>
+              </p>
             </div>
+          </div>
 
-            <div className='genesis-league__trust-item'>
-              <h3>The platform is open source</h3>
+          <div className='genesis-league__group'>
+            <h3 className='genesis-league__group-title'>Open source</h3>
+            <div className='genesis-league__group-body'>
               <p>
                 I wrote this site for this league and its source is public. What
                 the software does with a roster can be inspected before you hold
                 one.
               </p>
-              <a
-                href='https://github.com/mistakia/league'
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                Read the source on GitHub
-              </a>
+              <p className='genesis-league__group-link'>
+                <a
+                  href='https://github.com/mistakia/league'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Read the source on GitHub
+                </a>
+              </p>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* The reader who gets this far has read the whole argument, and the
             hero link is now several screens behind him. */}

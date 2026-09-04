@@ -118,6 +118,13 @@ export default function LandingPage() {
         {landing_sections.map((section) => (
           <Section key={section.title} {...section} />
         ))}
+
+        {/* The bottom edge, and nothing else. The page ended on its last
+            description with no rule under it, so the directory ran out rather
+            than finishing — the Genesis page closes on the masthead's own
+            weight and this one did not. It carries no copy on purpose: a
+            footer of links here would repeat the directory it closes. */}
+        <div className='landing__end' aria-hidden='true' />
       </div>
     </div>
   )

@@ -41,9 +41,15 @@
 // enough to be taken in rather than read. Mono sets loose and even, so at this
 // size it needs negative tracking and tight leading — without them it reads as
 // a terminal dump, which is the failure mode of every mono headline.
+// Balanced and pretty here for the same reason the landing page's are: a
+// headline never leaves one word alone on its second line, and prose never
+// leaves an orphan. Both degrade to `normal` where unsupported, so they are
+// polish that cannot break a layout. The two pages are read one after another
+// and had this on only one of them.
 .genesis-league h1.genesis-league__lede
   margin 0
   max-width 26ch
+  text-wrap balance
   font-family $prose_mono
   font-weight $prose_bold
   font-size clamp(25px, 3.1vw, 34px)
@@ -63,6 +69,7 @@
   line-height 1.55
   letter-spacing normal
   color $prose_body
+  text-wrap pretty
 
   @media (max-width 640px)
     margin-top 20px
@@ -109,20 +116,45 @@
   @media (max-width 640px)
     margin-bottom 32px
 
-// Each group is a rail row: its label in the left column, its rules beside it.
+// Each group is a rail row: its label in the left column, its prose beside it.
+// A hairline above each one separates them without drawing a box around
+// anything, which is the same treatment the landing page's directory entries
+// take — the two pages are read one after another, and a group of league rules
+// and a directory entry are the same object. The first group takes none, so the
+// rule never doubles up under the band above it.
 .genesis-league__group
   prose_rail()
-  margin-bottom 36px
+  padding-top 24px
+  margin-top 24px
+  border-top 1px solid $prose_rule
 
-  &:last-child
-    margin-bottom 0
+  &:first-of-type
+    padding-top 0
+    margin-top 0
+    border-top none
 
-.genesis-league__group-title
+// QUALIFIED WITH THE ELEMENT. The `.genesis-league h2, h3` block above is
+// (0,1,1) and silently beat this class on colour, tracking and line-height
+// while letting font-size and text-transform through — so the label rendered
+// uppercase at the right size in near-black at -0.01em, which is the section
+// head's own voice rather than the muted rail label this is meant to be. That
+// is the half-applied failure the file's other rules are qualified against.
+.genesis-league h3.genesis-league__group-title
   prose_section_title()
   margin 0
 
   @media (max-width 640px)
     margin-bottom 0.9em
+
+// The prose half of a rail row that is paragraphs rather than a list. Its last
+// paragraph carries a link, which needs the gap a paragraph would take rather
+// than sitting flush against the text above it.
+.genesis-league__group-body
+  p
+    margin 0 0 1.1em
+
+.genesis-league p.genesis-league__group-link
+  margin 0
 
 // NO MARK OF ANY KIND — no disc, and no dash either. The rail already names
 // the group these belong to, so a per-item mark states membership a second
@@ -136,35 +168,10 @@
 
   li
     margin-bottom 1.1em
+    text-wrap pretty
 
     &:last-child
       margin-bottom 0
-
-// The claims. A hairline above each one separates them without drawing a box
-// around anything, which keeps the page reading as one column of paper.
-//
-// NOT A RAIL ROW, unlike the groups above. A rail label is a NAME — two or
-// three words the eye reads as a column — and these headings are whole
-// sentences, which in a 208px column set as four ragged lines beside a
-// paragraph and read as a layout failure rather than as an index.
-.genesis-league__trust-item
-  padding-top 28px
-  margin-top 28px
-  border-top 1px solid $prose_rule
-
-  &:first-child
-    padding-top 0
-    margin-top 0
-    border-top none
-
-  // The same size as the landing page's entry labels, which is what this is:
-  // a mono line naming a thing, with prose about it underneath.
-  h3
-    margin 0 0 0.5em
-    font-size 1em
-
-  p
-    margin-bottom 0.6em
 
 // The closing rule matches the masthead's rather than a section band's: it
 // closes the page the way the first one opened it.

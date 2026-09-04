@@ -268,3 +268,15 @@
   margin 0
   color $prose_body
   text-wrap pretty
+
+// The bottom edge. It takes the MASTHEAD's 2px rather than a section band's
+// 1px, so the page is bracketed by the same weight top and bottom — that is
+// what says the directory ended rather than ran out. It carries nothing, which
+// is why it is a bare div: the closing gesture is the rule, and the page's own
+// bottom padding is the space under it.
+.landing__end
+  margin-top 64px
+  border-top 2px solid $prose_rule_heavy
+
+  @media (max-width 640px)
+    margin-top 48px
