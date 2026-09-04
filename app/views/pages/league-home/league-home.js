@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, NavLink } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
@@ -13,16 +13,18 @@ import DashboardLeaguePositionalValue from '@components/dashboard-league-positio
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import PlayerRoster from '@components/player-roster'
 import LeagueRecentTransactions from '@components/league-recent-transactions'
+import LeagueScheduleList from '@components/league-schedule-list'
 import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
 import Notices from '@components/notices'
 import CopyMarkdownButton from '@components/copy-markdown-button'
-import { current_season, fantasy_positions, league_defaults } from '#constants'
+import { current_season, league_defaults } from '#constants'
 import {
   isReserveEligible,
   isReserveCovEligible,
   get_free_agent_period,
-  get_restricted_free_agency_nomination_window
+  get_restricted_free_agency_nomination_window,
+  toPercent
 } from '#libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 import { teams_to_array } from '@core/utils'
@@ -30,6 +32,84 @@ import RestrictedFreeAgencySchedule from '@components/restricted-free-agency-sch
 import RestrictedFreeAgencyNomination from '@components/restricted-free-agency-nomination'
 
 import './league-home.styl'
+
+// Compact odds table over the teams the page already loads. The markup mirrors
+// `standings.js` rather than sharing a component with it, because extracting one
+// would edit the standings page while the Material UI removal is in flight
+// there; the follow-up to extract it is filed on this page's task.
+function LeagueOdds({ teams, leagueId }) {
+  // Playoff and bye odds are stale once the postseason starts, so both columns
+  // leave together -- header cells included, or the remaining columns misalign
+  const is_regular_season =
+    current_season.week <= current_season.regular_season_final_week
+
+  const sorted = teams
+    .toList()
+    .sort((a, b) => (b.championship_odds || 0) - (a.championship_odds || 0))
+
+  const has_odds = sorted.some(
+    (team) =>
+      team.playoff_odds !== null ||
+      team.bye_odds !== null ||
+      team.championship_odds !== null
+  )
+
+  if (!has_odds) return null
+
+  return (
+    <div className='section'>
+      <div className='heading__section-title'>Odds</div>
+      <div className='league__gloss'>
+        Simulated from the current rosters and the remaining schedule. The
+        season has not started, so these are projections rather than standings;
+        full records are on the standings page.
+      </div>
+      <div className='table__container'>
+        <div className='table__row table__head'>
+          <div className='table__cell text lead-cell sticky__column'>Team</div>
+          {is_regular_season && (
+            <div className='table__cell metric'>Playoff Odds</div>
+          )}
+          {is_regular_season && (
+            <div className='table__cell metric'>Bye Odds</div>
+          )}
+          <div className='table__cell metric'>Champ Odds</div>
+        </div>
+        {sorted.map((team) => (
+          <div className='table__row' key={team.team_id}>
+            <div className='table__cell text lead-cell sticky__column'>
+              <div className='table__cell-text'>{team.name}</div>
+            </div>
+            {is_regular_season && (
+              <div className='table__cell metric'>
+                {toPercent(team.playoff_odds)}
+              </div>
+            )}
+            {is_regular_season && (
+              <div className='table__cell metric'>
+                {toPercent(team.bye_odds)}
+              </div>
+            )}
+            <div className='table__cell metric'>
+              {toPercent(team.championship_odds)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <NavLink
+        className='league__home-link'
+        to={`/leagues/${leagueId}/standings`}
+      >
+        Full standings and records
+      </NavLink>
+    </div>
+  )
+}
+
+LeagueOdds.propTypes = {
+  teams: ImmutablePropTypes.map,
+  leagueId: PropTypes.number
+}
 
 export default function LeagueHomePage({
   players,
@@ -48,7 +128,10 @@ export default function LeagueHomePage({
   leagueId,
   percentiles,
   teams,
-  is_team_manager
+  is_team_manager,
+  is_logged_in,
+  has_league_events,
+  has_recent_transactions
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -107,7 +190,11 @@ export default function LeagueHomePage({
 
   const notice_items = [...rfa_notices]
 
-  if (league.free_agency_period_start) {
+  // Second-person copy below addresses a manager about their own roster, so it
+  // is gated on membership -- a visitor should never read what they will not be
+  // able to release. The auction close itself still reaches everyone, through
+  // the dates section.
+  if (is_team_manager && league.free_agency_period_start) {
     const fa_period = get_free_agent_period(league)
     if (current_season.now.isBefore(fa_period.start)) {
       notice_items.push(
@@ -125,17 +212,6 @@ export default function LeagueHomePage({
         </Alert>
       )
     }
-  }
-
-  const groups = {}
-  for (const position of fantasy_positions) {
-    if (!groups[position]) groups[position] = []
-    groups[position] = players.active
-      .filter((pMap) => pMap.get('primary_position') === position)
-      .sort(
-        (a, b) =>
-          b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)
-      )
   }
 
   // Only announced restricted free agents and this team's own nominee are
@@ -173,10 +249,9 @@ export default function LeagueHomePage({
     }
   })
 
-  for (const player_map of [
-    ...players.reserve_short_term,
-    ...players.reserve_long_term
-  ]) {
+  for (const player_map of is_team_manager
+    ? [...players.reserve_short_term, ...players.reserve_long_term]
+    : []) {
     if (!player_map.get('pid')) continue
 
     const practice_week = player_map.get('practice_week')
@@ -206,7 +281,7 @@ export default function LeagueHomePage({
     }
   }
 
-  for (const player_map of players.cov) {
+  for (const player_map of is_team_manager ? players.cov : []) {
     if (!player_map.get('pid')) continue
 
     if (
@@ -235,30 +310,125 @@ export default function LeagueHomePage({
 
   const team_poaches = poaches.filter((p) => p.tid === teamId)
 
+  // Everything a manager has to act on, collected so the heading can be omitted
+  // when there is nothing under it. An empty section beneath a label is worse
+  // than no section at all.
+  const manager_action_items = []
+
+  if (notice_items.length) {
+    manager_action_items.push(
+      <Grid item xs={12} key='notices'>
+        <Notices notices={notice_items} />
+      </Grid>
+    )
+  }
+
+  if (has_rfa_nomination) {
+    manager_action_items.push(
+      <Grid item xs={12} key='rfa-nomination'>
+        <RestrictedFreeAgencyNomination />
+      </Grid>
+    )
+  }
+
+  if (waivers.poach.size) {
+    manager_action_items.push(
+      <Grid item xs={12} key='waivers-poach'>
+        <DashboardPlayersTable
+          title='Poaching Waiver Claims'
+          claims={waivers.poach}
+          waiverType='poach'
+        />
+      </Grid>
+    )
+  }
+
+  if (waivers.active.size) {
+    manager_action_items.push(
+      <Grid item xs={12} key='waivers-active'>
+        <DashboardPlayersTable
+          title='Active Roster Waiver Claims'
+          claims={waivers.active}
+          waiverType='active'
+        />
+      </Grid>
+    )
+  }
+
+  if (waivers.practice.size) {
+    manager_action_items.push(
+      <Grid item xs={12} key='waivers-practice'>
+        <DashboardPlayersTable
+          title='Practice Squad Waiver Claims'
+          claims={waivers.practice}
+          waiverType='practice'
+        />
+      </Grid>
+    )
+  }
+
+  if (team_poaches.size) {
+    manager_action_items.push(
+      <Grid item xs={12} key='poaching-claims'>
+        <DashboardPlayersTable title='Poaching Claims' poaches={team_poaches} />
+      </Grid>
+    )
+  }
+
+  if (cutlist.size) {
+    manager_action_items.push(
+      <Grid item xs={12} key='cutlist'>
+        <DashboardPlayersTable
+          title={
+            <>
+              Cutlist
+              <Icon name='not-interested' />
+            </>
+          }
+          cutlist={cutlist}
+          total={cutlist}
+          {...{ percentiles }}
+        />
+      </Grid>
+    )
+  }
+
   const body = (
     <div className='league-container league__home'>
-      {league.league_id && (
-        <div className='copy-markdown-button-row'>
-          <CopyMarkdownButton path={`/leagues/${league.league_id}.md`} />
-        </div>
-      )}
       <Grid container spacing={2}>
-        {notice_items.length ? (
+        <Grid item xs={12}>
+          <LeagueHeader />
+          {league.league_id && (
+            <div className='copy-markdown-button-row'>
+              <CopyMarkdownButton path={`/leagues/${league.league_id}.md`} />
+            </div>
+          )}
+        </Grid>
+        {manager_action_items.length > 0 && (
           <Grid item xs={12}>
-            <Notices notices={notice_items} />
-          </Grid>
-        ) : null}
-        {is_before_restricted_free_agency_end && (
-          <>
-            {has_rfa_nomination && (
-              <Grid item xs={12} md={6}>
-                <RestrictedFreeAgencyNomination />
-              </Grid>
-            )}
-            <Grid item xs={12} md={has_rfa_nomination ? 6 : 12}>
-              <RestrictedFreeAgencySchedule />
+            <div className='heading__section-title'>Manager Actions</div>
+            <Grid container spacing={2}>
+              {manager_action_items}
             </Grid>
-          </>
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <LeagueOdds {...{ teams, leagueId }} />
+        </Grid>
+        {has_league_events && (
+          <Grid item xs={12} className='league-schedule'>
+            <div className='section'>
+              <div className='heading__section-title'>Dates</div>
+              <LeagueScheduleList />
+            </div>
+          </Grid>
+        )}
+        {/* Announced restricted free agents and the nomination schedule are
+            league-wide public content, not a manager's own to-do list */}
+        {is_before_restricted_free_agency_end && (
+          <Grid item xs={12}>
+            <RestrictedFreeAgencySchedule />
+          </Grid>
         )}
         {active_free_agent_items.length > 0 && (
           <Grid item xs={12}>
@@ -280,65 +450,33 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        {Boolean(waivers.poach.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title='Poaching Waiver Claims'
-              claims={waivers.poach}
-              waiverType='poach'
-            />
-          </Grid>
-        )}
-        {Boolean(waivers.active.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title='Active Roster Waiver Claims'
-              claims={waivers.active}
-              waiverType='active'
-            />
-          </Grid>
-        )}
-        {Boolean(waivers.practice.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title='Practice Squad Waiver Claims'
-              claims={waivers.practice}
-              waiverType='practice'
-            />
-          </Grid>
-        )}
-        {Boolean(team_poaches.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title='Poaching Claims'
-              poaches={team_poaches}
-            />
-          </Grid>
-        )}
-        <Grid item xs={12}>
-          <LeagueHeader />
-        </Grid>
-        {Boolean(cutlist.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title={
-                <>
-                  Cutlist
-                  <Icon name='not-interested' />
-                </>
-              }
-              cutlist={cutlist}
-              total={cutlist}
-              {...{ percentiles }}
-            />
-          </Grid>
-        )}
         <Grid item xs={12} className='league-positional-value'>
-          <DashboardLeaguePositionalValue tid={teamId} />
+          <div className='heading__section-title'>Projected Points+</div>
+          <div className='league__gloss'>
+            Each bar totals the points a roster is projected to add above a
+            replacement-level starter, split by position, with draft picks
+            valued alongside.
+          </div>
+          <DashboardLeaguePositionalValue />
         </Grid>
-        <Grid item xs={12} className='league-recent-transactions'>
-          <LeagueRecentTransactions />
-        </Grid>
+        {has_recent_transactions && (
+          <Grid item xs={12} className='league-recent-transactions'>
+            <div className='heading__section-title'>Recent Transactions</div>
+            <div className='league__gloss'>
+              The league&apos;s latest signings, releases, and claims.
+            </div>
+            <LeagueRecentTransactions />
+          </Grid>
+        )}
+        {!is_logged_in && (
+          <Grid item xs={12}>
+            <div className='league__home-cta'>
+              <NavLink className='league__home-link' to='/genesis-league'>
+                What is the Genesis League?
+              </NavLink>
+            </div>
+          </Grid>
+        )}
       </Grid>
     </div>
   )
@@ -363,5 +501,8 @@ LeagueHomePage.propTypes = {
   load_rosters: PropTypes.func,
   percentiles: PropTypes.object,
   teams: PropTypes.object,
-  is_team_manager: PropTypes.bool
+  is_team_manager: PropTypes.bool,
+  is_logged_in: PropTypes.bool,
+  has_league_events: PropTypes.bool,
+  has_recent_transactions: PropTypes.bool
 }

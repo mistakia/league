@@ -1,3 +1,15 @@
+// One sentence under a heading saying what the block below actually measures.
+// Deliberately NOT nested inside .league__home: the header card resets the
+// inset with `.league__header .league__gloss`, and a rule nested here would tie
+// that at 0,2,0 and win or lose on chunk order alone.
+.league__gloss
+  font-family 'Inter', sans-serif
+  font-size 13px
+  line-height 1.5
+  color rgba(0, 0, 0, 0.6)
+  padding 0 16px 12px
+  max-width 640px
+
 .league__home
   display flex
   flex-direction column
@@ -10,3 +22,30 @@
   // cell would otherwise hold half a row of blank space beside its partner
   .MuiGrid-item:empty
     display none
+
+  // The shared .section shrink-wraps its content on the standings page; here it
+  // holds full-width charts and tables, so it spans the grid cell instead
+  .section
+    max-width none
+    width 100%
+
+  // Sits directly under the identity card it belongs to, so it keeps the card's
+  // right edge and none of the vertical gap a grid row would give it
+  .copy-markdown-button-row
+    padding 8px 0 0
+
+  .league__home-link
+    display inline-block
+    padding 12px 16px
+    font-family 'Inter', sans-serif
+    font-size 13px
+    color $textColor
+    text-decoration underline
+
+    &:hover
+      color $textColorDark
+
+  .league__home-cta
+    display flex
+    justify-content center
+    padding 16px 0

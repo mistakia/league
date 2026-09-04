@@ -10,7 +10,9 @@ import {
   is_before_restricted_free_agency_end,
   get_waiver_players_for_current_team,
   get_poach_players_for_current_league,
-  get_teams_for_current_league
+  get_teams_for_current_league,
+  get_league_events,
+  get_transactions
 } from '@core/selectors'
 import { player_actions } from '@core/players'
 import { draft_pick_value_actions } from '@core/draft-pick-value'
@@ -31,6 +33,8 @@ const map_state_to_props = createSelector(
   get_poach_players_for_current_league,
   is_before_restricted_free_agency_end,
   get_teams_for_current_league,
+  get_league_events,
+  get_transactions,
   (
     app,
     restricted_free_agency_players,
@@ -40,7 +44,9 @@ const map_state_to_props = createSelector(
     waivers,
     poaches,
     is_before_restricted_free_agency_end,
-    teams
+    teams,
+    league_events,
+    transactions
   ) => {
     const items = []
     restricted_free_agency_players.forEach((p) => {
@@ -82,7 +88,12 @@ const map_state_to_props = createSelector(
       is_before_restricted_free_agency_end,
       percentiles,
       teams,
-      is_team_manager
+      is_team_manager,
+      is_logged_in: Boolean(app.userId),
+      // The page owns each section's heading, so it needs to know whether the
+      // connected child below it will render anything
+      has_league_events: league_events.length > 0,
+      has_recent_transactions: transactions.get('items').size > 0
     }
   }
 )

@@ -5,9 +5,18 @@
   font-family 'IBM Plex Mono', monospace
   h1
     font-weight 100
+    margin-bottom 0
 
   .MuiChip-label
     font-family 'IBM Plex Mono', monospace
+
+  // The card already carries the horizontal padding the heading and its gloss
+  // add, and a gloss inset past its own heading reads as a different block
+  .heading__section-title
+    padding 16px 0 0
+
+  .league__gloss
+    padding 4px 0 12px
 
 .league__chips
   align-items center
