@@ -177,25 +177,6 @@ describe('auction settlement resolver', function () {
     // decided by a timestamp the team never committed the ranked amount at, and
     // in both the loser had put the money up first.
     describe('the instant belongs to the RANKED amount', function () {
-      it('ranks a clamped claim on when it covered the clamped amount', function () {
-        // Team 2 stated $30 at 10:00 and holds $10. Team 3 stated $10 at 09:00.
-        // Both are ranked at $10 -- and team 3 reached $10 first, so it wins.
-        // Ranking team 2 on its $30 instant is ranking it on an amount that
-        // never took effect; ranking it on 10:00 against 09:00 still loses here,
-        // which is why the case that DISCRIMINATES is the one below it.
-        const result = resolve(
-          [
-            claim(NOMINATOR, 0, '2026-09-01'),
-            claim(2, 30, '2026-09-02T10:00:00Z'),
-            claim(3, 10, '2026-09-02T09:00:00Z')
-          ],
-          { overrides: { 2: open_roster({ available_cap: 10 }) } }
-        )
-
-        expect(result.winner_tid).to.equal(3)
-        expect(result.price).to.equal(10)
-      })
-
       it('ranks a clamped claim on the EARLIER commitment that covers it', function () {
         // Team 2 bid $12 at 09:00 and then stated $30 at 11:00, against a $10
         // cap. Its effective maximum is $10, and the $12 bid covers $10 -- so
@@ -224,12 +205,17 @@ describe('auction settlement resolver', function () {
         expect(result.price).to.equal(10)
       })
 
-      it('keeps the bid instant when an election merely restates the same amount', function () {
-        // The worked case: X bids $5 at 10:00, Y elects $5 at 10:05, X elects $5
-        // at 10:10. All three are at $5, none is clamped, and X had real money
-        // on the wire before Y said anything -- so X wins. The old raise guard
-        // was a strict `<`, so X's own confirming election overwrote its bid
-        // instant with 10:10 and handed the player to Y.
+      it('takes the earliest of two commitments at the same amount', function () {
+        // WHAT THIS KILLS IS `at < earliest` IN THE RESOLVER, not the builder's
+        // raise guard. The two $5 commitments are handed in by this fixture, so
+        // restoring the strict `<` in `build_auction_claims` leaves this green
+        // -- a fixture that injects a function's output cannot control that
+        // function. The builder half of the same worked case is covered where it
+        // can actually fail, in `auction.claim-commitments.spec.mjs`.
+        //
+        // The case it stands for: X bids $5 at 10:00, Y elects $5 at 10:05, X
+        // elects $5 at 10:10 confirming money already on the wire. X wins on the
+        // earlier of its own two commitments.
         const result = resolve([
           claim(NOMINATOR, 0, '2026-09-01'),
           {

@@ -7,7 +7,8 @@ import {
   sendNotifications,
   verifyUserTeam,
   processRelease,
-  submitDeactivate
+  submitDeactivate,
+  assert_deactivate_allowed_during_auction
 } from '#libs-server'
 import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
@@ -144,6 +145,22 @@ router.post('/?', async (req, res) => {
 
       // remove from roster for space check
       roster.removePlayer(release_pid)
+    }
+
+    // ASKED BEFORE THE FIRST WRITE, and that placement is the whole point.
+    // `submitDeactivate` enforces the auction freeze itself, but the release
+    // below runs first and is not transactional, so a refusal from inside
+    // `submitDeactivate` leaves the released player gone and the demotion
+    // undone, with a 400 as the only signal. The client sends `release_pid`
+    // exactly when the practice squad is full, so that is the ordinary request
+    // rather than an edge case.
+    try {
+      await assert_deactivate_allowed_during_auction({
+        lid: leagueId,
+        slot: roster.get(deactivate_pid) && roster.get(deactivate_pid).slot
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
     }
 
     // process release first if specified

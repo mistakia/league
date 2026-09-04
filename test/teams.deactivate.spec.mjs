@@ -569,5 +569,71 @@ describe('API /teams - deactivate', function () {
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.PSD)
     })
+
+    // THE REFUSAL MUST COST NOTHING, and this is the case that says so.
+    //
+    // The route takes an optional `release_pid` and processes that release
+    // FIRST, to make practice squad room for the demotion. `process-release.mjs`
+    // runs on the module connection with no transaction, so a refusal raised
+    // from inside `submitDeactivate` arrives after the release has committed:
+    // the released player is gone, the demotion never happened, and the manager
+    // sees only a 400. The client sends `release_pid` exactly when the practice
+    // squad is full, which is the ordinary case for a team demoting a player, so
+    // this would have half-applied every such request for the length of the
+    // auction rather than in some rare corner.
+    //
+    // Asserting the STATUS alone cannot see this -- the response is a 400 either
+    // way. The assertion that matters is that the released player is still on
+    // the practice squad afterwards.
+    it('leaves the release unapplied when it refuses a combined release and demotion', async () => {
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'month').toISOString()
+      )
+
+      const demote_player = await draft_player_to_bench()
+      const release_player = await selectPlayer({
+        exclude_pids: [demote_player.pid],
+        exclude_rostered_players: true
+      })
+      await addPlayer({
+        teamId: 1,
+        leagueId: league_id,
+        userId: 1,
+        player: release_player,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
+        value: 1
+      })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          deactivate_pid: demote_player.pid,
+          release_pid: release_player.pid,
+          leagueId: league_id
+        })
+
+      await error(
+        request,
+        'active roster players can not be moved to the practice squad during the free agency auction'
+      )
+
+      const roster_rows = await knex('rosters_players').where({
+        season_year: current_season.year,
+        week: current_season.week,
+        pid: release_player.pid
+      })
+      expect(roster_rows).to.have.length(1)
+      expect(roster_rows[0].slot).to.equal(roster_slot_types.PS)
+
+      const release_transactions = await knex('transactions').where({
+        lid: league_id,
+        pid: release_player.pid,
+        type: transaction_types.ROSTER_RELEASE
+      })
+      expect(release_transactions).to.have.length(0)
+    })
   })
 })

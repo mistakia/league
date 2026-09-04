@@ -16,6 +16,53 @@ import sendNotifications from './send-notifications.mjs'
 import { is_auction_in_progress } from './auction-completion.mjs'
 import db from '#db'
 
+/**
+ * Refuse an active-roster demotion while the free agency auction is running.
+ *
+ * Rosters are fixed for the auction, and this is the SECOND of the two slot
+ * changes that can break that -- `submit-reserve.mjs` is the first and refuses
+ * for the same reason. Moving an active-roster player to the practice squad
+ * leaves the `rosters_players` row count identical while `availableSpace` and
+ * `availableCap` both RISE, because `Roster` derives both from the ACTIVE slots
+ * alone, so a team that had dropped out of an open player's eligible set
+ * re-enters it.
+ *
+ * REFUSED RATHER THAN HOOKED INTO `reevaluate_auction_after_roster_change`.
+ * That call settles a nomination whose eligible set is now complete, which is
+ * the right answer for a change that only ever REMOVES capacity; this one adds
+ * it, so re-evaluating would faithfully record a set that should never have
+ * grown. Monotonicity is the assumption second-price settlement rests on, and
+ * the freeze is what makes `is_auction_complete` monotone in the first place.
+ *
+ * EXPORTED BECAUSE THE ROUTE HAS TO ASK BEFORE IT WRITES. `POST /teams/:tid/deactivate`
+ * takes an optional `release_pid` and processes that release FIRST, to make
+ * practice squad room for the demotion -- and `process-release.mjs` runs on the
+ * module connection with no transaction, so it is committed by the time this
+ * throws from inside `submitDeactivate`. That half-applied the request: the
+ * released player was gone and the demotion never happened, with a 400 as the
+ * only signal. The client sends `release_pid` exactly when the practice squad is
+ * full, which is the ordinary case, so every such request would have half-applied
+ * for the length of the auction.
+ *
+ * Checking it here as well as at the call site is deliberate duplication of a
+ * READ, not of the rule: the rule lives in this function, and the route calls it
+ * before its first write.
+ *
+ * The source slot has to be checked, not just the auction: a practice squad
+ * activation moves no active roster row and cannot change either quantity.
+ */
+export const assert_deactivate_allowed_during_auction = async ({
+  lid,
+  slot
+}) => {
+  if (!active_roster_slots.includes(slot)) return
+  if (!(await is_auction_in_progress({ lid }))) return
+
+  throw new Error(
+    'active roster players can not be moved to the practice squad during the free agency auction'
+  )
+}
+
 export default async function ({
   tid,
   deactivate_pid,
@@ -56,34 +103,10 @@ export default async function ({
     throw new Error('reserve players can not be placed on the practice squad')
   }
 
-  // Rosters are fixed for the free agency auction, and this is the SECOND of the
-  // two slot changes that can break that -- `submit-reserve.mjs` is the first
-  // and refuses for the same reason. Moving an active-roster player to the
-  // practice squad leaves the `rosters_players` row count identical while
-  // `availableSpace` and `availableCap` both RISE, because `Roster` derives both
-  // from the ACTIVE slots alone. A team that had dropped out of an open player's
-  // eligible set can therefore re-enter it, and the settlement's cap
-  // monotonicity guard is the only thing downstream that can see it -- only for
-  // the winner, and only inside the settling transaction.
-  //
-  // REFUSED RATHER THAN HOOKED INTO `reevaluate_auction_after_roster_change`.
-  // That call settles a nomination whose eligible set is now complete, which is
-  // the right answer for a change that only ever REMOVES capacity; this one adds
-  // it, so re-evaluating would faithfully record a set that should never have
-  // grown. Monotonicity is the assumption second-price settlement rests on, and
-  // the freeze is what makes `is_auction_complete` monotone in the first place.
-  //
-  // The source slot has to be checked, not just the auction: a player already on
-  // reserve is caught above, and this path is otherwise reachable only from an
-  // active slot, but the guard states the condition it actually depends on.
-  if (
-    active_roster_slots.includes(roster.get(deactivate_pid).slot) &&
-    (await is_auction_in_progress({ lid: leagueId }))
-  ) {
-    throw new Error(
-      'active roster players can not be moved to the practice squad during the free agency auction'
-    )
-  }
+  await assert_deactivate_allowed_during_auction({
+    lid: leagueId,
+    slot: roster.get(deactivate_pid).slot
+  })
 
   const player_rows = await db('player').where('pid', deactivate_pid).limit(1)
   const player_row = player_rows[0]

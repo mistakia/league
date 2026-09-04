@@ -86,10 +86,15 @@ describe('auction claim commitments', function () {
     // Both instants survive. The builder does not choose between them, because
     // which one applies depends on the clamped amount and the caps are not
     // here.
-    expect(bidder.commitments).to.eql([
-      { amount: 5, at: at('2026-09-02T10:10:00Z') },
-      { amount: 5, at: at('2026-09-02T10:00:00Z') }
+    //
+    // Compared as a SET. `earliest_commitment_at` scans the whole array, so
+    // nothing downstream reads the order and asserting it would redden this on a
+    // reordering that changes no behavior.
+    expect(bidder.commitments).to.have.deep.members([
+      { amount: 5, at: at('2026-09-02T10:00:00Z') },
+      { amount: 5, at: at('2026-09-02T10:10:00Z') }
     ])
+    expect(bidder.commitments).to.have.length(2)
     expect(bidder.maximum_bid).to.equal(5)
   })
 
@@ -172,10 +177,11 @@ describe('auction claim commitments', function () {
 
     const bidder = claims.find((claim) => claim.tid === 2)
     expect(bidder.maximum_bid).to.equal(20)
-    expect(bidder.commitments).to.eql([
+    expect(bidder.commitments).to.have.deep.members([
       { amount: 12, at: at('2026-09-02T10:00:00Z') },
       { amount: 20, at: at('2026-09-02T11:00:00Z') }
     ])
+    expect(bidder.commitments).to.have.length(2)
   })
 
   it('gives a decline no commitment', function () {

@@ -476,6 +476,39 @@ describe('auction settlement against postgres', function () {
         maximum_bid: 5
       })
 
+      // THE INSTANTS ARE ASSERTED, not just their consequence. Without this the
+      // pair proves only that a bid inserted earlier beats an election inserted
+      // later, which stays true if `amount_set_at` were stamped from the
+      // DATABASE clock instead of the mocked one -- the bid sits a month in the
+      // simulated past, so it precedes any real-clock election no matter what.
+      // These three readings are what tie the ordering to the clock the test
+      // moves.
+      const [bid_row] = await knex('transactions').where({
+        lid: league_id,
+        pid,
+        tid: 2,
+        type: transaction_types.AUCTION_BID
+      })
+      const elections = await knex('auction_elections').where({
+        lid: league_id,
+        season_year,
+        pid
+      })
+      const election_at = (tid) =>
+        new Date(
+          elections.find((row) => row.tid === tid).amount_set_at
+        ).toISOString()
+
+      expect(new Date(bid_row.occurred_at).toISOString()).to.equal(
+        base().hour(10).minute(0).second(0).millisecond(0).toISOString()
+      )
+      expect(election_at(3)).to.equal(
+        base().hour(10).minute(5).second(0).millisecond(0).toISOString()
+      )
+      expect(election_at(2)).to.equal(
+        base().hour(10).minute(10).second(0).millisecond(0).toISOString()
+      )
+
       const settlement = await decline_remaining({ pid, except: [1, 2, 3] })
 
       expect(settlement).to.not.equal(null)
