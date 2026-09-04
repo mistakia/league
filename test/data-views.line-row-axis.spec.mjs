@@ -244,19 +244,45 @@ describe('data views line row axis', function () {
       expect(is_ladder_market_type(undefined)).to.equal(false)
     })
 
-    // The predicate reads the constant groups, not the substring ALT. The two
-    // agree today across the whole Market control, and that agreement is the
-    // reason the string match was never worth writing -- pinned so a future
-    // ladder that is not named ALT fails here rather than silently collapsing.
-    it('agrees with the constant groups across every offered market', () => {
+    // Ladder membership is MEASURED from posted line counts, not matched on the
+    // substring ALT. The two coincided until 2026-09-04, when four player types
+    // were measured posting ladders under no ALT name; this assertion used to
+    // compare the predicate against a substring match and was pinned so exactly
+    // that case would fail here rather than silently collapsing rows.
+    //
+    // It still stops here. What it now pins is the explicit membership, so
+    // adding or dropping a ladder type remains a deliberate act with a
+    // measurement behind it. Do not relax it to a size check -- a size check
+    // passes on a set that swapped members.
+    it('holds the measured ladder membership across every offered market', () => {
       const offered = Object.values(bookmaker_constants.player_game_prop_types)
-      const by_predicate = offered.filter(is_ladder_market_type)
-      const by_substring = offered.filter((market_type) =>
-        market_type.includes('ALT')
-      )
-      expect(by_predicate).to.eql(by_substring)
-      expect(by_predicate.length).to.be.greaterThan(0)
-      expect(by_predicate.length).to.be.lessThan(offered.length)
+      const measured_non_alt_ladders = [
+        'GAME_FIRST_QUARTER_RECEPTIONS',
+        'GAME_PASSING_RUSHING_YARDS',
+        'GAME_FIRST_QUARTER_RUSHING_ATTEMPTS',
+        'GAME_FIRST_QUARTER_PASSING_ATTEMPTS'
+      ]
+      const expected = offered
+        .filter(
+          (market_type) =>
+            market_type.includes('ALT') ||
+            measured_non_alt_ladders.includes(market_type)
+        )
+        .sort()
+
+      expect(offered.filter(is_ladder_market_type).sort()).to.eql(expected)
+      expect(expected.length).to.be.greaterThan(0)
+      expect(expected.length).to.be.lessThan(offered.length)
+
+      // Every ladder type is reachable by the player-scoped line axis. A game,
+      // team or season type admitted here -- GAME_ALT_TEAM_TOTAL was the
+      // near-miss, an ALT-named market posting a median of one line -- would
+      // offer an axis the server contributes no rungs to.
+      expect(
+        [...bookmaker_constants.ladder_market_types].filter(
+          (market_type) => !offered.includes(market_type)
+        )
+      ).to.eql([])
     })
 
     // The shape the UI actually produces: market_type is a SELECT carrying a

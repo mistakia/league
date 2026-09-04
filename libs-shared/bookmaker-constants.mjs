@@ -342,16 +342,27 @@ export const player_first_half_alt_prop_types = {
 // disagreeing is invisible until a user hits it. Defined once here, in the
 // isomorphic layer both can import.
 //
-// Derived from the constant groups rather than from a `market_type like
-// 'GAME_ALT_%'` string match. The groups are the existing answer to this exact
-// question, they cover the whole Market dropdown, and they do not silently miss
-// a future ladder that is not named ALT.
-export const ladder_market_types = new Set([
-  ...Object.values(player_quarter_alt_prop_types),
-  ...Object.values(player_game_alt_prop_types),
-  ...Object.values(player_first_half_alt_prop_types)
-])
-
+// Membership is MEASURED from posted line counts, not matched on a name. The
+// three ALT groups are the bulk of it, and four further player types post
+// ladders while carrying no ALT token -- measured 2026-09-04 over production,
+// joining on (source_id, source_market_id, time_type) and counting distinct
+// non-null selection_metric_line per market:
+//
+//   GAME_FIRST_QUARTER_RECEPTIONS         DraftKings  4,436 markets  median 3  55.2% at 3+
+//   GAME_PASSING_RUSHING_YARDS            DraftKings  3,144 markets  median 4  58.0% at 3+
+//   GAME_FIRST_QUARTER_RUSHING_ATTEMPTS   DraftKings  1,348 markets  median 3  61.2% at 3+
+//   GAME_FIRST_QUARTER_PASSING_ATTEMPTS   DraftKings    998 markets  median 3  81.2% at 3+
+//
+// All four carry a player pid on essentially every row, which is what the
+// player-scoped line row axis needs to reach them.
+//
+// Do NOT replace this with a `market_type like 'GAME_ALT_%'` match. It was
+// proposed, measured and refuted: it would add 20 game, team and season types
+// the player-scoped axis cannot reach, add GAME_ALT_TEAM_TOTAL which posts a
+// median of 1 line and is not a ladder, and miss all four types above.
+//
+// Declared below player_game_prop_types because GAME_PASSING_RUSHING_YARDS is a
+// member of it.
 export const player_game_prop_types = {
   GAME_PASSING_YARDS: 'GAME_PASSING_YARDS',
   GAME_RECEIVING_YARDS: 'GAME_RECEIVING_YARDS',
@@ -400,6 +411,16 @@ export const player_game_prop_types = {
   ...player_fourth_quarter_prop_types,
   ...player_first_half_alt_prop_types
 }
+
+export const ladder_market_types = new Set([
+  ...Object.values(player_quarter_alt_prop_types),
+  ...Object.values(player_game_alt_prop_types),
+  ...Object.values(player_first_half_alt_prop_types),
+  player_first_quarter_prop_types.GAME_FIRST_QUARTER_RECEPTIONS,
+  player_first_quarter_prop_types.GAME_FIRST_QUARTER_RUSHING_ATTEMPTS,
+  player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_ATTEMPTS,
+  player_game_prop_types.GAME_PASSING_RUSHING_YARDS
+])
 
 export const awards_prop_types = {
   SEASON_MVP: 'SEASON_MVP',
