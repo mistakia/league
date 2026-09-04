@@ -4,11 +4,11 @@
 // that at 0,2,0 and win or lose on chunk order alone.
 .league__gloss
   font-family 'Inter', sans-serif
-  font-size 13px
+  font-size 12px
   line-height 1.5
-  color rgba(0, 0, 0, 0.6)
+  color rgba(0, 0, 0, 0.55)
   padding 0 16px 12px
-  max-width 640px
+  max-width 560px
 
 .league__home
   display flex
@@ -26,15 +26,54 @@
     display none
 
   // The shared .section shrink-wraps its content on the standings page; here it
-  // holds full-width charts and tables, so it spans the grid cell instead
+  // holds full-width charts and tables, so it spans the grid cell instead.
+  //
+  // It also drops the white card. Two cards of different internal rhythm on a
+  // grey ground read as two unrelated widgets; on the one ground, separated by
+  // a rule under the heading, they read as two columns of one page. Structure
+  // by rule rather than by box, per STYLE.md.
   .section
     max-width none
     width 100%
+    background transparent
+    border-radius 0
 
-  // Sits directly under the identity card it belongs to, so it keeps the card's
-  // right edge and none of the vertical gap a grid row would give it
-  .copy-markdown-button-row
-    padding 8px 0 0
+    .heading__section-title
+      padding 0 0 8px
+      border-bottom 1px solid $textColor
+
+    // The card is gone, so the gloss takes its inset from the heading's left
+    // edge rather than from a padded box. Safe beside the header's own rule at
+    // the same specificity: a gloss is inside a .section or inside
+    // .league__header, never both.
+    .league__gloss
+      padding 10px 0 14px
+
+  // The table sits on the ground too, so its rows lose the paper fill and keep
+  // only the rules. The sticky lead cell is the exception: it takes the GROUND
+  // rather than transparent, because it has to keep occluding the cells that
+  // scroll under it when the table overflows.
+  .table__row
+    background transparent
+
+    .table__cell
+      background transparent
+
+    .table__cell.sticky__column
+      background $backgroundColor
+
+  .table__head
+    height auto
+    border-bottom 1px solid $borderColor
+
+    .table__cell
+      padding 8px 0
+
+  // $borderColorLight is lighten($borderColor, 90) — four steps off the ground
+  // and invisible on it. Row rules take $borderColor for the same reason
+  // STYLE.md records for $prose_rule.
+  .table__row:not(.table__head)
+    border-bottom 1px solid $borderColor
 
   // The sidebar accordion gives the schedule a whole drawer to itself; here it
   // shares a row with the odds table and has to end near the same baseline, so
@@ -59,6 +98,11 @@
       width auto
       min-width 0
 
+  // Inside a section it keeps the section's left edge; in the footer row the
+  // flex gap does the spacing, so the inset is vertical only either way
+  .section .league__home-link
+    padding 12px 0
+
   .league__home-link
     display inline-block
     padding 12px 16px
@@ -70,7 +114,18 @@
     &:hover
       color $textColorDark
 
-  .league__home-cta
+    // The waitlist is the one thing this page asks a stranger to do, so it is
+    // the only link here that carries weight
+    &.-lead
+      font-weight 600
+
+  // Every off-page next step in one row: the waitlist, the pitch page, and the
+  // markdown url, which used to float on its own line under the header
+  .league__home-footer
     display flex
+    flex-wrap wrap
+    align-items center
     justify-content center
-    padding 16px 0
+    gap 8px 24px
+    padding 24px 0 0
+    border-top 1px solid $borderColor

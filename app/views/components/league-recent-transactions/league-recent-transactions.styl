@@ -27,12 +27,11 @@
   gap 16px
   width 100%
 
+// Two halves of one block, separated from the page by the rule under each
+// label rather than by a bordered box — the page structures by rule.
 .transactions__section
   display flex
   flex-direction column
-  border 1px solid $borderColor
-  border-radius 8px
-  padding 16px
   height fit-content
 
 .transactions__section-title
@@ -41,4 +40,5 @@
   text-transform uppercase
   font-size 12px
   font-weight 800
-  padding 16px 0
+  padding 0 0 8px
+  border-bottom 1px solid $textColor

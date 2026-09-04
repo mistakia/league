@@ -78,8 +78,12 @@ export default function DashboardLeaguePositionalValue({
         type: 'bar',
         backgroundColor: 'transparent'
       },
+      // The page names the section above the chart, and the value axis names
+      // the unit below it. A third copy in the middle said nothing new. Its
+      // sibling chart, league-teams-value-over-time, is null here for the
+      // same reason.
       title: {
-        text: 'Projected Points+'
+        text: null
       },
       xAxis: {
         categories: team_names,

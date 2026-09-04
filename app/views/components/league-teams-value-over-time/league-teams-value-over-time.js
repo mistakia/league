@@ -99,7 +99,10 @@ export default function LeagueTeamsValueOverTime({
 
   const options = {
     chart: {
-      type: 'line'
+      type: 'line',
+      // The page is one ground; a white plot panel made the chart the only
+      // card on it. Matches dashboard-league-positional-value.
+      backgroundColor: 'transparent'
     },
 
     title: {

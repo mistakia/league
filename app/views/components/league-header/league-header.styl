@@ -1,7 +1,8 @@
+// No card and no inset. The page names its sections against one left edge, and
+// the league's own name is the headline that edge is set by — a padded white
+// panel put the h1 32px inside every label beneath it.
 .league__header
-  background white
-  padding 8px 32px
-  border-radius 16px
+  padding 8px 0
   font-family 'IBM Plex Mono', monospace
   h1
     font-weight 100
@@ -10,13 +11,13 @@
   .MuiChip-label
     font-family 'IBM Plex Mono', monospace
 
-  // The card already carries the horizontal padding the heading and its gloss
-  // add, and a gloss inset past its own heading reads as a different block
+  // Matches the rule the page's other section headings carry
   .heading__section-title
-    padding 16px 0 0
+    padding 16px 0 8px
+    border-bottom 1px solid $textColor
 
   .league__gloss
-    padding 4px 0 12px
+    padding 10px 0 14px
 
 .league__chips
   align-items center
@@ -24,7 +25,7 @@
   padding-bottom 24px
 
   .MuiChip-root
-    margin 8px 0 0 8px
+    margin 8px 8px 0 0
     border-radius 3px
     &.starters
       color white

@@ -398,11 +398,6 @@ export default function LeagueHomePage({
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <LeagueHeader />
-          {league.league_id && (
-            <div className='copy-markdown-button-row'>
-              <CopyMarkdownButton path={`/leagues/${league.league_id}.md`} />
-            </div>
-          )}
         </Grid>
         {manager_action_items.length > 0 && (
           <Grid item xs={12}>
@@ -454,32 +449,40 @@ export default function LeagueHomePage({
           </Grid>
         )}
         <Grid item xs={12} className='league-positional-value'>
-          <div className='heading__section-title'>Projected Points+</div>
-          <div className='league__gloss'>
-            Each bar totals the points a roster is projected to add above a
-            replacement-level starter, split by position, with draft picks
-            valued alongside.
+          <div className='section'>
+            <div className='heading__section-title'>Projected Points+</div>
+            <div className='league__gloss'>
+              Each bar totals the points a roster is projected to add above a
+              replacement-level starter, split by position, with draft picks
+              valued alongside.
+            </div>
+            <DashboardLeaguePositionalValue />
           </div>
-          <DashboardLeaguePositionalValue />
         </Grid>
+        {/* No heading here: the block labels its own two halves Signings and
+            Releases, and a third label above them named nothing new */}
         {has_recent_transactions && (
           <Grid item xs={12} className='league-recent-transactions'>
-            <div className='heading__section-title'>Recent Transactions</div>
-            <div className='league__gloss'>
-              The league&apos;s latest signings, releases, and claims.
-            </div>
             <LeagueRecentTransactions />
           </Grid>
         )}
-        {!is_logged_in && (
-          <Grid item xs={12}>
-            <div className='league__home-cta'>
-              <NavLink className='league__home-link' to='/genesis-league'>
-                What is the Genesis League?
-              </NavLink>
-            </div>
-          </Grid>
-        )}
+        <Grid item xs={12}>
+          <div className='league__home-footer'>
+            {!is_logged_in && (
+              <>
+                <NavLink className='league__home-link -lead' to='/waitlist'>
+                  Join the waitlist
+                </NavLink>
+                <NavLink className='league__home-link' to='/genesis-league'>
+                  What is the Genesis League?
+                </NavLink>
+              </>
+            )}
+            {league.league_id && (
+              <CopyMarkdownButton path={`/leagues/${league.league_id}.md`} />
+            )}
+          </div>
+        </Grid>
       </Grid>
     </div>
   )
