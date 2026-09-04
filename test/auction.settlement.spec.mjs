@@ -404,6 +404,123 @@ describe('auction settlement against postgres', function () {
     })
   })
 
+  // THE PURE SPECS CANNOT REACH THIS. `auction.claim-commitments.spec.mjs`
+  // drives the builder with hand-written ISO strings; here the instants arrive
+  // as whatever the driver hands back for a `timestamptz` column, and the two
+  // commitments being compared come from DIFFERENT tables --
+  // `transactions.occurred_at` and `auction_elections.amount_set_at`. A
+  // commitment shape that worked on strings and silently failed to order two
+  // Dates would pass every pure case and lose a real player.
+  //
+  // The clock is MOVED between the three writes rather than left frozen. Under a
+  // fixed MockDate all three instants are the same value, every ordering is a
+  // tie, and the assertion below passes on whichever team the sort happens to
+  // emit first -- which looks exactly like the rule working.
+  describe('the tiebreak instant against real rows', function () {
+    const decline_remaining = async ({ pid, except }) => {
+      const team_ids = await all_team_ids()
+      let settlement = null
+      for (const tid of team_ids) {
+        if (except.includes(tid)) continue
+        const result = await submit_auction_election({
+          lid: league_id,
+          tid,
+          pid,
+          user_id: 1,
+          maximum_bid: null
+        })
+        if (result.settlement) settlement = result.settlement
+      }
+      return settlement
+    }
+
+    const base = () =>
+      current_season.regular_season_start.subtract('1', 'month')
+
+    it('awards a tie to the team that bid before its rival elected', async function () {
+      // Team 2 bids $5 at 10:00. Team 3 elects $5 at 10:05. Team 2 elects $5 at
+      // 10:10, confirming money it already had on the wire -- and wins, because
+      // its earliest commitment AT $5 is the bid.
+      MockDate.set(base().hour(9).minute(0).second(0).toISOString())
+      const pid = await free_agent()
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
+
+      MockDate.set(base().hour(10).minute(0).second(0).toISOString())
+      await knex('transactions').insert({
+        user_id: 1,
+        tid: 2,
+        pid,
+        lid: league_id,
+        type: transaction_types.AUCTION_BID,
+        player_salary: 5,
+        week: 0,
+        season_year,
+        occurred_at: new Date()
+      })
+
+      MockDate.set(base().hour(10).minute(5).second(0).toISOString())
+      await submit_auction_election({
+        lid: league_id,
+        tid: 3,
+        pid,
+        user_id: 1,
+        maximum_bid: 5
+      })
+
+      MockDate.set(base().hour(10).minute(10).second(0).toISOString())
+      await submit_auction_election({
+        lid: league_id,
+        tid: 2,
+        pid,
+        user_id: 1,
+        maximum_bid: 5
+      })
+
+      const settlement = await decline_remaining({ pid, except: [1, 2, 3] })
+
+      expect(settlement).to.not.equal(null)
+      expect(settlement.winner_tid).to.equal(2)
+      expect(settlement.price).to.equal(5)
+
+      MockDate.set(base().toISOString())
+    })
+
+    it('awards the same tie to the earlier ELECTION when no bid stands behind it', async function () {
+      // The control, and the only thing that makes the case above evidence:
+      // identical shape, identical election instants, team 2's bid removed. Team
+      // 3 elected first, so team 3 wins. Without this pair, "team 2 wins" is
+      // consistent with a resolver that simply favours the lower team id.
+      MockDate.set(base().hour(9).minute(0).second(0).toISOString())
+      const pid = await free_agent()
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
+
+      MockDate.set(base().hour(10).minute(5).second(0).toISOString())
+      await submit_auction_election({
+        lid: league_id,
+        tid: 3,
+        pid,
+        user_id: 1,
+        maximum_bid: 5
+      })
+
+      MockDate.set(base().hour(10).minute(10).second(0).toISOString())
+      await submit_auction_election({
+        lid: league_id,
+        tid: 2,
+        pid,
+        user_id: 1,
+        maximum_bid: 5
+      })
+
+      const settlement = await decline_remaining({ pid, except: [1, 2, 3] })
+
+      expect(settlement).to.not.equal(null)
+      expect(settlement.winner_tid).to.equal(3)
+
+      MockDate.set(base().toISOString())
+    })
+  })
+
   describe('a placed bid is binding', function () {
     it('leaves a team leading at the amount it bid after its ceiling is withdrawn', async function () {
       const pid = await free_agent()

@@ -1,4 +1,4 @@
-/* global describe before beforeEach it */
+/* global describe before beforeEach afterEach it */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
@@ -521,6 +521,104 @@ describe('API /teams - activate', function () {
         })
 
       await error(request, 'player has exceeded 48 hours on active roster')
+    })
+  })
+
+  // The activate route reaches `submit_deactivate` through its own branch, so
+  // the auction freeze has to hold HERE too and this is the route that makes it
+  // matter. The swap looks space-neutral -- one active player out, one in -- but
+  // `availableCap` moves by the difference of the two salaries, and it moves UP
+  // whenever the demoted player is the more expensive one. That is the same
+  // monotonicity break the direct deactivate route can cause, arriving through a
+  // request that reads like a lineup adjustment.
+  describe('free agency auction freeze', function () {
+    const league_id = 1
+    const season_year = current_season.year
+
+    const put_league_in_auction_window = async () => {
+      await knex('seasons')
+        .where({ lid: league_id, season_year })
+        .update({
+          free_agency_period_start: regular_season_start
+            .clone()
+            .subtract('2', 'months')
+            .toDate(),
+          free_agency_period_end: regular_season_start.clone().toDate()
+        })
+    }
+
+    const stage_swap = async () => {
+      const activate_player = await selectPlayer({
+        exclude_rostered_players: true
+      })
+      const deactivate_player = await selectPlayer({
+        exclude_pids: [activate_player.pid],
+        exclude_rostered_players: true
+      })
+
+      await addPlayer({
+        teamId: 1,
+        leagueId: league_id,
+        userId: 1,
+        player: activate_player,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
+        value: 2
+      })
+      // The expensive one is the one leaving the active roster, so the swap
+      // RAISES the team's available cap rather than leaving it flat.
+      await addPlayer({
+        teamId: 1,
+        leagueId: league_id,
+        userId: 1,
+        player: deactivate_player,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.ROSTER_ADD,
+        value: 9
+      })
+
+      return chai_request
+        .execute(server)
+        .post('/api/teams/1/activate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          activate_pid: activate_player.pid,
+          deactivate_pid: deactivate_player.pid,
+          leagueId: league_id
+        })
+    }
+
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+      await put_league_in_auction_window()
+    })
+
+    afterEach(function () {
+      MockDate.reset()
+    })
+
+    it('refuses the activate-with-deactivate swap during the auction', async () => {
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'month').toISOString()
+      )
+
+      await error(
+        await stage_swap(),
+        'active roster players can not be moved to the practice squad during the free agency auction'
+      )
+    })
+
+    it('allows the same swap once the auction period is over', async () => {
+      // The control. Without it the refusal above is consistent with the swap
+      // being broken for any of a dozen other reasons.
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+
+      const res = await stage_swap()
+
+      res.should.have.status(200)
+      res.body.slot.should.equal(roster_slot_types.BENCH)
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
     })
   })
 })
