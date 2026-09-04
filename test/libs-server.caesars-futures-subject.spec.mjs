@@ -2,7 +2,10 @@
 
 import * as chai from 'chai'
 
-import { get_caesars_futures_subject } from '#libs-server/caesars/caesars-futures-subject.mjs'
+import {
+  get_caesars_futures_subject,
+  get_caesars_futures_subject_positions
+} from '#libs-server/caesars/caesars-futures-subject.mjs'
 
 const expect = chai.expect
 
@@ -20,7 +23,7 @@ describe('libs-server caesars futures subject', function () {
           name: '|Cam Ward| |Total Regular Season Passing Yards|',
           metadata: {}
         })
-      ).to.deep.equal({ player_name: 'Cam Ward' })
+      ).to.deep.equal({ player_name: 'Cam Ward', positions: ['QB'] })
     })
 
     // The placeholder decides the grain, not the metadata. Eight player markets
@@ -33,7 +36,75 @@ describe('libs-server caesars futures subject', function () {
           name: '|Abdul Carter| |Total Regular Season Sacks|',
           metadata: { teamAbbr: 'NYG' }
         })
-      ).to.deep.equal({ player_name: 'Abdul Carter' })
+      ).to.deep.equal({
+        player_name: 'Abdul Carter',
+        positions: ['DL', 'DE', 'DT', 'NT', 'LB', 'ILB', 'OLB', 'MLB', 'EDGE']
+      })
+    })
+  })
+
+  // THE DISAMBIGUATOR, AND THE ONLY THING IT MAY DO.
+  //
+  // Three Josh Allens (QB BUF, DL JAX, retired OL) and two active Justin
+  // Jeffersons (WR MIN, LB CLE) cost 9 futures markets their selection_pid on
+  // every run, because _select_best_match refuses on multiple matches. The
+  // importer applies these positions as a SECOND pass, so the set can only turn
+  // a null into a pid.
+  describe('the statistic-to-position map', function () {
+    it('reads a quarterback statistic as quarterback-only', function () {
+      expect(
+        get_caesars_futures_subject_positions(
+          'Total Regular Season Passing Yards'
+        )
+      ).to.deep.equal(['QB'])
+      expect(
+        get_caesars_futures_subject_positions(
+          'Total Regular Season Touchdown Passes'
+        )
+      ).to.deep.equal(['QB'])
+    })
+
+    // The pair that decides the six Josh Allen markets. A rushing total belongs
+    // to a quarterback as readily as to a back, so the set must include QB --
+    // and the combined form must resolve QB-only rather than widening, which is
+    // what the first-match ordering buys.
+    it('includes quarterbacks in a rushing set and keeps the combined form narrow', function () {
+      expect(
+        get_caesars_futures_subject_positions(
+          'Total Regular Season Rushing Yards'
+        )
+      ).to.include('QB')
+      expect(
+        get_caesars_futures_subject_positions(
+          'Total Regular Season Passing + Rushing Yards'
+        )
+      ).to.deep.equal(['QB'])
+    })
+
+    // The three Justin Jefferson markets. WR MIN and LB CLE are separated by
+    // the receiving set holding neither LB nor any of its spellings.
+    it('reads a receiving statistic as skill positions only', function () {
+      const positions = get_caesars_futures_subject_positions(
+        'Total Regular Season Receiving Yards'
+      )
+      expect(positions).to.include('WR')
+      expect(positions).to.not.include('LB')
+      expect(
+        get_caesars_futures_subject_positions('Total Regular Season Receptions')
+      ).to.include('WR')
+    })
+
+    // An unmapped statistic must yield an EMPTY set, not a guess. The importer
+    // skips the second pass entirely on empty, so the market keeps the safe
+    // null it already had.
+    it('returns an empty set for a statistic it does not know', function () {
+      expect(
+        get_caesars_futures_subject_positions(
+          'Total Regular Season Field Goals'
+        )
+      ).to.deep.equal([])
+      expect(get_caesars_futures_subject_positions('')).to.deep.equal([])
+      expect(get_caesars_futures_subject_positions(undefined)).to.deep.equal([])
     })
   })
 

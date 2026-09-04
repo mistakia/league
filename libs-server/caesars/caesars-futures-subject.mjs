@@ -50,6 +50,58 @@ const strip_pipes = (value) => value.replaceAll('|', '').trim()
 // in the other 44 cases is far worse than declining in one.
 const SUBJECT_PLACEHOLDER_SEGMENTS = new Set(['Player', 'Team'])
 
+// WHICH POSITIONS CAN POST THIS STATISTIC -- A DISAMBIGUATOR, NOT A CLASSIFIER.
+//
+// The player table holds three Josh Allens (QB BUF, DL JAX, and a retired OL)
+// and two active Justin Jeffersons (WR MIN, LB CLE). `_select_best_match`
+// returns null on multiple matches by design rather than guessing, so those two
+// names cost 9 futures markets their `selection_pid` on every run.
+//
+// A position set breaks the tie without introducing a guess, because the caller
+// applies it as a SECOND pass and `_select_best_match` still refuses on more
+// than one survivor. So the failure modes are bounded in both directions: a set
+// that is too narrow leaves the null it was called to resolve, and a set that is
+// too wide leaves the ambiguity that produced the null. Neither can invent a
+// pid.
+//
+// Sets are deliberately generous, and the positions are spelled the way
+// `player.primary_position` spells them -- DL, DE, DT and NT all occur, as do
+// LB, ILB, OLB, MLB and EDGE. Rushing includes QB because a quarterback's
+// rushing total is exactly the Josh Allen market this exists for.
+const SUBJECT_POSITIONS_BY_STATISTIC = [
+  [/Passing|Touchdown Passes|Interceptions Thrown/i, ['QB']],
+  [/Rushing/i, ['QB', 'RB', 'FB', 'WR', 'TE']],
+  [/Receiving|Receptions/i, ['WR', 'TE', 'RB', 'FB']],
+  [
+    /Sacks|Tackles/i,
+    ['DL', 'DE', 'DT', 'NT', 'LB', 'ILB', 'OLB', 'MLB', 'EDGE']
+  ]
+]
+
+/**
+ * Positions that could plausibly post the statistic a futures template names.
+ *
+ * Returns an empty array when the statistic matches nothing, which the caller
+ * treats as "no disambiguation available" rather than as "no player qualifies".
+ *
+ * Order matters and the FIRST match wins: 'Passing + Rushing Yards' is a
+ * quarterback market, and a rushing-first reading would widen it to four more
+ * positions for no gain.
+ */
+export const get_caesars_futures_subject_positions = (statistic_segment) => {
+  if (!statistic_segment) {
+    return []
+  }
+
+  for (const [pattern, positions] of SUBJECT_POSITIONS_BY_STATISTIC) {
+    if (pattern.test(statistic_segment)) {
+      return positions
+    }
+  }
+
+  return []
+}
+
 /**
  * Identify who or what a Caesars futures market is about.
  *
@@ -128,5 +180,16 @@ export const get_caesars_futures_subject = ({
     return team_source ? { nfl_team: fixTeam(team_source) } : null
   }
 
-  return subject ? { player_name: subject } : null
+  if (!subject) {
+    return null
+  }
+
+  // The statistic segment is the LAST one, and the alignment assertion above has
+  // already proved it is the same in `name` and in `templateName`.
+  return {
+    player_name: subject,
+    positions: get_caesars_futures_subject_positions(
+      strip_pipes(template_segments[template_segments.length - 1])
+    )
+  }
 }

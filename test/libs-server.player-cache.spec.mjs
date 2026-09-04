@@ -25,13 +25,19 @@ const ACTIVE_PID = 'TEST-PCAC-000002'
 const ERA_OLD_PID = 'TEST-PCAC-000003'
 const ERA_NEW_PID = 'TEST-PCAC-000004'
 const LONE_WRONG_ERA_PID = 'TEST-PCAC-000005'
+// The Josh Allen shape: one name, a quarterback and a defensive lineman both
+// active, and a retired lineman the recency filters already drop.
+const SAME_NAME_QB_PID = 'TEST-PCAC-000006'
+const SAME_NAME_DL_PID = 'TEST-PCAC-000007'
 
 const ALL_PIDS = [
   RETIRED_PID,
   ACTIVE_PID,
   ERA_OLD_PID,
   ERA_NEW_PID,
-  LONE_WRONG_ERA_PID
+  LONE_WRONG_ERA_PID,
+  SAME_NAME_QB_PID,
+  SAME_NAME_DL_PID
 ]
 
 const make_player = (overrides) => ({
@@ -89,6 +95,25 @@ describe('LIBS-SERVER player_cache.find_player', function () {
         first_name: 'Lonewrong',
         formatted_name: 'lonewrong fixture',
         nfl_draft_year: 2023
+      }),
+      // One name, two active players, different positions and different teams.
+      make_player({
+        pid: SAME_NAME_QB_PID,
+        first_name: 'Samename',
+        formatted_name: 'samename fixture',
+        primary_position: 'QB',
+        secondary_position: 'QB',
+        current_nfl_team: 'BUF',
+        nfl_draft_year: 2018
+      }),
+      make_player({
+        pid: SAME_NAME_DL_PID,
+        first_name: 'Samename',
+        formatted_name: 'samename fixture',
+        primary_position: 'DL',
+        secondary_position: 'DL',
+        current_nfl_team: 'JAX',
+        nfl_draft_year: 2019
       })
     ])
   })
@@ -181,6 +206,66 @@ describe('LIBS-SERVER player_cache.find_player', function () {
     player_cache
       .find_player({ name: 'lonewrong fixture', nfl_draft_year: 2011 })
       .pid.should.equal(LONE_WRONG_ERA_PID)
+  })
+
+  // THE POSITION FILTER, AS A PAIR OF READINGS THAT MUST DIFFER.
+  //
+  // Without it the two active same-name rows are indistinguishable and the
+  // lookup abstains -- which is what costs 9 Caesars futures markets their
+  // selection_pid on every run. The filter narrows a candidate set and can do
+  // nothing else: it never widens, and _select_best_match still refuses on more
+  // than one survivor.
+  describe('the position filter', function () {
+    it('abstains on two same-name players when no position is supplied', () => {
+      expect(player_cache.find_player({ name: 'samename fixture' })).to.equal(
+        null
+      )
+    })
+
+    it('resolves each of them once the caller names the position', () => {
+      player_cache
+        .find_player({ name: 'samename fixture', positions: ['QB'] })
+        .pid.should.equal(SAME_NAME_QB_PID)
+      player_cache
+        .find_player({ name: 'samename fixture', positions: ['DL'] })
+        .pid.should.equal(SAME_NAME_DL_PID)
+    })
+
+    // A generous set is the normal case -- a rushing statistic admits five
+    // positions -- and it still resolves, because only one candidate is in it.
+    it('resolves on a wide set that only one candidate falls inside', () => {
+      player_cache
+        .find_player({
+          name: 'samename fixture',
+          positions: ['QB', 'RB', 'FB', 'WR', 'TE']
+        })
+        .pid.should.equal(SAME_NAME_QB_PID)
+    })
+
+    // Both failure directions return the SAME null the caller already had, so a
+    // wrong set cannot manufacture a pid.
+    it('returns null when the set matches both candidates or neither', () => {
+      expect(
+        player_cache.find_player({
+          name: 'samename fixture',
+          positions: ['QB', 'DL']
+        })
+      ).to.equal(null)
+      expect(
+        player_cache.find_player({ name: 'samename fixture', positions: ['K'] })
+      ).to.equal(null)
+    })
+
+    // An empty set must filter NOTHING, which is what makes the parameter safe
+    // to add to shared machinery every importer matches through.
+    it('leaves an unambiguous lookup untouched, with and without an empty set', () => {
+      player_cache
+        .find_player({ name: 'active fixture' })
+        .pid.should.equal(ACTIVE_PID)
+      player_cache
+        .find_player({ name: 'active fixture', positions: [] })
+        .pid.should.equal(ACTIVE_PID)
+    })
   })
 
   it('builds the name+draft-year index only when asked to', async () => {

@@ -313,6 +313,45 @@ describe('libs-server caesars market types', function () {
       )
     })
 
+    // THE TWO SIDES OF AN INTERCEPTION SETTLE FROM OPPOSITE COLUMNS.
+    //
+    // The thrown-side single-game template sat as a no-map whose reason named a
+    // column mismatch the constant vocabulary had already resolved:
+    // SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS_THROWN existed and nothing
+    // used it. Asserting the two are DIFFERENT is the check that matters --
+    // mapping them together would grade quarterbacks against defenders.
+    it('keeps the caught and thrown single-game interception markets distinct', function () {
+      const caught = get_market_type({
+        template_name:
+          '|Most Interceptions By Defensive Player In Single Game| |Regular Season - Individual Player|'
+      })
+      const thrown = get_market_type({
+        template_name:
+          '|Most Interceptions Thrown In a Single Game| |Regular Season - Individual Player|'
+      })
+
+      expect(caught).to.equal('SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS')
+      expect(thrown).to.equal(
+        'SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS_THROWN'
+      )
+      expect(thrown).to.not.equal(caught)
+    })
+
+    // The SEASON-grain thrown market has no constant and stays a no-map. Its
+    // reason must not claim the twin above rescues it -- that claim was there
+    // and was false.
+    it('leaves the season-grain thrown markets untyped with a reason', function () {
+      for (const template_name of [
+        '|Most Regular Season Interceptions Thrown|',
+        '|Most Interceptions Thrown| |Regular Season - Individual Player|'
+      ]) {
+        expect(get_market_type({ template_name })).to.equal(null)
+        expect(caesars_market_type_by_template[template_name].reason).to.be.a(
+          'string'
+        )
+      }
+    })
+
     it('does not resolve a template name off Object.prototype', function () {
       expect(get_market_type({ template_name: 'constructor' })).to.equal(null)
       expect(get_market_type({ template_name: 'toString' })).to.equal(null)

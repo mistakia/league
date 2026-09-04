@@ -488,7 +488,7 @@ export const caesars_market_type_by_template = {
   '|Most Regular Season Interceptions Thrown|': {
     market_type: null,
     reason:
-      'SEASON_LEADER_INTERCEPTIONS is the DEFENSIVE leader -- interceptions caught. This market is interceptions THROWN, the quarterback side, and the two settle from opposite columns. Mapping them together would grade every quarterback against defenders. The statistic-first twin below carries the same market under a scoped template and is typed there.'
+      'SEASON_LEADER_INTERCEPTIONS is the DEFENSIVE leader -- interceptions caught. This market is interceptions THROWN, the quarterback side, and the two settle from opposite columns. Mapping them together would grade every quarterback against defenders. No thrown-side season leader constant exists; its statistic-first twin below is untyped for the same reason, and only the SINGLE-GAME thrown market has a constant.'
   },
   '|Most Regular Season Tackles And Assists|': {
     market_type: null,
@@ -542,7 +542,7 @@ export const caesars_market_type_by_template = {
   '|Most Interceptions Thrown| |Regular Season - Individual Player|': {
     market_type: null,
     reason:
-      'No league-high constant for interceptions THROWN. SEASON_LEAGUE_HIGH_INTERCEPTIONS is the defensive side -- interceptions caught -- and grading quarterbacks against it would settle from the wrong column.'
+      'No SEASON-grain league-high constant for interceptions THROWN. SEASON_LEAGUE_HIGH_INTERCEPTIONS is the defensive side -- interceptions caught -- and grading quarterbacks against it would settle from the wrong column. The thrown side is coined only at single-game grain, and that twin below is typed.'
   },
 
   // The single-game highs, same family, distinguished only by 'In a Single
@@ -590,11 +590,15 @@ export const caesars_market_type_by_template = {
       market_type:
         season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS
     },
+  // The constant vocabulary ALREADY distinguishes the two sides of an
+  // interception, and this row did not read it. SEASON_LEAGUE_HIGH_SINGLE_GAME_
+  // INTERCEPTIONS_THROWN was coined for exactly this market and was unused
+  // everywhere in the codebase; the no-map reason here described the column
+  // mismatch its existence removes.
   '|Most Interceptions Thrown In a Single Game| |Regular Season - Individual Player|':
     {
-      market_type: null,
-      reason:
-        'Interceptions THROWN, not caught. Same column mismatch as its season-long twin above.'
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS_THROWN
     },
   '|Longest Rush| |Regular Season|': {
     market_type: season_high_totals_types.SEASON_LEAGUE_LONGEST_RUSH

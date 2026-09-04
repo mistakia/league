@@ -12,6 +12,7 @@ import clean_string from './clean-string.mjs'
 /**
  * @typedef {object} PlayerFilters
  * @property {string[]} teams
+ * @property {string[]} [positions]
  * @property {boolean} ignore_free_agent
  * @property {boolean} ignore_retired
  */
@@ -103,6 +104,11 @@ class PlayerCache {
    * @param {number} params.fantasylabs_player_id - FantasyLabs ID to search for
    * @param {number} params.nfl_draft_year - NFL draft year (used with name for composite lookup)
    * @param {string[]} params.teams - Optional team abbreviations to filter by
+   * @param {string[]} params.positions - Optional primary positions to filter by. Defaults to
+   *   empty, which filters nothing, so every existing caller behaves identically. A caller passes
+   *   this only to DISAMBIGUATE: the filter can narrow a candidate set, never widen it, and
+   *   _select_best_match still refuses on more than one survivor. So the worst a wrong position
+   *   set can do is leave the null it was called to resolve.
    * @param {boolean} params.ignore_free_agent - Whether to exclude free agents (default: true)
    * @param {boolean} params.ignore_retired - Whether to exclude retired players (default: true)
    * @returns {PlayerRow|null} Player object if found, null otherwise
@@ -118,6 +124,7 @@ class PlayerCache {
     fantasylabs_player_id,
     nfl_draft_year,
     teams = [],
+    positions = [],
     ignore_free_agent = true,
     ignore_retired = true
   }) {
@@ -131,6 +138,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -147,6 +155,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -162,6 +171,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -176,6 +186,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -190,6 +201,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -204,6 +216,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -220,6 +233,7 @@ class PlayerCache {
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
+          positions,
           ignore_free_agent,
           ignore_retired
         })
@@ -242,6 +256,7 @@ class PlayerCache {
 
     const filtered_players = this._apply_filters(potential_players, {
       teams,
+      positions,
       ignore_free_agent,
       ignore_retired
     })
@@ -520,7 +535,10 @@ class PlayerCache {
    * @returns {PlayerRow[]} Filtered array of players
    * @private
    */
-  _apply_filters(players, { teams, ignore_free_agent, ignore_retired }) {
+  _apply_filters(
+    players,
+    { teams, positions = [], ignore_free_agent, ignore_retired }
+  ) {
     let filtered_players = players
 
     // Filter by teams if provided
@@ -529,6 +547,17 @@ class PlayerCache {
       const formatted_teams = teams.map(fixTeam)
       filtered_players = filtered_players.filter((player) =>
         formatted_teams.includes(player.current_nfl_team)
+      )
+    }
+
+    // Filter by primary position if provided. Matched verbatim against
+    // player.primary_position rather than through a normaliser, because the
+    // column holds 24 distinct values -- DL, DE, DT and NT all appear, as do LB,
+    // ILB, OLB, MLB and EDGE -- so a caller has to name the spellings it means
+    // and a mapping layer here would only hide which ones it missed.
+    if (positions.length > 0) {
+      filtered_players = filtered_players.filter((player) =>
+        positions.includes(player.primary_position)
       )
     }
 
