@@ -4,7 +4,13 @@ import {
   player_prop_types,
   team_game_market_types,
   game_props_types,
-  team_props_types
+  team_props_types,
+  awards_prop_types,
+  futures_types,
+  team_season_types,
+  division_specials_types,
+  player_season_prop_types,
+  season_high_totals_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('caesars:market-types')
@@ -352,9 +358,440 @@ export const caesars_market_type_by_template = {
     market_type: null,
     reason:
       'Ambiguous statistic. The only player-side tackle constants are the combined GAME_TACKLES_ASSISTS and GAME_ALT_TACKLES_ASSISTS, and Caesars does not publish whether this team aggregate counts tackles plus assists or solo tackles. A settlement handler would sum whichever the constant name claimed, so coining one without the vendor terms would encode a guess as a grade.'
+  },
+
+  // ===========================================================================
+  // FUTURES -- the season-long families, dark since 2025-02-20.
+  // ===========================================================================
+  //
+  // Two key SHAPES below, and which one a template gets is not cosmetic.
+  //
+  // SUBJECT-FIRST templates ('|Team| |Regular Season Wins|') are keyed by their
+  // STRIPPED form ('|Regular Season Wins|'), because the leading segment is the
+  // subject and the feed substitutes real names into it -- '|Nik Bonitto| |Total
+  // Regular Season Sacks|' is a real template. Keying the stripped form types
+  // the whole family and never enumerates a player.
+  //
+  // STATISTIC-FIRST templates ('|Most Passing Yards| |Regular Season -
+  // Individual Player|') are keyed by their FULL name, because their trailing
+  // segment is a bare scope shared by twenty-one different statistics. See
+  // FORBIDDEN_TEMPLATE_TABLE_KEYS below.
+
+  // Team season totals and standings. Keyed stripped; the subject is the team,
+  // carried on metadata.teamAbbr.
+  '|Regular Season Wins|': {
+    market_type: team_season_types.TEAM_REGULAR_SEASON_WINS
+  },
+  '|Regular Season Team Total Points|': {
+    market_type: team_season_types.TEAM_REGULAR_SEASON_POINTS
+  },
+  '|To Make The Playoffs|': {
+    market_type: team_season_types.TEAM_TO_MAKE_PLAYOFFS
+  },
+  '|Stage Of Elimination|': {
+    market_type: futures_types.STAGE_OF_ELIMINATION
+  },
+  '|Regular Season Division Wins|': {
+    market_type: division_specials_types.DIVISION_WINS
+  },
+  '|Best Regular Season Record|': {
+    market_type: team_season_types.TEAM_MOST_REGULAR_SEASON_WINS
+  },
+  '|Worst Regular Season Record|': {
+    market_type: team_season_types.TEAM_FEWEST_REGULAR_SEASON_WINS
+  },
+  '|Team To Go 17-0|': { market_type: team_season_types.TEAM_PERFECT_SEASON },
+  '|Team To Go 0-17|': { market_type: team_season_types.TEAM_WINLESS_SEASON },
+
+  // Championship and division futures.
+  '|Super Bowl 61 Winner|': { market_type: futures_types.SUPER_BOWL_WINNER },
+  '|Super Bowl Exacta|': { market_type: futures_types.NAME_THE_FINALISTS },
+  '|Super Bowl Winning Division|': {
+    market_type: futures_types.WINNING_DIVISION
+  },
+  '|First Time Super Bowl Winner|': {
+    market_type: futures_types.FIRST_TIME_WINNER
+  },
+  '|Pro Football Conference Winner|': {
+    market_type: futures_types.CONFERENCE_WINNER
+  },
+  '|Division Winner|': { market_type: futures_types.DIVISION_WINNER },
+  '|Division Exacta 1-2|': {
+    market_type: division_specials_types.DIVISION_STRAIGHT_FORECAST
+  },
+  '|Division Exact Order|': {
+    market_type: division_specials_types.DIVISION_EXACT_ORDER
+  },
+  // Stripped from '|AFC| |Top Conference Seed|' and its NFC twin -- the
+  // conference is the subject segment, so both resolve through one key.
+  '|Top Conference Seed|': { market_type: futures_types.NUMBER_1_SEED },
+
+  // Awards.
+  '|Regular Season MVP|': { market_type: awards_prop_types.SEASON_MVP },
+  '|Offensive Player Of The Year|': {
+    market_type: awards_prop_types.OFFENSIVE_PLAYER_OF_THE_YEAR
+  },
+  '|Defensive Player Of The Year Award|': {
+    market_type: awards_prop_types.DEFENSIVE_PLAYER_OF_THE_YEAR
+  },
+  '|Offensive Rookie Of The Year|': {
+    market_type: awards_prop_types.OFFENSIVE_ROOKIE_OF_THE_YEAR
+  },
+  '|Defensive Rookie Of The Year|': {
+    market_type: awards_prop_types.DEFENSIVE_ROOKIE_OF_THE_YEAR
+  },
+  '|Comeback Player Of The Year|': {
+    market_type: awards_prop_types.COMEBACK_PLAYER_OF_THE_YEAR
+  },
+  '|Coach Of The Year Award|': {
+    market_type: awards_prop_types.COACH_OF_THE_YEAR
+  },
+
+  // Player season totals, keyed stripped from the '|Player| |...|' family.
+  '|Total Regular Season Receptions|': {
+    market_type: player_season_prop_types.SEASON_RECEPTIONS
+  },
+
+  // Player season ALTERNATE thresholds -- 'X+' lines on a season total.
+  '|Player To Record X+ Passing Yards|': {
+    market_type: player_season_prop_types.SEASON_ALT_PASSING_YARDS
+  },
+  '|Player To Record X+ Passing Touchdowns|': {
+    market_type: player_season_prop_types.SEASON_ALT_PASSING_TOUCHDOWNS
+  },
+  '|Player To Record X+ Rushing Yards|': {
+    market_type: player_season_prop_types.SEASON_ALT_RUSHING_YARDS
+  },
+  '|Player To Record X+ Rushing Touchdowns|': {
+    market_type: player_season_prop_types.SEASON_ALT_RUSHING_TOUCHDOWNS
+  },
+  '|Player To Record X+ Receiving Yards|': {
+    market_type: player_season_prop_types.SEASON_ALT_RECEIVING_YARDS
+  },
+  '|Player To Record X+ Receiving Touchdowns|': {
+    market_type: player_season_prop_types.SEASON_ALT_RECEIVING_TOUCHDOWNS
+  },
+  '|Player To Record X+ Sacks|': {
+    market_type: player_season_prop_types.SEASON_ALT_SACKS
+  },
+
+  // Season leaders published as a bare single-segment template.
+  '|Most Regular Season Receiving Touchdowns|': {
+    market_type: player_prop_types.SEASON_LEADER_RECEIVING_TOUCHDOWNS
+  },
+  '|Most Regular Season Reception|': {
+    market_type: player_prop_types.SEASON_LEADER_RECEPTIONS
+  },
+  '|Most Regular Season Sacks|': {
+    market_type: player_prop_types.SEASON_LEADER_SACKS
+  },
+  '|Most Regular Season Interceptions Thrown|': {
+    market_type: null,
+    reason:
+      'SEASON_LEADER_INTERCEPTIONS is the DEFENSIVE leader -- interceptions caught. This market is interceptions THROWN, the quarterback side, and the two settle from opposite columns. Mapping them together would grade every quarterback against defenders. The statistic-first twin below carries the same market under a scoped template and is typed there.'
+  },
+  '|Most Regular Season Tackles And Assists|': {
+    market_type: null,
+    reason:
+      'No season-long tackles constant exists, and the game-grain GAME_TACKLES_ASSISTS is a different grain rather than a candidate. Same reason the team tackles template above is left untyped: coining one without the vendor terms would encode a guess as a grade.'
+  },
+  '|Most Regular Season Rookie Receiving Yards|': {
+    market_type: null,
+    reason:
+      'Rookie-scoped leader. SEASON_LEADER_RECEIVING_YARDS is the league-wide leader and its settlement would grade against the whole league, so the two are not interchangeable. No rookie-scoped constant exists.'
+  },
+
+  // ---------------------------------------------------------------------------
+  // STATISTIC-FIRST templates. Keyed by their FULL name, never by the trailing
+  // scope segment they share.
+  // ---------------------------------------------------------------------------
+  '|Most Passing Yards| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_PASSING_YARDS
+  },
+  '|Most Passing Touchdowns| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_PASSING_TOUCHDOWNS
+  },
+  '|Most Rushing Yards| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_RUSHING_YARDS
+  },
+  '|Most Rushing Touchdowns| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_RUSHING_TOUCHDOWNS
+  },
+  '|Most Receiving Yards| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_RECEIVING_YARDS
+  },
+  '|Most Receiving Touchdowns| |Regular Season - Individual Player|': {
+    market_type:
+      season_high_totals_types.SEASON_LEAGUE_HIGH_RECEIVING_TOUCHDOWNS
+  },
+  '|Most Receptions| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_RECEPTIONS
+  },
+  '|Most Sacks| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_SACKS
+  },
+  '|Most Interceptions By Defensive Player| |Regular Season - Individual Player|':
+    {
+      market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_INTERCEPTIONS
+    },
+  '|Most Passing Completions| |Regular Season - Individual Player|': {
+    market_type: null,
+    reason:
+      'No season-long completions constant. SEASON_PASSING_COMPLETIONS is a per-player season total, not the league leader, so it would grade one player rather than the field.'
+  },
+  '|Most Interceptions Thrown| |Regular Season - Individual Player|': {
+    market_type: null,
+    reason:
+      'No league-high constant for interceptions THROWN. SEASON_LEAGUE_HIGH_INTERCEPTIONS is the defensive side -- interceptions caught -- and grading quarterbacks against it would settle from the wrong column.'
+  },
+
+  // The single-game highs, same family, distinguished only by 'In a Single
+  // Game'. These are league-wide season-long markets about the best individual
+  // GAME anyone posts, which is why they are season_high_totals and not a game
+  // grain.
+  '|Most Passing Yards In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_PASSING_YARDS
+    },
+  '|Most Passing Touchdowns In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_PASSING_TOUCHDOWNS
+    },
+  '|Most Rush Yards In a Single Game| |Regular Season - Individual Player|': {
+    market_type:
+      season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_RUSHING_YARDS
+  },
+  '|Most Rush Touchdowns In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_RUSHING_TOUCHDOWNS
+    },
+  '|Most Receiving Yards In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_RECEIVING_YARDS
+    },
+  '|Most Receiving Touchdowns In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_RECEIVING_TOUCHDOWNS
+    },
+  '|Most Receptions In a Single Game| |Regular Season - Individual Player|': {
+    market_type:
+      season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_RECEPTIONS
+  },
+  '|Most Sacks In a Single Game| |Regular Season - Individual Player|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_SACKS
+  },
+  '|Most Interceptions By Defensive Player In Single Game| |Regular Season - Individual Player|':
+    {
+      market_type:
+        season_high_totals_types.SEASON_LEAGUE_HIGH_SINGLE_GAME_INTERCEPTIONS
+    },
+  '|Most Interceptions Thrown In a Single Game| |Regular Season - Individual Player|':
+    {
+      market_type: null,
+      reason:
+        'Interceptions THROWN, not caught. Same column mismatch as its season-long twin above.'
+    },
+  '|Longest Rush| |Regular Season|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_LONGEST_RUSH
+  },
+  '|Longest Reception| |Regular Season|': {
+    market_type: season_high_totals_types.SEASON_LEAGUE_LONGEST_RECEPTION
+  },
+  '|Total Overtime Games| |Regular Season|': {
+    market_type: null,
+    reason:
+      'League-wide count of games going to overtime. No constant exists for a season-long league game-count proposition, and every season_high_totals member is a player statistic, so none is a candidate.'
+  },
+  '|Total Games Ending In a Tie| |Regular Season|': {
+    market_type: null,
+    reason:
+      'Same family as the overtime-games count above and left untyped for the same reason.'
+  },
+
+  // ---------------------------------------------------------------------------
+  // Deliberate no-maps in the futures families.
+  // ---------------------------------------------------------------------------
+  '|Alternate Regular Season Wins|': {
+    market_type: null,
+    reason:
+      'Alternate win-total lines for a team. TEAM_REGULAR_SEASON_WINS is the single posted over/under and TEAM_EXACT_REGULAR_SEASON_WINS is the exact-total market; mapping the alternate ladder onto either would collapse many lines onto one key, which is the same defect the game-grain alt families avoid by having their own ALT constants. Coining TEAM_ALT_REGULAR_SEASON_WINS is the fix, deferred with the other coining decisions.'
+  },
+  '|Exact Win Total After First 5 Weeks|': {
+    market_type: null,
+    reason:
+      'Scoped to the first five weeks, not the season. TEAM_EXACT_REGULAR_SEASON_WINS settles on the full regular season, so mapping this to it would grade a five-week market against seventeen weeks of results.'
+  },
+  '|Specials|': {
+    market_type: null,
+    reason:
+      "Stripped from '|Team| |Specials|'. A per-team grab-bag whose selections carry the actual proposition, so one market type cannot describe it. Present as a decision rather than a gap."
+  },
+  '|Regular Season Specials|': {
+    market_type: null,
+    reason:
+      'Undifferentiated specials grab-bag, same shape as the team specials above.'
+  },
+  '|NFL Award Specials|': {
+    market_type: null,
+    reason:
+      'Award grab-bag spanning several awards in one market. The individual awards each have their own template and constant above; this one cannot be reduced to a single award.'
+  },
+  '|Rings & Recognition Specials|': {
+    market_type: null,
+    reason:
+      'Cross-family promotional grab-bag combining championship and award propositions in one market.'
+  },
+  '|Highest Scoring Game|': {
+    market_type: null,
+    reason:
+      'League-wide leader over games, not a team or player statistic. No constant covers a season-long superlative whose subject is a game.'
+  },
+  '|Lowest Scoring Game|': {
+    market_type: null,
+    reason: 'Same family as the highest-scoring-game market above.'
+  },
+  '|Highest Scoring Team|': {
+    market_type: null,
+    reason:
+      'League-wide leader across teams. TEAM_REGULAR_SEASON_POINTS is a per-team season total whose settlement grades one team against a line, not teams against each other.'
+  },
+  '|Lowest Scoring Team|': {
+    market_type: null,
+    reason: 'Same family as the highest-scoring-team market above.'
+  },
+  '|Any Team To Go 17-0|': {
+    market_type: null,
+    reason:
+      'League-wide yes/no. TEAM_PERFECT_SEASON is team-grain and settles per team, so mapping this to it would attach a league proposition to whichever team the selection named.'
+  },
+  '|Any Team To Go 0-17|': {
+    market_type: null,
+    reason: 'League-wide twin of the undefeated market above.'
+  },
+  '|Last Undefeated Team|': {
+    market_type: null,
+    reason:
+      'Settles on WHICH team stays undefeated longest, not on whether a given team runs the table, so TEAM_PERFECT_SEASON is not a candidate.'
+  },
+  '|Last Winless Team|': {
+    market_type: null,
+    reason: 'Twin of the last-undefeated market above.'
+  },
+  '|Most Tight End Receiving Yards|': {
+    market_type: null,
+    reason:
+      'Position-scoped leader. SEASON_LEADER_RECEIVING_YARDS settles across all receivers, so the two would grade different fields.'
+  },
+  '|Most Passing Yards|': {
+    market_type: null,
+    reason:
+      "Bare leader template with no scope segment, published in the September Specials tab alongside its explicitly scoped twin '|Most Regular Season Passing Yards|'. Caesars does not state whether the bare form means the season or the opening window, and the two settle on different periods."
+  },
+  '|Most Passing Touchdowns|': {
+    market_type: null,
+    reason: 'Bare unscoped leader template; same ambiguity as passing yards.'
+  },
+  '|Most Rushing Yards|': {
+    market_type: null,
+    reason: 'Bare unscoped leader template; same ambiguity as passing yards.'
+  },
+  '|Most Rushing Touchdowns|': {
+    market_type: null,
+    reason: 'Bare unscoped leader template; same ambiguity as passing yards.'
+  },
+  '|Most Receiving Yards|': {
+    market_type: null,
+    reason: 'Bare unscoped leader template; same ambiguity as passing yards.'
+  },
+  '|Most Receiving Touchdowns|': {
+    market_type: null,
+    reason: 'Bare unscoped leader template; same ambiguity as passing yards.'
+  },
+
+  // The combined-statistic season totals. Four templates, all of the
+  // '|Player| |Total Regular Season A + B|' shape, left untyped pending the
+  // decision on whether to coin into player_season_prop_types -- the one
+  // constant group that reaches a user-facing Market picker.
+  '|Total Regular Season Passing + Rushing Yards|': {
+    market_type: null,
+    reason:
+      'Combined passing and rushing yards. No constant sums two statistics, and mapping to either half would grade against half the market. Coining SEASON_PASSING_RUSHING_YARDS reaches the user-facing Market picker, so it is an operator decision rather than a free wiring.'
+  },
+  '|Total Regular Season Passing + Rushing Touchdowns|': {
+    market_type: null,
+    reason: 'Combined-statistic season total; same decision as the yards twin.'
+  },
+  '|Total Regular Season Rushing + Receiving Yards|': {
+    market_type: null,
+    reason: 'Combined-statistic season total; same decision as the yards twin.'
+  },
+  '|Total Regular Season Rushing + Receiving Touchdowns|': {
+    market_type: null,
+    reason: 'Combined-statistic season total; same decision as the yards twin.'
   }
 }
 
+// THE SEPARATOR BETWEEN TEMPLATE SEGMENTS.
+//
+// Measured over a live 2026-09-04 crawl of all 16 competition tabs: 48 of the
+// 146 distinct templates carry more than one segment, and every one of them
+// uses exactly this separator. Splitting on it yields segments whose OUTER
+// pipes are preserved and whose inner ones are consumed, so
+// '|Player| |Total Regular Season Sacks|' splits to
+// ['|Player', 'Total Regular Season Sacks|'] and rejoining a suffix with a
+// leading '|' restores the wire form exactly.
+const TEMPLATE_SEGMENT_SEPARATOR = '| |'
+
+// SCOPE SEGMENTS THAT MUST NEVER BECOME TABLE KEYS.
+//
+// The multi-segment templates come in two OPPOSITE arrangements. Most carry the
+// subject first and the statistic last ('|Player| |Total Regular Season
+// Sacks|'), but 26 carry the statistic FIRST and a bare scope last ('|Most
+// Passing Yards| |Regular Season - Individual Player|').
+//
+// So a rule that looked up the TRAILING segment would collapse every statistic
+// sharing a scope onto one key -- 21 distinct statistics onto 'Regular Season -
+// Individual Player' alone -- and would do it SILENTLY, typing twenty-one
+// different markets identically rather than failing. That is why the lookup
+// below is full-key-first, and why these two keys are forbidden outright: with
+// them absent, a statistic-first template can only ever resolve by its full
+// name, and the retry branch can only miss.
+export const FORBIDDEN_TEMPLATE_TABLE_KEYS = [
+  '|Regular Season|',
+  '|Regular Season - Individual Player|'
+]
+
+for (const forbidden_key of FORBIDDEN_TEMPLATE_TABLE_KEYS) {
+  if (Object.hasOwn(caesars_market_type_by_template, forbidden_key)) {
+    throw new Error(
+      `caesars-market-types: '${forbidden_key}' is a bare SCOPE segment shared by many distinct statistics, not a market template. Keying it silently types every statistic under that scope identically. Key the full template name instead.`
+    )
+  }
+}
+
+/**
+ * Resolve a Caesars `templateName` to a market type.
+ *
+ * Full verbatim lookup FIRST, subject-stripped retry SECOND. The order is the
+ * whole design:
+ *
+ *  1. The statistic-first templates carry their scope in the trailing segment
+ *     and are keyed by their full name, so they resolve at step one and never
+ *     reach the retry.
+ *  2. The subject-first templates ('|Player| |...|', '|Team| |...|') are keyed
+ *     by the stripped generic form, so they resolve at step two.
+ *
+ * Step two is also what absorbs proper-name churn. `templateName` is not a
+ * closed enum -- the feed embeds live player names in it, so
+ * '|Nik Bonitto| |Total Regular Season Sacks|' appears alongside the generic
+ * '|Player| |Total Regular Season Sacks|'. Both strip to the same generic key,
+ * and the table never has to enumerate a player who will be gone next season.
+ */
 export const get_market_type = ({ template_name }) => {
   if (!template_name) {
     return null
@@ -363,10 +800,20 @@ export const get_market_type = ({ template_name }) => {
   // hasOwn rather than a bare lookup: a template that happened to be named
   // 'constructor' would otherwise resolve off Object.prototype and return a
   // function instead of null.
-  if (!Object.hasOwn(caesars_market_type_by_template, template_name)) {
-    log(`no table entry for template_name: ${template_name}`)
-    return null
+  if (Object.hasOwn(caesars_market_type_by_template, template_name)) {
+    return caesars_market_type_by_template[template_name].market_type
   }
 
-  return caesars_market_type_by_template[template_name].market_type
+  const segments = template_name.split(TEMPLATE_SEGMENT_SEPARATOR)
+
+  if (segments.length > 1) {
+    const subject_stripped_key = `|${segments.slice(1).join(TEMPLATE_SEGMENT_SEPARATOR)}`
+
+    if (Object.hasOwn(caesars_market_type_by_template, subject_stripped_key)) {
+      return caesars_market_type_by_template[subject_stripped_key].market_type
+    }
+  }
+
+  log(`no table entry for template_name: ${template_name}`)
+  return null
 }

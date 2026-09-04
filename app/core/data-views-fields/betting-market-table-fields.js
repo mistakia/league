@@ -231,17 +231,35 @@ export default {
           bookmaker_constants.player_season_prop_types.SEASON_PASSING_YARDS,
         single: true
       },
+      // The books that actually write season-long rows, measured rather than
+      // assumed: counting prop_markets_index rows with a null esbid and a
+      // SEASON_* market_type gives FanDuel 1818, DraftKings 1288, Caesars 707
+      // and BetMGM 432. Pinnacle's two rows are the whole of its season-long
+      // history and are left out.
+      //
+      // This offered FanDuel alone until 2026-09-04, which made the column a
+      // FanDuel view rather than a betting-market view -- DraftKings has been
+      // writing season rows the whole time, and restoring Caesars futures is
+      // pointless if the only surface that shows them cannot select them.
       source_id: {
         label: 'Bookmaker',
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-        values: [bookmaker_constants.bookmakers.FANDUEL],
+        values: [
+          bookmaker_constants.bookmakers.FANDUEL,
+          bookmaker_constants.bookmakers.DRAFTKINGS,
+          bookmaker_constants.bookmakers.CAESARS,
+          bookmaker_constants.bookmakers.BETMGM
+        ],
         default_value: bookmaker_constants.bookmakers.FANDUEL,
         single: true
       },
+      // The list stopped at 2024 while default_value was current_season.year,
+      // so the default was not among the permitted values. 2025 and 2026 hold
+      // more season rows than every earlier year combined.
       year: {
         ...single_year,
         default_value: current_season.year,
-        values: [2023, 2024]
+        values: [2023, 2024, 2025, 2026]
       },
       career_year
     }

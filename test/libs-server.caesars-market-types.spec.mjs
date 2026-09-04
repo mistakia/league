@@ -4,14 +4,17 @@ import * as chai from 'chai'
 
 import {
   get_market_type,
-  caesars_market_type_by_template
+  caesars_market_type_by_template,
+  FORBIDDEN_TEMPLATE_TABLE_KEYS
 } from '#libs-server/caesars/caesars-market-types.mjs'
 import {
   player_prop_types,
   team_game_market_types,
   team_grain_market_types,
   game_props_types,
-  team_props_types
+  team_props_types,
+  team_season_types,
+  season_high_totals_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
 const expect = chai.expect
@@ -318,5 +321,144 @@ describe('libs-server caesars market types', function () {
 
   it('returns null when given neither a template nor a category', function () {
     expect(get_market_type({})).to.equal(null)
+  })
+
+  // The futures templates come in two OPPOSITE arrangements, and the lookup
+  // order is what keeps them apart. Full key first, subject-stripped retry
+  // second.
+  describe('segment-aware lookup', function () {
+    it('resolves a STATISTIC-FIRST template by its full key', function () {
+      expect(
+        get_market_type({
+          template_name:
+            '|Most Passing Yards| |Regular Season - Individual Player|'
+        })
+      ).to.equal(season_high_totals_types.SEASON_LEAGUE_HIGH_PASSING_YARDS)
+    })
+
+    it('keeps the twenty-one statistics sharing a scope DISTINCT', function () {
+      // The specific failure a trailing-segment rule would cause: every one of
+      // these shares the trailing segment 'Regular Season - Individual Player',
+      // so a rule keyed on it would return one type for all of them.
+      const shared_scope_templates = Object.keys(
+        caesars_market_type_by_template
+      ).filter((template_name) =>
+        template_name.endsWith('| |Regular Season - Individual Player|')
+      )
+
+      expect(shared_scope_templates.length).to.be.at.least(10)
+
+      const resolved = shared_scope_templates
+        .map((template_name) => get_market_type({ template_name }))
+        .filter((market_type) => market_type !== null)
+
+      expect(new Set(resolved).size).to.equal(resolved.length)
+    })
+
+    it('resolves a SUBJECT-FIRST template by stripping its leading segment', function () {
+      expect(
+        get_market_type({
+          template_name: '|Player| |Total Regular Season Passing Yards|'
+        })
+      ).to.equal(
+        get_market_type({
+          template_name: '|Total Regular Season Passing Yards|'
+        })
+      )
+    })
+
+    it('resolves a template carrying a live PLAYER NAME through the same retry', function () {
+      // templateName is not a closed enum -- the feed embeds real names. The
+      // retry is what stops the table having to enumerate players.
+      expect(
+        get_market_type({
+          template_name: '|Nik Bonitto| |Total Regular Season Sacks|'
+        })
+      ).to.equal(
+        get_market_type({ template_name: '|Total Regular Season Sacks|' })
+      )
+      expect(
+        get_market_type({
+          template_name: '|Nik Bonitto| |Total Regular Season Sacks|'
+        })
+      ).to.not.equal(null)
+    })
+
+    it('resolves a TEAM template through the same retry', function () {
+      expect(
+        get_market_type({ template_name: '|Team| |Regular Season Wins|' })
+      ).to.equal(team_season_types.TEAM_REGULAR_SEASON_WINS)
+    })
+
+    // THE CONTROL FIRES ON THE SPLIT, NOT ON THE TABLE.
+    //
+    // Asserting that some template maps to some constant would pass identically
+    // against the OLD un-segmented lookup for any single-segment key, so it
+    // cannot tell the new code from the old. These two assert the retry branch
+    // itself: a multi-segment name resolving to exactly what its stripped form
+    // resolves to, while the stripped form is NOT itself the full name.
+    it('reaches the stripped key only through the retry branch', function () {
+      const full = '|Team| |To Make The Playoffs|'
+      const stripped = '|To Make The Playoffs|'
+
+      expect(Object.hasOwn(caesars_market_type_by_template, full)).to.equal(
+        false
+      )
+      expect(Object.hasOwn(caesars_market_type_by_template, stripped)).to.equal(
+        true
+      )
+      expect(get_market_type({ template_name: full })).to.equal(
+        caesars_market_type_by_template[stripped].market_type
+      )
+    })
+
+    it('does not strip a SINGLE-segment template', function () {
+      // '|Regular Season Wins|' must not be reachable by stripping something
+      // that merely ends in it.
+      expect(
+        get_market_type({
+          template_name: '|No Such Prefix Regular Season Wins|'
+        })
+      ).to.equal(null)
+    })
+
+    it('only strips on the exact separator', function () {
+      expect(
+        get_market_type({ template_name: '|Team||Regular Season Wins|' })
+      ).to.equal(null)
+      expect(
+        get_market_type({ template_name: '|Team|  |Regular Season Wins|' })
+      ).to.equal(null)
+    })
+  })
+
+  // A BARE SCOPE SEGMENT MUST NEVER BE A TABLE KEY.
+  //
+  // This is the invariant that makes the retry safe. If '|Regular Season -
+  // Individual Player|' were ever keyed, every statistic-first template that
+  // missed its full key would fall back onto it and be typed identically --
+  // silently, since a wrong type is indistinguishable from a right one at the
+  // call site.
+  describe('forbidden table keys', function () {
+    it('names the scope segments that may not be keyed', function () {
+      expect(FORBIDDEN_TEMPLATE_TABLE_KEYS).to.include('|Regular Season|')
+      expect(FORBIDDEN_TEMPLATE_TABLE_KEYS).to.include(
+        '|Regular Season - Individual Player|'
+      )
+    })
+
+    it('holds none of them in the table', function () {
+      for (const forbidden_key of FORBIDDEN_TEMPLATE_TABLE_KEYS) {
+        expect(caesars_market_type_by_template).to.not.have.property(
+          forbidden_key
+        )
+      }
+    })
+
+    it('leaves a bare scope segment untyped', function () {
+      for (const forbidden_key of FORBIDDEN_TEMPLATE_TABLE_KEYS) {
+        expect(get_market_type({ template_name: forbidden_key })).to.equal(null)
+      }
+    })
   })
 })
