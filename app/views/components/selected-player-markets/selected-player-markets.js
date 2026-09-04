@@ -14,10 +14,18 @@ import FormControl from '@mui/material/FormControl'
 import PercentileMetric from '@components/percentile-metric'
 import { calculatePercentiles } from '#libs-shared'
 
+import { build_market_navigation } from './market-navigation'
 import './selected-player-markets.styl'
 
-function MarketCard({ market_name, markets }) {
-  const is_alt_line = market_name.includes('ALT')
+function MarketCard({ market_key, market_name, markets }) {
+  // Read off the market_type KEY, never the display label. The label is now a
+  // short human string ("Alt Pass Yds"), and a substring test against it would
+  // pass or fail on how the label happens to be spelled.
+  //
+  // This test is itself one of the consumers that
+  // user:task/league/fix-prop-market-shape-classification.md converts to
+  // classify_prop_market_shape. Left as it was, pointed at the right input.
+  const is_alt_line = market_key.includes('ALT')
   const [selected_line, set_selected_line] = useState('')
   const has_line = useMemo(() => check_has_line(markets), [markets])
 
@@ -99,6 +107,7 @@ function MarketCard({ market_name, markets }) {
 }
 
 MarketCard.propTypes = {
+  market_key: PropTypes.string.isRequired,
   market_name: PropTypes.string,
   markets: PropTypes.array.isRequired
 }
@@ -586,25 +595,6 @@ function create_x_axis({ game_info, plot_lines, plot_bands, axis_breaks }) {
   }
 }
 
-function categorize_markets(market_options) {
-  const categorized = {
-    season: [],
-    game: [],
-    unprocessed: []
-  }
-  market_options.forEach((market) => {
-    if (market.startsWith('SEASON_')) {
-      categorized.season.push(market)
-    } else if (market.startsWith('GAME_')) {
-      categorized.game.push(market)
-    } else {
-      categorized.unprocessed.push(market)
-    }
-  })
-
-  return categorized
-}
-
 export default function SelectedPlayerMarkets({
   player_map,
   load_player_betting_markets,
@@ -617,38 +607,24 @@ export default function SelectedPlayerMarkets({
     load_player_betting_markets(pid)
   }, [pid, load_player_betting_markets])
 
-  const market_options = useMemo(() => {
-    return Object.keys(grouped_markets)
-  }, [grouped_markets])
-
-  const categorized_markets = useMemo(() => {
-    return categorize_markets(market_options)
-  }, [market_options])
-
-  const sorted_market_options = useMemo(() => {
-    return [
-      ...categorized_markets.season,
-      ...categorized_markets.game,
-      ...categorized_markets.unprocessed
-    ]
-  }, [categorized_markets])
+  const market_options = useMemo(
+    () => build_market_navigation(Object.keys(grouped_markets)),
+    [grouped_markets]
+  )
 
   useEffect(() => {
-    if (sorted_market_options.length > 0 && !selected_market) {
-      set_selected_market(sorted_market_options[0])
+    if (market_options.length > 0 && !selected_market) {
+      set_selected_market(market_options[0])
     }
-  }, [sorted_market_options, selected_market])
+  }, [market_options, selected_market])
 
   return (
     <div className='selected-player-markets'>
       <Autocomplete
-        options={sorted_market_options}
-        groupBy={(option) => {
-          if (categorized_markets.season.includes(option)) return 'Season'
-          if (categorized_markets.game.includes(option)) return 'Game'
-          return 'Other'
-        }}
-        getOptionLabel={(option) => option.replace(/_/g, ' ').toUpperCase()}
+        options={market_options}
+        groupBy={(option) => option.group}
+        getOptionLabel={(option) => option.label}
+        isOptionEqualToValue={(option, value) => option.key === value.key}
         value={selected_market}
         onChange={(event, new_value) => set_selected_market(new_value)}
         renderInput={(params) => (
@@ -657,8 +633,9 @@ export default function SelectedPlayerMarkets({
       />
       {selected_market && (
         <MarketCard
-          market_name={selected_market}
-          markets={grouped_markets[selected_market]}
+          market_key={selected_market.key}
+          market_name={selected_market.label}
+          markets={grouped_markets[selected_market.key]}
         />
       )}
     </div>
