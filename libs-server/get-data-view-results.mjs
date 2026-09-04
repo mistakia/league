@@ -2496,6 +2496,42 @@ const DATA_VIEW_MAX_PARALLEL_WORKERS_PER_GATHER = 2
 // approached. A probe that trips it falls back to the default planner.
 const PLAN_PROBE_TIMEOUT_MS = 5000
 
+// The `SET LOCAL` prologue, in the order it is sent.
+//
+// Exported because `rows_index` is derived from its LENGTH: every setting
+// produces its own result object ahead of the query's, so a settings list and a
+// row index that disagree read an empty `command: 'SET'` result instead of the
+// rows -- and because the arm is conditional, that failure would land only on
+// the slow statements the arm exists to fix, which is exactly where it would be
+// least likely to be noticed. Building the list in one place makes the two
+// impossible to drift apart, and makes the pairing testable without a database.
+//
+// work_mem takes a quoted string literal -- the constant holds the VALUE
+// (`1GB`), so the quotes belong at the interpolation site. Emitting it bare
+// yields `work_mem = 1GB`, which Postgres rejects as trailing junk after a
+// numeric literal and which fails every cache-miss execution.
+//
+// The executor always passes a timeout, so there is no no-timeout arm; the
+// `|| 40000` is a defensive fallback that keeps a null timeout from emitting
+// invalid SQL. `SET LOCAL jit = off` was deleted with this extraction: jit is
+// off server-side since 2026-08-13, making the per-statement override a no-op.
+export const build_session_settings = ({
+  timeout,
+  disable_nested_loops = false
+}) => {
+  const settings = [
+    `SET LOCAL statement_timeout = ${timeout || 40000}`,
+    `SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'`
+  ]
+  if (disable_nested_loops) {
+    settings.push('SET LOCAL enable_nestloop = off')
+    settings.push(
+      `SET LOCAL max_parallel_workers_per_gather = ${DATA_VIEW_MAX_PARALLEL_WORKERS_PER_GATHER}`
+    )
+  }
+  return settings
+}
+
 // Plan the statement, and answer whether it should be re-planned with nested
 // loops disabled.
 //
@@ -2513,14 +2549,21 @@ const PLAN_PROBE_TIMEOUT_MS = 5000
 // able to FAIL a request: any error, timeout or unrecognised response shape
 // falls back to the default planner, which is what would have run without this
 // function at all.
-const should_disable_nested_loops = async ({ execution_query_string }) => {
+// `run_statement` is injected so the fallback contract can be exercised for
+// real rather than asserted. It defaults to the live db, and every test that
+// takes it passes a runner that throws, hangs or answers nonsense -- which is
+// the only way to prove that none of those can fail a request.
+export const should_disable_nested_loops = async ({
+  execution_query_string,
+  run_statement = (sql) => db.raw(sql)
+}) => {
   const probe_started_at = Date.now()
   try {
     // work_mem is repeated here rather than dropped because it is an input to
     // the planner's costing, not just an execution budget. Probing under a
     // different work_mem would plan a different statement than the one that
     // then runs, which is the one way this probe could be actively wrong.
-    const response = await db.raw(
+    const response = await run_statement(
       `SET LOCAL statement_timeout = ${PLAN_PROBE_TIMEOUT_MS}; SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'; EXPLAIN (FORMAT JSON) ${execution_query_string};`
     )
     const plan = extract_plan_from_explain_response(response[2])
@@ -2600,23 +2643,18 @@ export default async function ({
   // `|| 40000` is a defensive fallback that keeps a null timeout from emitting
   // invalid SQL. `SET LOCAL jit = off` was deleted with this extraction: jit is
   // off server-side since 2026-08-13, making the per-statement override a no-op.
-  const session_settings = [
-    `SET LOCAL statement_timeout = ${timeout || 40000}`,
-    `SET LOCAL work_mem = '${DATA_VIEW_WORK_MEM}'`
-  ]
-
-  if (await should_disable_nested_loops({ execution_query_string })) {
-    session_settings.push('SET LOCAL enable_nestloop = off')
-    session_settings.push(
-      `SET LOCAL max_parallel_workers_per_gather = ${DATA_VIEW_MAX_PARALLEL_WORKERS_PER_GATHER}`
-    )
-  }
+  const session_settings = build_session_settings({
+    timeout,
+    disable_nested_loops: await should_disable_nested_loops({
+      execution_query_string
+    })
+  })
 
   // Each `SET LOCAL` produces its own result object ahead of the query's, so
   // the row set is the one past the last setting. Derived rather than written
-  // as a literal because the arm above makes the count conditional, and a
-  // hardcoded index would read the wrong result object -- an empty `command:
-  // 'SET'` result -- on exactly the slow statements this exists to speed up.
+  // as a literal because the arm makes the count conditional, and a hardcoded
+  // index would read the wrong result object -- an empty `command: 'SET'`
+  // result -- on exactly the slow statements this exists to speed up.
   const rows_index = session_settings.length
 
   const response = await db.raw(
