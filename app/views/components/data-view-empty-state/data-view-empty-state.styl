@@ -41,33 +41,32 @@
 .data-view-empty-state__lede
   margin-bottom 18px
 
+// A RULE, NOT A BOX. The tutorial is the least important thing here and a
+// bordered, tinted panel made it the heaviest -- on an empty page it outweighed
+// both the headline and the two controls the headline points at. A hairline and
+// a quiet toggle say "there is more here" without competing for the first look.
 .data-view-empty-state__quick-start
-  margin-bottom 20px
-  border 1px solid rgba(0, 0, 0, 0.14)
-  border-radius 6px
-  // Keeps the toggle's hover tint inside the rounded corners.
-  overflow hidden
+  margin-bottom 18px
+  border-top 1px solid rgba(0, 0, 0, 0.12)
 
 .data-view-empty-state__toggle
   display flex
   align-items center
-  justify-content space-between
-  gap 8px
-  width 100%
+  gap 6px
   margin 0
-  padding 9px 12px
+  padding 9px 0
   border 0
-  background-color rgba(0, 0, 0, 0.03)
-  color rgba(0, 0, 0, 0.78)
+  background transparent
+  color rgba(0, 0, 0, 0.55)
   font-family inherit
   font-size 13px
   font-weight 600
   text-align left
   cursor pointer
-  transition background-color 150ms ease
+  transition color 120ms ease
 
   &:hover
-    background-color rgba(0, 0, 0, 0.07)
+    color rgba(0, 0, 0, 0.87)
 
 // The turn-over on expand comes from Icon's own `flipped` prop
 // (icon.styl's .icon--flipped), not from a rotate rule here -- every
@@ -77,8 +76,7 @@
   color rgba(0, 0, 0, 0.45)
 
 .data-view-empty-state__panel
-  padding 14px 14px 16px
-  border-top 1px solid rgba(0, 0, 0, 0.1)
+  padding 2px 0 10px
 
 .data-view-empty-state__steps
   margin 0

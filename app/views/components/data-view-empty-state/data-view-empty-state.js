@@ -75,8 +75,12 @@ export default function DataViewEmptyState({ has_columns, has_saved_views }) {
       <div className='data-view-empty-state__headline'>
         This view has no columns yet.
       </div>
+      {/* Both entry paths in one line, in the order they sit on screen: the
+          describe box is directly above this, and Columns is in the strip
+          above that. Naming only one of them left the other undiscovered. */}
       <div className='data-view-empty-state__lede'>
-        Open <strong>Columns</strong> and add a field to see data.
+        Open <strong>Columns</strong> and add a field, or{' '}
+        <strong>describe a view</strong> and have it built for you.
       </div>
       {/* The steps and the tip live INSIDE the disclosure element the toggle
           heads, rather than beside it, so what the control owns is visible

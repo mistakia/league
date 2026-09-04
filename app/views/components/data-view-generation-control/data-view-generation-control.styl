@@ -1,74 +1,144 @@
+// One panel, two resting sizes. Closed it is a single quiet button in the
+// controls strip; open it is the widest thing on an empty page, because a
+// prompt the user cannot read back is a prompt they cannot correct.
 .data-view-generation
   display flex
   flex-direction column
-  gap 4px
-  font 400 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+  gap 6px
+  width 100%
+  max-width 640px
+  font 400 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 
 .data-view-generation__open
   align-self flex-start
-  background transparent
+  display flex
+  align-items center
+  height 28px
+  padding 0 12px
+  background white
   border 1px solid $borderColor
-  border-radius 4px
-  padding 4px 10px
+  border-radius $button_border_radius
   cursor pointer
   color $textColor
+  font inherit
+  font-weight 500
+  transition border-color 120ms ease, color 120ms ease
 
   &:hover
-    border-color $accentColor
+    border-color $textColor
+
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset 2px
+
+.data-view-generation--open
+  // Paper, not ground: the panel is a control the user is working inside, and
+  // it has to separate from the page it floats over.
+  padding 10px 12px 8px
+  background white
+  border 1px solid $borderColor
+  border-radius $button_border_radius
 
 .data-view-generation__form
   display flex
-  align-items center
+  flex-direction column
   gap 6px
 
 .data-view-generation__input
-  // Every flex item takes min-width auto, and an input carries an intrinsic
-  // width from its size attribute -- so without this it refuses to compress and
-  // widens the whole controls row.
-  min-width 0
-  flex 1
-  padding 5px 8px
-  border 1px solid $borderColor
-  border-radius 4px
-  font inherit
-
-  &:disabled
-    background mix($borderColor, white, 25%)
-
-.data-view-generation__submit
-  flex-shrink 0
-  padding 5px 12px
-  border 1px solid $accentColor
-  border-radius 4px
-  background $accentColor
-  color white
-  cursor pointer
-
-  &:disabled
-    opacity 0.5
-    cursor default
-
-.data-view-generation__close
-  flex-shrink 0
-  background transparent
+  // Borderless inside the panel. The panel IS the input's frame -- drawing a
+  // second border around the textarea puts two rounded rectangles 12px apart
+  // and makes the padding read as a mistake.
+  width 100%
+  min-height 60px
+  // The cap the auto-grow in the component grows into. Past this the prompt is
+  // long enough that scrolling it is the lesser cost against a panel that
+  // pushes the table off screen.
+  max-height 220px
+  padding 0
   border 0
-  padding 0 4px
+  background transparent
+  resize none
+  overflow-y auto
+  color $textColor
+  font inherit
+  font-size 14px
+  line-height 1.5
+
+  &::placeholder
+    color rgba(0, 0, 0, 0.36)
+
+  // The panel is opened BY the user and focuses itself, so a ring here would
+  // be lit at rest on every open. The buttons below carry their own.
+  &:focus
+    outline none
+
+  &:disabled
+    color rgba(0, 0, 0, 0.5)
+    // Deliberately not greyed to a fill: while a run is live this is the only
+    // copy of the instruction on screen and it still has to read as text.
+    -webkit-text-fill-color rgba(0, 0, 0, 0.5)
+
+.data-view-generation__actions
+  display flex
+  align-items center
+  justify-content flex-end
+  gap 4px
+  // Reserved so the row does not jump a button's height when `Build it`
+  // appears on the first keystroke.
+  min-height 28px
+
+.data-view-generation__hint
+  margin-right auto
+  color rgba(0, 0, 0, 0.4)
+  font-size 11px
+
+.data-view-generation__cancel
+.data-view-generation__submit
+  height 28px
+  border-radius $button_border_radius
   cursor pointer
-  font-size 18px
-  line-height 1
-  opacity 0.55
+  font inherit
+  font-size 12px
+  font-weight 500
+  transition background-color 120ms ease, color 120ms ease
+
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset 2px
+
+.data-view-generation__cancel
+  padding 0 8px
+  border 0
+  background transparent
+  color rgba(0, 0, 0, 0.5)
 
   &:hover
-    opacity 1
+    background rgba(0, 0, 0, 0.05)
+    color $textColor
+
+.data-view-generation__submit
+  padding 0 14px
+  border 0
+  background $textColorDark
+  color white
+  font-weight 600
+
+  &:hover
+    background black
 
 .data-view-generation__status
   display flex
   align-items center
   gap 8px
+  padding-top 8px
+  border-top 1px solid rgba(0, 0, 0, 0.08)
   color mix($textColor, white, 70%)
+  font-size 12px
 
 .data-view-generation__status-label
+  flex-shrink 0
   font-weight 600
+  color $textColor
 
 .data-view-generation__instruction
   // The instruction is arbitrary user text on one line in a constrained row.
@@ -76,6 +146,11 @@
   overflow hidden
   text-overflow ellipsis
   white-space nowrap
+
+.data-view-generation__trajectory
+  flex-shrink 0
+  margin-left auto
+  font-variant-numeric tabular-nums
 
 .data-view-generation__timeline
   // COLLAPSED IS ONE ROW; EXPANDED IS A LIST, and the panel sits in a controls
@@ -89,9 +164,12 @@
   min-width 0
   max-height 260px
   overflow-y auto
-  border 1px solid $borderColor
-  border-radius 4px
-  padding 4px 6px
+  margin-top 8px
+  padding 6px 8px
+  border 1px solid rgba(0, 0, 0, 0.08)
+  border-radius $button_border_radius
+  background $backgroundColor
+  font-size 12px
 
   // Collapsed, the box is a single row and a scrollbar or a fixed height would
   // both be wrong. :has is what lets the frame follow the component's own
@@ -109,16 +187,21 @@
   font-size 12px
 
 .data-view-generation__explanation,
+.data-view-generation__refusal,
+.data-view-generation__error
+  margin-top 8px
+  padding 8px 10px
+  border-radius $button_border_radius
+  font-size 12px
+  line-height 1.5
+
+.data-view-generation__explanation,
 .data-view-generation__refusal
-  padding 6px 10px
   border 1px solid rgba(2, 136, 209, 0.35)
-  border-radius 4px
   background rgb(229, 246, 253)
   color rgb(1, 67, 97)
 
 .data-view-generation__error
-  padding 6px 10px
   border 1px solid rgba(211, 47, 47, 0.35)
-  border-radius 4px
   background rgb(253, 237, 237)
   color rgb(95, 33, 32)

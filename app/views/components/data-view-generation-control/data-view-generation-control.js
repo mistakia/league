@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import AgentSessionTimeline from 'react-agent-timeline'
 
@@ -84,6 +84,34 @@ export default function DataViewGenerationControl({
   // reset when entries arrive -- a timeline that re-collapsed itself on every
   // live entry would be unreadable for exactly the run worth reading.
   const [is_timeline_expanded, set_is_timeline_expanded] = useState(false)
+  const input_ref = useRef(null)
+
+  // Opening the panel is a request to type in it, so the caret goes there
+  // rather than leaving the user to click the box they just asked for. Not
+  // `autoFocus`: React applies that on mount only, and the panel is also opened
+  // by the resume effect below, which does not remount it.
+  useEffect(() => {
+    if (!is_open) return
+    const element = input_ref.current
+    if (!element || element.disabled) return
+    element.focus()
+    // Caret at the end, not over a selection -- a resumed run leaves the
+    // previous instruction in the box and selecting all of it means the next
+    // keystroke silently replaces it.
+    const end = element.value.length
+    element.setSelectionRange(end, end)
+  }, [is_open])
+
+  // Grow with the prompt instead of scrolling a one-line window. A view
+  // instruction is a sentence or three, and the whole point of reviewing one
+  // before sending is being able to see all of it. The cap lives in the
+  // stylesheet -- height is reset first so the box shrinks back on delete.
+  useEffect(() => {
+    const element = input_ref.current
+    if (!element) return
+    element.style.height = 'auto'
+    element.style.height = `${element.scrollHeight}px`
+  }, [instruction, is_open])
 
   // Re-attach to a run this browser started before a reload. Runs once: the
   // stored id is read at mount and the server answers with an UPDATE frame that
@@ -115,9 +143,22 @@ export default function DataViewGenerationControl({
   // every run's first seconds, not an edge case.
   const timeline_entries = generation.timeline_entries ?? []
 
+  const can_submit = Boolean(instruction.trim()) && !is_live
+
+  // One control, three jobs, and only one of them is an abort. Dismissing
+  // clears CLIENT state -- the run itself keeps going on the server and can be
+  // resumed -- so calling it "Cancel" over a live run promises a kill it does
+  // not perform.
+  const dismiss_label = is_live ? 'Hide' : status ? 'Close' : 'Cancel'
+
+  const close_panel = () => {
+    set_is_open(false)
+    dismiss_data_view_generation()
+  }
+
   const on_submit = (event) => {
     event.preventDefault()
-    if (!instruction.trim() || is_live) return
+    if (!can_submit) return
     // The current view rides along as the EDIT case. The server treats a
     // table_state on the request as "this is what the user is looking at";
     // the agent returns a complete replacement rather than a patch.
@@ -144,33 +185,52 @@ export default function DataViewGenerationControl({
   return (
     <div className='data-view-generation data-view-generation--open'>
       <form className='data-view-generation__form' onSubmit={on_submit}>
-        <input
+        <textarea
+          ref={input_ref}
           className='data-view-generation__input'
-          type='text'
+          rows={3}
           value={instruction}
           disabled={is_live}
-          placeholder='Describe the view you want'
+          placeholder='Describe the view you want — say who the rows are, what to measure, and over which seasons or weeks.'
           aria-label='Describe the view you want'
           onChange={(event) => set_instruction(event.target.value)}
-        />
-        <button
-          type='submit'
-          className='data-view-generation__submit'
-          disabled={is_live || !instruction.trim()}
-        >
-          Build it
-        </button>
-        <button
-          type='button'
-          className='data-view-generation__close'
-          aria-label='Close'
-          onClick={() => {
-            set_is_open(false)
-            dismiss_data_view_generation()
+          onKeyDown={(event) => {
+            // Enter sends, shift-Enter breaks the line. A textarea is here to
+            // show a long prompt, not to invite one -- the instruction is a
+            // sentence, so the key that ends a sentence should send it.
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              on_submit(event)
+              return
+            }
+            if (event.key === 'Escape' && !is_live) close_panel()
           }}
-        >
-          ×
-        </button>
+        />
+        {/* Actions appear only once they do something. An always-present
+            disabled `Build it` is the loudest element in an empty panel and
+            says nothing the empty box has not already said; the hint takes its
+            place until there is a prompt to send. */}
+        <div className='data-view-generation__actions'>
+          <span className='data-view-generation__hint'>
+            {is_live
+              ? ''
+              : can_submit
+                ? 'Enter to build'
+                : 'Shift-Enter for a new line'}
+          </span>
+          <button
+            type='button'
+            className='data-view-generation__cancel'
+            onClick={close_panel}
+          >
+            {dismiss_label}
+          </button>
+          {can_submit && (
+            <button type='submit' className='data-view-generation__submit'>
+              Build it
+            </button>
+          )}
+        </div>
       </form>
 
       {status && (
