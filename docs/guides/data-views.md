@@ -2,76 +2,141 @@
 
 #### Table of Contents
 
+- [Quick start](#quick-start)
+- [The controls](#the-controls)
+- [What a row is](#what-a-row-is)
+- [Columns and field parameters](#columns-and-field-parameters)
+- [Filters](#filters)
+- [Splits](#splits)
+- [Sorting](#sorting)
+- [Saving and sharing](#saving-and-sharing)
+- [Exporting](#exporting)
+- [Scatter plots](#scatter-plots)
 - [Terminology](#terminology)
-- [Overview](#overview)
-- [Create New View](#create-new-view)
-- [Share View](#share-view)
-- [Export View](#export-view)
-- [Examples Views](#examples-views)
+- [Example views](#example-views)
   - [Total targets on first series of a drive in 2023](#total-targets-on-first-series-of-a-drive-in-2023)
   - [Total targets on third and fourth down in 2022 and 2023](#total-targets-on-third-and-fourth-down-in-2022-and-2023)
-  - [Receiving Yards from 1 WR Formations in 2023](#receiving-yards-from-1-wr-formations-in-2023)
-  - [Career Receiving Yards & Age of players under 23 years old](#career-receiving-yards--age-of-players-under-23-years-old)
-  - [Receiving Yards in Week 1 (Column for Each Year between 2019-2023)](#receiving-yards-in-week-1-column-for-each-year-between-2019-2023)
-  - [Total Receiving Yards from Week 1-3 Between 2021-2023](#total-receiving-yards-from-week-1-3-between-2021-2023)
-  - [Most Receptions over 60 yards since 2021](#most-receptions-over-60-yards-since-2021)
-  - [Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023](#receiving-yards--touchdowns-from-players-with-an-overall-espn-open-score-over-80-in-2023)
-  - [Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023](#players-with-over-80-receiving-yards-in-week-1-and-1200-receiving-yards-in-2023)
-  - [Receiving yards from non first read targets](#receiving-yards-from-non-first-read-targets)
+  - [Career receiving yards and age of players under 23](#career-receiving-yards-and-age-of-players-under-23)
+  - [Receiving yards in week 1, a column for each year 2019-2023](#receiving-yards-in-week-1-a-column-for-each-year-2019-2023)
+  - [Total receiving yards from weeks 1-3 between 2021 and 2023](#total-receiving-yards-from-weeks-1-3-between-2021-and-2023)
+  - [Most receptions over 60 yards since 2021](#most-receptions-over-60-yards-since-2021)
+  - [Receiving yards and touchdowns for players with an ESPN open score over 80 in 2023](#receiving-yards-and-touchdowns-for-players-with-an-espn-open-score-over-80-in-2023)
+  - [Players with 80+ receiving yards in week 1 and 1200+ in 2023](#players-with-80-receiving-yards-in-week-1-and-1200-in-2023)
   - [Receiving yards in the first quarter in 2023](#receiving-yards-in-the-first-quarter-in-2023)
-  - [Passing yards while the winning percentage is less than 75% in 2022 and 2023](#passing-yards-while-the-winning-percentage-is-less-than-75-in-2022-and-2023)
 
 </div>
 
 <div class="body">
 
-Start off by familiarizing yourself with the available metrics and play by play columns in the [glossary](https://xo.football/glossary). It's always a good idea to check the coverage for a given stat or play by play column in the glossary to understand how complete the results are.
+A data view is a table you build yourself: you choose the columns, the filters, and what each row represents. Nothing here is preset — the built-in views are just starting points you can copy and change.
 
-If there's something you'd like to see, or if coverage for a data point is lacking, let us know on [Discord](https://discord.gg/azSX97Qj9Z) or [submit a stat or improvement on Github](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E).
+## Quick start
 
-For advanced users and developers, see the [Data Views System Documentation](../data-views-system.md) for technical implementation details, performance guidelines, and the complete API schema.
+1. Open the **Current View** panel at the top left and select **Add view**.
+2. Open **Columns**, find a field, and click `+` to add it. It appears under **SHOWN IN TABLE** at the top of the panel.
+3. Hover the field under **SHOWN IN TABLE** and click the arrow to expand its parameters — season, week, and anything else that changes how the number is calculated.
+4. Select **Apply**. Results load immediately.
+
+That is the whole loop. Everything below is detail on one of those steps.
+
+Before you go far, skim the [glossary](https://xo.football/glossary) — it defines every metric and play-by-play column, and it lists the coverage for each one, which is the fastest way to find out whether a stat goes back as far as you need.
+
+If a data point is missing or its coverage is thin, say so on [Discord](https://discord.gg/azSX97Qj9Z) or [submit a stat request on GitHub](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E).
+
+## The controls
+
+Everything lives in one bar above the table.
+
+| Control               | What it does                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| **Current View**      | Names the view you are on. Opens a panel to search views, switch, duplicate, or **Add view**. |
+| **⋮** (the view menu) | Copy a share link, export, recalculate, clear the local cache.                                |
+| **Player** / **Team** | What each row represents.                                                                     |
+| **Columns**           | Add, remove, reorder columns and edit their parameters.                                       |
+| **Filter**            | Narrow which rows come back.                                                                  |
+| **Splits**            | Break each row out along an axis such as season or week.                                      |
+| **Save** / **Reset**  | Appear once you have unsaved changes. **Reset** discards them; **Save** keeps the view.       |
+
+Two things about **Apply** are worth knowing up front, because both read as the control being broken.
+
+**Apply and Discard only exist while you have a pending change.** Inside **Columns**, **Filter** and **Splits**, your edits are held locally until you apply them, and the two buttons appear at that moment. An open panel with no buttons means you have not changed anything yet.
+
+**Splits is empty unless a selected column offers an axis.** With nothing applicable selected it says `No splits available for selected columns`, which is a statement about your columns rather than a fault.
+
+## What a row is
+
+The **Player** / **Team** toggle sets what each row means. In the app's own words: _what each row in the table represents. Switching prunes columns, filters, and sorts to those compatible with the selected grain._
+
+So switching is not purely cosmetic — a column that only makes sense per player is dropped when you switch to **Team**, and the same for filters and sorts. Your selections for each side are remembered for the session, so flipping back restores what you had.
+
+Each grain seeds its own leading columns: **Player** starts with name, NFL team and position; **Team** starts with the team code and name.
+
+## Columns and field parameters
+
+Open **Columns**. The panel has two halves:
+
+- **SHOWN IN TABLE** — the columns currently in the view. Drag to reorder. Hover one and expand it to edit its parameters. **Bulk Edit** edits a parameter across several columns at once; **Remove All** clears them.
+- **AVAILABLE COLUMNS** — everything else, grouped by category (projection, measurables, betting markets, PFF, ESPN, rankings, and more). Use **Search columns** rather than scrolling; there are several hundred.
+
+**Field parameters are the part people miss, and they are where most of the power is.** A field such as `Receiving Yards (By Play)` is not one number — it is a calculation over play-by-play data, and its parameters decide which plays count: which seasons, which weeks, which downs, which quarter, which field position. Two columns of the same field with different parameters are two different questions side by side, which is how most of the examples below are built.
+
+You can add the same field more than once. That is deliberate — a column per season is the normal way to see a trend.
+
+## Filters
+
+Open **Filter**. Search for a field, add it, then set an operator and a value. Filters accept parameters too, under the same expand-and-edit pattern as columns.
+
+**A filter and a field parameter are different things and are easy to confuse.** A filter decides which ROWS come back. A field parameter decides which plays feed the VALUE in one column. "Players who had at least 1200 receiving yards" is a filter; "receiving yards, but only from the first quarter" is a parameter.
+
+A filter does not need its field to be a visible column, and a visible column does not have to be filtered.
+
+## Splits
+
+**Splits** breaks each row out along an axis, so one player becomes one row per season, or per week. It appears when a selected column offers an axis; columns that cannot answer along that axis do not offer it.
+
+Two columns can offer the same axis and mean different things by it, and when that happens the option is disabled with both sides named rather than silently picking one.
+
+## Sorting
+
+Click a column header for its menu: **Sort ascending**, **Sort descending**, and the `(multi)` variants that add the column to an existing sort instead of replacing it. The same menu carries **Filter** (adds this column as a filter) and **Remove column**.
+
+## Saving and sharing
+
+**Save** keeps the view on your account and requires being signed in. If the view is not yours to edit — a built-in, or one you opened from someone's link — **Save** is disabled and the way forward is to duplicate it from the **Current View** panel first.
+
+**Copy Link** in the view menu works whether or not you are signed in, and captures the view exactly as it stands. It is a snapshot: change the view afterwards and you need a fresh link.
+
+## Exporting
+
+From the view menu: **Export CSV**, **Export JSON**, **Export Markdown**, and **Copy To Clipboard**.
+
+Saved views additionally get an API URL in that menu, returning the same data as CSV or JSON — useful for a spreadsheet or a script that should re-fetch rather than hold a stale copy.
+
+Two other entries live there. **Recalculate View** re-runs the query instead of taking a cached result, which is what you want after the underlying data has been updated. **Clear Local Cache** discards the view state this browser has stored.
+
+## Scatter plots
+
+On any numeric column's header menu, choose **Select for scatter plot X**, and another column's **Select for scatter plot Y**. A **Show Plot** button then appears in the toolbar. Points carry team logos, and you can color them by team or position from inside the plot.
 
 ## Terminology
 
-| Term                 | Definition                                                                                                                                                                             |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `View`               | A collection of fields (columns), filters, and sorting options.                                                                                                                        |
-| `Field`              | A data point or metric. Shown as a column in the view.                                                                                                                                 |
-| `Field Parameters`   | Additional options that modify how a field is calculated or displayed.                                                                                                                 |
-| `Filter`             | A condition that narrows down the rows in the view. Can be confused with `Field Parameters`. Filters narrow down the rows whereas field parameters narrow down the values in a column. |
-| `View Controller`    | Lists the current view, search for views, and allows you to add/remove views.                                                                                                          |
-| `Columns Controller` | Lists the current fields (columns) used in the view and allows you to add/remove fields.                                                                                               |
-| `Filters Controller` | Lists the current fields used in the view as filters and allows you to add/remove filters.                                                                                             |
-| `View Menu`          | Contains options for sharing and exporting data from the view.                                                                                                                         |
+| Term                        | Definition                                                                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **View**                    | A saved combination of columns, filters, sorting, row grain and splits.                                                                |
+| **Field**                   | A single data point or metric. Shown as a column.                                                                                      |
+| **Field parameters**        | Options that change how a field is calculated — which seasons, weeks, downs, and so on.                                                |
+| **Filter**                  | A condition on which rows come back. Not the same as a field parameter: filters narrow ROWS, parameters narrow the values in a COLUMN. |
+| **Row grain**               | What one row represents — a player or a team.                                                                                          |
+| **Split**                   | An axis that expands one row into several, such as a row per season.                                                                   |
+| **Current View panel**      | Names the current view; used to search, switch, duplicate and add views.                                                               |
+| **Columns / Filter panels** | Where columns and filters are added, removed and configured.                                                                           |
+| **View menu**               | The `⋮` button: sharing, exporting, recalculating.                                                                                     |
 
-## Overview
+For technical detail — row-grain identities, the column contract, the sandboxed SQL tier — see the [Data Views System documentation](../data-views-system.md).
 
-- Each row in the view is a player or a team. To filter to just teams, select `Team` or `DST` in the `Position` field in the `Filters Controller`.
-- Each column in the view is a `Field`. To change the columns displayed in the view, open the `Columns Controller` and add or remove `Fields`. To modify the value shown in a given column, expand the `Field` in the `Columns Controller` and modify the field parameters.
+## Example views
 
-## Create New View
-
-1. Create a view by clicking on the `View Controller` that lists the current view (top left) and selecting `+ Add View`.
-2. Add columns by opening the `Columns Controller`.
-3. Hover over a `Field` you'd like to add and click `+`.
-4. Fields calculated from play by play data will have additional parameters you can modify.
-   1. Hover over the selected field under the `shown in table` section (at the top) and click the down arrow to expand and view the available parameters.
-5. Fields in the `shown in table` section can be dragged and dropped to reorder the columns.
-6. As you make changes, select `Apply` to update the view and display results.
-
-## Share View
-
-For logged out users, you can obtain a link to the current state of a view by opening the `View Menu` (ellipsis (`...`) button in the top left) and selecting `Copy Link`. This link can be shared with anyone, allowing them to view the same view in its current state. If you make any changes, you'll have to grab a new link.
-
-For logged in users, you can save the current view by clicking `save` in the top right corner of the table.
-
-## Export View
-
-You can download the data from a view in either CSV or JSON format. You can directly download the data by opening the `View Menu` (ellipsis (`...`) button in the top left) and selecting `Export CSV` or `Export JSON`.
-
-Alternatively for any saved views, you can grab a API URL endpoint that will return the data for the view in CSV or JSON format. The links will be available in the `View Menu`.
-
-## Examples Views
+Each example links to a live view, followed by the steps to build it yourself. They assume you have opened **Columns** and are working in the **AVAILABLE COLUMNS** half; every one ends with **Apply**.
 
 #### Total targets on first series of a drive in 2023
 
@@ -79,15 +144,15 @@ Alternatively for any saved views, you can grab a API URL endpoint that will ret
 
 ```
 - add view
-- open columns controller
-- search for `targets` or scroll and select `Targets (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over `Targets (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set the column parameters
+- open Columns
+- search for `targets` and select `Targets (By Play)`, under the Receiving category
+- the column appears under SHOWN IN TABLE at the top of the panel
+- hover it there and expand it to show its parameters
+- set the parameters
   - `series_sequence` to `1 to 1`
   - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+- select Apply
+- press `esc` or click away to close the panel
 ```
 
 #### Total targets on third and fourth down in 2022 and 2023
@@ -96,176 +161,129 @@ Alternatively for any saved views, you can grab a API URL endpoint that will ret
 
 ```
 - add view
-- open columns controller
-- search for `targets`, scroll and select `Targets (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over `Targets (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
+- open Columns
+- search for `targets` and select `Targets (By Play)`, under the Receiving category
+- hover it under SHOWN IN TABLE and expand it
+- set the parameters
   - `down` to `3 to 4`
-  - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+  - `Year` to `2022` and `2023`
+- select Apply
 ```
 
-#### Receiving Yards from 1 WR Formations in 2023
-
-TODO
-
-#### Career Receiving Yards & Age of players under 23 years old
+#### Career receiving yards and age of players under 23
 
 [View Link](https://xo.football/data-views?columns=%5B%22player_receiving_yards_from_plays%22%2C%22player_age%22%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_age%22%2C%22operator%22%3A%22%3C%3D%22%2C%22value%22%3A%2223%22%7D%5D&view_id=a4f07e01-37b6-4743-9557-76644968a361&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
+This one uses a filter as well as columns, and shows that the filtered field can also be a visible column.
+
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- search for `age`, scroll and select `Age`
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- select apply (apply the column to the view)
-- hit `esc` or click away from the columns controller to close it
-- open filters controller
-- search for `Age`, scrolle and select `Age`
+- open Columns
+- search for `receiving yards` and select `Receiving Yards (By Play)`, under the Receiving category
+- search for `age` and select `Age`
+- select Apply, then close the panel
+- open Filter
+- search for `Age` and select `Age`
   - set the operator to `Less than or equal`
   - set the value to `23`
-- select apply (apply the filter to the view)
-- hit `esc` or click away from the filters controller to close it
+- select Apply
 ```
 
-#### Receiving Yards in Week 1 (Column for Each Year between 2019-2023)
+#### Receiving yards in week 1, a column for each year 2019-2023
 
 [View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2022%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2021%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2020%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%2C2022%2C2021%2C2020%2C2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%2C%22column_index%22%3A5%7D%5D&where=%5B%5D&view_id=8ec84f0b-6253-4472-8f25-ade76ec8dd5d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
+The clearest illustration of one field added repeatedly with different parameters. Note the last column totals all five seasons, so it is the one worth sorting on.
+
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-  - add the column 5 times by repeatedly clicking the `+` button
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-  - there should be 5 `Receiving Yards (By Play)` columns
-- hover over the first `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set the column parameters for the first column
+- open Columns
+- search for `receiving yards` and select `Receiving Yards (By Play)`, under the Receiving category
+  - click `+` five times to add five copies
+- five `Receiving Yards (By Play)` entries now sit under SHOWN IN TABLE
+- expand the first and set
   - `Year` to `2023`
   - `Week` to `1`
-- repeat the above for the other 4 columns, setting the year to `2022`, `2021`, `2020`, `2019`
-- additionally add another column for cumulative receiving yards across those years from week 1 games
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- hover over the newly added `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2019`, `2020`, `2021`, `2022`, `2023`
+- repeat for the other four, setting `Year` to 2022, 2021, 2020 and 2019
+- add a sixth copy for the cumulative total and set
+  - `Year` to 2019, 2020, 2021, 2022 and 2023
   - `Week` to `1`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
-- sort by the cumulative receiving yards column descending
+- select Apply and close the panel
+- sort descending on the cumulative column
 ```
 
-#### Total Receiving Yards from Week 1-3 Between 2021-2023
+#### Total receiving yards from weeks 1-3 between 2021 and 2023
 
 [View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=461ff2dd-dd68-4ad8-b52e-e19233f7c23d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over the `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2021`, `2022`, `2023`
-  - `Week` to `1` to `3`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+- open Columns
+- search for `receiving yards` and select `Receiving Yards (By Play)`
+- expand it under SHOWN IN TABLE and set
+  - `Year` to 2021, 2022 and 2023
+  - `Week` to `1 to 3`
+- select Apply
 ```
 
-#### Most Receptions over 60 yards since 2021
+#### Most receptions over 60 yards since 2021
 
 [View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10%2C11%2C12%2C13%2C14%2C15%2C16%2C17%2C18%2C19%2C20%2C21%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%2C%22recv_yds%22%3A%5B60%2C99%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=0a0b78b0-6e4f-4d0d-8a85-4ee9f301b68c&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
+A parameter, not a filter: the length condition selects which PLAYS are counted, so the column holds a count of long receptions rather than a filtered list of players.
+
 ```
 - add view
-- open columns controller
-- search for `receptions`, scroll and select `Receptions (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over the `Receptions (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2021`, `2022`, `2023`
-  - `Recv Yds` to `60` to `99`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+- open Columns
+- search for `receptions` and select `Receptions (By Play)`, under the Receiving category
+- expand it under SHOWN IN TABLE and set
+  - `Year` to 2021, 2022 and 2023
+  - `Recv Yds` to `60 to 99`
+- select Apply
 ```
 
-#### Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023
+#### Receiving yards and touchdowns for players with an ESPN open score over 80 in 2023
 
 [View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_touchdowns_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%7D%5D&view_id=48240f40-87a3-48e3-b03a-4536b9928a17&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
+Note the filter carries its own `Year` parameter. Without it the filter would judge a different season than the columns show.
+
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2023`
-- search for `receiving touchdowns`, scroll and select `Receiving Touchdowns (By Play)` it will be under the `Receiving` category
-- hover over `Receiving Touchdowns (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2023`
-- search for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
-- hover over `ESPN Open Score` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
-- open filter controller
-- search for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
-  - set the operator to `Greater Than or Equal`
+- open Columns
+- add `Receiving Yards (By Play)` and set `Year` to `2023`
+- add `Receiving Touchdowns (By Play)` and set `Year` to `2023`
+- add `ESPN Open Score`, under the ESPN category, and set `Year` to `2023`
+- select Apply and close the panel
+- open Filter
+- search for `espn open score` and select `ESPN Open Score`
+  - set the operator to `Greater than or equal`
   - set the value to `80`
-  - expand filter to view available parameters
-  - set filter params
-    - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+  - expand the filter and set `Year` to `2023`
+- select Apply
 ```
 
-#### Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023
+#### Players with 80+ receiving yards in week 1 and 1200+ in 2023
 
 [View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%2C%22params%22%3A%7B%22week%22%3A%5B1%5D%2C%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%221200%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&view_id=18c19779-091e-4c31-9791-0b74180d3a8d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
+Two filters on the same field with different parameters — the same trick as repeated columns, applied to rows.
+
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over the `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2023`
-  - `Week` to `1`
-- search for `receiving yards`, scoll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- hover over the new `Receiving Yards (By Play)` (second one) in the `shown in the table` section to expand it and display available parameters
-- set column parameters
-  - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
-- open filters controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-  - set the operator to `Greater Than or Equal`
-  - set the value to `80`
-  - expand filter to view available parameters
-  - set filter params
-    - `Year` to `2023`
-    - `Week` to `1`
-  - `Recv Yds` to `80` to `99`
-- add another search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-  - set the operator to `Greater Than or Equal`
-  - set the value to `1200`
-  - expand filter to view available parameters
-  - set filter params
-    - `Year` to `2023`
-- apply changes
-- hit `esc` or click away from the filters controller to close it
+- open Columns
+- add `Receiving Yards (By Play)` and set `Year` to `2023`, `Week` to `1`
+- add a second `Receiving Yards (By Play)` and set `Year` to `2023`
+- select Apply and close the panel
+- open Filter
+- add `Receiving Yards (By Play)`
+  - operator `Greater than or equal`, value `80`
+  - expand and set `Year` to `2023`, `Week` to `1`
+- add a second `Receiving Yards (By Play)`
+  - operator `Greater than or equal`, value `1200`
+  - expand and set `Year` to `2023`
+- select Apply
 ```
-
-#### Receiving yards from non first read targets
-
-TODO
 
 #### Receiving yards in the first quarter in 2023
 
@@ -273,19 +291,12 @@ TODO
 
 ```
 - add view
-- open columns controller
-- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- once selected the column will appear in the `shown in table` section at the top of the columns controller
-- hover over the new `Receiving Yards (By Play)` (second one) in the `shown in the table` section to expand it and display available parameters
-- set column parameters
+- open Columns
+- search for `receiving yards` and select `Receiving Yards (By Play)`
+- expand it under SHOWN IN TABLE and set
   - `Year` to `2023`
   - `Qtr` to `1`
-- apply changes
-- hit `esc` or click away from the columns controller to close it
+- select Apply
 ```
-
-#### Passing yards while the winning percentage is less than 75% in 2022 and 2023
-
-TODO
 
 </div>
