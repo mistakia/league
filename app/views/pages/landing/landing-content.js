@@ -70,7 +70,13 @@ export const landing_sections = [
     // test/app.landing-links.spec.mjs fails on a landing entry naming one.
     // Their `note` is what says so to a reader.
     title: 'Accounts',
-    blurb: 'An account saves your work.',
+    // THE AVAILABILITY LIVES HERE, ON THE ACCOUNT, NOT ON EACH FEATURE. It was
+    // a per-entry `on request` note beside Agent-built views, which stated a
+    // property of the ACCOUNT as though it were a property of that one
+    // capability — and would have to be repeated on the next gated thing. An
+    // account is invite only and everything an account unlocks inherits that,
+    // so the section says it once and the entries below say what they are.
+    blurb: 'An account saves your work. Invite only, and by request.',
     links: [
       {
         // NOT "a saved view gets a link" — a share link is generated for any
@@ -82,14 +88,17 @@ export const landing_sections = [
           'Build and share views without an account. An account is what keeps them.'
       },
       {
-        // The entitlement is `users.data_view_generation_is_enabled`, NOT NULL
-        // DEFAULT false, and the control is hidden outright for an account
-        // without it — so "on request" is the literal mechanism rather than a
-        // softer word for unavailable.
+        // POINTS AT WHERE THE FEATURE LIVES, like Saved views above it. The
+        // control is rendered inside data views for an account carrying
+        // `users.data_view_generation_is_enabled`, so that is its destination —
+        // it never had a page of its own, which is the only reason it was a
+        // bare entry. The entitlement is not restated here: the section blurb
+        // says an account is invite only and by request, and this is one of the
+        // things an account unlocks.
         label: 'Agent-built views',
+        to: '/data-views',
         description:
-          'Describe a table; an agent builds everything else — columns, filters, splits — and shows you what it ran.',
-        note: 'on request'
+          'Describe a table; an agent builds everything else — columns, filters, splits — and shows you what it ran.'
       },
       {
         // MOVED HERE FROM `Leagues`, AND DELIBERATELY REFRAMED. The previous
@@ -136,7 +145,7 @@ export const landing_sections = [
         label: 'Source on GitHub',
         href: github_url,
         description:
-          'The transaction rules, the cap arithmetic and the scoring, all readable.'
+          'The whole platform — the app, the API, the data pipeline and the rules it enforces.'
       },
       {
         label: 'About',

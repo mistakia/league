@@ -246,10 +246,19 @@
   @media (max-width 640px)
     margin-bottom 0.35em
 
-// An entry with no destination yet. Same type as its linked siblings so the
-// column stays even, in the muted ink so it does not read as clickable.
+// An entry with no destination yet. FULL INK, like every linked sibling — the
+// muted grey this carried read as the entry being faded out, which is the
+// register of something disabled rather than of something still being built.
+// What marks it as not clickable is the missing underline, which is the same
+// signal every other page uses and does not cost the label its weight in the
+// column. Its `note` says why there is no link.
+//
+// Set explicitly rather than left to inherit: prose_page() colours the page
+// $prose_body and only an anchor gets $prose_ink, so dropping this rule
+// entirely would leave the label a step lighter than its linked siblings —
+// a third state, and a quieter version of the fade being removed here.
 .landing__link-label--inert
-  color $prose_muted
+  color $prose_ink
 
 // The one thing on the page that qualifies rather than names. Tiny, mono,
 // muted — it has to be legible beside the label without competing with it,
