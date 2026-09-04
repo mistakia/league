@@ -105,6 +105,24 @@ const RUN_TIMEOUT_MS = 22 * 60 * 1000
 const TRANSCRIPT_SETTLE_TIMEOUT_MS = 90 * 1000
 const TRANSCRIPT_SETTLE_POLL_MS = 3 * 1000
 
+// How hard the runner tries to release a finished run's session, and how long it
+// then waits for the slot to actually be free. Both exist because the SAME
+// failure -- a session left registered as running -- is silent at the point it
+// happens and only shows up as the next three instructions expiring.
+const REAP_ATTEMPTS = 3
+const REAP_RETRY_MS = 10 * 1000
+const SLOT_WAIT_TIMEOUT_MS = 3 * 60 * 1000
+const SLOT_POLL_MS = 5 * 1000
+
+// The session_slug prefix `dispatch_generation_session` mints, which is how a
+// generation session is told apart from every other live thread in the running
+// list. Kept in step with base-session-client.mjs by nothing but this comment:
+// the runner cannot import from libs-server without dragging the dispatch path
+// into a script that must not dispatch.
+const GENERATION_SESSION_LABEL_PREFIX = 'data-view-generation-'
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
@@ -465,17 +483,101 @@ export const reap_stranded_session = async ({ thread_id, log }) => {
     }
   }
 
-  const ended = await try_exec(
-    'base',
-    ['thread', 'end', thread_id, '--force-cross-thread'],
-    { cwd: USER_BASE_DIR }
-  )
-  if (!ended.ok) {
-    log(`  session reap failed: ${ended.error}`)
-    return { reaped: false, reason: ended.error }
+  // RETRIED, because a reap that fails once costs every REMAINING instruction.
+  // `base thread end` answered "Thread not found" on two consecutive runs of the
+  // 2026-09-04 sweep for threads that resolve fine minutes later -- the record is
+  // briefly unresolvable to this host right after the session is created. The
+  // old code logged that and moved on, which left the slot held and made the
+  // three instructions behind it expire un-dispatched at 15 minutes each. A
+  // transient miss must not be indistinguishable from a released session.
+  let last_error = null
+  for (let attempt = 1; attempt <= REAP_ATTEMPTS; attempt++) {
+    const ended = await try_exec(
+      'base',
+      ['thread', 'end', thread_id, '--force-cross-thread'],
+      { cwd: USER_BASE_DIR }
+    )
+    if (ended.ok) {
+      log('  stranded session released')
+      return { reaped: true, reason: 'ended' }
+    }
+    last_error = ended.error
+    if (attempt < REAP_ATTEMPTS) {
+      log(`  reap attempt ${attempt} failed, retrying: ${ended.error}`)
+      await sleep(REAP_RETRY_MS)
+    }
   }
-  log('  stranded session released')
-  return { reaped: true, reason: 'ended' }
+
+  log(`  session reap failed after ${REAP_ATTEMPTS} attempts: ${last_error}`)
+  return { reaped: false, reason: last_error }
+}
+
+/**
+ * Wait until no STRANDED generation session holds the profile's single slot.
+ *
+ * THE PRECONDITION EVERY DISPATCH DEPENDS ON, asserted rather than assumed. The
+ * drainer cannot claim a job while a session is registered as running, and a job
+ * it never claims does not fail -- it sits `queued` until its own 15-minute
+ * deadline and is recorded `expired` with a null `dispatched_at`. That row looks
+ * exactly like a generation too slow to finish, so a held slot reads as the
+ * thing the benchmark exists to measure. Three rows of the 2026-09-04 sweep were
+ * read that way before the null dispatch timestamp gave it away.
+ *
+ * SCOPE, measured rather than assumed: a HEALTHY in-flight generation session
+ * does not appear in `base thread list --running` at all. Polled every 8s across
+ * a 32-second run on 2026-09-04, the list never once showed it, while the job row
+ * went queued -> running -> completed throughout. What the list DOES surface is
+ * the stranded case -- a session the reconciler left in `awaiting_user` after its
+ * job went terminal -- which is the only state that actually blocks a later
+ * dispatch, and is exactly the state that wedged that sweep. So this is a
+ * leftover-detector, not a concurrency gate; serialization is what keeps two live
+ * runs from overlapping, and this catches the corpse the previous run left behind.
+ *
+ * Returns rather than throws when the slot stays held: the caller reports it on
+ * the row, and one stuck sweep should not discard the runs already paid for.
+ *
+ * @param {object} params
+ * @param {(message: string) => void} params.log
+ * @returns {Promise<{free: boolean, holder: string|null}>}
+ */
+export const await_generation_slot_free = async ({ log }) => {
+  const deadline = Date.now() + SLOT_WAIT_TIMEOUT_MS
+  let announced = false
+
+  for (;;) {
+    const { ok, stdout } = await try_exec(
+      'base',
+      ['thread', 'list', '--running'],
+      { cwd: USER_BASE_DIR }
+    )
+    // A list we could not read is not evidence the slot is held. Proceeding is
+    // the safe direction: the dispatch either succeeds or returns a 429 the job
+    // row records honestly.
+    if (!ok) return { free: true, holder: null }
+
+    const holder = stdout
+      .split('\n')
+      .find((line) => line.includes(GENERATION_SESSION_LABEL_PREFIX))
+    if (!holder) {
+      if (announced) log('  slot released')
+      return { free: true, holder: null }
+    }
+
+    const thread_id = holder
+      .split(/\s+/)
+      .find((field) => UUID_PATTERN.test(field))
+    if (!announced) {
+      log(
+        `  waiting for the generation slot, held by ${thread_id || 'a session'}`
+      )
+      announced = true
+    }
+
+    if (Date.now() > deadline) {
+      return { free: false, holder: thread_id || null }
+    }
+    await sleep(SLOT_POLL_MS)
+  }
 }
 
 /**
@@ -487,6 +589,11 @@ export const reap_stranded_session = async ({ thread_id, log }) => {
 export const run_one = async ({ entry, iteration, log }) => {
   log(`\n${entry.instruction_id} (run ${iteration})`)
   log(`  "${entry.instruction}"`)
+
+  // Before the clock starts, not after: a job enqueued against a held slot
+  // spends its whole 15-minute deadline queued, and the wall time it reports is
+  // the deadline rather than anything the agent did.
+  const slot = await await_generation_slot_free({ log })
 
   const contention_before = await read_contention()
   const cache_before = await read_prefix_cache_counters()
@@ -536,6 +643,12 @@ export const run_one = async ({ entry, iteration, log }) => {
     session_id,
     status: job.status,
     runner_timed_out: Boolean(job.runner_timed_out),
+    // The two columns that separate "the agent was slow" from "the job never
+    // reached an agent". A null dispatch timestamp on an expired row means the
+    // drainer never claimed it, which is a capacity fact about the sweep and
+    // says nothing about the instruction.
+    dispatched_at: job.dispatched_at ? job.dispatched_at.toISOString() : null,
+    slot_free_before_dispatch: slot.free,
     branch: job.generation_branch || null,
     error_code: job.error_code || null,
     wall_ms,
@@ -601,7 +714,14 @@ export const format_table = (rows) => {
   const body = rows.map((row) => [
     row.instruction_id,
     String(row.iteration),
-    row.runner_timed_out ? 'STUCK' : row.status,
+    // UNDISPATCHED outranks the job's own status deliberately: `expired` with
+    // no dispatch is a queue fact, and printing it as `expired` invites reading
+    // a capacity problem as a slow instruction.
+    row.runner_timed_out
+      ? 'STUCK'
+      : row.dispatched_at === null && row.status === 'expired'
+        ? 'UNDISPATCHED'
+        : row.status,
     row.branch || '-',
     row.turns === null ? '?' : String(row.turns),
     row.output_tokens === null ? '?' : String(row.output_tokens),
