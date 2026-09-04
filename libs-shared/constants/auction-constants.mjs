@@ -15,7 +15,8 @@ export const auction_election_outcomes = {
   WON: 'won',
   // a strictly higher claim won
   OUTBID: 'outbid',
-  // tied the winning amount and lost on nomination order or amount_set_at
+  // tied the winning amount and lost on nomination order, then on who committed
+  // to that amount first -- a placed BID counts, not only a stated maximum
   LOST_TIEBREAK: 'lost_tiebreak',
   // null maximum at settlement
   DECLINED: 'declined',
@@ -72,7 +73,7 @@ export const auction_election_outcome_descriptions = {
   [auction_election_outcomes.WON]: 'This election signed the player.',
   [auction_election_outcomes.OUTBID]: 'A higher maximum won the player.',
   [auction_election_outcomes.LOST_TIEBREAK]:
-    'Tied the winning amount and lost on nomination order, then on which maximum was set first.',
+    'Tied the winning amount and lost on nomination order, then on which team committed to that amount first. A bid already placed counts, not just a maximum you set.',
   [auction_election_outcomes.DECLINED]:
     'You declined this player, so no maximum was in play.',
   [auction_election_outcomes.BUDGET_EXCEEDED]:

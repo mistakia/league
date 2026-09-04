@@ -261,13 +261,25 @@ export const get_outstanding_election_team_ids = ({
     // reached through that gate and is written for the general statement, not
     // for a constructible input.
     //
-    // AND THE GUARANTEE IS EXACTLY "CANNOT IMPROVE ITS OWN CLAIM". It used to be
-    // narrower than that, because a later election at or above an equal bid
-    // pushed the single `amount_set_at` forward and the tiebreak read it, so a
-    // discharge quietly handed the team back its earlier BID instant. Claims now
-    // carry every commitment and the resolver ranks on the EARLIEST one covering
-    // the amount, so an election that cannot raise the claim cannot move the
-    // tiebreak either, and the discharge changes nothing at all.
+    // AND THE GUARANTEE IS "CANNOT IMPROVE ITS OWN CLAIM", NOT "CANNOT AFFECT
+    // ANYTHING". Keep those apart -- the stronger reading is wrong and was
+    // written here once.
+    //
+    // The TIEBREAK half is now genuinely unaffected, which it was not before.
+    // A later election at or above an equal bid used to push the claim's single
+    // `amount_set_at` forward, so a discharge quietly handed the team back its
+    // earlier bid instant; claims now carry every commitment and the resolver
+    // ranks on the earliest one covering the amount, and for a discharged team
+    // that is always the bid, since its effective maximum clamps to the cap its
+    // bid already reached.
+    //
+    // What a discharge DOES still change is the LEDGER. A team discharged
+    // without electing has no `auction_elections` row, so `persist_auction_settlement`
+    // has nothing to write its outcome onto even when it WINS -- see the comment
+    // there, which explains why fabricating a row is the worse option. The
+    // winning bid's `user_id` then falls back to the bidder rather than the
+    // election's author, and those differ when a commissioner wrote the election
+    // for another team, which this league allows.
     //
     // This reads only placed bids and roster-derived caps, both already public,
     // so the outstanding set stays broadcastable exactly as it is today.

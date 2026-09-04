@@ -1,6 +1,46 @@
 import { auction_election_outcomes, AUCTION_BID_INCREMENT } from '#constants'
 
 /**
+ * The earliest instant a team was on record for at least `amount`.
+ *
+ * THE TIEBREAK RANKS ON THE EFFECTIVE MAXIMUM, SO ITS TIMESTAMP MUST TOO. The
+ * claim builder cannot answer this: the effective maximum is
+ * `min(stated, available_cap)` and the caps arrive here, so a timestamp attached
+ * upstream necessarily belongs to the STATED amount. Whenever a claim was
+ * clamped that is an amount which never took effect, and the team was ranked on
+ * a moment it never committed to the number it is competing at.
+ *
+ * The rule is the earliest commitment that COVERS the ranked amount. A
+ * commitment below it is not evidence of anything at this price -- a $5 bid says
+ * nothing about $10 -- and the earliest covering one is exactly "when did this
+ * team put at least this much on the table", which is what the priority rule
+ * claims to measure.
+ *
+ * It also settles the equal-amount case the old raise-guard got wrong. A team
+ * that bid $5 and later elected $5 holds two commitments at $5; the earlier one
+ * wins, so the money on the wire keeps its priority instead of losing it to its
+ * own confirmation.
+ *
+ * Returns null when nothing covers the amount. Both routes to it are nominator
+ * claims built with no bids in hand: the synthetic claim, which carries no
+ * commitments at all, and the raise branch beside it, which lifts an existing
+ * claim's `maximum_bid` to the opening bid without recording an instant for it.
+ * The second one can therefore return null while holding commitments. Neither is
+ * reachable from a shipped caller, since the nomination is always the first row
+ * in `bids`.
+ */
+const earliest_commitment_at = ({ commitments = [], amount }) => {
+  let earliest = null
+  for (const commitment of commitments) {
+    if (commitment.amount < amount) continue
+    const at = new Date(commitment.at).getTime()
+    if (Number.isNaN(at)) continue
+    if (earliest === null || at < earliest) earliest = at
+  }
+  return earliest
+}
+
+/**
  * Second-price resolution for one nominated auction player.
  *
  * PURE. No database, no clock, no socket. `auction-settlement.mjs` owns
@@ -32,41 +72,6 @@ import { auction_election_outcomes, AUCTION_BID_INCREMENT } from '#constants'
  *   readings coincide.
  * @returns {{ winner_tid: number|null, price: number, outcomes: Map<number, {outcome: string}> }}
  */
-/**
- * The earliest instant a team was on record for at least `amount`.
- *
- * THE TIEBREAK RANKS ON THE EFFECTIVE MAXIMUM, SO ITS TIMESTAMP MUST TOO. The
- * claim builder cannot answer this: the effective maximum is
- * `min(stated, available_cap)` and the caps arrive here, so a timestamp attached
- * upstream necessarily belongs to the STATED amount. Whenever a claim was
- * clamped that is an amount which never took effect, and the team was ranked on
- * a moment it never committed to the number it is competing at.
- *
- * The rule is the earliest commitment that COVERS the ranked amount. A
- * commitment below it is not evidence of anything at this price -- a $5 bid says
- * nothing about $10 -- and the earliest covering one is exactly "when did this
- * team put at least this much on the table", which is what the priority rule
- * claims to measure.
- *
- * It also settles the equal-amount case the old raise-guard got wrong. A team
- * that bid $5 and later elected $5 holds two commitments at $5; the earlier one
- * wins, so the money on the wire keeps its priority instead of losing it to its
- * own confirmation.
- *
- * Returns null when nothing covers the amount, which is reachable only for the
- * synthetic nominator claim built with no commitments at all.
- */
-const earliest_commitment_at = ({ commitments = [], amount }) => {
-  let earliest = null
-  for (const commitment of commitments) {
-    if (commitment.amount < amount) continue
-    const at = new Date(commitment.at).getTime()
-    if (Number.isNaN(at)) continue
-    if (earliest === null || at < earliest) earliest = at
-  }
-  return earliest
-}
-
 export const resolve_auction_player = ({
   claims = [],
   rosters,
