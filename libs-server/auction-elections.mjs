@@ -5,7 +5,7 @@ import {
   lock_auction_for_league,
   get_active_auction_nomination,
   get_auction_team_capacities,
-  get_outstanding_team_ids,
+  get_outstanding_election_team_ids,
   settle_auction_player_if_complete
 } from './auction-settlement.mjs'
 import getRoster from './get-roster.mjs'
@@ -56,6 +56,59 @@ const get_live_election = async ({ trx, lid, season_year, pid, tid }) => {
     .whereNull('withdrawn_at')
     .whereNull('settled_at')
   return rows[0]
+}
+
+/**
+ * Write or revise one team's election, inside a transaction the CALLER owns.
+ *
+ * Split out of `submit_auction_election` so a nomination can carry its
+ * nominator's maximum. The nomination bid and that election have to land in one
+ * transaction or a crash between them opens a player whose nominator has no
+ * election -- and since a nomination no longer discharges anyone, that player
+ * would then wait on its own nominator until someone noticed.
+ *
+ * It takes `trx` rather than opening its own and it does NOT take the advisory
+ * lock or settle. Both callers hold the lock across their own write and the
+ * completeness check that follows it, which is the point of the lock; taking it
+ * again here would say the ordering is this function's business when it is the
+ * caller's.
+ */
+export const upsert_auction_election = async ({
+  trx,
+  lid,
+  season_year,
+  pid,
+  tid,
+  user_id,
+  maximum_bid,
+  now = new Date()
+}) => {
+  const existing = await get_live_election({ trx, lid, season_year, pid, tid })
+
+  if (!existing) {
+    return trx('auction_elections').insert({
+      lid,
+      season_year,
+      pid,
+      tid,
+      user_id,
+      maximum_bid,
+      submitted_at: now,
+      amount_set_at: now
+    })
+  }
+
+  const is_same_amount = existing.maximum_bid === maximum_bid
+  return trx('auction_elections')
+    .where('election_id', existing.election_id)
+    .update({
+      user_id,
+      maximum_bid,
+      // `amount_set_at` moves ONLY when the amount moves. The tie rule compares
+      // when the winning amount was last set, so rewriting it on a no-op
+      // resubmit would let a manager refresh their priority for free.
+      amount_set_at: is_same_amount ? existing.amount_set_at : now
+    })
 }
 
 /**
@@ -133,39 +186,15 @@ export const submit_auction_election = async ({
       )
     }
 
-    const now = new Date()
-    const existing = await get_live_election({
+    await upsert_auction_election({
       trx,
       lid,
       season_year,
       pid,
-      tid
+      tid,
+      user_id,
+      maximum_bid: normalized_maximum
     })
-
-    if (existing) {
-      const is_same_amount = existing.maximum_bid === normalized_maximum
-      await trx('auction_elections')
-        .where('election_id', existing.election_id)
-        .update({
-          user_id,
-          maximum_bid: normalized_maximum,
-          // `amount_set_at` moves ONLY when the amount moves. The tie rule
-          // compares when the winning amount was last set, so rewriting it on a
-          // no-op resubmit would let a manager refresh their priority for free.
-          amount_set_at: is_same_amount ? existing.amount_set_at : now
-        })
-    } else {
-      await trx('auction_elections').insert({
-        lid,
-        season_year,
-        pid,
-        tid,
-        user_id,
-        maximum_bid: normalized_maximum,
-        submitted_at: now,
-        amount_set_at: now
-      })
-    }
 
     log(
       `team ${tid} elected ${normalized_maximum === null ? 'decline' : `$${normalized_maximum}`} on ${pid}`
@@ -315,11 +344,9 @@ export const get_auction_settlement_status = async ({
       opening_bid: nomination.opening_bid,
       nominating_team_id: nomination.nominating_team_id
     },
-    outstanding_election_tids: get_outstanding_team_ids({
+    outstanding_election_tids: get_outstanding_election_team_ids({
       capacities,
-      elections,
-      bids: nomination.bids,
-      nominating_team_id: nomination.nominating_team_id
+      elections
     })
   }
 }
@@ -357,6 +384,7 @@ export const broadcast_auction_settlement_status = async ({
 
 export default {
   submit_auction_election,
+  upsert_auction_election,
   withdraw_auction_election,
   get_team_auction_elections,
   get_auction_settlement_status,

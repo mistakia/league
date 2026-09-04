@@ -60,7 +60,20 @@ describe('auction settlement against postgres', function () {
   // The nomination IS the opening bid, written to `transactions` exactly as the
   // live socket writes it. There is no nomination-state table: the open player,
   // the current price and the leader are the latest AUCTION_BID row.
-  const nominate = async ({ pid, tid, value = 0, user_id = 1 }) => {
+  //
+  // `maximum_bid` mirrors the socket's OPTIONAL nomination ceiling. Supplying it
+  // is what discharges the nominator, because a nomination binds its nominator
+  // without discharging it -- so a nomination written without one leaves the
+  // nominating team in the outstanding set and nothing can settle until it
+  // elects. Most specs below want the player to settle and so state it; the
+  // completeness specs omit it deliberately, and that is the case under test.
+  const nominate = async ({
+    pid,
+    tid,
+    value = 0,
+    user_id = 1,
+    maximum_bid = null
+  }) => {
     await knex('transactions').insert({
       user_id,
       tid,
@@ -72,6 +85,16 @@ describe('auction settlement against postgres', function () {
       season_year,
       occurred_at: new Date()
     })
+
+    if (maximum_bid !== null) {
+      await submit_auction_election({
+        lid: league_id,
+        tid,
+        pid,
+        user_id,
+        maximum_bid
+      })
+    }
   }
 
   const free_agent = async (exclude_pids = []) => {
@@ -96,7 +119,6 @@ describe('auction settlement against postgres', function () {
       const status = await get_auction_settlement_status({ lid: league_id })
       expect(status.nomination.pid).to.equal(pid)
       expect(status.outstanding_election_tids.length).to.be.greaterThan(0)
-      expect(status.outstanding_election_tids).to.not.include(1)
 
       const processed = await knex('transactions').where({
         lid: league_id,
@@ -106,9 +128,53 @@ describe('auction settlement against postgres', function () {
       expect(processed).to.have.length(0)
     })
 
+    // A NOMINATION IS NOT AN ELECTION. The nominating team is bound to its
+    // opening bid and can still be outbid off its own nomination, so until it
+    // names a ceiling the auction does not know its position at any price above
+    // the opening -- and waits.
+    //
+    // Run as a PAIR against the same fixture, because "the nominator is
+    // outstanding" passes trivially against a status call that never resolved
+    // the nominator at all. The two readings have to differ.
+    it('leaves the nominating team outstanding until it elects', async function () {
+      const pid_without_ceiling = await free_agent()
+      await nominate({ pid: pid_without_ceiling, tid: 1, value: 2 })
+
+      const without_ceiling = await get_auction_settlement_status({
+        lid: league_id
+      })
+      expect(without_ceiling.outstanding_election_tids).to.include(1)
+
+      // Settle it out of the way so the second nomination is the open one.
+      const team_ids = await all_team_ids()
+      for (const tid of team_ids) {
+        await submit_auction_election({
+          lid: league_id,
+          tid,
+          pid: pid_without_ceiling,
+          user_id: 1,
+          maximum_bid: tid === 1 ? 2 : null
+        })
+      }
+
+      const pid_with_ceiling = await free_agent([pid_without_ceiling])
+      await nominate({
+        pid: pid_with_ceiling,
+        tid: 1,
+        value: 2,
+        maximum_bid: 9
+      })
+
+      const with_ceiling = await get_auction_settlement_status({
+        lid: league_id
+      })
+      expect(with_ceiling.nomination.pid).to.equal(pid_with_ceiling)
+      expect(with_ceiling.outstanding_election_tids).to.not.include(1)
+    })
+
     it('settles the moment the last eligible team elects', async function () {
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
 
       const team_ids = await all_team_ids()
       const others = team_ids.filter((tid) => tid !== 1)
@@ -148,7 +214,7 @@ describe('auction settlement against postgres', function () {
 
     it('prices at the runner-up maximum plus one increment', async function () {
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
 
       const team_ids = await all_team_ids()
       const others = team_ids.filter((tid) => tid !== 1)
@@ -367,7 +433,7 @@ describe('auction settlement against postgres', function () {
   describe('a placed bid is binding', function () {
     it('leaves a team leading at the amount it bid after its ceiling is withdrawn', async function () {
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
 
       // Team 2 holds a $30 ceiling and has already been bid to $11 on the wire.
       await submit_auction_election({
@@ -391,9 +457,14 @@ describe('auction settlement against postgres', function () {
 
       await withdraw_auction_election({ lid: league_id, tid: 2, pid })
 
+      // Withdrawing put team 2 back in the outstanding set -- a bid does not
+      // discharge -- so it has to state a position before anything can settle.
+      // It DECLINES, which makes this the sharper case: a decline is a
+      // revocation going forward and cannot unwind the $11 already on the wire,
+      // so team 2 still holds a binding claim at $11 and still wins there.
       const team_ids = await all_team_ids()
       let settlement = null
-      for (const tid of team_ids.filter((tid) => tid !== 1 && tid !== 2)) {
+      for (const tid of team_ids.filter((tid) => tid !== 1)) {
         const result = await submit_auction_election({
           lid: league_id,
           tid,
@@ -416,7 +487,7 @@ describe('auction settlement against postgres', function () {
       // passes could each observe the other missing, neither would settle, and
       // with no timer in slow mode the nomination hung indefinitely.
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
 
       const team_ids = await all_team_ids()
       const others = team_ids.filter((tid) => tid !== 1)
@@ -467,7 +538,7 @@ describe('auction settlement against postgres', function () {
   describe('the auction only signs', function () {
     it('adds one active player and never raises the winner cap', async function () {
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
 
       const [before] = await knex('teams').where({
         team_id: 1,
@@ -577,7 +648,7 @@ describe('auction settlement against postgres', function () {
       await auction.setup()
 
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
       await auction._load_transactions()
       expect(auction.nominating_team_id).to.equal(1)
 
@@ -602,7 +673,7 @@ describe('auction settlement against postgres', function () {
   describe('the active nomination', function () {
     it('is null once the open player has been processed', async function () {
       const pid = await free_agent()
-      await nominate({ pid, tid: 1, value: 0 })
+      await nominate({ pid, tid: 1, value: 0, maximum_bid: 0 })
       expect(
         await get_active_auction_nomination({ lid: league_id })
       ).to.not.equal(null)

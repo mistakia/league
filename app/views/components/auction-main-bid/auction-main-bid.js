@@ -45,6 +45,14 @@ export default function AuctionMainBid({
   is_final_block
 }) {
   const [value, set_value] = useState(0)
+
+  // THE NOMINATOR'S OPTIONAL CEILING. Empty is the ordinary case and means "not
+  // stated" -- NOT a decline, which a nominator cannot express anyway. A
+  // nomination binds the nominator to its opening bid but does not discharge it
+  // from the outstanding set, so a nominator who states nothing here is the team
+  // the auction waits on next, and can elect later from the standing-elections
+  // control once they have seen the field react.
+  const [nomination_maximum, set_nomination_maximum] = useState('')
   const previous = useRef({ bidValue, nominated_pid })
 
   // Election mode carries no clock of any kind, so there is no timer to render
@@ -108,6 +116,15 @@ export default function AuctionMainBid({
     bid(value)
   }
 
+  const handle_nomination_maximum_change = (event) => {
+    const next = event.target.value
+    if (next === '') return set_nomination_maximum('')
+    const parsed = Number(next)
+    if (!Number.isInteger(parsed) || parsed < 0) return
+    if (parsed > availableCap) return
+    set_nomination_maximum(next)
+  }
+
   const handle_click_nominate = () => {
     if (!is_valid(value)) {
       showNotification({
@@ -116,7 +133,23 @@ export default function AuctionMainBid({
       })
       return
     }
-    nominate(value)
+
+    // Refused BELOW the opening bid rather than quietly raised. The nomination
+    // binds the nominator to its opening bid regardless, so a lower ceiling
+    // would be raised back up by the server and the manager charged a number
+    // they had explicitly capped under.
+    const maximum =
+      nomination_maximum === '' ? null : Number(nomination_maximum)
+    if (maximum !== null && maximum < value) {
+      showNotification({
+        message: 'maximum must be at or above your opening bid',
+        severity: 'warning'
+      })
+      return
+    }
+
+    nominate(value, maximum)
+    set_nomination_maximum('')
   }
 
   // WHY this team cannot take the open player, as a button label and as a
@@ -234,9 +267,22 @@ export default function AuctionMainBid({
   } else if (isNominating || isCommish) {
     disabled = !selected_pid
     action = (
-      <Button small disabled={!selected_pid} onClick={handle_click_nominate}>
-        Nominate ${value}
-      </Button>
+      <div className='auction__nominate'>
+        {is_election_mode && (
+          <input
+            type='number'
+            className='auction__nominate-maximum'
+            placeholder='Max (optional)'
+            min={value}
+            max={availableCap}
+            value={nomination_maximum}
+            onChange={handle_nomination_maximum_change}
+          />
+        )}
+        <Button small disabled={!selected_pid} onClick={handle_click_nominate}>
+          Nominate ${value}
+        </Button>
+      </div>
     )
   } else {
     disabled = true

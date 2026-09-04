@@ -197,13 +197,32 @@ export const run_auction_simulation = async ({
     if (!candidate) break
 
     const opening = Math.floor(random() * 3)
+
+    // THE NOMINATOR'S CEILING, STATED INLINE OR NOT AT ALL YET. A nomination
+    // binds the nominator to its opening bid but does NOT discharge it from the
+    // outstanding set, so every nomination needs an election from its nominator
+    // eventually. Both ways of supplying it are real paths a manager takes, so
+    // the seed picks between them and the simulation covers each.
+    const states_ceiling_inline = random() < 0.5
+    const nominator_maximum = opening + Math.floor(random() * 20)
+
     await auction.nominate(
-      { pid: candidate.pid, value: opening, user_id },
+      {
+        pid: candidate.pid,
+        value: opening,
+        user_id,
+        maximum_bid: states_ceiling_inline ? nominator_maximum : null
+      },
       { user_id, tid: nominating_team_id }
     )
     state = await record(
       'nominate',
-      { pid: candidate.pid, tid: nominating_team_id, value: opening },
+      {
+        pid: candidate.pid,
+        tid: nominating_team_id,
+        value: opening,
+        maximum_bid: states_ceiling_inline ? nominator_maximum : null
+      },
       state
     )
 
@@ -323,6 +342,42 @@ export const run_auction_simulation = async ({
         })
         state = await record('relent', { tid, pid: candidate.pid }, state)
       }
+    }
+
+    // THE NOMINATOR IS THE LAST TEAM THE AUCTION WAITS ON when it did not state
+    // a ceiling inline, and asserting that is the point of splitting the two
+    // paths. Everyone else has now elected and every holdout has relented, so
+    // the ONLY thing still holding this player open is the nominator's missing
+    // election -- if it had settled already, a nomination would be discharging
+    // its nominator again and the whole rule would be back.
+    if (!states_ceiling_inline) {
+      const settled_before_nominator_elected = state.processed.some(
+        (row) => row.pid === candidate.pid
+      )
+      if (settled_before_nominator_elected) {
+        failures.push(
+          `step ${log.length}: ${candidate.pid} settled before its nominator (team ${nominating_team_id}) elected`
+        )
+      }
+
+      // A nominator cannot decline the player it nominated, so this is always a
+      // maximum and never null.
+      await submit_auction_election({
+        lid,
+        tid: nominating_team_id,
+        pid: candidate.pid,
+        user_id,
+        maximum_bid: nominator_maximum
+      })
+      state = await record(
+        'nominator-elect',
+        {
+          tid: nominating_team_id,
+          pid: candidate.pid,
+          maximum_bid: nominator_maximum
+        },
+        state
+      )
     }
 
     const settled = state.processed.some((row) => row.pid === candidate.pid)

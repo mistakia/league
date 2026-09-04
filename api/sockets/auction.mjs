@@ -16,10 +16,11 @@ import {
   lock_auction_for_league,
   get_active_auction_nomination,
   get_auction_team_capacities,
-  get_outstanding_team_ids,
+  get_outstanding_election_team_ids,
   broadcast_auction_settlement,
   build_auction_claims
 } from '#libs-server/auction-settlement.mjs'
+import { upsert_auction_election } from '#libs-server/auction-elections.mjs'
 import { resolve_nominating_team_id } from '#libs-server/auction-completion.mjs'
 import { resolve_auction_player } from '#libs-server/resolve-auction-player.mjs'
 import { get_auction_mode, AUCTION_MODES } from '#libs-server/auction-modes.mjs'
@@ -554,11 +555,20 @@ export default class Auction {
       const bid = await this._create_bid_record(message, { user_id, tid })
       this._transactions.unshift(bid)
 
-      // A manual bid SUPERSEDES that team's standing maximum: bidding below
-      // your own ceiling means you meant that amount, bidding above it raises
-      // the ceiling to match, and either way the engine stops proxying for you
-      // on this player. `build_auction_claims` implements that by binding the
-      // team's claim to what it actually bid.
+      // A BID BINDS THE BIDDER BUT DOES NOT DISCHARGE IT. The bid raises the
+      // team's claim if it is above their standing ceiling
+      // (`build_auction_claims` is raise-only), so they owe what they bid --
+      // but it leaves them in the outstanding set, because a bid states a
+      // position at ONE price and completeness needs a position at every price.
+      // A bidder who wants out of the outstanding set elects; see
+      // `get_outstanding_election_team_ids`.
+      //
+      // SUPERSESSION IS LIVE-MODE ONLY and does not run here. Binding a claim
+      // DOWNWARD -- a team typing $3 while holding a $30 ceiling meaning they
+      // meant $3 -- needs `_manual_bids`, which only the live branch below
+      // populates, because from the transaction log alone an engine bid and a
+      // human bid are the same row. In election mode the $30 ceiling still
+      // stands and the team lowers it by revising its election.
       if (this._election_mode) {
         // A BID OUTSIDE A LIVE BLOCK IS ANNOUNCED; one inside a block is not.
         // Operator ruling, 2026-09-02. Outside a block a bid is a rare,
@@ -633,7 +643,7 @@ export default class Auction {
 
     const nominating_team_id = this.nominating_team_id
     let { value = 0 } = message
-    const { pid } = message
+    const { pid, maximum_bid = null } = message
 
     this.logger(
       `received nomination for ${pid} for $${value} (team_id ${tid}, user_id ${user_id})`
@@ -670,13 +680,20 @@ export default class Auction {
     // of THAT player and says nothing about the next one.
     this._manual_bids.clear()
 
-    // Create and record nomination bid
-    const bid = await this._create_nomination_bid(
-      message,
+    // THE CEILING IS ELECTION-MODE ONLY. Inside a live block the engine already
+    // proxies every standing maximum and the bid clock closes the player, so a
+    // ceiling attached to a nomination there would be a second way to say what
+    // the election control already says. Outside one it is the nominator's only
+    // way to discharge itself in the same action.
+    const nomination_maximum_bid = this._election_mode ? maximum_bid : null
+
+    const bid = await this._create_nomination_bid({
+      pid,
       nominating_team_id,
       value,
-      attributed_user_id
-    )
+      user_id: attributed_user_id,
+      maximum_bid: nomination_maximum_bid
+    })
     this._transactions.unshift(bid)
 
     if (this._election_mode) {
@@ -837,6 +854,33 @@ export default class Auction {
       return false
     }
 
+    // THE OPTIONAL CEILING. Absent is the ordinary case and means "not stated"
+    // rather than a decline -- the nominator simply stays outstanding and may
+    // elect later. Only a ceiling that was actually stated is checked.
+    //
+    // It is refused BELOW the opening bid rather than quietly raised. The
+    // nomination binds the nominator to its opening bid regardless, so
+    // `build_auction_claims` would raise a lower ceiling back up and the
+    // manager would be charged a number they had explicitly capped under -- a
+    // silent disagreement with what they typed.
+    if (message.maximum_bid !== null && message.maximum_bid !== undefined) {
+      if (
+        !Number.isInteger(message.maximum_bid) ||
+        message.maximum_bid < message.value
+      ) {
+        this.reply(user_id, 'invalid maximum bid')
+        this.logger(
+          `nomination maximum ${message.maximum_bid} is not a whole dollar at or above the opening bid ${message.value}`
+        )
+        return false
+      }
+
+      if (message.maximum_bid > roster_obj.availableCap) {
+        this.reply(user_id, 'exceeds salary limit')
+        return false
+      }
+    }
+
     return true
   }
 
@@ -956,9 +1000,29 @@ export default class Auction {
     return bid_with_uid
   }
 
-  async _create_nomination_bid(message, nominating_team_id, value, user_id) {
-    const { pid } = message
-
+  /**
+   * Open a nomination, and record the nominator's ceiling when they named one.
+   *
+   * ONE TRANSACTION, because a nomination no longer discharges its nominator.
+   * If the bid committed and the election did not, the player would open and
+   * then wait on the very team that nominated it, with the manager believing
+   * they had already stated a maximum -- a stall that looks like the auction
+   * ignoring them. Under the league's advisory lock for the same reason
+   * `submit_auction_election` takes it: the election write and any completeness
+   * check that follows have to serialize against a concurrent settlement.
+   *
+   * `maximum_bid` is OPTIONAL and null means "not stated", NOT a decline. A
+   * nominator cannot decline the player it nominated, so there is no decline to
+   * express here; omitting it simply leaves the nominator outstanding, free to
+   * elect later once they have seen the field react.
+   */
+  async _create_nomination_bid({
+    pid,
+    nominating_team_id,
+    value,
+    user_id,
+    maximum_bid = null
+  }) {
     const bid = {
       user_id,
       tid: nominating_team_id,
@@ -971,13 +1035,29 @@ export default class Auction {
       occurred_at: new Date()
     }
 
-    const insert_query = await db('transactions')
-      .insert(bid)
-      .returning('transaction_id')
-    const bid_with_uid = {
-      ...bid,
-      transaction_id: insert_query[0].transaction_id
-    }
+    const transaction_id = await db.transaction(async (trx) => {
+      await lock_auction_for_league({ trx, lid: this._lid })
+
+      const insert_query = await trx('transactions')
+        .insert(bid)
+        .returning('transaction_id')
+
+      if (maximum_bid !== null) {
+        await upsert_auction_election({
+          trx,
+          lid: this._lid,
+          season_year: current_season.year,
+          pid,
+          tid: nominating_team_id,
+          user_id,
+          maximum_bid
+        })
+      }
+
+      return insert_query[0].transaction_id
+    })
+
+    const bid_with_uid = { ...bid, transaction_id }
 
     this.broadcast({
       type: 'AUCTION_BID',
@@ -1101,11 +1181,9 @@ export default class Auction {
       .whereNull('withdrawn_at')
       .whereNull('settled_at')
 
-    return get_outstanding_team_ids({
+    return get_outstanding_election_team_ids({
       capacities,
-      elections,
-      bids: nomination.bids,
-      nominating_team_id: nomination.nominating_team_id
+      elections
     })
   }
 

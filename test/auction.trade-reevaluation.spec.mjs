@@ -101,7 +101,13 @@ describe('auction re-evaluation on trade', function () {
     return rows
   }
 
-  const nominate = async ({ pid, tid, value }) => {
+  // `maximum_bid` mirrors the socket's optional nomination ceiling. A nomination
+  // binds its nominator without discharging it, so a nominator that states no
+  // ceiling is a team the auction still waits on -- which matters more here than
+  // anywhere else, because a trade is the one thing that can put an INELIGIBLE
+  // nominator back into the eligible set and therefore back into the outstanding
+  // set it had silently left.
+  const nominate = async ({ pid, tid, value, maximum_bid = null }) => {
     await knex('transactions').insert({
       user_id: 1,
       tid,
@@ -113,6 +119,16 @@ describe('auction re-evaluation on trade', function () {
       season_year,
       occurred_at: new Date()
     })
+
+    if (maximum_bid !== null) {
+      await submit_auction_election({
+        lid: league_id,
+        tid,
+        pid,
+        user_id: 1,
+        maximum_bid
+      })
+    }
   }
 
   const processed_rows = (pid) =>
@@ -196,7 +212,16 @@ describe('auction re-evaluation on trade', function () {
 
     expect(await available_cap(2)).to.be.at.least(nomination_price)
 
-    await nominate({ pid: nominated.pid, tid: 1, value: nomination_price })
+    // Team 1 states its ceiling at the opening price. It is INELIGIBLE at that
+    // price right now -- it holds the expensive player -- and the trade is what
+    // gives it the budget back, so this is the election that lets the player
+    // settle to it once team 2 drops out.
+    await nominate({
+      pid: nominated.pid,
+      tid: 1,
+      value: nomination_price,
+      maximum_bid: nomination_price
+    })
 
     // Every eligible team except team 2 declines. Team 2 is left outstanding,
     // and ASSERTED outstanding below, so the trade is the only thing that can

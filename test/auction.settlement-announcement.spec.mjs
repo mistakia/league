@@ -111,7 +111,10 @@ describe('auction settlement announcement', function () {
   // spot is eligible regardless of budget -- the draft fixture leaves teams over
   // the cap, and a priced nomination would disqualify them all before the
   // settlement under test ever happened.
-  const nominate_free_agent = async ({ tid }) => {
+  // `maximum_bid` mirrors the socket's optional nomination ceiling. A nomination
+  // binds its nominator without discharging it, so a nominator that states no
+  // ceiling stays in the outstanding set and no later election can complete it.
+  const nominate_free_agent = async ({ tid, maximum_bid = null }) => {
     const rostered = await knex('rosters_players')
       .join('rosters', 'rosters.roster_id', 'rosters_players.roster_id')
       .where('rosters.lid', league_id)
@@ -137,6 +140,16 @@ describe('auction settlement announcement', function () {
       occurred_at: new Date()
     })
 
+    if (maximum_bid !== null) {
+      await submit_auction_election({
+        lid: league_id,
+        tid,
+        pid: player.pid,
+        user_id: 1,
+        maximum_bid
+      })
+    }
+
     return player.pid
   }
 
@@ -145,7 +158,7 @@ describe('auction settlement announcement', function () {
   // election completes the eligible set.
   const settle_a_player = async () => {
     const tids = await team_ids()
-    const pid = await nominate_free_agent({ tid: 1 })
+    const pid = await nominate_free_agent({ tid: 1, maximum_bid: 0 })
 
     for (const tid of tids) {
       if (tid === 1 || tid === 2) continue
@@ -306,7 +319,7 @@ describe('auction settlement announcement', function () {
     this.timeout(60 * 1000)
 
     const tids = await team_ids()
-    const pid = await nominate_free_agent({ tid: 1 })
+    const pid = await nominate_free_agent({ tid: 1, maximum_bid: 0 })
 
     for (const tid of tids) {
       if (tid === 1 || tid === 2) continue
@@ -384,7 +397,7 @@ describe('auction settlement announcement', function () {
     it('names the team, the player and the amount it opened at', async function () {
       this.timeout(60 * 1000)
 
-      const pid = await nominate_free_agent({ tid: 1 })
+      const pid = await nominate_free_agent({ tid: 1, maximum_bid: 0 })
 
       const message = await format_nomination_message({
         team_id: 1,
@@ -418,7 +431,7 @@ describe('auction settlement announcement', function () {
       this.timeout(60 * 1000)
 
       const tids = await team_ids()
-      const pid = await nominate_free_agent({ tid: 1 })
+      const pid = await nominate_free_agent({ tid: 1, maximum_bid: 0 })
       const outstanding = tids.filter((tid) => tid !== 1)
       expect(outstanding.length, 'more than one team is waiting').to.be.above(1)
 

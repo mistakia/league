@@ -200,11 +200,12 @@ export function* submit_bid({ payload }) {
 
 export function* submit_nomination({ payload }) {
   const { selected_pid } = yield select(get_auction_state)
-  const { value } = payload
+  const { value, maximum_bid = null } = payload
   const message = {
     type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
       value,
+      maximum_bid,
       pid: selected_pid
     }
   }

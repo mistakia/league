@@ -427,3 +427,17 @@
   text-transform uppercase
   letter-spacing 0.5px
   opacity 0.7
+
+// The nominate action and its OPTIONAL ceiling, side by side. The field is
+// election-mode only: inside a live block the engine already proxies every
+// standing maximum and the bid clock closes the player, so a ceiling attached
+// to a nomination there would duplicate the election control.
+.auction__nominate
+  display flex
+  align-items center
+  gap 6px
+
+.auction__nominate-maximum
+  width 96px
+  padding 4px 6px
+  font-size 12px

@@ -128,8 +128,12 @@ describe('auction stall and the eligible set', function () {
       const [nominator, ...others] = tids
       const player = await free_agent()
 
+      // The nominator states its ceiling inline. A nomination binds but does not
+      // discharge, so without this the nominator is outstanding too and the
+      // stall under test would be a TWO-team stall -- which cannot distinguish
+      // "waiting on the quiet team" from "waiting on anybody at all".
       await auction.nominate(
-        { pid: player.pid, value: 0 },
+        { pid: player.pid, value: 0, maximum_bid: 0 },
         { user_id: 1, tid: nominator }
       )
 
@@ -182,7 +186,7 @@ describe('auction stall and the eligible set', function () {
       const player = await free_agent()
 
       await auction.nominate(
-        { pid: player.pid, value: 0 },
+        { pid: player.pid, value: 0, maximum_bid: 0 },
         { user_id: 1, tid: nominator }
       )
 
@@ -229,7 +233,7 @@ describe('auction stall and the eligible set', function () {
       const player = await free_agent()
 
       await auction.nominate(
-        { pid: player.pid, value: 0 },
+        { pid: player.pid, value: 0, maximum_bid: 0 },
         { user_id: 1, tid: nominator }
       )
 

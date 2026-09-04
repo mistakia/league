@@ -126,7 +126,10 @@ describe('auction election broadcasts', function () {
   // active spot is eligible regardless of budget -- the draft fixture leaves
   // teams over the cap, and a priced nomination would disqualify them all before
   // the broadcast under test ever ran.
-  const nominate_free_agent = async ({ tid }) => {
+  // `maximum_bid` mirrors the socket's optional nomination ceiling. A nomination
+  // binds its nominator without discharging it, so a nominator that states no
+  // ceiling stays in the outstanding set and no later election can complete it.
+  const nominate_free_agent = async ({ tid, maximum_bid = null }) => {
     const rostered = await knex('rosters_players')
       .join('rosters', 'rosters.roster_id', 'rosters_players.roster_id')
       .where('rosters.lid', league_id)
@@ -151,6 +154,16 @@ describe('auction election broadcasts', function () {
       season_year,
       occurred_at: new Date()
     })
+
+    if (maximum_bid !== null) {
+      await submit_auction_election({
+        lid: league_id,
+        tid,
+        pid: player.pid,
+        user_id: 1,
+        maximum_bid
+      })
+    }
 
     return player.pid
   }
@@ -195,7 +208,7 @@ describe('auction election broadcasts', function () {
     this.timeout(60 * 1000)
 
     const tids = await team_ids()
-    const pid = await nominate_free_agent({ tid: 1 })
+    const pid = await nominate_free_agent({ tid: 1, maximum_bid: 0 })
 
     // Every team but the nominator and team 2 declines up front, so the one
     // election driven over the route is the one that completes the set.

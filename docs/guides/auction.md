@@ -71,6 +71,21 @@ Two properties that look like details and are not:
 - **A proxy step does not reset the bid clock. Only a human bid does.** A fully-proxied player settles one bid clock after nomination however many teams wanted them, which is what makes a large final block tractable. **The SERVER owns the countdown and announces it as `AUCTION_TIMER` whenever the running clock changes** — a bid broadcast is not a clock event. The client used to rebuild the countdown from a duration on every `AUCTION_BID`, so a proxy step put a fresh clock on screen while the sale was seconds away, and a reconnecting client got no countdown at all because `AUCTION_INIT` carried durations and no expiry.
 - **Supersession binds a claim DOWNWARD and is socket state**, in `_manual_bids`. From the transaction log an engine bid and a human bid are the same row by design, so only the live socket can tell them apart; `build_auction_claims` stays raise-only for the REST paths that cannot.
 
+## Only an election discharges
+
+Completeness is the only thing that settles a player in election mode, and it counts ELECTIONS and nothing else. `get_outstanding_election_team_ids` in `libs-server/auction-settlement.mjs` is the whole rule: an eligible team is outstanding until it has a live `auction_elections` row, whatever else it has done.
+
+**A bid does not discharge, and neither does a nomination.** This is the distinction the original conflated — it seeded the outstanding set with the nominating team and every team holding a bid, so any bid discharged its bidder permanently, with no argument recorded anywhere for why.
+
+The two are different kinds of statement, and the difference is the price:
+
+- **An election is price-independent.** A maximum is a standing position at every price, which is exactly what completeness has to claim — that the field is known at whatever price the player settles at. That is also why a standing maximum _below_ the current price still discharges: the team's position at this price is known, and it is "out". Without that a team holds a nomination open forever by never revising a stale maximum.
+- **A bid is price-specific.** Bidding $11 says a team was in at $11 and says nothing about $12. When a bid discharged, a team that bid and was then outbid settled away without ever being asked about the higher price — and election mode has no clock, so completeness was the only thing that could have asked.
+
+**Binding is the other axis and it still counts bids.** `build_auction_claims` owns it: a placed bid binds its bidder, a nomination binds its nominator to the opening bid, and that is why every nominated player still sells and there is no `unsold` outcome. Do not read "nominating is bidding" as "nominating is electing".
+
+**A nomination may carry an optional ceiling.** `nominate` accepts a `maximum_bid`, and the socket writes the bid and that election in ONE transaction under the league's advisory lock — a nomination whose election was lost would open a player that waits on its own nominator. It is optional: absent means the nominator has not stated a ceiling and stays outstanding, free to elect later. It is election-mode only, refused below the opening bid, and it is NOT a decline — a nominator cannot decline the player it nominated.
+
 ## Eligibility must stay monotone
 
 A team that leaves an eligible set never re-enters it, and completeness once reached stays reached. Second-price settlement rests on that. Anything that fills an active roster spot without passing through settlement breaks it, so:

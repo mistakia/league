@@ -141,6 +141,27 @@ describe('auction settlement against a firing bid clock', function () {
     }
   }
 
+  // THE NOMINATOR'S OWN ELECTION, written directly for the same reason the
+  // declines are: these specs complete the eligible set WITHOUT settling it, and
+  // `submit_auction_election` would settle on the last one.
+  //
+  // It cannot be a decline. A nomination binds its nominator to the opening bid
+  // but does not discharge it, so the nominator has to state a ceiling like
+  // anyone else -- and a team may not decline the player it nominated.
+  const elect_directly = async ({ tid, pid, maximum_bid }) => {
+    const submitted_at = new Date()
+    await knex('auction_elections').insert({
+      lid: league_id,
+      season_year,
+      pid,
+      tid,
+      user_id: 1,
+      maximum_bid,
+      submitted_at,
+      amount_set_at: submitted_at
+    })
+  }
+
   const rows_for = async (pid) => ({
     roster: await knex('rosters_players').where({
       lid: league_id,
@@ -185,8 +206,12 @@ describe('auction settlement against a firing bid clock', function () {
     expect(leading.tid, 'the socket has the rival leading').to.equal(rival)
     expect(leading.player_salary).to.equal(8)
 
-    // Complete the eligible set without settling it.
-    await decline_directly({ tids: rest, pid })
+    // Complete the eligible set without settling it. The rival is included
+    // despite leading the board at $8: a bid binds but does not discharge, so it
+    // needs an election like everyone else -- and declining does not unwind the
+    // $8 already on the wire, which stays its binding claim.
+    await decline_directly({ tids: [...rest, rival], pid })
+    await elect_directly({ tid: nominator, pid, maximum_bid: 0 })
 
     // A settlement transaction is OPEN -- the shape of a manager completing the
     // set over REST, or of a trade reaching the same call, while the block runs.
@@ -235,6 +260,7 @@ describe('auction settlement against a firing bid clock', function () {
     await auction.nominate({ pid, value: 0 }, { user_id: 1, tid: nominator })
 
     await decline_directly({ tids: others, pid })
+    await elect_directly({ tid: nominator, pid, maximum_bid: 0 })
 
     const trx = await knex.transaction()
     const settlement = await settle_auction_player_if_complete({

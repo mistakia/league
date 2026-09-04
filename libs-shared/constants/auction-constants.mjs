@@ -35,10 +35,17 @@ export const auction_election_outcomes = {
 // deliberately absent here, because neither state can occur and a named state
 // that cannot fire reads to every later reader as a case that is handled:
 //
-// - No `unsold`. Nominating IS bidding -- the player opens at the nominating
-//   team's bid, so the nominator always holds a claim and every nominated player
-//   sells. A player nobody nominates is never processed at all and takes
-//   NOT_NOMINATED at auction close.
+// - No `unsold`. The player opens at the nominating team's bid and a placed bid
+//   BINDS, so the nominator always holds a claim in `build_auction_claims` and
+//   every nominated player sells. A player nobody nominates is never processed
+//   at all and takes NOT_NOMINATED at auction close.
+//
+//   Read that as binding and nothing else. It is NOT a statement that the
+//   nomination discharges the nominator from the outstanding set -- it does
+//   not, and a nominated player waits for its nominator's election like anyone
+//   else's. The two were conflated once and it settled players whose nominator
+//   had never named a ceiling; `get_outstanding_election_team_ids` carries the
+//   argument.
 // - No `player_ineligible`. In restricted free agency it means the player left
 //   the original roster or lost restricted status. The auction is strictly
 //   sequential with exactly one open player, that player is a free agent by

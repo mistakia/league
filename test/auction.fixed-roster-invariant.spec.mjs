@@ -120,15 +120,23 @@ describe('auction settlement keeps rosters and budgets monotone', function () {
       [tids[2], 4]
     ])
 
+    // THE NOMINATOR ELECTS TOO. A nomination binds its nominator to the opening
+    // bid but does not discharge it from the outstanding set, so without an
+    // election of its own the eligible set never completes and nothing settles.
+    // It states its opening bid rather than declining, which it cannot do on a
+    // player it nominated.
     let settlement = null
     for (const tid of tids) {
-      if (tid === nominating_team_id) continue
+      const maximum_bid = () => {
+        if (tid === nominating_team_id) return 0
+        return contenders.has(tid) ? contenders.get(tid) : null
+      }
       const result = await submit_auction_election({
         lid: league_id,
         tid,
         pid: player.pid,
         user_id: 1,
-        maximum_bid: contenders.has(tid) ? contenders.get(tid) : null
+        maximum_bid: maximum_bid()
       })
       if (result.settlement) settlement = result.settlement
     }

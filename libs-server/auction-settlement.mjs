@@ -151,24 +151,41 @@ export const get_auction_team_capacities = async ({
  * -- which means a team that leaves this set can never re-enter it except by
  * trade, and completeness once reached stays reached.
  *
- * A standing maximum BELOW the current price still counts as an election and
- * satisfies completeness. Without that rule a team holds a nomination open
- * indefinitely by declining to revise a stale maximum, which would be a
- * forcing-function hole in a design that has none.
+ * ONLY AN ELECTION DISCHARGES. A BID DOES NOT, and neither does a nomination.
+ * This is the whole rule, and it is the one term the original had no argument
+ * for: it seeded the set with the nominating team and every team holding a bid,
+ * so any bid discharged its bidder permanently.
+ *
+ * The two are different KINDS of statement and the distinction is the price:
+ *
+ * - An election is PRICE-INDEPENDENT. A maximum is a standing position at every
+ *   price, which is exactly what completeness needs to claim -- that the field
+ *   is known at whatever price this settles at. That is also why a standing
+ *   maximum BELOW the current price still discharges: the team's position at
+ *   this price is known, and it is "out". Without that a team holds a
+ *   nomination open indefinitely by declining to revise a stale maximum.
+ * - A bid is PRICE-SPECIFIC. Bidding $11 says the team was in at $11 and says
+ *   nothing about $12. Treating it as a discharge let a team that bid and was
+ *   then outbid settle away without ever being asked about the higher price --
+ *   and in election mode there is no clock, so completeness was the only thing
+ *   that could have asked.
+ *
+ * BINDING IS THE OTHER AXIS AND IT STILL COUNTS BIDS. `build_auction_claims`
+ * owns it: a placed bid binds the bidder to pay it, a nomination binds the
+ * nominator to its opening bid, and that is why every nominated player still
+ * sells and there is no `unsold` outcome. Binding and discharging were conflated
+ * here; they are separate questions and only this one turns on electing.
  */
-export const get_outstanding_team_ids = ({
+export const get_outstanding_election_team_ids = ({
   capacities,
-  elections,
-  bids = [],
-  nominating_team_id
+  elections
 }) => {
-  const has_acted = new Set([nominating_team_id])
-  for (const election of elections) has_acted.add(election.tid)
-  for (const bid of bids) has_acted.add(bid.tid)
+  const has_elected = new Set()
+  for (const election of elections) has_elected.add(election.tid)
 
   const outstanding = []
   for (const [tid, capacity] of capacities) {
-    if (has_acted.has(tid)) continue
+    if (has_elected.has(tid)) continue
     if (!capacity.is_eligible) continue
     outstanding.push(tid)
   }
@@ -189,6 +206,14 @@ export const get_outstanding_team_ids = ({
  * - NOMINATING IS BIDDING. The nominating team always holds a claim at least
  *   its opening bid, which is why there is no all-decline case and no unsold
  *   outcome: an uncontested nominated player sells to its nominator.
+ *
+ * BUT BIDDING IS NOT ELECTING, and the two rules above are the reason that has
+ * to be said here rather than only in `get_outstanding_election_team_ids`.
+ * Binding a team to what it bid says what it OWES at this price; it says
+ * nothing about its position at the next one, so it cannot discharge the team
+ * from the outstanding set. Reading "nominating is bidding" as "nominating is
+ * electing" is exactly the conflation that let a nomination settle a player
+ * whose nominator had never stated a ceiling.
  */
 export const build_auction_claims = ({
   elections,
@@ -303,11 +328,9 @@ export const settle_auction_player_if_complete = async ({
       current_price: nomination.current_price
     })
 
-    const outstanding = get_outstanding_team_ids({
+    const outstanding = get_outstanding_election_team_ids({
       capacities,
-      elections,
-      bids: nomination.bids,
-      nominating_team_id: nomination.nominating_team_id
+      elections
     })
 
     if (outstanding.length) {
@@ -734,7 +757,7 @@ export const reevaluate_auction_after_roster_change = async ({
 export default {
   get_active_auction_nomination,
   get_auction_team_capacities,
-  get_outstanding_team_ids,
+  get_outstanding_election_team_ids,
   build_auction_claims,
   settle_auction_player_if_complete,
   announce_auction_settlement,
