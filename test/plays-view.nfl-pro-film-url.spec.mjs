@@ -39,6 +39,8 @@ const seed_play = async ({
   quarter = 1,
   play_type = 'PASS',
   is_sack = null,
+  down_number = 1,
+  yards_to_go = null,
   game_clock_start = null,
   play_description = null
 }) =>
@@ -51,6 +53,8 @@ const seed_play = async ({
     quarter,
     play_type,
     is_sack,
+    down_number,
+    yards_to_go,
     game_clock_start,
     play_description,
     updated: new Date()
@@ -190,6 +194,36 @@ describe('plays view / nfl pro film url', function () {
       expect(await film_url(114)).to.include('playType=play_type_pass')
     })
 
+    it('types a penalty no-play as unknown, which the filter UI never offers', async function () {
+      // NFL Pro's dropdown has eight play types and this is not one of them; the
+      // API honours it anyway. Without it a wiped snap cannot be told from the
+      // kickoff sharing its clock.
+      await seed_play({
+        play_id: 115,
+        play_type: 'NOPL',
+        play_description:
+          '(11:56) (Shotgun) D.Prescott pass incomplete short right. PENALTY on PHI, DPI.'
+      })
+
+      expect(await film_url(115)).to.include('playType=play_type_unknown')
+    })
+
+    it('types a wiped special-teams snap by what the description says', async function () {
+      // A no-play is only `unknown` when the snap it wiped was from scrimmage.
+      // NFL Pro types a penalised punt as play_type_punt, so sending unknown for
+      // one returns an empty list -- the single dead link left in the holdout
+      // after the clock bugs were fixed.
+      await seed_play({
+        play_id: 116,
+        play_type: 'NOPL',
+        yards_to_go: 13,
+        play_description:
+          '(2:50) J.Fox punts 52 yards to MIN 7, Center-J.McQuaide. PENALTY on MIN.'
+      })
+
+      expect(await film_url(116)).to.include('playType=play_type_punt')
+    })
+
     it('splits FGXP into the extra point and field goal filters', async function () {
       // An extra point shares its clock with the kickoff that follows it, which
       // is the collision playType exists to break.
@@ -208,6 +242,45 @@ describe('plays view / nfl pro film url', function () {
 
       expect(await film_url(111)).to.include('playType=play_type_xp')
       expect(await film_url(112)).to.include('playType=play_type_field_goal')
+    })
+  })
+
+  describe('yards to go', function () {
+    it('buckets distance into the API own three bands', async function () {
+      // Not even thirds: SHORT is 1-2, MID is 3-6, LONG is 7 and up. This is the
+      // tiebreaker for a penalty enforced at the same clock and type as the play
+      // after it -- 4th & 2 and 4th & 7 are both punts at 7:12.
+      for (const [play_id, yards_to_go, band] of [
+        [160, 2, 'SHORT'],
+        [161, 6, 'MID'],
+        [162, 7, 'LONG']
+      ]) {
+        await seed_play({
+          play_id,
+          yards_to_go,
+          play_description: `(10:00) pass short left for ${yards_to_go}.`
+        })
+        expect(await film_url(play_id)).to.include(`yardsToGoType=${band}`)
+      }
+    })
+
+    it('omits the band on an onside kick, which we record as 1st & 10', async function () {
+      // The real row that produced the corpus's only dead link. NFL Pro reports
+      // distance 0 on every kick; we record an onside kick as 1st & 10 because
+      // the kicking team can recover it. So neither `yards_to_go > 0` nor a down
+      // of 1-4 excludes it, and both were tried -- the gate has to name the play
+      // types run from scrimmage.
+      await seed_play({
+        play_id: 163,
+        play_type: 'KOFF',
+        down_number: 1,
+        yards_to_go: 10,
+        game_clock_start: '02:53',
+        play_description:
+          'M.Gay kicks onside 12 yards from WAS 40 to GB 48. D.Wicks to GB 48 for no gain.'
+      })
+
+      expect(await film_url(163)).to.not.include('yardsToGoType')
     })
   })
 
@@ -256,6 +329,36 @@ describe('plays view / nfl pro film url', function () {
       expect(await film_url(130)).to.equal(null)
     })
 
+    it('returns null when play_type is NULL rather than falling through', async function () {
+      // Three-valued logic, and it turned the guard into a pass-through. With a
+      // NULL play_type, `play_type in (...)` is NULL, so the whole filmable test
+      // is NULL, `not NULL` is NULL, and a CASE arm whose condition is NULL is
+      // not taken -- the expression reached its ELSE and built a URL for exactly
+      // the rows the guard exists to reject. 13 of these shipped into a holdout.
+      await seed_play({
+        play_id: 132,
+        play_type: null,
+        game_clock_start: '10:00',
+        play_description: ''
+      })
+
+      expect(await film_url(132)).to.equal(null)
+    })
+
+    it('returns null when game_clock_start is an empty string', async function () {
+      // An empty string is not a missing value to Postgres: it survives every
+      // `is null` guard, and lpad(split_part('', ':', 1), 2, '0') then yields
+      // '00', producing a live-looking URL ending in `gameClock=00:`.
+      await seed_play({
+        play_id: 133,
+        play_type: 'KOFF',
+        game_clock_start: '',
+        play_description: ''
+      })
+
+      expect(await film_url(133)).to.equal(null)
+    })
+
     it('returns null for a row that is not a play that was run', async function () {
       // A timeout carries a clock, so without this gate it would link to
       // whichever play happened to share that second.
@@ -275,6 +378,7 @@ describe('plays view / nfl pro film url', function () {
       play_id: 140,
       quarter: 3,
       week: 5,
+      yards_to_go: 5,
       play_description: '(07:23) S.Barkley left tackle to DAL 3.'
     })
 
@@ -287,7 +391,8 @@ describe('plays view / nfl pro film url', function () {
       gameId: String(esbid),
       quarter: '3',
       gameClock: '07:23',
-      playType: 'play_type_pass'
+      playType: 'play_type_pass',
+      yardsToGoType: 'MID'
     })
   })
 })

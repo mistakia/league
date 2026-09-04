@@ -28,6 +28,7 @@ export const default_plays_views = {
         }
       ],
       prefix_columns: [
+        'play_film_url',
         'play_year',
         'play_week',
         'play_off_team',
@@ -84,6 +85,7 @@ export const default_plays_views = {
         }
       ],
       prefix_columns: [
+        'play_film_url',
         'play_year',
         'play_week',
         'play_off_team',
@@ -140,6 +142,7 @@ export const default_plays_views = {
         }
       ],
       prefix_columns: [
+        'play_film_url',
         'play_year',
         'play_week',
         'play_off_team',

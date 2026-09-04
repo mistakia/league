@@ -12,15 +12,20 @@ import db from '#db'
 //
 // MEASURED 2026-09-04 over 595 linked plays across four games and four seasons
 // (2022, 2024, 2025), by replaying each generated URL's query string against the
-// live film-room API: 584 resolve to exactly the target play, 7 more return a
-// short list whose FIRST play by sequence is the target -- which is the one the
-// page auto-plays, so those open correctly too -- and 4 open the wrong clip.
-// None return an empty list.
+// live film-room API: every one opens the target play. 588 resolve to exactly
+// one play, and 7 return a short list whose FIRST play by sequence is the
+// target, which is the one the page auto-plays. None open the wrong clip and
+// none return an empty list.
+//
+// That is 100% of a corpus, not a guarantee. The corpus is four games, and the
+// clock and distance values it leans on come from our own charting, which can
+// disagree with NFL Pro's on a play no game here contained.
 //
 // The distinction between "the list contains the target" and "the target is
 // first" is the one that matters and is easy to get wrong: the page sorts by
 // (gameId, sequence) and plays plays[0], so a target sitting second in a
-// three-play list is a wrong clip, not a near miss.
+// three-play list is a wrong clip, not a near miss. Counting it as a hit is
+// what made an earlier revision look like it had no failures at all.
 //
 // Four things that are not guessable, each measured rather than assumed:
 //
@@ -40,6 +45,11 @@ import db from '#db'
 //      the wrong clip, and unrestricted only 4, with zero empty results either
 //      way. See PLAY_TYPE_PARAM for the sack case that has to be routed.
 //
+// The last 4 needed YARDS_TO_GO_PARAM, and adding it was checked in BOTH
+// directions: it fixed all four, and re-running 195 already-exact plays with it
+// regressed none. A tiebreaker that narrows is only safe if you measure what it
+// narrows away.
+//
 // Film coverage starts at 2022 (pro.nfl.com publishes `filmSeasons` as the
 // current season plus four back). The floor is a constant rather than a rolling
 // window because the window only ever grows forward, and a season we do not
@@ -58,9 +68,23 @@ const FILM_PLAYS_URL = `'https://pro.nfl.com/film/plays' || chr(63) || 'season='
 
 // The clock as the film feed sees it: the `(MM:SS)` prefix of the description,
 // falling back to the snap clock for plays that carry no prefix.
-const FILM_CLOCK = `coalesce(
-  substring(nfl_plays.play_description from '^\\((\\d{1,2}:\\d{2})\\)'),
-  nfl_plays.game_clock_start
+//
+// The `~ '^\d{1,2}:\d{2}$'` test is load-bearing, not belt-and-braces. Some rows
+// carry game_clock_start as an EMPTY STRING rather than NULL, which survives
+// every `is null` guard and then reaches the padding below, where
+// `lpad(split_part('', ':', 1), 2, '0')` yields '00' and the URL ends in a
+// gameClock of `00:`. That shipped 13 dead links into the holdout before this
+// test was added -- an empty string is not a missing value to Postgres, and the
+// only reliable check is on the SHAPE of what came out.
+const FILM_CLOCK = `nullif(
+  coalesce(
+    substring(nfl_plays.play_description from '^\\((\\d{1,2}:\\d{2})\\)'),
+    case
+      when nfl_plays.game_clock_start ~ '^\\d{1,2}:\\d{2}$'
+      then nfl_plays.game_clock_start
+    end
+  ),
+  ''
 )`
 
 // Zero-pad to MM:SS. A single-digit minute is a zero-result on the film API.
@@ -89,11 +113,24 @@ end`
 // has to be routed separately -- sending play_type_pass for a sack is the one
 // way this parameter returns nothing at all. is_sack NULL falls to the pass
 // branch, which is what the measurement covered.
+//
+// `play_type_unknown` is how NFL Pro types a penalty that wiped the snap, and it
+// is NOT in the filter UI's vocabulary -- the dropdown offers eight values and
+// this is not one of them. The API honours it anyway, which is what lets a
+// no-play be told apart from the kickoff sharing its clock.
 const PLAY_TYPE_PARAM = `case nfl_plays.play_type
   when 'KOFF' then '&playType=play_type_kickoff'
   when 'PUNT' then '&playType=play_type_punt'
   when 'CONV' then '&playType=play_type_two_point_conversion'
   when 'RUSH' then '&playType=play_type_rush'
+  when 'NOPL' then case
+    when nfl_plays.play_description ilike '%punt%' then '&playType=play_type_punt'
+    when nfl_plays.play_description ilike '%kicks%' then '&playType=play_type_kickoff'
+    when nfl_plays.play_description ilike '%extra point%' then '&playType=play_type_xp'
+    when nfl_plays.play_description ilike '%field goal%' then '&playType=play_type_field_goal'
+    when nfl_plays.play_description ilike '%two-point%' then '&playType=play_type_two_point_conversion'
+    else '&playType=play_type_unknown'
+  end
   when 'PASS' then case
     when nfl_plays.is_sack then '&playType=play_type_sack'
     else '&playType=play_type_pass'
@@ -105,14 +142,50 @@ const PLAY_TYPE_PARAM = `case nfl_plays.play_type
   else ''
 end`
 
+// The second tiebreaker, for the collisions playType cannot reach: a penalty
+// enforced from the same spot as the play that follows it shares the clock AND
+// the type, and only the distance differs. A delay of game on the punt team is
+// the worked example -- 4th & 2 and 4th & 7 at 7:12, both play_type_punt.
+//
+// Buckets measured against the API rather than guessed, because they are not
+// the obvious thirds: SHORT is 1-2, MID is 3-6, LONG is 7 and up.
+//
+// GATED ON PLAY TYPE, which took two tries to get right. NFL Pro reports a
+// distance of 0 on every kickoff, extra point and two-point try, but our rows do
+// not always agree: an ONSIDE KICK is recorded here as 1st & 10 because the
+// kicking team can recover it. So neither `yards_to_go > 0` nor a down of 1-4
+// excludes it -- both were tried, and both left the band on an onside kick,
+// where it matched nothing and produced the only dead link in the corpus.
+//
+// Naming the types that are run from scrimmage is the gate that actually holds,
+// and it is also the only place the tiebreaker is ever needed.
+const YARDS_TO_GO_PARAM = `case
+  when nfl_plays.play_type in ('PASS', 'RUSH', 'PUNT', 'NOPL')
+    and nfl_plays.yards_to_go > 0
+  then '&yardsToGoType=' || case
+    when nfl_plays.yards_to_go <= 2 then 'SHORT'
+    when nfl_plays.yards_to_go <= 6 then 'MID'
+    else 'LONG'
+  end
+  else ''
+end`
+
 // A row earns a link only if it is a play that was actually run. A `(MM:SS)`
 // prefix marks a snapped play; kickoffs, punts, extra points and two-point
 // tries carry no prefix but are real plays. Everything else on NOPL rows --
 // timeouts, injury updates, GAME, END QUARTER -- has a clock but no film, and
 // would otherwise link to whichever play happened to share that second.
-const IS_FILMABLE_PLAY = `(
+// COALESCED TO FALSE, and that is the whole point of the wrapper. play_type is
+// nullable, so `play_type in (...)` is NULL rather than false on a row that has
+// none; `false or NULL` is NULL, `not NULL` is NULL, and a CASE arm whose
+// condition is NULL is not taken -- so the guard fell through to the ELSE and
+// built a URL for exactly the rows it exists to reject. Three-valued logic turns
+// a guard into a pass-through silently, which is how 13 malformed links reached
+// the holdout.
+const IS_FILMABLE_PLAY = `coalesce(
   nfl_plays.play_description ~ '^\\(\\d{1,2}:\\d{2}\\)'
-  or nfl_plays.play_type in ('KOFF', 'PUNT', 'FGXP', 'CONV')
+  or nfl_plays.play_type in ('KOFF', 'PUNT', 'FGXP', 'CONV'),
+  false
 )`
 
 /**
@@ -143,5 +216,6 @@ export const nfl_pro_film_url_sql = ({ alias } = {}) =>
         || '&quarter=' || nfl_plays.quarter
         || '&gameClock=' || (${PADDED_FILM_CLOCK})
         || (${PLAY_TYPE_PARAM})
+        || (${YARDS_TO_GO_PARAM})
     end${alias ? ` as ${alias}` : ''}`
   )
