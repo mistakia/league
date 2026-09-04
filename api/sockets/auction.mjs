@@ -1264,7 +1264,8 @@ export default class Auction {
 
     return get_outstanding_election_team_ids({
       capacities,
-      elections
+      elections,
+      bids: nomination.bids
     })
   }
 

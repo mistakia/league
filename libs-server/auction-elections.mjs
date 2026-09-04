@@ -359,7 +359,8 @@ export const get_auction_settlement_status = async ({
     },
     outstanding_election_tids: get_outstanding_election_team_ids({
       capacities,
-      elections
+      elections,
+      bids: nomination.bids
     })
   }
 }

@@ -169,10 +169,16 @@ export const get_auction_team_capacities = async ({
  * -- which means a team that leaves this set can never re-enter it except by
  * trade, and completeness once reached stays reached.
  *
- * ONLY AN ELECTION DISCHARGES. A BID DOES NOT, and neither does a nomination.
- * This is the whole rule, and it is the one term the original had no argument
- * for: it seeded the set with the nominating team and every team holding a bid,
- * so any bid discharged its bidder permanently.
+ * AN ELECTION DISCHARGES, AND SO DOES A CLAIM THAT NO ELECTION COULD IMPROVE.
+ * Those are the only two, and the second is a strict refinement of the first
+ * rather than a softening of it -- it fires exactly where electing is provably
+ * incapable of changing the team's own claim. The argument for it is at its own
+ * check below.
+ *
+ * A BID ALONE DOES NOT DISCHARGE, and neither does a nomination. That is the
+ * term the original had no argument for: it seeded the set with the nominating
+ * team and every team holding a bid, so any bid discharged its bidder
+ * permanently, including one that had been outbid.
  *
  * The two are different KINDS of statement and the distinction is the price:
  *
@@ -196,15 +202,66 @@ export const get_auction_team_capacities = async ({
  */
 export const get_outstanding_election_team_ids = ({
   capacities,
-  elections
+  elections,
+  bids = []
 }) => {
   const has_elected = new Set()
   for (const election of elections) has_elected.add(election.tid)
+
+  const highest_bid = new Map()
+  for (const bid of bids) {
+    const current = highest_bid.get(bid.tid)
+    if (current === undefined || bid.player_salary > current) {
+      highest_bid.set(bid.tid, bid.player_salary)
+    }
+  }
 
   const outstanding = []
   for (const [tid, capacity] of capacities) {
     if (has_elected.has(tid)) continue
     if (!capacity.is_eligible) continue
+
+    // AN ELECTION THAT CANNOT IMPROVE ITS OWN CLAIM DISCHARGES TOO, and this is
+    // the second discharge rather than an exception to the first.
+    //
+    // A team's whole influence on the settlement runs through its claim.
+    // `build_auction_claims` makes that claim `max(election_maximum,
+    // highest_bid)` and `resolve_auction_player` then takes
+    // `min(claim, available_cap)`. So for a team holding a bid B against a cap
+    // C, deciding whether to state a maximum M:
+    //
+    //   not electing  ->  min(B, C)
+    //   electing M    ->  min(max(M, B), C)
+    //
+    // WHEN B >= C THOSE ARE THE SAME NUMBER, C, for every M including one far
+    // above the cap -- because max(M, B) >= B >= C, so both clamp. The team
+    // cannot raise its own claim by electing, so waiting on it is waiting on an
+    // input that cannot move the winner or the price. League 1 held a player
+    // open for two hours on exactly this: a team leading at $1 against a $1 cap.
+    //
+    // COMPARE AGAINST THE CAP, NEVER AGAINST THE CURRENT PRICE. Discharging a
+    // team whose bid merely meets the price is discharging the LEADER, and that
+    // reintroduces what 25f26a564 fixed: a leader bidding $5 against a $50 cap
+    // would settle away to a rival's $30 election at $6, never having been asked
+    // whether it would go above $5. Under the cap comparison a team is
+    // discharged only when it could not have bid higher whatever it did, so no
+    // team loses an answer that could have mattered.
+    //
+    // AND THE GUARANTEE IS "CANNOT IMPROVE ITS OWN CLAIM", NOT "CANNOT AFFECT
+    // ANYTHING". One thing does still move: electing at or above an existing
+    // equal bid pushes `amount_set_at` forward in `build_auction_claims`, which
+    // is the tiebreak input, so a discharged team settles on its BID timestamp
+    // rather than a later election one. That can only help the discharged team,
+    // and it is arguably the more correct reading -- the amount was committed
+    // when the money was actually bid. Stated here because the narrower
+    // guarantee is the true one and the next reader should not assume the
+    // stronger one.
+    //
+    // This reads only placed bids and roster-derived caps, both already public,
+    // so the outstanding set stays broadcastable exactly as it is today.
+    const bid = highest_bid.get(tid)
+    if (bid !== undefined && bid >= capacity.available_cap) continue
+
     outstanding.push(tid)
   }
   return outstanding
@@ -432,7 +489,8 @@ export const settle_auction_player_if_complete = async ({
 
     const outstanding = get_outstanding_election_team_ids({
       capacities,
-      elections
+      elections,
+      bids: nomination.bids
     })
 
     if (outstanding.length) {
