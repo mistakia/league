@@ -777,12 +777,16 @@ observations:
     [gotcha] 2026-09-04 The league deploy path has NO lock, so two sessions can each pass preflight
     and run yarn deploy:all concurrently; both did. Claim the deploy by message BEFORE running it,
     and re-read the host sha immediately before starting.
+  - >-
+    [bug] 2026-09-04 submit-reserve and submit-deactivate break auction eligibility monotonicity
+    unhooked: a slot change raises availableCap and availableSpace with no roster row moving, and
+    neither calls reevaluate_auction_after_roster_change. Detail in docs/guides/auction.md.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-09-04T08:15:12.482Z'
+updated_at: '2026-09-04T20:07:55.311Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
