@@ -171,3 +171,95 @@ export const erased_role_attribution_restore_rows = async ({
     previous_gsis: row.previous_gsis || null
   }))
 }
+
+/**
+ * The GSIS-SURVIVOR class: the `_pid` was destroyed and the `_gsis` was not.
+ *
+ * A DIFFERENT class from the erased bucket above, not a widening of it. There
+ * the identity is gone from the row entirely and the changelog is the only
+ * surviving copy. Here the row still carries a `_gsis`, so the identity is
+ * still on the row -- what was lost is the resolution of it. That difference
+ * is what makes this class safe to heal outside the NOPL/CONV scope: the
+ * restore is checked against a value the row itself still holds, so it does
+ * not have to rely on the changelog alone being right.
+ *
+ * THE AGREEMENT CHECK IS THE WHOLE SAFETY ARGUMENT. A row qualifies only when
+ * the changelog's `previous_pid` resolves to a player whose CURRENT
+ * `gsis_player_id` equals the `_gsis` still on the row. Two independently
+ * stored values -- one written before the clear, one written by the feed
+ * since -- have to name the same player. A restore that fails that check is
+ * reported, never guessed at.
+ *
+ * NOTHING HERE EVER WRITES A `_gsis`. It sets the `_pid` and only the `_pid`.
+ * Clearing a `_gsis` to make the role-pid residual monitor green is the
+ * failure this module exists to catch, and a healer that could write the
+ * `_gsis` column at all would be one edit away from being that bug.
+ *
+ * TARGET-FAMILY SPELLINGS, verified against the table rather than assumed:
+ * `play_changelog` carries both the pre-conform `trg_pid` and the post-conform
+ * `target_pid`, so a healer reading only one of them returns a confident
+ * partial count. The passer family has no post-conform rows, which is why
+ * CLEARED_COLUMN_NAMES above lists only the short spellings.
+ *
+ * @typedef {object} gsis_survivor_restore_row
+ * @property {number} esbid
+ * @property {number} play_id
+ * @property {string} play_type
+ * @property {string} season_type
+ * @property {number} season_year
+ * @property {string} live_gsis - the `_gsis` still on the row
+ * @property {string|null} previous_pid - the `_pid` as it was before the clear
+ *
+ * @returns {Promise<gsis_survivor_restore_row[]>}
+ */
+const TARGET_CLEARED_PID_COLUMN_NAMES = ['trg_pid', 'target_pid']
+
+export const target_gsis_survivor_restore_rows = async () => {
+  const rows = await db
+    .with('cleared', (query) =>
+      query
+        .distinct('esbid', 'play_id')
+        .from('play_changelog')
+        .whereIn('column_name', TARGET_CLEARED_PID_COLUMN_NAMES)
+        .whereNull('new_value')
+        .whereNotNull('previous_value')
+    )
+    .select(
+      'nfl_plays.esbid',
+      'nfl_plays.play_id',
+      'nfl_plays.play_type',
+      'nfl_plays.season_type',
+      'nfl_plays.season_year',
+      'nfl_plays.target_gsis_player_id as live_gsis',
+      'previous_pid.previous_value as previous_pid'
+    )
+    .from('cleared')
+    .join('nfl_plays', function () {
+      this.on('nfl_plays.esbid', '=', 'cleared.esbid').andOn(
+        'nfl_plays.play_id',
+        '=',
+        'cleared.play_id'
+      )
+    })
+    .joinRaw(
+      `left join lateral (
+         select previous_value from play_changelog
+         where esbid = nfl_plays.esbid and play_id = nfl_plays.play_id
+           and column_name in ('trg_pid', 'target_pid')
+           and new_value is null and previous_value is not null
+         limit 1
+       ) previous_pid on true`
+    )
+    .whereNull('nfl_plays.target_pid')
+    .whereNotNull('nfl_plays.target_gsis_player_id')
+
+  return rows.map((row) => ({
+    esbid: Number(row.esbid),
+    play_id: Number(row.play_id),
+    play_type: row.play_type,
+    season_type: row.season_type,
+    season_year: Number(row.season_year),
+    live_gsis: row.live_gsis,
+    previous_pid: row.previous_pid || null
+  }))
+}
