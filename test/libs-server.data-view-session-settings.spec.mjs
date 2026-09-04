@@ -4,7 +4,8 @@ import * as chai from 'chai'
 
 import {
   build_session_settings,
-  should_disable_nested_loops
+  should_disable_nested_loops,
+  execute_data_view_statement
 } from '#libs-server/get-data-view-results.mjs'
 
 const expect = chai.expect
@@ -260,5 +261,140 @@ describe('data view session settings', () => {
           .disable_nested_loops
       )
     })
+  })
+})
+
+// The dynamic-shared-memory fallback.
+//
+// `too many dynamic shared memory segments` is a SERVER-WIDE resource error --
+// it can fail sessions that have nothing to do with data views -- and it is the
+// objection that disqualified this whole approach the first time round. Capping
+// max_parallel_workers_per_gather was believed to have removed it. The full
+// 139-statement sweep found two statements still hitting it, on a strictly
+// sequential run, both of which completed fine under the default planner.
+//
+// So the arm can turn a working statement into a hard failure, and the remedy
+// is to retry that specific error once without the arm. What these assert is
+// the narrowness: the retry must fire for this error under the arm, and must
+// NOT fire for anything else, or it would silently double the cost of every
+// genuinely slow statement.
+describe('the dynamic shared memory fallback', () => {
+  const dsm_error = () =>
+    new Error('error: too many dynamic shared memory segments')
+
+  // Two SET LOCALs under the default planner, four under the arm, and the rows
+  // sit one past the last setting -- so a fallback that forgot to rebuild the
+  // settings list would read a `command: 'SET'` result instead of the rows.
+  const responder = ({ fail_times, seen }) => {
+    let calls = 0
+    return async (sql) => {
+      seen.push(sql)
+      calls += 1
+      if (calls <= fail_times) throw dsm_error()
+      const settings = sql.split('SET LOCAL').length - 1
+      return [
+        ...Array.from({ length: settings }, () => ({
+          command: 'SET',
+          rows: []
+        })),
+        { command: 'SELECT', rows: [{ pid: 'PATR-MAHO-000123' }], fields: [] }
+      ]
+    }
+  }
+
+  it('retries without the arm and returns the rows', async () => {
+    const seen = []
+    const result = await execute_data_view_statement({
+      execution_query_string: 'select 1',
+      timeout: 40000,
+      disable_nested_loops: true,
+      run_statement: responder({ fail_times: 1, seen })
+    })
+    expect(result.rows).to.deep.equal([{ pid: 'PATR-MAHO-000123' }])
+    expect(seen).to.have.lengthOf(2)
+    expect(seen[0]).to.include('enable_nestloop = off')
+    // The retry is the DEFAULT planner, which is what would have run had the
+    // probe answered false. Asserting only that it succeeded would pass against
+    // a retry that re-applied the arm and happened not to fail twice.
+    expect(seen[1]).to.not.include('enable_nestloop')
+  })
+
+  it('reads the rows past the settings on the retry, not a SET result', async () => {
+    const seen = []
+    const result = await execute_data_view_statement({
+      execution_query_string: 'select 1',
+      timeout: 40000,
+      disable_nested_loops: true,
+      run_statement: responder({ fail_times: 1, seen })
+    })
+    expect(result.command).to.equal('SELECT')
+  })
+
+  it('retries only once, and surfaces a second exhaustion', async () => {
+    const seen = []
+    let threw = null
+    try {
+      await execute_data_view_statement({
+        execution_query_string: 'select 1',
+        timeout: 40000,
+        disable_nested_loops: true,
+        run_statement: responder({ fail_times: 2, seen })
+      })
+    } catch (error) {
+      threw = error
+    }
+    expect(threw, 'a second exhaustion must not be swallowed').to.be.an('error')
+    expect(seen).to.have.lengthOf(2)
+  })
+
+  // The negative controls. Without these the retry would look correct while
+  // firing on cases it must never touch.
+  it('does not retry when the arm was never applied', async () => {
+    const seen = []
+    let threw = null
+    try {
+      await execute_data_view_statement({
+        execution_query_string: 'select 1',
+        timeout: 40000,
+        disable_nested_loops: false,
+        run_statement: responder({ fail_times: 1, seen })
+      })
+    } catch (error) {
+      threw = error
+    }
+    expect(threw).to.be.an('error')
+    expect(seen, 'nothing to fall back to').to.have.lengthOf(1)
+  })
+
+  it('does not retry a timeout, which the arm cannot fix by being removed', async () => {
+    const seen = []
+    let threw = null
+    try {
+      await execute_data_view_statement({
+        execution_query_string: 'select 1',
+        timeout: 40000,
+        disable_nested_loops: true,
+        run_statement: async (sql) => {
+          seen.push(sql)
+          throw new Error('canceling statement due to statement timeout')
+        }
+      })
+    } catch (error) {
+      threw = error
+    }
+    expect(threw).to.be.an('error')
+    expect(seen).to.have.lengthOf(1)
+  })
+
+  it('passes a successful first attempt straight through', async () => {
+    const seen = []
+    const result = await execute_data_view_statement({
+      execution_query_string: 'select 1',
+      timeout: 40000,
+      disable_nested_loops: true,
+      run_statement: responder({ fail_times: 0, seen })
+    })
+    expect(seen).to.have.lengthOf(1)
+    expect(result.rows).to.have.lengthOf(1)
   })
 })

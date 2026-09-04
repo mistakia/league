@@ -2595,6 +2595,87 @@ export const should_disable_nested_loops = async ({
   }
 }
 
+// `too many dynamic shared memory segments` is a server-wide resource, not a
+// per-statement budget: exhausting it can fail unrelated sessions, which is the
+// objection that disqualified `enable_nestloop = off` the first time it was
+// considered. Capping `max_parallel_workers_per_gather` was believed to have
+// removed it, on eight executions of four shapes. The full 139-statement sweep
+// says otherwise -- two statements hit it under the cap, on a strictly
+// SEQUENTIAL run, so it is not a concurrency artifact and no amount of serialism
+// fixes it. The cap is per Gather node; a plan with many parallel hash joins
+// still allocates a segment per node, and the pool is sized off MaxBackends.
+//
+// Retrying without the arm is the whole remedy. It is only ever reached by a
+// statement that has ALREADY failed, so it cannot make anything slower than it
+// would otherwise have been, and the default planner is exactly what would have
+// run had the probe answered false.
+//
+// Deliberately narrow: only this error, only when the arm was applied, only one
+// retry. A blanket retry would re-run genuinely slow statements twice and
+// double the very cost this file exists to remove.
+const DSM_EXHAUSTED_MESSAGE = 'too many dynamic shared memory segments'
+
+const run_data_view_statement = async ({
+  execution_query_string,
+  timeout,
+  disable_nested_loops,
+  run_statement
+}) => {
+  const session_settings = build_session_settings({
+    timeout,
+    disable_nested_loops
+  })
+  // Each `SET LOCAL` produces its own result object ahead of the query's, so
+  // the row set is the one past the last setting. Derived rather than written
+  // as a literal because the arm makes the count conditional, and a hardcoded
+  // index would read the wrong result object -- an empty `command: 'SET'`
+  // result -- on exactly the slow statements this exists to speed up.
+  const response = await run_statement(
+    `${session_settings.map((setting) => `${setting};`).join(' ')} ${execution_query_string};`
+  )
+  return response[session_settings.length]
+}
+
+// `run_statement` is injected for the same reason the probe injects one: the
+// only way to prove a fallback fires is to make the first attempt really fail.
+export const execute_data_view_statement = async ({
+  execution_query_string,
+  timeout,
+  disable_nested_loops,
+  run_statement = (sql) => db.raw(sql)
+}) => {
+  try {
+    return await run_data_view_statement({
+      execution_query_string,
+      timeout,
+      disable_nested_loops,
+      run_statement
+    })
+  } catch (error) {
+    const exhausted = String(error?.message ?? error).includes(
+      DSM_EXHAUSTED_MESSAGE
+    )
+    if (!disable_nested_loops || !exhausted) throw error
+
+    // console.log for the same reason as the probe decision: this is the audit
+    // trail for a server-wide resource running out, and the deployed server
+    // sets no DEBUG. A silent fallback here would hide the one failure mode
+    // that can reach sessions other than this one.
+    console.log(
+      `data-view-dsm-fallback: ${JSON.stringify({
+        reason: 'too many dynamic shared memory segments',
+        retried_without_arm: true
+      })}`
+    )
+    return run_data_view_statement({
+      execution_query_string,
+      timeout,
+      disable_nested_loops: false,
+      run_statement
+    })
+  }
+}
+
 export default async function ({
   row_axes = [],
   where = [],
@@ -2645,37 +2726,18 @@ export default async function ({
       .toString()
   }
 
-  // work_mem takes a quoted string literal -- the constant holds the VALUE
-  // (`1GB`), so the quotes belong here at the interpolation site. Emitting it
-  // bare yields `work_mem = 1GB`, which Postgres rejects as trailing junk after
-  // a numeric literal and which fails every cache-miss execution.
-  //
-  // The executor always passes a timeout, so there is no no-timeout arm; the
-  // `|| 40000` is a defensive fallback that keeps a null timeout from emitting
-  // invalid SQL. `SET LOCAL jit = off` was deleted with this extraction: jit is
-  // off server-side since 2026-08-13, making the per-statement override a no-op.
-  const session_settings = build_session_settings({
+  // knex's postgres dialect returns the raw pg response for a `raw` call, so
+  // the element this resolves to is a pg Result carrying `.fields` alongside
+  // `.rows`. The descriptors were previously discarded here; the derived-column
+  // path reads projection order and data_type off them rather than off anything
+  // declared.
+  const { rows, fields } = await execute_data_view_statement({
+    execution_query_string,
     timeout,
     disable_nested_loops: await should_disable_nested_loops({
       execution_query_string
     })
   })
-
-  // Each `SET LOCAL` produces its own result object ahead of the query's, so
-  // the row set is the one past the last setting. Derived rather than written
-  // as a literal because the arm makes the count conditional, and a hardcoded
-  // index would read the wrong result object -- an empty `command: 'SET'`
-  // result -- on exactly the slow statements this exists to speed up.
-  const rows_index = session_settings.length
-
-  const response = await db.raw(
-    `${session_settings.map((setting) => `${setting};`).join(' ')} ${execution_query_string};`
-  )
-  // knex's postgres dialect returns the raw pg response for a `raw` call, so
-  // this element is a pg Result carrying `.fields` alongside `.rows`. The
-  // descriptors were previously discarded here; the derived-column path reads
-  // projection order and data_type off them rather than off anything declared.
-  const { rows, fields } = response[rows_index]
 
   const {
     data_view_results,
