@@ -617,14 +617,10 @@ export const caesars_market_type_by_template = {
   // Deliberate no-maps in the futures families.
   // ---------------------------------------------------------------------------
   '|Alternate Regular Season Wins|': {
-    market_type: null,
-    reason:
-      'Alternate win-total lines for a team. TEAM_REGULAR_SEASON_WINS is the single posted over/under and TEAM_EXACT_REGULAR_SEASON_WINS is the exact-total market; mapping the alternate ladder onto either would collapse many lines onto one key, which is the same defect the game-grain alt families avoid by having their own ALT constants. Coining TEAM_ALT_REGULAR_SEASON_WINS is the fix, deferred with the other coining decisions.'
+    market_type: team_season_types.TEAM_ALT_REGULAR_SEASON_WINS
   },
   '|Exact Win Total After First 5 Weeks|': {
-    market_type: null,
-    reason:
-      'Scoped to the first five weeks, not the season. TEAM_EXACT_REGULAR_SEASON_WINS settles on the full regular season, so mapping this to it would grade a five-week market against seventeen weeks of results.'
+    market_type: team_season_types.TEAM_EXACT_WINS_AFTER_FIRST_FIVE_WEEKS
   },
   '|Specials|': {
     market_type: null,

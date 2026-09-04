@@ -504,7 +504,18 @@ export const futures_types = {
 
 export const team_season_types = {
   TEAM_REGULAR_SEASON_WINS: 'TEAM_REGULAR_SEASON_WINS',
+  // The alternate win-total LADDER, distinct from the single posted over/under
+  // above and from the exact-total market below. It needs its own key for the
+  // same reason the game-grain alt families do: many lines share one template,
+  // so folding them onto TEAM_REGULAR_SEASON_WINS would collapse them onto one
+  // key and lose every line but the last observed.
+  TEAM_ALT_REGULAR_SEASON_WINS: 'TEAM_ALT_REGULAR_SEASON_WINS',
   TEAM_EXACT_REGULAR_SEASON_WINS: 'TEAM_EXACT_REGULAR_SEASON_WINS',
+  // Scoped to the first five weeks, not the season, so it cannot share
+  // TEAM_EXACT_REGULAR_SEASON_WINS -- that constant settles against seventeen
+  // weeks of results and would grade this market on the wrong window.
+  TEAM_EXACT_WINS_AFTER_FIRST_FIVE_WEEKS:
+    'TEAM_EXACT_WINS_AFTER_FIRST_FIVE_WEEKS',
   TEAM_MOST_REGULAR_SEASON_WINS: 'TEAM_MOST_REGULAR_SEASON_WINS',
   TEAM_FEWEST_REGULAR_SEASON_WINS: 'TEAM_FEWEST_REGULAR_SEASON_WINS',
   TEAM_LONGEST_WINNING_STREAK: 'TEAM_LONGEST_WINNING_STREAK',
