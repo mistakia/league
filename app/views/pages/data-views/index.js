@@ -41,11 +41,46 @@ inject_saga('data_views', function* root_data_views_saga() {
   yield all([...data_views_sagas, ...data_view_generation_sagas])
 })
 
-const get_players_percentiles = createSelector(
+// The result rows, converted ONCE per result. `toJS` on a full result is the
+// most expensive thing this page does — a wide view is thousands of rows times
+// tens of columns — and it used to run inside the mapStateToProps combiner, so
+// every unrelated store change (a socket status flip, a player selection, a
+// highlighted team) paid for it again. Memoizing on the Immutable List means it
+// runs when the rows actually change and not otherwise.
+const get_data_view_result_rows = createSelector(
   (state) => state.getIn(['data_view_request', 'result']),
+  (result) => result.toJS()
+)
+
+// The request slice MINUS its rows. The page reads status, position, metadata,
+// error and the two error flags off this and never the rows, which it takes
+// from `players` — so converting the whole slice meant a second and third full
+// copy of the same result on every render.
+const get_data_view_request_props = createSelector(
+  (state) => state.get('data_view_request'),
+  (data_view_request) => data_view_request.delete('result').toJS()
+)
+
+const get_data_views_props = createSelector(
+  get_data_views,
+  get_has_unsaved_local_edits_map,
+  (data_views, has_unsaved_local_edits_map) =>
+    data_views
+      .toList()
+      .toJS()
+      .map((view) => ({
+        ...view,
+        has_unsaved_local_edits: Boolean(
+          has_unsaved_local_edits_map[view.view_id]
+        )
+      }))
+)
+
+const get_players_percentiles = createSelector(
+  get_data_view_result_rows,
   get_selected_data_view,
   get_data_views_fields,
-  (data_view_items, selected_data_view, data_views_fields) => {
+  (data_view_rows, selected_data_view, data_views_fields) => {
     const percentile_stat_keys = []
     const reverse_percentile_stats = {}
     const table_state_columns = []
@@ -145,7 +180,7 @@ const get_players_percentiles = createSelector(
     }
 
     const percentiles = calculatePercentiles({
-      items: data_view_items.toJS(),
+      items: data_view_rows,
       stats: percentile_stat_keys,
       reverse_percentile_stats
     })
@@ -160,7 +195,7 @@ const map_state_to_props = createSelector(
   get_stats_state,
   get_enriched_data_views_fields,
   get_selected_data_view,
-  get_data_views,
+  get_data_views_props,
   (state) => state.getIn(['players', 'selected']),
   (state) => state.getIn(['app', 'teamId']),
   (state) => state.getIn(['app', 'leagueId']),
@@ -168,9 +203,9 @@ const map_state_to_props = createSelector(
   get_teams_for_current_year,
   get_players_percentiles,
   (state) => state.getIn(['app', 'user', 'username']),
-  (state) => state.get('data_view_request'),
+  get_data_view_result_rows,
+  get_data_view_request_props,
   (state) => state.getIn(['websocket', 'is_connected']),
-  get_has_unsaved_local_edits_map,
   get_data_view_organization_props_for_table_view_controller,
   (
     allPlayersPending,
@@ -186,28 +221,20 @@ const map_state_to_props = createSelector(
     teams,
     players_percentiles,
     user_username,
+    players,
     data_view_request,
     is_socket_connected,
-    has_unsaved_local_edits_map,
     view_organization_props
   ) => ({
     user_id: userId,
-    players: data_view_request.get('result').toJS(),
+    players,
     isLoggedIn: Boolean(userId),
     isPending:
       allPlayersPending ||
       (selected_data_view.view_id.includes('STATS_BY_PLAY') && stats.isPending), // TODO handle player fields being loaded (stats, etc)
     selected_data_view,
     data_views_fields,
-    data_views: data_views
-      .toList()
-      .toJS()
-      .map((view) => ({
-        ...view,
-        has_unsaved_local_edits: Boolean(
-          has_unsaved_local_edits_map[view.view_id]
-        )
-      })),
+    data_views,
     selected_player_pid,
     teamId,
     leagueId,
@@ -215,7 +242,7 @@ const map_state_to_props = createSelector(
     teams,
     players_percentiles,
     user_username,
-    data_view_request: data_view_request.toJS(),
+    data_view_request,
     is_socket_connected,
     ...view_organization_props
   })

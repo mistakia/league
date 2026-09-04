@@ -304,8 +304,12 @@ export const reconcile_server_views = ({ server_view_ids, redux_view_ids }) => {
   if (changed) save_metadata(metadata)
 }
 
-export const save_last_active_view = (view_id) => {
-  write_json(LAST_ACTIVE_KEY, { view_id, timestamp: Date.now() })
+// `view_name` is a label, never an identity: it is written when known so the
+// next page load can name the view it restores before the server list arrives,
+// and a record written without one (or by an older build) restores exactly the
+// same view.
+export const save_last_active_view = ({ view_id, view_name }) => {
+  write_json(LAST_ACTIVE_KEY, { view_id, view_name, timestamp: Date.now() })
 }
 
 export const load_last_active_view = () => read_json(LAST_ACTIVE_KEY)

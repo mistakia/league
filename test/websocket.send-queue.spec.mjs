@@ -73,6 +73,30 @@ describe('websocket send queue', function () {
 
       expect(pending()).to.have.lengthOf(1)
     })
+
+    it('keeps only the latest message under a replace_key', function () {
+      // The data-view results request is the one queued message a user can
+      // write repeatedly inside the connect window -- every column add is
+      // another one. Flushing all of them runs every intermediate query and
+      // renders whichever ANSWER lands last, which need not be the state on
+      // screen.
+      enqueue({ type: 'DATA_VIEW_REQUEST', params: 1 }, { replace_key: 'dv' })
+      enqueue({ type: 'DATA_VIEW_REQUEST', params: 2 }, { replace_key: 'dv' })
+
+      expect(pending()).to.deep.equal([
+        { type: 'DATA_VIEW_REQUEST', params: 2 }
+      ])
+    })
+
+    it('does not let a replace_key displace another caller', function () {
+      enqueue({ type: 'AUCTION_JOIN' })
+      enqueue({ type: 'DATA_VIEW_REQUEST' }, { replace_key: 'dv' })
+
+      expect(pending().map((m) => m.type)).to.deep.equal([
+        'AUCTION_JOIN',
+        'DATA_VIEW_REQUEST'
+      ])
+    })
   })
 
   // Source gates. `@core/ws/service` imports `@core/store`, which reads
@@ -98,11 +122,18 @@ describe('websocket send queue', function () {
       return source.slice(start, end)
     }
 
-    it('is opted into in exactly two places in the tree', function () {
-      // Enumerated from the code that defines the class, not from the two names
-      // this session happened to look at. A third call site opting in -- for a
-      // bid, a nomination, a commissioner control -- fails here whatever it is
-      // called.
+    it('is opted into in exactly three places in the tree', function () {
+      // Enumerated from the code that defines the class, not from the names
+      // this session happened to look at. A further call site opting in -- for
+      // a bid, a nomination, a commissioner control -- fails here whatever it
+      // is called.
+      //
+      // The data-view results request is the third member and the only one that
+      // is not a registration. It qualifies on the same terms: a read, carrying
+      // no board state, correct against whatever socket opens. It is here
+      // because the data-views page issues its first query from a mount effect,
+      // which routinely beats the socket open on a cold load -- and a dropped
+      // frame there hangs the page at `pending` with nothing to end it.
       const files = []
       const walk = (dir) => {
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -122,6 +153,7 @@ describe('websocket send queue', function () {
 
       expect(opted_in).to.deep.equal([
         auction_sagas,
+        'app/core/data-views/sagas.js',
         'app/core/scoreboard/sagas.js'
       ])
     })

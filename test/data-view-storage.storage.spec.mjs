@@ -252,7 +252,7 @@ describe('data-view-storage storage module', function () {
         change_type: 'user_edit',
         is_new_view: false
       })
-      save_last_active_view('v1')
+      save_last_active_view({ view_id: 'v1' })
       clear_all()
       expect(mockStorage.getItem('data_view_history_v1')).to.be.null
       expect(mockStorage.getItem('data_view_history_v2')).to.be.null
@@ -316,9 +316,10 @@ describe('data-view-storage storage module', function () {
 
   describe('last active view', () => {
     it('round-trips via save_last_active_view / load_last_active_view', () => {
-      save_last_active_view('v-active')
+      save_last_active_view({ view_id: 'v-active', view_name: 'Active' })
       const result = load_last_active_view()
       expect(result.view_id).to.equal('v-active')
+      expect(result.view_name).to.equal('Active')
       expect(result.timestamp).to.be.a('number')
     })
 

@@ -77,14 +77,19 @@ export const closeWS = () => {
 // whatever socket opens. It defaults off so that a command written while the
 // socket is not open is dropped rather than delivered as a decision the manager
 // made against a board that has since moved. Returns whether it went out.
-export const send = (message, { queue_until_open = false } = {}) => {
+// `replace_key` names a queued message this one SUPERSEDES, for a caller that
+// can write more than once inside the connect window -- see send-queue.js.
+export const send = (
+  message,
+  { queue_until_open = false, replace_key } = {}
+) => {
   if (ws && ws.readyState === 1) {
     ws.send(JSON.stringify(message))
     return true
   }
 
   if (queue_until_open) {
-    enqueue(message)
+    enqueue(message, { replace_key })
     return false
   }
 

@@ -113,11 +113,17 @@ export function data_views_reducer(
     }
 
     case data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE: {
-      const { view_id, table_state } = payload
+      const { view_id, table_state, view_name } = payload
       if (!is_valid_table_state(table_state)) return state
       return state.mergeIn([view_id], {
         view_id,
-        table_state: migrate_persisted(table_state)
+        table_state: migrate_persisted(table_state),
+        // Only when the restore carried one, and never over a name already in
+        // the store: the server list is authoritative for the name, and it can
+        // land either side of this action.
+        ...(view_name && !state.getIn([view_id, 'view_name'])
+          ? { view_name }
+          : {})
       })
     }
 

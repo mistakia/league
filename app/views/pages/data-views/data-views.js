@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useState
+} from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -107,7 +114,44 @@ export default function DataViewsPage({
   const [cache_clear_dialog_open, set_cache_clear_dialog_open] = useState(false)
   const [filter_controls_open, set_filter_controls_open] = useState(false)
 
-  useEffect(() => {
+  // The URL's own table state, when it carries one. Parsed here rather than
+  // inside the effect because the load effect below has to know whether the URL
+  // names the view to show BEFORE it asks the saga to restore the last active
+  // one — two views competing for the first query is the transition this
+  // ordering removes.
+  const url_table_state = useMemo(() => {
+    if (view_id) return null
+
+    const parsed = parse_table_state_from_url(
+      new URLSearchParams(location.search)
+    )
+    const {
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot
+    } = parsed
+
+    const has_table_state =
+      columns.length ||
+      where.length ||
+      (prefix_columns.length && sort.length) ||
+      Object.keys(rank_aggregation || {}).length ||
+      Object.keys(scatter_plot_options || {}).length ||
+      disable_scatter_plot === true
+
+    return has_table_state ? parsed : null
+  }, [location.search, view_id])
+
+  // useLayoutEffect, not useEffect: this is the effect that SELECTS the view,
+  // and a selection made after paint means the browser has already drawn a
+  // frame of the default view. The restore it drives reads localStorage, which
+  // is synchronous, so paying for it before paint costs a read and buys a first
+  // paint of the view the user actually left on.
+  useLayoutEffect(() => {
     // Always call this, logged in or not. The saved-view LIST is owner-scoped
     // and requires auth, but selecting a view is not the same job as listing
     // one: default-view selection and browser-state restoration both hang off
@@ -116,71 +160,60 @@ export default function DataViewsPage({
     // page rendered its headers over an empty body indefinitely, with nothing
     // in the console and no failed request to react to. load_data_views itself
     // decides whether to call the API.
-    load_data_views()
+    load_data_views({ restore_last_active: !view_id && !url_table_state })
     if (view_id) {
       load_data_view(view_id)
     }
-  }, [load_data_views, load_data_view, view_id])
+  }, [load_data_views, load_data_view, view_id, url_table_state])
 
-  useEffect(() => {
-    if (!view_id) {
-      const search_params = new URLSearchParams(location.search)
-      const {
-        columns,
-        prefix_columns,
-        where,
-        sort,
-        row_axes,
-        row_grain,
-        q,
-        rank_aggregation,
-        scatter_plot_options,
-        disable_scatter_plot,
+  useLayoutEffect(() => {
+    // Only handle URL-based table state initialization
+    // Browser state restoration and default view selection is handled by sagas
+    if (!url_table_state) return
+
+    const {
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      row_axes,
+      row_grain,
+      q,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot,
+      view_name,
+      view_search_column_id,
+      view_description
+    } = url_table_state
+
+    const next_table_state = {
+      columns,
+      sort,
+      where,
+      prefix_columns,
+      row_axes,
+      row_grain,
+      q,
+      rank_aggregation,
+      scatter_plot_options,
+      disable_scatter_plot
+    }
+    data_view_changed(
+      {
+        // generate a new view_id to make sure it doesn't conflict with a saved view
+        view_id: generate_view_id(),
         view_name,
         view_search_column_id,
-        view_description
-      } = parse_table_state_from_url(search_params)
-
-      const has_table_state =
-        columns.length ||
-        where.length ||
-        (prefix_columns.length && sort.length) ||
-        Object.keys(rank_aggregation || {}).length ||
-        Object.keys(scatter_plot_options || {}).length ||
-        disable_scatter_plot === true
-
-      // Only handle URL-based table state initialization
-      // Browser state restoration and default view selection is handled by sagas
-      if (has_table_state) {
-        const next_table_state = {
-          columns,
-          sort,
-          where,
-          prefix_columns,
-          row_axes,
-          row_grain,
-          q,
-          rank_aggregation,
-          scatter_plot_options,
-          disable_scatter_plot
-        }
-        data_view_changed(
-          {
-            // generate a new view_id to make sure it doesn't conflict with a saved view
-            view_id: generate_view_id(),
-            view_name,
-            view_search_column_id,
-            view_description,
-            table_state: next_table_state,
-            saved_table_state: next_table_state
-          },
-          {
-            view_state_changed: true
-          }
-        )
+        view_description,
+        table_state: next_table_state,
+        saved_table_state: next_table_state
+      },
+      {
+        view_state_changed: true
       }
-    }
-  }, [location, data_view_changed, view_id])
+    )
+  }, [url_table_state, data_view_changed])
 
   useEffect(() => {
     for (const column of selected_data_view.table_state.columns) {
@@ -196,21 +229,38 @@ export default function DataViewsPage({
     selected_data_view.table_state.columns
   ])
 
-  for (const player of players) {
-    const is_rostered = Boolean(player.tid)
+  // Row-level classes are DERIVED, so they are computed here rather than
+  // written onto the rows in render. `players` is now memoized on the result
+  // (see the container), so mutating it in place would leave last render's
+  // classes on a row whose league context has since changed — and would keep
+  // handing the table the same array identity while its contents moved.
+  const rows = useMemo(
+    () =>
+      players.map((player) => {
+        const is_rostered = Boolean(player.tid)
 
-    const class_params = {
-      fa: isLoggedIn && !is_rostered,
-      selected: selected_player_pid === player.pid,
-      rostered: teamId && player.tid === teamId
-    }
+        const class_params = {
+          fa: isLoggedIn && !is_rostered,
+          selected: selected_player_pid === player.pid,
+          rostered: teamId && player.tid === teamId
+        }
 
-    if (highlight_team_ids.includes(player.tid)) {
-      const team = teams.get(player.tid, new Team())
-      class_params[`draft-order-${team.get('draft_order')}`] = true
-    }
-    player.className = get_string_from_object(class_params)
-  }
+        if (highlight_team_ids.includes(player.tid)) {
+          const team = teams.get(player.tid, new Team())
+          class_params[`draft-order-${team.get('draft_order')}`] = true
+        }
+
+        return { ...player, className: get_string_from_object(class_params) }
+      }),
+    [
+      players,
+      isLoggedIn,
+      selected_player_pid,
+      teamId,
+      highlight_team_ids,
+      teams
+    ]
+  )
 
   // New views seed with the canonical player-grain prefix. The conditional
   // player_league_roster_status column is layered on at render time via
@@ -597,7 +647,7 @@ export default function DataViewsPage({
         }
         clear_local_cache={() => set_cache_clear_dialog_open(true)}
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
-        data={players}
+        data={rows}
         filter_controls_open={filter_controls_open}
         set_filter_controls_open={set_filter_controls_open}
         metadata={data_view_request.metadata}

@@ -12,6 +12,7 @@ import {
 
 import { data_views_actions } from './index'
 import build_data_view_request_params from './build-data-view-request-params.mjs'
+import resolve_initial_view_selection from './resolve-initial-view-selection.mjs'
 import {
   default_data_view_view_id,
   default_data_views
@@ -74,6 +75,24 @@ function* load_nfl_plays_column_params() {
 
 const DEFAULT_VIEW_IDS = new Set(Object.keys(default_data_views))
 
+// Has this page load made its FIRST view selection yet. Module-scoped rather
+// than stored, because it is a fact about the page load and not about any view:
+// the store survives navigating away from /data-views and back, and a flag
+// living there would have to be cleared on a boundary nothing observes.
+//
+// It exists to keep the two selection paths from both firing. The early path
+// below selects from localStorage at mount; restore_last_active_view_if_default
+// selects once the server list lands. Without the flag the second one re-selects
+// the default view the first already chose, and SET_SELECTED_DATA_VIEW carries
+// view_state_changed -- so the page issues the same query twice.
+let initial_selection_applied = false
+
+// Test seam only. Nothing in the app resets this: within one page load the
+// first selection happens once.
+export const reset_initial_view_selection = () => {
+  initial_selection_applied = false
+}
+
 // Install quota-exceeded callback at module load (before any saga runs) so
 // a DATA_VIEW_CHANGED arriving before the root saga reaches this line is still
 // covered. store_registry.getStore() is the saga-side dispatch escape hatch.
@@ -112,14 +131,38 @@ function* handle_data_view_request({
     append_results
   })
 
-  yield call(send, {
-    type: 'DATA_VIEW_REQUEST',
-    payload: {
-      request_id: data_view.view_id,
-      params: opts,
-      ignore_cache
+  // Queued rather than dropped when the socket is still CONNECTING. The page
+  // now issues its first query from the mount effect, which routinely beats the
+  // socket open on a cold load -- and a dropped frame there leaves the reducer
+  // at `pending` with nothing to end it: the watchdog returns without erroring
+  // on a closed socket, and the reconnect replay only runs after a socket that
+  // opened at least once has dropped.
+  //
+  // A results request qualifies for the queue on the same terms as the two
+  // registrations already using it (see @core/ws/send-queue): it is a read,
+  // idempotent, carries no board state, and is correct to deliver against
+  // whatever socket opens. The queue does not cross a socket boundary, so a
+  // request written against a socket that dies is replayed by
+  // replay_in_flight_data_view_request instead, not flushed twice.
+  yield call(
+    send,
+    {
+      type: 'DATA_VIEW_REQUEST',
+      payload: {
+        request_id: data_view.view_id,
+        params: opts,
+        ignore_cache
+      }
+    },
+    {
+      queue_until_open: true,
+      // A replacing request supersedes whatever else is queued: it clears the
+      // results in the reducer too, so nothing queued before it is still
+      // wanted. An APPEND supersedes nothing -- two pages are both wanted, and
+      // dropping one leaves a hole in the table.
+      replace_key: append_results ? undefined : 'data_view_request'
     }
-  })
+  )
 
   yield put(data_view_request_actions.data_view_request(opts))
 }
@@ -392,7 +435,65 @@ export function* handle_delete_data_view({ payload }) {
   yield call(api_delete_data_view, { view_id })
 }
 
-export function* load_data_views() {
+// Choose the view to show BEFORE the saved-view list arrives.
+//
+// Everything this needs is in localStorage, which is synchronous, so the page
+// can render the view the user left on and issue its query on the first frame.
+// Until this existed, both of those waited on GET /api/data-views: the page
+// mounted on the default view, rendered it with no query in flight, and then
+// switched to loading the remembered view once the round trip landed -- a
+// transition the user reads as the page changing its mind.
+export function* apply_initial_view_selection() {
+  if (initial_selection_applied) return
+  initial_selection_applied = true
+
+  const last_active = yield call(load_last_active_view)
+  const snapshot =
+    last_active && last_active.view_id
+      ? yield call(load_latest_snapshot, last_active.view_id)
+      : null
+
+  const selection = resolve_initial_view_selection({
+    last_active,
+    snapshot,
+    default_view_id: default_data_view_view_id,
+    default_view_ids: DEFAULT_VIEW_IDS
+  })
+
+  if (selection.type === 'defer') {
+    // Nothing local to select from. Hand it back to the post-fetch path, which
+    // runs with the server's copy of the view in hand.
+    initial_selection_applied = false
+    return
+  }
+
+  if (selection.type === 'restore') {
+    // Restore FIRST: this is what puts the view in the store, so the selection
+    // below resolves to it rather than falling back to the default.
+    yield put(
+      data_views_actions.restore_data_view_table_state({
+        view_id: selection.view_id,
+        table_state: selection.table_state,
+        view_name: selection.view_name
+      })
+    )
+  }
+
+  // The selection is what carries view_state_changed, so it is also what issues
+  // the query -- including in the `default` case, where leaning on the reducer's
+  // initial value left the default view on screen with nothing in flight until
+  // the saved-view list landed.
+  yield put(data_views_actions.set_selected_data_view(selection.view_id))
+}
+
+export function* load_data_views({ payload = {} } = {}) {
+  // A direct link to a view, or a URL carrying its own table state, names the
+  // view to show -- restoring the last active one would query a view the user
+  // did not ask for and then be overwritten.
+  if (payload.restore_last_active) {
+    yield call(apply_initial_view_selection)
+  }
+
   const { userId } = yield select(get_app)
 
   // GET /api/data-views requires a user — 216c1a5d0 closed an anonymous leak of
@@ -487,7 +588,10 @@ export function* persist_table_state_to_browser({ payload }) {
     })
 
     if (is_new_view) {
-      yield call(save_last_active_view, view_id)
+      yield call(save_last_active_view, {
+        view_id,
+        view_name: data_view.view_name
+      })
     }
   } catch (error) {
     console.error('Error persisting table state to browser:', error)
@@ -499,7 +603,15 @@ export function* persist_selected_view_to_browser({ payload }) {
     const { data_view_id } = payload
     if (!data_view_id) return
     if (DEFAULT_VIEW_IDS.has(data_view_id)) return
-    yield call(save_last_active_view, data_view_id)
+    // The name rides along so the next page load can label the view it restores
+    // from localStorage. Without it the view selector renders nameless until the
+    // saved-view list arrives, which is the flicker this restore exists to
+    // remove, moved one field over.
+    const view = yield select(get_data_view_by_id, { view_id: data_view_id })
+    yield call(save_last_active_view, {
+      view_id: data_view_id,
+      view_name: view ? view.get('view_name') : undefined
+    })
   } catch (error) {
     console.error('Error persisting selected view to browser:', error)
   }
@@ -543,6 +655,9 @@ function* restore_view_states_from_browser(view_ids) {
 }
 
 function* restore_last_active_view_if_default(all_view_ids) {
+  // The early path already chose, and choosing again re-issues its query.
+  if (initial_selection_applied) return
+
   const current_selected_id = yield select(get_selected_data_view_id)
   if (current_selected_id !== default_data_view_view_id) return
 

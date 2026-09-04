@@ -57,9 +57,9 @@ export const data_views_actions = {
   }),
 
   RESTORE_DATA_VIEW_TABLE_STATE: 'RESTORE_DATA_VIEW_TABLE_STATE',
-  restore_data_view_table_state: ({ view_id, table_state }) => ({
+  restore_data_view_table_state: ({ view_id, table_state, view_name }) => ({
     type: data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE,
-    payload: { view_id, table_state }
+    payload: { view_id, table_state, view_name }
   }),
 
   // Step ONE entry back through the browser-local edit history.
