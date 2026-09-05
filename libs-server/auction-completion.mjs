@@ -16,15 +16,35 @@ import getLeague from './get-league.mjs'
  */
 export const get_auction_spots_remaining = async ({
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  db_client = db
 }) => {
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, season_year })
+  const teams = await db_client('teams').where({ lid, season_year })
 
   let spots = 0
   for (const team of teams) {
     const roster = new Roster({
-      roster: await getRoster({ tid: team.team_id }),
+      // `year` TRAVELS WITH THE TEAM ROW. The team query above is scoped to
+      // `season_year` while this read defaulted to `current_season.year`, so
+      // asking for a season that is not the current one counted THIS season's
+      // rosters against that season's teams and returned a number belonging to
+      // neither. Every shipped caller passes the current year, which is why it
+      // never showed.
+      //
+      // `week` is deliberately NOT pinned to 0 here. The auction writes its
+      // roster rows at week 0 and `getRoster` defaults to
+      // `current_season.fantasy_season_week`, which is 0 for the whole
+      // offseason and so agrees today -- but it becomes 1 at the regular season
+      // start, and a free agency period running past that would silently count
+      // a week the auction never writes to. Pinning it is a behaviour change to
+      // a safety-critical count and belongs with the owner of the settlement
+      // path, not here.
+      roster: await getRoster({
+        tid: team.team_id,
+        year: season_year,
+        db_client
+      }),
       league
     })
     spots += Math.max(roster.availableSpace, 0)
@@ -52,7 +72,8 @@ export const get_auction_spots_remaining = async ({
  */
 export const is_auction_complete = async ({
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  db_client = db
 }) => {
   const league = await getLeague({ lid })
 
@@ -64,7 +85,8 @@ export const is_auction_complete = async ({
 
   const spots_remaining = await get_auction_spots_remaining({
     lid,
-    season_year
+    season_year,
+    db_client
   })
   return spots_remaining === 0
 }
@@ -91,7 +113,8 @@ export const is_auction_complete = async ({
  */
 export const may_process_free_agency_waivers = async ({
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  db_client = db
 }) => {
   const league = await getLeague({ lid })
 
@@ -102,7 +125,7 @@ export const may_process_free_agency_waivers = async ({
   // Before the period opens there is no free agency at all.
   if (current_season.now.isBefore(period.start)) return false
 
-  return is_auction_complete({ lid, season_year })
+  return is_auction_complete({ lid, season_year, db_client })
 }
 
 /**
@@ -121,7 +144,8 @@ export const may_process_free_agency_waivers = async ({
  */
 export const is_auction_in_progress = async ({
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  db_client = db
 }) => {
   const league = await getLeague({ lid })
 
@@ -132,7 +156,7 @@ export const is_auction_in_progress = async ({
   // Before the period opens there is no auction.
   if (current_season.now.isBefore(period.start)) return false
 
-  return !(await is_auction_complete({ lid, season_year }))
+  return !(await is_auction_complete({ lid, season_year, db_client }))
 }
 
 /**
@@ -203,10 +227,11 @@ export const resolve_nominating_team_id = ({ transactions, tids, teams }) => {
  */
 export const get_auction_nominating_team_id = async ({
   lid,
-  season_year = current_season.year
+  season_year = current_season.year,
+  db_client = db
 }) => {
   const league = await getLeague({ lid })
-  const teams = (await db('teams').where({ lid, season_year })).sort(
+  const teams = (await db_client('teams').where({ lid, season_year })).sort(
     (a, b) => a.draft_order - b.draft_order
   )
   const tids = teams.map((team) => team.team_id)
@@ -214,13 +239,19 @@ export const get_auction_nominating_team_id = async ({
 
   for (const team of teams) {
     const roster = new Roster({
-      roster: await getRoster({ tid: team.team_id }),
+      // Same `year` correction as `get_auction_spots_remaining`: the team query
+      // is scoped to `season_year` and this read was not.
+      roster: await getRoster({
+        tid: team.team_id,
+        year: season_year,
+        db_client
+      }),
       league
     })
     team.availableSpace = roster.availableSpace
   }
 
-  const transactions = await db('transactions')
+  const transactions = await db_client('transactions')
     .whereIn('tid', tids)
     .where('season_year', season_year)
     .whereIn('type', [

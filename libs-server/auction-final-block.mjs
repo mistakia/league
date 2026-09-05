@@ -177,7 +177,13 @@ export const get_auction_final_block = async ({
     now
   })
 
-  log(describe_final_block(result))
+  // NAMED BY LEAGUE, because this line is emitted on a POLL and more than one
+  // league runs a free agency period at once. Without the id two leagues
+  // interleave in the log at the same cadence, and the pair reads as a single
+  // value oscillating between their two spot counts -- a retrospective on the
+  // 2026 auction spent several steps chasing that phantom before checking how
+  // many leagues were live.
+  log(`league ${lid} ${describe_final_block(result)}`)
 
   if (result.is_in_the_past) {
     // An output oracle distinct from the exit code, per the pipeline-failure

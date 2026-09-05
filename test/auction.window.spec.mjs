@@ -178,6 +178,42 @@ describe('auction window against a seeded league', function () {
     expect(await get_auction_spots_remaining({ lid: 1 })).to.equal(before - 1)
   })
 
+  it('reads rosters through the caller db_client, not the module pool', async function () {
+    // SCORED AS A PAIR, because a single reading cannot tell a threaded
+    // `db_client` from an ignored one -- both return a plausible number. The
+    // two readings are taken at the same instant against the same league and
+    // are required to DIFFER, which is only possible if the count inside the
+    // transaction sees that transaction's own uncommitted delete.
+    //
+    // It matters beyond tidiness. `getRoster` issues several queries per team
+    // and this runs one per team in the league; a caller holding the auction's
+    // advisory lock that cannot pass its own connection is acquiring pool
+    // connections held by the teams blocked on that lock, which is the
+    // settlement deadlock `get_auction_team_capacities` already carries a
+    // `db_client` to avoid.
+    const player = await selectPlayer({
+      exclude_rostered_players: true,
+      random: false
+    })
+    await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1 })
+
+    const trx = await knex.transaction()
+    try {
+      // Frees every filled spot, but only inside this transaction.
+      await trx('rosters_players').where({ lid: 1 }).del()
+
+      const inside = await get_auction_spots_remaining({
+        lid: 1,
+        db_client: trx
+      })
+      const outside = await get_auction_spots_remaining({ lid: 1 })
+
+      expect(inside).to.be.above(outside)
+    } finally {
+      await trx.rollback()
+    }
+  })
+
   it('refuses a league with no free agency period rather than passing it', async function () {
     // The seeded league carries no free_agency_period_start, which is now the
     // only thing that says a league HAS a free agency period. That must read as
