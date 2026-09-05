@@ -41,7 +41,7 @@ export const base_url = 'https://base.tint.space'
 // scans the landing copy for a hardcoded season count, since a number typed
 // into a sentence goes stale in September and nothing reports it.
 export const hero_deck =
-  'Dynasty leagues with a real salary cap. NFL projections, betting markets and play-by-play, open to anyone.'
+  'Dynasty leagues with a salary cap. NFL projections, betting markets and play-by-play, open to anyone.'
 
 // The hero's two actions. The primary is the strongest thing the platform
 // ships and the one that needs no account; the secondary is the claim the
