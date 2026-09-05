@@ -68,17 +68,17 @@ beside it, which reads as the menu being wrong rather than as the page being pap
 
 Defined in `app/styles/prose-form.styl`.
 
-| Token                | Value     | Use                                                |
-| -------------------- | --------- | -------------------------------------------------- |
-| `$prose_ink`         | `#17181a` | Headlines, labels, link text                       |
-| `$prose_body`        | `#3d4045` | Running prose                                      |
-| `$prose_muted`       | `#696d72` | Eyebrows, blurbs, notes, placeholders              |
-| `$prose_paper`       | `#ffffff` | Cards and form controls — **not** page backgrounds |
-| `$prose_rule`        | `#d7d9dc` | The hairline between two things of the same kind   |
-| `$prose_rule_strong` | `#c9cbcf` | Link underlines and input borders                  |
-| `$prose_rule_heavy`  | `#17181a` | The band rule that opens a section                 |
-| `$prose_accent`      | `#c1121f` | Hover, focus rings, errors. Nothing else           |
-| `$prose_action`      | `#636a73` | Filled submits and the floating menu button        |
+| Token                | Value     | Use                                                                       |
+| -------------------- | --------- | ------------------------------------------------------------------------- |
+| `$prose_ink`         | `#17181a` | Headlines, labels, link text                                              |
+| `$prose_body`        | `#3d4045` | Running prose                                                             |
+| `$prose_muted`       | `#696d72` | Eyebrows, blurbs, notes, placeholders                                     |
+| `$prose_paper`       | `#ffffff` | Cards and form controls — **not** page backgrounds                        |
+| `$prose_rule`        | `#d7d9dc` | The hairline between two things of the same kind, and every field marking |
+| `$prose_rule_strong` | `#c9cbcf` | Link underlines and input borders                                         |
+| `$prose_rule_heavy`  | `#17181a` | The band rule that opens a section                                        |
+| `$prose_accent`      | `#c1121f` | Hover, focus rings, errors. Nothing else                                  |
+| `$prose_action`      | `#636a73` | Filled submits and the floating menu button                               |
 
 Three of these are set against the ground rather than against white. `$prose_rule` was `#e3e4e6`,
 four steps off `#f0f0f0`, so rules that were present in the DOM were invisible on screen.
@@ -86,6 +86,13 @@ four steps off `#f0f0f0`, so rules that were present in the DOM were invisible o
 pages actually sit on — under the floor, for text set at normal size in every place it appears.
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
+
+**One paint for every field marking.** The yard numbers, the hash marks and the end zone wordmark
+are all `$prose_rule`, the faintest grey in the palette — and paint is the one thing on the page
+that can afford it. A mark at 48px is legible at a contrast a line of prose would vanish at, and
+every one of these is decorative by construction, carrying nothing a reader has to make out. The
+yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
+and at that size it read as ink competing with the head across the row from it.
 
 **Check a grey against the surface it lands on, not against white.** Two of the three above were
 first measured on white and shipped failing on `#f0f0f0`. `$prose_action` is the exception that

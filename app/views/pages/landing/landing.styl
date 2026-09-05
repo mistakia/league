@@ -289,11 +289,16 @@
 // is heavy at roughly normal width, six feet by four, and Chivo 900 is the
 // nearest thing to that. app/index.html carries the comparison it won.
 //
-// In the hairline greys rather than in ink, because it is a mark on the ground
-// and not something to read. $prose_rule_strong is the palette's own value for
-// a line a reader is meant to notice without looking at it, which is exactly
-// what this is; a literal one step lighter was tried and is not worth a tenth
-// token on a page that already has three greys.
+// $prose_rule, which is ONE PAINT FOR EVERY FIELD MARKING — this number, the
+// hash marks in the same band, and the wordmark in the end zone. It is the
+// faintest grey the palette has, and paint is the one thing on the page that
+// can afford it: a mark this size is legible at a contrast a line of prose
+// would disappear at, and everything painted here is decorative by
+// construction, carrying nothing a reader has to be able to make out.
+//
+// It was $prose_rule_strong, one step darker, which is the value for a LINE a
+// reader is meant to notice — and at 48px that read as ink, so the number
+// competed with the head across the row from it instead of sitting under it.
 .landing__yard
   position absolute
   // 14px against prose_section_band()'s own 16px of padding-top: a turned
@@ -307,7 +312,7 @@
   font-size 48px
   line-height 1
   letter-spacing 0.02em
-  color $prose_rule_strong
+  color $prose_rule
   user-select none
 
   @media (max-width 640px)
