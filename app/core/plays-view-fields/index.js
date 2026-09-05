@@ -18,6 +18,8 @@ import TeamCodeColumn from '@components/team-code-column'
 //   cell                 - names an entry in CELL_COMPONENTS, rendering the
 //                          cell in place of the plain-text path (react-table's
 //                          table-cell.js dispatches on `component`)
+//   justify_content      - CSS justify-content for the cell, e.g. 'flex-start'
+//                          to left-align the text. Cells center by default.
 //   disable_percentiles  - bool. Suppresses shading on a numeric column. See
 //                          the rule below for which ones
 //
@@ -92,6 +94,7 @@ const build_field = (column_id, declaration) => {
     fixed,
     disable_percentiles,
     cell,
+    justify_content,
     description
   } = declaration
 
@@ -119,6 +122,7 @@ const build_field = (column_id, declaration) => {
 
   if (column_values) field.column_values = column_values
   if (fixed !== undefined) field.fixed = fixed
+  if (justify_content) field.justify_content = justify_content
   if (disable_percentiles) field.disable_percentiles = true
   if (cell) {
     const component = CELL_COMPONENTS[cell]
