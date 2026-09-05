@@ -243,12 +243,22 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         isLocked: true
       })
 
+    // THE TYPE IS STAMPED HERE BECAUSE THE ELECTION-MODE BROADCAST OMITS IT.
+    // `broadcast_auction_settlement` sends `{ pid, tid, player_salary }` and no
+    // `type`, while the socket's own settle path sends the whole transaction
+    // row -- so the two fan-outs put differently shaped records into the same
+    // list, and a reader that switches on `type` sees the election-mode sale as
+    // neither a bid nor a sale. Stamping is the narrow fix: the payload's own
+    // type, where it has one, is already this value.
     case auction_actions.AUCTION_PROCESSED:
       return state.merge({
         selected_pid: null,
         isPaused: false,
         bid: null,
-        transactions: state.transactions.unshift(payload),
+        transactions: state.transactions.unshift({
+          ...payload,
+          type: transaction_types.AUCTION_PROCESSED
+        }),
         nominated_pid: null,
         // The outstanding set belongs to the player that just sold. Carrying it
         // into the next nomination would name teams against a player they have

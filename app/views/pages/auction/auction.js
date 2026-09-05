@@ -10,6 +10,7 @@ import AuctionStandingElections from '@components/auction-standing-elections'
 import AuctionSettlementStatus from '@components/auction-settlement-status'
 import AuctionBlockCalendar from '@components/auction-block-calendar'
 import AuctionStatus from '@components/auction-status'
+import AuctionTransactions from '@components/auction-transactions'
 
 import './auction.styl'
 
@@ -133,6 +134,16 @@ export default function AuctionPage({
             <AuctionBlockCalendar />
             <AuctionStandingElections
               key={`standing-elections-${is_narrow}`}
+              is_collapsible={is_narrow}
+            />
+            {/* Last in the rail: the auction's ledger rather than its current
+                state, and the only panel here a manager reads backwards. Keyed
+                on the breakpoint for the same reason its sibling is -- the
+                Accordion reads `default_expanded` once, so it has to remount
+                rather than stay open through a rotation into the phone
+                layout. */}
+            <AuctionTransactions
+              key={`transactions-${is_narrow}`}
               is_collapsible={is_narrow}
             />
           </div>

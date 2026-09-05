@@ -1,0 +1,118 @@
+.auction-transactions
+  padding 12px
+  display flex
+  flex-direction column
+  gap 12px
+  border-top 1px solid $borderColor
+
+  &__header
+    display flex
+    justify-content space-between
+    align-items baseline
+    gap 8px
+    flex 1
+    min-width 0
+    font-size 11px
+    color rgba(0, 0, 0, 0.6)
+
+  &__title
+    font-size 14px
+    font-weight 700
+    color $textColor
+
+  &__filters
+    align-self flex-start
+
+  // BOUNDED AND SCROLLED HERE, not by the rail. On a desktop the rail scrolls
+  // as one column, so an unbounded list pushes the calendar and the elections
+  // above it out of reach of anyone reading the newest sale; on a phone the
+  // rail does not scroll at all and a covered row is simply never readable.
+  // Its own scroller keeps the panel a fixed share of either layout.
+  &__list
+    display flex
+    flex-direction column
+    gap 4px
+    max-height 260px
+    overflow-y auto
+
+  // ONE LINE PER TRANSACTION, CLIPPED RATHER THAN WRAPPED, matching the
+  // elections list above it. The player name is the only elastic child; the
+  // team, the amount and the timestamp are short, bounded and the reason the
+  // row exists. `min-width 0` AND `overflow hidden` on every link in the chain,
+  // because the first alone lets the box shrink while its text keeps painting
+  // full width over whatever follows.
+  &__row
+    display flex
+    align-items center
+    gap 8px
+    font-size 13px
+    min-width 0
+    overflow hidden
+    white-space nowrap
+
+  &__team
+    flex 0 0 auto
+    display flex
+    align-items center
+    gap 4px
+
+  // A FLEX ROW, not a block. `PlayerName` renders a FRAGMENT of two siblings --
+  // the name and a label carrying the status, PSP and cutlist chips -- so in a
+  // block parent the chip starts its own LINE, which put a `Q` under the name,
+  // doubled that row's height and left the amount beside it floating against
+  // two lines of nothing. Measured on the live board: every row with a status
+  // chip was 2x the height of the rows around it.
+  &__player
+    flex 1 1 auto
+    min-width 0
+    overflow hidden
+    display flex
+    align-items center
+    gap 4px
+
+    .player__name-label
+      flex 0 0 auto
+
+    .player__name
+      flex 1 1 auto
+      min-width 0
+      overflow hidden
+
+    .player__name-top
+      overflow hidden
+      text-overflow ellipsis
+
+  &__amount
+    flex 0 0 auto
+
+  &__kind
+    flex 0 0 auto
+    font-size 11px
+    text-transform uppercase
+    opacity 0.7
+
+  &__timestamp
+    flex 0 0 auto
+    font-size 11px
+    color rgba(0, 0, 0, 0.4)
+
+  &__empty
+    font-size 13px
+    opacity 0.7
+
+  &__more
+    font-size 11px
+    opacity 0.6
+
+// Collapsible on a phone, where the root IS the Accordion and its summary
+// button already owns the row's padding. Keeping the panel's own padding here
+// would double it and push the chevron off the line.
+.accordion.auction-transactions
+  padding 0
+  gap 0
+
+  .auction-transactions__filters
+    margin 8px 0
+
+  .auction-transactions__list
+    padding-bottom 8px
