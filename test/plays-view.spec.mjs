@@ -445,6 +445,34 @@ describe('Plays View', () => {
     })
   })
 
+  // The pairing this asserts is the one that bites: a view that scopes its own
+  // years loses the REG default, so without an explicit season-type clause it
+  // returns preseason plays under a regular-season-looking table. Measured on
+  // production 2026-09-05 -- the first row of the Burrow Cover-2 view was a
+  // 2025 preseason snap.
+  describe('season scope', () => {
+    it('emits no season-type filter when the view sets its own years', async () => {
+      const { query } = await get_plays_view_results_query({
+        columns: ['play_type'],
+        where: [{ column_id: 'play_year', operator: 'IN', value: [2024] }]
+      })
+
+      expect(query.toString()).to.not.include('season_type')
+    })
+
+    it('lets a view restore the regular-season scope with play_seas_type', async () => {
+      const { query } = await get_plays_view_results_query({
+        columns: ['play_type'],
+        where: [
+          { column_id: 'play_year', operator: 'IN', value: [2024] },
+          { column_id: 'play_seas_type', operator: '=', value: 'REG' }
+        ]
+      })
+
+      expect(query.toString()).to.include("nfl_plays.season_type = 'REG'")
+    })
+  })
+
   // A plays column is three separate declarations -- the server definition, the
   // shared description, and the client field -- and nothing made them agree.
   // The failure is silent in both directions: a column with no description

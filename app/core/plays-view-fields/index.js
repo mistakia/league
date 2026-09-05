@@ -188,6 +188,13 @@ const plays_view_fields = {
     // A calendar ordinal, not a magnitude.
     disable_percentiles: true
   }),
+  play_seas_type: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
+    header_label: 'TYPE',
+    size: 60,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: ['PRE', 'REG', 'POST']
+  }),
   play_week: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'WK',

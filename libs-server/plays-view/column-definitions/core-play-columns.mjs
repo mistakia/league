@@ -106,6 +106,18 @@ export default {
     main_select: () => ['nfl_plays.season_year as play_year'],
     main_where: () => 'nfl_plays.season_year'
   },
+  // Load-bearing rather than decorative, because of how the year filter works:
+  // a `play_year` WHERE clause suppresses the request-level year param, and the
+  // REG default rides on that param. So a view that scopes its own seasons has
+  // NO season-type filter at all and quietly mixes preseason and postseason
+  // into what reads as a regular-season table. Without this column a shared
+  // link -- which carries table_state and no params -- had no way to say REG.
+  play_seas_type: {
+    column_name: 'season_type',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.season_type as play_seas_type'],
+    main_where: () => 'nfl_plays.season_type'
+  },
   play_week: {
     column_name: 'week',
     table_name: 'nfl_plays',

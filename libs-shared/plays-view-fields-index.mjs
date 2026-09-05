@@ -15,6 +15,8 @@ export default {
   play_sequence: 'The sequence number of the play in the game',
   play_year: 'The NFL season year',
   play_week: 'The NFL week number',
+  play_seas_type:
+    'The season type — PRE, REG or POST. Filter on it whenever the view sets its own years, since a year filter turns off the regular-season default.',
   play_game_id: 'The unique game identifier (ESBID)',
   play_film_url:
     'Link to the coaches film for this play on NFL Pro (requires an NFL Pro subscription). Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates.',
