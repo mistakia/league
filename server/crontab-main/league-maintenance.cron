@@ -75,6 +75,22 @@
 ## missing day is what the recovery slots exist to absorb.
 0 9 * * * NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-keeptradecut-liquidity-coverage.mjs >> /var/log/league/audit-keeptradecut-liquidity-coverage.log 2>&1
 
+## Every Monday at 6:15AM -- does the DraftKings mapper still classify what
+## DraftKings publishes?
+##
+## WEEKLY, not per-run. The per-run oracle in import-draftkings-odds.mjs owns
+## the fast question (a subcategory id nobody has ruled on yet) and answers it
+## within one four-hour import cycle. This one asks whether a PAST ruling has
+## gone stale, which moves on the scale of a season, not a cycle -- running it
+## per-import would re-derive the same verdict 42 times a week and read as
+## noise. It also replays the mapper over every distinct tuple in a 30-day
+## window, which is a real query, so it belongs off the import path.
+##
+## Expect it to go red in-season on categories 1303 and 1744 until those are
+## either mapped or re-declined with the volume on record; that is the finding,
+## not a misconfiguration.
+15 6 * * 1 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-draftkings-market-type-coverage.mjs >> /var/log/league/audit-draftkings-market-type-coverage.log 2>&1
+
 ## Every Monday at 5:00AM (with optimal-lineup pass)
 30 5 * * 1 NODE_ENV=production nice -n 10 /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
 

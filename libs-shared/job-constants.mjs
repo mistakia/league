@@ -208,7 +208,14 @@ export const job_types = {
   // under no schedule and the current season simply had no rows. IMPORT_PFF_GRADES
   // (65) covers the season-grain table only and its green rows said nothing
   // about the game grain.
-  IMPORT_PFF_GAMELOGS: 143
+  IMPORT_PFF_GAMELOGS: 143,
+
+  // Separate from DRAFTKINGS_ODDS (33) on purpose. The importer's own red row
+  // means it could not collect; this one means it collected fine and the
+  // mapper's out-of-scope rulings have drifted from what DraftKings publishes.
+  // Folding the second into the first would make a mapping decision look like
+  // a collection failure.
+  AUDIT_DRAFTKINGS_MARKET_TYPE_COVERAGE: 144
 }
 
 export const job_title_by_id = {
@@ -353,5 +360,6 @@ export const job_title_by_id = {
   140: 'Announce Draft Slate',
   141: 'Generate Player Snaps',
   142: 'Import Player Plays (Charting)',
-  143: 'Import PFF Gamelogs'
+  143: 'Import PFF Gamelogs',
+  144: 'Audit DraftKings Market Type Coverage'
 }
