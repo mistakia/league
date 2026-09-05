@@ -198,6 +198,43 @@ describe('libs-server draftkings market types', function () {
     })
   })
 
+  // DraftKings renumbered two TD Scorers subcategories and the handler kept the
+  // retired ids. 11819 and 11820 have published nothing since records begin,
+  // while their live successors landed in the declined set and wrote null
+  // market_type on every observation. Both types already existed.
+  describe('offer category 1003 renumbered TD scorer subcategories', function () {
+    it('maps 11818 (Last TD Scorer, Inc OT) to the existing last-scorer type', function () {
+      expect(
+        get_market_type({ offerCategoryId: 1003, subcategoryId: 11818 })
+      ).to.equal(player_prop_types.GAME_LAST_TOUCHDOWN_SCORER)
+    })
+
+    it('maps 12451 (1st Team TD Scorer) to the existing first-team-scorer type', function () {
+      expect(
+        get_market_type({ offerCategoryId: 1003, subcategoryId: 12451 })
+      ).to.equal(player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER)
+    })
+
+    it('keeps the retired 11820 on the same type as its successor', function () {
+      expect(
+        get_market_type({ offerCategoryId: 1003, subcategoryId: 11820 })
+      ).to.equal(player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER)
+    })
+
+    it('still collects an unrecognised 1003 subcategory as a gap', function () {
+      unmapped_subcategories_by_offer_category.clear()
+
+      expect(
+        get_market_type({ offerCategoryId: 1003, subcategoryId: 999999 })
+      ).to.equal(null)
+      expect(unmapped_subcategories_by_offer_category.get(1003)).to.include(
+        999999
+      )
+
+      unmapped_subcategories_by_offer_category.clear()
+    })
+  })
+
   // The seeded sets are what keep the importer's signal readable: the collector
   // records everything, and without a gate the subcategory arm names the same
   // 221 ids and the category arm the same 42 on every run.
@@ -236,7 +273,10 @@ describe('libs-server draftkings market types', function () {
         18525,
         // Position-group season leaders under 1595 (2026-09-05).
         15816,
-        20232
+        20232,
+        // Renumbered TD scorer subcategories under 1003 (2026-09-05).
+        11818,
+        12451
       ]) {
         expect(
           known_unmapped_subcategory_ids.has(Number(subcategory_id)),

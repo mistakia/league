@@ -271,8 +271,20 @@ export const get_market_type_offer_1003 = ({ subcategoryId, marketTypeId }) => {
       // Fallback to ANYTIME_TOUCHDOWN if marketTypeId is not recognized
       return player_prop_types.ANYTIME_TOUCHDOWN
 
+    // 11820 has published nothing since records begin; 12451 is the id
+    // DraftKings uses for the same product now ("1st <TEAM> TD Scorer", one
+    // market per team, ~17 player selections each). Both map, so a replay of
+    // stored history and a live run agree.
     case 11820:
+    case 12451:
       return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
+
+    // "Last TD Scorer (Inc OT)" -- full-game scope, so the existing type
+    // applies unchanged. The DraftKings selection layer already handles it:
+    // draftkings-helpers.mjs carries it in YES_NO_MARKET_TYPES and gives it an
+    // implicit 0.5 threshold. Only this arm was missing.
+    case 11818:
+      return player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
 
     default:
       return unmapped_subcategory(1003, subcategoryId)
