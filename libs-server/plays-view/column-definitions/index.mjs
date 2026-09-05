@@ -1,5 +1,5 @@
 import db from '#db'
-import { plays_view_columns } from '#libs-shared'
+import plays_view_columns from '#libs-shared/plays-view-columns.mjs'
 import overrides from './overrides.mjs'
 
 // Every plays-view column's server definition, derived from the shared

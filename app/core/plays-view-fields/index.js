@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { plays_view_columns } from '#libs-shared'
+import plays_view_columns from '#libs-shared/plays-view-columns.mjs'
 import PlayFilmLink from '@components/play-film-link'
 import TeamCodeColumn from '@components/team-code-column'
 

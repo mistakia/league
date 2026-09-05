@@ -312,6 +312,45 @@ describe('Plays View', () => {
 
       expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
     })
+
+    it('should return 1 hour cache TTL for a range covering the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [
+          {
+            column_id: 'play_year',
+            operator: '>=',
+            value: current_season.year - 1
+          }
+        ],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
+    })
+
+    it('should return 1 hour cache TTL for a negation that cannot exclude the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [{ column_id: 'play_year', operator: '!=', value: 2020 }],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
+    })
+
+    it('should still return 7 day cache TTL for a range that ends before the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [
+          {
+            column_id: 'play_year',
+            operator: 'IN',
+            value: [2020, 2021]
+          }
+        ],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(7 * 24 * 60 * 60)
+    })
   })
 
   describe('validation', () => {
