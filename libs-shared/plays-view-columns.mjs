@@ -30,7 +30,7 @@ export default {
     size: 50,
     cell: 'PlayFilmLinkCell',
     description:
-      "Opens the NFL Pro film room on this play's game, filtered to its quarter, play type, distance and down, and plays the first clip that matches (requires an NFL Pro subscription). NFL Pro has no per-play link, so the target play is not always the one that plays first. Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates."
+      "Opens the NFL Pro film room on this play's game, filtered to its quarter, play type, distance, down, outcome and players, and plays the first clip that matches (requires an NFL Pro subscription). NFL Pro has no per-play link, so this is the closest a link can get: the filters leave the target play as the only result about seven times in ten, and playing first about eight times in ten. Very occasionally NFL's own charting disagrees with ours and the filters match no clip at all. Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates."
   },
   play_esbid: {
     table: 'nfl_plays',

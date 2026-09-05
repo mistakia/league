@@ -36,6 +36,25 @@ const join_player =
     join_state[role] = true
   }
 
+// The film link reads four tables, and it reads them from the SELECT list and
+// from ORDER BY alike, so all four joins have to be present on either path.
+//
+// The three player roles are prefixed `film_` and keyed on the play's GSIS id
+// rather than reusing the `passer`/`target`/`rusher` roles above, which are
+// keyed on the pid columns. That is not duplication to collapse: the two id
+// paths resolve to a different gsis_it_player_id on roughly half a percent of
+// plays, and it is the GSIS path the film-room filters were measured against.
+const join_play_film_url = (context) => {
+  join_nfl_games(context)
+  for (const [role, pid_column] of [
+    ['film_passer', 'passer_gsis_player_id'],
+    ['film_target', 'target_gsis_player_id'],
+    ['film_rusher', 'ball_carrier_gsis_player_id']
+  ]) {
+    join_player({ role, pid_column, player_key: 'gsis_player_id' })(context)
+  }
+}
+
 // Held as strings rather than built per call site because each has to appear
 // identically in three places -- the select, the WHERE expression and the sort
 // expression. A select and a filter that disagree on the fallback would filter
@@ -90,7 +109,7 @@ export default {
   play_film_url: {
     main_select: () => [nfl_pro_film_url_sql({ alias: 'play_film_url' })],
     sort_column_name: nfl_pro_film_url_sql(),
-    join: join_nfl_games
+    join: join_play_film_url
   },
 
   play_off_team: {

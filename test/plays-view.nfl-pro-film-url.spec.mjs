@@ -68,7 +68,14 @@ const seed_play = async ({
   down_number = 1,
   yards_to_go = null,
   game_clock_start = null,
-  play_description = null
+  play_description = null,
+  is_touchdown = null,
+  is_completion = null,
+  is_interception = null,
+  offense_nfl_team = null,
+  passer_gsis_player_id = null,
+  target_gsis_player_id = null,
+  ball_carrier_gsis_player_id = null
 }) =>
   db('nfl_plays').insert({
     esbid,
@@ -83,24 +90,108 @@ const seed_play = async ({
     yards_to_go,
     game_clock_start,
     play_description,
+    is_touchdown,
+    is_completion,
+    is_interception,
+    offense_nfl_team,
+    passer_gsis_player_id,
+    target_gsis_player_id,
+    ball_carrier_gsis_player_id,
     updated: new Date()
   })
 
-// The join is part of the contract: the expression reads nfl_games, so every
-// caller has to supply it. `join_nfl_games` does this in the plays-view
-// overrides; here it is spelled out so a missing join fails loudly rather than
-// silently reading a column from the wrong place.
-const film_url = async (play_id) => {
-  const [row] = await db('nfl_plays')
+// The player rows the film link resolves its passerId, targetId and rusherId
+// through. `gsis_it_player_id` is the id NFL Pro's filters match on;
+// `nfl_player_id` is the well-formed integer that silently matches nothing, and
+// it is seeded here deliberately so a regression to it fails on a value that is
+// present rather than on a null.
+const players = [
+  {
+    pid: 'FILM-PASS-999001',
+    gsis_player_id: '00-0099001',
+    gsis_it_player_id: 990001,
+    nfl_player_id: 9990001,
+    first_name: 'Film',
+    last_name: 'Passer'
+  },
+  {
+    pid: 'FILM-TARG-999002',
+    gsis_player_id: '00-0099002',
+    gsis_it_player_id: 990002,
+    nfl_player_id: 9990002,
+    first_name: 'Film',
+    last_name: 'Target'
+  },
+  {
+    pid: 'FILM-RUSH-999003',
+    gsis_player_id: '00-0099003',
+    gsis_it_player_id: 990003,
+    nfl_player_id: 9990003,
+    first_name: 'Film',
+    last_name: 'Rusher'
+  }
+]
+
+const seed_players = async () =>
+  db('player')
+    .insert(
+      players.map((p) => ({
+        ...p,
+        short_name: `${p.first_name[0]}.${p.last_name}`,
+        formatted_name: `${p.first_name} ${p.last_name}`.toLowerCase(),
+        primary_position: 'QB',
+        secondary_position: 'QB'
+      }))
+    )
+    .onConflict('pid')
+    .ignore()
+
+// The joins are part of the contract: the expression reads nfl_games and three
+// role-aliased copies of player, so every caller has to supply all four.
+// `join_play_film_url` does this in the plays-view overrides; here they are
+// spelled out so a missing join fails loudly rather than silently reading a
+// column from the wrong place.
+//
+// The player joins key on the GSIS id and NOT on the pid columns. Those two
+// paths disagree on roughly half a percent of production plays, and the GSIS
+// path is the one the film-room filters were measured against.
+const film_url_query = () =>
+  db('nfl_plays')
     .leftJoin('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+    .leftJoin(
+      'player as film_passer',
+      'nfl_plays.passer_gsis_player_id',
+      'film_passer.gsis_player_id'
+    )
+    .leftJoin(
+      'player as film_target',
+      'nfl_plays.target_gsis_player_id',
+      'film_target.gsis_player_id'
+    )
+    .leftJoin(
+      'player as film_rusher',
+      'nfl_plays.ball_carrier_gsis_player_id',
+      'film_rusher.gsis_player_id'
+    )
     .select(nfl_pro_film_url_sql({ alias: 'play_film_url' }))
-    .where({ 'nfl_plays.esbid': esbid, play_id })
+
+const film_url = async (play_id) => {
+  const [row] = await film_url_query().where({
+    'nfl_plays.esbid': esbid,
+    play_id
+  })
   return row.play_film_url
 }
 
 const clear = async () => {
   await db('nfl_plays').where({ esbid }).del()
   await db('nfl_games').where({ esbid }).del()
+  await db('player')
+    .whereIn(
+      'pid',
+      players.map((p) => p.pid)
+    )
+    .del()
 }
 
 describe('plays view / nfl pro film url', function () {
@@ -109,6 +200,7 @@ describe('plays view / nfl pro film url', function () {
   before(async () => {
     await clear()
     await seed_game({})
+    await seed_players()
   })
   after(clear)
 
@@ -486,10 +578,10 @@ describe('plays view / nfl pro film url', function () {
         updated: new Date()
       })
 
-      const [row] = await db('nfl_plays')
-        .leftJoin('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-        .select(nfl_pro_film_url_sql({ alias: 'play_film_url' }))
-        .where({ 'nfl_plays.esbid': other_esbid, play_id: 171 })
+      const [row] = await film_url_query().where({
+        'nfl_plays.esbid': other_esbid,
+        play_id: 171
+      })
 
       expect(row.play_film_url).to.equal(null)
 
@@ -523,6 +615,265 @@ describe('plays view / nfl pro film url', function () {
       })
 
       expect(await film_url(181)).to.not.include('down=')
+    })
+  })
+
+  describe('the outcome filters', function () {
+    it('serialises a boolean as 1 and never as true', async function () {
+      // The single sharpest trap on this surface. The page writes its OWN
+      // filters as `touchdown=true` into the address bar, and that exact string
+      // fed back in on a cold load trips the filter panel's `clearAll`, which
+      // nulls every key except season, seasonType, weekSlug and gameId. A bad
+      // value does not cost its own key, it costs the WHOLE query.
+      await seed_play({
+        play_id: 200,
+        play_type: 'RUSH',
+        is_touchdown: true,
+        play_description: '(08:00) J.Mixon right guard for 3 yards, TOUCHDOWN.'
+      })
+
+      const url = await film_url(200)
+      expect(url).to.include('touchdown=1')
+      expect(url).to.not.include('true')
+    })
+
+    it('asserts the negative polarity too', async function () {
+      // Where most of the narrowing comes from. Sending an outcome only when it
+      // is true moved target-first by two points across the corpus; sending both
+      // polarities moved it by more than thirty.
+      await seed_play({
+        play_id: 201,
+        play_type: 'RUSH',
+        is_touchdown: false,
+        play_description: '(08:00) J.Mixon right guard for 3 yards.'
+      })
+
+      expect(await film_url(201)).to.include('touchdown=0')
+    })
+
+    it('says nothing about a touchdown our row is silent on', async function () {
+      // Before 2025 our rows encode "not a touchdown" as NULL and never as
+      // false, so a NULL here is genuinely an absence of information rather than
+      // a negative, and asserting either polarity on it would be a guess.
+      await seed_play({
+        play_id: 202,
+        play_type: 'RUSH',
+        is_touchdown: null,
+        play_description: '(08:00) J.Mixon right guard for 3 yards.'
+      })
+
+      expect(await film_url(202)).to.not.include('touchdown=')
+    })
+
+    it('omits the touchdown filter on a play not run from scrimmage', async function () {
+      // The single largest correction measured here: NFL Pro's touchdown flag
+      // matches NOTHING on a kickoff, punt, field goal or two-point try,
+      // whatever the polarity, so an assertion there is a dead link rather than
+      // a narrower one. Gating to PASS and RUSH cleared 26 of 31 dead links.
+      await seed_play({
+        play_id: 203,
+        play_type: 'KOFF',
+        is_touchdown: false,
+        game_clock_start: '15:00',
+        play_description: 'J.Elliott kicks 60 yards from PHI 35 to DAL 5.'
+      })
+
+      expect(await film_url(203)).to.not.include('touchdown=')
+    })
+
+    it('sends the completion in both polarities on a pass', async function () {
+      await seed_play({
+        play_id: 204,
+        yards_to_go: 10,
+        is_completion: true,
+        play_description: '(08:00) J.Burrow pass short right to J.Chase.'
+      })
+      await seed_play({
+        play_id: 205,
+        yards_to_go: 10,
+        is_completion: false,
+        play_description: '(08:00) J.Burrow pass incomplete short right.'
+      })
+
+      expect(await film_url(204)).to.include('completion=1')
+      expect(await film_url(205)).to.include('completion=0')
+    })
+
+    it('omits the completion on a sack, which NFL Pro does not chart', async function () {
+      // A sack is a pass in our play_type and its own value in theirs, and they
+      // chart no completion on one -- so either polarity is a filter the target
+      // play cannot satisfy. Same routing as playType, which sends
+      // play_type_sack here.
+      await seed_play({
+        play_id: 206,
+        is_sack: true,
+        yards_to_go: 10,
+        is_completion: false,
+        play_description: '(08:00) J.Burrow sacked at CIN 20 for -7 yards.'
+      })
+
+      const url = await film_url(206)
+      expect(url).to.include('playType=play_type_sack')
+      expect(url).to.not.include('completion=')
+    })
+
+    it('omits the completion on a rush, which has no such concept', async function () {
+      await seed_play({
+        play_id: 207,
+        play_type: 'RUSH',
+        yards_to_go: 10,
+        play_description: '(08:00) J.Mixon right guard for 3 yards.'
+      })
+
+      expect(await film_url(207)).to.not.include('completion=')
+    })
+
+    it('sends an interception only when it happened', async function () {
+      // True only. `interception=0` holds for nearly every play, so it narrows
+      // nothing while adding one more filter that can disagree with NFL's
+      // charting -- the only cost side of this trade.
+      await seed_play({
+        play_id: 208,
+        yards_to_go: 10,
+        is_interception: true,
+        play_description: '(08:00) J.Burrow pass deep middle INTERCEPTED.'
+      })
+      await seed_play({
+        play_id: 209,
+        yards_to_go: 10,
+        is_interception: false,
+        play_description: '(08:00) J.Burrow pass short right to J.Chase.'
+      })
+
+      expect(await film_url(208)).to.include('interception=1')
+      expect(await film_url(209)).to.not.include('interception=')
+    })
+  })
+
+  describe('the player pins', function () {
+    it('sends gsis_it_player_id and never nfl_player_id', async function () {
+      // Both are integers on `player` and both survive the page's
+      // reconciliation intact. Only one matches anything: a wrong-id-space
+      // passerId keeps the query whole and returns zero plays, which looks like
+      // a broken link and not like a bad parameter. The seeded player carries
+      // both ids so this fails on a value that is present.
+      await seed_play({
+        play_id: 210,
+        yards_to_go: 10,
+        passer_gsis_player_id: '00-0099001',
+        play_description: '(08:00) F.Passer pass short right to F.Target.'
+      })
+
+      const url = await film_url(210)
+      expect(url).to.include('passerId=990001')
+      expect(url).to.not.include('9990001')
+    })
+
+    it('sends the target', async function () {
+      await seed_play({
+        play_id: 211,
+        yards_to_go: 10,
+        target_gsis_player_id: '00-0099002',
+        play_description: '(08:00) F.Passer pass short right to F.Target.'
+      })
+
+      expect(await film_url(211)).to.include('targetId=990002')
+    })
+
+    it('sends the rusher on a rush', async function () {
+      await seed_play({
+        play_id: 212,
+        play_type: 'RUSH',
+        yards_to_go: 10,
+        ball_carrier_gsis_player_id: '00-0099003',
+        play_description: '(08:00) F.Rusher right guard for 3 yards.'
+      })
+
+      expect(await film_url(212)).to.include('rusherId=990003')
+    })
+
+    it('omits the rusher when the ball carrier is not rushing', async function () {
+      // The carrier on a completed pass is the receiver, whom NFL Pro charts as
+      // the target rather than the rusher, so rusherId matches nothing there.
+      await seed_play({
+        play_id: 213,
+        yards_to_go: 10,
+        ball_carrier_gsis_player_id: '00-0099003',
+        play_description: '(08:00) F.Passer pass short right to F.Rusher.'
+      })
+
+      expect(await film_url(213)).to.not.include('rusherId=')
+    })
+
+    it('omits a player we cannot resolve rather than sending an empty pin', async function () {
+      await seed_play({
+        play_id: 214,
+        yards_to_go: 10,
+        passer_gsis_player_id: '00-0099999',
+        play_description: '(08:00) pass short right.'
+      })
+
+      const url = await film_url(214)
+      expect(url).to.not.include('passerId')
+      expect(url).to.include('playType=play_type_pass')
+    })
+  })
+
+  describe('the possession team', function () {
+    it('sends NFL Pro numeric team id, zero padding included', async function () {
+      // Their id is a four-CHARACTER string, not an integer: Carolina is `0750`
+      // and not `750`. Nothing in our schema carries this id space --
+      // nfl_games.home_team_id is the shield UUID and home_ngs_team_id is a
+      // third space again -- so it is a literal map, read off NFL Pro's own film
+      // payload over the sixteen week-1 games of 2024.
+      await seed_play({
+        play_id: 220,
+        yards_to_go: 10,
+        offense_nfl_team: 'CAR',
+        play_description: '(08:00) B.Young pass short right.'
+      })
+
+      expect(await film_url(220)).to.include('possessionTeamId=0750')
+    })
+
+    it('maps every team the plays table carries', async function () {
+      // The map is a literal, so the failure mode is a team quietly missing from
+      // it and losing its pin -- invisible in any single-play check. Asserting
+      // the whole vocabulary is what makes that loud.
+      const teams = [
+        ['ARI', '3800'],
+        ['LA', '2510'],
+        ['LAC', '4400'],
+        ['LV', '2520'],
+        ['WAS', '5110'],
+        ['NYG', '3410'],
+        ['NYJ', '3430'],
+        ['JAX', '2250']
+      ]
+
+      for (const [index, [team, team_id]] of teams.entries()) {
+        const play_id = 230 + index
+        await seed_play({
+          play_id,
+          yards_to_go: 10,
+          offense_nfl_team: team,
+          play_description: '(08:00) pass short right.'
+        })
+        expect(await film_url(play_id)).to.include(
+          `possessionTeamId=${team_id}`
+        )
+      }
+    })
+
+    it('omits the team when the play records no offense', async function () {
+      await seed_play({
+        play_id: 240,
+        yards_to_go: 10,
+        offense_nfl_team: null,
+        play_description: '(08:00) pass short right.'
+      })
+
+      expect(await film_url(240)).to.not.include('possessionTeamId')
     })
   })
 })
