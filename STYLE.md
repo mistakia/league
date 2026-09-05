@@ -7,21 +7,24 @@ typography, rules and alignment — never by boxes, cards, gradients or shadows.
 football, so the page borrows the field's own marks: ruled lines across it, and route arrows for
 the wordmark.
 
-**On the landing page the worksheet is read as a field**, and the reading cost one hairline. The
-rules were already there — a stack of horizontal lines with nothing at either end. Drawing the
-sideline is what closes them into a field:
+**On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field            |
-| -------------------------------------------------- | ----------------------- |
-| The 1px border around `.landing`                   | Sidelines and end lines |
-| The two 2px ink rules                              | The goal lines          |
-| The hero above the first, the space below the last | The end zones           |
-| The 1px ink band rule opening a section            | A ten-yard line         |
-| The hairline between two entries                   | The yard lines between  |
+| On the page                                        | On the field           |
+| -------------------------------------------------- | ---------------------- |
+| The two 2px ink rules                              | The goal lines         |
+| The hero above the first, the space below the last | The end zones          |
+| The 1px ink band rule opening a section            | A ten-yard line        |
+| The hairline between two entries                   | The yard lines between |
+| `.landing__yard`                                   | The yard numbers       |
 
-Nothing was added for the metaphor and nothing is decorative. **Ticks along the band rules were
-tried in an earlier pass and removed at the operator's word, and there are no yard numbers** —
-four invented figures on a page whose argument is that its numbers are real.
+**The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
+end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
+called, a rectangle around a directory of four groups is the grid of cards the anti-patterns
+forbid, drawn once instead of four times, and it read as a container on sight. Ticks along the band
+rules were tried in an earlier pass and removed too. **What carries the reading is the yard
+numbers** — the mark a reader identifies before he has thought about it, and the reason a field is
+recognisable from the top row with no sideline in view. Painted on the ground, they cost nothing at
+the page's edges, which is exactly where the border went wrong.
 
 ## Core Principles
 
@@ -32,8 +35,9 @@ four invented figures on a page whose argument is that its numbers are real.
 - **One left edge, and now no exception** — the lede, every section head and every entry label
   align to it at every width. The section head was right-aligned in the rail for a while, because
   on the left edge it read as one more item in the list and face and size were losing that argument
-  alone. The sideline settles it: a head is the first thing inside a segment of the field, under
-  that segment's own ten-yard line
+  alone. The yard number settles it from the other side of the row: a head is now the left end of a
+  marked ten-yard line rather than the first row of a list, and it does not have to leave the
+  page's one alignment to say so
 - **Restraint at rest** — colour and emphasis arrive on interaction, not on load
 
 ## Two Languages, One Ground
@@ -89,8 +93,8 @@ Loaded in `app/index.html`: **IBM Plex Mono 300/400/500/600** and **Inter 400/50
 
 **The weight facts are asymmetric and both matter.** `$prose_bold` is 600 because Plex Mono has no
 700 — asking for it gets a synthesized bold, which on mono reads as a smudge. Inter _does_ load
-700, so the sans section label is the one place on these pages that can go heavier, and it is
-drawn rather than faked.
+700, so the sans section label and the yard number are the two places on these pages that can go
+heavier, and both are drawn rather than faked.
 
 | Role         | Mixin                   | Face      | Size                               | Weight  |
 | ------------ | ----------------------- | --------- | ---------------------------------- | ------- |
@@ -101,6 +105,7 @@ drawn rather than faked.
 | Group label  | `prose_section_title()` | Plex Mono | 0.8125em, `0.14em` tracking, upper | 600     |
 | Eyebrow      | `prose_eyebrow()`       | Plex Mono | 0.75em, `0.16em` tracking, upper   | 500     |
 | Field label  | `prose_label()`         | Plex Mono | 0.9375em                           | 600     |
+| Yard number  | `.landing__yard`        | **Inter** | 48px, turned `vertical-rl`         | **700** |
 
 Rules:
 
@@ -122,11 +127,12 @@ Rules:
 - **17px is the floor for any form control.** Below 16px iOS Safari zooms on focus and does not
   zoom back out.
 - `text-wrap: balance` on headlines, `text-wrap: pretty` on prose. Both degrade to `normal`.
-- **The field did not buy a third face, and was asked to.** A condensed grotesque for yard numerals
-  is the obvious candidate and there is nowhere to put it: the field is legible from its lines, the
-  only label near it is the 11px section head, where a display face is unreadable and pointless,
-  and drawing actual numerals means inventing four figures. A third face needs a job the two cannot
-  do; this one had a look it wanted instead.
+- **The yard number is Inter 700, not a third face, and the question was live.** A condensed
+  grotesque is what an NFL field actually uses and this is the one place on the site with a job for
+  a display face. It still does not clear the bar: turned, at 48px, in a hairline grey, what the
+  numeral has to do is read as paint from across the page — and Inter 700 does that. A third face
+  would buy a closer imitation of a specific field's sign painter, at the cost of a third webfont
+  on the front door and a face used by exactly four glyphs.
 
 ## Structure
 
@@ -167,18 +173,19 @@ three type sizes, so a hardcoded nudge is wrong the moment any of the five input
 
 ### The rules — three weights
 
-| Weight            | Where                                                    | Says                                                                         |
-| ----------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 2px ink           | `prose_section_band(2px)`, and the last rule on the page | Masthead, and the goal line                                                  |
-| 1px ink           | `prose_section_band()`                                   | A new section begins                                                         |
-| 1px `$prose_rule` | Between entries                                          | Two things of the same kind                                                  |
-| 1px `$prose_rule` | The border around `.landing`                             | The sideline. Hairline, so the frame never outranks the goal lines inside it |
+| Weight            | Where                                                    | Says                        |
+| ----------------- | -------------------------------------------------------- | --------------------------- |
+| 2px ink           | `prose_section_band(2px)`, and the last rule on the page | Masthead, and the goal line |
+| 1px ink           | `prose_section_band()`                                   | A new section begins        |
+| 1px `$prose_rule` | Between entries                                          | Two things of the same kind |
 
-**The yard lines stop 20px short of the sideline** (12px on a phone), via a negative margin and an
-equal padding on every ruled block — band, entry hairline and the closing goal line, so no rule is
-a different length from its neighbours. They stop short rather than meeting it because meeting it
-closes every row into a cell, and a page of cells is a table, which is what the rest of the site
-already is.
+**Every rule runs the full measure, including behind the yard numbers.** The number band is a
+`padding-right` on `.landing__section` — 72px, 44px on a phone — and a border spans the padding
+box, so the rules keep their length while every row of content stops short of the number. A yard
+line running behind a number is what a field does; a rule that stopped at one would read as a
+column break. The band is on the SECTION and not on the head row: a turned numeral is taller than
+the head, and reserved on the head alone it hung into the first entry and sat on the last word of a
+description.
 
 **A page is bracketed by the heavy weight top and bottom.** The 2px rule that opens the first
 section closes the last one too, so a reader reaching the end sees the directory finish rather than
@@ -194,23 +201,19 @@ apart with nothing between them, which reads as a mistake rather than as two lev
 redrawn at the icon's own 512×512 coordinates so the two read as one object. Nothing added, nothing
 stylised.
 
-It sits **in the top end zone, above the header text, at 72px, at every width** — one placement and
-no breakpoint. The text never moves for it: the lede shares its left edge with every section head
-and every entry label, and putting the mark above rather than beside it is what keeps that free.
+It **hangs in the left margin** above 1400px at 104px, and sits above the header text below that.
+The text never moves for it: the lede shares its left edge with every section head and every entry
+label, and the header is the worst place to lose that alignment.
 
-**It used to hang in the left margin above 1400px**, out of flow, at 104px. The sideline ended
-that. With a border drawn around the page there is no margin to hang in — only inside the field and
-outside it — and the hanging mark landed outside, 8px off the new left sideline, because its 32px
-gap was measured from the text edge and the frame sits 32px left of that. A bigger gap and a higher
-breakpoint would have bought a second layout, visible only above ~1460px, whose entire purpose was
-to protect an alignment the frame now protects for free.
+That breakpoint is set by the **nav drawer**, not by the page gutter. The obvious arithmetic (880px
+measure, so the gutter is `(viewport - 880) / 2`) answers the wrong question — the mark hangs into
+the column the drawer already occupies, and overlapped it by 24px at 1280px.
 
-Two facts from that era worth keeping, because both would be re-derived wrongly. The old breakpoint
-was set by the **nav drawer**, not the page gutter — the obvious arithmetic (`(viewport - 880) / 2`)
-answers the wrong question, and the mark overlapped the drawer by 24px at 1280px. And the mark is
-72px rather than 104px because in the margin it was free, occupying space the page was not using,
-while in the end zone it spends the top of the first screen: at 104px it pushed the eyebrow 293px
-down a 1280x900 laptop.
+**Moving it into the flow was tried and reverted.** It came about honestly: with a hairline frame
+around the page there was no margin left to hang in, and the hanging mark sat 8px off the new
+sideline. The frame is gone and the premise with it. What that detour is worth keeping for is the
+measurement — stacked at 104px the mark pushes the eyebrow 293px down a 1280x900 laptop, which is
+the cost of the below-1400px layout and the thing to check before making the stacked range wider.
 
 Inline SVG, not `@components/icon`: the sprite is a 24×24 UI-glyph surface, and a name with no
 symbol in it renders **nothing** rather than erroring.
@@ -234,11 +237,12 @@ symbol in it renders **nothing** rather than erroring.
 - **No filled button on a reading page.** A filled button is the register of something being sold,
   and neither reading page sells anything. Their next steps are text links. `prose_action_fill()`
   is for real form submits.
-- **No boxes or cards on a prose page.** A directory drawn as a grid of cards becomes a marketing
-  page the moment there are three of them. The landing frame is not the exception it looks like:
-  what a card wraps is a content GROUP, and there are four of those here. The frame encloses the
-  page, once, at the same hairline the entries use — it is the sideline, not a container drawn
-  around anything.
+- **No boxes or cards on a prose page**, and **that includes one box around everything.** A
+  directory drawn as a grid of cards becomes a marketing page the moment there are three of them,
+  and a hairline rectangle around the whole page is the same object drawn once — it was tried on
+  the landing page, argued for as a sideline rather than a container, and read as a container
+  anyway. The argument to distrust is the one that says a rectangle is not a box because of what it
+  is called.
 - **No shadows for depth.** The one shadow in the language lifts the floating action off the page.
 - **No `@mui/*` import.** `test/app.mui-import-ratchet.spec.mjs` holds per-package budgets that must
   EQUAL the real count in both directions — adding _or removing_ an import fails unless the budget

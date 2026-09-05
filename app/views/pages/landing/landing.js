@@ -49,7 +49,18 @@ SectionLink.propTypes = {
   note: PropTypes.string
 }
 
-const Section = ({ title, blurb, links }) => (
+// The yard number painted beside the section's own ten-yard line. Counting DOWN
+// from midfield toward the goal line the page closes on makes reading the
+// directory a drive, and it is also what keeps the sequence legal when a
+// section is added: the fifth is the 10 rather than a number no field has.
+//
+// A REAL ELEMENT AND NOT A ::before, because a CSS counter would put the digits
+// in generated content, which several screen readers announce — so every
+// section head would be read out as a number nobody can act on. Here it carries
+// aria-hidden and says nothing.
+const yard_line = (index) => 50 - index * 10
+
+const Section = ({ title, blurb, links, yard }) => (
   <section className='landing__section'>
     {/* The heading and its blurb share one rail row, so the heading sits in
         the label column above the entry labels and the blurb sits in the prose
@@ -59,6 +70,9 @@ const Section = ({ title, blurb, links }) => (
       <h2 className='landing__section-title'>{title}</h2>
       <p className='landing__section-blurb'>{blurb}</p>
     </div>
+    <span className='landing__yard' aria-hidden='true'>
+      {yard}
+    </span>
     <ul className='landing__links'>
       {links.map((link) => (
         <SectionLink key={link.label} {...link} />
@@ -70,7 +84,8 @@ const Section = ({ title, blurb, links }) => (
 Section.propTypes = {
   title: PropTypes.string,
   blurb: PropTypes.string,
-  links: PropTypes.array
+  links: PropTypes.array,
+  yard: PropTypes.number
 }
 
 export default function LandingPage() {
@@ -116,8 +131,8 @@ export default function LandingPage() {
           <RouteDiagram />
         </header>
 
-        {landing_sections.map((section) => (
-          <Section key={section.title} {...section} />
+        {landing_sections.map((section, index) => (
+          <Section key={section.title} {...section} yard={yard_line(index)} />
         ))}
 
         {/* The bottom edge, and nothing else. The page ended on its last

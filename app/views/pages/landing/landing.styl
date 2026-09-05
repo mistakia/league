@@ -11,61 +11,41 @@
 // Hierarchy is carried by spacing and hairline rules, which is what lets a
 // twelve-entry list stay scannable without any of it shouting.
 //
-// THE PAGE IS A FIELD, and every line that says so was already on it. The
-// directory was a stack of horizontal rules with nothing at either end, which
-// is a ruled worksheet; a field is the same rules with SIDELINES, and that is
-// the entire addition — one hairline border around the page, which closes the
-// rules into an object instead of leaving them floating in the measure.
-//
-// What the existing rules then become, without any of them changing weight:
+// THE PAGE IS A FIELD, and most of the marks that say so were already on it.
+// What the existing rules become, none of them changing weight:
 //
 //   the two 2px ink rules   the goal lines
 //   the hero above the first, and the space below the last   the end zones
 //   the 1px ink band rules  the ten-yard lines
 //   the hairlines between entries   the yard lines between them
 //
-// ONE BORDER, NOT A BOX. The distinction is what it encloses: a card wraps a
-// content group and there are four of those here, which is the grid of cards
-// the paragraph above forbids. This encloses the PAGE, once, at the hairline
-// weight the entries already use — the frame is the sideline, not a container
-// drawn around anything.
+// NO BORDER AROUND THE PAGE. Sidelines and end lines drawn as a hairline
+// rectangle were tried and removed. Whatever it is called, a rectangle around a
+// directory of four groups is the grid of cards the paragraph above forbids,
+// drawn once instead of four times — and it read as a container the moment it
+// was on screen, which is the failure that paragraph is describing.
 //
-// NO TICK MARKS AND NO YARD NUMBERS. Ticks along the band rules were tried in
-// an earlier pass and the operator removed them, and numerals would be four
-// invented figures on a page whose whole argument is that its numbers are
-// real. The field is legible from the lines alone.
-
-// The gap between a rule's end and the sideline. The yard lines stop short of
-// the sideline rather than running into it: meeting it closes every row into a
-// cell and the page reads as a table, and a table is what the rest of the site
-// is. Stated as a pair because `-$var` does not negate inside a property.
-$field_inset = 20px
-$field_inset_pull = -20px
-$field_inset_phone = 12px
-$field_inset_phone_pull = -12px
-
+// SO THE FIELD IS MARKED FROM INSIDE, by the yard numbers. They are what makes
+// a set of parallel rules read as a field rather than as a list — the mark a
+// reader identifies before he has thought about it, and the reason a field is
+// recognisable from the top row with no sideline in view. Being painted ON the
+// ground, they cost nothing at the page's edges, which is where the border went
+// wrong.
+//
+// NOT TICKS ON THE BAR. A row of ticks along each band rule was tried in an
+// earlier pass and the operator removed them, and this is deliberately not that
+// gesture returning in another costume: a tick decorates the rule it sits on,
+// and a yard number is a mark on the ground that a rule happens to run past.
+//
+// THEY COUNT DOWN toward the goal line the page ends on, so reading the
+// directory top to bottom is a drive. The direction is also what makes the
+// sequence survive an edit — a fifth section becomes the 10 and the drive still
+// lands, where counting up would run off the field.
 .landing-surface
   prose_surface()
 
 .landing
   prose_page_wide()
-
-  // The sideline, the end lines, and the two edges nobody counts, in one
-  // declaration. Hairline weight, because a heavier frame would outrank the
-  // ink band rules inside it and the goal lines are the page's heaviest mark.
-  border 1px solid $prose_rule
-  // Air between the frame and the viewport, so the top line reads as a line
-  // someone drew rather than as the edge of the window. Taken OUT of the page
-  // padding rather than added to it, so nothing below the frame moves.
-  margin 24px auto
-  padding 64px 32px 96px
-
-  // Restated because prose_page()'s own phone block is emitted ABOVE this one
-  // at the same specificity, so the flat padding above would otherwise win at
-  // every width and the page would keep desktop gutters on a phone.
-  @media (max-width 640px)
-    margin 16px auto
-    padding 36px 22px 64px
 
   h2
     font-family $prose_mono
@@ -88,32 +68,50 @@ $field_inset_phone_pull = -12px
 // No rule of its own. The first section's band rule is the masthead rule — see
 // prose_section_band().
 //
-// THE END ZONE. The hero is what sits between the frame's top line and the
-// first goal line, and the mark sits in it — above the text, at one size, at
-// every width.
+// THE MARK HANGS IN THE MARGIN, and the text does not move for it. Putting the
+// mark in a column of its own indents the headline past the page's own left
+// edge, which breaks the one alignment the whole page is built on — the lede,
+// every section label and every entry label share that edge, and the header is
+// the worst place to lose it.
 //
-// IT USED TO HANG IN THE MARGIN above 1400px, out of flow in the space left of
-// the measure, so the headline never had to move for it. The sideline ended
-// that: with a border drawn around the page there is no margin to hang in, only
-// inside the field and outside it, and the hanging mark landed OUTSIDE — eight
-// pixels off the new left sideline, since its 32px gap was measured from the
-// text edge and the frame now sits 32px left of that. Read as a collision, not
-// as a placement.
-//
-// The fix is not a bigger gap and a higher breakpoint. That buys a second
-// layout, seen only above ~1460px, whose whole purpose was to protect an
-// alignment the frame now protects for free: the mark is above the text, so the
-// text is flush left in the only layout there is. One placement, no breakpoint,
-// no absolute positioning, and nothing outside the sideline.
+// So it is taken OUT OF FLOW into the space left of the measure. The text block
+// keeps the full width it had before the mark existed, flush left.
 //
 // The mark comes AFTER the text in the DOM, so the copy is what a screen reader
-// reaches first; column-reverse is what paints it above.
+// reaches first; which side it paints on is a layout question.
 .landing__hero
-  display flex
-  flex-direction column-reverse
-  align-items flex-start
-  gap 20px
+  position relative
   padding-bottom 0
+
+  // THE BREAKPOINT IS SET BY THE NAV DRAWER, NOT BY THE PAGE GUTTER, and that
+  // is the whole reason it is this high. The arithmetic that suggests itself —
+  // measure 880px, so the gutter is (viewport - 880) / 2, and the mark needs
+  // 104px plus a 32px gap, therefore 1160px — is answering the wrong question:
+  // the mark is not hanging into empty space, it is hanging into the column the
+  // app's drawer already occupies. Measured, the mark's left edge clears the
+  // drawer's right edge by 56px at 1440 and OVERLAPS it by 24px at 1280, so a
+  // 1160px rule paints the mark on top of the menu. 1400px is the narrowest
+  // width that still clears it.
+  //
+  // Anything narrower puts the mark back in the flow above the header, which is
+  // what the phone layout does and for the same reason: there is no room beside
+  // the text, and the text keeping its own left edge matters more than the mark
+  // keeping its position.
+  @media (min-width 1400px)
+    .route-diagram
+      position absolute
+      // `top 0` and not `top 6px`: the base rule already carries margin-top 6px,
+      // and an absolutely positioned box takes BOTH, which silently doubles the
+      // optical nudge that aligns the mark with the eyebrow.
+      top 0
+      right 100%
+      margin-right 32px
+
+  @media (max-width 1399px)
+    display flex
+    flex-direction column-reverse
+    align-items flex-start
+    gap 28px
 
 .landing__hero-text
   min-width 0
@@ -123,17 +121,16 @@ $field_inset_phone_pull = -12px
 //
 // Sized by WIDTH alone, with the viewBox holding the aspect ratio, so the mark
 // cannot be stretched out of the proportions it was matched to.
-//
-// 72px, and no longer 104px at any width. In the margin the mark was free — it
-// occupied space the page was not using — and in the end zone it spends the top
-// of the first screen: at 104px it pushed the eyebrow 293px down a 1280x900
-// laptop. 72px is the size at which it still reads as the icon and the headline
-// is back near the top of the page.
 .route-diagram
   display block
   flex-shrink 0
-  width 72px
+  width 104px
   height auto
+  margin-top 6px
+
+  @media (max-width 640px)
+    width 68px
+    margin-top 0
 
 // A route is a stroked path and must not be filled, or the area between its
 // legs floods; a head is nothing but fill. One ink, two properties.
@@ -200,27 +197,79 @@ $field_inset_phone_pull = -12px
 // entries within a section are closer than the sections are to each other, and
 // the two lines of an entry closer still.
 //
-// PULLED OUT INTO THE GUTTER so the rule runs past the text toward the
-// sideline. Every rule on the page takes this pair — band, hairline and the
-// closing goal line — because a page whose structure is rules cannot have some
-// of them one length and the rest another.
+// `position relative` is for the yard number, which is taken out of flow so
+// that a mark at display size cannot push the head row around.
+//
+// THE PADDING IS THE NUMBER'S BAND, and it is on the SECTION rather than on the
+// head row because a rotated numeral is taller than the head — reserved on the
+// head alone, it hung down into the first entry and sat on the last word of a
+// description. Reserved here, every row in the section stops short of it.
+//
+// The band does not shorten the rules. A border spans the padding box, so the
+// ten-yard line and the hairlines below it still run the full measure and pass
+// behind the number — which is what a yard line does.
 .landing__section
   prose_section_band()
+  position relative
   margin-top 32px
-  margin-left $field_inset_pull
-  margin-right $field_inset_pull
-  padding-left $field_inset
-  padding-right $field_inset
+  padding-right 72px
 
   &:first-of-type
     prose_section_band(2px)
 
   @media (max-width 640px)
     margin-top 26px
-    margin-left $field_inset_phone_pull
-    margin-right $field_inset_phone_pull
-    padding-left $field_inset_phone
-    padding-right $field_inset_phone
+    padding-right 44px
+
+// THE YARD NUMBER. Large, and painted the colour of a rule rather than of text
+// — it is a mark on the ground, not something to read, and at ink weight it
+// would be the loudest thing on the page and would read as a heading with a
+// number in it.
+//
+// AT THE RIGHT EDGE OF THE MEASURE, in the band the section reserves for it,
+// starting level with the ten-yard line it belongs to. Field numbers sit inside
+// a sideline, and the page's left edge is spoken for — the lede, every section
+// head and every entry label stand on it. The right edge is the free one.
+//
+// TURNED, BECAUSE A FIELD NUMBER IS TURNED. It is painted to be read from the
+// sideline it sits nearest, not from the end zone, and that is most of why a
+// number on grass reads as a field rather than as a label. `writing-mode` is
+// what turns it: an upright numeral in the same place is a figure beside a
+// heading, and the same numeral rotated is paint on the ground.
+//
+// It is also what makes the mark affordable. Turned, it occupies a 40px-wide
+// strip and any height it likes; upright at a size worth seeing it would be a
+// 90px-wide block, and there is no 90px of measure to give up.
+//
+// Inter rather than the mono: mono's even widths read as a monospace setting of
+// a number, and a painted field numeral is a grotesque. 700 is real here —
+// Inter loads it, Plex Mono does not — and this is the second place on the page
+// that can use it, after the section head.
+//
+// In the hairline greys rather than in ink, because it is a mark on the ground
+// and not something to read. $prose_rule_strong is the palette's own value for
+// a line a reader is meant to notice without looking at it, which is exactly
+// what this is; a literal one step lighter was tried and is not worth a tenth
+// token on a page that already has three greys.
+.landing__yard
+  position absolute
+  // 14px against prose_section_band()'s own 16px of padding-top: a turned
+  // numeral has its side bearing above it rather than a cap height, so matching
+  // the numbers leaves it visibly low against the head beside it.
+  top 14px
+  right 0
+  writing-mode vertical-rl
+  font-family $prose_sans
+  font-weight 700
+  font-size 48px
+  line-height 1
+  letter-spacing 0.02em
+  color $prose_rule_strong
+  user-select none
+
+  @media (max-width 640px)
+    top 12px
+    font-size 30px
 
 // A standing label under the band rule, not a headline. The entries below are
 // set larger than it and that is the newspaper order — a section head names
@@ -296,21 +345,11 @@ $field_inset_phone_pull = -12px
   padding-top 11px
   margin-top 11px
   border-top 1px solid $prose_rule
-  margin-left $field_inset_pull
-  margin-right $field_inset_pull
-  padding-left $field_inset
-  padding-right $field_inset
 
   &:first-child
     padding-top 0
     margin-top 0
     border-top none
-
-  @media (max-width 640px)
-    margin-left $field_inset_phone_pull
-    margin-right $field_inset_phone_pull
-    padding-left $field_inset_phone
-    padding-right $field_inset_phone
 
 // The destination, in the rail. Set in the mono so the twelve of them form a
 // column the eye can run down without reading a word of the prose beside them.
@@ -381,10 +420,6 @@ $field_inset_phone_pull = -12px
 .landing__end
   margin-top 32px
   border-top 2px solid $prose_rule_heavy
-  margin-left $field_inset_pull
-  margin-right $field_inset_pull
 
   @media (max-width 640px)
     margin-top 26px
-    margin-left $field_inset_phone_pull
-    margin-right $field_inset_phone_pull
