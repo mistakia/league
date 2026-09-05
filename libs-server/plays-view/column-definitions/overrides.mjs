@@ -16,30 +16,20 @@ const join_nfl_games = ({ query, join_state }) => {
   }
 }
 
-function join_player_passer({ query, join_state }) {
-  if (!join_state.player_passer) {
-    query.leftJoin('player as passer', 'nfl_plays.passer_pid', 'passer.pid')
-    join_state.player_passer = true
-  }
-}
-
-function join_player_rusher({ query, join_state }) {
-  if (!join_state.player_rusher) {
+// One left join per player ROLE, added at most once per query. The role is
+// both the SQL table alias and the join_state key, so a role can never be
+// joined twice and two columns reading the same role share one join.
+const join_player =
+  ({ role, pid_column }) =>
+  ({ query, join_state }) => {
+    if (join_state[role]) return
     query.leftJoin(
-      'player as rusher',
-      'nfl_plays.ball_carrier_pid',
-      'rusher.pid'
+      `player as ${role}`,
+      `nfl_plays.${pid_column}`,
+      `${role}.pid`
     )
-    join_state.player_rusher = true
+    join_state[role] = true
   }
-}
-
-function join_player_target({ query, join_state }) {
-  if (!join_state.player_target) {
-    query.leftJoin('player as target', 'nfl_plays.target_pid', 'target.pid')
-    join_state.player_target = true
-  }
-}
 
 // Held as strings rather than built per call site because each has to appear
 // identically in three places -- the select, the WHERE expression and the sort
@@ -52,16 +42,21 @@ const COVERAGE_SOURCE = `CASE WHEN nfl_plays.coverage_type IS NOT NULL THEN 'cha
 const CANONICAL_MAN_ZONE = `CASE nfl_plays.man_zone WHEN 'MAN' THEN 'MAN_COVERAGE' WHEN 'ZONE' THEN 'ZONE_COVERAGE' ELSE nfl_plays.man_zone END`
 
 // A player name is a concatenation across a join, so it selects TWO fragments:
-// the name for display and the underlying pid, which the group-by path needs.
-const player_name = ({ alias, table, pid_column, join, player_group_by }) => ({
-  join,
+// the name for display and the underlying pid, which the group-by path needs
+// and which is also the only stable identity -- two players share a name.
+//
+// `player_group_by` is set only for the three roles the group-by enum knows
+// about; it is read behind a truthiness check, so the defensive roles leaving
+// it undefined is the correct way to say "not a grouping target".
+const player_name = ({ alias, role, pid_column, player_group_by }) => ({
+  join: join_player({ role, pid_column }),
   main_select: () => [
-    db.raw(`${table}.first_name || ' ' || ${table}.last_name as ${alias}`),
+    db.raw(`${role}.first_name || ' ' || ${role}.last_name as ${alias}`),
     `nfl_plays.${pid_column}`
   ],
-  main_where: () => `${table}.first_name || ' ' || ${table}.last_name`,
+  main_where: () => `${role}.first_name || ' ' || ${role}.last_name`,
   aggregate_select: () =>
-    db.raw(`MAX(${table}.first_name || ' ' || ${table}.last_name) as ${alias}`),
+    db.raw(`MAX(${role}.first_name || ' ' || ${role}.last_name) as ${alias}`),
   player_group_by
 })
 
@@ -98,24 +93,52 @@ export default {
 
   play_passer: player_name({
     alias: 'play_passer',
-    table: 'passer',
+    role: 'passer',
     pid_column: 'passer_pid',
-    join: join_player_passer,
     player_group_by: 'player_passer'
   }),
   play_rusher: player_name({
     alias: 'play_rusher',
-    table: 'rusher',
+    role: 'rusher',
     pid_column: 'ball_carrier_pid',
-    join: join_player_rusher,
     player_group_by: 'player_rusher'
   }),
   play_target: player_name({
     alias: 'play_target',
-    table: 'target',
+    role: 'target',
     pid_column: 'target_pid',
-    join: join_player_target,
     player_group_by: 'player_target'
+  }),
+
+  play_interceptor: player_name({
+    alias: 'play_interceptor',
+    role: 'interceptor',
+    pid_column: 'interceptor_pid'
+  }),
+  play_sacker: player_name({
+    alias: 'play_sacker',
+    role: 'sacker',
+    pid_column: 'sack_player_1_pid'
+  }),
+  play_solo_tackler: player_name({
+    alias: 'play_solo_tackler',
+    role: 'solo_tackler',
+    pid_column: 'solo_tackle_1_pid'
+  }),
+  play_assist_tackler: player_name({
+    alias: 'play_assist_tackler',
+    role: 'assist_tackler',
+    pid_column: 'tackle_assist_1_pid'
+  }),
+  play_penalty_player: player_name({
+    alias: 'play_penalty_player',
+    role: 'penalty_player',
+    pid_column: 'penalty_player_pid'
+  }),
+  play_fumble_lost_by: player_name({
+    alias: 'play_fumble_lost_by',
+    role: 'fumble_lost_by',
+    pid_column: 'fumble_lost_pid'
   }),
 
   play_coverage_type: {

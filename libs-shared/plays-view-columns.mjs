@@ -1072,5 +1072,357 @@ export default {
     header_label: 'OOP',
     aggregate: 'bool_count',
     description: 'Whether the pass was thrown out of the pocket'
+  },
+
+  // Down conversion. Populated every season from 2022 on, 86 to 99 percent of
+  // plays.
+  play_is_third_down_converted: {
+    table: 'nfl_plays',
+    column: 'is_third_down_converted',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: '3DC',
+    aggregate: 'bool_count',
+    description: 'Whether a third down was converted on this play'
+  },
+  play_is_third_down_failed: {
+    table: 'nfl_plays',
+    column: 'is_third_down_failed',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: '3DF',
+    aggregate: 'bool_count',
+    description: 'Whether a third down attempt failed on this play'
+  },
+  play_is_fourth_down_converted: {
+    table: 'nfl_plays',
+    column: 'is_fourth_down_converted',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: '4DC',
+    aggregate: 'bool_count',
+    description: 'Whether a fourth down was converted on this play'
+  },
+  play_is_fourth_down_failed: {
+    table: 'nfl_plays',
+    column: 'is_fourth_down_failed',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: '4DF',
+    aggregate: 'bool_count',
+    description: 'Whether a fourth down attempt failed on this play'
+  },
+
+  // EPA decomposition. air_epa and yac_epa sum to epa on the dropback subset;
+  // the pair is populated on about 87 percent of dropbacks every season.
+  play_air_epa: {
+    table: 'nfl_plays',
+    column: 'air_epa',
+    kind: 'number',
+    group: 'OUTCOME',
+    header_label: 'AIR EPA',
+    fixed: 2,
+    aggregate: 'avg',
+    description:
+      'The share of a pass play’s EPA earned in the air, before the catch'
+  },
+  play_yac_epa: {
+    table: 'nfl_plays',
+    column: 'yac_epa',
+    kind: 'number',
+    group: 'OUTCOME',
+    header_label: 'YAC EPA',
+    fixed: 2,
+    aggregate: 'avg',
+    description:
+      'The share of a pass play’s EPA earned after the catch. Adds to AIR EPA to give the play’s EPA'
+  },
+  play_xyac_epa: {
+    table: 'nfl_plays',
+    column: 'xyac_epa',
+    kind: 'number',
+    group: 'OUTCOME',
+    header_label: 'xYAC EPA',
+    fixed: 2,
+    aggregate: 'avg',
+    description:
+      'The EPA expected after the catch given where the ball was caught, against which YAC EPA is the result'
+  },
+  play_vegas_wpa: {
+    table: 'nfl_plays',
+    column: 'vegas_wpa',
+    kind: 'number',
+    group: 'OUTCOME',
+    header_label: 'V WPA',
+    fixed: 3,
+    aggregate: 'avg',
+    description:
+      'Win probability added, using a win probability model that accounts for the pregame betting line'
+  },
+  play_vegas_win_probability: {
+    table: 'nfl_plays',
+    column: 'vegas_win_probability',
+    kind: 'number',
+    group: 'OUTCOME',
+    header_label: 'V WP',
+    fixed: 3,
+    aggregate: 'avg',
+    // A pre-snap circumstance rather than something the play produced, so it
+    // does not shade -- the same rule that opts EP, WP and XPASS out.
+    disable_percentiles: true,
+    description:
+      'The possessing team’s win probability before the play, accounting for the pregame betting line'
+  },
+
+  // Rushing scheme. run_concept and run_gap_intent are charted from 2025 only;
+  // yards_created and yards_blocked run from 2023.
+  play_run_concept: {
+    table: 'nfl_plays',
+    column: 'run_concept',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: [
+      'OUTSIDE ZONE',
+      'INSIDE ZONE',
+      'MAN',
+      'POWER',
+      'PULL LEAD',
+      'COUNTER',
+      'TRAP',
+      'DRAW',
+      'SNEAK',
+      'SCRAMBLE',
+      'FULLBACK',
+      'TRICK',
+      'KNEEL',
+      'OTHER',
+      'NONE'
+    ],
+    group: 'RUSHING',
+    header_label: 'CONCEPT',
+    size: 110,
+    description:
+      'The blocking scheme the run was designed around. Charted from the 2025 season onward; every earlier season is empty. Distinct from LOC and GAP, which describe where the run actually went'
+  },
+  play_run_gap_intent: {
+    table: 'nfl_plays',
+    column: 'run_gap_intent',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: [
+      'A GAP',
+      'B GAP',
+      'C GAP',
+      'D GAP',
+      'EDGE',
+      'JET SWEEP',
+      'END AROUND',
+      'REVERSE',
+      'NONE'
+    ],
+    group: 'RUSHING',
+    header_label: 'GAP INT',
+    size: 100,
+    description:
+      'The gap the run was designed to hit, in letter-gap terms. Charted from the 2025 season onward; every earlier season is empty. NOT comparable to GAP, which names O-line slots — the two are different taxonomies and must never be merged'
+  },
+  play_yards_created: {
+    table: 'nfl_plays',
+    column: 'yards_created',
+    kind: 'number',
+    group: 'RUSHING',
+    header_label: 'YDS CR',
+    aggregate: 'avg',
+    fixed: 1,
+    description:
+      'Rushing yards attributed to the ball carrier rather than to the blocking. Charted from the 2023 season onward'
+  },
+  play_yards_blocked: {
+    table: 'nfl_plays',
+    column: 'yards_blocked',
+    kind: 'number',
+    group: 'RUSHING',
+    header_label: 'YDS BL',
+    aggregate: 'avg',
+    fixed: 1,
+    description:
+      'Rushing yards attributed to the blocking rather than to the ball carrier. Charted from the 2023 season onward'
+  },
+
+  // Pre-snap alignment.
+  play_starting_hash: {
+    table: 'nfl_plays',
+    column: 'starting_hash',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: ['LEFT', 'MIDDLE', 'RIGHT'],
+    group: 'SITUATIONAL',
+    header_label: 'HASH',
+    size: 80,
+    description:
+      'Which hash mark the ball started on. Populated from the 2022 season onward, on 60 to 80 percent of plays depending on the season'
+  },
+  play_is_motion_before_snap: {
+    table: 'nfl_plays',
+    column: 'is_motion_before_snap',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: 'MOT PRE',
+    aggregate: 'bool_count',
+    description:
+      'Whether a player was in motion before the snap and had reset. Charted from the 2023 season onward'
+  },
+  play_is_motion_during_snap: {
+    table: 'nfl_plays',
+    column: 'is_motion_during_snap',
+    kind: 'boolean',
+    group: 'SITUATIONAL',
+    header_label: 'MOT AT',
+    aggregate: 'bool_count',
+    description:
+      'Whether a player was still moving at the snap. Charted from the 2023 season onward'
+  },
+  play_receiver_alignment_charting: {
+    table: 'nfl_plays',
+    column: 'receiver_alignment_charting',
+    kind: 'text',
+    group: 'SITUATIONAL',
+    header_label: 'REC ALIGN',
+    size: 100,
+    // Deliberately NOT a SELECT. 23 distinct values, of which 15 appear on
+    // fewer than 250 plays and one is MISCxMISC, so a faceted list would read
+    // as 23 real formations. Same call as play_penalty_type.
+    description:
+      'Receiver alignment as left-by-right counts, for example 2x2 or 3x1. Charted from the 2025 season onward; every earlier season is empty. A different axis from the 2024 receiver alignment feed, which wrote strong-side-first forms — the two are never stitched together'
+  },
+
+  // Middle-of-field coverage. Both charted from 2025 only.
+  play_mofc_played: {
+    table: 'nfl_plays',
+    column: 'mofc_played',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: ['OPEN', 'CLOSED', 'MISC'],
+    group: 'SITUATIONAL',
+    header_label: 'MOFC',
+    size: 90,
+    description:
+      'Whether the middle of the field was actually open or closed once the play developed. Charted from the 2025 season onward; every earlier season is empty'
+  },
+  play_mofc_look: {
+    table: 'nfl_plays',
+    column: 'mofc_look',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: ['OPEN', 'CLOSED', 'MISC'],
+    group: 'SITUATIONAL',
+    header_label: 'MOFC LOOK',
+    size: 100,
+    description:
+      'Whether the defense SHOWED an open or closed middle of the field before the snap, which the played coverage may contradict. Charted from the 2025 season onward; every earlier season is empty'
+  },
+  play_action_concept: {
+    table: 'nfl_plays',
+    column: 'play_action_concept',
+    kind: 'text',
+    data_type: 'SELECT',
+    column_values: [
+      'OUTSIDE ZONE',
+      'INSIDE ZONE',
+      'MAN',
+      'POWER',
+      'PULL LEAD',
+      'COUNTER',
+      'TRAP',
+      'DRAW',
+      'TRICK'
+    ],
+    group: 'SITUATIONAL',
+    header_label: 'PA CONCEPT',
+    size: 110,
+    description:
+      'The run concept a play-action fake sold. Charted from the 2025 season onward; every earlier season is empty. Populated on about 68 percent of play-action plays, so an empty cell on a PA play means unknown rather than none'
+  },
+
+  // Defensive and penalty player references. Each is a name built across a
+  // join, the same shape as PASSER and TARGET, and each carries its pid so a
+  // consumer can key on identity rather than on a name that two players share.
+  play_interceptor: {
+    table: 'nfl_plays',
+    column: 'interceptor_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'INT BY',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the defender who intercepted the pass. Resolves on 94 to 100 percent of interceptions depending on the season'
+  },
+  play_sacker: {
+    table: 'nfl_plays',
+    column: 'sack_player_1_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'SACK BY',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the primary defender credited with the sack. Recorded from the 2025 season onward, on about 88 percent of sacks; every earlier season is empty'
+  },
+  play_solo_tackler: {
+    table: 'nfl_plays',
+    column: 'solo_tackle_1_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'TACKLE',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the defender credited with the solo tackle. Resolves on over 99 percent of solo tackles'
+  },
+  play_assist_tackler: {
+    table: 'nfl_plays',
+    column: 'tackle_assist_1_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'ASSIST',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the first defender credited with an assisted tackle. Reads from the tackle_assist family, NOT from the parallel assisted_tackle one, which covers roughly a fifth of the same assists'
+  },
+  play_penalty_player: {
+    table: 'nfl_plays',
+    column: 'penalty_player_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'PENALTY ON',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the player the penalty was called on. Resolves on 80 to 94 percent of penalties depending on the season'
+  },
+  play_fumble_lost_by: {
+    table: 'nfl_plays',
+    column: 'fumble_lost_pid',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'FUM BY',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the player who lost the fumble. Resolves on over 95 percent of lost fumbles, but note that the underlying lost-fumble flag is itself over-set in 2025 — it marks more plays than the fumble flag does'
   }
 }
