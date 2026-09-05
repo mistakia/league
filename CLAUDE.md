@@ -54,6 +54,8 @@ These are the ones you cannot route to, because you hit them without deciding to
 
 **Nothing destructive runs against a target it has not verified.** `db/guard-destructive-target.mjs` refuses on the live database's own identity rather than on `NODE_ENV`, and there is deliberately no bypass flag.
 
+**`debug()` is dark in production, so a `log(...)` line is not a report.** The deployed API sets no `DEBUG`, which makes every `debug`-namespaced call — including the `this.logger` on a socket — write nothing at all on the server. An error handler whose only outward surface is such a line is silent, and a degraded subsystem then looks exactly like a healthy one from outside the process. Anything a human needs to learn about needs `emit_signal`, and anything that can recover needs `resolve_signal` beside it. Both no-op outside production, so a spec that does not inject them passes with the call site deleted.
+
 **Never put a secret value as a literal in any command.** Tool calls are recorded verbatim in a synced, indexed timeline. Use indirection; if a literal was emitted, treat it as exposed and rotate.
 
 **This repository is PUBLIC, and every file in it is published — including entity files.** Two consequences that catch sessions without warning:
