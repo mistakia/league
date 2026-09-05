@@ -9,7 +9,7 @@
  * every table in the public schema of whatever #db resolved to -- it does not
  * care which database that is.
  *
- * Two design rules follow from that finding, and neither is negotiable:
+ * Three design rules follow from that finding, and none is negotiable:
  *
  *   1. ASSERT ON THE RESOLVED TARGET, NOT ON NODE_ENV. The label already lied
  *      once. `current_database()` is asked of the live server, over the same
@@ -19,6 +19,12 @@
  *      database name nobody has vouched for, a host that is not loopback --
  *      every one of these REFUSES. There is no "unknown, therefore probably
  *      fine" branch, matching config/index.mjs's sops decrypt path.
+ *   3. MAKE THE TARGET PROVE IT IS DISPOSABLE. Added 2026-09-05, because rules 1
+ *      and 2 still could not tell two loopback servers apart: `host=127.0.0.1
+ *      database=league_test` names both the :5433 test container and a Homebrew
+ *      Postgres on :5432, so the wrong server's tables were one same-named
+ *      database away from being dropped. A target must now carry a COMMENT
+ *      declaring itself disposable. Provisioners stamp it; the suite never does.
  *
  * There is deliberately no environment-variable escape hatch and no allowlist
  * that config can extend. Both would reintroduce exactly the hole above: a
@@ -32,9 +38,34 @@
  * the target as an explicit argument, not a bypass flag threaded through here.
  */
 
+// The database must say, in its own COMMENT, that it exists to be thrown away.
+// This is the primary control; the name allowlist and the loopback test below
+// are secondary and neither can replace it.
+//
+// The hole it closes: the other two conditions cannot tell two loopback servers
+// apart. The macbook runs the test container on :5433 and a Homebrew Postgres on
+// :5432, and `host=127.0.0.1 database=league_test` describes both -- so a
+// `league_test` on the wrong server passed name-plus-loopback and would have had
+// every table in it dropped. Port is not a fix: it is client-side config, the
+// same thing this guard exists to distrust, and inside the container the server
+// reports 5432 either way.
+//
+// Applied by the PROVISIONERS, never by the suite: db/test/init-roles.sql (docker
+// first-init and CI) and scripts/test-isolated.sh at CREATE DATABASE. A target
+// that stamped itself on the way to dropping itself would be no control at all.
+//
+// Survives teardown because test/global.mjs drops tables WHERE schemaname =
+// 'public' and a database comment is not a table.
+const DISPOSABLE_DATABASE_MARKER = 'league:disposable-test-database'
+
 // Databases a destructive operation may target. Hardcoded, not config-derived
 // and not env-extensible: the allowlist is the control, and a control that its
 // own blast radius can edit is not one.
+//
+// Retained ALONGSIDE the marker rather than replaced by it. The marker proves
+// disposability and the name proves nothing the marker does not -- but the two
+// fail in different directions, and the cost of the redundancy is one string
+// comparison against a mistakenly-stamped production database.
 const ALLOWED_DATABASES = new Set([
   'league_test',
   'league_development',
@@ -73,7 +104,8 @@ const refuse = ({ operation, target, reason }) => {
       `  reason:   ${reason}\n` +
       `  resolved: ${format_target(target)}\n` +
       `  allowed:  databases {${[...ALLOWED_DATABASES].join(', ')}} or ` +
-      `${ALLOWED_DATABASE_PATTERN}, on loopback only\n` +
+      `${ALLOWED_DATABASE_PATTERN}, on loopback only, AND carrying the ` +
+      `database comment '${DISPOSABLE_DATABASE_MARKER}'\n` +
       `  This guard reads current_database() from the live server, not ` +
       `NODE_ENV. If you meant to run against a local database, point your ` +
       `config or LEAGUE_DB_* overrides at one; there is no bypass flag.`
@@ -89,7 +121,9 @@ const resolve_live_target = async ({ knex, operation }) => {
   try {
     const result = await knex.raw(
       'SELECT current_database() AS database, current_user AS user, ' +
-        'inet_server_addr()::text AS server_addr'
+        'inet_server_addr()::text AS server_addr, ' +
+        'shobj_description((SELECT oid FROM pg_database ' +
+        "WHERE datname = current_database()), 'pg_database') AS marker"
     )
     rows = result?.rows
   } catch (error) {
@@ -119,7 +153,8 @@ const resolve_live_target = async ({ knex, operation }) => {
     user: row.user,
     host: connection.host,
     port: connection.port,
-    server_addr: row.server_addr
+    server_addr: row.server_addr,
+    marker: row.marker
   }
 }
 
@@ -145,6 +180,26 @@ export const assert_destructive_target_allowed = async ({
   }
 
   const target = await resolve_live_target({ knex, operation })
+
+  // Checked FIRST: it is the only condition that identifies the server rather
+  // than describing the connection, so it is the one that catches a same-named
+  // database on the wrong loopback instance.
+  if (target.marker !== DISPOSABLE_DATABASE_MARKER) {
+    refuse({
+      operation,
+      target,
+      reason:
+        `database "${target.database}" carries no disposability marker ` +
+        `(found ${target.marker === null || target.marker === undefined ? 'none' : `"${target.marker}"`}), ` +
+        `so it has not declared itself safe to destroy. If this really is a ` +
+        `throwaway database, stamp it from a psql session on THAT server:\n` +
+        `    COMMENT ON DATABASE "${target.database}" IS '${DISPOSABLE_DATABASE_MARKER}';\n` +
+        `  A container created before this guard existed will not have it -- ` +
+        `db/test/init-roles.sql only runs on first init of an empty volume. ` +
+        `Check you are on the intended server first: the test container is ` +
+        `:5433, not :5432`
+    })
+  }
 
   if (!is_allowed_database(target.database)) {
     refuse({
@@ -175,8 +230,11 @@ export const assert_destructive_target_allowed = async ({
 }
 
 /**
- * Same rule, applied to a target described by plain values rather than by a live
- * connection. For the shell-out paths (pg_restore, psql -f) that build a command
+ * Same rule MINUS the disposability marker, applied to a target described by
+ * plain values rather than by a live connection. It holds no connection, so it
+ * cannot ask the server for its comment and is left with exactly the
+ * name-plus-loopback pair that cannot distinguish two loopback servers. Treat it
+ * as the weaker form it is. For the shell-out paths (pg_restore, psql -f) that build a command
  * line instead of holding a knex handle. Weaker than the connection form -- it
  * trusts the caller's strings -- so prefer the connection form wherever a pool
  * exists.
@@ -225,6 +283,7 @@ export const assert_destructive_target_values_allowed = ({
 export {
   ALLOWED_DATABASES,
   ALLOWED_DATABASE_PATTERN,
+  DISPOSABLE_DATABASE_MARKER,
   LOOPBACK_HOSTS,
   is_allowed_database
 }

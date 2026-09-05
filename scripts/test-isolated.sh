@@ -76,6 +76,20 @@ if [ "$(psql_admin "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'")" !=
   exit 1
 fi
 created=1
+
+# Stamp it disposable. db/guard-destructive-target.mjs refuses to drop tables in
+# a database that has not said this about itself, and this script is the only
+# thing that knows the per-run name. Done HERE, by the provisioner, and never by
+# the suite: a target that stamps itself on the way to being dropped proves
+# nothing. Keep the string identical to DISPOSABLE_DATABASE_MARKER in the guard.
+psql_admin "COMMENT ON DATABASE \"${DB_NAME}\" IS 'league:disposable-test-database'" >/dev/null
+if [ -z "$(psql_admin "SELECT 1 FROM pg_database d
+            WHERE d.datname = '${DB_NAME}'
+              AND shobj_description(d.oid, 'pg_database') = 'league:disposable-test-database'")" ]; then
+  echo "error: ${DB_NAME} was not stamped disposable; refusing to start mocha" >&2
+  exit 1
+fi
+
 echo "test database: ${DB_NAME}"
 
 # Arguments mean a SPEC SUBSET, so declare it. The response-validation teardown

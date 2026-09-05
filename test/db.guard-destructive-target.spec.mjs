@@ -1,9 +1,12 @@
 /* global describe it */
 import * as chai from 'chai'
 
+import fs from 'fs'
+
 import {
   assert_destructive_target_allowed,
-  assert_destructive_target_values_allowed
+  assert_destructive_target_values_allowed,
+  DISPOSABLE_DATABASE_MARKER
 } from '#db/guard-destructive-target.mjs'
 
 const expect = chai.expect
@@ -12,8 +15,14 @@ const expect = chai.expect
 // current_database() from the connection, so a stub server plus a stub pool
 // config is the whole surface -- no database needed, and the refusing cases are
 // exactly the ones a real database could not safely exercise.
-const fake_knex = ({ database, user = 'league_test', host, port = 5433 }) => ({
-  raw: async () => ({ rows: [{ database, user, server_addr: null }] }),
+const fake_knex = ({
+  database,
+  user = 'league_test',
+  host,
+  port = 5433,
+  marker = DISPOSABLE_DATABASE_MARKER
+}) => ({
+  raw: async () => ({ rows: [{ database, user, server_addr: null, marker }] }),
   client: { config: { connection: { host, port } } }
 })
 
@@ -35,6 +44,63 @@ describe('db/guard-destructive-target', function () {
         operation: 'unit test'
       })
       expect(target.database).to.equal('league_test_guard')
+    })
+
+    // The case the marker exists for. Before it, name-plus-loopback described
+    // BOTH the :5433 test container and the machine's other Postgres on :5432,
+    // so an unstamped league_test on the wrong server was a permitted target.
+    it('REFUSES an allowlisted name on loopback when the marker is absent', async () => {
+      let error
+      try {
+        await assert_destructive_target_allowed({
+          knex: fake_knex({
+            database: 'league_test',
+            host: '127.0.0.1',
+            port: 5432,
+            marker: null
+          }),
+          operation: 'unit test'
+        })
+      } catch (err) {
+        error = err
+      }
+      expect(error, 'guard did not refuse an unstamped database').to.exist
+      expect(error.message).to.include('no disposability marker')
+      expect(error.message).to.include('COMMENT ON DATABASE')
+    })
+
+    it('REFUSES when the marker holds some other string', async () => {
+      let error
+      try {
+        await assert_destructive_target_allowed({
+          knex: fake_knex({
+            database: 'league_test',
+            host: '127.0.0.1',
+            marker: 'default administrative connection database'
+          }),
+          operation: 'unit test'
+        })
+      } catch (err) {
+        error = err
+      }
+      expect(error, 'guard did not refuse').to.exist
+      expect(error.message).to.include('no disposability marker')
+    })
+
+    it('REFUSES a marked database that is still not allowlisted', async () => {
+      // The marker is primary but not sufficient: a production database that
+      // somehow got stamped is still caught by the name.
+      let error
+      try {
+        await assert_destructive_target_allowed({
+          knex: fake_knex({ database: 'league_production', host: '127.0.0.1' }),
+          operation: 'unit test'
+        })
+      } catch (err) {
+        error = err
+      }
+      expect(error, 'guard did not refuse').to.exist
+      expect(error.message).to.include('not an approved destructive target')
     })
 
     it('REFUSES the production database even on loopback', async () => {
@@ -155,5 +221,21 @@ describe('db/guard-destructive-target', function () {
         })
       ).to.throw(/unverified/)
     })
+  })
+
+  // The provisioners stamp in SQL and the guard compares in JS, so the literal
+  // lives in two languages and nothing but this links them.
+  describe('marker literal', function () {
+    const provisioners = ['db/test/init-roles.sql', 'scripts/test-isolated.sh']
+
+    for (const file of provisioners) {
+      it(`${file} stamps the exact string the guard requires`, () => {
+        const contents = fs.readFileSync(file, 'utf8')
+        expect(
+          contents,
+          `${file} does not contain DISPOSABLE_DATABASE_MARKER`
+        ).to.include(DISPOSABLE_DATABASE_MARKER)
+      })
+    }
   })
 })

@@ -40,3 +40,35 @@ BEGIN
   END IF;
 END
 $$;
+
+-- Disposability marker. db/guard-destructive-target.mjs REQUIRES this comment
+-- before it will let anything drop tables here, so a database without it is
+-- simply not a destructive target.
+--
+-- Why a marker and not the database NAME: the guard's other conditions are the
+-- name and "is the host loopback", and neither can tell two loopback servers
+-- apart. This machine runs the test container on :5433 and a Homebrew Postgres
+-- on :5432; a `league_test` on EITHER satisfies name-plus-loopback, so the name
+-- test would have permitted dropping every table on the wrong server. Only the
+-- server itself can say "I was created to be thrown away", so we ask it.
+--
+-- Set on current_database() rather than a literal name, because the same script
+-- stamps league_test (docker init and CI) and scripts/test-isolated.sh stamps
+-- each per-run league_test_<slug>.
+--
+-- A COMMENT survives the suite's own teardown by construction: test/global.mjs
+-- drops tables WHERE schemaname = 'public', and a database comment is not a
+-- table. A marker table in public would delete itself on the first run.
+--
+-- Keep this string byte-identical to DISPOSABLE_DATABASE_MARKER in
+-- db/guard-destructive-target.mjs; test/db.guard-destructive-target.spec.mjs
+-- fails if they drift.
+DO $$
+BEGIN
+  EXECUTE format(
+    'COMMENT ON DATABASE %I IS %L',
+    current_database(),
+    'league:disposable-test-database'
+  );
+END
+$$;
