@@ -5,9 +5,14 @@ import cache from '#api/cache.mjs'
 import {
   getPlayers,
   getRestrictedFreeAgencyBids,
-  getLeague
+  getLeague,
+  redis_cache
 } from '#libs-server'
 import attach_format_gamelog_columns from '#libs-server/attach-format-gamelog-columns.mjs'
+import {
+  get_player_content_feed_items,
+  NFL_CONTENT_TAG_URIS
+} from '#libs-server/content-feed-client.mjs'
 
 const router = express.Router()
 
@@ -1219,6 +1224,110 @@ router.get('/:pid/markets/?', async (req, res) => {
 
     const result = Object.values(grouped_markets)
     res.send(result)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+// How many items reach the page. The upstream page is fetched larger than this
+// because the source-type and title filters below both drop rows, and
+// `source_type` is not part of the upstream filter vocabulary yet.
+const CONTENT_FEED_RENDER_LIMIT = 10
+const CONTENT_FEED_FETCH_LIMIT = 50
+
+// base serves this route from ONE 60/min anonymous bucket shared by league's
+// whole server, so the cache is a correctness control and not a speed tweak.
+// The TTL is explicit at the write: `redis_cache.set` without one stores a
+// value that never expires, which is how a months-old payload once went on
+// being served as fresh.
+const CONTENT_FEED_CACHE_TTL_SECONDS = 600
+
+/**
+ * @swagger
+ * /players/{pid}/content:
+ *   get:
+ *     tags:
+ *       - Players
+ *     summary: Recent linked content for a player
+ *     description: |
+ *       Headlines that mention this player, proxied from the Base content feed and
+ *       cached. Link-out metadata only — title, link, source domain and date. No
+ *       article body is served, and nothing is stored by this service.
+ *
+ *       Returns an empty list when the integration is unconfigured or the upstream
+ *       is unavailable. This surface is supplementary and its absence is a normal
+ *       state, so it never fails the request.
+ *     parameters:
+ *       - in: path
+ *         name: pid
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Recent content items mentioning the player
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       title:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                       domain:
+ *                         type: string
+ *                         nullable: true
+ *                       published_at:
+ *                         type: string
+ *                         nullable: true
+ */
+router.get('/:pid/content/?', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { pid } = req.params
+    const cache_key = `/players/${pid}/content`
+
+    const cached_value = await redis_cache.get(cache_key)
+    if (cached_value) {
+      return res.send(cached_value)
+    }
+
+    const { items } = await get_player_content_feed_items({
+      pid,
+      tag_uris: NFL_CONTENT_TAG_URIS,
+      limit: CONTENT_FEED_FETCH_LIMIT
+    })
+
+    const payload = {
+      // Twitter items carry no title at all under the upstream's public
+      // projection -- it withholds `summary` deliberately, because on Reddit
+      // that column is byte-identical to the whole post body. So a non-Reddit
+      // item has nothing renderable, and both filters below are load-bearing:
+      // the first states the policy, the second states what can be drawn.
+      items: items
+        .filter((item) => item.source_type === 'reddit')
+        .filter((item) => Boolean(item.title))
+        .slice(0, CONTENT_FEED_RENDER_LIMIT)
+        // `author` is deliberately dropped: it is the poster's Reddit username,
+        // and nothing on the page renders it.
+        .map(({ title, url, domain, published_at }) => ({
+          title,
+          url,
+          domain,
+          published_at
+        }))
+    }
+
+    await redis_cache.set(cache_key, payload, CONTENT_FEED_CACHE_TTL_SECONDS)
+
+    res.send(payload)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
