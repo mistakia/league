@@ -212,6 +212,7 @@ export default function AuctionMainBid({
 
   const classNames = []
   let action = null
+  let nomination_maximum_bid_field = null
   let disabled = false
   if (!league.free_agency_period_start || !isStarted || isComplete) {
     action = null
@@ -267,30 +268,40 @@ export default function AuctionMainBid({
   } else if (isNominating || isCommish) {
     disabled = !selected_pid
     action = (
-      <div className='auction__nominate'>
-        {/* `isNominating` and NOT `isCommish`: a ceiling binds the team that
-            stated it, and the commissioner nominating out of turn nominates on
-            behalf of the team on the clock, so a ceiling typed here would be
-            another team's. The server refuses it; offering the control anyway
-            would be offering one that cannot work. The bound is also wrong --
-            `availableCap` here is the CURRENT team's, not the nominating
-            team's. */}
-        {is_election_mode && isNominating && (
-          <input
-            type='number'
-            className='auction__nominate-maximum-bid'
-            placeholder='Max (optional)'
-            min={value}
-            max={availableCap}
-            value={nomination_maximum_bid}
-            onChange={handle_nomination_maximum_bid_change}
-          />
-        )}
-        <Button small disabled={!selected_pid} onClick={handle_click_nominate}>
-          Nominate ${value}
-        </Button>
-      </div>
+      <Button small disabled={!selected_pid} onClick={handle_click_nominate}>
+        Nominate ${value}
+      </Button>
     )
+    // BESIDE THE GROUP, NOT INSIDE IT, and that is the whole of why this is a
+    // separate variable rather than a wrapper around the button above.
+    // `action` is rendered as a SEGMENT of the stepper, and the paint that
+    // makes three buttons read as one control is written in button.styl as
+    // `.button-group > .button` plus a `+ .button` adjacency. A wrapper div in
+    // that position matches neither: the nominate button keeps its full radius
+    // and its own hover shadow inside a control it is welded to, and the `+`
+    // segment loses the -1px and the seam border because its previous sibling
+    // is no longer a button. Nothing errors and nothing is missing from the
+    // DOM, which is why it survived review.
+    //
+    // `isNominating` and NOT `isCommish`: a ceiling binds the team that stated
+    // it, and the commissioner nominating out of turn nominates on behalf of
+    // the team on the clock, so a ceiling typed here would be another team's.
+    // The server refuses it; offering the control anyway would be offering one
+    // that cannot work. The bound is also wrong -- `availableCap` here is the
+    // CURRENT team's, not the nominating team's.
+    if (is_election_mode && isNominating) {
+      nomination_maximum_bid_field = (
+        <input
+          type='number'
+          className='auction__nominate-maximum-bid'
+          placeholder='Max (optional)'
+          min={value}
+          max={availableCap}
+          value={nomination_maximum_bid}
+          onChange={handle_nomination_maximum_bid_change}
+        />
+      )
+    }
   } else {
     disabled = true
     action = <LoadingButton disabled variant='contained' loading />
@@ -408,6 +419,7 @@ export default function AuctionMainBid({
                   )}
                 </ButtonGroup>
               )}
+              {nomination_maximum_bid_field}
               {/* Where the pass button used to sit. A decline is the same
                   action the pass was, and a maximum is the one it never had.
                   Drawn on its own condition rather than the bid clock's — see

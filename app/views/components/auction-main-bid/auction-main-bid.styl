@@ -410,6 +410,15 @@
   .auction__bid-actions .button-group
     grid-area stepper
 
+  // NAMED, NOT LEFT TO AUTO-PLACEMENT. The row above is `display grid` here,
+  // and an item with no area takes the first free cell in row order -- which is
+  // (1,1), inside the `state` row, putting the ceiling ABOVE the stepper
+  // instead of beside it. `form` is the slot the election control's own form
+  // takes, and the two never co-occur: this field needs no open player and
+  // `show_election_control` requires one.
+  .auction__bid-actions .auction__nominate-maximum-bid
+    grid-area form
+
   .auction__main-timer
     flex 0 0 30px
 
@@ -428,16 +437,47 @@
   letter-spacing 0.5px
   opacity 0.7
 
-// The nominate action and its OPTIONAL ceiling, side by side. The field is
-// election-mode only: inside a live block the engine already proxies every
+// THE NOMINATION'S OPTIONAL CEILING, A SIBLING OF THE STEPPER AND NOT A
+// SEGMENT OF IT. It sits directly in `.auction__main-action`, so the row's own
+// `gap 8px` is what separates it from the group -- there is no wrapper, and a
+// wrapper is what this rule replaces. Wrapping the nominate button and this
+// field in one box put a non-button in the stepper's segment position, where
+// `.button-group > .button` in button.styl reaches neither: the nominate
+// button kept its full radius and its own hover shadow inside the control, and
+// the `+` segment lost the -1px and the seam border its `+ .button` adjacency
+// draws.
+//
+// Election-mode only: inside a live block the engine already proxies every
 // standing maximum and the bid clock closes the player, so a ceiling attached
-// to a nomination there would duplicate the election control.
-.auction__nominate
-  display flex
-  align-items center
-  gap 6px
-
+// to a nomination there would duplicate the election control. It never
+// co-occurs with that control either -- this field needs no open player and
+// `show_election_control` requires one -- which is why it may take the `form`
+// area below without contending for it.
+//
+// `height 26px` with `box-sizing border-box` is the ONLY thing that lands this
+// on the buttons' band: `.button__small` is 26px, and a bare input sized by its
+// own padding and line box came out short and sat off the row. 16px type rather
+// than 12px for the same reason the election control's input is 16 -- below
+// 16px iOS Safari zooms the page on focus and does not zoom back out, and this
+// is a control a manager reaches on a phone.
+// `150px` and `flex 0 0 auto` together. 150 is what holds `Max (optional)` at
+// 16px beside the number spinner Chrome draws inside the box; the placeholder
+// says the field is skippable and a truncated one says nothing. No shrink,
+// because `.auction__main-action` is a wrapping flex row below 1160px and a
+// shrinking box wraps LAST -- it would compress to an unreadable strip rather
+// than take its own line.
 .auction__nominate-maximum-bid
-  width 96px
-  padding 4px 6px
-  font-size 12px
+  box-sizing border-box
+  flex 0 0 auto
+  width 150px
+  height 26px
+  padding 0 8px
+  font-size 16px
+  font-weight 600
+  background $prose_paper
+  border 1px solid $prose_rule_strong
+  border-radius $button_border_radius
+
+  &:focus
+    border-color $prose_accent
+    outline none
