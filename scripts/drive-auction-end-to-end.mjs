@@ -556,21 +556,52 @@ const assert_board_is_clean = async () => {
 const teardown = async () => {
   process.stdout.write('\nteardown\n')
 
-  const assert_scoped = async (table, builder) => {
-    const [row] = await builder(db(table))
-      .whereNot('lid', lid)
-      .count('* as count')
-    const outside = Number(row.count)
-    if (outside !== 0) {
+  // THE ASSERTION IS ON THE QUERY THAT ACTUALLY RUNS, and that is the whole
+  // point of the shape below.
+  //
+  // This used to COUNT the rows the builder matched outside this league and
+  // refuse if any existed. Two things were wrong with it, and the second is why
+  // it was replaced rather than tuned.
+  //
+  // It could not detect what its own comment claimed. `scoped_delete` applies
+  // `.where('lid', lid)` itself, so the delete was already confined whatever the
+  // builder said -- the count was taken against a predicate the delete never
+  // used. A `scoped_delete` that genuinely LOST its `lid` term would have gone
+  // undetected, because the check ran on the builder rather than on the delete.
+  //
+  // And it made the script unrunnable exactly when it is most needed. Every
+  // builder here is scoped by `season_year` alone, which league 1's live auction
+  // satisfies by definition -- so during a real free agency period the count was
+  // never zero and the opening teardown aborted before the run began.
+  //
+  // Asserting on the compiled DELETE fixes both: it is a statement about this
+  // query rather than about other leagues' data, so it cannot be tripped by a
+  // league that merely exists, and it fails closed if the `lid` term is ever
+  // dropped. It also cannot pass vacuously the way a `where lid = x` /
+  // `where not lid = x` pair would, which always counts zero and certifies
+  // nothing.
+  // The identifier arrives QUOTED -- knex compiles this to
+  // `delete from "auction_elections" where "season_year" = ? and "lid" = ?` --
+  // so the optional quotes are not decoration. Without them this pattern matches
+  // nothing and the guard refuses every delete, which a positive control caught
+  // and reading the pattern did not.
+  const assert_league_scoped = (table, query) => {
+    const { sql, bindings } = query.toSQL()
+    const constrains_lid =
+      /"?\blid\b"?\s*=\s*\?/.test(sql) && bindings.includes(lid)
+    if (!constrains_lid) {
       throw new Error(
-        `refusing to delete from ${table}: predicate matches ${outside} row(s) outside league ${lid}`
+        `refusing to delete from ${table}: the statement is not constrained to league ${lid}: ${sql}`
       )
     }
   }
 
   const scoped_delete = async (table, builder, label) => {
-    await assert_scoped(table, builder)
-    const deleted = await builder(db(table)).where('lid', lid).del()
+    // Built ONCE and both asserted and executed, so the statement checked is
+    // the statement that runs. Building it twice is how the two drift.
+    const query = builder(db(table)).where('lid', lid).del()
+    assert_league_scoped(table, query)
+    const deleted = await query
     process.stdout.write(`  removed ${deleted} ${label}\n`)
   }
 
