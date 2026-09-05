@@ -493,112 +493,19 @@ $sideline_offset_phone = -22px
 
 // THE SECOND GOAL LINE. It takes the MASTHEAD's 2px rather than a section
 // band's 1px, so the page is bracketed by the same weight top and bottom —
-// that is what says the directory ended rather than ran out, and it is what
-// makes the space between it and the frame below an end zone rather than
-// trailing whitespace. It carries nothing, which is why it is a bare div.
-// THE END ZONE, and it is a bounded, painted band rather than the space that
-// happened to be left under the last rule.
+// that is what says the directory ended rather than ran out. It carries
+// nothing, which is why it is a bare div.
 //
-// TWO BOUNDARIES, BOTH AT THE GOAL LINE'S WEIGHT. The rule above is the goal
-// line the directory closes on; the rule below is the end line, and an end zone
-// with only one of them is an edge with space under it. This is not the border
-// that was tried and removed — that one enclosed the whole page and read as a
-// container. This encloses the six inches of field that a boundary is FOR, and
-// the thing it bounds is the only part of the page with no content in it.
-//
-// THE SIDELINES ARE WHERE THE PAINT STOPS. The figure runs to the measure's
-// edges and ends, so the zone is closed left and right without two more rules.
-//
-// WHAT IS PAINTED IN IT IS A PROJECTED DISTRIBUTION — a sample as bars, the
-// density it was drawn from as a curve over them, and the middle eighty per cent
-// as an interval above that. This is a fantasy analytics platform, and the end
-// zone is the one band on the page with nothing in it to compete with, so it is
-// where the site can say what KIND of thing it is without a sentence of copy or
-// an icon. The geometry and the argument for each of the three marks are in
-// end-zone-figure.js; what belongs here is only how the band is built.
-//
-// THE END LINE IS ITS AXIS. The bars stand on the 2px rule that already closes
-// the page, so the figure needs no baseline of its own — the boundary the end
-// zone already had turns out to be the one every chart of this kind is drawn on.
-// That is also the whole argument for putting it here rather than anywhere else.
-//
-// NOT THE TICKS THAT WERE REMOVED FROM THE BAR, though it is the closest thing
-// to them on the page: those were a row of EQUAL ticks decorating a section rule,
-// and equal is what made them decoration. Bars of varying height on a rule are a
-// measurement, and the rule they stand on is being used rather than dressed.
-//
-// A HATCH, THEN A FINE LATTICE, THEN A ROW OF DIAMONDS were all here first, and
-// what killed the first two is worth keeping: at any pitch small enough to tile,
-// a pattern reads as SHADING over the zone rather than as a marking on it.
-// Whatever goes here has to be made of shapes big enough to be counted.
-//
-// THE DEPTH IS SET HERE AND NOWHERE ELSE. It used to come from the wordmark's
-// own padding and line box, which meant the band was as deep as a line of type
-// happened to be; with the wordmark gone there is nothing in flow to give it a
-// height at all, and a figure that is absolutely positioned cannot give itself
-// one. 140px is close to what the wordmark left and reads as a band rather than
-// as a strip, and the phone's 84px holds the same proportion against its measure.
+// A BOUNDED END ZONE WAS BUILT ON THIS RULE AND HAS BEEN TAKEN BACK OFF: a
+// second 2px rule below, a fixed depth between them, and in turn a hatch, a
+// lattice, a row of diamonds, a wordmark and a distribution painted in the
+// band. All of it is gone and the rule is the bare closing bracket it was
+// before. What the attempts have in common is worth keeping — every one of
+// them was an ornament looking for a reason, on the one strip of the page
+// whose whole job is to be empty.
 .landing__end
-  position relative
-  height 140px
   margin-top 32px
   border-top 2px solid $prose_rule_heavy
-  border-bottom 2px solid $prose_rule_heavy
 
   @media (max-width 640px)
-    height 84px
     margin-top 26px
-
-// STRETCHED TO THE ZONE RATHER THAN SIZED. `preserveAspectRatio none` lets the
-// figure take whatever box the zone has at any width, so the bars always stand
-// exactly the zone's depth and reach exactly its two sidelines — no width or
-// height in px in the drawing, and one number to change if the band's depth ever
-// changes.
-//
-// The cost is that everything in the figure is scaled horizontally, which is why
-// every stroked mark in it carries `vector-effect="non-scaling-stroke"`: without
-// it a curve drawn under a 2:1.4 scale comes out thicker where it runs flat than
-// where it runs steep, which on a hairline is the difference between a drawn
-// line and a smeared one.
-.landing__end-figure
-  position absolute
-  top 0
-  right 0
-  bottom 0
-  left 0
-  width 100%
-  height 100%
-
-// $prose_rule, the same paint as every other field marking. The bars are FILL
-// and never stroke: a stroked bar under a non-uniform scale gets a thicker top
-// than side, which is visible at this width and is the reason the sample is
-// drawn as solids rather than as outlines.
-.landing__end-bar
-  fill $prose_rule
-
-// A STEP DARKER THAN THE BARS, WHICH IS THE ONE PLACE THE ONE-PAINT RULE BENDS
-// and has to. The curve and the interval are the MODEL and the bars are the
-// sample, and a fit painted at the value of the thing it is fitted to is not
-// legible as a second mark at all — it reads as an edge on the bars. One step is
-// enough because the two never coincide: the curve rides above the bar tops
-// wherever the sample fell short, and that gap is what the value difference has
-// to survive.
-//
-// The wordmark that used to sit here took the same step for the same reason, and
-// the reason outlived it.
-.landing__end-curve
-  fill none
-  stroke $prose_rule_strong
-  stroke-width 1.5
-  stroke-linecap round
-  stroke-linejoin round
-
-// The interval is drawn a hair heavier than the curve. It is the smallest mark
-// in the figure and the one carrying the most specific claim — a range rather
-// than a number — so it is the one that cannot afford to be read as part of the
-// curve behind it.
-.landing__end-interval
-  fill none
-  stroke $prose_rule_strong
-  stroke-width 1.75
-  stroke-linecap round

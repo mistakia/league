@@ -9,15 +9,15 @@ the wordmark.
 
 **On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field                                    |
-| -------------------------------------------------- | ----------------------------------------------- |
-| The two 2px ink rules                              | The goal lines                                  |
-| The hero above the first, the space below the last | The end zones                                   |
-| The 1px ink band rule opening a section            | A ten-yard line                                 |
-| The hairline between two entries                   | The yard lines between                          |
-| `.landing__yard`                                   | The yard numbers                                |
-| `.landing__section::before`                        | The hash marks, down the right sideline         |
-| `.landing__end`                                    | The end zone: two boundaries and a distribution |
+| On the page                                        | On the field                                |
+| -------------------------------------------------- | ------------------------------------------- |
+| The two 2px ink rules                              | The goal lines                              |
+| The hero above the first, the space below the last | The end zones                               |
+| The 1px ink band rule opening a section            | A ten-yard line                             |
+| The hairline between two entries                   | The yard lines between                      |
+| `.landing__yard`                                   | The yard numbers                            |
+| `.landing__section::before`                        | The hash marks, down the right sideline     |
+| `.landing__end`                                    | The closing goal line, and nothing below it |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -87,20 +87,17 @@ pages actually sit on — under the floor, for text set at normal size in every 
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
 
-**One paint for every field marking.** The yard numbers, the hash marks and the end zone figure's
-bars are all `$prose_rule`, the faintest grey in the palette, and paint is the one thing on the page
-that can afford it: a mark at 48px is legible at a contrast a line of prose would vanish at, and
-every one of these is decorative by construction, carrying nothing a reader has to make out. The
-yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
-and at that size it read as ink competing with the head across the row from it.
+**One paint for every field marking, and no exceptions left.** The yard numbers and the hash marks
+are both `$prose_rule`, the faintest grey in the palette, and paint is the one thing on the page that
+can afford it: a mark at 48px is legible at a contrast a line of prose would vanish at, and both are
+decorative by construction, carrying nothing a reader has to make out. The yard number was a step
+darker at first, which is the value for a LINE a reader is meant to notice, and at that size it read
+as ink competing with the head across the row from it.
 
-**The rule bends in exactly one place, and it is a layering.** The end zone's curve and interval are
-`$prose_rule_strong`, one step darker than the bars they are drawn over. Everything else painted on
-this page sits on the bare ground; these sit on another marking, and a fit painted at the value of
-the thing it is fitted to is not a second mark at all — it reads as an edge on the bars. One step is
-enough because the two never coincide: the curve rides above the bar tops wherever the sample fell
-short, and that gap is what the difference has to survive. The wordmark that used to sit in this
-band took the same step for the same reason, and the reason outlived it.
+The rule used to bend once, for marks painted on top of other marks in the end zone — a wordmark on
+hatching, later a fitted curve over its own sample — which need a step of separation from what they
+sit on. Nothing on the page is layered that way now, so the exception went with the end zone rather
+than staying behind as a licence.
 
 **Check a grey against the surface it lands on, not against white.** Two of the three above were
 first measured on white and shipped failing on `#f0f0f0`. `$prose_action` is the exception that
@@ -159,9 +156,10 @@ Rules:
   NFL field numeral is heavy at roughly normal width (six feet by four), so **every condensed
   candidate went thin and stringy once turned** — Anton, Saira Condensed, Barlow Condensed, Oswald,
   Big Shoulders, Fjalla One — and Archivo Black went round. Chivo 900 is the one that reads as
-  paint. **It now pays for itself in ONE place**, the yard numbers, since the end zone wordmark it
-  also carried is gone. That is a thin margin for a third face and it is worth saying out loud
-  rather than leaving to be discovered: if the yard numbers ever go, the face goes with them.
+  paint. **It now pays for itself in ONE place**, the yard numbers, since the end zone that also
+  carried it in a wordmark is gone. That is a thin margin for a third face and it is worth saying
+  out loud rather than leaving to be discovered: if the yard numbers ever go, the face goes with
+  them, and so does the `Chivo` request in `app/index.html`.
 
 ## Structure
 
@@ -239,58 +237,26 @@ description.
 section closes the last one too, so a reader reaching the end sees the directory finish rather than
 run out.
 
-**On the landing page that closing rule is the second goal line, and below it is a real end zone.**
-It has two boundaries at the goal line's own weight — the rule above and an end line below — because
-a zone with only one of them is an edge with space under it. Its sidelines are where the paint
-stops: the figure runs to the measure's edges and ends, closing it left and right without two more
-rules. **The zone sets its own depth** (140px, 84px on a phone) because nothing in flow gives it one
-any more — it used to inherit whatever a line of the wordmark happened to be.
+**On the landing page that closing rule is the second goal line, and it carries nothing.** A bounded
+end zone was built below it — a second 2px rule, a fixed depth between them — and in turn hatching,
+a fine lattice, a row of diamonds, the site's wordmark and a projected distribution were painted in
+the band. All of it has been removed and the rule is the bare closing bracket it started as.
 
-**What is painted in the zone is a projected distribution**, in `end-zone-figure.js`: a sample as
-bars, the log-normal density it was drawn from as a curve over them, and the middle eighty per cent
-as a capped interval above that. This is the one place the page says what KIND of site it is rather
-than what is on it — the directory above names fourteen destinations and not one of them can say "we
-model this". **The end line is its axis**; the bars stand on the 2px rule that already closes the
-page, which is the whole argument for putting the figure here and not somewhere else.
+**That history is the useful part, so it is kept when the code is not.** Every attempt was an
+ornament looking for a reason, on the strip of the page whose whole job is to be empty, and each one
+failed differently:
 
-**Three marks, three claims, and that is why there are three.** The bars say there is data, the
-curve says it is fitted rather than plotted, and the interval says the answer is a range rather than
-a number. A histogram alone said only the first, which is what it was before.
+- **A pattern fine enough to tile reads as SHADING over the band, not as a marking on it.** That
+  killed the hatch and the lattice at every pitch tried.
+- **A pattern coarse enough to escape that becomes a row of ornaments** — three diamonds across the
+  measure is jewellery, not a field marking.
+- **A figure with something to say still has to earn the band.** The distribution said what kind of
+  site this is, which is more than the patterns managed, and it was still a picture under a
+  directory that had already finished.
+- **The wordmark was the page saying its own name twice**, four screens below the masthead that
+  already carries it.
 
-What it must keep doing, each learned by getting it wrong on the rendered page:
-
-- **The sample MISSES the curve, and the miss is square-root scaled.** Bar tops sitting exactly on
-  the curve make the curve an outline of the bars — one mark drawn twice. Counting noise goes as the
-  square root of the count, so a tall bin deviates more absolutely and less relatively; flat jitter
-  makes the tail as ragged as the peak, which is what added noise looks like next to sampled noise.
-- **The bars are most of the pitch, not a fifth of it.** Thin bars with air between them read as a
-  comb or a waveform. Bins abut; the gap is relief and nothing more.
-- **The tail decays rather than flooring, and it reaches the far sideline.** A minimum bar height
-  set above where the density lands clamps the last third to one value and the tail becomes a
-  baseline. A distribution too tight for the band leaves its right third empty, which reads as a
-  figure that ran out — the parameters are chosen so the ninetieth percentile lands at four fifths
-  of the width.
-- **The skew is the point.** A symmetrical bell is the same gesture with the interesting half sanded
-  off, and the right tail is the shape a week of fantasy scoring actually takes.
-- **Every stroked mark carries `vector-effect="non-scaling-stroke"`.** The svg is stretched with
-  `preserveAspectRatio="none"`, so without it a hairline comes out thicker where it runs flat than
-  where it runs steep.
-
-**A hatch, then a fine lattice, then a row of diamonds were all here first.** What killed the first
-two is worth keeping: at any pitch small enough to tile, a pattern reads as SHADING over the zone
-rather than as a marking on it. Whatever goes here has to be made of shapes big enough to be
-counted.
-
-**The site's name was painted across this band and is not any more.** It was the obvious thing to
-put in an end zone, and it was the second time the page said it — the masthead carries the same
-wordmark four screens up, so it repeated rather than added, it sat over the figure, and removing it
-is what let the figure use the full depth. This is still not a footer: a footer of links here would
-repeat the directory it is closing. The band is `aria-hidden` because it is a shape and not a chart —
-there is no series behind it and nothing to read off it.
-
-This is not the border that was tried and removed. That one enclosed the whole page and read as a
-container; this bounds the one band on the page with no content in it, which is what a boundary is
-for.
+Anything proposed for this space has to answer why the space needs filling.
 
 The header does **not** carry its own rule. Giving it one puts two parallel rules sixty pixels
 apart with nothing between them, which reads as a mistake rather than as two levels of break.
@@ -337,9 +303,7 @@ symbol in it renders **nothing** rather than erroring.
 - **No filled button on a reading page.** A filled button is the register of something being sold,
   and neither reading page sells anything. Their next steps are text links. `prose_action_fill()`
   is for real form submits.
-- **No boxes or cards on a prose page**, and **that includes one box around everything.** A band
-  with a rule above and below it is not that object — the end zone has two boundaries and no
-  verticals, and what it encloses is the only part of the page carrying no content. A
+- **No boxes or cards on a prose page**, and **that includes one box around everything.** A
   directory drawn as a grid of cards becomes a marketing page the moment there are three of them,
   and a hairline rectangle around the whole page is the same object drawn once — it was tried on
   the landing page, argued for as a sideline rather than a container, and read as a container

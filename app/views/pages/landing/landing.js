@@ -5,7 +5,6 @@ import { NavLink } from 'react-router-dom'
 import PageLayout from '@layouts/page'
 
 import RouteDiagram from './route-diagram'
-import EndZoneFigure from './end-zone-figure'
 import {
   hero_deck,
   landing_sections,
@@ -136,29 +135,18 @@ export default function LandingPage() {
           <Section key={section.title} {...section} yard={yard_line(index)} />
         ))}
 
-        {/* THE BOTTOM END ZONE. The rule above it is the second goal line, and
-            until something was painted below that rule the space was just the
-            page's bottom padding — the reader could see the directory had
-            ended but nothing said the field had.
+        {/* The bottom edge, and nothing else. The page ended on its last
+            description with no rule under it, so the directory ran out rather
+            than finishing — the Genesis page closes on the masthead's own
+            weight and this one did not. It carries no copy on purpose: a
+            footer of links here would repeat the directory it closes.
 
-            WHAT IS PAINTED THERE IS A PROJECTED DISTRIBUTION, which is the one
-            place the page says what KIND of site this is rather than what is
-            on it. The directory above names fourteen destinations and not one
-            of them can say "we model this". See end-zone-figure.js.
-
-            THE SITE'S NAME WAS HERE AND IS NOT ANY MORE. It was the obvious
-            thing to paint in an end zone and it was the second time the page
-            said it — the masthead carries the same wordmark four screens up,
-            so it repeated rather than added, and it sat over the figure and
-            took the band's one clear reading with it. Removing it is what
-            let the figure use the full depth.
-
-            Still no footer: a footer of links here would repeat the directory
-            it is closing. aria-hidden because it is a shape and not a chart —
-            there is no series behind it and nothing to read off it. */}
-        <div className='landing__end' aria-hidden='true'>
-          <EndZoneFigure />
-        </div>
+            A BOUNDED END ZONE WAS BUILT BELOW THIS RULE AND HAS BEEN REMOVED,
+            along with everything painted in it in turn — hatching, a lattice,
+            diamonds, the site's wordmark, a distribution. Anything proposed
+            for this space has to answer why the space needs filling, which
+            none of them did. */}
+        <div className='landing__end' aria-hidden='true' />
       </div>
     </div>
   )
