@@ -135,12 +135,22 @@ export default function LandingPage() {
           <Section key={section.title} {...section} yard={yard_line(index)} />
         ))}
 
-        {/* The bottom edge, and nothing else. The page ended on its last
-            description with no rule under it, so the directory ran out rather
-            than finishing — the Genesis page closes on the masthead's own
-            weight and this one did not. It carries no copy on purpose: a
-            footer of links here would repeat the directory it closes. */}
-        <div className='landing__end' aria-hidden='true' />
+        {/* THE BOTTOM END ZONE. The rule is the second goal line, and what is
+            painted below it is what a team paints in its own end zone: its
+            name, across the width, in the field's paint face. Until it was
+            there the space under the closing rule was just the page's bottom
+            padding — the reader could see the directory had ended but nothing
+            said the field had.
+
+            Still no footer. This is the site's name, which the masthead
+            already carries at the top of the same page, so it repeats a
+            wordmark rather than adding one — and a footer of links here would
+            repeat the directory it is closing. It is aria-hidden for the same
+            reason: the name is already in the heading above, and a screen
+            reader reaching it twice learns nothing the second time. */}
+        <div className='landing__end' aria-hidden='true'>
+          <span className='landing__end-mark'>{site_name}</span>
+        </div>
       </div>
     </div>
   )

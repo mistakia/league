@@ -9,13 +9,15 @@ the wordmark.
 
 **On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field           |
-| -------------------------------------------------- | ---------------------- |
-| The two 2px ink rules                              | The goal lines         |
-| The hero above the first, the space below the last | The end zones          |
-| The 1px ink band rule opening a section            | A ten-yard line        |
-| The hairline between two entries                   | The yard lines between |
-| `.landing__yard`                                   | The yard numbers       |
+| On the page                                        | On the field                     |
+| -------------------------------------------------- | -------------------------------- |
+| The two 2px ink rules                              | The goal lines                   |
+| The hero above the first, the space below the last | The end zones                    |
+| The 1px ink band rule opening a section            | A ten-yard line                  |
+| The hairline between two entries                   | The yard lines between           |
+| `.landing__yard`                                   | The yard numbers                 |
+| `.landing__section::after`                         | The hash marks                   |
+| `.landing__end-mark`                               | The name painted in the end zone |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -28,7 +30,10 @@ the page's edges, which is exactly where the border went wrong.
 
 ## Core Principles
 
-- **Two faces, no third** — IBM Plex Mono for display and labels, Inter for prose and section heads
+- **Two faces for reading, and one for paint** — IBM Plex Mono for display and labels, Inter for
+  prose and section heads, and Chivo 900 for the landing field's markings and nothing else. The
+  bar a third face has to clear is a job the two cannot do: a painted field numeral is one, a
+  heading is not
 - **Rules, not boxes** — three rule weights do the work a card would otherwise do
 - **One ground** — every surface is `$backgroundColor`; paper is for controls, not for pages
 - **One accent** — a single deep red, spent on hover, focus and error and nothing else
@@ -89,28 +94,35 @@ LABEL, and that is the floor on going lighter.
 
 ## Typography
 
-Loaded in `app/index.html`: **IBM Plex Mono 300/400/500/600** and **Inter 400/500/600/700**.
+Loaded in `app/index.html`: **IBM Plex Mono 300/400/500/600**, **Inter 400/500/600/700** and
+**Chivo 900** — that one weight alone, because 900 is the whole reason it is here.
 
 **The weight facts are asymmetric and both matter.** `$prose_bold` is 600 because Plex Mono has no
 700 — asking for it gets a synthesized bold, which on mono reads as a smudge. Inter _does_ load
 700, so the sans section label and the yard number are the two places on these pages that can go
 heavier, and both are drawn rather than faked.
 
-| Role         | Mixin                   | Face      | Size                               | Weight  |
-| ------------ | ----------------------- | --------- | ---------------------------------- | ------- |
-| Body         | `prose_page()`          | Inter     | 17px / 1.7                         | 400     |
-| Page title   | `prose_title()`         | Plex Mono | `clamp(30px, 4.4vw, 40px)`         | 600     |
-| Hero lede    | page-local              | Plex Mono | `clamp(25px, 3.1vw, 34px)`         | 600     |
-| Section head | `prose_section_label()` | **Inter** | 0.6875em, `0.12em` tracking, upper | **700** |
-| Group label  | `prose_section_title()` | Plex Mono | 0.8125em, `0.14em` tracking, upper | 600     |
-| Eyebrow      | `prose_eyebrow()`       | Plex Mono | 0.75em, `0.16em` tracking, upper   | 500     |
-| Field label  | `prose_label()`         | Plex Mono | 0.9375em                           | 600     |
-| Yard number  | `.landing__yard`        | **Inter** | 48px, turned `vertical-rl`         | **700** |
+| Role         | Mixin                   | Face      | Size                                 | Weight  |
+| ------------ | ----------------------- | --------- | ------------------------------------ | ------- |
+| Body         | `prose_page()`          | Inter     | 17px / 1.7                           | 400     |
+| Page title   | `prose_title()`         | Plex Mono | `clamp(30px, 4.4vw, 40px)`           | 600     |
+| Hero lede    | page-local              | Plex Mono | `clamp(25px, 3.1vw, 34px)`           | 600     |
+| Section head | `prose_section_label()` | **Inter** | 0.6875em, `0.12em` tracking, upper   | **700** |
+| Group label  | `prose_section_title()` | Plex Mono | 0.8125em, `0.14em` tracking, upper   | 600     |
+| Eyebrow      | `prose_eyebrow()`       | Plex Mono | 0.75em, `0.16em` tracking, upper     | 500     |
+| Field label  | `prose_label()`         | Plex Mono | 0.9375em                             | 600     |
+| Yard number  | `.landing__yard`        | **Chivo** | 48px, turned `vertical-rl`           | **900** |
+| End zone     | `.landing__end-mark`    | **Chivo** | `clamp(24px, 5.9vw, 52px)`, `0.22em` | **900** |
 
 Rules:
 
 - **Mono sets loose and even**, so it takes negative tracking (`-0.02em` to `-0.025em`) and tight
   leading at display size, or a headline reads as a terminal dump.
+- **A section head is a step off ink**, at `$prose_body`. It and the entry labels were both
+  `$prose_ink`, so the head was the same colour as the twelve destinations it names. Ink belongs to
+  the entry labels, which are the only things on the page a reader came to click; the head joins
+  the wayfinding layer with the blurb and the yard number. Not `$prose_muted` — that is the blurb's
+  colour, and a head set in it is a caption.
 - **A section head is SMALLER than the entries under it.** That is the newspaper order — the head
   names where you are, the items are what you came to read. The band rule above it supplies the
   hierarchy that size would otherwise have to.
@@ -127,12 +139,13 @@ Rules:
 - **17px is the floor for any form control.** Below 16px iOS Safari zooms on focus and does not
   zoom back out.
 - `text-wrap: balance` on headlines, `text-wrap: pretty` on prose. Both degrade to `normal`.
-- **The yard number is Inter 700, not a third face, and the question was live.** A condensed
-  grotesque is what an NFL field actually uses and this is the one place on the site with a job for
-  a display face. It still does not clear the bar: turned, at 48px, in a hairline grey, what the
-  numeral has to do is read as paint from across the page — and Inter 700 does that. A third face
-  would buy a closer imitation of a specific field's sign painter, at the cost of a third webfont
-  on the front door and a face used by exactly four glyphs.
+- **The field bought the third face, and Chivo 900 is it.** Inter 700 was the incumbent and reads
+  as a user interface — a screen face at a weight meant for labels. The candidates were rendered
+  turned, at 48px, in the real grey on the real page, which is the only test that settles it: an
+  NFL field numeral is heavy at roughly normal width (six feet by four), so **every condensed
+  candidate went thin and stringy once turned** — Anton, Saira Condensed, Barlow Condensed, Oswald,
+  Big Shoulders, Fjalla One — and Archivo Black went round. Chivo 900 is the one that reads as
+  paint. It pays for itself twice, in the yard numbers and the end zone wordmark.
 
 ## Structure
 
@@ -179,6 +192,19 @@ three type sizes, so a hardcoded nudge is wrong the moment any of the five input
 | 1px ink           | `prose_section_band()`                                   | A new section begins        |
 | 1px `$prose_rule` | Between entries                                          | Two things of the same kind |
 
+**The hash marks are one row, in the number's band, and that is forced rather than chosen.** A
+field carries two inbound rows out in the middle of the field; the middle of this page is running
+prose. A row in the rail's gutter was tried and every tick read as a hyphen belonging to the
+sentence beside it. The band the number already reserves is the one corridor with no text in it.
+Two tick lengths on one pseudo-element — the short mark at every yard, the long one where a
+five-yard line would fall — so the row reads in fives rather than as a comb. These are not the
+ticks that were removed from the bar: those ran ALONG a band rule and decorated it, and these run
+down the field between the rules and cross none of them.
+
+**The band is built from its parts, not guessed.** Numeral, 4px, strip, 8px, prose. Guessing it
+gave the phone a band that fit the number alone, and the widest description reached the strip's
+left edge exactly — a collision one glyph away.
+
 **Every rule runs the full measure, including behind the yard numbers.** The number band is a
 `padding-right` on `.landing__section` — 72px, 44px on a phone — and a border spans the padding
 box, so the rules keep their length while every row of content stops short of the number. A yard
@@ -189,8 +215,15 @@ description.
 
 **A page is bracketed by the heavy weight top and bottom.** The 2px rule that opens the first
 section closes the last one too, so a reader reaching the end sees the directory finish rather than
-run out. On the landing page the closing rule carries no copy at all (`.landing__end`) — a footer
-of links there would repeat the directory it is closing.
+run out.
+
+**On the landing page that closing rule is the second goal line, and the site's name is painted
+below it**, across the width, in the paint face (`.landing__end-mark`). Until it was there the space
+under the rule was the page's bottom padding: the reader could see the directory had ended, but
+nothing said the field had. It is still not a footer — the name is the one the masthead carries at
+the top of the same page, so it repeats a wordmark rather than adding one, and it is `aria-hidden`
+because a screen reader reaching that name twice learns nothing the second time. A footer of links
+there would repeat the directory it is closing.
 
 The header does **not** carry its own rule. Giving it one puts two parallel rules sixty pixels
 apart with nothing between them, which reads as a mistake rather than as two levels of break.
@@ -272,6 +305,13 @@ h3` won on colour, tracking and line-height while letting `font-size` and `text-
 - **`$variables` are not substituted inside `calc()`.** Use the custom-property form.
 - **A `var(--x)` nothing declares drops the whole declaration.** This app styles with stylus
   tokens; a CSS custom property is the exception and must be declared somewhere.
+- **`document.fonts.check()` returns TRUE for a font that does not exist.** It answers "can the
+  browser render this text with this font stack", and a stack always resolves to something — so
+  `check('900 48px NotARealFace')` is `true`, measured. A webfont that failed to load is the
+  silent-fauxing failure the `index.html` font comment describes, and the one API that looks built
+  to detect it cannot. Measure the rendered WIDTH of the same string in the candidate face and in
+  the fallback and require them to DIFFER, with a bogus family as the control that must match the
+  fallback exactly.
 - **`normalize.css` strips `-webkit-appearance` from every `input`**, so a hand-rolled checkbox has
   no box, no tick and no size, and `accent-color` is inert. Call `prose_checkbox()`.
 - **A non-`.button` direct child of `<ButtonGroup>` silently un-paints the segmented control**, and
