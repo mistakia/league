@@ -33,9 +33,13 @@ describe('auction proxy bidding and auto-nomination', function () {
   // nomination clock deliberately, and can COUNT how many times each was armed
   // -- which is how "a proxy step does not reset the bid clock" is asserted.
   // Records every scheduled callback, TAGGED with which clock armed it. Counting
-  // by duration cannot work here: the padded bid clock and the mode poll are both
-  // 15,000ms in the test config, and the mode poll re-arms on every tick, so a
-  // count of 15,000ms timers is a count of two different things.
+  // by duration cannot work here: every duration is configuration, the padded
+  // bid clock and the mode poll collided at 15,000ms exactly while the poll sat
+  // there, and the poll re-arms on every tick -- so a count of 15,000ms timers
+  // was a count of two different things. The poll has since moved to 60,000 and
+  // that collision is gone, which changes nothing: the next edit to either
+  // number restores it silently, and a duration-keyed count would go vacuous
+  // rather than fail.
   const build_timers = () => {
     const scheduled = []
     return {

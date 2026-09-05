@@ -25,6 +25,7 @@ import { resolve_nominating_team_id } from '#libs-server/auction-completion.mjs'
 import { resolve_auction_player } from '#libs-server/resolve-auction-player.mjs'
 import { get_auction_mode, AUCTION_MODES } from '#libs-server/auction-modes.mjs'
 import { get_auction_nomination_order } from '#libs-server/auction-nomination-order.mjs'
+import emit_signal, { resolve_signal } from '#libs-server/emit-signal.mjs'
 import debug from 'debug'
 
 // How often the socket asks whether a block has opened or closed.
@@ -54,6 +55,12 @@ import debug from 'debug'
 // guarantee, and a cache over a safety-critical derivation trades a bounded
 // lateness for an unbounded wrongness.
 const AUCTION_MODE_POLL_MS = 60_000
+
+// The signal source for a mode resolution that will not resolve. Named for the
+// RESOLUTION rather than for the socket, matching `auction-final-block` and
+// `auction-nomination-order`, so the three auction sources read as one family
+// in the queue.
+const MODE_SIGNAL_SOURCE = 'auction-mode-resolution'
 
 // The real timers, and the default injection.
 //
@@ -86,6 +93,17 @@ export const real_auction_timers = {
   clear_timeout: (handle) => clearTimeout(handle)
 }
 
+// THE SEAM FOR THE MODE-RESOLUTION SIGNAL, injected for exactly the reason the
+// announcer below is: `emit_signal` no-ops when BASE_API_URL and its two
+// companions are unset, which is every environment but production, so the call
+// is unobservable otherwise. This subsystem has already shipped an announcement
+// that nothing called, twice, and a signal nobody can see raised is the same
+// defect wearing the clothes of the guard against it.
+export const real_auction_signals = {
+  emit: emit_signal,
+  resolve: resolve_signal
+}
+
 // THE SEAM FOR THE CLAIM ANNOUNCEMENT, and it exists for the same reason the
 // timers one does: without it there is no way to assert that this socket SENDS.
 //
@@ -109,7 +127,8 @@ export default class Auction {
     wss,
     lid,
     timers = real_auction_timers,
-    announce = real_auction_announcer
+    announce = real_auction_announcer,
+    signals = real_auction_signals
   }) {
     this._wss = wss
     this._lid = lid
@@ -147,6 +166,12 @@ export default class Auction {
     // all until a manager acts, which is the block failing exactly when it is
     // supposed to be carrying the auction.
     this._mode_resolved = false
+    // Consecutive mode-resolution failures, and whether this socket has ever
+    // reported a healthy resolve. Both feed the signal pair in _refresh_mode;
+    // neither decides the mode.
+    this._signals = signals
+    this._mode_resolution_failures = 0
+    this._mode_health_reported = false
     this._block_end_at = null
     this._is_final_block = false
     // Per-player, cleared on every nomination. A manual bid SUPERSEDES that
@@ -1907,6 +1932,15 @@ export default class Auction {
    * finalized sessions and the computed final block, and this applies the
    * answer. A second derivation here is the shape of the defect this subsystem
    * has already produced twice.
+   *
+   * AND THIS IS THE ONLY DOOR INTO THE FINAL BLOCK, which is what makes the
+   * catch below worth as much care as the resolution itself. Nothing else moves
+   * a league into live mode, so a throw that keeps recurring here removes the
+   * auction's only termination guarantee -- silently, through an exception
+   * handler doing exactly what it was written to do. `get_auction_final_block`
+   * reaches `getRoster`, which THROWS "No roster found" rather than returning
+   * empty for a week with no roster row, so this is a reachable shape and not a
+   * hypothetical.
    */
   async _refresh_mode() {
     if (!this._system_election_mode) return
@@ -1921,9 +1955,21 @@ export default class Auction {
       // A mode lookup that throws must not take the auction with it: staying in
       // whichever mode is already in force is the degraded outcome, and the next
       // poll retries.
+      //
+      // BUT IT MUST NOT BE SILENT, and it was. `this.logger` is a `debug()`
+      // namespace and the production PM2 environment sets no DEBUG at all, so
+      // this line writes nothing on the deployed server -- a stuck mode was
+      // indistinguishable from a healthy one from outside the process. That is
+      // the exact shape user:guideline/surface-pipeline-failures.md exists to
+      // prevent, and the signal below is the output oracle distinct from the
+      // absence of a throw.
       this.logger('error resolving auction mode', error)
+      this._mode_resolution_failures += 1
+      await this._report_mode_resolution_failure(error)
       return
     }
+
+    await this._report_mode_resolution_healthy()
 
     this._block_end_at = resolved.block_end_at
     this._is_final_block = resolved.is_final_block
@@ -1947,6 +1993,70 @@ export default class Auction {
     }
 
     return this._leave_live_mode()
+  }
+
+  /**
+   * Raise the signal that a league's mode resolution is stuck.
+   *
+   * DEDUPED ON THE LEAGUE, following `auction-final-block.mjs`, so a fault that
+   * recurs on every poll collapses into one open signal rather than one per
+   * minute. That is what makes emitting on EVERY failure affordable, and
+   * emitting on every failure is what removes the threshold nobody could pick.
+   *
+   * The count is in the payload because it is the actionable content: one
+   * failure is a blip the next poll clears, and a count in the hundreds is a
+   * league that has not been able to reach its final block for hours.
+   *
+   * It never fails its caller. `emit_signal` already swallows its own transport
+   * errors and returns null, and a signal that could take the mode poll down
+   * would be strictly worse than the silence it replaces.
+   */
+  async _report_mode_resolution_failure(error) {
+    await this._signals.emit({
+      source: MODE_SIGNAL_SOURCE,
+      kind: 'pipeline_failure',
+      severity: 'high',
+      title: `league ${this._lid} cannot resolve its auction mode`,
+      payload: {
+        lid: this._lid,
+        consecutive_failures: this._mode_resolution_failures,
+        error: error.message,
+        // Named because it is the consequence rather than the symptom: this is
+        // the only path into live mode, so while it is failing the league
+        // cannot enter its final block.
+        consequence: 'the league cannot transition into its final block'
+      },
+      dedup_key: `pipeline_failure:${MODE_SIGNAL_SOURCE}:${this._lid}`
+    })
+  }
+
+  /**
+   * Close that signal once the mode resolves again.
+   *
+   * GATED ON THE OBSERVED HEALTHY CONDITION AND ON BOOT, never on an in-process
+   * "did I emit" latch alone. A latch by itself is what `emit-signal.mjs` warns
+   * against: PM2 reloads this process on every deploy, so a signal opened by the
+   * previous process would have nothing left that remembers to close it and
+   * would read as a stuck detector forever. Resolving on the FIRST healthy
+   * resolve after boot covers exactly that case.
+   *
+   * After that it is quiet. A successful poll on a league that has never failed
+   * calls nothing, which is what keeps a per-minute poll from becoming a
+   * per-minute round trip to the signals API.
+   */
+  async _report_mode_resolution_healthy() {
+    if (this._mode_health_reported && !this._mode_resolution_failures) return
+
+    const failures = this._mode_resolution_failures
+    this._mode_resolution_failures = 0
+    this._mode_health_reported = true
+
+    await this._signals.resolve({
+      dedup_key: `pipeline_failure:${MODE_SIGNAL_SOURCE}:${this._lid}`,
+      resolution_note: failures
+        ? `auction mode resolved after ${failures} consecutive failures`
+        : 'auction socket started and resolved its mode'
+    })
   }
 
   async _enter_live_mode() {

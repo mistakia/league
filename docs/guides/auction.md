@@ -60,6 +60,14 @@ The reducer opens `isPaused` true so no control is offered before the auction is
 
 **Do not consult `is_auction_election_mode_enabled` to answer it.** That column selects which auction SYSTEM a league-season runs — this design, or the pre-2026 timer-driven open outcry it rolls back to. A season boolean answering the mode question is a second source of truth that disagrees the moment a block convenes.
 
+**`_refresh_mode` is the ONLY door into live mode, so its catch is load-bearing.** Nothing else moves a league into its final block — the design's only termination guarantee — so a throw inside the mode resolution that keeps recurring removes that guarantee entirely, through an exception handler doing exactly what it was written to do. `get_auction_final_block` reads every team's roster and `getRoster` THROWS rather than returning empty for a team with no roster row, so this is reachable rather than hypothetical.
+
+Staying in the current mode is still the right degraded behavior. What was wrong is that it was silent: `this.logger` is a `debug()` namespace and the production PM2 environment sets no DEBUG, so the catch wrote nothing on the deployed server and a stuck mode was indistinguishable from a healthy one from outside the process. It now emits a `pipeline_failure` signal deduped on the league, carrying the consecutive-failure count and the consequence, and closes it when the mode resolves again.
+
+**The signal pair is INJECTED, and a spec that does not inject cannot see it.** `emit_signal` no-ops whenever `BASE_API_URL` and its two companions are unset, which is every environment but production — the same trap the Discord announcer carries. Score a change here by deleting the call site, which is what `test/auction.mode-resolution-signal.spec.mjs` is built around, and drive the throw by deleting a roster row rather than injecting an error the resolution could never raise.
+
+**The healthy arm resolves on recovery AND once on boot.** The boot resolve is not redundant: PM2 reloads this process on every deploy, so a signal opened by the previous process has nothing left in memory that remembers to close it, and an in-process latch alone would strand it open forever.
+
 A block boundary is a wall-clock event with no message behind it, so the socket POLLS for it. That poll is also what arms the clocks on a socket that boots inside a block: `_election_mode` starts `false`, which is a real mode rather than "unknown", so the first resolve must transition even when it agrees with the default. Without that the block convenes and then does nothing at all.
 
 ## One pricing rule, two callers
