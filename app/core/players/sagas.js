@@ -40,7 +40,8 @@ import {
   api_get_player_gamelogs,
   api_get_player_seasonlogs,
   api_get_player_practices,
-  api_get_player_betting_markets
+  api_get_player_betting_markets,
+  api_get_player_content
 } from '@core/api'
 import { draft_actions } from '@core/draft'
 import { player_actions } from './actions'
@@ -313,6 +314,16 @@ export function* load_player_betting_markets({ payload }) {
   yield call(api_get_player_betting_markets, { pid })
 }
 
+export function* load_player_content({ payload }) {
+  const { pid } = payload
+  const request_history = yield select(get_request_history)
+  const is_pending_or_fulfilled = request_history.get(
+    `GET_PLAYER_CONTENT_${pid}`
+  )
+  if (is_pending_or_fulfilled) return
+  yield call(api_get_player_content, { pid })
+}
+
 export function* load_missing_roster_players({ payload }) {
   const { leagueId } = yield select(get_app)
   const players_map = yield select((state) =>
@@ -500,6 +511,10 @@ export function* watch_load_player_betting_markets() {
   )
 }
 
+export function* watch_load_player_content() {
+  yield takeLatest(player_actions.LOAD_PLAYER_CONTENT, load_player_content)
+}
+
 export function* watch_load_all_players() {
   yield takeEvery(player_actions.LOAD_ALL_PLAYERS, load_all_players)
 }
@@ -557,6 +572,7 @@ export const player_sagas = [
   fork(watch_load_player_seasonlogs),
   fork(watch_load_player_practices),
   fork(watch_load_player_betting_markets),
+  fork(watch_load_player_content),
   fork(watch_load_all_players),
   fork(watch_load_league_players),
   fork(watch_load_team_players),

@@ -596,6 +596,16 @@ export function players_reducer(state = initialState, { payload, type }) {
         })
       })
 
+    // The route answers with an { items } envelope rather than a bare array,
+    // mirroring the upstream content-feed contract it proxies, so the list is
+    // one level in. An absent items key stores an empty List rather than
+    // undefined, which is also what a disabled or unreachable upstream yields.
+    case player_actions.GET_PLAYER_CONTENT_FULFILLED:
+      return state.setIn(
+        ['items', payload.opts.pid, 'content_items'],
+        new List(payload.data?.items || [])
+      )
+
     case player_actions.GET_PLAYER_BETTING_MARKETS_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(

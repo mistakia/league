@@ -102,6 +102,7 @@ export {
   api_post_restricted_free_agent_nomination,
   api_delete_restricted_free_agent_nomination,
   api_get_player_betting_markets,
+  api_get_player_content,
   api_get_league_careerlogs,
   api_get_data_views,
   api_get_data_view,

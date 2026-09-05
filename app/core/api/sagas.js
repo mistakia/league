@@ -60,7 +60,8 @@ import {
   get_player_gamelogs_actions,
   get_player_seasonlogs_actions,
   get_player_practices_actions,
-  get_player_betting_markets_actions
+  get_player_betting_markets_actions,
+  get_player_content_actions
 } from '@core/players/actions'
 import { get_charted_plays_actions } from '@core/stats/actions'
 import { get_plays_actions, get_play_stats_actions } from '@core/plays/actions'
@@ -724,6 +725,12 @@ export const api_get_player_betting_markets = fetch.bind(
   null,
   api.get_player_betting_markets,
   get_player_betting_markets_actions
+)
+
+export const api_get_player_content = fetch.bind(
+  null,
+  api.get_player_content,
+  get_player_content_actions
 )
 
 export const api_get_league_careerlogs = fetch.bind(

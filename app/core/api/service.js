@@ -448,6 +448,10 @@ export const api = {
     const url = `${API_URL}/players/${pid}/markets`
     return { url }
   },
+  get_player_content({ pid }) {
+    const url = `${API_URL}/players/${pid}/content`
+    return { url }
+  },
   get_draft_pick_value({ leagueId }) {
     const url = `${API_URL}/leagues/${leagueId}/draft-pick-value`
     return { url }

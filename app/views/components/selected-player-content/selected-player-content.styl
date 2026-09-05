@@ -1,0 +1,48 @@
+// App-chrome language, not the prose language: this renders inside the player
+// drawer beside the gamelog and market tables, so it takes variables.styl
+// tokens. Rules separate the entries -- no cards, no shadows.
+.selected__player-content
+  display flex
+  flex-direction column
+  padding 8px 0
+
+.player-content__item
+  display block
+  padding 10px 12px
+  border-bottom 1px solid $borderColor
+  color $textColor
+  text-decoration none
+  transition color 120ms ease, background-color 120ms ease
+
+  &:last-child
+    border-bottom none
+
+  &:hover
+    color $accentColor
+
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset -2px
+
+.player-content__title
+  font-size 14px
+  line-height 1.4
+  // Third-party headlines run to arbitrary length. Two lines is the budget; the
+  // clamp needs the block container and the hidden overflow together, or the
+  // text renders in full and nothing reports it.
+  display -webkit-box
+  -webkit-line-clamp 2
+  -webkit-box-orient vertical
+  overflow hidden
+
+.player-content__meta
+  display flex
+  gap 8px
+  margin-top 4px
+  font-size 11px
+  text-transform uppercase
+  letter-spacing 0.06em
+  color lighten($textColor, 25)
+
+.player-content__date
+  margin-left auto
