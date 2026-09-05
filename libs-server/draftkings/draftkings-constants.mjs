@@ -186,9 +186,14 @@ export const known_unmapped_offer_category_ids = new Set([
   1680, 1702, 1719, 1723, 1736, 1743, 1744, 1801, 1803, 1844, 1872, 1873, 1900,
   1908, 1920,
   // 1972 (Drive Props) and 1974 (No Brainer) ruled out 2026-09-05, signals
-  // 128477/128469. The taxonomy has no drive granularity, so the five Drive
-  // Props subcategories have no settlement-correct type short of coining one;
-  // 1974's single "Either Team to Score 1+ Point" is a novelty with no fitting
-  // type either. Deleting either id makes the family reportable again.
+  // 128477/128469. Declined on VOLUME, not on feasibility: both are brand-new
+  // families first published 2026-09-04, and across their whole recorded
+  // history they account for 92 and 2 observed markets respectively, on a
+  // single game. Note for whoever revisits this — drive-grain settlement is
+  // already available, since nfl_plays carries drive_sequence and 19 other
+  // drive columns populated for ~99% of plays, so mapping the five Drive Props
+  // subcategories needs new market types and a data-view surface but no new
+  // data. Revisit once a few weeks of volume show the families persist.
+  // Deleting either id makes the family reportable again.
   1972, 1974
 ])
