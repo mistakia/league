@@ -284,7 +284,10 @@ h3` won on colour, tracking and line-height while letting `font-size` and `text-
   wrapping the Nominate button and the new input together — and that wrapper was `action`, which
   renders as a stepper segment. **Put a new control BESIDE the group, not inside it**; the row
   around it already carries the gap. `player-context-menu.js` states the same rule at its own call
-  site.
+  site. **The corollary is that a group of segments cannot be MAPPED**: with no wrapper allowed there
+  is nowhere to hang a React `key` but the `Button` itself, and
+  `test/app.connected-component-props.spec.mjs` fails a `Button` handed any prop it does not declare,
+  `key` included. Write the segments out as separate children, which need no keys at all.
 - **Two font sizes centred on each other do not share a baseline.** `align-items: center` aligns
   BOXES, so a smaller neighbour — a `$` before an amount, a unit after one, a caption beside a value
   — sits high by half the difference in the two ascents. That is around 1px at the sizes this app
