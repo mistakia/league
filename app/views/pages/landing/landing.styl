@@ -506,35 +506,70 @@ $sideline_offset_phone = -22px
 // container. This encloses the six inches of field that a boundary is FOR, and
 // the thing it bounds is the only part of the page with no content in it.
 //
-// THE SIDELINES ARE WHERE THE PAINT STOPS. The lattice runs to the measure's
-// edges and end, so the zone is closed left and right without two more rules.
+// THE SIDELINES ARE WHERE THE PAINT STOPS. The figure runs to the measure's
+// edges and ends, so the zone is closed left and right without two more rules.
 //
-// A DIAMOND LATTICE, WHICH IS THE OLD DESIGN. Before end zones were solid
-// colour with a wordmark dropped in, they were ruled off in diamonds — a
-// diagonal lattice painted the width of the zone — and that is a pattern this
-// palette can actually draw, because it is made of the page's own hairline
-// repeated rather than of a second surface colour.
+// WHAT IS PAINTED IN IT IS A DISTRIBUTION — a row of standing bars whose heights
+// trace a curve. This is a fantasy analytics platform, and the end zone is the
+// one band on the page with nothing in it to compete with, so it is where the
+// site can say what it is without a sentence of copy or an icon. A histogram is
+// the figure that says it: not a chart of anything a reader is meant to read off,
+// but the shape of one, which is a claim about how the site thinks.
 //
-// TWO GRADIENTS AT OPPOSED 45s, not one. A single family of stripes is a hatch
-// and reads as shading; the diamonds only appear where the second family
-// crosses the first, so both are load-bearing and neither is decoration on the
-// other.
+// A REAL DISTRIBUTION AND NOT A DECORATIVE WAVE. The heights are a log-normal
+// density, right-skewed with a long tail, because that is the shape a week of
+// fantasy scoring actually takes — the mode below the mean and the tail carrying
+// the weeks that win a matchup. A symmetrical bell would have been the same
+// gesture with the interesting half sanded off.
 //
-// A 26px PITCH, NEARLY TWICE THE HATCH IT REPLACES, and the pitch is what
-// decides whether this reads as diamonds at all. Two families lay down twice
-// the ink of one, so the hatch's own 14px darkened the zone into a grey panel —
-// which is the solid-colour end zone this pattern exists instead of. 18px was
-// tried against the rendered page and still read as mesh: the cells were small
-// enough that the eye took the texture and not the shape. At 26px the diamonds
-// are individually legible and the zone is lighter than the hatch was.
+// THE END LINE IS ITS AXIS. The bars stand on the 2px rule that already closes
+// the page, so the figure needs no baseline of its own — the boundary the end
+// zone already had turns out to be the one every chart of this kind is drawn on.
+// That is also the whole argument for putting it here rather than anywhere else.
+//
+// NOT THE TICKS THAT WERE REMOVED FROM THE BAR, though it is the closest thing
+// to them on the page: those were a row of EQUAL ticks decorating a section rule,
+// and equal is what made them decoration. Bars of varying height on a rule are a
+// measurement, and the rule they stand on is being used rather than dressed.
+//
+// A HATCH, THEN A FINE LATTICE, THEN A ROW OF DIAMONDS were all here first, and
+// what killed the first two is worth keeping: at any pitch small enough to tile,
+// a pattern reads as SHADING over the zone rather than as a marking on it.
+// Whatever goes here has to be made of shapes big enough to be counted.
 .landing__end
+  position relative
   margin-top 32px
   border-top 2px solid $prose_rule_heavy
   border-bottom 2px solid $prose_rule_heavy
-  background-image repeating-linear-gradient(45deg, $prose_rule 0 1px, transparent 1px 26px), repeating-linear-gradient(-45deg, $prose_rule 0 1px, transparent 1px 26px)
 
   @media (max-width 640px)
     margin-top 26px
+
+// STRETCHED TO THE ZONE RATHER THAN SIZED. `preserveAspectRatio none` lets the
+// figure take whatever box the zone has at any width, so the bars always stand
+// exactly the zone's depth and reach exactly its two sidelines — no width or
+// height in px, and nothing to keep in step with the wordmark's clamp.
+//
+// The cost is that the bars are scaled horizontally with everything else, so
+// their width in px varies with the measure. That is why the viewBox sets them
+// at 2 units against 444: at the 880px measure they land on 4px and at a phone's
+// 386px on 1.7px, which is a hairline at one end and a thin bar at the other and
+// wrong at neither.
+.landing__end-figure
+  position absolute
+  top 0
+  right 0
+  bottom 0
+  left 0
+  width 100%
+  height 100%
+
+// $prose_rule, the same paint as every other field marking. The bars are FILL
+// and never stroke: a stroked bar under a non-uniform scale gets a thicker top
+// than side, which is visible at this width and is the reason the figure is
+// drawn as solids rather than as outlines.
+.landing__end-bar
+  fill $prose_rule
 
 // THE PAINT IN THE END ZONE. Sized to fill the width rather than to a point on
 // the type scale, which is what end zone lettering does — it is set to the zone
@@ -547,7 +582,12 @@ $sideline_offset_phone = -22px
 //
 // It clamps rather than scaling by viewport, so the phone gets a wordmark that
 // still fills its zone without a 52px line breaking in two.
+// `position relative` is what keeps the wordmark ON the figure. The bars are an
+// absolutely positioned svg, so they paint after ordinary in-flow content however
+// early they sit in the DOM; the letters need to be positioned too, and later, to
+// come back over them.
 .landing__end-mark
+  position relative
   display block
   padding 44px 0
   text-align center

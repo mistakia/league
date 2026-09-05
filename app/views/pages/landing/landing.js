@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom'
 import PageLayout from '@layouts/page'
 
 import RouteDiagram from './route-diagram'
+import EndZoneFigure from './end-zone-figure'
 import {
   hero_deck,
   landing_sections,
@@ -142,6 +143,12 @@ export default function LandingPage() {
             padding — the reader could see the directory had ended but nothing
             said the field had.
 
+            THE NAME SITS ON A DISTRIBUTION, which is the one place the page
+            says what kind of site this is rather than what is on it. The
+            directory above names fourteen destinations and none of them can
+            say "we model this"; the figure says it without a sentence, and it
+            costs nothing because the band was empty. See end-zone-figure.js.
+
             Still no footer. This is the site's name, which the masthead
             already carries at the top of the same page, so it repeats a
             wordmark rather than adding one — and a footer of links here would
@@ -149,6 +156,7 @@ export default function LandingPage() {
             reason: the name is already in the heading above, and a screen
             reader reaching it twice learns nothing the second time. */}
         <div className='landing__end' aria-hidden='true'>
+          <EndZoneFigure />
           <span className='landing__end-mark'>{site_name}</span>
         </div>
       </div>
