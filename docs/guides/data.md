@@ -1,10 +1,40 @@
 # Add or Change a Data-View Column
 
-**When to read this:** Read before touching a column definition, a param registry, a field factory or a golden.
+**When to read this:** Read before touching a data-view or plays-view column definition, a param registry, a field factory or a golden.
 
 Column ids and params are persisted in saved views and short URLs, so a rename here is a migration. Four hashes behave differently under one.
 
 Extracted from `CLAUDE.md`, which keeps the one-line rule and routes here.
+
+The plays view is a separate surface from the data views and its own section is first, because the two look alike and their rules differ at the point that matters: a data-view column carries params, and a plays-view column cannot.
+
+---
+
+## The plays view: one declaration, and no params at all
+
+**Every plays-view column is declared once, in `libs-shared/plays-view-columns.mjs`.** Three consumers read that one entry: the server derives its SQL from the `table` plus `column` pair (`libs-server/plays-view/column-definitions/index.mjs`), the client builds its field from `kind` and the display attributes (`app/core/plays-view-fields/index.js`), and the tooltip reads `description`. Until 2026-09 these were three hand-maintained registries with a parity test standing in for a single source.
+
+To add a column, add one entry. You do not touch the server or the client unless the column needs something derivation cannot give it:
+
+- **Real SQL** — a `CASE`, a concatenation across a join, a derived URL — goes in `libs-server/plays-view/column-definitions/overrides.mjs`, and the declaration must set `sql_override: true`. `index.mjs` throws at import if the two disagree, so the flag cannot drift from the map.
+- **A React cell** goes in `CELL_COMPONENTS` in the client field file, named by the declaration's `cell` key. This is the one thing that cannot live in `libs-shared`.
+- **A player name** is a join, so use the `player_name` helper in `overrides.mjs`. It takes a `role`, which is both the SQL table alias and the join dedupe key, and it selects the pid alongside the name.
+
+Two invariants are enforced at import rather than by a test: a declaration that would select nothing throws, and an override for an undeclared column throws. Set parity between the registries is true by construction and is no longer asserted.
+
+**The plays view takes NO params.** Every filterable fact about a play is a column, and `where` over columns is the only filter mechanism. Per-column params are meaningful in the data-view system because a data-view column aggregates over many plays and owns its own scope; here the grain _is_ the play and the request owns the scope, so a per-column param would be a weaker duplicate of `where`. The `{column_id, params}` column form is still parsed, because 9 short URLs persist it, and its params are ignored by design. Do not re-plumb them.
+
+Season scope is therefore an ordinary `where` clause. `apply_default_season_scope` synthesizes a `play_year` clause when the request names none — an unscoped request scans all 27 `nfl_plays` partitions, and the socket, the search route and the export route can all reach one. It fires on the ABSENCE of a `play_year` clause, so a clause that bounds nothing (`IS NOT NULL`, `!= 2020`) suppresses it and still scans everything; that is deliberate, since narrowing a filter the caller wrote would answer a different question than the one asked.
+
+**Changing what a column emits requires the byte-identical check, not the suite.** `scripts/emit-plays-view-column-sql.mjs` dumps every column's SQL as stable JSON so a refactor can be proven to have moved nothing, against a worktree pinned to the pre-change revision. It records each select fragment's FORM as well as its text: knex quotes a plain string and passes a `db.raw` through bare, so two fragments that stringify alike can emit different SQL. Assert the denominator and show the check red — a mutated boolean aggregate should turn exactly the `bool_count` columns red.
+
+**A column id is permanent.** Ids are persisted in immutable short URLs, so renaming a key in the declaration silently breaks a saved link. A moved id surfaces as an unknown-column error rather than as a wrong number, which is why the persisted-URL check is a replay rather than a diff.
+
+**State the first season in the description of any column that does not span every season.** This is the whole defense against the failure `drive_yards` already shipped: a column whose coverage or MEANING changes between seasons looks entirely healthy from a non-null rate, and a user comparing 2024 to 2025 reads an empty cell as "it did not happen" rather than "it was not charted". Measure population PER SEASON, never pooled — pooling a 2025-only column with an empty 2024 halves its real rate and hides that it is 2025-only at all. That is not hypothetical: it made `run_concept` read as a 49.9 percent column when it is 99.8 percent of 2025 rushes and absent before, and it did the same to four others.
+
+Two columns must never be coalesced with their similarly-named siblings, because they are different taxonomies and merging them produces nonsense: `run_gap` (O-line slots) with `run_gap_intent` (letter gaps), and `receiver_alignment` (2024, strong-side-first) with `receiver_alignment_charting` (2025, left-by-right).
+
+**A high-cardinality text column stays TEXT, not SELECT.** A faceted list over a long tail shows near-duplicate and junk values as separate, double-counted entries that read as real. `play_penalty_type` (96 values in two spelling styles) and `play_receiver_alignment_charting` (23 values, 15 of them under 250 plays, one `MISCxMISC`) are both text for this reason.
 
 ---
 

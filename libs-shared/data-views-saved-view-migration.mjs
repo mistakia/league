@@ -1182,14 +1182,25 @@ const apply_rename_to_sort = ({ sort, rename_map }) => {
 
 // Rewrites the param-carrying entries every table_state shares -- columns,
 // prefix_columns, where, sort -- via the single migrate_params pass above.
-// This is the part of the migration plays views need too: they resolve
-// play-filter params through the same apply_play_by_play_column_params_to_query
-// registry as the from-plays data-view columns, so a param key or column id
-// renamed here is exactly as live a saved-view hazard on user_plays_views as on
-// user_data_views. Split out from migrate_table_state so a plays-view caller
-// gets the column/param rewriting without the row_grain/splits/subjects
-// normalization below, which is a data-views-only concept plays views have no
-// field for.
+// This is the part of the migration plays views need too, but for ONE of its
+// two halves rather than both.
+//
+// A COLUMN ID rename is exactly as live a hazard on user_plays_views as on
+// user_data_views: plays-view column ids are persisted in saved views, in
+// browser history and in immutable short URLs, and a moved id surfaces as an
+// unknown-column error.
+//
+// A PARAM key rename is not. The plays view stopped consuming params in
+// 2026-09: every filterable fact about a play is a column and `where` is the
+// only filter mechanism, so no plays-view request path reads
+// apply_play_by_play_column_params_to_query any more. The params pass still
+// runs over a plays-view table_state because short URLs persist the
+// {column_id, params} column form and rewriting a key inside one is harmless,
+// not because anything downstream would read the result.
+//
+// Split out from migrate_table_state so a plays-view caller gets the
+// column/param rewriting without the row_grain/splits/subjects normalization
+// below, which is a data-views-only concept plays views have no field for.
 const migrate_column_entries_and_params = (table_state) => {
   let changed = false
   const next = { ...table_state }
@@ -1236,11 +1247,14 @@ const migrate_column_entries_and_params = (table_state) => {
 
 // Read-time migration for a plays view's table_state (user_plays_views and its
 // browser-storage undo history in app/core/plays-view/browser-storage.mjs).
-// Plays views persist columns/prefix_columns/where/sort/params the same shape
+// Plays views persist columns/prefix_columns/where/sort the same shape
 // data-views does, minus row_grain/splits/subjects, which the plays-view schema
-// has never carried -- so this covers exactly the param-key and column-id
-// renames, none of the data-views-only normalization migrate_table_state also
-// does.
+// has never carried -- so this covers the column-id renames, and none of the
+// data-views-only normalization migrate_table_state also does.
+//
+// It rewrites param keys as well, but see migrate_column_entries_and_params
+// above: the plays view no longer reads params, so that half preserves the
+// persisted shape rather than fixing anything a request would consume.
 export const migrate_plays_view_table_state = (table_state) => {
   if (!table_state || typeof table_state !== 'object') {
     return { changed: false, table_state }
