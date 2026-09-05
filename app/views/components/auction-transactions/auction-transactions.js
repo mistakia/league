@@ -1,95 +1,104 @@
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import PropTypes from 'prop-types'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import Accordion from '@components/accordion'
-import Button from '@components/button'
-import ButtonGroup from '@components/button-group'
+import cluster_auction_transactions from '@core/auction/cluster-auction-transactions.mjs'
 import { timeago } from '@core/utils'
 
 import './auction-transactions.styl'
 
-const kind_display_names = {
-  nomination: 'Nominated',
-  bid: 'Bid',
-  processed: 'Sold'
-}
-
-const empty_messages = {
-  processed: 'No players have sold yet.',
-  bid: 'No bids yet.',
-  nomination: 'No players have been nominated yet.',
-  all: 'No auction activity yet.'
-}
-
+// ONE VIEW, ONE UNIT: the player auction. This panel carried four filters --
+// processed, bids, nominations and all -- and each of the first three was a flat
+// list of one kind of row, which is the shape a cluster replaced: a sale with no
+// bidding around it, a bid with no player price beside it, a nomination that
+// says nothing about what the player went on to fetch. The cluster answers all
+// three at once for the player it is about, so the segmented control was four
+// ways of asking for less.
+//
 // A full auction is one nomination and several bids per player across a few
-// hundred players, and every row here mounts a connected `PlayerName` and a
-// connected `TeamName`. The rail is a reference surface read in glances rather
-// than a ledger read to the bottom, so it shows the newest run and says how
-// many rows it is not showing.
-const MAX_VISIBLE_ROWS = 50
+// hundred players, and every cluster here mounts a connected `PlayerName` and a
+// connected `TeamName` per bidding team. The rail is a reference surface read in
+// glances rather than a ledger read to the bottom, so it shows the newest run
+// and says how many auctions it is not showing.
+const MAX_VISIBLE_AUCTIONS = 20
 
-export default function AuctionTransactions({
-  transactions,
-  is_collapsible = false
-}) {
-  const [filter, set_filter] = useState('processed')
+// The teams a cluster names before it stops counting them out. Four fits the
+// meta line at 320px; past that the count of the rest is the useful part, since
+// the auctions with a long tail of bidders are exactly the ones where the top
+// four are what a manager wanted.
+const MAX_VISIBLE_TEAM_BIDS = 4
 
-  const rows =
-    filter === 'all'
-      ? transactions
-      : transactions.filter((row) => row.kind === filter)
-  const visible = rows.slice(0, MAX_VISIBLE_ROWS)
+const format_age = (occurred_at) =>
+  occurred_at ? timeago.format(new Date(occurred_at), 'league_short') : ''
 
-  // WRITTEN OUT RATHER THAN MAPPED, for two rules that meet here. A segment
-  // must be a DIRECT `.button` child of the group -- a wrapper is reached by
-  // none of the paint that makes the four read as one control -- so there is
-  // nowhere to hang a `key` but the Button itself, and
-  // `test/app.connected-component-props.spec.mjs` fails a Button handed a prop
-  // it does not declare. Four separate children need no keys at all.
-  const render_filter = (value, label) => (
-    <Button
-      small
-      is_active={filter === value}
-      onClick={() => set_filter(value)}
-    >
-      {label}
-    </Button>
+export default function AuctionTransactions({ transactions }) {
+  const auctions = useMemo(
+    () => cluster_auction_transactions(transactions),
+    [transactions]
   )
 
-  const render_row = (row) => {
-    const { transaction } = row
+  const visible = auctions.slice(0, MAX_VISIBLE_AUCTIONS)
+
+  // ONE PLAYER'S AUCTION AS TWO LINES: the name and the price it stands at,
+  // then who bid what on the line under it.
+  //
+  // THE NAME GETS THE WHOLE WIDTH, and that is the point of the shape. Every
+  // arrangement that put the team, the state and the age on the SAME line as
+  // the name was competing for a 320px rail with about 250px of usable width,
+  // and the name -- the one field a manager is scanning for -- is what lost:
+  // three or four short fixed columns left it under 120px and cut most names
+  // mid-surname. Stacked, it has the line to itself minus the price, which is
+  // the only figure that has to sit beside it.
+  //
+  // ONE ENTRY PER TEAM, NOT PER BID. Printing every bid was tried and it is the
+  // harder read: a contested player became six near-identical lines of team and
+  // dollar amount and three auctions filled the scroller, while the question a
+  // manager is asking -- who was in on this player, and how far did each of
+  // them go -- had to be reconstructed by reading the lines and taking a
+  // maximum per team. That is what `team_bids` already did.
+  const render_auction = (auction) => {
+    const { sale, team_bids } = auction
+    const top = sale || auction.bids[0] || auction.nomination
+
+    const shown = team_bids.slice(0, MAX_VISIBLE_TEAM_BIDS)
+    const hidden = team_bids.length - shown.length
 
     return (
-      <div className='auction-transactions__row' key={row.key}>
-        <div className='auction-transactions__team'>
-          <TeamName abbrv color tid={transaction.tid} />
-        </div>
-        {/* PlayerName renders a FRAGMENT of two siblings, so it needs a flex
-            element of its own or its status chip wraps away from the name. */}
-        <div className='auction-transactions__player'>
-          <PlayerName pid={transaction.pid} />
-        </div>
-        <div className='auction-transactions__amount'>
-          ${transaction.player_salary}
-        </div>
-        {/* Only under `all`, where it is the one thing telling two rows apart.
-            Under a single-kind filter it repeats the selected segment on every
-            row and crowds the name beside it. */}
-        {filter === 'all' && (
-          <div className='auction-transactions__kind'>
-            {kind_display_names[row.kind]}
+      <div className='auction-transactions__auction' key={auction.key}>
+        <div className='auction-transactions__auction-head'>
+          <div className='auction-transactions__player'>
+            <PlayerName pid={auction.pid} />
           </div>
-        )}
-        {/* Absent on an election-mode sale: `broadcast_auction_settlement`
-            carries the price and the winner and no timestamp, so the row is
-            drawn without one rather than with an Invalid Date. */}
-        {transaction.occurred_at && (
+          <div className='auction-transactions__amount'>
+            ${top.transaction.player_salary}
+          </div>
+        </div>
+        <div className='auction-transactions__auction-meta'>
+          {/* SOLD OR OPEN, once per auction. Without it a settled auction and
+              one still taking bids are the same block with different ages, and
+              the leading team reads as the winner in both. */}
+          <div className='auction-transactions__status'>
+            {sale ? 'sold' : 'open'}
+          </div>
+          <div className='auction-transactions__bids'>
+            {shown.map((team_bid) => (
+              <div className='auction-transactions__bid' key={team_bid.tid}>
+                <TeamName abbrv tid={team_bid.tid} />
+                <span className='auction-transactions__bid-amount'>
+                  ${team_bid.amount}
+                </span>
+              </div>
+            ))}
+            {hidden > 0 && (
+              <div className='auction-transactions__bid'>+{hidden}</div>
+            )}
+          </div>
           <div className='auction-transactions__timestamp'>
-            {timeago.format(new Date(transaction.occurred_at), 'league_short')}
+            {format_age(top.transaction.occurred_at)}
           </div>
-        )}
+        </div>
       </div>
     )
   }
@@ -100,65 +109,43 @@ export default function AuctionTransactions({
   const header = (
     <div className='auction-transactions__header'>
       <div className='auction-transactions__title'>Transactions</div>
-      <div>{rows.length}</div>
+      <div>{auctions.length}</div>
     </div>
   )
 
   const body = (
     <>
-      {/* ONE FILTER, ONE KIND. The three kinds answer different questions --
-          what sold and for how much, who is bidding on the open player, and
-          which players have been put up -- and mixing them puts the sales a
-          manager is pricing against behind every bid of the auction. `all` is
-          the interleaved read for anyone following the board live, and it is
-          not the default. */}
-      <ButtonGroup className='auction-transactions__filters'>
-        {render_filter('processed', 'Processed')}
-        {render_filter('bid', 'Bids')}
-        {render_filter('nomination', 'Nominations')}
-        {render_filter('all', 'All')}
-      </ButtonGroup>
-
-      {!rows.length && (
+      {!auctions.length && (
         <div className='auction-transactions__empty'>
-          {empty_messages[filter]}
+          No auction activity yet.
         </div>
       )}
 
       {Boolean(visible.length) && (
         <div className='auction-transactions__list'>
-          {visible.map(render_row)}
+          {visible.map(render_auction)}
         </div>
       )}
 
-      {rows.length > visible.length && (
+      {auctions.length > visible.length && (
         <div className='auction-transactions__more'>
-          {rows.length - visible.length} older not shown
+          {auctions.length - visible.length} older not shown
         </div>
       )}
     </>
   )
 
-  // Collapsed by default on the phone, where the rail stacks under the board
-  // and does not scroll -- an open list there pushes the calendar and the
-  // settlement status off the bottom of the screen.
-  if (is_collapsible) {
-    return (
-      <Accordion className='auction-transactions' summary={header}>
-        {body}
-      </Accordion>
-    )
-  }
-
+  // COLLAPSED AT EVERY WIDTH, not just on the phone. The ledger is the one
+  // panel in the rail a manager reads backwards, and it is the longest, so it
+  // sits shut under the calendar and the settlement status until it is asked
+  // for. The count in the header is what the shut panel still answers.
   return (
-    <div className='auction-transactions'>
-      {header}
+    <Accordion className='auction-transactions' summary={header}>
       {body}
-    </div>
+    </Accordion>
   )
 }
 
 AuctionTransactions.propTypes = {
-  transactions: PropTypes.array,
-  is_collapsible: PropTypes.bool
+  transactions: PropTypes.array
 }

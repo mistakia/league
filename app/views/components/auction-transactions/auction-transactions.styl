@@ -1,10 +1,9 @@
+// THE PANEL IS AN ACCORDION AT EVERY WIDTH, so the root here IS the
+// disclosure. Its summary button already owns the header row's padding and its
+// own bottom rule, so the panel adds neither: a padding here would double the
+// summary's and push the chevron off the line, and a border-top would draw a
+// second rule against the summary's own.
 .auction-transactions
-  padding 12px
-  display flex
-  flex-direction column
-  gap 12px
-  border-top 1px solid $borderColor
-
   &__header
     display flex
     justify-content space-between
@@ -20,9 +19,6 @@
     font-weight 700
     color $textColor
 
-  &__filters
-    align-self flex-start
-
   // BOUNDED AND SCROLLED HERE, not by the rail. On a desktop the rail scrolls
   // as one column, so an unbounded list pushes the calendar and the elections
   // above it out of reach of anyone reading the newest sale; on a phone the
@@ -31,30 +27,61 @@
   &__list
     display flex
     flex-direction column
-    gap 4px
     max-height 260px
     overflow-y auto
 
-  // ONE LINE PER TRANSACTION, CLIPPED RATHER THAN WRAPPED, matching the
-  // elections list above it. The player name is the only elastic child; the
-  // team, the amount and the timestamp are short, bounded and the reason the
-  // row exists. `min-width 0` AND `overflow hidden` on every link in the chain,
-  // because the first alone lets the box shrink while its text keeps painting
-  // full width over whatever follows.
-  &__row
+  // ONE AUCTION, TWO LINES, separated from the next by a hairline rather than
+  // by a gap. Whitespace alone between blocks of the same type leaves a reader
+  // counting lines to find where one player's auction ends; the rule is the
+  // same mark the elections list above uses between two entries.
+  //
+  // `flex 0 0 auto` is not decoration. This list is a flex column with a
+  // `max-height`, so once the clusters overflow it every one of them is an item
+  // free to SHRINK, and the `overflow hidden` on their lines sets the automatic
+  // minimum size to zero rather than to the content. Unfixed, twenty auctions
+  // divided 260px between them and the list rendered as a stack of hairlines
+  // with the scrollbar it should have had.
+  &__auction
+    flex 0 0 auto
+    padding 4px 0
+
+    + .auction-transactions__auction
+      border-top 1px solid $borderColor
+
+  // THE NAME LINE. Only the price sits beside it, so at 320px the name has
+  // about 250px instead of the 120 it had when the team, the state and the age
+  // shared its line.
+  &__auction-head
     display flex
     align-items center
     gap 8px
+    height 20px
     font-size 13px
     min-width 0
     overflow hidden
     white-space nowrap
 
-  &__team
-    flex 0 0 auto
+  // THE LINE UNDER IT, holding everything the name line gave up: whether the
+  // auction settled, which teams were in on the player and how far each went,
+  // and how long ago it last moved. Quieter and smaller, so the panel is read
+  // as a column of names and prices first and this line only where the eye
+  // stops.
+  &__auction-meta
     display flex
     align-items center
-    gap 4px
+    gap 6px
+    height 16px
+    font-size 11px
+    color rgba(0, 0, 0, 0.55)
+    min-width 0
+    overflow hidden
+    white-space nowrap
+
+  &__status
+    flex 0 0 26px
+    text-transform uppercase
+    letter-spacing 0.04em
+    opacity 0.6
 
   // A FLEX ROW, not a block. `PlayerName` renders a FRAGMENT of two siblings --
   // the name and a label carrying the status, PSP and cutlist chips -- so in a
@@ -62,6 +89,10 @@
   // doubled that row's height and left the amount beside it floating against
   // two lines of nothing. Measured on the live board: every row with a status
   // chip was 2x the height of the rows around it.
+  //
+  // `min-width 0` AND `overflow hidden` on every link in the chain, because the
+  // first alone lets the box shrink while its text keeps painting full width
+  // over whatever follows.
   &__player
     flex 1 1 auto
     min-width 0
@@ -82,18 +113,47 @@
       overflow hidden
       text-overflow ellipsis
 
+  // Mono and tabular, right-aligned: a price column is read by its digits
+  // lining up, and the proportional sans put `$4` and `$41` on different edges.
   &__amount
-    flex 0 0 auto
+    flex 0 0 40px
+    text-align right
+    font-family 'IBM Plex Mono', monospace
+    font-variant-numeric tabular-nums
 
-  &__kind
-    flex 0 0 auto
-    font-size 11px
-    text-transform uppercase
-    opacity 0.7
+  // WHO WAS IN, AND HOW FAR EACH WENT. One entry per team at the most it
+  // offered, highest first, so the entry at the head is the winner or the
+  // standing high bid and the rest says how close the room got. Clipped rather
+  // than wrapped: the cluster is a fixed two lines, and the count of the teams
+  // past the edge is carried by a `+N` entry rather than by a third line.
+  &__bids
+    flex 1 1 auto
+    display flex
+    align-items center
+    gap 6px
+    min-width 0
+    overflow hidden
 
+  &__bid
+    flex 0 0 auto
+    display flex
+    align-items center
+    gap 3px
+
+    .team__name
+      padding 0
+      font-weight 500
+
+  &__bid-amount
+    font-family 'IBM Plex Mono', monospace
+    font-variant-numeric tabular-nums
+
+  // Always present, empty on an election-mode sale: `broadcast_auction_settlement`
+  // carries the price and the winner and no timestamp, so the cell is drawn
+  // without one rather than with an Invalid Date.
   &__timestamp
-    flex 0 0 auto
-    font-size 11px
+    flex 0 0 34px
+    text-align right
     color rgba(0, 0, 0, 0.4)
 
   &__empty
@@ -101,18 +161,6 @@
     opacity 0.7
 
   &__more
+    padding-top 6px
     font-size 11px
     opacity 0.6
-
-// Collapsible on a phone, where the root IS the Accordion and its summary
-// button already owns the row's padding. Keeping the panel's own padding here
-// would double it and push the chevron off the line.
-.accordion.auction-transactions
-  padding 0
-  gap 0
-
-  .auction-transactions__filters
-    margin 8px 0
-
-  .auction-transactions__list
-    padding-bottom 8px
