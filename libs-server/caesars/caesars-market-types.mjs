@@ -714,25 +714,26 @@ export const caesars_market_type_by_template = {
   },
 
   // The combined-statistic season totals. Four templates, all of the
-  // '|Player| |Total Regular Season A + B|' shape, left untyped pending the
-  // decision on whether to coin into player_season_prop_types -- the one
-  // constant group that reaches a user-facing Market picker.
+  // '|Player| |Total Regular Season A + B|' shape. These are the only Caesars
+  // futures templates whose typing needed an operator ruling, because
+  // player_season_prop_types is the one constant group reaching a user-facing
+  // Market picker. Ruled 2026-09-04: coin them.
+  //
+  // Each keeps its own constant rather than reusing a half. Mapping the
+  // passing-plus-rushing yards market to SEASON_PASSING_YARDS would grade a
+  // combined line against a passing-only total, which is worse than leaving it
+  // untyped.
   '|Total Regular Season Passing + Rushing Yards|': {
-    market_type: null,
-    reason:
-      'Combined passing and rushing yards. No constant sums two statistics, and mapping to either half would grade against half the market. Coining SEASON_PASSING_RUSHING_YARDS reaches the user-facing Market picker, so it is an operator decision rather than a free wiring.'
+    market_type: player_season_prop_types.SEASON_PASSING_RUSHING_YARDS
   },
   '|Total Regular Season Passing + Rushing Touchdowns|': {
-    market_type: null,
-    reason: 'Combined-statistic season total; same decision as the yards twin.'
+    market_type: player_season_prop_types.SEASON_PASSING_RUSHING_TOUCHDOWNS
   },
   '|Total Regular Season Rushing + Receiving Yards|': {
-    market_type: null,
-    reason: 'Combined-statistic season total; same decision as the yards twin.'
+    market_type: player_season_prop_types.SEASON_RUSHING_RECEIVING_YARDS
   },
   '|Total Regular Season Rushing + Receiving Touchdowns|': {
-    market_type: null,
-    reason: 'Combined-statistic season total; same decision as the yards twin.'
+    market_type: player_season_prop_types.SEASON_RUSHING_RECEIVING_TOUCHDOWNS
   }
 }
 

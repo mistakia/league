@@ -219,7 +219,24 @@ export const player_season_prop_types = {
   SEASON_ALT_RECEIVING_YARDS: 'SEASON_ALT_RECEIVING_YARDS',
   SEASON_ALT_RECEIVING_TOUCHDOWNS: 'SEASON_ALT_RECEIVING_TOUCHDOWNS',
   SEASON_ALT_SACKS: 'SEASON_ALT_SACKS',
-  SEASON_ALT_INTERCEPTIONS: 'SEASON_ALT_INTERCEPTIONS'
+  SEASON_ALT_INTERCEPTIONS: 'SEASON_ALT_INTERCEPTIONS',
+
+  // COMBINED-STATISTIC SEASON TOTALS, COINED ON AN OPERATOR RULING 2026-09-04.
+  //
+  // These are the only Caesars futures constants that needed one. Every other
+  // family this task wired landed in futures_types or team_season_types, which
+  // reach no data-view param and no swagger enum; this group is the one that
+  // reaches a user-facing Market picker
+  // (app/core/data-views-fields/betting-market-table-fields.js), so coining here
+  // widens a surface the operator sees.
+  //
+  // Each sums two statistics the singles above already carry separately.
+  // Mapping one of these to either half would grade against half the market, so
+  // they need their own constants rather than a reuse.
+  SEASON_PASSING_RUSHING_YARDS: 'SEASON_PASSING_RUSHING_YARDS',
+  SEASON_PASSING_RUSHING_TOUCHDOWNS: 'SEASON_PASSING_RUSHING_TOUCHDOWNS',
+  SEASON_RUSHING_RECEIVING_YARDS: 'SEASON_RUSHING_RECEIVING_YARDS',
+  SEASON_RUSHING_RECEIVING_TOUCHDOWNS: 'SEASON_RUSHING_RECEIVING_TOUCHDOWNS'
 }
 
 export const player_quarter_alt_prop_types = {

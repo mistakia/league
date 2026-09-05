@@ -14,7 +14,8 @@ import {
   game_props_types,
   team_props_types,
   team_season_types,
-  season_high_totals_types
+  season_high_totals_types,
+  player_season_prop_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
 const expect = chai.expect
@@ -311,6 +312,61 @@ describe('libs-server caesars market types', function () {
       expect(caesars_market_type_by_template).to.not.have.property(
         '|No Such Market|'
       )
+    })
+
+    // THE FOUR COMBINED-STATISTIC TEMPLATES, COINED ON AN OPERATOR RULING.
+    //
+    // Each must get its OWN type. Reusing a half -- mapping the combined
+    // passing-plus-rushing yards market to SEASON_PASSING_YARDS -- would grade a
+    // combined line against a passing-only total, which is worse than the null
+    // these carried before. So the assertion that matters is that all four are
+    // distinct from each other AND from the singles they are built from.
+    it('types the four combined-statistic templates distinctly', function () {
+      const combined = {
+        '|Total Regular Season Passing + Rushing Yards|':
+          'SEASON_PASSING_RUSHING_YARDS',
+        '|Total Regular Season Passing + Rushing Touchdowns|':
+          'SEASON_PASSING_RUSHING_TOUCHDOWNS',
+        '|Total Regular Season Rushing + Receiving Yards|':
+          'SEASON_RUSHING_RECEIVING_YARDS',
+        '|Total Regular Season Rushing + Receiving Touchdowns|':
+          'SEASON_RUSHING_RECEIVING_TOUCHDOWNS'
+      }
+
+      for (const [template_name, market_type] of Object.entries(combined)) {
+        expect(get_market_type({ template_name })).to.equal(market_type)
+      }
+
+      const types = Object.values(combined)
+      expect(new Set(types).size).to.equal(4)
+      for (const single of [
+        'SEASON_PASSING_YARDS',
+        'SEASON_RUSHING_YARDS',
+        'SEASON_RECEIVING_YARDS',
+        'SEASON_PASSING_TOUCHDOWNS',
+        'SEASON_RUSHING_TOUCHDOWNS',
+        'SEASON_RECEIVING_TOUCHDOWNS'
+      ]) {
+        expect(types).to.not.include(single)
+      }
+    })
+
+    // They reach the picker through player_season_prop_types, which is what
+    // made them an operator decision rather than a free wiring. Asserting the
+    // membership keeps a later refactor from quietly moving them into a group
+    // that widens nothing and changing what the operator ruled on.
+    it('places the combined constants in the group that reaches the picker', function () {
+      for (const market_type of [
+        'SEASON_PASSING_RUSHING_YARDS',
+        'SEASON_PASSING_RUSHING_TOUCHDOWNS',
+        'SEASON_RUSHING_RECEIVING_YARDS',
+        'SEASON_RUSHING_RECEIVING_TOUCHDOWNS'
+      ]) {
+        expect(player_season_prop_types).to.have.property(
+          market_type,
+          market_type
+        )
+      }
     })
 
     // THE TWO SIDES OF AN INTERCEPTION SETTLE FROM OPPOSITE COLUMNS.
