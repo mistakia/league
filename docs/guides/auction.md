@@ -123,6 +123,8 @@ The cost is a product judgement rather than a correctness one. The displayed set
 
 **Score this on three mutations, because the obvious two do not cover it.** Disabling the gate reddens the settling case; dropping the `< first` term reddens the tie case; and wiring the sealed rule into the BROADCAST set reddens nothing at all unless a board carries TWO holdouts, one priced out and one not — where the player still does not settle and the returned set must name both. `test/auction.implied-price-gating.spec.mjs` carries that third case for exactly this reason, and the file was green under the leak mutation until it existed.
 
+**The same discrimination is available in production, at settlement time only.** The `auction-settlement` debug namespace logs `waiting on N team(s): ... (M more shown but priced out)` exactly when the gating set is a strict subset of the broadcast set, and the suffix is the only positive evidence the gate discharged anyone — a board where every contender declines produces a correct settlement that exercises nothing. Production PM2 sets no `DEBUG`, so a verifier must set the namespace explicitly (and clear a set `DEBUG` before loading the enable-helper, which otherwise no-ops).
+
 The two are different kinds of statement, and the difference is the price:
 
 - **An election is price-independent.** A maximum is a standing position at every price, which is exactly what completeness has to claim — that the field is known at whatever price the player settles at. That is also why a standing maximum _below_ the current price still discharges: the team's position at this price is known, and it is "out". Without that a team holds a nomination open forever by never revising a stale maximum.
