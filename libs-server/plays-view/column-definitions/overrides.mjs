@@ -78,7 +78,8 @@ export default {
   // reused verbatim as the sort column.
   play_film_url: {
     main_select: () => [nfl_pro_film_url_sql({ alias: 'play_film_url' })],
-    sort_column_name: nfl_pro_film_url_sql()
+    sort_column_name: nfl_pro_film_url_sql(),
+    join: join_nfl_games
   },
 
   play_off_team: {

@@ -21,13 +21,14 @@
 export default {
   play_film_url: {
     sql_override: true,
+    join: true,
     kind: 'text',
     group: 'CORE',
     header_label: 'FILM',
     size: 50,
     cell: 'PlayFilmLinkCell',
     description:
-      'Link to the coaches film for this play on NFL Pro (requires an NFL Pro subscription). Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates.'
+      "Opens the NFL Pro film room on this play's game, filtered to its quarter, play type, distance and down, and plays the first clip that matches (requires an NFL Pro subscription). NFL Pro has no per-play link, so the target play is not always the one that plays first. Empty for plays before the 2022 season, which predate film coverage, and for rows that are not a play that was run, such as timeouts and injury updates."
   },
   play_esbid: {
     table: 'nfl_plays',

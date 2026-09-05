@@ -13,12 +13,18 @@ const expect = chai.expect
   Coverage for the NFL Pro coaches-film deep link on the plays view.
 
   The URL is assembled in SQL, and every part of that assembly is a rule that was
-  measured against the live film-room API rather than reasoned out -- the clock
+  measured against the live film room rather than reasoned out -- the clock
   comes from the play description and not from game_clock_start, minutes are
   zero-padded, playType is sent for every play with sacks routed separately, and
   the whole thing is NULL before the 2022 season. A change to any of them produces a URL that still
   looks like a URL and quietly resolves to the wrong play, or to no play, which
   is exactly the failure no reader would notice in a table cell.
+
+  `gameId` is the SHIELD UUID and not the esbid, which is the one rule here that
+  a reasonable reader will try to simplify away. The film-room API accepts the
+  esbid; the PAGE resolves the value against its own game list, finds nothing,
+  drops the parameter, and serves a playlist spanning the whole week. Asserting
+  the UUID is what stops that from coming back.
 
   Every case therefore asserts the resolved STRING, not the shape of the
   expression. Cases are seeded rather than read from production rows so the
@@ -30,6 +36,26 @@ const expect = chai.expect
 // Outside every seeded fixture's range, so these rows cannot collide with
 // another spec's and a leftover cannot be mistaken for one.
 const esbid = 99000401
+
+// The value the URL must carry, and it comes off nfl_games rather than
+// nfl_plays -- deliberately unlike the esbid so a regression to the esbid fails
+// here rather than passing on a value that happens to match.
+const shield_game_id = 'f5919910-311e-11f0-b670-ae1250fadad1'
+
+const seed_game = async ({
+  season_year = 2025,
+  season_type = 'REG',
+  week = 1
+}) =>
+  db('nfl_games').insert({
+    esbid,
+    season_year,
+    season_type,
+    week,
+    away_nfl_team: 'CIN',
+    home_nfl_team: 'CLE',
+    shield_game_id
+  })
 
 const seed_play = async ({
   play_id,
@@ -60,21 +86,30 @@ const seed_play = async ({
     updated: new Date()
   })
 
+// The join is part of the contract: the expression reads nfl_games, so every
+// caller has to supply it. `join_nfl_games` does this in the plays-view
+// overrides; here it is spelled out so a missing join fails loudly rather than
+// silently reading a column from the wrong place.
 const film_url = async (play_id) => {
   const [row] = await db('nfl_plays')
+    .leftJoin('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
     .select(nfl_pro_film_url_sql({ alias: 'play_film_url' }))
-    .where({ esbid, play_id })
+    .where({ 'nfl_plays.esbid': esbid, play_id })
   return row.play_film_url
 }
 
 const clear = async () => {
   await db('nfl_plays').where({ esbid }).del()
+  await db('nfl_games').where({ esbid }).del()
 }
 
 describe('plays view / nfl pro film url', function () {
   this.timeout(30000)
 
-  before(clear)
+  before(async () => {
+    await clear()
+    await seed_game({})
+  })
   after(clear)
 
   describe('registration', function () {
@@ -403,11 +438,91 @@ describe('plays view / nfl pro film url', function () {
       season: '2025',
       seasonType: 'REG',
       weekSlug: 'WEEK_5',
-      gameId: String(esbid),
+      gameId: shield_game_id,
       quarter: '3',
       gameClock: '07:23',
       playType: 'play_type_pass',
-      yardsToGoType: 'MID'
+      yardsToGoType: 'MID',
+      down: '1'
+    })
+  })
+
+  describe('the game', function () {
+    it('sends the shield uuid rather than the esbid', async function () {
+      // The whole defect this file was rewritten for. The esbid resolves against
+      // no option in the page's game list, so the page silently drops gameId and
+      // serves the entire week's playlist -- a wrong GAME, not a wrong play.
+      await seed_play({
+        play_id: 170,
+        play_description: '(10:00) pass short left.'
+      })
+
+      const url = await film_url(170)
+      expect(url).to.include(`gameId=${shield_game_id}`)
+      expect(url).to.not.include(String(esbid))
+    })
+
+    it('returns null when the game carries no shield id', async function () {
+      // A link with no game in it is the failure mode being fixed, so a game we
+      // cannot identify earns no link at all.
+      const other_esbid = 99000402
+      await db('nfl_games').insert({
+        esbid: other_esbid,
+        season_year: 2025,
+        season_type: 'REG',
+        week: 1,
+        away_nfl_team: 'DAL',
+        home_nfl_team: 'PHI'
+      })
+      await db('nfl_plays').insert({
+        esbid: other_esbid,
+        play_id: 171,
+        season_year: 2025,
+        season_type: 'REG',
+        week: 1,
+        quarter: 1,
+        play_type: 'PASS',
+        play_description: '(10:00) pass short left.',
+        updated: new Date()
+      })
+
+      const [row] = await db('nfl_plays')
+        .leftJoin('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+        .select(nfl_pro_film_url_sql({ alias: 'play_film_url' }))
+        .where({ 'nfl_plays.esbid': other_esbid, play_id: 171 })
+
+      expect(row.play_film_url).to.equal(null)
+
+      await db('nfl_plays').where({ esbid: other_esbid }).del()
+      await db('nfl_games').where({ esbid: other_esbid }).del()
+    })
+  })
+
+  describe('down', function () {
+    it('sends the down on a play run from scrimmage', async function () {
+      await seed_play({
+        play_id: 180,
+        down_number: 3,
+        yards_to_go: 8,
+        play_description: '(10:00) (Shotgun) pass deep middle.'
+      })
+
+      expect(await film_url(180)).to.include('down=3')
+    })
+
+    it('omits the down on a kick, which NFL Pro records without one', async function () {
+      // Same gate as yardsToGoType and for the same reason: an onside kick is
+      // recorded here as 1st & 10, and a down on a kick matches nothing.
+      await seed_play({
+        play_id: 181,
+        play_type: 'KOFF',
+        down_number: 1,
+        yards_to_go: 10,
+        game_clock_start: '15:00',
+        play_description: 'J.Elliott kicks 60 yards from PHI 35 to DAL 5.'
+      })
+
+      expect(await film_url(181)).to.not.include('down=')
     })
   })
 })
