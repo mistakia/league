@@ -526,6 +526,51 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
     header_label: 'QBR'
   }),
+  play_is_qb_dropback: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'DRPB'
+  }),
+  // The union of both feeds' vocabularies, because the column is the union of
+  // both feeds. COVER_5, COVER_9 and COMBINATION come only from our charting,
+  // PREVENT only from Next Gen Stats, and two-man arrives already normalized to
+  // COVER_2_MAN, so `2_MAN` is deliberately not offered -- a filter option that
+  // can never match is worse than a missing one.
+  play_coverage_type: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'COV',
+    size: 110,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: [
+      'COVER_0',
+      'COVER_1',
+      'COVER_2',
+      'COVER_2_MAN',
+      'COVER_3',
+      'COVER_4',
+      'COVER_5',
+      'COVER_6',
+      'COVER_9',
+      'COMBINATION',
+      'PREVENT'
+    ]
+  }),
+  play_coverage_source: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'COVSRC',
+    size: 110,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: ['charted', 'next_gen_stats']
+  }),
+  play_man_zone: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'MN/ZN',
+    size: 120,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    // Only the normalized spellings, for the same reason: the column rewrites
+    // MAN and ZONE, so offering them here would be two options that match
+    // nothing while looking like the ones a 2025 view needs.
+    column_values: ['MAN_COVERAGE', 'ZONE_COVERAGE', 'SITUATIONAL', 'MISC']
+  }),
   play_is_blitz: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
     header_label: 'BLZ'

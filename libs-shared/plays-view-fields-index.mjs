@@ -95,6 +95,14 @@ export default {
   play_is_screen: 'Whether the play was a screen pass',
   play_is_qb_scramble: 'Whether the quarterback scrambled',
   play_is_qb_rush: 'Whether it was a designed quarterback run',
+  play_is_qb_dropback:
+    'Whether the quarterback dropped back — a pass attempt, a sack, or a scramble',
+  play_coverage_type:
+    'The coverage shell (COVER_0 through COVER_9, COVER_2_MAN, COMBINATION, PREVENT). Our own charting where it exists, from 2023, and the Next Gen Stats classification otherwise, back to 2018. The two disagree on about 38 percent of the plays both classify, so pair this with the coverage source column before comparing across 2023.',
+  play_coverage_source:
+    'Which feed supplied the coverage shell on this play — charted (ours, 2023 onward) or next_gen_stats (2018 onward). Filter on it to hold one classifier constant across a multi-season view.',
+  play_man_zone:
+    'Whether the coverage was man or zone (MAN_COVERAGE, ZONE_COVERAGE, SITUATIONAL, MISC). The two feeds spell this differently and both are live in 2025, so the raw MAN/ZONE spellings are normalized to the long ones here.',
   play_is_blitz: 'Whether the defense blitzed',
   play_is_zero_blitz: 'Whether the defense ran a zero blitz',
   play_is_motion: 'Whether pre-snap motion was used',

@@ -147,6 +147,65 @@ describe('Plays View', () => {
 
       compare_queries(query.toString(), expected_query)
     })
+
+    // The coverage and dropback columns are what make a "this passer's plays
+    // against this coverage shell" view expressible at all -- the data has been
+    // in nfl_plays since 2018 and had no plays-view column until 2026-09-04.
+    // Asserted on the three-clause conjunction rather than one column at a time,
+    // because the view they exist for needs all three in one WHERE.
+    it('should filter on passer, dropback and coverage shell together', async () => {
+      const { query } = await get_plays_view_results_query({
+        columns: [
+          'play_desc',
+          'play_coverage_type',
+          'play_man_zone',
+          'play_is_qb_dropback'
+        ],
+        where: [
+          {
+            column_id: 'play_passer_pid',
+            operator: '=',
+            value: 'test-pid-123'
+          },
+          {
+            column_id: 'play_is_qb_dropback',
+            operator: '=',
+            value: 'true'
+          },
+          {
+            column_id: 'play_coverage_type',
+            operator: 'IN',
+            value: ['COVER_2', 'COVER_2_MAN']
+          }
+        ],
+        params: { year: [2024] }
+      })
+
+      const expected_query = `select "nfl_plays"."play_description" as "play_desc", COALESCE(nfl_plays.coverage_type::text, CASE WHEN nfl_plays.coverage_type_ngs = '2_MAN' THEN 'COVER_2_MAN' ELSE nfl_plays.coverage_type_ngs END) as play_coverage_type, CASE nfl_plays.man_zone WHEN 'MAN' THEN 'MAN_COVERAGE' WHEN 'ZONE' THEN 'ZONE_COVERAGE' ELSE nfl_plays.man_zone END as play_man_zone, "nfl_plays"."is_qb_dropback" as "play_is_qb_dropback" from "nfl_plays" where "nfl_plays"."season_year" in (2024) and "nfl_plays"."season_type" in ('REG') and nfl_plays.passer_pid = 'test-pid-123' and nfl_plays.is_qb_dropback = 'true' and COALESCE(nfl_plays.coverage_type::text, CASE WHEN nfl_plays.coverage_type_ngs = '2_MAN' THEN 'COVER_2_MAN' ELSE nfl_plays.coverage_type_ngs END) in ('COVER_2', 'COVER_2_MAN') limit 500`
+
+      compare_queries(query.toString(), expected_query)
+    })
+
+    // The filter has to read the SAME fallback the select renders. A filter
+    // written against the raw charted column would answer a 2021 request with
+    // an empty table while the column displayed a populated one.
+    it('should filter coverage through the fallback in a season our charting does not cover', async () => {
+      const { query } = await get_plays_view_results_query({
+        columns: ['play_coverage_type', 'play_coverage_source'],
+        where: [
+          {
+            column_id: 'play_coverage_type',
+            operator: '=',
+            value: 'COVER_2'
+          }
+        ],
+        params: { year: [2021] }
+      })
+
+      const expected_query = `select COALESCE(nfl_plays.coverage_type::text, CASE WHEN nfl_plays.coverage_type_ngs = '2_MAN' THEN 'COVER_2_MAN' ELSE nfl_plays.coverage_type_ngs END) as play_coverage_type, CASE WHEN nfl_plays.coverage_type IS NOT NULL THEN 'charted' WHEN nfl_plays.coverage_type_ngs IS NOT NULL THEN 'next_gen_stats' END as play_coverage_source from "nfl_plays" where "nfl_plays"."season_year" in (2021) and "nfl_plays"."season_type" in ('REG') and COALESCE(nfl_plays.coverage_type::text, CASE WHEN nfl_plays.coverage_type_ngs = '2_MAN' THEN 'COVER_2_MAN' ELSE nfl_plays.coverage_type_ngs END) = 'COVER_2' limit 500`
+
+      compare_queries(query.toString(), expected_query)
+    })
   })
 
   describe('aggregate mode', () => {
