@@ -10,12 +10,62 @@
 // grid of cards becomes a marketing page the moment there are three of them.
 // Hierarchy is carried by spacing and hairline rules, which is what lets a
 // twelve-entry list stay scannable without any of it shouting.
+//
+// THE PAGE IS A FIELD, and every line that says so was already on it. The
+// directory was a stack of horizontal rules with nothing at either end, which
+// is a ruled worksheet; a field is the same rules with SIDELINES, and that is
+// the entire addition — one hairline border around the page, which closes the
+// rules into an object instead of leaving them floating in the measure.
+//
+// What the existing rules then become, without any of them changing weight:
+//
+//   the two 2px ink rules   the goal lines
+//   the hero above the first, and the space below the last   the end zones
+//   the 1px ink band rules  the ten-yard lines
+//   the hairlines between entries   the yard lines between them
+//
+// ONE BORDER, NOT A BOX. The distinction is what it encloses: a card wraps a
+// content group and there are four of those here, which is the grid of cards
+// the paragraph above forbids. This encloses the PAGE, once, at the hairline
+// weight the entries already use — the frame is the sideline, not a container
+// drawn around anything.
+//
+// NO TICK MARKS AND NO YARD NUMBERS. Ticks along the band rules were tried in
+// an earlier pass and the operator removed them, and numerals would be four
+// invented figures on a page whose whole argument is that its numbers are
+// real. The field is legible from the lines alone.
+
+// The gap between a rule's end and the sideline. The yard lines stop short of
+// the sideline rather than running into it: meeting it closes every row into a
+// cell and the page reads as a table, and a table is what the rest of the site
+// is. Stated as a pair because `-$var` does not negate inside a property.
+$field_inset = 20px
+$field_inset_pull = -20px
+$field_inset_phone = 12px
+$field_inset_phone_pull = -12px
 
 .landing-surface
   prose_surface()
 
 .landing
   prose_page_wide()
+
+  // The sideline, the end lines, and the two edges nobody counts, in one
+  // declaration. Hairline weight, because a heavier frame would outrank the
+  // ink band rules inside it and the goal lines are the page's heaviest mark.
+  border 1px solid $prose_rule
+  // Air between the frame and the viewport, so the top line reads as a line
+  // someone drew rather than as the edge of the window. Taken OUT of the page
+  // padding rather than added to it, so nothing below the frame moves.
+  margin 24px auto
+  padding 64px 32px 96px
+
+  // Restated because prose_page()'s own phone block is emitted ABOVE this one
+  // at the same specificity, so the flat padding above would otherwise win at
+  // every width and the page would keep desktop gutters on a phone.
+  @media (max-width 640px)
+    margin 16px auto
+    padding 36px 22px 64px
 
   h2
     font-family $prose_mono
@@ -38,50 +88,32 @@
 // No rule of its own. The first section's band rule is the masthead rule — see
 // prose_section_band().
 //
-// THE MARK HANGS IN THE MARGIN, and the text does not move for it. Putting the
-// mark in a column of its own indents the headline past the page's own left
-// edge, which breaks the one alignment the whole page is built on — the lede,
-// every section label and every entry label share that edge, and the header is
-// the worst place to lose it.
+// THE END ZONE. The hero is what sits between the frame's top line and the
+// first goal line, and the mark sits in it — above the text, at one size, at
+// every width.
 //
-// So it is taken OUT OF FLOW into the space left of the measure. The text block
-// keeps the full width it had before the mark existed, flush left.
+// IT USED TO HANG IN THE MARGIN above 1400px, out of flow in the space left of
+// the measure, so the headline never had to move for it. The sideline ended
+// that: with a border drawn around the page there is no margin to hang in, only
+// inside the field and outside it, and the hanging mark landed OUTSIDE — eight
+// pixels off the new left sideline, since its 32px gap was measured from the
+// text edge and the frame now sits 32px left of that. Read as a collision, not
+// as a placement.
+//
+// The fix is not a bigger gap and a higher breakpoint. That buys a second
+// layout, seen only above ~1460px, whose whole purpose was to protect an
+// alignment the frame now protects for free: the mark is above the text, so the
+// text is flush left in the only layout there is. One placement, no breakpoint,
+// no absolute positioning, and nothing outside the sideline.
 //
 // The mark comes AFTER the text in the DOM, so the copy is what a screen reader
-// reaches first; which side it paints on is a layout question.
+// reaches first; column-reverse is what paints it above.
 .landing__hero
-  position relative
+  display flex
+  flex-direction column-reverse
+  align-items flex-start
+  gap 20px
   padding-bottom 0
-
-  // THE BREAKPOINT IS SET BY THE NAV DRAWER, NOT BY THE PAGE GUTTER, and that
-  // is the whole reason it is this high. The arithmetic that suggests itself —
-  // measure 880px, so the gutter is (viewport - 880) / 2, and the mark needs
-  // 104px plus a 32px gap, therefore 1160px — is answering the wrong question:
-  // the mark is not hanging into empty space, it is hanging into the column the
-  // app's drawer already occupies. Measured, the mark's left edge clears the
-  // drawer's right edge by 56px at 1440 and OVERLAPS it by 24px at 1280, so a
-  // 1160px rule paints the mark on top of the menu. 1400px is the narrowest
-  // width that still clears it.
-  //
-  // Anything narrower puts the mark back in the flow above the header, which is
-  // what the phone layout does and for the same reason: there is no room beside
-  // the text, and the text keeping its own left edge matters more than the mark
-  // keeping its position.
-  @media (min-width 1400px)
-    .route-diagram
-      position absolute
-      // `top 0` and not `top 6px`: the base rule already carries margin-top 6px,
-      // and an absolutely positioned box takes BOTH, which silently doubles the
-      // optical nudge that aligns the mark with the eyebrow.
-      top 0
-      right 100%
-      margin-right 32px
-
-  @media (max-width 1399px)
-    display flex
-    flex-direction column-reverse
-    align-items flex-start
-    gap 28px
 
 .landing__hero-text
   min-width 0
@@ -91,16 +123,17 @@
 //
 // Sized by WIDTH alone, with the viewBox holding the aspect ratio, so the mark
 // cannot be stretched out of the proportions it was matched to.
+//
+// 72px, and no longer 104px at any width. In the margin the mark was free — it
+// occupied space the page was not using — and in the end zone it spends the top
+// of the first screen: at 104px it pushed the eyebrow 293px down a 1280x900
+// laptop. 72px is the size at which it still reads as the icon and the headline
+// is back near the top of the page.
 .route-diagram
   display block
   flex-shrink 0
-  width 104px
+  width 72px
   height auto
-  margin-top 6px
-
-  @media (max-width 640px)
-    width 68px
-    margin-top 0
 
 // A route is a stroked path and must not be filled, or the area between its
 // legs floods; a head is nothing but fill. One ink, two properties.
@@ -166,63 +199,86 @@
 // A rule opens each section and the spacing inside it carries the rest:
 // entries within a section are closer than the sections are to each other, and
 // the two lines of an entry closer still.
+//
+// PULLED OUT INTO THE GUTTER so the rule runs past the text toward the
+// sideline. Every rule on the page takes this pair — band, hairline and the
+// closing goal line — because a page whose structure is rules cannot have some
+// of them one length and the rest another.
 .landing__section
   prose_section_band()
-  margin-top 44px
+  margin-top 32px
+  margin-left $field_inset_pull
+  margin-right $field_inset_pull
+  padding-left $field_inset
+  padding-right $field_inset
 
   &:first-of-type
     prose_section_band(2px)
 
   @media (max-width 640px)
-    margin-top 36px
+    margin-top 26px
+    margin-left $field_inset_phone_pull
+    margin-right $field_inset_phone_pull
+    padding-left $field_inset_phone
+    padding-right $field_inset_phone
 
 // A standing label under the band rule, not a headline. The entries below are
 // set larger than it and that is the newspaper order — a section head names
 // where you are and the items are what you came to read. What separates it from
 // the muted labels elsewhere on the site is the ink and the rule above it,
 // which is enough and does not cost a fourth size in the type scale.
+//
+// ON THE LEFT EDGE, WITH EVERYTHING ELSE. It was right-aligned in the rail's
+// label column, because on the left edge it read as one more item in the list
+// and face and size were losing that argument alone. The sideline settles it:
+// the head is the first thing inside a segment of the field, under that
+// segment's own ten-yard line, and it no longer needs to leave the page's one
+// alignment to say so. What it costs to leave is the whole point — the lede,
+// every entry label and this head now share one edge at every width, and the
+// right-aligned version had a hundred and thirty pixels of dead gutter to the
+// left of every section head.
+//
+// It also drops the phone exception, which existed only because the rail
+// collapses there and a right-aligned head would have gone to the far edge of
+// the screen. There is one alignment now and no width where it changes.
+//
 // QUALIFIED WITH THE ELEMENT, like the eyebrow and the lede. The `.landing h2`
 // block above is (0,1,1) and silently beats a bare class — and it beats it on
 // exactly the four properties this label is trying to change (family, weight,
 // colour, tracking) while leaving font-size to come through, so an unqualified
 // rule here renders at the new SIZE in the old FACE and reads as a change that
 // landed.
-// RIGHT-ALIGNED IN THE RAIL, and that is what separates it from the entry
-// labels below it. The section head and the entry labels sat in the same 208px
-// column on the same left edge, so a head read as one more item in the list
-// rather than as the thing naming them — face and size were carrying that
-// distinction alone and were losing.
-//
-// Aligning it to the gutter instead puts the head against the prose it
-// introduces and leaves the entry labels alone on the left edge, so the column
-// reads as a list with a standing head rather than as a list with an odd first
-// row. The entry labels do not move; this is the one element that leaves the
-// left edge, which is why it can afford to.
-//
-// LEFT AGAIN ON A PHONE, where the rail is `display block`: with no column to
-// sit at the right of, the head would go to the far edge of the screen and the
-// alignment would read as an accident.
 .landing h2.landing__section-title
   prose_section_label()
-  text-align right
-
-  @media (max-width 640px)
-    text-align left
 
 // One line under the heading saying what the group is for, so a reader can
 // skip a whole section without reading its entries. Muted, because it is
 // orientation rather than content. It sits in the rail's prose column so the
 // section head and the entry labels below share one left edge.
+//
+// A STEP SMALLER THAN THE DESCRIPTIONS IT INTRODUCES. At the page's body size
+// it was the largest text in its row and the third largest on the page, so the
+// band rule said a section was beginning and the type said the blurb was the
+// thing to read — colour was carrying that distinction alone against a size
+// that argued the other way. Dropping one step puts the row's weight back on
+// the head and the entries, which is the order the rule already sets.
+//
+// Balanced rather than pretty: these are one or two lines, and pretty only
+// guards the LAST line, which on a two-line blurb leaves a full first line
+// above four words. Balance splits them evenly.
 .landing p.landing__section-blurb
   margin 0
+  font-size 0.875em
+  line-height 1.5
+  text-wrap balance
   color $prose_muted
 
 .landing__section-head
   prose_rail()
-  margin-bottom 26px
+  margin-bottom 18px
 
   @media (max-width 640px)
-    margin-bottom 22px
+    margin-bottom 16px
 
     .landing__section-title
       margin-bottom 0.6em
@@ -237,14 +293,24 @@
 // entry takes none, so the rule never doubles up under the band above it.
 .landing__link
   prose_rail()
-  padding-top 14px
-  margin-top 14px
+  padding-top 11px
+  margin-top 11px
   border-top 1px solid $prose_rule
+  margin-left $field_inset_pull
+  margin-right $field_inset_pull
+  padding-left $field_inset
+  padding-right $field_inset
 
   &:first-child
     padding-top 0
     margin-top 0
     border-top none
+
+  @media (max-width 640px)
+    margin-left $field_inset_phone_pull
+    margin-right $field_inset_phone_pull
+    padding-left $field_inset_phone
+    padding-right $field_inset_phone
 
 // The destination, in the rail. Set in the mono so the twelve of them form a
 // column the eye can run down without reading a word of the prose beside them.
@@ -292,19 +358,33 @@
 
 // No max-width: the rail already holds the measure, and a second limit inside
 // it would only ever be the binding one at some width nobody chose.
+//
+// A STEP UNDER THE PAGE'S BODY SIZE, which is the one size change the field
+// asked for. 17px is a READING size, set for the paragraph it was designed
+// against — and none of these is a paragraph. They are one-line captions in a
+// list of fourteen, and at reading size half of them took two lines each, so
+// the directory ran a screen and a half and the lines that structure it were
+// too far apart to read as a field at all. At 16px most of them fit one line,
+// which halves the page and doubles the rules on it.
 .landing p.landing__link-description
   margin 0
+  font-size 0.9412em
+  line-height 1.55
   color $prose_body
   text-wrap pretty
 
-// The bottom edge. It takes the MASTHEAD's 2px rather than a section band's
-// 1px, so the page is bracketed by the same weight top and bottom — that is
-// what says the directory ended rather than ran out. It carries nothing, which
-// is why it is a bare div: the closing gesture is the rule, and the page's own
-// bottom padding is the space under it.
+// THE SECOND GOAL LINE. It takes the MASTHEAD's 2px rather than a section
+// band's 1px, so the page is bracketed by the same weight top and bottom —
+// that is what says the directory ended rather than ran out, and it is what
+// makes the space between it and the frame below an end zone rather than
+// trailing whitespace. It carries nothing, which is why it is a bare div.
 .landing__end
-  margin-top 44px
+  margin-top 32px
   border-top 2px solid $prose_rule_heavy
+  margin-left $field_inset_pull
+  margin-right $field_inset_pull
 
   @media (max-width 640px)
-    margin-top 36px
+    margin-top 26px
+    margin-left $field_inset_phone_pull
+    margin-right $field_inset_phone_pull

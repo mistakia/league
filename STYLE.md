@@ -7,15 +7,33 @@ typography, rules and alignment — never by boxes, cards, gradients or shadows.
 football, so the page borrows the field's own marks: ruled lines across it, and route arrows for
 the wordmark.
 
+**On the landing page the worksheet is read as a field**, and the reading cost one hairline. The
+rules were already there — a stack of horizontal lines with nothing at either end. Drawing the
+sideline is what closes them into a field:
+
+| On the page                                        | On the field            |
+| -------------------------------------------------- | ----------------------- |
+| The 1px border around `.landing`                   | Sidelines and end lines |
+| The two 2px ink rules                              | The goal lines          |
+| The hero above the first, the space below the last | The end zones           |
+| The 1px ink band rule opening a section            | A ten-yard line         |
+| The hairline between two entries                   | The yard lines between  |
+
+Nothing was added for the metaphor and nothing is decorative. **Ticks along the band rules were
+tried in an earlier pass and removed at the operator's word, and there are no yard numbers** —
+four invented figures on a page whose argument is that its numbers are real.
+
 ## Core Principles
 
 - **Two faces, no third** — IBM Plex Mono for display and labels, Inter for prose and section heads
 - **Rules, not boxes** — three rule weights do the work a card would otherwise do
 - **One ground** — every surface is `$backgroundColor`; paper is for controls, not for pages
 - **One accent** — a single deep red, spent on hover, focus and error and nothing else
-- **One left edge, with one exception** — every headline and every entry label aligns to it. The
-  section head is the exception: it is right-aligned in the rail's label column, so it reads as the
-  thing naming the list rather than as its first row
+- **One left edge, and now no exception** — the lede, every section head and every entry label
+  align to it at every width. The section head was right-aligned in the rail for a while, because
+  on the left edge it read as one more item in the list and face and size were losing that argument
+  alone. The sideline settles it: a head is the first thing inside a segment of the field, under
+  that segment's own ten-yard line
 - **Restraint at rest** — colour and emphasis arrive on interaction, not on load
 
 ## Two Languages, One Ground
@@ -45,7 +63,7 @@ Defined in `app/styles/prose-form.styl`.
 | -------------------- | --------- | -------------------------------------------------- |
 | `$prose_ink`         | `#17181a` | Headlines, labels, link text                       |
 | `$prose_body`        | `#3d4045` | Running prose                                      |
-| `$prose_muted`       | `#6b7075` | Eyebrows, blurbs, notes, placeholders              |
+| `$prose_muted`       | `#696d72` | Eyebrows, blurbs, notes, placeholders              |
 | `$prose_paper`       | `#ffffff` | Cards and form controls — **not** page backgrounds |
 | `$prose_rule`        | `#d7d9dc` | The hairline between two things of the same kind   |
 | `$prose_rule_strong` | `#c9cbcf` | Link underlines and input borders                  |
@@ -53,11 +71,17 @@ Defined in `app/styles/prose-form.styl`.
 | `$prose_accent`      | `#c1121f` | Hover, focus rings, errors. Nothing else           |
 | `$prose_action`      | `#636a73` | Filled submits and the floating menu button        |
 
-Two of these are set against the ground rather than against white. `$prose_rule` was `#e3e4e6`,
+Three of these are set against the ground rather than against white. `$prose_rule` was `#e3e4e6`,
 four steps off `#f0f0f0`, so rules that were present in the DOM were invisible on screen.
+`$prose_muted` was `#6b7075`, which clears AA on white at 5.0:1 and is 4.39:1 on the ground the
+pages actually sit on — under the floor, for text set at normal size in every place it appears.
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
-hole punched in the page. It is 5.47:1 against its white label, and that ratio is the floor —
-`#6b7075` is 5.0:1 and anything lighter fails AA.
+hole punched in the page.
+
+**Check a grey against the surface it lands on, not against white.** Two of the three above were
+first measured on white and shipped failing on `#f0f0f0`. `$prose_action` is the exception that
+proves the rule — it is a background, so the ratio that governs it is 5.47:1 against its own white
+LABEL, and that is the floor on going lighter.
 
 ## Typography
 
@@ -85,11 +109,24 @@ Rules:
 - **A section head is SMALLER than the entries under it.** That is the newspaper order — the head
   names where you are, the items are what you came to read. The band rule above it supplies the
   hierarchy that size would otherwise have to.
+- **So is the blurb beside it**, and it stays a step under the entry descriptions it introduces —
+  `0.875em` against their `0.9412em`. At body size it was the largest type in its own row, so the
+  rule said a section was starting and the type said the orientation line was the thing to read.
+- **A directory entry is not a paragraph.** 17px is a READING size, set against running prose, and
+  the landing descriptions are one-line captions in a list of fourteen — at 17px half of them took
+  two lines, the page ran a screen and a half, and the rules that structure it were too far apart
+  to read as a field. They are `0.9412em` (16px). This is a landing-page exception, not a change to
+  `prose_page()`: the questionnaire and the ballot ARE paragraphs and keep 17px.
 - **Section head and group label are separated by FACE**, not by size. Sizing the parent larger was
   the old answer and it cost a step in the type scale to say what two faces already say.
 - **17px is the floor for any form control.** Below 16px iOS Safari zooms on focus and does not
   zoom back out.
 - `text-wrap: balance` on headlines, `text-wrap: pretty` on prose. Both degrade to `normal`.
+- **The field did not buy a third face, and was asked to.** A condensed grotesque for yard numerals
+  is the obvious candidate and there is nowhere to put it: the field is legible from its lines, the
+  only label near it is the 11px section head, where a display face is unreadable and pointless,
+  and drawing actual numerals means inventing four figures. A third face needs a job the two cannot
+  do; this one had a look it wanted instead.
 
 ## Structure
 
@@ -130,11 +167,18 @@ three type sizes, so a hardcoded nudge is wrong the moment any of the five input
 
 ### The rules — three weights
 
-| Weight            | Where                                                    | Says                                        |
-| ----------------- | -------------------------------------------------------- | ------------------------------------------- |
-| 2px ink           | `prose_section_band(2px)`, and the last rule on the page | Masthead. The header has no rule of its own |
-| 1px ink           | `prose_section_band()`                                   | A new section begins                        |
-| 1px `$prose_rule` | Between entries                                          | Two things of the same kind                 |
+| Weight            | Where                                                    | Says                                                                         |
+| ----------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 2px ink           | `prose_section_band(2px)`, and the last rule on the page | Masthead, and the goal line                                                  |
+| 1px ink           | `prose_section_band()`                                   | A new section begins                                                         |
+| 1px `$prose_rule` | Between entries                                          | Two things of the same kind                                                  |
+| 1px `$prose_rule` | The border around `.landing`                             | The sideline. Hairline, so the frame never outranks the goal lines inside it |
+
+**The yard lines stop 20px short of the sideline** (12px on a phone), via a negative margin and an
+equal padding on every ruled block — band, entry hairline and the closing goal line, so no rule is
+a different length from its neighbours. They stop short rather than meeting it because meeting it
+closes every row into a cell, and a page of cells is a table, which is what the rest of the site
+already is.
 
 **A page is bracketed by the heavy weight top and bottom.** The 2px rule that opens the first
 section closes the last one too, so a reader reaching the end sees the directory finish rather than
@@ -150,13 +194,23 @@ apart with nothing between them, which reads as a mistake rather than as two lev
 redrawn at the icon's own 512×512 coordinates so the two read as one object. Nothing added, nothing
 stylised.
 
-It **hangs in the left margin** above 1400px and sits above the header below it. The text never
-moves for it: the lede shares its left edge with every section label and every entry label, and the
-header is the worst place to lose that alignment.
+It sits **in the top end zone, above the header text, at 72px, at every width** — one placement and
+no breakpoint. The text never moves for it: the lede shares its left edge with every section head
+and every entry label, and putting the mark above rather than beside it is what keeps that free.
 
-That breakpoint is set by the **nav drawer**, not by the page gutter. The obvious arithmetic
-(880px measure, so the gutter is `(viewport - 880) / 2`) answers the wrong question — the mark
-hangs into the column the drawer already occupies, and overlapped it by 24px at 1280px.
+**It used to hang in the left margin above 1400px**, out of flow, at 104px. The sideline ended
+that. With a border drawn around the page there is no margin to hang in — only inside the field and
+outside it — and the hanging mark landed outside, 8px off the new left sideline, because its 32px
+gap was measured from the text edge and the frame sits 32px left of that. A bigger gap and a higher
+breakpoint would have bought a second layout, visible only above ~1460px, whose entire purpose was
+to protect an alignment the frame now protects for free.
+
+Two facts from that era worth keeping, because both would be re-derived wrongly. The old breakpoint
+was set by the **nav drawer**, not the page gutter — the obvious arithmetic (`(viewport - 880) / 2`)
+answers the wrong question, and the mark overlapped the drawer by 24px at 1280px. And the mark is
+72px rather than 104px because in the margin it was free, occupying space the page was not using,
+while in the end zone it spends the top of the first screen: at 104px it pushed the eyebrow 293px
+down a 1280x900 laptop.
 
 Inline SVG, not `@components/icon`: the sprite is a 24×24 UI-glyph surface, and a name with no
 symbol in it renders **nothing** rather than erroring.
@@ -166,6 +220,10 @@ symbol in it renders **nothing** rather than erroring.
 - **120ms** for colour and border. Geometry moves only on `:active` (`translateY(1px)`).
 - **Accent on hover, not at rest.** A link is ink with a `$prose_rule_strong` underline; hover
   repaints both to the accent.
+- **The underline is a real underline, not a bottom border.** A border sits on the bottom of the
+  line box, so one value lands at two depths across a 1.45 label and 1.7 running prose, and it runs
+  through every descender. `text-underline-offset: 0.28em` measures from the baseline instead, and
+  `text-decoration-skip-ink` breaks around the descenders.
 - **Focus is a ring, not a hue swap.** `outline: 2px solid $prose_accent` with a 3px offset — a
   border that only changes colour is invisible to anyone who cannot separate the two. Where the
   element repaints to the accent on hover, the ring is ink instead.
@@ -177,7 +235,10 @@ symbol in it renders **nothing** rather than erroring.
   and neither reading page sells anything. Their next steps are text links. `prose_action_fill()`
   is for real form submits.
 - **No boxes or cards on a prose page.** A directory drawn as a grid of cards becomes a marketing
-  page the moment there are three of them.
+  page the moment there are three of them. The landing frame is not the exception it looks like:
+  what a card wraps is a content GROUP, and there are four of those here. The frame encloses the
+  page, once, at the same hairline the entries use — it is the sideline, not a container drawn
+  around anything.
 - **No shadows for depth.** The one shadow in the language lifts the floating action off the page.
 - **No `@mui/*` import.** `test/app.mui-import-ratchet.spec.mjs` holds per-package budgets that must
   EQUAL the real count in both directions — adding _or removing_ an import fails unless the budget

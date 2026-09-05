@@ -110,10 +110,9 @@ export default function LandingPage() {
               </a>
             </p>
           </div>
-          {/* Beside the text, not under it. AFTER it in the DOM so a screen
-              reader and a phone both reach the copy first — the phone layout
-              puts the mark above with column-reverse rather than by moving it
-              here. */}
+          {/* Above the text, and AFTER it in the DOM so a screen reader reaches
+              the copy first — the layout puts the mark above with
+              column-reverse rather than by moving it here. */}
           <RouteDiagram />
         </header>
 

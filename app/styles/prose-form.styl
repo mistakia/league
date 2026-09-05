@@ -28,7 +28,14 @@ $prose_mono = 'IBM Plex Mono', monospace
 $prose_paper = #ffffff
 $prose_ink = #17181a
 $prose_body = #3d4045
-$prose_muted = #6b7075
+// MEASURED AGAINST THE GROUND, LIKE THE HAIRLINE BELOW, and that is what moved
+// it off #6b7075. That value is 5.0:1 on white and clears AA there, which is
+// the number the palette was checked against — but no prose page is white. On
+// $backgroundColor (#f0f0f0) the same grey is 4.39:1, under the 4.5 floor, and
+// everything wearing it is normal-size text: the eyebrow, the section blurbs,
+// the notes. #696d72 is 4.57:1 on the ground and 5.21:1 on the white of a card,
+// so it clears in both places, and one step of grey is not a visible change.
+$prose_muted = #696d72
 // THE HAIRLINE IS SET AGAINST THE GROUND, NOT AGAINST WHITE. These pages sit on
 // $backgroundColor (#f0f0f0), and #e3e4e6 — the value this was — is four steps
 // off it: the rules separating twelve directory entries were present in the DOM
@@ -95,15 +102,32 @@ prose_page()
   p
     margin 0 0 1em
 
+  // A REAL UNDERLINE RATHER THAN A BOTTOM BORDER, which is the same line drawn
+  // by something that knows where the letters are. A border sits on the bottom
+  // of the LINE BOX, so its distance from the baseline is a function of
+  // line-height — 1.45 on a directory label and 1.7 in running prose put the
+  // same underline at two different depths on pages read one after another —
+  // and it runs straight through every descender it meets.
+  //
+  // text-underline-offset is measured from the baseline instead, so one value
+  // holds at every line-height, and skip-ink breaks the line around the `g` in
+  // `Agent-built views` and the `y` in `Every statistic`.
+  //
+  // 0.28em rather than a pixel value, so the offset scales with the label it
+  // belongs to; at the label sizes here it lands just under the descenders.
   a
     color $prose_ink
     font-weight $prose_bold
     font-family $prose_mono
-    border-bottom 1px solid $prose_rule_strong
-    transition border-color 120ms ease, color 120ms ease
+    text-decoration underline
+    text-decoration-thickness 1px
+    text-decoration-color $prose_rule_strong
+    text-underline-offset 0.28em
+    text-decoration-skip-ink auto
+    transition text-decoration-color 120ms ease, color 120ms ease
     &:hover
       color $prose_accent
-      border-bottom-color $prose_accent
+      text-decoration-color $prose_accent
     &:focus-visible
       outline 2px solid $prose_accent
       outline-offset 3px
