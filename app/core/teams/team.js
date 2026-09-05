@@ -28,7 +28,10 @@ export const Team = new Record({
   playoff_odds_with_loss: null,
   division_odds_with_loss: null,
   bye_odds_with_loss: null,
-  championship_odds_with_loss: null
+  championship_odds_with_loss: null,
+
+  championships: 0,
+  is_defending_champion: false
 })
 
 export function createTeam({
@@ -58,6 +61,9 @@ export function createTeam({
   division_odds_with_loss,
   bye_odds_with_loss,
   championship_odds_with_loss,
+
+  championships,
+  is_defending_champion,
 
   stats,
 
@@ -91,6 +97,9 @@ export function createTeam({
     playoff_odds_with_loss,
     division_odds_with_loss,
     bye_odds_with_loss,
-    championship_odds_with_loss
+    championship_odds_with_loss,
+
+    championships,
+    is_defending_champion
   })
 }

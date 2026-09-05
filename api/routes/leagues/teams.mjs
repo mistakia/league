@@ -132,6 +132,14 @@ const router = express.Router({
  *               items:
  *                 $ref: '#/components/schemas/DraftPick'
  *               description: Unused draft picks owned by this team
+ *             championships:
+ *               type: integer
+ *               description: All-time league championships won by this team
+ *               example: 2
+ *             is_defending_champion:
+ *               type: boolean
+ *               description: Whether this team won the most recently completed league season
+ *               example: false
  *
  *     CreateTeamRequest:
  *       type: object
@@ -289,6 +297,8 @@ const router = express.Router({
  *                       division_odds_with_loss: 0.28
  *                       bye_odds_with_loss: 0.15
  *                       championship_odds_with_loss: 0.08
+ *                       championships: 2
+ *                       is_defending_champion: false
  *                       picks:
  *                         - uid: 1542
  *                           tid: 13
@@ -368,9 +378,32 @@ router.get('/?', async (req, res) => {
         })
       })
 
+    // All-time championship counts from the careerlog, plus the incumbent
+    // holder of the title from the most recently completed league season.
+    //
+    // The champion season is `year - 1`, NOT `last_completed_season_year`: that
+    // constant names the current season once it has results, whose `overall_finish`
+    // is not written until the playoffs conclude, so during the season it matches
+    // nothing while the previous season's winner is exactly who the title belongs to.
+    const [careerlogs, [defending_row]] = await Promise.all([
+      db('league_team_careerlogs')
+        .where({ lid: leagueId })
+        .select('tid', 'championships'),
+      db('league_team_seasonlogs')
+        .where({ lid: leagueId, season_year: current_season.year - 1 })
+        .where('overall_finish', 1)
+        .select('tid')
+        .limit(1)
+    ])
+
     for (const team of teams) {
       const forecast = forecasts.find((f) => f.tid === team.team_id) || {}
+      const careerlog = careerlogs.find((c) => c.tid === team.team_id)
       team.picks = picks.filter((p) => p.tid === team.team_id)
+      team.championships = careerlog ? careerlog.championships : 0
+      team.is_defending_champion = Boolean(
+        defending_row && team.team_id === defending_row.tid
+      )
       team.playoff_odds = forecast.playoff_odds
       team.division_odds = forecast.division_odds
       team.bye_odds = forecast.bye_odds

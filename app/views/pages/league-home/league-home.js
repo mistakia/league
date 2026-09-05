@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { useParams, useNavigate, NavLink } from 'react-router-dom'
+import { useParams, useNavigate, NavLink, Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
@@ -56,13 +56,29 @@ function LeagueOdds({ teams, leagueId }) {
 
   if (!has_odds) return null
 
+  const defending_team = sorted.find((team) => team.is_defending_champion)
+  const team_url = (team_id) => `/leagues/${leagueId}/teams/${team_id}`
+
   return (
     <div className='section'>
       <div className='heading__section-title'>Odds</div>
       <div className='league__gloss'>
-        Simulated from the current rosters and the remaining schedule. The
-        season has not started, so these are projections rather than standings;
-        full records are on the standings page.
+        <div>
+          Simulated from the current rosters and the remaining schedule. The
+          season has not started, so these are projections rather than
+          standings; full records are on the standings page.
+        </div>
+        {defending_team && (
+          <div className='league__defending-champion'>
+            Defending champion:{' '}
+            <Link
+              className='league__team-link'
+              to={team_url(defending_team.team_id)}
+            >
+              {defending_team.name}
+            </Link>
+          </div>
+        )}
       </div>
       <div className='table__container'>
         <div className='table__row table__head'>
@@ -78,7 +94,24 @@ function LeagueOdds({ teams, leagueId }) {
         {sorted.map((team) => (
           <div className='table__row' key={team.team_id}>
             <div className='table__cell text lead-cell sticky__column'>
-              <div className='table__cell-text'>{team.name}</div>
+              <div className='table__cell-text'>
+                <Link className='league__team-link' to={team_url(team.team_id)}>
+                  {team.name}
+                </Link>
+                {team.championships > 0 && (
+                  <span
+                    className='league__champ-record'
+                    title={`${team.championships} ${
+                      team.championships === 1
+                        ? 'championship'
+                        : 'championships'
+                    }`}
+                  >
+                    <Icon name='star-solid' small />
+                    {team.championships}
+                  </span>
+                )}
+              </div>
             </div>
             {is_regular_season && (
               <div className='table__cell metric'>

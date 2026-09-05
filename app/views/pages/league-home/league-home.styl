@@ -10,6 +10,43 @@
   padding 0 16px 12px
   max-width 560px
 
+// A team name links to its page wherever it appears here -- the odds rows and
+// the defending-champion line. Ink at rest, emphasis on hover, like the page's
+// other text links.
+.league__team-link
+  color $textColor
+  text-decoration none
+
+  &:hover
+    color $textColorDark
+    text-decoration underline
+
+// The defending champion, a mono footnote under the gloss -- one quieter line
+// beneath the projection description it does not belong to
+.league__defending-champion
+  margin-top 4px
+  font-family 'IBM Plex Mono', monospace
+  font-size 11px
+  color rgba(0, 0, 0, 0.55)
+
+  .league__team-link
+    color $textColor
+    text-decoration underline
+
+// A team's all-time title count beside its name in the odds table -- one small
+// star and a number, muted so the projections stay the point of the table
+.league__champ-record
+  margin-left 6px
+  font-family 'IBM Plex Mono', monospace
+  font-size 11px
+  color rgba(0, 0, 0, 0.45)
+  white-space nowrap
+
+  .icon
+    width 14px
+    height 14px
+    margin-right 2px
+
 .league__home
   display flex
   flex-direction column
