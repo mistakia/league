@@ -18,7 +18,6 @@ the wordmark.
 | `.landing__yard`                                   | The yard numbers                                |
 | `.landing__section::before`                        | The hash marks, down the right sideline         |
 | `.landing__end`                                    | The end zone: two boundaries and a distribution |
-| `.landing__end-mark`                               | The name painted in it                          |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -88,15 +87,20 @@ pages actually sit on — under the floor, for text set at normal size in every 
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
 
-**One paint for every field marking.** The yard numbers, the hash marks and the end zone's bars are
-all `$prose_rule`, the faintest grey in the palette. The end zone WORDMARK is the one step off it,
-at `$prose_rule_strong`, and it has to be: everything else painted here sits on the bare ground,
-while the wordmark sits on the figure in the same grey, and at the same value the letters and the
-bars dissolve into each other — and paint is the one thing on the page that can afford it. A mark
-at 48px is legible at a contrast a line of prose would vanish at, and every one of these is
-decorative by construction, carrying nothing a reader has to make out. The
+**One paint for every field marking.** The yard numbers, the hash marks and the end zone figure's
+bars are all `$prose_rule`, the faintest grey in the palette, and paint is the one thing on the page
+that can afford it: a mark at 48px is legible at a contrast a line of prose would vanish at, and
+every one of these is decorative by construction, carrying nothing a reader has to make out. The
 yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
 and at that size it read as ink competing with the head across the row from it.
+
+**The rule bends in exactly one place, and it is a layering.** The end zone's curve and interval are
+`$prose_rule_strong`, one step darker than the bars they are drawn over. Everything else painted on
+this page sits on the bare ground; these sit on another marking, and a fit painted at the value of
+the thing it is fitted to is not a second mark at all — it reads as an edge on the bars. One step is
+enough because the two never coincide: the curve rides above the bar tops wherever the sample fell
+short, and that gap is what the difference has to survive. The wordmark that used to sit in this
+band took the same step for the same reason, and the reason outlived it.
 
 **Check a grey against the surface it lands on, not against white.** Two of the three above were
 first measured on white and shipped failing on `#f0f0f0`. `$prose_action` is the exception that
@@ -113,17 +117,16 @@ Loaded in `app/index.html`: **IBM Plex Mono 300/400/500/600**, **Inter 400/500/6
 700, so the sans section label and the yard number are the two places on these pages that can go
 heavier, and both are drawn rather than faked.
 
-| Role         | Mixin                   | Face      | Size                                 | Weight  |
-| ------------ | ----------------------- | --------- | ------------------------------------ | ------- |
-| Body         | `prose_page()`          | Inter     | 17px / 1.7                           | 400     |
-| Page title   | `prose_title()`         | Plex Mono | `clamp(30px, 4.4vw, 40px)`           | 600     |
-| Hero lede    | page-local              | Plex Mono | `clamp(25px, 3.1vw, 34px)`           | 600     |
-| Section head | `prose_section_label()` | **Inter** | 0.6875em, `0.12em` tracking, upper   | **700** |
-| Group label  | `prose_section_title()` | Plex Mono | 0.8125em, `0.14em` tracking, upper   | 600     |
-| Eyebrow      | `prose_eyebrow()`       | Plex Mono | 0.75em, `0.16em` tracking, upper     | 500     |
-| Field label  | `prose_label()`         | Plex Mono | 0.9375em                             | 600     |
-| Yard number  | `.landing__yard`        | **Chivo** | 48px, turned `vertical-rl`           | **900** |
-| End zone     | `.landing__end-mark`    | **Chivo** | `clamp(24px, 5.9vw, 52px)`, `0.22em` | **900** |
+| Role         | Mixin                   | Face      | Size                               | Weight  |
+| ------------ | ----------------------- | --------- | ---------------------------------- | ------- |
+| Body         | `prose_page()`          | Inter     | 17px / 1.7                         | 400     |
+| Page title   | `prose_title()`         | Plex Mono | `clamp(30px, 4.4vw, 40px)`         | 600     |
+| Hero lede    | page-local              | Plex Mono | `clamp(25px, 3.1vw, 34px)`         | 600     |
+| Section head | `prose_section_label()` | **Inter** | 0.6875em, `0.12em` tracking, upper | **700** |
+| Group label  | `prose_section_title()` | Plex Mono | 0.8125em, `0.14em` tracking, upper | 600     |
+| Eyebrow      | `prose_eyebrow()`       | Plex Mono | 0.75em, `0.16em` tracking, upper   | 500     |
+| Field label  | `prose_label()`         | Plex Mono | 0.9375em                           | 600     |
+| Yard number  | `.landing__yard`        | **Chivo** | 48px, turned `vertical-rl`         | **900** |
 
 Rules:
 
@@ -156,7 +159,9 @@ Rules:
   NFL field numeral is heavy at roughly normal width (six feet by four), so **every condensed
   candidate went thin and stringy once turned** — Anton, Saira Condensed, Barlow Condensed, Oswald,
   Big Shoulders, Fjalla One — and Archivo Black went round. Chivo 900 is the one that reads as
-  paint. It pays for itself twice, in the yard numbers and the end zone wordmark.
+  paint. **It now pays for itself in ONE place**, the yard numbers, since the end zone wordmark it
+  also carried is gone. That is a thin margin for a third face and it is worth saying out loud
+  rather than leaving to be discovered: if the yard numbers ever go, the face goes with them.
 
 ## Structure
 
@@ -238,37 +243,54 @@ run out.
 It has two boundaries at the goal line's own weight — the rule above and an end line below — because
 a zone with only one of them is an edge with space under it. Its sidelines are where the paint
 stops: the figure runs to the measure's edges and ends, closing it left and right without two more
-rules. The site's name is painted across it in the paint face (`.landing__end-mark`).
+rules. **The zone sets its own depth** (140px, 84px on a phone) because nothing in flow gives it one
+any more — it used to inherit whatever a line of the wordmark happened to be.
 
-**What is painted in the zone is a distribution** — a row of standing bars whose heights trace a
-log-normal density, right-skewed with a long tail, in `end-zone-figure.js`. This is the one place
-the page says what KIND of site it is rather than what is on it: the directory above names fourteen
-destinations and not one of them can say "we model this", and a histogram says it with no copy and
-no icon, in a band that was empty anyway. **The end line is its axis** — the bars stand on the 2px
-rule that already closes the page, which is the whole argument for putting the figure here and not
-somewhere else.
+**What is painted in the zone is a projected distribution**, in `end-zone-figure.js`: a sample as
+bars, the log-normal density it was drawn from as a curve over them, and the middle eighty per cent
+as a capped interval above that. This is the one place the page says what KIND of site it is rather
+than what is on it — the directory above names fourteen destinations and not one of them can say "we
+model this". **The end line is its axis**; the bars stand on the 2px rule that already closes the
+page, which is the whole argument for putting the figure here and not somewhere else.
 
-Three things it must keep doing, each of them learned by getting it wrong:
+**Three marks, three claims, and that is why there are three.** The bars say there is data, the
+curve says it is fitted rather than plotted, and the interval says the answer is a range rather than
+a number. A histogram alone said only the first, which is what it was before.
 
+What it must keep doing, each learned by getting it wrong on the rendered page:
+
+- **The sample MISSES the curve, and the miss is square-root scaled.** Bar tops sitting exactly on
+  the curve make the curve an outline of the bars — one mark drawn twice. Counting noise goes as the
+  square root of the count, so a tall bin deviates more absolutely and less relatively; flat jitter
+  makes the tail as ragged as the peak, which is what added noise looks like next to sampled noise.
 - **The bars are most of the pitch, not a fifth of it.** Thin bars with air between them read as a
   comb or a waveform. Bins abut; the gap is relief and nothing more.
-- **The tail decays rather than flooring.** A minimum bar height set above where the density lands
-  clamps the last third to one value, and the tail becomes a baseline — the one thing a decaying
-  tail must not look like. The floor exists only so bars that would vanish do not.
+- **The tail decays rather than flooring, and it reaches the far sideline.** A minimum bar height
+  set above where the density lands clamps the last third to one value and the tail becomes a
+  baseline. A distribution too tight for the band leaves its right third empty, which reads as a
+  figure that ran out — the parameters are chosen so the ninetieth percentile lands at four fifths
+  of the width.
 - **The skew is the point.** A symmetrical bell is the same gesture with the interesting half sanded
   off, and the right tail is the shape a week of fantasy scoring actually takes.
+- **Every stroked mark carries `vector-effect="non-scaling-stroke"`.** The svg is stretched with
+  `preserveAspectRatio="none"`, so without it a hairline comes out thicker where it runs flat than
+  where it runs steep.
 
 **A hatch, then a fine lattice, then a row of diamonds were all here first.** What killed the first
 two is worth keeping: at any pitch small enough to tile, a pattern reads as SHADING over the zone
 rather than as a marking on it. Whatever goes here has to be made of shapes big enough to be
 counted.
 
+**The site's name was painted across this band and is not any more.** It was the obvious thing to
+put in an end zone, and it was the second time the page said it — the masthead carries the same
+wordmark four screens up, so it repeated rather than added, it sat over the figure, and removing it
+is what let the figure use the full depth. This is still not a footer: a footer of links here would
+repeat the directory it is closing. The band is `aria-hidden` because it is a shape and not a chart —
+there is no series behind it and nothing to read off it.
+
 This is not the border that was tried and removed. That one enclosed the whole page and read as a
 container; this bounds the one band on the page with no content in it, which is what a boundary is
-for. It is still not a footer — the name is the one the masthead carries at
-the top of the same page, so it repeats a wordmark rather than adding one, and it is `aria-hidden`
-because a screen reader reaching that name twice learns nothing the second time. A footer of links
-there would repeat the directory it is closing.
+for.
 
 The header does **not** carry its own rule. Giving it one puts two parallel rules sixty pixels
 apart with nothing between them, which reads as a mistake rather than as two levels of break.

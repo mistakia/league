@@ -136,28 +136,28 @@ export default function LandingPage() {
           <Section key={section.title} {...section} yard={yard_line(index)} />
         ))}
 
-        {/* THE BOTTOM END ZONE. The rule is the second goal line, and what is
-            painted below it is what a team paints in its own end zone: its
-            name, across the width, in the field's paint face. Until it was
-            there the space under the closing rule was just the page's bottom
-            padding — the reader could see the directory had ended but nothing
-            said the field had.
+        {/* THE BOTTOM END ZONE. The rule above it is the second goal line, and
+            until something was painted below that rule the space was just the
+            page's bottom padding — the reader could see the directory had
+            ended but nothing said the field had.
 
-            THE NAME SITS ON A DISTRIBUTION, which is the one place the page
-            says what kind of site this is rather than what is on it. The
-            directory above names fourteen destinations and none of them can
-            say "we model this"; the figure says it without a sentence, and it
-            costs nothing because the band was empty. See end-zone-figure.js.
+            WHAT IS PAINTED THERE IS A PROJECTED DISTRIBUTION, which is the one
+            place the page says what KIND of site this is rather than what is
+            on it. The directory above names fourteen destinations and not one
+            of them can say "we model this". See end-zone-figure.js.
 
-            Still no footer. This is the site's name, which the masthead
-            already carries at the top of the same page, so it repeats a
-            wordmark rather than adding one — and a footer of links here would
-            repeat the directory it is closing. It is aria-hidden for the same
-            reason: the name is already in the heading above, and a screen
-            reader reaching it twice learns nothing the second time. */}
+            THE SITE'S NAME WAS HERE AND IS NOT ANY MORE. It was the obvious
+            thing to paint in an end zone and it was the second time the page
+            said it — the masthead carries the same wordmark four screens up,
+            so it repeated rather than added, and it sat over the figure and
+            took the band's one clear reading with it. Removing it is what
+            let the figure use the full depth.
+
+            Still no footer: a footer of links here would repeat the directory
+            it is closing. aria-hidden because it is a shape and not a chart —
+            there is no series behind it and nothing to read off it. */}
         <div className='landing__end' aria-hidden='true'>
           <EndZoneFigure />
-          <span className='landing__end-mark'>{site_name}</span>
         </div>
       </div>
     </div>
