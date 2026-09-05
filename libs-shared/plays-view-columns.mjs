@@ -1425,5 +1425,18 @@ export default {
     join: true,
     description:
       'The name of the player who lost the fumble. Resolves on over 95 percent of lost fumbles, but note that the underlying lost-fumble flag is itself over-set in 2025 — it marks more plays than the fumble flag does'
+  },
+  play_targeted_defender: {
+    table: 'nfl_plays',
+    column: 'targeted_defender_gsis',
+    sql_override: true,
+    kind: 'text',
+    group: 'PERSONNEL',
+    header_label: 'COVERED BY',
+    size: 120,
+    aggregate: 'override',
+    join: true,
+    description:
+      'The name of the defender in primary coverage on the target. Charted from the 2023 season onward; 2022 and earlier are empty. Tagged on slightly more plays than have a resolved target, so a small number of cells name a defender on a play whose receiver was never identified'
   }
 }

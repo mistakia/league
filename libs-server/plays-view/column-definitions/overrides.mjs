@@ -19,14 +19,19 @@ const join_nfl_games = ({ query, join_state }) => {
 // One left join per player ROLE, added at most once per query. The role is
 // both the SQL table alias and the join_state key, so a role can never be
 // joined twice and two columns reading the same role share one join.
+//
+// `player_key` is the PLAYER-side column the play's identifier matches. It is
+// `pid` for every role whose play-side column is a pid, and `gsis_player_id`
+// for the one role whose play-side column is a GSIS id instead. Defaulting it
+// keeps the pid roles reading exactly as before.
 const join_player =
-  ({ role, pid_column }) =>
+  ({ role, pid_column, player_key = 'pid' }) =>
   ({ query, join_state }) => {
     if (join_state[role]) return
     query.leftJoin(
       `player as ${role}`,
       `nfl_plays.${pid_column}`,
-      `${role}.pid`
+      `${role}.${player_key}`
     )
     join_state[role] = true
   }
@@ -48,8 +53,14 @@ const CANONICAL_MAN_ZONE = `CASE nfl_plays.man_zone WHEN 'MAN' THEN 'MAN_COVERAG
 // `player_group_by` is set only for the three roles the group-by enum knows
 // about; it is read behind a truthiness check, so the defensive roles leaving
 // it undefined is the correct way to say "not a grouping target".
-const player_name = ({ alias, role, pid_column, player_group_by }) => ({
-  join: join_player({ role, pid_column }),
+const player_name = ({
+  alias,
+  role,
+  pid_column,
+  player_group_by,
+  player_key
+}) => ({
+  join: join_player({ role, pid_column, player_key }),
   main_select: () => [
     db.raw(`${role}.first_name || ' ' || ${role}.last_name as ${alias}`),
     `nfl_plays.${pid_column}`
@@ -140,6 +151,15 @@ export default {
     alias: 'play_fumble_lost_by',
     role: 'fumble_lost_by',
     pid_column: 'fumble_lost_pid'
+  }),
+  // The one role whose play-side identifier is a GSIS id rather than a pid, so
+  // it matches player.gsis_player_id instead of player.pid. Everything else
+  // about it is the same shape as the roles above.
+  play_targeted_defender: player_name({
+    alias: 'play_targeted_defender',
+    role: 'targeted_defender',
+    pid_column: 'targeted_defender_gsis',
+    player_key: 'gsis_player_id'
   }),
 
   play_coverage_type: {
