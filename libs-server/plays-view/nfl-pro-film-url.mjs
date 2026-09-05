@@ -13,10 +13,11 @@ import db from '#db'
 // filter vocabulary and DROPS every key it cannot resolve, rewriting the address
 // bar as it goes. Two of ours were dropped:
 //
-//   - `gameClock` is not a filter the page knows at all. The API honours it; the
-//     page deletes it. It is kept below anyway because it costs nothing and it
-//     is what makes the URL exact for anything that talks to the API directly --
-//     but it pins NOTHING in a browser, and no accuracy claim may rest on it.
+//   - `gameClock` is not in the page's filter vocabulary, so the page deletes
+//     it -- but NOT before using it once. See THE TWO-REQUEST RACE below: the
+//     first request the page issues carries the whole query verbatim, clock
+//     included, and is play-exact. Keep sending it. It is the only reason a
+//     click ever lands on the individual play.
 //   - `gameId` as our ESBID resolved against no option in the page's game list,
 //     so it was dropped too, leaving a filter with no game in it. The playlist
 //     then spanned the whole WEEK, sorted by gameId, and auto-played the first
@@ -35,14 +36,38 @@ import db from '#db'
 // half the query, and it reported a near-perfect score against links that opened
 // the wrong game in every browser. Measure the surface the user actually uses.
 //
-// WHAT THIS LINK CAN AND CANNOT PROMISE, measured 2026-09-05 over ten plays
-// loaded in a real browser: the right GAME, ten times out of ten, against zero
-// out of ten before the shield-UUID fix. The right PLAY, no. With gameClock
-// gone there is no play-level pin left, so the page opens a playlist of the
-// game's plays matching (quarter, playType, yardsToGoType, down) -- one to nine
-// of them in the sample -- and auto-plays the earliest by sequence. The target
-// leads that list only when it is the earliest such play. Say "this play's
-// situation", never "this play", anywhere this column is described.
+// THE TWO-REQUEST RACE, measured 2026-09-05 by intercepting the page's own XHRs
+// in a real browser. The page does NOT sanitise the query before it fetches. Its
+// FilmPlaysPage.checkQuery hands `this.$route.query` straight to
+// /api/secured/videos/filmroom/plays, so on any load it issues two requests:
+//
+//   1. the query VERBATIM, gameClock included -- which the API honours, and
+//      which therefore returns the single target play and mounts its clip; then
+//   2. the same URL MINUS gameClock, after the filter panel reconciles the query
+//      against its own storeKey vocabulary and does a $router.replace, which the
+//      route watcher answers by calling checkQuery a second time.
+//
+// The second response replaces the first. So the clip a user ends up on is
+// decided by a race this code does not control: catch the page early and it is
+// the exact play, catch it late and it is the situation playlist. That race,
+// not a regression on NFL's side, is what makes this link look like it "used to
+// work" -- it did, transiently, and it still does, transiently.
+//
+// WHAT THIS LINK CAN AND CANNOT PROMISE. The right GAME, ten times out of ten in
+// a browser, against zero out of ten before the shield-UUID fix. The right PLAY,
+// only if request 1 wins the race. Once request 2 lands, the page holds a
+// playlist of the game's plays matching (quarter, playType, yardsToGoType, down)
+// -- one to nine of them in the sample -- and auto-plays the earliest by
+// sequence. So the guaranteed floor is the situation, and the play is the
+// unguaranteed upside. Describe the column by its floor.
+//
+// The page has NO per-play route to link to instead. The full Nuxt route table,
+// dumped live, carries /film/plays and /film/plays-debug and nothing with a
+// playId segment. /film/plays-debug does KEEP a playId query key that
+// /film/plays drops, and then ignores it -- selectedPlay stayed on the game's
+// first play either way. Our nfl_plays.play_id IS their playId and
+// nfl_games.shield_game_id IS their fapiGameId, so the identifiers are in hand
+// if a consumer for them ever appears; today there is none.
 //
 // The distinction between "the list contains the target" and "the target is
 // first" is the one that matters: the page plays plays[0], so a target sitting
