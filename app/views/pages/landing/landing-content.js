@@ -25,6 +25,24 @@ export const discord_url = 'https://discord.com/invite/azSX97Qj9Z'
 // the clear and is the only target here that does.
 export const base_url = 'https://base.tint.space'
 
+// THE DECK QUALIFIES THE HEADLINE RATHER THAN RESTATING IT, and that is why it
+// is page copy instead of `site_tagline`. The tagline is a STANDALONE sentence
+// — it is the meta description, the README's opening line and the GitHub repo
+// description, all places where it is read with no headline above it, so it has
+// to name the platform itself: "An open-source platform for managing fantasy
+// football leagues…". Directly under an h1 that already says "an open-source
+// fantasy football platform", that opening clause is the same sentence twice.
+//
+// So the tagline keeps its three jobs untouched and the deck stops being a copy
+// of it. What the headline cannot carry is what the site actually holds, which
+// is what this says: the two halves, leagues and research, in that order.
+//
+// NO COUNTS OR SEASON NUMBERS HERE. test/libs-shared.social-meta-copy.spec.mjs
+// scans the landing copy for a hardcoded season count, since a number typed
+// into a sentence goes stale in September and nothing reports it.
+export const hero_deck =
+  'Dynasty leagues with a real salary cap. NFL projections, betting markets and play-by-play, open to anyone.'
+
 // The hero's two actions. The primary is the strongest thing the platform
 // ships and the one that needs no account; the secondary is the claim the
 // whole page rests on, which is checkable rather than assertable.

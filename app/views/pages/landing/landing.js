@@ -6,11 +6,12 @@ import PageLayout from '@layouts/page'
 
 import RouteDiagram from './route-diagram'
 import {
+  hero_deck,
   landing_sections,
   primary_action,
   secondary_action
 } from './landing-content'
-import { site_name, site_tagline } from '#libs-shared/social-sharing.mjs'
+import { site_name } from '#libs-shared/social-sharing.mjs'
 
 import './landing.styl'
 
@@ -86,12 +87,13 @@ export default function LandingPage() {
             <h1 className='landing__lede'>
               an open-source fantasy football platform.
             </h1>
-            {/* The tagline is the SHARED one, read from the copy module rather
-              than typed here. README.md carries the same sentence and
-              test/libs-shared.social-meta-copy.spec.mjs holds the two
-              together, so the site's own description of itself cannot drift
-              from the one on GitHub. */}
-            <p className='landing__deck'>{site_tagline}</p>
+            {/* NOT `site_tagline`, deliberately. That sentence is written to
+              stand alone — it is the meta description, the README's opening
+              line and the GitHub repo description — so it names the platform
+              in its first clause, which under this h1 is the headline said
+              twice. It keeps all three of those jobs; the deck says what the
+              headline cannot. */}
+            <p className='landing__deck'>{hero_deck}</p>
             {/* Text links, not buttons. A filled button is a conversion
               affordance and this page is not selling anything — the two
               destinations here are the first two entries of the directory
