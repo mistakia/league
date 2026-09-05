@@ -188,6 +188,110 @@ export const classify_drive_seq_coherence = (rows) => {
   }
 }
 
+// The cross-half invariant above is about the NUMBERING. Two other things about a
+// drive can be wrong while the numbering is perfect, and this auditor was blind to
+// both of them despite being the only gate written for the drive family.
+//
+// ORPHANED COUNT -- a row carrying drive_play_count with no drive_sequence. The
+// count describes a drive the row does not belong to, so every consumer keyed on
+// `${esbid}_${drive_sequence}` skips the row while any consumer reading the count
+// off the play reads a number for nothing. It is the residue shape a renumber
+// leaves behind, which is exactly what the numbering check cannot see: the rows it
+// examines are the ones that HAVE a drive_sequence.
+//
+// UNBOUNDED YARDS -- a drive cannot gain or lose more than the length of the field.
+// drive_yards reads within [-99, 99] in every season of the feed's history except
+// one, and the out-of-bound rows are the visible edge of a meaning change rather
+// than a handful of bad values. A bound is the cheapest possible assertion and
+// nothing was making it.
+//
+// Both are counted in ROWS rather than games: they are per-row properties, and a
+// game-level count would hide 800 rows behind a dozen games.
+/**
+ * @typedef {'orphaned_drive_play_count' | 'out_of_bound_drive_yards'} AttributeClass
+ *
+ * @typedef {Record<AttributeClass, number>} AttributeTotals
+ *
+ * @typedef {{ season_year: number } & AttributeTotals} AttributeSeason
+ */
+
+/** @type {AttributeTotals} */
+const KNOWN_DRIVE_ATTRIBUTE_BASELINE = {
+  // 30 rows as of 2026-09-05: 19 in 2013 and 11 in 2021, pre-existing residue with
+  // no owner. The 803 rows in 2025 are NOT baselined -- they belong to
+  // repair-2025-drive-block and this check is red until that repair lands, which
+  // is the point. LOWER THIS as repairs land.
+  orphaned_drive_play_count: 30,
+  // Zero everywhere in 27 seasons except 170 rows in 2025, same repair.
+  out_of_bound_drive_yards: 0
+}
+
+const DRIVE_YARDS_BOUND = 99
+
+/**
+ * Count the two per-row drive-attribute violations, per season so a regime change
+ * in one season is visible rather than averaged into 27 of them.
+ *
+ * @returns {Promise<{ totals: AttributeTotals, by_season: AttributeSeason[] }>}
+ */
+export const find_drive_attribute_violations = async () => {
+  const result = await db.raw(
+    `SELECT season_year,
+            count(*) FILTER (
+              WHERE drive_play_count IS NOT NULL AND drive_sequence IS NULL
+            ) AS orphaned_drive_play_count,
+            count(*) FILTER (
+              WHERE drive_yards > ? OR drive_yards < ?
+            ) AS out_of_bound_drive_yards,
+            count(*) AS rows_scanned
+     FROM nfl_plays
+     WHERE is_deleted IS NOT TRUE
+     GROUP BY season_year
+     ORDER BY season_year`,
+    [DRIVE_YARDS_BOUND, -DRIVE_YARDS_BOUND]
+  )
+
+  // Same oracle as the coherence query: a predicate that stopped matching would
+  // otherwise report zero violations over zero rows and read as clean.
+  /** @type {Array<Record<string, unknown>>} */
+  const raw_rows = result.rows
+  const rows_scanned = raw_rows.reduce(
+    (/** @type {number} */ sum, row) => sum + Number(row.rows_scanned),
+    0
+  )
+  if (!rows_scanned) {
+    throw new Error(
+      'no nfl_plays rows resolved; drive attribute check cannot assert anything'
+    )
+  }
+
+  /** @type {AttributeSeason[]} */
+  const by_season = raw_rows
+    .map((row) => ({
+      season_year: Number(row.season_year),
+      orphaned_drive_play_count: Number(row.orphaned_drive_play_count),
+      out_of_bound_drive_yards: Number(row.out_of_bound_drive_yards)
+    }))
+    .filter(
+      (row) =>
+        row.orphaned_drive_play_count > 0 || row.out_of_bound_drive_yards > 0
+    )
+
+  return {
+    totals: {
+      orphaned_drive_play_count: by_season.reduce(
+        (/** @type {number} */ sum, row) => sum + row.orphaned_drive_play_count,
+        0
+      ),
+      out_of_bound_drive_yards: by_season.reduce(
+        (/** @type {number} */ sum, row) => sum + row.out_of_bound_drive_yards,
+        0
+      )
+    },
+    by_season
+  }
+}
+
 /**
  * Read the distinct (esbid, quarter, drive_sequence) triples from nfl_plays and classify
  * them. One row per drive per quarter -- roughly 200k rows, not 1.5M plays.
@@ -231,6 +335,8 @@ export const find_drive_seq_coherence_violations = async () => {
 const audit_drive_seq_coherence = async () => {
   const { games_checked, violations, violation_counts_by_class } =
     await find_drive_seq_coherence_violations()
+  const { totals: attribute_totals, by_season: attribute_by_season } =
+    await find_drive_attribute_violations()
 
   log(
     `Checked ${games_checked} games: ${violations.length} carry a drive_sequence value spanning both halves`
@@ -241,6 +347,17 @@ const audit_drive_seq_coherence = async () => {
   log(
     `  other: ${violation_counts_by_class.other} (baseline ${KNOWN_VIOLATION_BASELINE.other})`
   )
+  log(
+    `  orphaned drive_play_count rows: ${attribute_totals.orphaned_drive_play_count} (baseline ${KNOWN_DRIVE_ATTRIBUTE_BASELINE.orphaned_drive_play_count})`
+  )
+  log(
+    `  drive_yards outside +/-${DRIVE_YARDS_BOUND}: ${attribute_totals.out_of_bound_drive_yards} (baseline ${KNOWN_DRIVE_ATTRIBUTE_BASELINE.out_of_bound_drive_yards})`
+  )
+  for (const season of attribute_by_season) {
+    log(
+      `    ${season.season_year}: ${season.orphaned_drive_play_count} orphaned, ${season.out_of_bound_drive_yards} out of bound`
+    )
+  }
 
   const regressions = /** @type {[ViolationClass, number][]} */ (
     Object.entries(KNOWN_VIOLATION_BASELINE)
@@ -258,12 +375,25 @@ const audit_drive_seq_coherence = async () => {
         .map((violation) => violation.esbid)
     }))
 
-  if (!regressions.length) {
-    log('No drive_sequence coherence regression against the recorded baseline')
+  const attribute_regressions = /** @type {[AttributeClass, number][]} */ (
+    Object.entries(KNOWN_DRIVE_ATTRIBUTE_BASELINE)
+  )
+    .filter(
+      ([violation_class, baseline]) =>
+        attribute_totals[violation_class] > baseline
+    )
+    .map(([violation_class, baseline]) => ({
+      violation_class,
+      baseline,
+      observed: attribute_totals[violation_class]
+    }))
+
+  if (!regressions.length && !attribute_regressions.length) {
+    log('No drive coherence regression against the recorded baselines')
     return
   }
 
-  const summary = regressions
+  const summary = [...regressions, ...attribute_regressions]
     .map(
       ({ violation_class, baseline, observed }) =>
         `${violation_class} ${observed} > baseline ${baseline}`
@@ -272,7 +402,7 @@ const audit_drive_seq_coherence = async () => {
 
   const emitted = signal_log.error(
     new Error(
-      `drive_sequence cross-half coherence regressed (${summary}). A drive_sequence value spanning both halves makes the esbid+drive_sequence drive key address two drives at once, inflating per-drive rate denominators and corrupting drive_play_count.`
+      `drive coherence regressed (${summary}). A drive_sequence value spanning both halves makes the esbid+drive_sequence drive key address two drives at once; an orphaned drive_play_count describes a drive its own row does not belong to; a drive_yards value outside the field length cannot mean what the column means.`
     ),
     {
       severity: 'high',
@@ -280,7 +410,11 @@ const audit_drive_seq_coherence = async () => {
         games_checked,
         violation_counts_by_class,
         baseline: KNOWN_VIOLATION_BASELINE,
-        regressions
+        regressions,
+        attribute_totals,
+        attribute_by_season,
+        attribute_baseline: KNOWN_DRIVE_ATTRIBUTE_BASELINE,
+        attribute_regressions
       }
     }
   )
@@ -288,7 +422,7 @@ const audit_drive_seq_coherence = async () => {
     await emitted.promise
   }
 
-  throw new Error(`drive_sequence coherence regressed: ${summary}`)
+  throw new Error(`drive coherence regressed: ${summary}`)
 }
 
 const main = async () => {
