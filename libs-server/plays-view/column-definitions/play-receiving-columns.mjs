@@ -17,7 +17,7 @@ export default {
       'nfl_plays.target_pid'
     ],
     main_where: () => "target.first_name || ' ' || target.last_name",
-    aggregate_select: ({ params } = {}) =>
+    aggregate_select: () =>
       db.raw(
         "MAX(target.first_name || ' ' || target.last_name) as play_target"
       ),

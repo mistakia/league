@@ -52,6 +52,14 @@ export const default_plays_views = {
           operator: '=',
           value: String(current_season.last_completed_season_year)
         },
+        // Naming a year gets exactly those seasons and no implicit season
+        // type, so a view scoping its own years must say REG or it mixes
+        // preseason and postseason into a regular-season table.
+        {
+          column_id: 'play_seas_type',
+          operator: '=',
+          value: 'REG'
+        },
         {
           column_id: 'play_type',
           operator: '!=',
@@ -109,6 +117,14 @@ export const default_plays_views = {
           operator: '=',
           value: String(current_season.last_completed_season_year)
         },
+        // Naming a year gets exactly those seasons and no implicit season
+        // type, so a view scoping its own years must say REG or it mixes
+        // preseason and postseason into a regular-season table.
+        {
+          column_id: 'play_seas_type',
+          operator: '=',
+          value: 'REG'
+        },
         {
           column_id: 'play_type',
           operator: '=',
@@ -165,6 +181,14 @@ export const default_plays_views = {
           column_id: 'play_year',
           operator: '=',
           value: String(current_season.last_completed_season_year)
+        },
+        // Naming a year gets exactly those seasons and no implicit season
+        // type, so a view scoping its own years must say REG or it mixes
+        // preseason and postseason into a regular-season table.
+        {
+          column_id: 'play_seas_type',
+          operator: '=',
+          value: 'REG'
         },
         {
           column_id: 'play_type',

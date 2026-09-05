@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { plays_view_fields_index, nfl_plays_column_params } from '#libs-shared'
+import { plays_view_fields_index } from '#libs-shared'
 import PlayFilmLink from '@components/play-film-link'
 import TeamCodeColumn from '@components/team-code-column'
 
@@ -184,7 +184,6 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YEAR',
     size: 60,
-    column_params: nfl_plays_column_params,
     // A calendar ordinal, not a magnitude.
     disable_percentiles: true
   }),
@@ -199,7 +198,6 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'WK',
     size: 40,
-    column_params: nfl_plays_column_params,
     // A calendar ordinal, not a magnitude.
     disable_percentiles: true
   }),

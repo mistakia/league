@@ -21,7 +21,7 @@ export default {
       'nfl_plays.ball_carrier_pid'
     ],
     main_where: () => "rusher.first_name || ' ' || rusher.last_name",
-    aggregate_select: ({ params } = {}) =>
+    aggregate_select: () =>
       db.raw(
         "MAX(rusher.first_name || ' ' || rusher.last_name) as play_rusher"
       ),

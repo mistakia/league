@@ -116,16 +116,8 @@ function* handle_plays_view_request({
 }
 
 function* handle_selected_player_plays_request({ payload }) {
-  const {
-    columns,
-    prefix_columns,
-    where,
-    sort,
-    params,
-    group_by,
-    offset,
-    limit
-  } = payload
+  const { columns, prefix_columns, where, sort, group_by, offset, limit } =
+    payload
 
   if (!columns || !columns.length) {
     return
@@ -140,7 +132,6 @@ function* handle_selected_player_plays_request({ payload }) {
     prefix_columns,
     where,
     sort,
-    params,
     group_by,
     offset,
     limit,

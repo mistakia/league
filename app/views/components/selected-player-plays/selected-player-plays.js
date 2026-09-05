@@ -86,6 +86,14 @@ const build_default_table_state = ({ pos, year }) => ({
       column_id: 'play_year',
       operator: '=',
       value: String(year)
+    },
+    // Naming a year gets exactly those seasons and no implicit season type,
+    // so the drawer says REG or it shows preseason snaps alongside the
+    // regular-season ones with nothing to tell them apart.
+    {
+      column_id: 'play_seas_type',
+      operator: '=',
+      value: 'REG'
     }
   ],
   sort: [
