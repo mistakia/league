@@ -146,13 +146,14 @@ const process_selection = (
 
   let formatted_selection_pid = player_row?.pid || draftkings_team || null
 
-  // Handle game spread market special case
+  // Handle game spread market special case. RAW DraftKings markets carry no
+  // top-level categoryId, so the re-run below always saw undefined and recorded
+  // the null category into the mapper's collector on every selection -- the
+  // recurring `null` offer-category id on signals 128409/128469/128477. The
+  // caller already derived market_type from the real offer category, so compare
+  // that instead of re-deriving from an absent field.
   const is_game_spread_market =
-    draftkings.get_market_type({
-      offerCategoryId: market.categoryId,
-      subcategoryId: market.subcategoryId,
-      betOfferTypeId: market.marketType?.betOfferTypeId
-    }) === bookmaker_constants.team_game_market_types.GAME_SPREAD
+    market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD
 
   if (is_game_spread_market && selection.label) {
     try {
