@@ -3,7 +3,7 @@
 # Pre-flight gate for `yarn deploy:all`. Refuses to start a deploy from a tree
 # whose contents would not match what production ends up running.
 #
-# Three failure modes, all of them observed in this repo rather than imagined:
+# The failure modes below were all observed in this repo rather than imagined:
 #
 #   1. Unpushed commits. Every recipient host deploys by `git pull` from
 #      origin/master, so a local commit that is not pushed deploys the PRIOR
@@ -22,6 +22,13 @@
 #      origin. private is a NESTED submodule that user-base's sync-all does not
 #      recurse into, so its commits are pushed by hand and are the easiest thing
 #      in the deploy to forget.
+#
+#   4. A deploy nobody sized. `deploy:all` ships ALL of origin/master, not the
+#      change you have in mind, and this tree is shared -- so the range usually
+#      holds other sessions' work and every commit in it restarts production
+#      together. On 2026-09-04 one data-view fix carried six unrelated commits,
+#      seven of them a sibling's auction work awaiting an operator window, and
+#      dropped the live auction's sockets outside it.
 #
 # Being BEHIND origin/master is refused for the same reason as (1) inverted: the
 # hosts would pull code newer than the tree `yarn build` bundled, so the served
@@ -139,15 +146,15 @@ fi
 #
 # The oracle is pm2's exit status and a non-empty jlist, not the grep. The nvm
 # incantation is the same one the `load:main` deploy script uses.
+# The API host is fleet topology, not a fact about league, and this repository
+# is public -- so it is configuration with no default. Resolved once here, ahead
+# of both gates that need it, so a missing config fails HERE naming the file
+# rather than as an `ssh ''` whose error names nothing.
+main_host=$(node scripts/league-topology-value.mjs deploy.main_host) || exit 1
+
 if [ -n "${SKIP_REDIS_ENV_GATE:-}" ]; then
   echo "preflight-deploy: skipping the pm2 LEAGUE_REDIS_HOST check (SKIP_REDIS_ENV_GATE set)"
 else
-  # The API host is fleet topology, not a fact about league, and this
-  # repository is public -- so it is configuration with no default. Resolved
-  # before the probe so a missing config fails HERE, naming the file, rather
-  # than as an `ssh ''` whose error names nothing.
-  main_host=$(node scripts/league-topology-value.mjs deploy.main_host) || exit 1
-
   redis_env_state=$(ssh -o BatchMode=yes -o ConnectTimeout=10 "$main_host" '
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
@@ -189,6 +196,71 @@ else
       "deploy-window operation -- not something to run under an active auction."
     ;;
   esac
+fi
+
+# (5) what this deploy actually carries
+#
+# `deploy:all` ships ALL of origin/master, never "your change". This tree is
+# shared by concurrent sessions, so the range routinely contains other people's
+# work, and every commit in it goes to production together.
+#
+# The gate exists because that went wrong on 2026-09-04: a session deployed to
+# ship one data-view fix and carried six unrelated commits with it, seven of
+# which belonged to a sibling holding the free agency auction and were waiting
+# on an operator-chosen window. Nothing in the deploy path mentioned them. Both
+# hosts restarted, and the auction's sockets dropped outside the window.
+#
+# Authorship cannot answer "is this mine" here -- every session commits as the
+# same git user -- so the gate does not try to guess. It prints the range and
+# makes you say the number back, which is the step that was missing. A count you
+# have to read off this list is not a checkbox you can leave ticked in a shell
+# profile, which is why it is the count rather than a bare =1.
+deployed_sha=$(ssh -o BatchMode=yes -o ConnectTimeout=10 "$main_host" \
+  'cd /root/league && git rev-parse HEAD' 2>/dev/null) || deployed_sha=""
+
+if [ -z "$deployed_sha" ]; then
+  fail \
+    "could not read the currently deployed commit from the API host, so this" \
+    "gate cannot show you what the deploy would carry. It refuses rather than" \
+    "reporting a range it did not obtain."
+fi
+
+if ! git cat-file -e "${deployed_sha}^{commit}" 2>/dev/null; then
+  fail \
+    "the API host is on commit $deployed_sha, which does not exist in this" \
+    "repository. Fetch, or check you are pointed at the host you think." \
+    "Either way the deploy range cannot be computed and is not assumed empty."
+fi
+
+carried=$(git rev-list --count "$deployed_sha"..HEAD)
+
+if [ "$carried" = "0" ]; then
+  echo "preflight-deploy: production is already on $(git rev-parse --short HEAD); this deploy would carry no new commits."
+else
+  echo ""
+  echo "This deploy carries $carried commit(s) that are not on production:"
+  echo ""
+  git log --format='  %h  %s' "$deployed_sha"..HEAD
+  echo ""
+  echo "  A deploy restarts the API on both hosts and DROPS EVERY LIVE WEBSOCKET,"
+  echo "  including an in-progress free agency auction. If any commit above"
+  echo "  belongs to another session, ask its owner before shipping it."
+  echo ""
+
+  if [ "${DEPLOY_ACK_RANGE:-}" != "$carried" ]; then
+    fail \
+      "this deploy carries $carried commit(s), listed above, and they have not" \
+      "been acknowledged." \
+      "" \
+      "Read the list. Confirm every commit in it is finished and cleared by" \
+      "whoever owns it, then re-run with the count:" \
+      "" \
+      "  DEPLOY_ACK_RANGE=$carried yarn deploy:all" \
+      "" \
+      "The number has to match, so it cannot be set once and forgotten."
+  fi
+
+  echo "preflight-deploy: deploy range of $carried commit(s) acknowledged."
 fi
 
 echo "preflight-deploy: clean tree, HEAD == origin/master ($(git rev-parse --short HEAD)), private pushed, pm2 redis env present"
