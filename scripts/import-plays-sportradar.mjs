@@ -473,11 +473,20 @@ const map_statistics = async ({
   return results.reduce((acc, result) => Object.assign(acc, result), {})
 }
 
-const map_sportradar_play_to_nfl_play = async ({
+/**
+ * Build the `update` object handed to `update_play` for one Sportradar play.
+ *
+ * `resolve_player` is injectable so the field-authority enumeration
+ * (`scripts/audit-sportradar-field-authority.mjs`) can execute this function
+ * over a synthetic play without a player cache or a database. The importer
+ * itself always takes the default.
+ */
+export const map_sportradar_play_to_nfl_play = async ({
   sportradar_play: play,
   game_context,
   drive_context,
-  team_mappings_cache
+  team_mappings_cache,
+  resolve_player: resolve_player_override = null
 }) => {
   const mapped = map_basic_play_data({
     sportradar_play: play,
@@ -496,7 +505,7 @@ const map_sportradar_play_to_nfl_play = async ({
     map_drive_data({ drive_context })
   )
 
-  const resolve_player = resolve_player_id
+  const resolve_player = resolve_player_override || resolve_player_id
   const get_team_abbrev = (params) =>
     get_team_abbreviation({ ...params, team_mappings_cache })
 
