@@ -285,6 +285,17 @@ h3` won on colour, tracking and line-height while letting `font-size` and `text-
   renders as a stepper segment. **Put a new control BESIDE the group, not inside it**; the row
   around it already carries the gap. `player-context-menu.js` states the same rule at its own call
   site.
+- **Two font sizes centred on each other do not share a baseline.** `align-items: center` aligns
+  BOXES, so a smaller neighbour — a `$` before an amount, a unit after one, a caption beside a value
+  — sits high by half the difference in the two ascents. That is around 1px at the sizes this app
+  uses: invisible in the source, invisible in a computed-style dump because every value is exactly
+  what was asked for, and plain in a screenshot as a glyph floating off the text. Nudging the small
+  one down is the wrong repair — the offset is a function of two font sizes and the line box they
+  share, so it is wrong again when any of the three moves, which is the same argument the rail's
+  `align-items: baseline` note makes. Declare ONE `font-size` and ONE `line-height` on the parent
+  and let both children inherit; a prefix recedes on weight and colour, which cost no geometry. The
+  same applies to a `::placeholder` sized differently from the value it becomes: the text then
+  changes size and position on the first keystroke.
 
 ## Verifying a Style Change
 
@@ -302,6 +313,15 @@ expanded from one that silently did not.
    clipping something on purpose.
 5. **A container's overflow cannot see a child that truncates**, and a check that measures only the
    element you added cannot see what your change did to the layout around it.
+6. **When the state you changed is unreachable in a browser, build the element a page of its own.**
+   Some surfaces need a state a dev server cannot be walked into — an auction control that renders
+   only while your team is on the clock in election mode, an error banner behind a failing import.
+   Skipping the screenshot there is how a 1px defect ships. A static HTML file loading
+   `app/styles/normalize.css`, the font links from `app/index.html`, and the component's compiled
+   `.styl` reproduces the box faithfully, because everything that positions it is CSS plus inherited
+   font metrics; drive it with `playwright-core` against the installed Chrome (no browser download)
+   and screenshot at `deviceScaleFactor: 6`, where a sub-pixel misalignment is plainly visible. Say
+   which half you checked: this proves the CSS, not the component's props or its place in the bar.
 
 `yarn dev:live` per `user:guideline/software/develop-league.md`, and note a sibling session may
 already have a dev server up — check before starting your own.
