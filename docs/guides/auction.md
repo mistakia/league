@@ -81,9 +81,11 @@ A claim therefore carries `commitments`, one `{ amount, at }` per placed bid plu
 
 **Score this at the level of the function that owns it.** `test/auction.resolver.spec.mjs` hands the resolver commitments directly, so it controls the ranking rule and says nothing about which commitments the builder emits — the equal-bid defect is invisible to it, and a fixture that injects a builder's output cannot control that builder. `test/auction.claim-commitments.spec.mjs` drives `build_auction_claims` into the resolver for exactly that reason.
 
-## An election discharges, and so does a claim no election could improve
+## An election discharges, and so does a claim no election could improve, and so does a cap the price has passed
 
-Completeness is the only thing that settles a player in election mode. `get_outstanding_election_team_ids` in `libs-server/auction-settlement.mjs` is the whole rule, and it discharges an eligible team on exactly two grounds: a live `auction_elections` row, or a placed bid that already reaches that team's `available_cap`.
+Completeness is the only thing that settles a player in election mode. `get_outstanding_election_team_ids` in `libs-server/auction-settlement.mjs` is the whole rule, and it discharges an eligible team on exactly three grounds: a live `auction_elections` row, a placed bid that already reaches that team's `available_cap`, or an `available_cap` the claims on record have already priced past.
+
+**The third is opt-in and the other two are not**, because only the third reads anything sealed. It fires only when the caller passes `ranked_contenders`, and the section below it is the whole reason that parameter exists.
 
 **A bid does not discharge, and neither does a nomination.** This is the distinction the original conflated — it seeded the outstanding set with the nominating team and every team holding a bid, so any bid discharged its bidder permanently, with no argument recorded anywhere for why.
 
@@ -93,14 +95,32 @@ Completeness is the only thing that settles a player in election mode. `get_outs
 
 Two things about its reach. Because bids are non-decreasing (the socket refuses one at or below the current price, and an engine bid is floored at it) and eligibility already requires `available_cap >= current_price`, the surviving reachable case is the one where **bid, cap and price are all equal** — so in practice this discharges a tapped-out leader. The `>` half of the `>=` is unreachable through that gate and is written for the general statement rather than for a case you can construct. And **the guarantee is exactly "cannot improve its own claim"** — it used to be narrower. A later election at or above an equal bid pushed the claim's single `amount_set_at` forward, so a discharge quietly returned the team its earlier bid instant. Claims now carry every commitment and the tiebreak ranks on the earliest one covering the amount, so an election that cannot raise the claim cannot move the tiebreak either.
 
-**It reads only placed bids and roster-derived caps.** Both are already public, so the outstanding set stays broadcastable exactly as it is. That is the property separating this from gating on the implied clearing price, which would leak sealed maxima and is deliberately not shipped here.
+**It reads only placed bids and roster-derived caps.** Both are already public, so the set it produces stays broadcastable exactly as it is. That is what separates the first two grounds from the third.
+
+## The third ground: the set the auction WAITS on is not the set it DISPLAYS
+
+Eligibility is tested at `current_price`, the last PLACED bid, while `resolve_auction_player` prices at `runner_up.effective_maximum + 1`. Those diverge hard, and the divergence is the pace defect. Measured on the live board: Kyler Murray's last placed bid was $2 and he settled at $13; Jared Goff's was $2 and he settled at $25; Jordan Love's was $1 and he settled at $16. Every team with a cap in between was held outstanding while provably unable to win — about 361 minutes across five players, spent open after the clearing price had already been determined, in a mode with no clock. Settlement itself costs about 60ms, so there is no code latency to recover here; the only lever is which teams the set waits on.
+
+**The bound is the runner-up's ceiling, not the price.** A team's best possible claim is its whole `available_cap`, since electing at or above the cap clamps to it. Adding a claim at `C` to a field whose two highest claims are `first` and `second` changes nothing when `C <= second`: the top two values are unchanged, so the winner is unchanged and the price, `min(first, second + 1)`, is unchanged with it.
+
+**`C < first` is the other half and it is not redundant.** At `first === second` the player prices at `first`, so a rule written against the PRICE would discharge a team that can match the lead and take the player on the tiebreak. Fewer than two contenders means no bound at all — the price is the opening bid and any eligible claim raises it — and not discharging is the conservative direction.
+
+**The gating set and the broadcast set are computed separately, and collapsing them is the defect.** `settle_auction_player_if_complete` runs the rule twice: once with `ranked_contenders` to decide whether to settle, once without to produce the set it hands back. Only the second is ever displayed, and the two BROADCAST callers — `get_auction_settlement_status` and the socket's `_get_outstanding_election_tids` — pass no `ranked_contenders` at all.
+
+Gating the DISPLAYED set on the implied price would leak sealed maxima: teams would drop off the list in cap order as the bound rose, caps are roster-derived and effectively public, so watching who disappears bounds the runner-up's ceiling before the sale. In a sealed second-price league whose commissioner competes, that is material. **Decoupling is leak-free for a reason worth stating**: second-price already publishes the runner-up's ceiling in the settled price itself, so settling sooner reveals nothing the sale does not.
+
+The cost is a product judgement rather than a correctness one. The displayed set stops meaning "who must act" and names teams that need not act, which a manager can read as still being live on the player.
+
+**Safety does not rest on monotonicity, and an early draft of this wrongly claimed it did.** The bound is NOT monotone — `withdraw_auction_election` lowers it and puts discharged teams back. What makes it safe instead is that every write able to reverse a discharge is itself a settlement trigger under the same `pg_advisory_xact_lock`: withdraw settles in its own transaction, and a trade or an override release reaches settlement through `reevaluate_auction_after_roster_change`. The set emptying and the player settling are one serialized event, so re-entry is only ever observed while the player is still open, where it is correct rather than hazardous.
+
+**Score this on three mutations, because the obvious two do not cover it.** Disabling the gate reddens the settling case; dropping the `< first` term reddens the tie case; and wiring the sealed rule into the BROADCAST set reddens nothing at all unless a board carries TWO holdouts, one priced out and one not — where the player still does not settle and the returned set must name both. `test/auction.implied-price-gating.spec.mjs` carries that third case for exactly this reason, and the file was green under the leak mutation until it existed.
 
 The two are different kinds of statement, and the difference is the price:
 
 - **An election is price-independent.** A maximum is a standing position at every price, which is exactly what completeness has to claim — that the field is known at whatever price the player settles at. That is also why a standing maximum _below_ the current price still discharges: the team's position at this price is known, and it is "out". Without that a team holds a nomination open forever by never revising a stale maximum.
 - **A bid is price-specific.** Bidding $11 says a team was in at $11 and says nothing about $12. When a bid discharged, a team that bid and was then outbid settled away without ever being asked about the higher price — and election mode has no clock, so completeness was the only thing that could have asked.
 
-**The settle call HANDS BACK the outstanding set, and callers must not recompute it.** `settle_auction_player_if_complete` returns `{ settlement, outstanding }`, because computing that set is how it decides whether to settle. Every caller used to discard it and make `get_auction_settlement_status` or the socket's own helper sweep every roster again on the same request — the common path, since most elections do not complete a set. Pass it to `broadcast_auction_settlement_status`; omitting it still works and still recomputes, which is exactly why a spec has to count the QUERIES rather than check the broadcast. That measurement has its own trap: the route calls `res.send` and only then awaits the broadcast, so a counter wrapped around the request stops before the second sweep runs and reports success however the route is wired.
+**The settle call HANDS BACK the outstanding set, and callers must not recompute it.** `settle_auction_player_if_complete` returns `{ settlement, outstanding }`, because computing that set is how it decides whether to settle — and what it returns is the BROADCAST set, never the set it gated on. The gating set is a subset, so a call that does not settle always hands back a non-empty list and no client is shown an empty set on a player still open. Every caller used to discard it and make `get_auction_settlement_status` or the socket's own helper sweep every roster again on the same request — the common path, since most elections do not complete a set. Pass it to `broadcast_auction_settlement_status`; omitting it still works and still recomputes, which is exactly why a spec has to count the QUERIES rather than check the broadcast. That measurement has its own trap: the route calls `res.send` and only then awaits the broadcast, so a counter wrapped around the request stops before the second sweep runs and reports success however the route is wired.
 
 **And only compute the capacities something reads.** The two consumers skip most of the board between them — an elected team is discharged before its capacity is checked, and a decline is filtered out before the resolver touches the roster map. Derive that scope from the CLAIM SET, never from the elections carrying a null maximum: a decliner holding a placed bid and the nominating team are both raised back to real claims by `build_auction_claims`, and dropping their capacity makes the resolver disqualify them as `ROSTER_FULL`.
 
@@ -110,7 +130,11 @@ The two are different kinds of statement, and the difference is the price:
 
 ## Eligibility must stay monotone
 
-A team that leaves an eligible set never re-enters it, and completeness once reached stays reached. Second-price settlement rests on that. Anything that fills an active roster spot without passing through settlement breaks it, so:
+A team that leaves an eligible set never re-enters it, and completeness once reached stays reached. Second-price settlement rests on that.
+
+This is a statement about ELIGIBILITY, not about the outstanding set as a whole — the third discharge above turns on a bound a withdrawal can lower, and its safety argument is a serialization one rather than a monotonicity one. Do not read the two as the same claim.
+
+Anything that fills an active roster spot without passing through settlement breaks eligibility monotonicity, so:
 
 - A trade and a commissioner-override release call `reevaluate_auction_after_roster_change`.
 - Free agency waivers, poaching waivers and poaching CLAIMS all hold until the auction completes. Practice-squad waivers deliberately do not — a practice add consumes no active spot and no cap.

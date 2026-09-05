@@ -70,7 +70,7 @@ const earliest_commitment_at = ({ commitments = [], amount }) => {
  *   if nobody outbids, and must not be refunded down to $1 because its rivals
  *   folded. In election mode the nomination is usually the only bid and the two
  *   readings coincide.
- * @returns {{ winner_tid: number|null, price: number, outcomes: Map<number, {outcome: string}> }}
+ * @returns {{ winner_tid: number|null, price: number, outcomes: Map<number, {outcome: string}>, ranked_contenders: Array<{tid: number, effective_maximum: number}> }}
  */
 export const resolve_auction_player = ({
   claims = [],
@@ -136,7 +136,12 @@ export const resolve_auction_player = ({
   }
 
   if (!contenders.length) {
-    return { winner_tid: null, price: opening_bid, outcomes }
+    return {
+      winner_tid: null,
+      price: opening_bid,
+      outcomes,
+      ranked_contenders: []
+    }
   }
 
   // Rank: highest effective maximum first, then the nominating team, then the
@@ -186,7 +191,26 @@ export const resolve_auction_player = ({
     })
   }
 
-  return { winner_tid: winner.tid, price, outcomes }
+  // RANKED CONTENDERS COME BACK WITH THE RESULT, because the completeness rule
+  // needs the runner-up's ceiling and nothing else here can supply it. A claim's
+  // effective maximum is `min(stated, available_cap)` and the caps arrive at this
+  // function, so `get_outstanding_election_team_ids` cannot rank anything for
+  // itself -- and re-ranking upstream would be a second copy of the clamp, the
+  // disqualifications and the ordering.
+  //
+  // Only `tid` and `effective_maximum` are exposed. The consumer asks one
+  // question of this list -- what would a further claim have to beat -- and the
+  // rest of a contender is its identity, its commitments and its election, none
+  // of which that question needs.
+  return {
+    winner_tid: winner.tid,
+    price,
+    outcomes,
+    ranked_contenders: ranked.map(({ tid, effective_maximum }) => ({
+      tid,
+      effective_maximum
+    }))
+  }
 }
 
 export default resolve_auction_player

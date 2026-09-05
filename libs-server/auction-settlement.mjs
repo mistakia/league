@@ -164,16 +164,28 @@ export const get_auction_team_capacities = async ({
 /**
  * The teams the auction is still waiting on for the open player.
  *
- * PURE. Eligibility is monotone -- rosters are fixed for the whole period, so
+ * PURE. ELIGIBILITY is monotone -- rosters are fixed for the whole period, so
  * open spots only fall, spent budget only rises and position counts only climb
- * -- which means a team that leaves this set can never re-enter it except by
- * trade, and completeness once reached stays reached.
+ * -- which means a team that leaves the set on eligibility can never re-enter it
+ * except by trade, and completeness once reached stays reached.
  *
- * AN ELECTION DISCHARGES, AND SO DOES A CLAIM THAT NO ELECTION COULD IMPROVE.
- * Those are the only two, and the second is a strict refinement of the first
- * rather than a softening of it -- it fires exactly where electing is provably
- * incapable of changing the team's own claim. The argument for it is at its own
- * check below.
+ * THE SET AS A WHOLE IS NOT MONOTONE, and nothing here needs it to be. The third
+ * discharge below turns on the runner-up's ceiling, which a withdrawal lowers,
+ * so a team can leave this set and come back. That is safe for a reason that has
+ * nothing to do with monotonicity and is stated at that check: every write able
+ * to reverse a discharge settles under the same lock in the same transaction.
+ *
+ * AN ELECTION DISCHARGES, AND SO DOES A CLAIM NO ELECTION COULD IMPROVE, AND SO
+ * DOES A CAP THE PRICE ON RECORD HAS ALREADY PASSED. Those are the only three,
+ * and the second and third are strict refinements of the first rather than
+ * softenings of it -- each fires exactly where electing is provably incapable of
+ * changing the winner or the price. The argument for each is at its own check
+ * below.
+ *
+ * THE THIRD IS OPT-IN AND THE OTHER TWO ARE NOT, because only the third reads
+ * anything sealed. Passing `ranked_contenders` turns it on; the settlement path
+ * does and the two broadcast paths do not, so what the auction WAITS on and what
+ * it DISPLAYS are deliberately different sets. See the check itself.
  *
  * A BID ALONE DOES NOT DISCHARGE, and neither does a nomination. That is the
  * term the original had no argument for: it seeded the set with the nominating
@@ -203,7 +215,8 @@ export const get_auction_team_capacities = async ({
 export const get_outstanding_election_team_ids = ({
   capacities,
   elections,
-  bids = []
+  bids = [],
+  ranked_contenders = null
 }) => {
   const has_elected = new Set()
   for (const election of elections) has_elected.add(election.tid)
@@ -214,6 +227,38 @@ export const get_outstanding_election_team_ids = ({
     if (current === undefined || bid.player_salary > current) {
       highest_bid.set(bid.tid, bid.player_salary)
     }
+  }
+
+  // The two highest claims OTHER THAN this team's own, which is what its
+  // election would have to beat. Its own claim is excluded because the question
+  // is what changes when this team raises ITSELF: ranking it against the version
+  // of itself it is replacing answers nothing.
+  //
+  // THE SKIP CHANGES NO ANSWER TODAY, and that is worth saying rather than
+  // leaving as an implied claim. A team that reaches this point has not elected
+  // (the first discharge) and, if it bid, bid strictly below its cap (the
+  // second), so its own claim `t0` satisfies `t0 < C`. The discharge needs
+  // `C <= second`, which forces `t0 < C <= second` -- so the team is never in the
+  // top two of a ranking that includes it, and including it would produce the
+  // same `first` and `second`. The skip is written for the general statement, the
+  // way the `>=` in the check above is, so this stays correct if the order of the
+  // three discharges ever changes.
+  //
+  // `ranked_contenders` arrives sorted by effective maximum descending, so the
+  // first two survivors of the skip are the two that matter.
+  const rivals_above = (tid) => {
+    let first = null
+    let second = null
+    for (const contender of ranked_contenders) {
+      if (contender.tid === tid) continue
+      if (first === null) {
+        first = contender.effective_maximum
+      } else {
+        second = contender.effective_maximum
+        break
+      }
+    }
+    return { first, second }
   }
 
   const outstanding = []
@@ -285,6 +330,63 @@ export const get_outstanding_election_team_ids = ({
     // so the outstanding set stays broadcastable exactly as it is today.
     const bid = highest_bid.get(tid)
     if (bid !== undefined && bid >= capacity.available_cap) continue
+
+    // AND A THIRD DISCHARGE, WHICH ONLY THE SETTLEMENT PATH ASKS FOR: a team the
+    // price on record has already put out of reach.
+    //
+    // Eligibility above is tested at `current_price`, the last PLACED bid, while
+    // the settlement prices at `runner_up.effective_maximum + 1`. Those diverge
+    // hard. On the live board Jared Goff's last placed bid was $2 and he settled
+    // at $25, so every team with a cap between the two was held outstanding for
+    // an hour and a half while provably unable to win. Across five players that
+    // was about 361 minutes of an auction with no clock, spent open AFTER the
+    // clearing price was already determined.
+    //
+    // THE BOUND IS THE RUNNER-UP'S CEILING, NOT THE PRICE. A team's best possible
+    // claim is its whole `available_cap` -- electing anything at or above the cap
+    // clamps to it. Adding a claim at C to a field whose two highest claims are
+    // `first` and `second` changes nothing when `C <= second`: the top two values
+    // are still `first` and `second`, so the winner is unchanged and the price,
+    // `min(first, second + 1)`, is unchanged with it.
+    //
+    // `C < first` IS THE OTHER HALF AND IT IS NOT REDUNDANT. When
+    // `C == first == second` the team ties for the LEAD and could take the player
+    // on the tiebreak, so `C <= second` alone would discharge a team whose
+    // election decides the winner. Comparing against the price instead of the
+    // pair collapses exactly that case, because a tie prices at `first`.
+    //
+    // Fewer than two rivals means no bound: `second` is null, the price is the
+    // opening bid, and any eligible claim can raise it. Not discharging is the
+    // conservative direction and this takes it.
+    //
+    // SAFETY DOES NOT REST ON MONOTONICITY, and an early draft of this wrongly
+    // said it did. The bound is NOT monotone -- `withdraw_auction_election`
+    // lowers it and puts discharged teams back. What makes it safe is that every
+    // write able to reverse a discharge is itself a settlement trigger under the
+    // same `pg_advisory_xact_lock`: withdraw settles in its own transaction, and
+    // a trade or an override release reaches settlement through
+    // `reevaluate_auction_after_roster_change`. So the set emptying and the
+    // player settling are ONE serialized event, and re-entry can only be observed
+    // while the player is still open, where it is correct rather than hazardous.
+    //
+    // IT IS OPT-IN BECAUSE IT LEAKS, and that is the whole reason for the
+    // parameter rather than an unconditional rule. This reads sealed maxima
+    // through the runner-up's ceiling. Caps are roster-derived and effectively
+    // public, so a set that shed teams in cap order as the bound rose would let
+    // anyone watching bound the runner-up's ceiling -- material in a sealed
+    // second-price league whose commissioner competes. The settlement path passes
+    // `ranked_contenders`; the two BROADCAST callers deliberately do not, and
+    // `docs/guides/auction.md` carries why decoupling them is leak-free.
+    if (ranked_contenders) {
+      const { first, second } = rivals_above(tid)
+      if (
+        second !== null &&
+        capacity.available_cap <= second &&
+        capacity.available_cap < first
+      ) {
+        continue
+      }
+    }
 
     outstanding.push(tid)
   }
@@ -427,6 +529,13 @@ const get_live_elections = async ({ trx, lid, season_year, pid }) =>
  * Neither is a state the auction is waiting on anybody in, so the two coincide
  * honestly rather than by accident.
  *
+ * WHAT IT RETURNS IS THE BROADCAST SET, NOT THE SET IT GATED ON. Those are two
+ * different computations here and the difference is deliberate: settlement waits
+ * only on teams the implied clearing price leaves able to win, while the set
+ * handed back -- and displayed -- discharges only on grounds that read nothing
+ * sealed. The gating set is a subset, so the displayed set is never empty while
+ * a player is still open. The full argument is at the discharge itself.
+ *
  * @returns {Promise<{settlement: null|{pid: string, winner_tid: number, price: number}, outstanding: number[]}>}
  */
 export const settle_auction_player_if_complete = async ({
@@ -541,20 +650,11 @@ export const settle_auction_player_if_complete = async ({
       db_client: trx
     })
 
-    const outstanding = get_outstanding_election_team_ids({
-      capacities,
-      elections,
-      bids: nomination.bids
-    })
-
-    if (outstanding.length) {
-      log(
-        `${nomination.pid} waiting on ${outstanding.length} team(s): ${outstanding.join(', ')}`
-      )
-      return { settlement: null, outstanding }
-    }
-
-    const { winner_tid, price, outcomes } = resolve_auction_player({
+    // RESOLVED BEFORE THE COMPLETENESS CHECK, NOT AFTER IT, because the check
+    // now needs the runner-up's ceiling to decide who is still worth waiting on.
+    // It is pure and costs nothing to run early; what it must NOT do early is
+    // throw, so the no-winner refusal below stays behind the gate where it was.
+    const resolution = resolve_auction_player({
       claims,
       rosters: capacities,
       nominating_team_id: nomination.nominating_team_id,
@@ -565,6 +665,52 @@ export const settle_auction_player_if_complete = async ({
       // actually bid or a team that folded would drag the price back down.
       opening_bid: nomination.current_price
     })
+
+    // TWO SETS, AND THE SPLIT IS THE POINT.
+    //
+    // `outstanding` is what the league SEES. It discharges on an election and on
+    // a claim no election could improve, both of which read only placed bids and
+    // roster-derived caps -- already public, so it stays broadcastable exactly as
+    // it is today. Every caller of this function broadcasts this one.
+    //
+    // `gating` is what the auction WAITS on. It adds the implied-price discharge,
+    // which reads the runner-up's sealed ceiling, and it is never displayed.
+    //
+    // GATING ON THE SEALED SET WITHOUT DISPLAYING IT IS LEAK-FREE, and the reason
+    // is second-price itself: the settled price already publishes the runner-up's
+    // ceiling, so settling sooner reveals nothing the sale does not. Displaying
+    // the sealed set would not be -- teams would drop off the board in cap order
+    // as the bound rose, which bounds that ceiling BEFORE the sale, to anyone
+    // watching, in a league whose commissioner competes.
+    //
+    // `gating` is a SUBSET of `outstanding` by construction, since it is the same
+    // rule plus one more discharge. So a non-settling call always returns a
+    // non-empty `outstanding`, and no client is ever shown an empty set on a
+    // player that has not sold.
+    const outstanding = get_outstanding_election_team_ids({
+      capacities,
+      elections,
+      bids: nomination.bids
+    })
+
+    const gating = get_outstanding_election_team_ids({
+      capacities,
+      elections,
+      bids: nomination.bids,
+      ranked_contenders: resolution.ranked_contenders
+    })
+
+    if (gating.length) {
+      log(
+        `${nomination.pid} waiting on ${gating.length} team(s): ${gating.join(', ')}` +
+          (outstanding.length > gating.length
+            ? ` (${outstanding.length - gating.length} more shown but priced out)`
+            : '')
+      )
+      return { settlement: null, outstanding }
+    }
+
+    const { winner_tid, price, outcomes } = resolution
 
     if (!winner_tid) {
       // Unreachable by construction: the nominating team always holds a claim
