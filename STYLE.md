@@ -9,16 +9,16 @@ the wordmark.
 
 **On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field                                      |
-| -------------------------------------------------- | ------------------------------------------------- |
-| The two 2px ink rules                              | The goal lines                                    |
-| The hero above the first, the space below the last | The end zones                                     |
-| The 1px ink band rule opening a section            | A ten-yard line                                   |
-| The hairline between two entries                   | The yard lines between                            |
-| `.landing__yard`                                   | The yard numbers                                  |
-| `.landing__section::before`                        | The hash marks, down the left sideline            |
-| `.landing__end`                                    | The end zone: two boundaries, old-school hatching |
-| `.landing__end-mark`                               | The name painted in it                            |
+| On the page                                        | On the field                                                |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| The two 2px ink rules                              | The goal lines                                              |
+| The hero above the first, the space below the last | The end zones                                               |
+| The 1px ink band rule opening a section            | A ten-yard line                                             |
+| The hairline between two entries                   | The yard lines between                                      |
+| `.landing__yard`                                   | The yard numbers                                            |
+| `.landing__section::before`                        | The hash marks, down the right sideline                     |
+| `.landing__end`                                    | The end zone: two boundaries, an old-school diamond lattice |
+| `.landing__end-mark`                               | The name painted in it                                      |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -88,12 +88,12 @@ pages actually sit on — under the floor, for text set at normal size in every 
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
 
-**One paint for every field marking.** The yard numbers, the hash marks and the end zone hatching
+**One paint for every field marking.** The yard numbers, the hash marks and the end zone lattice
 are all `$prose_rule`, the faintest grey in the palette. The end zone WORDMARK is the one step off
 it, at `$prose_rule_strong`, and it has to be: everything else painted here sits on the bare ground,
-while the wordmark sits on hatching in the same grey, and at the same value the letters and the
-stripes dissolve into each other — and paint is the one thing on the page
-that can afford it. A mark at 48px is legible at a contrast a line of prose would vanish at, and
+while the wordmark sits on ruling in the same grey, and at the same value the letters and the
+diamonds dissolve into each other — and paint is the one thing on the page that can afford it.
+A mark at 48px is legible at a contrast a line of prose would vanish at, and
 every one of these is decorative by construction, carrying nothing a reader has to make out. The
 yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
 and at that size it read as ink competing with the head across the row from it.
@@ -203,24 +203,27 @@ three type sizes, so a hardcoded nudge is wrong the moment any of the five input
 | 1px ink           | `prose_section_band()`                                   | A new section begins        |
 | 1px `$prose_rule` | Between entries                                          | Two things of the same kind |
 
-**The hash marks run down the LEFT edge, which is the sideline**, hung in the page's own gutter
-(`-32px`, `-22px` on a phone) out past the left end of the rules. Every rule begins at that edge, so
-it is the one the whole page already answers to, and the marks sit just outside the lines they
-measure. The gutter is the only place they can be: inside the measure that edge is the most
-spoken-for column on the page — lede, section heads and entry labels all stand on it — and a tick
-column there lands on the first letter of every label. Two tick lengths on one pseudo-element, the
-short mark at every yard and the long one where a five-yard line would fall, so the row reads in
-fives rather than as a comb. These are still not the ticks that were removed from the bar: those
-ran ALONG a band rule and decorated it, and these run down the field between the rules and cross
-none of them.
+**The hash marks run down the RIGHT edge, outboard of the yard numbers**, hung in the page's own
+gutter (`-32px`, `-22px` on a phone) out past the right end of the rules and past the number's
+band. The number and the ticks belong to the same sideline: a field numeral is painted to be read
+from the sideline nearest it, so a row now reads prose, turned numeral, hashes, which is the order
+that sideline puts them in. Split across opposite margins they were two marks facing nothing. The
+gutter is the only place the row can sit: inside the measure the left edge is the most spoken-for
+column on the page — lede, section heads and entry labels all stand on it — and the right edge is
+the numeral's. Two tick lengths on one pseudo-element, the short mark at every yard and the long
+one where a five-yard line would fall, so the row reads in fives rather than as a comb; the long
+one is anchored to the strip's inner edge and grows away from the measure. These are still not the
+ticks that were removed from the bar: those ran ALONG a band rule and decorated it, and these run
+down the field between the rules and cross none of them.
 
 **The right band is the numeral and its clearance and nothing else** — 56px, 38px on a phone, being
-48px and 30px of turned numeral plus the 8px before the prose. Build a band from its parts rather
-than guessing: guessed at the number's own width, back when the hash row shared it, the phone's
-widest description reached the strip's left edge exactly — a collision one glyph away.
+48px and 30px of turned numeral plus the 8px before the prose. The hash row shares the SIDE but not
+the band, because it hangs in the gutter past it. Build a band from its parts rather than guessing:
+guessed at the number's own width, back when the hash row was inside the band, the phone's widest
+description reached the strip's left edge exactly — a collision one glyph away.
 
 **Every rule runs the full measure, including behind the yard numbers.** The number band is a
-`padding-right` on `.landing__section` — 72px, 44px on a phone — and a border spans the padding
+`padding-right` on `.landing__section` — 56px, 38px on a phone — and a border spans the padding
 box, so the rules keep their length while every row of content stops short of the number. A yard
 line running behind a number is what a field does; a rule that stopped at one would read as a
 column break. The band is on the SECTION and not on the head row: a turned numeral is taller than
@@ -234,11 +237,16 @@ run out.
 **On the landing page that closing rule is the second goal line, and below it is a real end zone.**
 It has two boundaries at the goal line's own weight — the rule above and an end line below — because
 a zone with only one of them is an edge with space under it. Its sidelines are where the paint
-stops: the hatching runs to the measure's edges and ends, closing it left and right without two more
-rules. It is **hatched at 45 degrees on a 14px pitch**, which is the old end zone design from before
-they were solid colour with a wordmark dropped in, and the one pattern this palette can draw — the
-page's own hairline repeated, not a second surface colour. Coarser reads as a barber pole; finer
-turns to grey mush at the size a phone renders it. The site's name is painted across it in the paint
+stops: the lattice runs to the measure's edges and ends, closing it left and right without two more
+rules. It is **ruled off in diamonds — two hairline families at opposed 45s on a 26px pitch** —
+which is the old end zone design from before they were solid colour with a wordmark dropped in, and
+a pattern this palette can draw, being the page's own hairline repeated rather than a second surface
+colour. Both families are load-bearing: one alone is a hatch and reads as shading, and the diamonds
+exist only where the second crosses the first. **The pitch is what decides whether it reads as
+diamonds at all**, and it has to be nearly twice the single hatch this replaced: two families lay
+down twice the ink of one, so the hatch's own 14px darkened the zone into the grey panel the pattern
+exists instead of, and 18px still read as mesh on the rendered page — the cells were small enough
+that the eye took the texture and not the shape. The site's name is painted across it in the paint
 face (`.landing__end-mark`).
 
 This is not the border that was tried and removed. That one enclosed the whole page and read as a

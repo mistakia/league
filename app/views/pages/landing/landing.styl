@@ -41,7 +41,7 @@
 // directory top to bottom is a drive. The direction is also what makes the
 // sequence survive an edit — a fifth section becomes the 10 and the drive still
 // lands, where counting up would run off the field.
-// The hash row hangs in the page's own left gutter, so its offset is that
+// The hash row hangs in the page's own right gutter, so its offset is that
 // gutter's width negated — prose_page() sets 32px, and 22px on a phone. Stated
 // as its own variable because `-$var` does not negate inside a property, and
 // kept beside the numbers it is derived from so the two cannot drift.
@@ -234,20 +234,28 @@ $sideline_offset_phone = -22px
   // fives rather than as an undifferentiated comb. Two repeating gradients on
   // one pseudo-element, each sized to its own tick length.
   //
-  // ALONG THE LEFT EDGE, WHICH IS THE SIDELINE. The rules all begin there, so
-  // it is the one edge every yard line already answers to, and a row of ticks
-  // running down it is what a sideline looks like from above.
+  // ALONG THE RIGHT EDGE, WHICH IS THE SIDELINE THE NUMBERS FACE. A field
+  // number is painted to be read from the sideline nearest it, and the hash row
+  // belongs on that same side — the number and the ticks are one edge of the
+  // field seen together, not two marks on opposite margins. Read down the page
+  // the row now goes prose, then the turned numeral, then the hashes outboard
+  // of it, which is the order a sideline puts them in.
   //
-  // IN THE PAGE'S OWN GUTTER, out past the left end of the rules. That is the
-  // only reason it can be there at all: the left edge INSIDE the measure is the
-  // most spoken-for column on the page — the lede, every section head and every
-  // entry label stand on it — and a tick column there lands on the first letter
-  // of every label. Hung in the padding it touches nothing, and the marks sit
-  // just outside the lines they measure, which is where a sideline is.
+  // IN THE PAGE'S OWN GUTTER, out past the right end of the rules and past the
+  // number's band. The left edge INSIDE the measure is the most spoken-for
+  // column on the page — the lede, every section head and every entry label
+  // stand on it — and the right edge inside the measure is the number's. Hung
+  // in the padding the row touches neither, and the marks sit just outside the
+  // lines they measure, which is where a sideline is.
   //
-  // It was in the number's band on the right, sharing the one corridor the page
-  // had. Moving it here frees that band down to the number's own width, which
-  // gives the prose column back the difference.
+  // OUTBOARD OF THE NUMBER, NOT SHARING ITS BAND. The two were in one corridor
+  // once and the band had to be 72px to hold both. The number keeps the band at
+  // its own width and the ticks hang past it in the gutter, so the prose column
+  // pays nothing for having them on the same side.
+  //
+  // The long tick is anchored to the strip's INNER edge and grows outward, the
+  // mirror of what it did on the left — background-position is `left top` here
+  // so the five-yard mark reaches away from the measure rather than into it.
   //
   // NOT THE TICKS THAT WERE REMOVED FROM THE BAR. Those were a row ALONG a band
   // rule, decorating the rule. These run down the field between the rules and
@@ -257,12 +265,12 @@ $sideline_offset_phone = -22px
     position absolute
     top 0
     bottom 0
-    left $sideline_offset
+    right $sideline_offset
     width 12px
     background-image repeating-linear-gradient(to bottom, $prose_rule 0 1px, transparent 1px 90px), repeating-linear-gradient(to bottom, $prose_rule 0 1px, transparent 1px 18px)
     background-size 12px 100%, 7px 100%
     background-repeat no-repeat, no-repeat
-    background-position right top, right top
+    background-position left top, left top
 
   // The right band is now the numeral and its clearance and nothing else: 48px
   // of turned numeral plus the 8px before the prose. It was 72px when the hash
@@ -272,7 +280,7 @@ $sideline_offset_phone = -22px
     padding-right 38px
 
     &::before
-      left $sideline_offset_phone
+      right $sideline_offset_phone
 
 // THE YARD NUMBER. Large, and painted the colour of a rule rather than of text
 // — it is a mark on the ground, not something to read, and at ink weight it
@@ -302,7 +310,7 @@ $sideline_offset_phone = -22px
 // nearest thing to that. app/index.html carries the comparison it won.
 //
 // $prose_rule, which is ONE PAINT FOR EVERY FIELD MARKING — this number, the
-// hash marks in the same band, and the wordmark in the end zone. It is the
+// hash marks outboard of it, and the lattice in the end zone. It is the
 // faintest grey the palette has, and paint is the one thing on the page that
 // can afford it: a mark this size is legible at a contrast a line of prose
 // would disappear at, and everything painted here is decorative by
@@ -498,20 +506,32 @@ $sideline_offset_phone = -22px
 // container. This encloses the six inches of field that a boundary is FOR, and
 // the thing it bounds is the only part of the page with no content in it.
 //
-// THE SIDELINES ARE WHERE THE PAINT STOPS. The stripes run to the measure's
+// THE SIDELINES ARE WHERE THE PAINT STOPS. The lattice runs to the measure's
 // edges and end, so the zone is closed left and right without two more rules.
 //
-// DIAGONAL STRIPES, WHICH IS THE OLD DESIGN. Before end zones were solid colour
-// with a wordmark dropped in, they were hatched — and hatching is also the one
-// pattern that survives this palette, because it is made of the page's own
-// hairline repeated rather than of a second surface colour. 45 degrees and a
-// 14px pitch: coarser reads as a barber pole, finer turns to grey mush at the
-// sizes a phone renders it.
+// A DIAMOND LATTICE, WHICH IS THE OLD DESIGN. Before end zones were solid
+// colour with a wordmark dropped in, they were ruled off in diamonds — a
+// diagonal lattice painted the width of the zone — and that is a pattern this
+// palette can actually draw, because it is made of the page's own hairline
+// repeated rather than of a second surface colour.
+//
+// TWO GRADIENTS AT OPPOSED 45s, not one. A single family of stripes is a hatch
+// and reads as shading; the diamonds only appear where the second family
+// crosses the first, so both are load-bearing and neither is decoration on the
+// other.
+//
+// A 26px PITCH, NEARLY TWICE THE HATCH IT REPLACES, and the pitch is what
+// decides whether this reads as diamonds at all. Two families lay down twice
+// the ink of one, so the hatch's own 14px darkened the zone into a grey panel —
+// which is the solid-colour end zone this pattern exists instead of. 18px was
+// tried against the rendered page and still read as mesh: the cells were small
+// enough that the eye took the texture and not the shape. At 26px the diamonds
+// are individually legible and the zone is lighter than the hatch was.
 .landing__end
   margin-top 32px
   border-top 2px solid $prose_rule_heavy
   border-bottom 2px solid $prose_rule_heavy
-  background-image repeating-linear-gradient(45deg, $prose_rule 0 1px, transparent 1px 14px)
+  background-image repeating-linear-gradient(45deg, $prose_rule 0 1px, transparent 1px 26px), repeating-linear-gradient(-45deg, $prose_rule 0 1px, transparent 1px 26px)
 
   @media (max-width 640px)
     margin-top 26px
@@ -538,10 +558,10 @@ $sideline_offset_phone = -22px
   line-height 1
   letter-spacing 0.22em
   text-transform uppercase
-  // A STEP DARKER THAN THE STRIPES IT SITS ON, which is the one place the
+  // A STEP DARKER THAN THE LATTICE IT SITS ON, which is the one place the
   // one-paint rule bends and has to. Everything else painted on this page sits
-  // on the bare ground; this sits on hatching in the same grey, and at the same
-  // value the letters and the stripes dissolve into each other.
+  // on the bare ground; this sits on ruling in the same grey, and at the same
+  // value the letters and the lattice dissolve into each other.
   color $prose_rule_strong
   user-select none
 
