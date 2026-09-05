@@ -32,14 +32,22 @@ export const get_auction_spots_remaining = async ({
       // neither. Every shipped caller passes the current year, which is why it
       // never showed.
       //
-      // `week` is deliberately NOT pinned to 0 here. The auction writes its
-      // roster rows at week 0 and `getRoster` defaults to
-      // `current_season.fantasy_season_week`, which is 0 for the whole
-      // offseason and so agrees today -- but it becomes 1 at the regular season
-      // start, and a free agency period running past that would silently count
-      // a week the auction never writes to. Pinning it is a behaviour change to
-      // a safety-critical count and belongs with the owner of the settlement
-      // path, not here.
+      // `week` is deliberately NOT pinned to 0 here, and the margin is thinner
+      // than it looks. The auction writes its roster rows at week 0 while
+      // `getRoster` defaults to `current_season.fantasy_season_week`, so the two
+      // agree only while that getter reads 0.
+      //
+      // IT DOES NOT FLIP AT `regular_season_start`, which is the natural guess
+      // and is wrong: `week` is `now.diff(regular_season_start, 'weeks')`, so it
+      // reaches 1 a WEEK after that anchor. In 2026 the anchor is 09-01T04:00Z,
+      // the flip is 09-08T04:00Z, and the free agency period ends 09-08T02:00Z
+      // -- the count stops being read two hours before it would have started
+      // reading a week the auction never writes to.
+      //
+      // So this is correct today by a two-hour margin, on a value that sizes the
+      // auction's only forcing function. Pinning it to 0 is the obvious repair
+      // and is a behaviour change to a safety-critical count, so it belongs with
+      // the owner of the settlement path rather than here.
       roster: await getRoster({
         tid: team.team_id,
         year: season_year,
