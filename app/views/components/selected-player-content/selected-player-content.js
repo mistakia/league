@@ -23,24 +23,29 @@ export default function SelectedPlayerContent({
 
   return (
     <div className='selected__player-content'>
+      {/* Plain property access, NOT item.get(). The reducer stores these with
+          `new List(items)`, and List does not deep-convert — its members stay
+          plain objects, so `item.get` is undefined and calling it throws on
+          the first render that has any content. That is the same shape
+          `selected-player-markets` uses (`market.source_id`), and it is why
+          this component looked fine for as long as the feed was switched off:
+          the empty case returns before the map and never touches an item. */}
       {content_items.map((item, index) => (
         <a
           key={index}
           className='player-content__item'
-          href={item.get('url')}
+          href={item.url}
           target='_blank'
           rel='noreferrer noopener'
         >
-          <div className='player-content__title'>{item.get('title')}</div>
+          <div className='player-content__title'>{item.title}</div>
           <div className='player-content__meta'>
-            {item.get('domain') && (
-              <span className='player-content__domain'>
-                {item.get('domain')}
-              </span>
+            {item.domain && (
+              <span className='player-content__domain'>{item.domain}</span>
             )}
-            {item.get('published_at') && (
+            {item.published_at && (
               <span className='player-content__date'>
-                {dayjs(item.get('published_at')).format('MMM D')}
+                {dayjs(item.published_at).format('MMM D')}
               </span>
             )}
           </div>
