@@ -558,5 +558,23 @@ describe('Plays View', () => {
         Object.keys(plays_view_column_definitions).length
       )
     })
+
+    // The client field builder already throws at import on an unknown group or
+    // an unresolvable data type, so those cannot ship. A SELECT with no
+    // column_values is the one shape it accepts and should not: the filter
+    // renders as a faceted control with an empty option list, which offers the
+    // user nothing while looking exactly like a working filter over a column
+    // that happens to have no values.
+    it('gives every SELECT column a non-empty column_values list', () => {
+      const empty = Object.entries(plays_view_columns)
+        .filter(
+          ([, declaration]) =>
+            declaration.data_type === 'SELECT' &&
+            !(declaration.column_values?.length > 0)
+        )
+        .map(([column_id]) => column_id)
+
+      expect(empty).to.eql([])
+    })
   })
 })
