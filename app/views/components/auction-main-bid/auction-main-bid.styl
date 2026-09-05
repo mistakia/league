@@ -416,7 +416,7 @@
   // instead of beside it. `form` is the slot the election control's own form
   // takes, and the two never co-occur: this field needs no open player and
   // `show_election_control` requires one.
-  .auction__bid-actions .auction__nominate-maximum-bid
+  .auction__bid-actions .auction__nominate-maximum
     grid-area form
 
   .auction__main-timer
@@ -438,10 +438,12 @@
   opacity 0.7
 
 // THE NOMINATION'S OPTIONAL CEILING, A SIBLING OF THE STEPPER AND NOT A
-// SEGMENT OF IT. It sits directly in `.auction__main-action`, so the row's own
-// `gap 8px` is what separates it from the group -- there is no wrapper, and a
-// wrapper is what this rule replaces. Wrapping the nominate button and this
-// field in one box put a non-button in the stepper's segment position, where
+// SEGMENT OF IT. It sits directly in `.auction__main-action`, alongside
+// `<ButtonGroup>` and not inside it, so the row's own `gap 8px` is what
+// separates the two. The box below IS a wrapper, and that is safe for exactly
+// that reason -- what must never be wrapped is a button occupying a SEGMENT
+// slot. Wrapping the nominate button and this field in one box did that, and
+// put a non-button in the stepper's segment position, where
 // `.button-group > .button` in button.styl reaches neither: the nominate
 // button kept its full radius and its own hover shadow inside the control, and
 // the `+` segment lost the -1px and the seam border its `+ .button` adjacency
@@ -454,30 +456,110 @@
 // `show_election_control` requires one -- which is why it may take the `form`
 // area below without contending for it.
 //
+// THE CONTROL IS THE LABEL PLUS THE BOX, and the label is why this is three
+// elements rather than the one bare input it used to be. `Max (optional)` was a
+// placeholder, so it said what the field was only while the field was empty --
+// and the moment a manager typed a number the caption went and the row carried
+// two unlabelled dollar amounts, the nominate stepper's and this one. The
+// caption now survives the typing.
+//
+// `align-items center` AND THE LABEL BESIDE THE BOX, not stacked over it. A
+// caption above a 26px box makes a 37px control, and the note on
+// `.auction__main-input` above records what a 37px control does to a row of
+// 26px buttons -- it centres 5.7px below their band and reads as a fourth
+// object on a row of three. Beside, the whole group is exactly one button tall
+// at every width and needs no out-of-flow anything.
+//
+// No shrink, because `.auction__main-action` is a wrapping flex row below
+// 1160px and a shrinking box wraps LAST -- it would compress to an unreadable
+// strip rather than take its own line.
+.auction__nominate-maximum
+  flex 0 0 auto
+  display flex
+  align-items center
+  gap 6px
+
+  // The 9px uppercase caption every other labelled value in this bar wears --
+  // MARKET, BYE, AGE, and `Your election` in the election control beside it. It
+  // is the whole of what this change is for, so it does not recede further than
+  // those do.
+  label
+    flex 0 0 auto
+    font-size 9px
+    font-weight 300
+    text-transform uppercase
+    letter-spacing 0.5px
+    line-height 1.1
+    white-space nowrap
+    color rgba(0, 0, 0, 0.6)
+
+// THE BOX IS THE BORDERED THING, NOT THE INPUT, because the `$` has to sit
+// inside the same rule the number does -- a unit drawn outside the border reads
+// as a word next to a field rather than as part of the amount.
+//
 // `height 26px` with `box-sizing border-box` is the ONLY thing that lands this
 // on the buttons' band: `.button__small` is 26px, and a bare input sized by its
-// own padding and line box came out short and sat off the row. 16px type rather
-// than 12px for the same reason the election control's input is 16 -- below
-// 16px iOS Safari zooms the page on focus and does not zoom back out, and this
-// is a control a manager reaches on a phone.
-// `150px` and `flex 0 0 auto` together. 150 is what holds `Max (optional)` at
-// 16px beside the number spinner Chrome draws inside the box; the placeholder
-// says the field is skippable and a truncated one says nothing. No shrink,
-// because `.auction__main-action` is a wrapping flex row below 1160px and a
-// shrinking box wraps LAST -- it would compress to an unreadable strip rather
-// than take its own line.
-.auction__nominate-maximum-bid
+// own padding and line box came out short and sat off the row.
+//
+// 104px rather than the 150 the unlabelled input took. The caption carries what
+// the placeholder used to have to spell out, so the box only has to hold
+// `Optional` and a two- or three-digit amount, and the spinner it used to
+// reserve room for is gone below. Label plus gap plus box comes to about what
+// the bare field cost, so nothing on the row moved to pay for the caption.
+.auction__nominate-maximum-field
   box-sizing border-box
   flex 0 0 auto
-  width 150px
+  display flex
+  align-items center
+  gap 2px
+  width 104px
   height 26px
   padding 0 8px
-  font-size 16px
-  font-weight 600
   background $prose_paper
   border 1px solid $prose_rule_strong
   border-radius $button_border_radius
 
-  &:focus
+  // Focus is drawn on the BOX and not on the input, since the input no longer
+  // owns the border. `:focus-within` is what carries it across the wrapper.
+  &:focus-within
     border-color $prose_accent
-    outline none
+
+  // The unit, stated by the control rather than typed by the manager. Muted and
+  // a step down, so it reads as part of the field and never as the value.
+  span
+    flex 0 0 auto
+    font-size 13px
+    font-weight 600
+    line-height 1
+    color rgba(0, 0, 0, 0.45)
+
+// 16px type rather than 12px for the same reason the election control's input
+// is 16 -- below 16px iOS Safari zooms the page on focus and does not zoom back
+// out, and this is a control a manager reaches on a phone.
+//
+// THE SPINNERS GO, matching `.auction__main-input` two hundred lines up. Chrome
+// draws them inside the box and they cost about 17px of a 104px field for two
+// arrows nobody aims at in a bar whose neighbouring control is a stepper.
+.auction__nominate-maximum-bid
+  flex 1 1 auto
+  min-width 0
+  width 100%
+  padding 0
+  border none
+  outline none
+  background transparent
+  font-size 16px
+  font-weight 600
+
+  &::-webkit-inner-spin-button
+  &::-webkit-outer-spin-button
+    -webkit-appearance none
+    margin 0
+
+  // Distinctly lighter than a real amount and a step smaller, so an empty field
+  // reads as one a manager may leave alone rather than as one holding a value.
+  &::placeholder
+    font-size 13px
+    font-weight 400
+    color $prose_muted
+    opacity 1

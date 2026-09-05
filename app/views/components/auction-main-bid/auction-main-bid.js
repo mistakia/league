@@ -289,17 +289,43 @@ export default function AuctionMainBid({
     // The server refuses it; offering the control anyway would be offering one
     // that cannot work. The bound is also wrong -- `availableCap` here is the
     // CURRENT team's, not the nominating team's.
+    //
+    // LABELLED, AND THE LABEL IS THE POINT. This was a bare input whose only
+    // caption was a `Max (optional)` placeholder -- which is gone the instant a
+    // manager types into it, so the one moment there is a number in the box is
+    // the moment nothing on screen says what the number means. Beside
+    // `Nominate $5` and a stepper that also edits a dollar amount, an
+    // unlabelled second number field reads as a second opening bid.
+    //
+    // The label sits BESIDE the box rather than above it, which is the shape
+    // the drawer's own maximum-bid form uses. Above would be the `Enter Bid`
+    // shape, and that one costs height: a caption stacked on a 26px box makes a
+    // 37px control on a row of 26px buttons, which auction-main-bid.styl
+    // already documents at length as the defect it had to route around with an
+    // out-of-flow label. Beside, the control stays exactly one button tall at
+    // every width.
     if (is_election_mode && isNominating) {
       nomination_maximum_bid_field = (
-        <input
-          type='number'
-          className='auction__nominate-maximum-bid'
-          placeholder='Max (optional)'
-          min={value}
-          max={availableCap}
-          value={nomination_maximum_bid}
-          onChange={handle_nomination_maximum_bid_change}
-        />
+        <div className='auction__nominate-maximum'>
+          <label htmlFor='auction-nominate-maximum'>Max bid</label>
+          {/* The `$` is drawn by the box, not typed into it. It states the
+              unit without spending a character of the field, and it is what
+              makes an empty box still read as an amount. */}
+          <div className='auction__nominate-maximum-field'>
+            <span aria-hidden='true'>$</span>
+            <input
+              id='auction-nominate-maximum'
+              type='number'
+              inputMode='numeric'
+              className='auction__nominate-maximum-bid'
+              placeholder='Optional'
+              min={value}
+              max={availableCap}
+              value={nomination_maximum_bid}
+              onChange={handle_nomination_maximum_bid_change}
+            />
+          </div>
+        </div>
       )
     }
   } else {
