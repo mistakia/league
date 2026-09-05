@@ -21,27 +21,17 @@
     color $textColorDark
     text-decoration underline
 
-// The defending champion, a mono footnote under the gloss -- one quieter line
-// beneath the projection description it does not belong to
-.league__defending-champion
-  margin-top 4px
-  font-family 'IBM Plex Mono', monospace
-  font-size 11px
-  color rgba(0, 0, 0, 0.55)
-
-  .league__team-link
-    color $textColor
-    text-decoration underline
-
-// A team's all-time title count beside its name in the odds table -- one small
-// star and a number, muted so the projections stay the point of the table
-.league__champ-record
+// The markers that sit beside a team name in the odds table, both muted mono
+// suffixes -- a team's all-time title count, and the reigning champion's word
+.league__champ-record,
+.league__champion
   margin-left 6px
   font-family 'IBM Plex Mono', monospace
   font-size 11px
   color rgba(0, 0, 0, 0.45)
   white-space nowrap
 
+.league__champ-record
   .icon
     width 14px
     height 14px

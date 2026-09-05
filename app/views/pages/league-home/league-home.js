@@ -56,29 +56,15 @@ function LeagueOdds({ teams, leagueId }) {
 
   if (!has_odds) return null
 
-  const defending_team = sorted.find((team) => team.is_defending_champion)
   const team_url = (team_id) => `/leagues/${leagueId}/teams/${team_id}`
 
   return (
     <div className='section'>
       <div className='heading__section-title'>Odds</div>
       <div className='league__gloss'>
-        <div>
-          Simulated from the current rosters and the remaining schedule. The
-          season has not started, so these are projections rather than
-          standings; full records are on the standings page.
-        </div>
-        {defending_team && (
-          <div className='league__defending-champion'>
-            Defending champion:{' '}
-            <Link
-              className='league__team-link'
-              to={team_url(defending_team.team_id)}
-            >
-              {defending_team.name}
-            </Link>
-          </div>
-        )}
+        Simulated from the current rosters and the remaining schedule. The
+        season has not started, so these are projections rather than standings;
+        full records are on the standings page.
       </div>
       <div className='table__container'>
         <div className='table__row table__head'>
@@ -110,6 +96,9 @@ function LeagueOdds({ teams, leagueId }) {
                     <Icon name='star-solid' small />
                     {team.championships}
                   </span>
+                )}
+                {team.is_defending_champion && (
+                  <span className='league__champion'>champion</span>
                 )}
               </div>
             </div>
