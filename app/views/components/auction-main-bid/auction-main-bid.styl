@@ -506,6 +506,27 @@
 // `Optional` and a two- or three-digit amount, and the spinner it used to
 // reserve room for is gone below. Label plus gap plus box comes to about what
 // the bare field cost, so nothing on the row moved to pay for the caption.
+// ONE FONT SIZE AND ONE LINE-HEIGHT FOR EVERYTHING IN THE BOX, and that is what
+// puts the `$` on the number's baseline rather than above it.
+//
+// The `$` was a step smaller than the amount, which is the obvious way to make
+// a unit recede and is why it was written that way. Two boxes of DIFFERENT font
+// sizes centred on each other do not share a baseline -- the smaller one's sits
+// higher by half the difference in their ascents, measured at 1.1px here, which
+// is small enough to survive a source read and plainly visible in a screenshot
+// as a `$` floating off the digits.
+//
+// Nudging the span down by that 1.1px is the wrong repair: it is a function of
+// two font sizes and the line box they share, so it is wrong again the moment
+// any of the three moves. Declaring one size and one line-height for both makes
+// the shared baseline a consequence of the box rather than a number someone
+// maintains. The `$` recedes on WEIGHT and COLOUR instead, which cost no
+// geometry.
+//
+// `line-height` on the FIELD, not on each child. It is inherited, and
+// normalize.css already hands the input the parent's family and size, so one
+// declaration here governs the span's line box and the input's inner editor
+// alike -- the two things that have to agree.
 .auction__nominate-maximum-field
   box-sizing border-box
   flex 0 0 auto
@@ -515,6 +536,8 @@
   width 104px
   height 26px
   padding 0 8px
+  font-size 16px
+  line-height 1.25
   background $prose_paper
   border 1px solid $prose_rule_strong
   border-radius $button_border_radius
@@ -524,18 +547,19 @@
   &:focus-within
     border-color $prose_accent
 
-  // The unit, stated by the control rather than typed by the manager. Muted and
-  // a step down, so it reads as part of the field and never as the value.
+  // The unit, stated by the control rather than typed by the manager. It takes
+  // the field's size and line-height untouched -- see above -- and recedes on
+  // weight and colour alone.
   span
     flex 0 0 auto
-    font-size 13px
-    font-weight 600
-    line-height 1
-    color rgba(0, 0, 0, 0.45)
+    font-weight 400
+    color rgba(0, 0, 0, 0.42)
 
-// 16px type rather than 12px for the same reason the election control's input
-// is 16 -- below 16px iOS Safari zooms the page on focus and does not zoom back
-// out, and this is a control a manager reaches on a phone.
+// NO `font-size` AND NO `line-height` HERE. Both come from the field above, so
+// the input and the `$` beside it are sized by one declaration and cannot drift
+// apart. The 16px that declaration sets is a floor rather than a preference:
+// below 16px iOS Safari zooms the page on focus and does not zoom back out, and
+// this is a control a manager reaches on a phone.
 //
 // THE SPINNERS GO, matching `.auction__main-input` two hundred lines up. Chrome
 // draws them inside the box and they cost about 17px of a 104px field for two
@@ -548,7 +572,6 @@
   border none
   outline none
   background transparent
-  font-size 16px
   font-weight 600
 
   &::-webkit-inner-spin-button
@@ -556,10 +579,13 @@
     -webkit-appearance none
     margin 0
 
-  // Distinctly lighter than a real amount and a step smaller, so an empty field
-  // reads as one a manager may leave alone rather than as one holding a value.
+  // WEIGHT AND COLOUR ONLY, and deliberately not size. A smaller placeholder is
+  // the natural way to say "this is a prompt, not a value", and it makes the
+  // text change size AND vertical position the instant a manager types the
+  // first digit -- the prompt is centred in its own smaller line box, the value
+  // in the field's, so the caret appears to step as the box fills. Same metrics
+  // for both means typing changes the ink and nothing else.
   &::placeholder
-    font-size 13px
     font-weight 400
     color $prose_muted
     opacity 1
