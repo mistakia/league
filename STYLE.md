@@ -9,16 +9,16 @@ the wordmark.
 
 **On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field                                                |
-| -------------------------------------------------- | ----------------------------------------------------------- |
-| The two 2px ink rules                              | The goal lines                                              |
-| The hero above the first, the space below the last | The end zones                                               |
-| The 1px ink band rule opening a section            | A ten-yard line                                             |
-| The hairline between two entries                   | The yard lines between                                      |
-| `.landing__yard`                                   | The yard numbers                                            |
-| `.landing__section::before`                        | The hash marks, down the right sideline                     |
-| `.landing__end`                                    | The end zone: two boundaries, an old-school diamond lattice |
-| `.landing__end-mark`                               | The name painted in it                                      |
+| On the page                                        | On the field                                    |
+| -------------------------------------------------- | ----------------------------------------------- |
+| The two 2px ink rules                              | The goal lines                                  |
+| The hero above the first, the space below the last | The end zones                                   |
+| The 1px ink band rule opening a section            | A ten-yard line                                 |
+| The hairline between two entries                   | The yard lines between                          |
+| `.landing__yard`                                   | The yard numbers                                |
+| `.landing__section::before`                        | The hash marks, down the right sideline         |
+| `.landing__end`                                    | The end zone: two boundaries and a distribution |
+| `.landing__end-mark`                               | The name painted in it                          |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -88,13 +88,13 @@ pages actually sit on — under the floor, for text set at normal size in every 
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
 
-**One paint for every field marking.** The yard numbers, the hash marks and the end zone lattice
-are all `$prose_rule`, the faintest grey in the palette. The end zone WORDMARK is the one step off
-it, at `$prose_rule_strong`, and it has to be: everything else painted here sits on the bare ground,
-while the wordmark sits on ruling in the same grey, and at the same value the letters and the
-diamonds dissolve into each other — and paint is the one thing on the page that can afford it.
-A mark at 48px is legible at a contrast a line of prose would vanish at, and
-every one of these is decorative by construction, carrying nothing a reader has to make out. The
+**One paint for every field marking.** The yard numbers, the hash marks and the end zone's bars are
+all `$prose_rule`, the faintest grey in the palette. The end zone WORDMARK is the one step off it,
+at `$prose_rule_strong`, and it has to be: everything else painted here sits on the bare ground,
+while the wordmark sits on the figure in the same grey, and at the same value the letters and the
+bars dissolve into each other — and paint is the one thing on the page that can afford it. A mark
+at 48px is legible at a contrast a line of prose would vanish at, and every one of these is
+decorative by construction, carrying nothing a reader has to make out. The
 yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
 and at that size it read as ink competing with the head across the row from it.
 
@@ -237,17 +237,31 @@ run out.
 **On the landing page that closing rule is the second goal line, and below it is a real end zone.**
 It has two boundaries at the goal line's own weight — the rule above and an end line below — because
 a zone with only one of them is an edge with space under it. Its sidelines are where the paint
-stops: the lattice runs to the measure's edges and ends, closing it left and right without two more
-rules. It is **ruled off in diamonds — two hairline families at opposed 45s on a 26px pitch** —
-which is the old end zone design from before they were solid colour with a wordmark dropped in, and
-a pattern this palette can draw, being the page's own hairline repeated rather than a second surface
-colour. Both families are load-bearing: one alone is a hatch and reads as shading, and the diamonds
-exist only where the second crosses the first. **The pitch is what decides whether it reads as
-diamonds at all**, and it has to be nearly twice the single hatch this replaced: two families lay
-down twice the ink of one, so the hatch's own 14px darkened the zone into the grey panel the pattern
-exists instead of, and 18px still read as mesh on the rendered page — the cells were small enough
-that the eye took the texture and not the shape. The site's name is painted across it in the paint
-face (`.landing__end-mark`).
+stops: the figure runs to the measure's edges and ends, closing it left and right without two more
+rules. The site's name is painted across it in the paint face (`.landing__end-mark`).
+
+**What is painted in the zone is a distribution** — a row of standing bars whose heights trace a
+log-normal density, right-skewed with a long tail, in `end-zone-figure.js`. This is the one place
+the page says what KIND of site it is rather than what is on it: the directory above names fourteen
+destinations and not one of them can say "we model this", and a histogram says it with no copy and
+no icon, in a band that was empty anyway. **The end line is its axis** — the bars stand on the 2px
+rule that already closes the page, which is the whole argument for putting the figure here and not
+somewhere else.
+
+Three things it must keep doing, each of them learned by getting it wrong:
+
+- **The bars are most of the pitch, not a fifth of it.** Thin bars with air between them read as a
+  comb or a waveform. Bins abut; the gap is relief and nothing more.
+- **The tail decays rather than flooring.** A minimum bar height set above where the density lands
+  clamps the last third to one value, and the tail becomes a baseline — the one thing a decaying
+  tail must not look like. The floor exists only so bars that would vanish do not.
+- **The skew is the point.** A symmetrical bell is the same gesture with the interesting half sanded
+  off, and the right tail is the shape a week of fantasy scoring actually takes.
+
+**A hatch, then a fine lattice, then a row of diamonds were all here first.** What killed the first
+two is worth keeping: at any pitch small enough to tile, a pattern reads as SHADING over the zone
+rather than as a marking on it. Whatever goes here has to be made of shapes big enough to be
+counted.
 
 This is not the border that was tried and removed. That one enclosed the whole page and read as a
 container; this bounds the one band on the page with no content in it, which is what a boundary is
