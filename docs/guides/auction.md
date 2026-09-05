@@ -136,6 +136,20 @@ The two are different kinds of statement, and the difference is the price:
 
 **A nomination may carry an optional ceiling.** `nominate` accepts a `maximum_bid`, and the socket writes the bid and that election in ONE transaction under the league's advisory lock — a nomination whose election was lost would open a player that waits on its own nominator. It is optional: absent means the nominator has not stated a ceiling and stays outstanding, free to elect later — unless its opening bid already reaches its own cap, which discharges it under the second ground above. It is election-mode only, refused below the opening bid, and it is NOT a decline — a nominator cannot decline the player it nominated.
 
+## A settlement that cannot be written REFUSES the write that triggered it
+
+`submit_auction_election` and `withdraw_auction_election` each write their row and settle the player in ONE transaction, so any throw inside the settlement has already erased the manager's write. That is the correct outcome and not a bug to be caught away.
+
+**The alternative is what makes it correct.** Committing the election and abandoning the settlement — a SAVEPOINT around the settle call, with either a signal or a retry behind it — reaches a set that is EMPTY and UNSETTLED. Completeness is the only thing that advances an election-mode auction and there is no clock, so once every team has elected there is no further write able to trigger a sale: the player sits open for the rest of the period while the board shows the auction waiting on nobody. Leaving the team outstanding is the repair. The set stays non-empty, the manager's own resubmission IS the retry path, and it cannot loop because it runs at human pace.
+
+**Only the error surface changed, and it was the mute half.** Every throw in the settlement is a bare `Error`, so it reached the manager as a 500 carrying nothing — while the `team N elected X` line had already printed ABOVE the settle call, making a wiped election indistinguishable from an ordinary one in the log. Both write verbs now refuse through `auction_election_error`, which both routes already branch on, and answer a 400 the manager can act on.
+
+**The signal is emitted OUTSIDE the transaction, and the placement is load-bearing.** `emit_signal` posts over the network with a ten-second timeout and the transaction holds the league's advisory lock, so emitting inside it would block every settlement in the league for the length of an HTTP call. The refusal is recorded during the rollback and emitted in a `finally`.
+
+**It emits without a resolve arm, unlike the mode-resolution signal.** That one reports a persistent state a later poll observes recovering; this reports a single refused write. Gating a resolve on the next successful settlement would put a network call on the hot success path for a condition that has never fired in production.
+
+**Score it on two mutations, because one does not cover it.** Removing the refusal wrapper reddens the 400 case and the signal case; deleting the signal call sites reddens only the signal case. `test/auction.settlement-refusal.spec.mjs` carries both, and drives the throw by deleting a roster row — `getRoster` raises rather than returning empty, and the settlement reads every contender's roster — rather than injecting an error the settlement could never raise. Its "leaves the refusing team outstanding" case stays GREEN under both mutations by design: the rollback happens either way today, and that case exists to catch a future change to the committing variant.
+
 ## Eligibility must stay monotone
 
 A team that leaves an eligible set never re-enters it, and completeness once reached stays reached. Second-price settlement rests on that.
