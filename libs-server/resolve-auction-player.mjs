@@ -119,8 +119,36 @@ export const resolve_auction_player = ({
     const effective_maximum = Math.min(claim.maximum_bid, roster.available_cap)
 
     if (effective_maximum < opening_bid) {
+      // WHICH TERM FELL SHORT DECIDES THE LABEL, and this used to report the
+      // budget whichever it was.
+      //
+      // `effective_maximum` is `min(stated, available_cap)`, so it drops below
+      // the price for two unrelated reasons: the team could not FUND the price,
+      // or the team simply did not OFFER it. Only the first is a budget
+      // situation, and `BUDGET_EXCEEDED` renders as "Available cap had fallen
+      // below the price by the time the player settled" -- which sends a manager
+      // who stated $3 on a $10 player looking for money they already have.
+      //
+      // A stated $0 is the sharp case: neither a decline nor a live claim, it
+      // discharges the team from the outstanding set and then reports a budget
+      // failure to a team with a full cap.
+      //
+      // The cap is tested FIRST because when both fell short the budget is the
+      // actionable half.
+      //
+      // And the other branch is `OUTBID` rather than a new outcome value. Not
+      // for cost -- `auction_elections.outcome` is a plain varchar with no
+      // enum behind it, so a new value would be constants and labels and no DDL
+      // at all. It is because `OUTBID` already means "a strictly higher claim
+      // won", which is precisely and completely what happened to a team that
+      // offered less than the price. A second name for the same fact would be a
+      // vocabulary a manager has to tell apart with no different action behind
+      // it, which is what the note in `auction-constants.mjs` warns against.
       outcomes.set(claim.tid, {
-        outcome: auction_election_outcomes.BUDGET_EXCEEDED
+        outcome:
+          roster.available_cap < opening_bid
+            ? auction_election_outcomes.BUDGET_EXCEEDED
+            : auction_election_outcomes.OUTBID
       })
       continue
     }

@@ -331,6 +331,54 @@ describe('auction settlement resolver', function () {
       expect(result.winner_tid).to.equal(NOMINATOR)
     })
 
+    // THE PAIR FOR THE CASE ABOVE, and the case it used to absorb silently.
+    //
+    // `effective_maximum` is `min(stated, available_cap)`, so it falls below the
+    // price for two unrelated reasons and this test is the one where the CAP is
+    // fine. Team 2 holds the default $200 and stated $3 on a $10 player: it was
+    // outbid, not short of money. Reporting a budget failure here sends a
+    // manager looking for cap space they already have.
+    it('calls a stated maximum below the price outbid, not a budget failure', function () {
+      const result = resolve(
+        [claim(NOMINATOR, 10, '2026-09-01'), claim(2, 3, '2026-09-02')],
+        { opening_bid: 10 }
+      )
+
+      expect(result.outcomes.get(2).outcome).to.equal(
+        auction_election_outcomes.OUTBID
+      )
+      expect(result.winner_tid).to.equal(NOMINATOR)
+    })
+
+    // A STATED $0 IS THE SHARP CASE. It is neither a decline nor a live claim:
+    // it discharges the team from the outstanding set the way any election does,
+    // and then reported a budget failure against a full cap.
+    it('calls a stated $0 outbid rather than a budget failure', function () {
+      const result = resolve(
+        [claim(NOMINATOR, 10, '2026-09-01'), claim(2, 0, '2026-09-02')],
+        { opening_bid: 10 }
+      )
+
+      expect(result.outcomes.get(2).outcome).to.equal(
+        auction_election_outcomes.OUTBID
+      )
+    })
+
+    // BOTH TERMS SHORT REPORTS THE BUDGET, because that is the actionable half.
+    it('reports the budget when the cap is short as well as the maximum', function () {
+      const result = resolve(
+        [claim(NOMINATOR, 10, '2026-09-01'), claim(2, 3, '2026-09-02')],
+        {
+          opening_bid: 10,
+          overrides: { 2: open_roster({ available_cap: 2 }) }
+        }
+      )
+
+      expect(result.outcomes.get(2).outcome).to.equal(
+        auction_election_outcomes.BUDGET_EXCEEDED
+      )
+    })
+
     it('caps an underfunded ceiling rather than invalidating it', function () {
       // Team 2 stated $30 but holds $12. It stays in contention at $12 rather
       // than dropping out, which is what preserves monotonicity.

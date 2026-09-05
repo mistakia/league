@@ -20,7 +20,15 @@ export const auction_election_outcomes = {
   LOST_TIEBREAK: 'lost_tiebreak',
   // null maximum at settlement
   DECLINED: 'declined',
-  // effective maximum -- min(stated, availableCap) -- fell below the price
+  // available cap fell below the price, so the team could not FUND it.
+  //
+  // Narrower than "effective maximum fell below the price", which is what this
+  // said and what the resolver used to test. That condition is
+  // `min(stated, availableCap) < price` and it is reached two ways -- a short
+  // cap, and a maximum the manager simply stated below the price. Only the
+  // first is a budget situation, and a team that stated $3 on a $10 player with
+  // $200 in hand was being told to go find money it already had. The second
+  // takes OUTBID, which is exactly what happened to it.
   BUDGET_EXCEEDED: 'budget_exceeded',
   // no open active roster spot at settlement
   ROSTER_FULL: 'roster_full',
