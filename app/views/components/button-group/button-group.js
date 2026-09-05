@@ -17,6 +17,19 @@ import './button-group.styl'
 // The paint that makes a group read as one control — the undone pair spacing,
 // the squared inner corners and the seam between segments — lives in
 // button.styl rather than here. See the specificity note there.
+//
+// EVERY DIRECT CHILD MUST BE A `.button`, and this is the one rule here that
+// fails silently. That paint is written as `.button-group > .button` plus a
+// `+ .button` adjacency, so a wrapper div in a segment slot is reached by none
+// of it: the wrapped button keeps its full radius and its own hover shadow,
+// and the segment AFTER the wrapper loses the -1px and the seam border,
+// because its previous sibling is no longer a button. Nothing errors, nothing
+// is missing from the DOM, and no stylesheet changed — so it reads as a CSS
+// regression with no CSS commit behind it. Shipped 2026-09-04 in the auction
+// bid bar, where a new control was added by wrapping it and the existing
+// button together and the wrapper was what rendered as the segment. A control
+// that is not a segment goes BESIDE the group; the row around it carries the
+// gap. player-context-menu.js states the same rule for its own note.
 
 export default function ButtonGroup({ children, className }) {
   const class_names = ['button-group']

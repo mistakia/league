@@ -209,6 +209,17 @@ h3` won on colour, tracking and line-height while letting `font-size` and `text-
   tokens; a CSS custom property is the exception and must be declared somewhere.
 - **`normalize.css` strips `-webkit-appearance` from every `input`**, so a hand-rolled checkbox has
   no box, no tick and no size, and `accent-color` is inert. Call `prose_checkbox()`.
+- **A non-`.button` direct child of `<ButtonGroup>` silently un-paints the segmented control**, and
+  the change that does it touches no stylesheet. Everything that makes a group read as one control
+  is written in `button.styl` as `.button-group > .button` plus a `+ .button` adjacency, so a
+  wrapper div in a segment slot is reached by none of it: the wrapped button keeps full radius and
+  its own hover shadow, and the segment AFTER the wrapper loses both its `-1px` and its seam
+  border, because its previous sibling is no longer a button. Nothing errors and nothing is missing
+  from the DOM. Shipped 2026-09-04, when the auction's optional nomination ceiling was added by
+  wrapping the Nominate button and the new input together — and that wrapper was `action`, which
+  renders as a stepper segment. **Put a new control BESIDE the group, not inside it**; the row
+  around it already carries the gap. `player-context-menu.js` states the same rule at its own call
+  site.
 
 ## Verifying a Style Change
 
