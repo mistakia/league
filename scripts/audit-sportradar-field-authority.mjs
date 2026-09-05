@@ -30,9 +30,14 @@ import { fileURLToPath } from 'url'
 
 import * as acorn from 'acorn'
 
+import { is_main } from '#libs-server'
 import { map_sportradar_play_to_nfl_play } from './import-plays-sportradar.mjs'
 import { SPORTRADAR_EXCLUSIVE_FIELDS } from '#libs-server/sportradar/sportradar-exclusive-fields.mjs'
 import { SPORTRADAR_PROTECTED_FIELDS } from '#libs-server/sportradar/sportradar-protected-fields.mjs'
+import {
+  SPORTRADAR_UNCONTESTED_FIELDS,
+  WRITER_CORPUS
+} from '#libs-server/sportradar/sportradar-uncontested-fields.mjs'
 import {
   add_personnel_counts_to_play_data,
   PERSONNEL_OFFENSE_COLUMNS,
@@ -42,9 +47,62 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..')
 
-// The one field reached past both authority lists, hardcoded in `overwrite_fields`
-// at the `update_play` call site in scripts/import-plays-sportradar.mjs.
-const HARDCODED_OVERWRITE_FIELDS = ['drive_yards']
+// Fields reached past both authority lists by a hardcoded `overwrite_fields` entry
+// at the `update_play` call site in scripts/import-plays-sportradar.mjs. Emptied
+// 2026-09-05 when `drive_yards` moved into the protected list; kept as a named
+// constant so a new exception has to be added here and is reported rather than
+// arriving as an anonymous string literal at a call site nobody re-reads.
+const HARDCODED_OVERWRITE_FIELDS = []
+
+// A column is uncontested only if no OTHER writer names it. Verifying that against
+// the tree is what stops the uncontested list decaying the way the protected list
+// did, where 18 entries named a column the importer does not write and so ruled on
+// nothing while reading as coverage.
+const resolve_competing_writers = (columns) => {
+  const sources = []
+  const missing_paths = []
+  for (const relative_path of WRITER_CORPUS) {
+    const absolute = path.join(repo_root, relative_path)
+    if (!fs.existsSync(absolute)) {
+      missing_paths.push(relative_path)
+      continue
+    }
+    const files = fs.statSync(absolute).isDirectory()
+      ? fs
+          .readdirSync(absolute)
+          .filter((name) => name.endsWith('.mjs'))
+          .map((name) => path.join(absolute, name))
+      : [absolute]
+    for (const file of files) {
+      sources.push([
+        path.relative(repo_root, file),
+        fs.readFileSync(file, 'utf8')
+      ])
+    }
+  }
+
+  // A writer path that no longer exists silently shrinks the corpus every
+  // membership claim is checked against, in the direction that says "nobody else
+  // writes this". Fail rather than narrow.
+  if (missing_paths.length) {
+    throw new Error(
+      `WRITER_CORPUS names paths that do not exist: ${missing_paths.join(', ')}`
+    )
+  }
+
+  const by_column = new Map()
+  for (const column of columns) {
+    // Anchored on both sides: an unanchored match on `drive_yards` also hits
+    // `drive_yards_penalized`, which would report a competing writer that does not
+    // exist and push a column out of the uncontested set for no reason.
+    const pattern = new RegExp(`(^|[^a-z0-9_])${column}([^a-z0-9_]|$)`)
+    by_column.set(
+      column,
+      sources.filter(([, source]) => pattern.test(source)).map(([file]) => file)
+    )
+  }
+  return by_column
+}
 
 // ---------------------------------------------------------------------------
 // nfl_plays columns, read from the tracked schema export
@@ -524,7 +582,12 @@ const run_negative_controls = ({
   return all_fired
 }
 
-const main = async () => {
+/**
+ * The whole classification, so a consumer (the containment and drift sweeps) takes
+ * its subject set from this one derivation rather than from a copied list that
+ * silently stops matching when a mapper changes.
+ */
+export const resolve_field_authority = async () => {
   const nfl_plays_columns = read_nfl_plays_columns()
   const { written_keys, personnel_written } = await collect_written_keys()
   const static_keys = collect_static_keys()
@@ -550,12 +613,28 @@ const main = async () => {
         SPORTRADAR_PROTECTED_FIELDS.has(column)
     )
     .sort()
+  const uncontested = written_columns
+    .filter((column) => SPORTRADAR_UNCONTESTED_FIELDS.has(column))
+    .sort()
   const ungoverned = written_columns
     .filter(
       (column) =>
         !SPORTRADAR_EXCLUSIVE_FIELDS.has(column) &&
-        !SPORTRADAR_PROTECTED_FIELDS.has(column)
+        !SPORTRADAR_PROTECTED_FIELDS.has(column) &&
+        !SPORTRADAR_UNCONTESTED_FIELDS.has(column)
     )
+    .sort()
+
+  // The uncontested claim, checked rather than trusted.
+  const competing_writers = resolve_competing_writers(written_columns)
+  const contested_uncontested = uncontested
+    .filter((column) => competing_writers.get(column).length)
+    .map((column) => ({
+      column,
+      writers: competing_writers.get(column)
+    }))
+  const inert_uncontested = [...SPORTRADAR_UNCONTESTED_FIELDS.keys()]
+    .filter((column) => !written_keys.has(column))
     .sort()
 
   // An entry in either list naming a column the importer does not write is not a
@@ -570,6 +649,45 @@ const main = async () => {
   const hardcoded_ungoverned = HARDCODED_OVERWRITE_FIELDS.filter((field) =>
     ungoverned.includes(field)
   )
+
+  return {
+    nfl_plays_columns,
+    written_keys,
+    written_columns,
+    written_non_columns,
+    static_keys,
+    unreached,
+    governed,
+    uncontested,
+    ungoverned,
+    competing_writers,
+    contested_uncontested,
+    inert_uncontested,
+    inert_exclusive,
+    inert_protected,
+    hardcoded_ungoverned,
+    personnel_written
+  }
+}
+
+const main = async () => {
+  const {
+    nfl_plays_columns,
+    written_keys,
+    written_columns,
+    written_non_columns,
+    static_keys,
+    unreached,
+    governed,
+    uncontested,
+    ungoverned,
+    contested_uncontested,
+    inert_uncontested,
+    inert_exclusive,
+    inert_protected,
+    hardcoded_ungoverned,
+    personnel_written
+  } = await resolve_field_authority()
 
   console.log('=== Sportradar field authority ===\n')
   console.log(
@@ -593,12 +711,22 @@ const main = async () => {
   )
   console.log(`written columns GOVERNED by a list:          ${governed.length}`)
   console.log(
+    `SPORTRADAR_UNCONTESTED_FIELDS entries:       ${SPORTRADAR_UNCONTESTED_FIELDS.size}`
+  )
+  console.log(
+    `written columns UNCONTESTED (no rival):      ${uncontested.length}`
+  )
+  console.log(
     `written columns UNGOVERNED:                  ${ungoverned.length}`
   )
   console.log('')
 
   console.log('--- ungoverned written columns ---')
   console.log(format_list(ungoverned))
+  console.log('')
+
+  console.log('--- uncontested written columns (no competing writer) ---')
+  console.log(format_list(uncontested))
   console.log('')
 
   console.log('--- governed written columns ---')
@@ -652,6 +780,32 @@ const main = async () => {
     exit_code = 1
   }
 
+  if (contested_uncontested.length) {
+    console.log(
+      'FALSE UNCONTESTED CLAIM: another writer names these, so they need a precedence ruling.'
+    )
+    for (const item of contested_uncontested) {
+      console.log(
+        `  ${item.column}: also written by ${item.writers.join(', ')}`
+      )
+    }
+    exit_code = 1
+  }
+
+  if (inert_uncontested.length) {
+    console.log(
+      `UNCONTESTED entries the importer never writes: ${inert_uncontested.join(', ')}`
+    )
+    exit_code = 1
+  }
+
+  if (ungoverned.length) {
+    console.log(
+      `UNRULED: ${ungoverned.length} written column(s) carry no disposition. Each needs an entry in the exclusive list, the protected list, or the uncontested list with a reason.`
+    )
+    exit_code = 1
+  }
+
   if (unreached.length) {
     console.log(
       'FIXTURE GAP: column-named write targets the synthetic play never reached.'
@@ -670,4 +824,6 @@ const main = async () => {
   process.exit(exit_code)
 }
 
-main()
+if (is_main(import.meta.url)) {
+  main()
+}

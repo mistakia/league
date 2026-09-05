@@ -1208,14 +1208,18 @@ const process_play = async ({
         play_row: db_play,
         update: mapped_play,
         overwrite_existing: stats.overwrite_existing,
-        // Use modern overwrite_fields approach for Sportradar-exclusive fields
-        // drive_yards: Sportradar provides accurate final drive total vs NFL v1 stale snapshots
-        overwrite_fields: [
-          'drive_yards',
-          ...(stats.ignore_sportradar_field_conflicts
-            ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
-            : [])
-        ],
+        // `drive_yards` was hardcoded here on the reasoning that Sportradar carries
+        // an accurate final drive total against NFL v1's stale snapshots. It was
+        // the only field reached past both authority lists, and the 2026-09-05
+        // field-authority audit found it is also the one whose MEANING changed:
+        // Sportradar's figure runs to 119 on 170 rows in 2025, against a maximum of
+        // exactly 99 in all 26 other seasons, which a drive total cannot be.
+        // Accuracy was the question asked when this exception was added; sameness
+        // was not. It is now in SPORTRADAR_PROTECTED_FIELDS with every other
+        // contested column, so this list carries only the exclusive set.
+        overwrite_fields: stats.ignore_sportradar_field_conflicts
+          ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
+          : [],
         // Authority blocklist: FTN/nflfastR-owned fields Sportradar may fill
         // when empty but must never overwrite, even under --overwrite_existing.
         // Structural backstop for the 2026-05-24 catchable_ball incident.

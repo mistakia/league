@@ -1,4 +1,4 @@
-// Sweep the ungoverned Sportradar-written nfl_plays columns for CROSS-SEASON
+// Sweep the nfl_plays columns the Sportradar importer writes for CROSS-SEASON
 // MEANING DRIFT: a column whose name, type and population rate all stay healthy
 // while the thing it holds changes.
 //
@@ -169,12 +169,16 @@ const run_negative_controls = async ({ findings, comparable_by_column }) => {
 }
 
 const main = async () => {
-  const { ungoverned } = await resolve_field_authority()
-  const types = await load_column_types(ungoverned)
+  // Subject set is what the importer WRITES, not what carries no authority ruling.
+  // The second set is empty as of the 2026-09-05 ruling and would make this sweep
+  // vacuous; the first is a fact about the code and is what decides which columns a
+  // Sportradar run can change the meaning of.
+  const { written_columns } = await resolve_field_authority()
+  const types = await load_column_types(written_columns)
 
   const subjects = []
   const out_of_scope = []
-  for (const column of ungoverned) {
+  for (const column of written_columns) {
     const data_type = types.get(column)
     if (!data_type) {
       out_of_scope.push({ column, reason: 'not an nfl_plays column' })
@@ -371,8 +375,8 @@ const main = async () => {
     if (!flagged) clean.push(subject.column)
   }
 
-  console.log('=== Sportradar ungoverned meaning-drift sweep ===\n')
-  console.log(`ungoverned columns:              ${ungoverned.length}`)
+  console.log('=== Sportradar written-column meaning-drift sweep ===\n')
+  console.log(`Sportradar-written columns:      ${written_columns.length}`)
   console.log(
     `  swept:                         ${subjects.filter((s) => s.kind !== 'high_cardinality').length}`
   )
@@ -441,9 +445,9 @@ const main = async () => {
       .map((subject) => subject.column),
     ...out_of_scope.map((item) => item.column)
   ])
-  if (accounted.size !== ungoverned.length) {
+  if (accounted.size !== written_columns.length) {
     console.log(
-      'COVERAGE GAP: an ungoverned column was neither swept nor excluded.'
+      'COVERAGE GAP: a written column was neither swept nor excluded.'
     )
     exit_code = 1
   }

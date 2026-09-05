@@ -20,8 +20,15 @@
 // perfectly fine. Collapsing them with `IS NOT TRUE` reports the second as the first,
 // which is how a benign vendor convention gets escalated into a defect.
 //
-// The subject set is taken from `resolve_field_authority()` rather than copied, and
-// EVERY ungoverned column must appear in PAIRS below -- with a superset, or with an
+// The subject set is every column the Sportradar importer WRITES, taken from
+// `resolve_field_authority()` rather than copied. It is deliberately not "the
+// columns with no authority ruling": that set is empty as of the 2026-09-05 ruling
+// and would make this sweep vacuous, and it was never the right class anyway --
+// what the importer writes is a fact about the code, while which list a column
+// sits in is a fact about the policy, and only the first decides what data a
+// Sportradar run can put in the table.
+//
+// EVERY written column must appear in PAIRS below -- with a superset, or with an
 // explicit `no_superset` reason. An unclassified column fails the run, so a mapper
 // that starts writing a new column cannot be swept over in silence.
 
@@ -158,7 +165,140 @@ const PAIRS = [
   { column: 'yard_line_number', no_superset: 'true of every play' },
   { column: 'yard_line_100', no_superset: 'true of every play' },
   { column: 'yard_line_start', no_superset: 'true of every play' },
-  { column: 'yard_line_end', no_superset: 'true of every play' }
+  { column: 'yard_line_end', no_superset: 'true of every play' },
+  // --- columns already carrying an authority ruling -----------------------------
+  // These sit in the exclusive or protected list, which decides who WINS a
+  // disagreement and says nothing about whether the value is self-consistent. The
+  // containment question is orthogonal to the precedence one, so they are swept
+  // alongside the rest.
+  { column: 'is_completion', no_superset: 'the event flag itself' },
+  { column: 'is_incompletion', superset: "play_type = 'PASS'" },
+  { column: 'is_interception', superset: "play_type = 'PASS'" },
+  { column: 'is_sack', superset: "play_type = 'PASS'" },
+  { column: 'is_passing_touchdown', superset: 'is_touchdown' },
+  { column: 'is_rushing_touchdown', superset: 'is_touchdown' },
+  { column: 'is_first_down_pass', superset: "play_type = 'PASS'" },
+  { column: 'is_first_down_rush', superset: "play_type = 'RUSH'" },
+  { column: 'is_catchable_ball', superset: "play_type = 'PASS'" },
+  { column: 'is_dropped_pass', superset: "play_type = 'PASS'" },
+  { column: 'is_qb_hit', superset: "play_type = 'PASS'" },
+  { column: 'is_qb_hurry', superset: "play_type = 'PASS'" },
+  { column: 'pocket_time', superset: "play_type = 'PASS'" },
+  { column: 'incomplete_pass_type', superset: 'is_incompletion' },
+  { column: 'play_direction', superset: "play_type = 'PASS'" },
+  {
+    column: 'yards_after_any_contact',
+    no_superset: 'charted on rushes and receptions alike'
+  },
+  { column: 'broken_tackles_rush', superset: "play_type = 'RUSH'" },
+  { column: 'broken_tackles_receiving', superset: 'is_completion' },
+  { column: 'is_qb_kneel', superset: "play_type = 'RUSH'" },
+  { column: 'field_goal_result_detail', superset: 'is_field_goal_attempt' },
+  { column: 'is_kickoff_onside', superset: 'is_kickoff_attempt' },
+  { column: 'is_kickoff_touchback', superset: 'is_kickoff_attempt' },
+  { column: 'is_punt_inside_20', superset: 'is_punt_attempt' },
+  { column: 'is_punt_touchback', superset: 'is_punt_attempt' },
+  { column: 'punt_hang_time', superset: 'is_punt_attempt' },
+  { column: 'is_fake_punt', superset: 'is_punt_attempt' },
+  { column: 'is_fake_field_goal', superset: 'is_field_goal_attempt' },
+  { column: 'is_penalty_declined', superset: 'is_penalty' },
+  { column: 'is_penalty_offset', superset: 'is_penalty' },
+  { column: 'fumble_recovered_team', superset: 'is_fumble' },
+  {
+    column: 'is_touchdown',
+    no_superset: 'a play outcome, not a detail of one'
+  },
+  { column: 'is_blitz', no_superset: 'a pre-snap fact, true of any play' },
+  { column: 'is_no_huddle', no_superset: 'a pre-snap fact, true of any play' },
+  {
+    column: 'is_screen_pass',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+  {
+    column: 'is_run_play_option',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+  {
+    column: 'quarterback_position',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+  { column: 'starting_hash', no_superset: 'a pre-snap fact, true of any play' },
+  {
+    column: 'pocket_location',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+  {
+    column: 'left_tightends',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+  {
+    column: 'right_tightends',
+    no_superset: 'a pre-snap fact, true of any play'
+  },
+
+  // Vendor identifiers and the wall clock are stamped on every play the feed
+  // carries, so there is no event whose absence would make one of them wrong.
+  {
+    column: 'sportradar_game_id',
+    no_superset: 'vendor identifier, on every play'
+  },
+  {
+    column: 'sportradar_play_id',
+    no_superset: 'vendor identifier, on every play'
+  },
+  {
+    column: 'sportradar_drive_id',
+    no_superset: 'vendor identifier, on every play'
+  },
+  {
+    column: 'sportradar_play_type',
+    no_superset: 'vendor identifier, on every play'
+  },
+  { column: 'wall_clock', no_superset: 'vendor timestamp, on every play' },
+
+  // A vendor player id travels with the pid column beside it and is contained by
+  // the same event, so pairing it separately would double-count every finding the
+  // pid already reports.
+  {
+    column: 'kicker_sportradar_player_id',
+    no_superset: 'travels with kicker_pid'
+  },
+  {
+    column: 'punter_sportradar_player_id',
+    no_superset: 'travels with punter_pid'
+  },
+  {
+    column: 'returner_sportradar_player_id',
+    no_superset: 'travels with returner_pid'
+  },
+  {
+    column: 'penalty_sportradar_player_id',
+    no_superset: 'travels with penalty_player_pid'
+  },
+  {
+    column: 'fumble_forced_1_sportradar_player_id',
+    no_superset: 'travels with fumble_forced_1_pid'
+  },
+  {
+    column: 'fumble_recovered_1_sportradar_player_id',
+    no_superset: 'travels with fumble_recovered_1_pid'
+  },
+  {
+    column: 'sack_1_sportradar_player_id',
+    no_superset: 'travels with sack_player_1_pid'
+  },
+  {
+    column: 'sack_2_sportradar_player_id',
+    no_superset: 'travels with sack_player_2_pid'
+  },
+  {
+    column: 'tackle_for_loss_1_sportradar_player_id',
+    no_superset: 'travels with tackle_for_loss_1_pid'
+  },
+  {
+    column: 'tackle_for_loss_2_sportradar_player_id',
+    no_superset: 'travels with tackle_for_loss_2_pid'
+  }
 ]
 
 const held_predicate = (column, is_boolean) =>
@@ -222,12 +362,14 @@ const run_negative_control = async ({ boolean_columns }) => {
 }
 
 const main = async () => {
-  const { ungoverned, nfl_plays_columns } = await resolve_field_authority()
+  const { written_columns, nfl_plays_columns } = await resolve_field_authority()
 
   const classified = new Set(PAIRS.map((pair) => pair.column))
-  const unclassified = ungoverned.filter((column) => !classified.has(column))
+  const unclassified = written_columns.filter(
+    (column) => !classified.has(column)
+  )
   const stale = PAIRS.map((pair) => pair.column).filter(
-    (column) => !ungoverned.includes(column)
+    (column) => !written_columns.includes(column)
   )
 
   const boolean_rows = await db('information_schema.columns')
@@ -238,8 +380,8 @@ const main = async () => {
   const measured_pairs = PAIRS.filter((pair) => pair.superset)
   const rows = await measure({ pairs: measured_pairs, boolean_columns })
 
-  console.log('=== Sportradar ungoverned containment sweep ===\n')
-  console.log(`ungoverned columns:            ${ungoverned.length}`)
+  console.log('=== Sportradar written-column containment sweep ===\n')
+  console.log(`Sportradar-written columns:    ${written_columns.length}`)
   console.log(`  with a declared superset:    ${measured_pairs.length}`)
   console.log(
     `  declared to have none:       ${PAIRS.length - measured_pairs.length}`
@@ -354,14 +496,14 @@ const main = async () => {
 
   if (unclassified.length) {
     console.log(
-      'COVERAGE GAP: ungoverned columns with no entry in PAIRS -- they were not swept.'
+      'COVERAGE GAP: written columns with no entry in PAIRS -- they were not swept.'
     )
     for (const column of unclassified) console.log(`  ${column}`)
     exit_code = 1
   }
   if (stale.length) {
     console.log(
-      'STALE PAIRS: entries naming a column that is no longer ungoverned.'
+      'STALE PAIRS: entries naming a column the importer no longer writes.'
     )
     for (const column of stale) console.log(`  ${column}`)
     exit_code = 1

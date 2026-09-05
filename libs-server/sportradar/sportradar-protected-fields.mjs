@@ -65,7 +65,87 @@ export const SPORTRADAR_PROTECTED_FIELDS = new Set([
   'is_first_down_penalty',
   'is_qb_dropback',
   'is_qb_kneel',
-  'is_qb_scramble'
+  'is_qb_scramble',
+
+  // ---- Contested columns ruled on 2026-09-05 by the field-authority audit ----
+  //
+  // Until that audit the importer wrote 81 nfl_plays columns that neither list
+  // named. Those were fill-only by DEFAULT and fully overwritable under
+  // `--overwrite_existing` -- which is precisely the gap the 2026-05-24
+  // is_catchable_ball incident ran through, still open on 81 more columns.
+  //
+  // Each column below is written by at least one OTHER writer, established by
+  // scanning WRITER_CORPUS in ./sportradar-uncontested-fields.mjs rather than by
+  // reading names, and the trailing comment records which. A contested column
+  // defaults to PROTECTED rather than to exclusive: Sportradar is a live proxy for
+  // most of them and there is no positive evidence it is the authority for any, so
+  // the safe direction is that it may FILL an empty column and never correct a
+  // value another writer already put there. Normal importer runs are fill-only
+  // already, so this changes nothing about them; it constrains exactly the two
+  // overwrite flags that have caused damage before.
+  //
+  // Move a column OUT of here into the exclusive list when there is evidence
+  // Sportradar is the authoritative source for it -- not because a re-import wants
+  // to overwrite it. That reasoning is what put `drive_yards` in overwrite_fields.
+  'away_score', // nflfastr
+  'ball_carrier_gsis_player_id', // scripts/process-plays,enrich:player-identification-enrichment
+  'ball_carrier_pid', // nfl-v1,scripts/process-plays,enrich:player-identification-enrichment
+  'defense_nfl_team', // nfl-v1,nflfastr,charting,charted-plays-from-csv,scripts/process-plays,enrich:fixed-drive-enrichment,enrich:team-assignment-enrichment
+  'drive_end_transition', // nflfastr
+  'drive_first_downs', // nflfastr
+  'drive_play_count', // nfl-v1,nflfastr,enrich:drive-play-count-enrichment
+  'drive_sequence', // nfl-v1,nflfastr,enrich:drive-play-count-enrichment,enrich:enrichment-helpers,enrich:fixed-drive-enrichment,enrich:index
+  'drive_start_transition', // nflfastr
+  'drive_top', // nflfastr
+  'drive_yards', // nfl-v1
+  'drive_yards_penalized', // nflfastr
+  'field_goal_result', // nflfastr
+  'game_clock_start', // nfl-v1,nflfastr,charted-plays-from-csv
+  'home_score', // nflfastr
+  'interceptor_gsis_player_id', // scripts/process-plays,enrich:player-identification-enrichment
+  'interceptor_pid', // scripts/process-plays,enrich:player-identification-enrichment
+  'is_field_goal_attempt', // nflfastr
+  'is_fumble_lost', // enrich:fixed-drive-enrichment,enrich:yardage-stat-enrichment
+  'is_goal_to_go', // nfl-v1
+  'is_kickoff_attempt', // nflfastr,enrich:fixed-drive-enrichment
+  'is_out_of_bounds', // nflfastr
+  'is_penalty', // nfl-v1
+  'is_punt_attempt', // nflfastr
+  'is_punt_blocked', // nflfastr
+  'is_qb_spike', // nfl-v1,nflfastr,enrich:qb-play-enrichment
+  'is_return_touchdown', // enrich:yardage-stat-enrichment
+  'is_safety', // nflfastr,enrich:fixed-drive-enrichment
+  'is_tackle_for_loss', // nflfastr
+  'is_touchback', // nflfastr
+  'kick_distance', // nflfastr
+  'offense_nfl_team', // nfl-v1,nflfastr,charting,charted-plays-from-csv,scripts/process-plays,enrich:fixed-drive-enrichment,enrich:team-assignment-enrichment
+  'pass_yards', // nflfastr,enrich:yardage-stat-enrichment
+  'passer_gsis_player_id', // scripts/process-plays,enrich:player-identification-enrichment
+  'passer_pid', // nfl-v1,scripts/process-plays,enrich:player-identification-enrichment
+  'penalty_player_gsis', // nflfastr,scripts/process-plays,enrich:player-identification-enrichment
+  'penalty_player_pid', // scripts/process-plays,enrich:player-identification-enrichment
+  'penalty_team', // nflfastr
+  'penalty_type', // nflfastr
+  'penalty_yards', // nflfastr
+  'play_type', // nfl-v1,nflfastr,scripts/process-plays,enrich:drive-play-count-enrichment,enrich:enrichment-helpers,enrich:fixed-drive-enrichment,enrich:index,enrich:play-type-enrichment
+  'possession_nfl_team', // nfl-v1,nflfastr,enrich:fixed-drive-enrichment,enrich:team-assignment-enrichment
+  'receiving_yards', // nflfastr,enrich:yardage-stat-enrichment
+  'return_yards', // enrich:yardage-stat-enrichment
+  'run_gap', // nflfastr
+  'rush_yards', // nflfastr,enrich:yardage-stat-enrichment
+  'seconds_remaining_game', // nfl-v1,nflfastr
+  'seconds_remaining_half', // nfl-v1,nflfastr
+  'seconds_remaining_quarter', // nfl-v1,nflfastr,charting
+  'target_gsis_player_id', // scripts/process-plays,enrich:player-identification-enrichment
+  'target_pid', // nfl-v1,scripts/process-plays,enrich:player-identification-enrichment
+  'yard_line_100', // nfl-v1,nflfastr,charting
+  'yard_line_end', // nfl-v1
+  'yard_line_number', // nfl-v1
+  'yard_line_side', // nfl-v1
+  'yard_line_start', // nfl-v1
+  'yards_after_catch', // enrich:yardage-stat-enrichment
+  'yards_gained', // enrich:index,enrich:success-metric-enrichment,enrich:yardage-stat-enrichment
+  'yards_to_go' // nfl-v1,nflfastr,charting,enrich:success-metric-enrichment
 ])
 
 /**
