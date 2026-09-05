@@ -129,6 +129,64 @@ export default {
       ),
     use_having: true
   },
+  play_qb_hurry: {
+    column_name: 'is_qb_hurry',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_qb_hurry as play_qb_hurry'],
+    main_where: () => 'nfl_plays.is_qb_hurry',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_qb_hurry = true THEN 1 ELSE 0 END) as play_qb_hurry'
+      ),
+    use_having: true
+  },
+  play_pocket_time: {
+    column_name: 'pocket_time',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.pocket_time as play_pocket_time'],
+    main_where: () => 'nfl_plays.pocket_time',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.pocket_time) as play_pocket_time'),
+    use_having: true
+  },
+  play_dropback_depth: {
+    column_name: 'dropback_depth',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.dropback_depth as play_dropback_depth'],
+    main_where: () => 'nfl_plays.dropback_depth',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.dropback_depth) as play_dropback_depth'),
+    use_having: true
+  },
+  play_throw_away: {
+    column_name: 'is_throw_away',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_throw_away as play_throw_away'],
+    main_where: () => 'nfl_plays.is_throw_away',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_throw_away = true THEN 1 ELSE 0 END) as play_throw_away'
+      ),
+    use_having: true
+  },
+  play_pass_location: {
+    column_name: 'pass_location',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.pass_location as play_pass_location'],
+    main_where: () => 'nfl_plays.pass_location'
+  },
+  play_read_thrown: {
+    column_name: 'read_thrown',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.read_thrown as play_read_thrown'],
+    main_where: () => 'nfl_plays.read_thrown'
+  },
+  play_qb_alignment: {
+    column_name: 'quarterback_position',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.quarterback_position as play_qb_alignment'],
+    main_where: () => 'nfl_plays.quarterback_position'
+  },
   play_qb_hit: {
     column_name: 'is_qb_hit',
     table_name: 'nfl_plays',

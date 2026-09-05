@@ -24,6 +24,9 @@ export default {
   play_yds_gained_avg: 'Average yards gained per play',
   play_first_down: 'Whether the play resulted in a first down',
   play_td: 'Whether the play resulted in a touchdown',
+  play_int: 'Whether the pass was intercepted',
+  play_penalty: 'Whether a penalty was called on the play',
+  play_penalty_type: 'The penalty called, when there was one',
   play_successful:
     'Whether the play was successful (gained expected yards based on down and distance)',
   play_epa: 'Expected Points Added - average EPA per play',
@@ -50,6 +53,15 @@ export default {
   play_qb_pressure: 'Whether the quarterback was pressured',
   play_qb_hit: 'Whether the quarterback was hit',
   play_sk: 'Whether the play resulted in a sack',
+  play_qb_hurry: 'Whether the quarterback was hurried',
+  play_pocket_time: 'Seconds the quarterback had in the pocket',
+  play_dropback_depth: 'How deep the quarterback dropped, in yards',
+  play_throw_away: 'Whether the quarterback threw the ball away',
+  play_pass_location: 'Where the pass went — LEFT, MIDDLE or RIGHT',
+  play_read_thrown:
+    'Which read the quarterback threw — FIRST, SECOND, CHECKDOWN, DESIGNED or SCRAMBLE_DRILL',
+  play_qb_alignment:
+    'How the quarterback lined up — SHOTGUN, UNDER_CENTER or PISTOL',
 
   // Rushing fields
   play_rusher: 'The name of the ball carrier/rusher',
@@ -66,6 +78,9 @@ export default {
   play_recv_yds: 'Receiving yards on the play',
   play_yards_after_catch: 'Yards gained after the catch',
   play_route: 'The route run by the receiver',
+  play_receiver_separation:
+    'How open the targeted receiver was — WIDE_OPEN, OPEN, ONE_STEP_OPEN, CLOSING_COVERAGE or TIGHT_COVERAGE',
+  play_pass_breakup: 'Whether a defender broke up the pass',
   play_contested_ball: 'Whether the catch was contested',
   play_catchable_ball: 'Whether the pass was catchable',
   play_endzone_target: 'Whether the target was in the end zone',
@@ -105,6 +120,8 @@ export default {
     'Whether the coverage was man or zone (MAN_COVERAGE, ZONE_COVERAGE, SITUATIONAL, MISC). The two feeds spell this differently and both are live in 2025, so the raw MAN/ZONE spellings are normalized to the long ones here.',
   play_is_blitz: 'Whether the defense blitzed',
   play_is_zero_blitz: 'Whether the defense ran a zero blitz',
+  play_is_stunt: 'Whether the pass rush ran a stunt',
+  play_coverage_defenders: 'How many defenders dropped into coverage',
   play_is_motion: 'Whether pre-snap motion was used',
   play_is_trick_play: 'Whether the play was a trick play',
   play_is_out_of_pocket: 'Whether the pass was thrown out of the pocket'

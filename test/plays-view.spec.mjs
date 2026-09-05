@@ -3,6 +3,8 @@
 import * as chai from 'chai'
 
 import { get_plays_view_results_query } from '#libs-server'
+import plays_view_column_definitions from '#libs-server/plays-view/column-definitions/index.mjs'
+import plays_view_fields_index from '#libs-shared/plays-view-fields-index.mjs'
 import { current_season } from '#constants'
 import { compare_queries } from './utils/index.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -440,6 +442,26 @@ describe('Plays View', () => {
       const expected_query = `select "nfl_plays"."play_type" from "nfl_plays" where "nfl_plays"."season_year" in (2023) and "nfl_plays"."season_type" in ('REG') limit 500`
 
       compare_queries(query.toString(), expected_query)
+    })
+  })
+
+  // A plays column is three separate declarations -- the server definition, the
+  // shared description, and the client field -- and nothing made them agree.
+  // The failure is silent in both directions: a column with no description
+  // renders a header with an empty tooltip, and a description for a column that
+  // no longer exists is prose nobody can reach. The client field list cannot be
+  // imported here (it carries JSX), so this asserts the two registries a server
+  // test can see; the client list is covered by the column controls rendering
+  // nothing for an id it does not know.
+  describe('column registry parity', () => {
+    it('gives every column a description and every description a column', () => {
+      const column_ids = Object.keys(plays_view_column_definitions)
+      const described_ids = Object.keys(plays_view_fields_index)
+
+      expect(column_ids.filter((id) => !plays_view_fields_index[id])).to.eql([])
+      expect(
+        described_ids.filter((id) => !plays_view_column_definitions[id])
+      ).to.eql([])
     })
   })
 })

@@ -41,6 +41,37 @@ export default {
       ),
     use_having: true
   },
+  play_int: {
+    column_name: 'is_interception',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_interception as play_int'],
+    main_where: () => 'nfl_plays.is_interception',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_interception = true THEN 1 ELSE 0 END) as play_int'
+      ),
+    use_having: true
+  },
+  play_penalty: {
+    column_name: 'is_penalty',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_penalty as play_penalty'],
+    main_where: () => 'nfl_plays.is_penalty',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_penalty = true THEN 1 ELSE 0 END) as play_penalty'
+      ),
+    use_having: true
+  },
+  // Free text rather than a SELECT: the vocabulary is the league's own penalty
+  // names and it is open, so an enumerated filter would be a list that goes
+  // stale silently. Filter it with LIKE.
+  play_penalty_type: {
+    column_name: 'penalty_type',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.penalty_type as play_penalty_type'],
+    main_where: () => 'nfl_plays.penalty_type'
+  },
   play_successful: {
     column_name: 'is_successful_play',
     table_name: 'nfl_plays',

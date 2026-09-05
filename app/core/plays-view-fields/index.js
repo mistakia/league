@@ -220,6 +220,19 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
     header_label: 'TD'
   }),
+  play_int: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
+    header_label: 'INT'
+  }),
+  play_penalty: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
+    header_label: 'PEN'
+  }),
+  play_penalty_type: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
+    header_label: 'PENTYPE',
+    size: 180
+  }),
   play_successful: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
     header_label: 'SUCC'
@@ -336,6 +349,51 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
     header_label: 'SK'
   }),
+  play_qb_hurry: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'HRY'
+  }),
+  play_pocket_time: play_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'PCKT',
+    fixed: 2
+  }),
+  play_dropback_depth: play_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'DEPTH',
+    fixed: 1
+  }),
+  play_throw_away: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'TAWAY'
+  }),
+  play_pass_location: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'LOC',
+    size: 80,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: ['LEFT', 'MIDDLE', 'RIGHT']
+  }),
+  play_read_thrown: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'READ',
+    size: 120,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: [
+      'FIRST',
+      'SECOND',
+      'CHECKDOWN',
+      'DESIGNED',
+      'SCRAMBLE_DRILL'
+    ]
+  }),
+  play_qb_alignment: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
+    header_label: 'QBALN',
+    size: 120,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: ['SHOTGUN', 'UNDER_CENTER', 'PISTOL']
+  }),
 
   // Rushing fields
   play_rusher: play_text_field({
@@ -400,6 +458,23 @@ const plays_view_fields = {
     column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
     header_label: 'ROUTE',
     size: 80
+  }),
+  play_receiver_separation: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
+    header_label: 'SEP',
+    size: 130,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    column_values: [
+      'WIDE_OPEN',
+      'OPEN',
+      'ONE_STEP_OPEN',
+      'CLOSING_COVERAGE',
+      'TIGHT_COVERAGE'
+    ]
+  }),
+  play_pass_breakup: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
+    header_label: 'PBU'
   }),
   play_contested_ball: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
@@ -578,6 +653,18 @@ const plays_view_fields = {
   play_is_zero_blitz: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
     header_label: '0BLZ'
+  }),
+  play_is_stunt: play_boolean_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'STNT'
+  }),
+  play_coverage_defenders: play_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
+    header_label: 'COVDEF',
+    fixed: 1,
+    // A defensive alignment count, the same circumstance-not-outcome case as
+    // the box and blitzer counts above.
+    disable_percentiles: true
   }),
   play_is_motion: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],

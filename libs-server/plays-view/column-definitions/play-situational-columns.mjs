@@ -99,6 +99,28 @@ export default {
       ),
     use_having: true
   },
+  play_is_stunt: {
+    column_name: 'is_stunt',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_stunt as play_is_stunt'],
+    main_where: () => 'nfl_plays.is_stunt',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_stunt = true THEN 1 ELSE 0 END) as play_is_stunt'
+      ),
+    use_having: true
+  },
+  play_coverage_defenders: {
+    column_name: 'coverage_defenders',
+    table_name: 'nfl_plays',
+    main_select: () => [
+      'nfl_plays.coverage_defenders as play_coverage_defenders'
+    ],
+    main_where: () => 'nfl_plays.coverage_defenders',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.coverage_defenders) as play_coverage_defenders'),
+    use_having: true
+  },
   // ONE canonical coverage column over two feeds, and one companion naming
   // which feed answered.
   //

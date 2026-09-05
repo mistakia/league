@@ -55,6 +55,25 @@ export default {
     main_select: () => ['nfl_plays.charted_route as play_route'],
     main_where: () => 'nfl_plays.charted_route'
   },
+  play_receiver_separation: {
+    column_name: 'targeted_receiver_separation',
+    table_name: 'nfl_plays',
+    main_select: () => [
+      'nfl_plays.targeted_receiver_separation as play_receiver_separation'
+    ],
+    main_where: () => 'nfl_plays.targeted_receiver_separation'
+  },
+  play_pass_breakup: {
+    column_name: 'is_pass_breakup',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.is_pass_breakup as play_pass_breakup'],
+    main_where: () => 'nfl_plays.is_pass_breakup',
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_pass_breakup = true THEN 1 ELSE 0 END) as play_pass_breakup'
+      ),
+    use_having: true
+  },
   play_contested_ball: {
     column_name: 'is_contested_ball',
     table_name: 'nfl_plays',
