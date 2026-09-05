@@ -624,23 +624,14 @@ router.get('/charted', async (req, res) => {
 router.post('/views/search', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const {
-      columns,
-      prefix_columns,
-      where,
-      sort,
-      params,
-      group_by,
-      offset,
-      limit
-    } = req.body
+    const { columns, prefix_columns, where, sort, group_by, offset, limit } =
+      req.body
 
     const cache_key = `/plays-views/${get_plays_view_hash({
       columns,
       prefix_columns,
       where,
       sort,
-      params,
       group_by,
       offset,
       limit
@@ -660,7 +651,6 @@ router.post('/views/search', async (req, res) => {
         prefix_columns,
         where,
         sort,
-        params,
         group_by,
         offset,
         limit,
@@ -732,7 +722,6 @@ router.get('/views/export/:view_id/:export_format', async (req, res) => {
       prefix_columns: table_state.prefix_columns,
       where: table_state.where,
       sort: table_state.sort,
-      params: table_state.params,
       group_by: table_state.group_by,
       offset: table_state.offset,
       limit: limit || table_state.limit
@@ -755,7 +744,6 @@ router.get('/views/export/:view_id/:export_format', async (req, res) => {
         prefix_columns: table_state.prefix_columns,
         where: table_state.where,
         sort: table_state.sort,
-        params: table_state.params,
         group_by: table_state.group_by,
         offset: table_state.offset,
         limit: limit || table_state.limit,

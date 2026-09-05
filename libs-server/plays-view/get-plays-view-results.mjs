@@ -1,7 +1,6 @@
 import db from '#db'
 import debug from 'debug'
 import { current_season } from '#constants'
-import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import * as validators from '#libs-server/validators.mjs'
 import plays_view_column_definitions from '#libs-server/plays-view/column-definitions/index.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
@@ -29,9 +28,13 @@ const GROUP_BY_COLUMNS = {
 const CACHE_TTL_CURRENT_SEASON = 60 * 60 // 1 hour (seconds)
 const CACHE_TTL_HISTORICAL = 7 * 24 * 60 * 60 // 7 days (seconds)
 
-function get_cache_info({ params = {} }) {
-  const year = params.year
-  const years = Array.isArray(year) ? year : [year]
+// Read off the resolved WHERE clauses rather than a param, because the plays
+// view has no params. apply_default_season_scope guarantees a play_year clause
+// exists by the time this runs, so there is no no-year branch to get wrong.
+function get_cache_info({ where }) {
+  const year_clause = where.find((clause) => clause.column_id === 'play_year')
+  const value = year_clause ? year_clause.value : null
+  const years = Array.isArray(value) ? value : [value]
   const includes_current_season = years.some(
     (y) => Number(y) === current_season.year
   )
@@ -41,11 +44,56 @@ function get_cache_info({ params = {} }) {
   return { cache_ttl }
 }
 
+// Persisted short URLs carry columns in both the bare-string and the
+// {column_id, params} object form, so both shapes are still ACCEPTED. The
+// params are deliberately not read: no plays column has ever consumed one, and
+// a filter that silently does nothing is worse than no filter at all.
 function resolve_column_id(column) {
-  if (typeof column === 'string') {
-    return { column_id: column, params: {} }
+  return typeof column === 'string' ? column : column.column_id
+}
+
+// The plays view takes no params. Every filterable fact about a play is a
+// column and `where` is the only filter mechanism, so the default scope is
+// expressed as ordinary WHERE clauses -- visible in the emitted SQL, and
+// editable by the caller like any other filter.
+//
+// Two rules, and the asymmetry between them is the point.
+//
+// A year is ALWAYS synthesized when absent, because it is the only thing
+// standing between an unscoped request and a full scan of every nfl_plays
+// partition (1.5M rows).
+//
+// The regular-season default is synthesized ONLY when the request names no
+// season scope at all. A caller who names a year gets exactly the seasons they
+// named. The old params-coupled default got this backwards: a play_year clause
+// suppressed the year param, the REG default rode on that param, and so a view
+// that scoped its own seasons silently lost its season-type filter and mixed
+// in preseason.
+function apply_default_season_scope(where) {
+  const has_year = where.some((clause) => clause.column_id === 'play_year')
+  if (has_year) {
+    return where
   }
-  return { column_id: column.column_id, params: column.params || {} }
+
+  const has_seas_type = where.some(
+    (clause) => clause.column_id === 'play_seas_type'
+  )
+  const defaults = [
+    {
+      column_id: 'play_year',
+      operator: '=',
+      value: current_season.last_completed_season_year
+    }
+  ]
+  if (!has_seas_type) {
+    defaults.push({
+      column_id: 'play_seas_type',
+      operator: '=',
+      value: 'REG'
+    })
+  }
+
+  return [...where, ...defaults]
 }
 
 function get_plays_view_hash({
@@ -53,7 +101,6 @@ function get_plays_view_hash({
   prefix_columns = [],
   where = [],
   sort = [],
-  params = {},
   group_by = null,
   offset = 0,
   limit = 500
@@ -64,7 +111,6 @@ function get_plays_view_hash({
       prefix_columns,
       where,
       sort,
-      params,
       group_by,
       offset,
       limit
@@ -77,13 +123,14 @@ export { get_plays_view_hash }
 export async function get_plays_view_results_query({
   columns = [],
   prefix_columns = [],
-  where = [],
+  where: requested_where = [],
   sort = [],
-  params = {},
   group_by = null,
   offset = 0,
   limit = 500
 }) {
+  const where = apply_default_season_scope(requested_where)
+
   // Validate inputs
   const table_state_valid = validators.table_state_validator({
     columns,
@@ -100,33 +147,10 @@ export async function get_plays_view_results_query({
     throw new Error(`Invalid group_by value: ${group_by}`)
   }
 
-  // Default year to current season, unless play_year is in WHERE clauses
-  const query_params = { ...params }
-  const has_year_in_where = where.some((c) => c.column_id === 'play_year')
-  if (!query_params.year && !has_year_in_where) {
-    query_params.year = [current_season.last_completed_season_year]
-  }
-
-  // Build base query
+  // Build base query. Season scope reaches the query through the WHERE loop
+  // below like every other filter -- there is no separate scope application
+  // and no param layer.
   const query = db('nfl_plays')
-
-  // Apply year filter directly (year was removed from nfl_plays_column_params
-  // in favor of nfl_week for data views, but the plays view uses year directly)
-  if (query_params.year) {
-    const year_values = Array.isArray(query_params.year)
-      ? query_params.year
-      : [query_params.year]
-    if (year_values.length) {
-      query.whereIn('nfl_plays.season_year', year_values)
-    }
-  }
-
-  // Apply global params via apply_play_by_play_column_params_to_query
-  apply_play_by_play_column_params_to_query({
-    query,
-    params: query_params,
-    table_name: 'nfl_plays'
-  })
 
   // Track which joins have been added
   const join_state = {
@@ -142,20 +166,17 @@ export async function get_plays_view_results_query({
 
   // Process prefix columns
   for (const col of prefix_columns) {
-    const { column_id } = resolve_column_id(col)
-    all_column_ids.add(column_id)
+    all_column_ids.add(resolve_column_id(col))
   }
 
   // Process main columns
   for (const col of columns) {
-    const { column_id } = resolve_column_id(col)
-    all_column_ids.add(column_id)
+    all_column_ids.add(resolve_column_id(col))
   }
 
   // Process where columns
   for (const clause of where) {
-    const { column_id } = resolve_column_id(clause)
-    all_column_ids.add(column_id)
+    all_column_ids.add(resolve_column_id(clause))
   }
 
   // Process sort columns
@@ -173,7 +194,7 @@ export async function get_plays_view_results_query({
   // Apply joins and selects for requested columns
   const visible_columns = [...prefix_columns, ...columns].map(resolve_column_id)
 
-  for (const { column_id } of visible_columns) {
+  for (const column_id of visible_columns) {
     const column_def = plays_view_column_definitions[column_id]
 
     // Add joins if needed
@@ -192,7 +213,7 @@ export async function get_plays_view_results_query({
         continue
       }
       if (column_def.aggregate_select) {
-        const agg_select = column_def.aggregate_select({ params: query_params })
+        const agg_select = column_def.aggregate_select()
         if (agg_select) {
           select_columns.push(agg_select)
         }
@@ -206,7 +227,7 @@ export async function get_plays_view_results_query({
     } else {
       // Browse mode - direct field selects
       if (column_def.main_select) {
-        const main_selects = column_def.main_select({ params: query_params })
+        const main_selects = column_def.main_select()
         select_columns.push(...main_selects)
       }
     }
@@ -296,7 +317,7 @@ export async function get_plays_view_results_query({
   query.offset(offset).limit(Math.min(limit, 2000))
 
   // Build metadata
-  const { cache_ttl } = get_cache_info({ params: query_params })
+  const { cache_ttl } = get_cache_info({ where })
   const plays_view_metadata = {
     cache_ttl
   }
@@ -309,7 +330,6 @@ export default async function get_plays_view_results({
   prefix_columns = [],
   where = [],
   sort = [],
-  params = {},
   group_by = null,
   offset = 0,
   limit = 500,
@@ -322,7 +342,6 @@ export default async function get_plays_view_results({
       prefix_columns,
       where,
       sort,
-      params,
       group_by,
       offset,
       limit

@@ -17,7 +17,7 @@ export default {
       'nfl_plays.passer_pid'
     ],
     main_where: () => "passer.first_name || ' ' || passer.last_name",
-    aggregate_select: ({ params } = {}) =>
+    aggregate_select: () =>
       db.raw(
         "MAX(passer.first_name || ' ' || passer.last_name) as play_passer"
       ),
