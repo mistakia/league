@@ -249,7 +249,7 @@ export const evaluate_auction_block_finalization = async ({
 
   // ONE LOCKED TRANSACTION FOR THE WHOLE EVALUATION. This runs on the opt-in
   // write AND on every read of the schedule -- the calendar, the block route,
-  // and the socket's mode poll every fifteen seconds -- so several evaluations
+  // and the socket's mode poll -- so several evaluations
   // are routinely in flight at once against one league.
   //
   // Unserialised, they read `finalized` before any of them writes and then

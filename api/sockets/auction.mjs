@@ -31,10 +31,29 @@ import debug from 'debug'
 //
 // A block boundary is a wall-clock event with no write behind it -- nobody
 // sends a message when 15:00 arrives -- so the only way the auction learns it
-// is now live is to look. Fifteen seconds against a 15-minute granularity means
-// a block is never more than a rounding error late, and the query is a read of
-// a handful of finalized rows.
-const AUCTION_MODE_POLL_MS = 15_000
+// is now live is to look.
+//
+// IT IS NOT "A READ OF A HANDFUL OF FINALIZED ROWS", which is what this said and
+// what set the interval at fifteen seconds. `get_auction_mode` computes the
+// final block, and that walks every team's roster for spots remaining -- so each
+// poll is a full per-team roster sweep. Measured over about 21 hours across two
+// leagues in a free agency period, this poll alone accounted for roughly 90% of
+// all roster reads on the box: 113,495 `getRoster` calls, its heaviest query
+// burning 193 seconds. That is the ambient pressure a settlement holding the
+// league advisory lock contends against, and the settlement is the only thing
+// that advances an election-mode auction.
+//
+// SIXTY SECONDS IS STILL A ROUNDING ERROR against the 15-minute block
+// granularity -- a block convenes at most a fifteenth of a slot late -- and it
+// cuts that load fourfold. Going further is not free in the same way: the
+// lateness a manager experiences is this interval, and a block they were told
+// starts at 15:00 should not start at 15:05.
+//
+// Polling less is the whole remaining lever. Caching the spots count was
+// considered and rejected: it is the input to the auction's only termination
+// guarantee, and a cache over a safety-critical derivation trades a bounded
+// lateness for an unbounded wrongness.
+const AUCTION_MODE_POLL_MS = 60_000
 
 // The real timers, and the default injection.
 //
@@ -46,12 +65,16 @@ const AUCTION_MODE_POLL_MS = 15_000
 // interface is what makes the clock addressable from a spec.
 //
 // Every call site also NAMES its clock, and production ignores the name. A spec
-// cannot tell the three apart by DURATION: `config-test.json` puts bidTimer at
-// 14,000, the socket pads it by 1,000, and AUCTION_MODE_POLL_MS is 15,000 -- so
-// counting 15,000ms timers counts bid clocks and mode polls together, and the
-// mode poll re-arms itself on every tick. "A proxy step does not reset the bid
-// clock" is asserted as a COUNT, and it is the property that keeps a full final
-// block tractable, so it has to be countable unambiguously.
+// cannot tell the three apart by DURATION, because every duration here is
+// CONFIGURATION: `config-test.json` puts bidTimer at 14,000 and the socket pads
+// it by 1,000, which collided exactly with AUCTION_MODE_POLL_MS while that was
+// 15,000 -- so counting 15,000ms timers counted bid clocks and mode polls
+// together, and the mode poll re-arms itself on every tick. The poll has since
+// moved to 60,000 and that particular collision is gone, which changes nothing
+// here: the next edit to either number restores it silently, and a spec keyed on
+// a duration would go quietly vacuous rather than fail. "A proxy step does not
+// reset the bid clock" is asserted as a COUNT, and it is the property that keeps
+// a full final block tractable, so it has to be countable unambiguously.
 export const AUCTION_TIMERS = {
   BID: 'bid',
   NOMINATION: 'nomination',

@@ -191,7 +191,7 @@ green.
 
 `auction_blocks` exists because the unanimity denominator freezes at finalization and rosters carry no as-of timestamp. Re-deriving finalization from the opt-in rows would silently un-finalize a block the league has already been told is happening.
 
-**Finalization is evaluated CONCURRENTLY as a matter of course** — on the opt-in write and on every read of the schedule, including the socket mode poll every fifteen seconds — so it runs in one transaction under the league advisory lock, and the convening announcement fires after the commit. The unique index settles insert against insert and nothing else: an EXTEND racing an INSERT put a real duplicate session on a real league, which is a phantom block on the calendar and a second announcement asking managers to attend a session they were already told about.
+**Finalization is evaluated CONCURRENTLY as a matter of course** — on the opt-in write and on every read of the schedule, including the socket mode poll — so it runs in one transaction under the league advisory lock, and the convening announcement fires after the commit. The unique index settles insert against insert and nothing else: an EXTEND racing an INSERT put a real duplicate session on a real league, which is a phantom block on the calendar and a second announcement asking managers to attend a session they were already told about.
 
 The final block is the opposite: computed on demand, no row, because every term is configuration or derived from the rosters. A column would be a second source of truth that can disagree with the board.
 
