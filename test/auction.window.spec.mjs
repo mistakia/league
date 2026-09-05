@@ -178,6 +178,38 @@ describe('auction window against a seeded league', function () {
     expect(await get_auction_spots_remaining({ lid: 1 })).to.equal(before - 1)
   })
 
+  it('counts the week the auction writes, not the week the clock is in', async function () {
+    // SCORED AS A PAIR ACROSS THE CLOCK, because today the pin and the old
+    // default return the same number -- `fantasy_season_week` reads 0 until
+    // 2026-09-08T04:00Z, so a single reading now cannot tell them apart.
+    //
+    // The pin is what makes the count read what the auction WROTE: both sale
+    // paths insert their roster row at week 0, `persist_auction_settlement` for
+    // an election settlement and `_add_player_to_roster` for a live block. The
+    // old default followed the clock instead, and the free agency period ended
+    // two hours before that clock moved.
+    const player = await selectPlayer({
+      exclude_rostered_players: true,
+      random: false
+    })
+    await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1 })
+
+    const inside_the_offseason = await get_auction_spots_remaining({ lid: 1 })
+
+    // Past the flip. `week` is now.diff(regular_season_start, 'weeks'), and the
+    // 2026 anchor is 09-01T04:00Z, so this is the first instant the default
+    // would have read week 1 -- a week the auction never writes to.
+    MockDate.set('2026-09-08T05:00:00Z')
+    try {
+      expect(current_season.fantasy_season_week).to.equal(1)
+      expect(await get_auction_spots_remaining({ lid: 1 })).to.equal(
+        inside_the_offseason
+      )
+    } finally {
+      MockDate.reset()
+    }
+  })
+
   it('reads rosters through the caller db_client, not the module pool', async function () {
     // SCORED AS A PAIR, because a single reading cannot tell a threaded
     // `db_client` from an ignored one -- both return a plausible number. The

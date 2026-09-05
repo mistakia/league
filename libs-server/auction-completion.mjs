@@ -32,25 +32,26 @@ export const get_auction_spots_remaining = async ({
       // neither. Every shipped caller passes the current year, which is why it
       // never showed.
       //
-      // `week` is deliberately NOT pinned to 0 here, and the margin is thinner
-      // than it looks. The auction writes its roster rows at week 0 while
-      // `getRoster` defaults to `current_season.fantasy_season_week`, so the two
-      // agree only while that getter reads 0.
+      // `week` IS PINNED TO 0 BECAUSE THAT IS THE WEEK THE AUCTION WRITES. Both
+      // sale paths insert their roster row at week 0 -- `persist_auction_settlement`
+      // for an election-mode settlement and `_add_player_to_roster` for a live
+      // block -- so reading week 0 is reading exactly what the auction wrote.
       //
-      // IT DOES NOT FLIP AT `regular_season_start`, which is the natural guess
-      // and is wrong: `week` is `now.diff(regular_season_start, 'weeks')`, so it
-      // reaches 1 a WEEK after that anchor. In 2026 the anchor is 09-01T04:00Z,
-      // the flip is 09-08T04:00Z, and the free agency period ends 09-08T02:00Z
-      // -- the count stops being read two hours before it would have started
-      // reading a week the auction never writes to.
+      // It used to take `getRoster`'s default, `current_season.fantasy_season_week`,
+      // which agrees only while that getter reads 0. IT DOES NOT FLIP AT
+      // `regular_season_start`, which is the natural guess and is wrong: `week` is
+      // `now.diff(regular_season_start, 'weeks')`, so it reaches 1 a WEEK after
+      // that anchor. In 2026 the anchor is 09-01T04:00Z, the flip is
+      // 09-08T04:00Z, and both live free agency periods end 09-08T02:00Z -- the
+      // default was correct by a two-hour margin, on the value that sizes the
+      // auction's only forcing function.
       //
-      // So this is correct today by a two-hour margin, on a value that sizes the
-      // auction's only forcing function. Pinning it to 0 is the obvious repair
-      // and is a behaviour change to a safety-critical count, so it belongs with
-      // the owner of the settlement path rather than here.
+      // Two hours is not a margin worth keeping, and pinning is a NO-OP for as
+      // long as it holds, which makes now the cheapest moment to take it.
       roster: await getRoster({
         tid: team.team_id,
         year: season_year,
+        week: 0,
         db_client
       }),
       league
@@ -247,11 +248,16 @@ export const get_auction_nominating_team_id = async ({
 
   for (const team of teams) {
     const roster = new Roster({
-      // Same `year` correction as `get_auction_spots_remaining`: the team query
-      // is scoped to `season_year` and this read was not.
+      // Same `year` and `week` treatment as `get_auction_spots_remaining`, and
+      // for the same reasons: the team query is scoped to `season_year` and this
+      // read was not, and the rotation walks `availableSpace` over the week the
+      // auction actually writes. Leaving one of the two pinned and not the other
+      // would let the nomination turn and the spot count disagree about which
+      // board they are reading.
       roster: await getRoster({
         tid: team.team_id,
         year: season_year,
+        week: 0,
         db_client
       }),
       league
