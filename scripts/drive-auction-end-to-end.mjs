@@ -59,6 +59,7 @@ import { randomBytes } from 'node:crypto'
 import jwt from 'jsonwebtoken'
 import dayjs from 'dayjs'
 import WebSocket from 'ws'
+import debug from 'debug'
 
 // NOTHING that reads `#config` or `#db` may be a STATIC import here. A static
 // import hoists above every statement in this file, and both of those modules
@@ -75,6 +76,15 @@ import WebSocket from 'ws'
 // arm `send-notifications`, which refuses outside production and is the reason a
 // misfire here cannot reach a Discord channel even if a webhook appeared.
 process.env.NODE_ENV = 'development'
+
+// THE COLLECTION INSTRUMENT NEEDS ONE NAMESPACE REGARDLESS OF THE SHELL.
+// `enable_debug_namespaces` defers to an explicit DEBUG env var, and this
+// script then cannot collect the `auction-settlement` line its gating scenario
+// asserts on -- shells on this machine set DEBUG=1. The script owns the whole
+// process, so an inherited DEBUG is not an authority here; it is cleared BEFORE
+// the namespaced helper module loads, because that helper snapshots the var at
+// its own import time.
+delete process.env.DEBUG
 
 const { default: config } = await import('#config')
 
@@ -143,6 +153,10 @@ const { get_auction_nominating_team_id } =
   await import('#libs-server/auction-completion.mjs')
 const { get_auction_mode, resolve_auction_mode_at, AUCTION_MODES } =
   await import('#libs-server/auction-modes.mjs')
+const { upsert_auction_election } =
+  await import('#libs-server/auction-elections.mjs')
+const { enable_debug_namespaces } =
+  await import('#libs-shared/enable-debug-namespaces.mjs')
 const { floor_to_block } = await import('#libs-server/auction-blocks.mjs')
 const { Roster } = await import('#libs-shared')
 const { default: getRoster } = await import('#libs-server/get-roster.mjs')
@@ -152,6 +166,25 @@ const { format_nomination_complete_message, format_block_convened_message } =
 
 const lid = args.lid
 const season_year = current_season.year
+
+/**
+ * The settlement's only positive evidence that the implied-price discharge did
+ * any work is a `debug('auction-settlement')` line carrying the `(N more shown
+ * but priced out)` suffix. debug() is dark unless its namespace is enabled, and
+ * this script boots the API in the same process -- so the namespace is switched
+ * on here and its lines are collected for a scenario to assert against. Forward
+ * to the real stream so the operator still sees them in the run output.
+ */
+const auction_log_lines = []
+
+/**
+ * The exit code's ONE source of truth, set where the summary computes its
+ * failure count. The process used to exit on whether `main()` returned clean,
+ * which lay in BOTH directions: a full run exited 0 while printing seven
+ * failures, and there was nothing the printed report could do about it. The
+ * exit code must be a restatement of the report, so that is what it reads.
+ */
+let run_failed = false
 
 // ============================================================================
 // REPORTING
@@ -214,14 +247,12 @@ let base_url = null
 
 const token_for = (user_id) => jwt.sign({ userId: user_id }, config.jwt.secret)
 
-const commissioner_token = () => token_for(league_row.commissioner_user_id)
-
-const api = async (method, url_path, body) => {
+const api_as = async (user_id, method, url_path, body) => {
   const response = await fetch(`${base_url}${url_path}`, {
     method,
     headers: {
       'content-type': 'application/json',
-      authorization: `Bearer ${commissioner_token()}`
+      authorization: `Bearer ${token_for(user_id)}`
     },
     body: body === undefined ? undefined : JSON.stringify(body)
   })
@@ -235,17 +266,56 @@ const api = async (method, url_path, body) => {
   return { status: response.status, body: parsed }
 }
 
+const api = (method, url_path, body) =>
+  api_as(league_row.commissioner_user_id, method, url_path, body)
+
 const elections_path = `/api/leagues/${lid}/auction-elections`
 const blocks_path = `/api/leagues/${lid}/auction-blocks`
 
 const elect = (teamId, pid, maximum_bid = null) =>
   api('POST', elections_path, { leagueId: lid, teamId, pid, maximum_bid })
 
+const elect_as = (user_id, teamId, pid, maximum_bid = null) =>
+  api_as(user_id, 'POST', elections_path, {
+    leagueId: lid,
+    teamId,
+    pid,
+    maximum_bid
+  })
+
 const withdraw = (teamId, pid) =>
   api('DELETE', elections_path, { leagueId: lid, teamId, pid })
 
-const read_elections = (teamId) =>
-  api('GET', `${elections_path}?teamId=${teamId}`)
+const read_elections = (teamId, user_id = league_row.commissioner_user_id) =>
+  api_as(user_id, 'GET', `${elections_path}?teamId=${teamId}`)
+
+/**
+ * Write an election on the board directly, bypassing the write route.
+ *
+ * THE SETUP HALF OF A SCENARIO IS SEEDED, NOT POSTED, because the election
+ * write routes are narrowed to ownership and eight of league 119's ten teams
+ * have no manager at all -- no token can act for them, so the route is closed
+ * to them by construction. The assert-about-the-route half stays on the route.
+ *
+ * Seeding deliberately fires NO settlement: `upsert_auction_election` only
+ * writes the row, so a field can be built up without the player selling
+ * underneath it. The completing election still goes through the real route so
+ * the sale fires from a real request.
+ */
+const seed_election = async ({ tid, pid, maximum_bid }) => {
+  const user_id = owner_of.get(tid) || league_row.commissioner_user_id
+  await db.transaction(async (trx) => {
+    await upsert_auction_election({
+      trx,
+      lid,
+      season_year,
+      pid,
+      tid,
+      user_id,
+      maximum_bid
+    })
+  })
+}
 
 const settlement_status = () => api('GET', `${elections_path}/status`)
 
@@ -348,9 +418,10 @@ const explain_silence = (client, from) => {
  * seconds" that two earlier readings mistook for a broken page. A 20-second
  * timeout here sat right on the boundary and made the socket look dead.
  */
-const await_init = async (client) => {
+const await_init = async (client, { where } = {}) => {
   const started = Date.now()
   const init = await client.await_message('AUCTION_INIT', {
+    where,
     timeout_ms: 120_000
   })
   const seconds = ((Date.now() - started) / 1000).toFixed(1)
@@ -370,6 +441,8 @@ const await_init = async (client) => {
 let league_row = null
 let team_ids = []
 let own_team = null
+/** tid -> user_id for the teams that have a manager at all. */
+let owner_of = new Map()
 const signed_pids = new Set()
 
 /**
@@ -501,6 +574,14 @@ const assert_target_is_safe = async () => {
     )
   }
   own_team = owned.tid
+
+  // WHO CAN ACT FOR WHICH TEAM, resolved once. The write routes are narrowed to
+  // ownership, so a scenario drives a team through the route only if it has a
+  // user -- and a token swap alone cannot cover the eight teams that do not.
+  const memberships = await db('users_teams')
+    .where({ season_year })
+    .whereIn('tid', team_ids)
+  owner_of = new Map(memberships.map((member) => [member.tid, member.user_id]))
 
   process.stdout.write(
     `target: league ${lid} "${league_row.name}", ${team_ids.length} teams, ` +
@@ -756,14 +837,19 @@ const drive_elections = async (pids) => {
     `${first_amount_set_at} -> ${revised && revised.amount_set_at}`
   )
 
-  // A second team's ceiling on the SAME player, so the scoping assertion below
-  // has a real amount it could have leaked rather than an empty set.
+  // A second team's ceiling on the SAME player gives the scoping assertion a
+  // real amount it could leak. THE WRITE ROUTE IS OWNERSHIP-NARROWED, so the
+  // second team's election is SEEDED -- but first the narrowing is asserted as
+  // the security finding it is: the caller is REFUSED for a team it does not
+  // own. This is the check that used to fail as `{"error":"invalid teamId"}`
+  // while expecting a 200.
   const rival = await elect(other_team, pid, 99)
-  must(
-    'a second team can elect on the same player',
-    rival.status === 200,
+  ok(
+    'the route refuses an election for a team the caller does not own',
+    rival.status === 400 && rival.body.error === 'invalid teamId',
     JSON.stringify(rival.body)
   )
+  await seed_election({ tid: other_team, pid, maximum_bid: 99 })
 
   read = await read_elections(team)
   ok(
@@ -776,14 +862,26 @@ const drive_elections = async (pids) => {
     !read.body.some((row) => row.maximum_bid === 99),
     JSON.stringify(read.body.filter((row) => row.maximum_bid === 99))
   )
-  partial(
-    'a manager cannot read a rival team’s ceilings',
-    'league ' +
-      lid +
-      ' deliberately has one member, so there is no second ' +
-      'identity here to be refused; the authorization branch is covered by ' +
-      'test/auction.election-scope.spec.mjs'
-  )
+
+  // THIS BOARD HAS A SECOND MANAGER (user 5 manages team 337), so the read
+  // scoping can be asserted as a refusal instead of the partial it used to be.
+  const second = await find_second_manager()
+  if (second) {
+    const cross = await read_elections(team, second.user_id)
+    ok(
+      'a rival manager cannot read this team’s ceilings',
+      cross.status === 400,
+      JSON.stringify(cross.body)
+    )
+  } else {
+    partial(
+      'a rival manager cannot read this team’s ceilings',
+      'no second identity is enrolled on league ' +
+        lid +
+        ', so the authorization branch is covered by ' +
+        'test/auction.election-scope.spec.mjs'
+    )
+  }
 
   const withdraw_maximum = await withdraw(team, pid)
   ok(
@@ -825,67 +923,118 @@ const drive_elections = async (pids) => {
     JSON.stringify(read.body.filter((row) => row.pid === pid))
   )
 
-  await withdraw(other_team, pid)
+  // The other team's seeded ceiling is withdrawn the same way it was placed --
+  // directly -- so the board is clean for the next scenario.
+  await db('auction_elections')
+    .where({ lid, season_year, pid, tid: other_team })
+    .update({ withdrawn_at: new Date() })
 }
 
 /**
- * A nomination, every eligible team electing, and a second-price settlement --
- * asserted on the wire of an ALREADY-CONNECTED client, because the claim is
- * that a loaded page moves.
+ * A two-holdout field completing -- one team priced out, one not -- and the
+ * second-price settlement it produces, asserted on the wire of an
+ * ALREADY-CONNECTED client, because the claim is that a loaded page moves.
+ *
+ * THE TWO-HOLDOUT SHAPE IS THE POINT. The implied-price gate discharges a team
+ * whose cap is at or below the runner-up ceiling, and nothing else
+ * discriminates it -- a settlement that completes proves the driver runs, not
+ * that the gate did any work. This board leaves exactly two teams outstanding:
+ * `priced_out`, which the auction no longer WAITS on although the board still
+ * shows it, and `holdout`, the one team the implied price still leaves able to
+ * win. Only the holdout's election can change the winner or the price, and it
+ * is the one team with a manager, so it goes through the real route and the
+ * settlement fires from a real request.
  */
-const TOP_CEILING = 8
-const SECOND_CEILING = 3
-const EXPECTED_PRICE = SECOND_CEILING + 1
+const TOP_CEILING = 55
+const SECOND_CEILING = 25
 
 const drive_settlement = async (pids) => {
   const pid = pids[1]
-  const client = await open_client()
 
+  // THE ROLE SET IS CHOSEN BY BUDGET, against the caps the settlement will
+  // price against. Three roles only need a cap; the fourth must also have a
+  // user, because completing the field over the route is this scenario's claim.
+  const caps = new Map()
+  for (const tid of team_ids) caps.set(tid, await available_cap(tid))
+
+  const owned_caps = team_ids
+    .filter((tid) => owner_of.has(tid))
+    .map((tid) => `${tid}=${caps.get(tid)}`)
+
+  // The holdout: a team the runner-up ceiling does NOT price out (cap above
+  // it) and that has a manager, so it can complete the field on the route.
+  const holdout = team_ids.find(
+    (tid) => owner_of.has(tid) && caps.get(tid) > SECOND_CEILING
+  )
+  must(
+    'a user-held team can fund a claim above the runner-up ceiling',
+    Boolean(holdout),
+    `owned caps: ${owned_caps.join(', ') || 'none'}`
+  )
+
+  const winner = team_ids.find(
+    (tid) => tid !== holdout && caps.get(tid) >= TOP_CEILING
+  )
+  must(
+    'a team can fund the leading ceiling',
+    Boolean(winner),
+    `no team besides ${holdout} holds $${TOP_CEILING} of cap`
+  )
+  const runner_up = team_ids.find(
+    (tid) =>
+      tid !== holdout && tid !== winner && caps.get(tid) >= SECOND_CEILING
+  )
+  must(
+    'a team can fund the runner-up ceiling',
+    Boolean(runner_up),
+    `no team besides ${holdout} and ${winner} holds $${SECOND_CEILING}`
+  )
+  const priced_out = team_ids.find(
+    (tid) =>
+      tid !== holdout &&
+      tid !== winner &&
+      tid !== runner_up &&
+      caps.get(tid) <= SECOND_CEILING &&
+      caps.get(tid) < TOP_CEILING
+  )
+  must(
+    'the board carries a team the implied price prices out',
+    Boolean(priced_out),
+    `no non-holding team with a cap in (0, $${SECOND_CEILING}]`
+  )
+
+  // The nomination lands on the team that holds the winning claim, and the
+  // clock is ARRANGED there before any socket opens -- the socket caches the
+  // team list and its draft order at setup.
+  const nominator = winner
+  const restore_rotation = await arrange_nomination_turn(winner)
+
+  const client = await open_client()
   try {
+    // THE SETUP IS SEEDED, NOT POSTED. The write routes are narrowed to
+    // ownership and eight of the ten teams have no user at all, so no token
+    // can act for them. Seeding fires no settlement, which is what makes it
+    // usable as setup. Only the holdout's completing election below goes
+    // through the route, so the sale still fires from a real request.
+    await seed_election({ tid: winner, pid, maximum_bid: TOP_CEILING })
+    await seed_election({ tid: runner_up, pid, maximum_bid: SECOND_CEILING })
+    for (const tid of team_ids) {
+      if (
+        tid === winner ||
+        tid === runner_up ||
+        tid === holdout ||
+        tid === priced_out
+      ) {
+        continue
+      }
+      await seed_election({ tid, pid, maximum_bid: null })
+    }
+
     const init = await await_init(client)
     ok(
       'the socket boots in election mode',
       init.payload.auction_mode === AUCTION_MODES.ELECTION,
       init.payload.auction_mode
-    )
-
-    const nominator = await get_auction_nominating_team_id({ lid, season_year })
-    must(
-      'a team holds the nomination turn',
-      Boolean(nominator),
-      'rotation returned null'
-    )
-
-    // THE TWO CEILINGS MUST BOTH BE FUNDABLE, or the input cannot distinguish
-    // second-price from anything else. A team's effective maximum is
-    // `min(stated, availableCap)`, and a cloned board leaves real teams with
-    // real budgets -- one of league 119's has $0. Picking the first two team ids
-    // put an unfundable $3 against a $0 cap, which capped to $0, tied with the
-    // nominator's opening bid, and settled at $1 for reasons that had nothing to
-    // do with the runner-up. Pick on the budget, not on the order.
-    const funded = []
-    for (const tid of team_ids) {
-      if (tid === nominator) continue
-      if ((await available_cap(tid)) >= TOP_CEILING) funded.push(tid)
-    }
-    must(
-      'two teams can fund the ceilings this scenario needs',
-      funded.length >= 2,
-      `only ${funded.length} team(s) hold $${TOP_CEILING} of cap`
-    )
-    const [winner, runner_up] = funded
-
-    // Two ceilings placed BEFORE the nomination, which is the design's whole
-    // point: an election is a standing instruction, not an answer to a prompt.
-    must(
-      'the top ceiling is accepted',
-      (await elect(winner, pid, TOP_CEILING)).status === 200,
-      `elect ${TOP_CEILING}`
-    )
-    must(
-      'the second ceiling is accepted',
-      (await elect(runner_up, pid, SECOND_CEILING)).status === 200,
-      `elect ${SECOND_CEILING}`
     )
 
     const before_nomination = client.mark()
@@ -922,93 +1071,86 @@ const drive_settlement = async (pids) => {
     )
     const outstanding = status.body.outstanding_election_tids
     ok(
-      'the nominator is not outstanding -- nominating is bidding',
-      !outstanding.includes(nominator),
+      'the board holds exactly the two holdouts, priced out and not',
+      outstanding.length === 2 &&
+        outstanding.includes(holdout) &&
+        outstanding.includes(priced_out),
       JSON.stringify(outstanding)
     )
     ok(
-      'the two teams that already elected are not outstanding',
+      'the seeded leader and runner-up are not outstanding',
       !outstanding.includes(winner) && !outstanding.includes(runner_up),
       JSON.stringify(outstanding)
     )
+
+    // THE GATE, POSITIVELY. The two-holdout board is the only shape that
+    // discriminates the implied-price discharge, and its only positive evidence
+    // is the settlement log line carrying the `(N more shown but priced out)`
+    // suffix. The socket emits it when the nomination settles the field down to
+    // the waited-on set, so it may land a beat after the opening bid broadcast.
+    const log_mark = auction_log_lines.length
+    let priced_out_line = null
+    const log_deadline = Date.now() + 10_000
+    while (Date.now() < log_deadline && !priced_out_line) {
+      priced_out_line = auction_log_lines
+        .slice(log_mark)
+        .find((line) => line.includes('more shown but priced out'))
+      if (!priced_out_line) await sleep(200)
+    }
+    ok(
+      'the implied-price discharge fires and counts the priced-out team',
+      Boolean(priced_out_line),
+      'no `(N more shown but priced out)` line from the settlement'
+    )
+
+    const owner = owner_of.get(holdout)
     must(
-      'at least one team is outstanding',
-      outstanding.length >= 1,
-      JSON.stringify(outstanding)
+      'the completing team has a real owner to act as',
+      Boolean(owner),
+      `team ${holdout} has no user`
     )
 
     const winner_cap_before = await available_cap(winner)
 
-    // Every remaining eligible team declines, one at a time, exactly as nine
-    // managers would. The last one completes the set and settles the player.
-    let settlement = null
-    for (let index = 0; index < outstanding.length; index++) {
-      const tid = outstanding[index]
-      const is_last = index === outstanding.length - 1
-      const mark = client.mark()
-      const response = await elect(tid, pid, null)
-      must(
-        `team ${tid} can decline`,
-        response.status === 200,
-        JSON.stringify(response.body)
-      )
-
-      if (!is_last) {
-        // MATCHED ON CONTENT, not on arrival order. The socket broadcasts its
-        // own status at nomination and each REST election broadcasts another,
-        // all of them asynchronously after the response returns -- so "the next
-        // AUCTION_SETTLEMENT_STATUS after this request" is routinely the
-        // PREVIOUS one still in flight, and asserting on it reads as a
-        // one-behind list that never shrinks. Wait for the message that says
-        // what is being claimed.
-        const shrunk = await client.await_message('AUCTION_SETTLEMENT_STATUS', {
-          from: mark,
-          where: (message) =>
-            !message.payload.outstanding_election_tids.includes(tid)
-        })
-        ok(
-          `the outstanding set shrinks on the wire after team ${tid}`,
-          Boolean(shrunk),
-          'no broadcast dropped this team from the outstanding set'
-        )
-      } else {
-        settlement = { response, mark }
-      }
-    }
-
-    const body = settlement.response.body
+    // THE ONE ELECTION THAT CROSSES THE ROUTE, with the team's OWN token: the
+    // holdout completes the waited-on set and the player settles while the
+    // priced-out team is never asked. That is the gate having done its job.
+    const mark = client.mark()
+    const response = await elect_as(owner, holdout, pid, null)
     must(
       'the completing election returns a settlement',
-      Boolean(body.settlement),
-      JSON.stringify(body)
+      Boolean(response.body.settlement),
+      JSON.stringify(response.body)
     )
     ok(
       'the player settles to the highest ceiling',
-      body.settlement.winner_tid === winner,
-      `${body.settlement.winner_tid} != ${winner}`
+      response.body.settlement.winner_tid === winner,
+      `${response.body.settlement.winner_tid} != ${winner}`
     )
     ok(
       'the price is the second claim plus one increment',
-      body.settlement.price === EXPECTED_PRICE,
-      `price ${body.settlement.price}, expected ${EXPECTED_PRICE} (runner-up ${SECOND_CEILING} + 1)`
+      response.body.settlement.price === SECOND_CEILING + 1,
+      `price ${response.body.settlement.price}, expected ${SECOND_CEILING + 1}`
     )
     signed_pids.add(pid)
 
+    const body = response.body
+
     // The four effects of the fan-out, three of which shipped missing once.
     const processed = await client.await_message('AUCTION_PROCESSED', {
-      from: settlement.mark
+      from: mark
     })
     ok('the sale reaches the wire', Boolean(processed), 'no AUCTION_PROCESSED')
     ok(
       'the sale carries the winner and the price',
       processed &&
         processed.payload.tid === winner &&
-        processed.payload.player_salary === EXPECTED_PRICE,
+        processed.payload.player_salary === SECOND_CEILING + 1,
       processed ? JSON.stringify(processed.payload) : 'absent'
     )
 
     const advanced = await client.await_message('AUCTION_NOMINATION_INFO', {
-      from: settlement.mark
+      from: mark
     })
     const expected_next = await get_auction_nominating_team_id({
       lid,
@@ -1059,11 +1201,14 @@ const drive_settlement = async (pids) => {
       JSON.stringify(by_tid.get(runner_up))
     )
     ok(
-      'every decline is marked declined',
-      outstanding.every(
-        (tid) => by_tid.get(tid)?.outcome === auction_election_outcomes.DECLINED
+      'every team that elected is marked declined',
+      [...by_tid.keys()].every(
+        (tid) =>
+          tid === winner ||
+          tid === runner_up ||
+          by_tid.get(tid)?.outcome === auction_election_outcomes.DECLINED
       ),
-      JSON.stringify(outstanding.map((tid) => [tid, by_tid.get(tid)?.outcome]))
+      JSON.stringify([...by_tid].map(([tid, row]) => `${tid}:${row.outcome}`))
     )
     ok(
       'every election on the player is settled',
@@ -1087,11 +1232,16 @@ const drive_settlement = async (pids) => {
     const cap_after = await available_cap(winner)
     ok(
       'the price is charged to the winner, exactly once',
-      cap_after === winner_cap_before - EXPECTED_PRICE,
-      `availableCap ${winner_cap_before} -> ${cap_after}, expected a fall of ${EXPECTED_PRICE}`
+      cap_after === winner_cap_before - (SECOND_CEILING + 1),
+      `availableCap ${winner_cap_before} -> ${cap_after}, expected a fall of ${SECOND_CEILING + 1}`
     )
   } finally {
     client.socket.close()
+    // `draft_order` IS the nomination rotation, so a swap left behind would
+    // change who nominates next for every later run and for anyone looking at
+    // the mirror. Restored here rather than in `teardown()`, because only this
+    // scenario knows what the order was.
+    await restore_rotation()
   }
 }
 
@@ -1451,11 +1601,50 @@ const drive_proxy_bidding = async (pids) => {
   )
   const restore_rotation = await arrange_nomination_turn(own_team)
 
+  // THE HUMAN BIDDER IS PICKED BY BUDGET, not by whichever team the second
+  // manager happens to manage -- that team (337) is league 119's $0 team and
+  // cannot fund a bid above the opening. The second user is REPOINTED at a
+  // funded team for the duration of the block, the way `draft_order` is
+  // swapped and restored, and the original mapping is put back in `finally`.
+  const second_original_tid = second.tid
+  const second_cap_now = await available_cap(second_original_tid)
+  const repoint = second_cap_now < HUMAN_BID
+  const funded_teams = []
+  for (const tid of team_ids) {
+    if (tid === own_team) continue
+    if ((await available_cap(tid)) >= PROXY_CEILING) funded_teams.push(tid)
+  }
+  must(
+    'a funded team exists for the second manager to bid from',
+    !repoint || funded_teams.length >= 1,
+    'every non-nominator team holds < $' + PROXY_CEILING + ' of cap'
+  )
+  const human = repoint ? funded_teams[0] : second_original_tid
+  if (repoint) {
+    await db('users_teams')
+      .where({ user_id: second.user_id, season_year })
+      .update({ tid: human })
+  }
+  const restore_second = repoint
+    ? () =>
+        db('users_teams')
+          .where({ user_id: second.user_id, season_year })
+          .update({ tid: second_original_tid })
+    : () => {}
+
   const client = await open_client()
   const second_client = await open_client({ user_id: second.user_id })
   try {
-    const init = await await_init(client)
-    await await_init(second_client)
+    // A socket joined while `setup()` is still walking rosters receives a
+    // BROADCAST init from a sibling join BEFORE its own join has finished, and
+    // that one is the constructor default -- live, with no block end. The state
+    // this scenario asserts is the socket INSIDE the block, so wait for the
+    // init that carries a block end rather than the first broadcast; awaiting
+    // it also means this socket's join has completed and its nomination handler
+    // is attached.
+    const in_block = (message) => Boolean(message.payload.block_end_at)
+    const init = await await_init(client, { where: in_block })
+    await await_init(second_client, { where: in_block })
 
     // A socket booting INSIDE a block starts with `_election_mode` false, which
     // is a real mode rather than "unknown" -- so the first resolve has to
@@ -1475,11 +1664,10 @@ const drive_proxy_bidding = async (pids) => {
     // THE THREE ROLES ARE FIXED BY WHO CAN ACT, not by team id. Only the two
     // enrolled managers can drive the socket at all, so the nominator is the
     // commissioner's team -- the clock was arranged onto it above -- and the
-    // human bidder is the second manager's. The ceiling holder is the one role
-    // that needs no identity: a standing election goes in over REST, and
-    // `verifyUserTeam` admits the commissioner for every team in their league.
+    // human bidder is the second manager's, repointed above onto a team that
+    // can fund the bid. The ceiling holder needs no identity: its standing
+    // election is seeded directly, so no user is required.
     const nominator = own_team
-    const human = second.tid
 
     const nominating = await get_auction_nominating_team_id({
       lid,
@@ -1515,10 +1703,20 @@ const drive_proxy_bidding = async (pids) => {
     )
     const [ceiling_holder] = solvent
 
-    must(
-      'a standing ceiling is accepted before the nomination',
-      (await elect(ceiling_holder, pid, PROXY_CEILING)).status === 200,
-      `elect ${PROXY_CEILING}`
+    // Seeded, not posted: this is the block setup, and the ceiling holder has
+    // no user to authenticate a route write with.
+    await seed_election({
+      tid: ceiling_holder,
+      pid,
+      maximum_bid: PROXY_CEILING
+    })
+    const ceiling_row = await db('auction_elections')
+      .where({ lid, season_year, pid, tid: ceiling_holder })
+      .first()
+    ok(
+      'a standing ceiling is on the board before the nomination',
+      Boolean(ceiling_row) && ceiling_row.maximum_bid === PROXY_CEILING,
+      JSON.stringify(ceiling_row)
     )
 
     // IN TURN, and not through any override. The commissioner bypass in
@@ -1641,9 +1839,11 @@ const drive_proxy_bidding = async (pids) => {
     second_client.socket.close()
     // `draft_order` IS the nomination rotation, so a swap left behind changes
     // who nominates next for every later run and for anyone looking at the
-    // mirror. Restored here rather than in `teardown()` because only this
-    // scenario knows what the order was.
+    // mirror. The repointed second manager is put back for the same reason.
+    // Restored here rather than in `teardown()` because only this scenario
+    // knows what the order was.
     await restore_rotation()
+    await restore_second()
   }
 }
 
@@ -1749,6 +1949,17 @@ const main = async () => {
   base_url = `http://127.0.0.1:${server.address().port}`
   process.stdout.write(`working-tree API on ${base_url}\n`)
 
+  // The settlement namespace, switched on and collected. debug() is off by
+  // default; the `priced out` suffix a scenario asserts on appears only when
+  // this namespace is enabled. See `auction_log_lines`.
+  enable_debug_namespaces('auction-settlement')
+  const write_log = debug.log
+  debug.log = (...args) => {
+    const line = args.map(String).join(' ')
+    auction_log_lines.push(line)
+    write_log(...args)
+  }
+
   // PARKING IS NOT A SCENARIO, and it deliberately leaves the league dirty.
   // Every bid-bar component -- the nominated player, its details row, the
   // settlement status, the compact election control -- renders only when
@@ -1814,7 +2025,8 @@ const main = async () => {
     }
   }
 
-  return failed === 0
+  run_failed = failed > 0
+  return !run_failed
 }
 
 let clean = false
@@ -1822,6 +2034,9 @@ try {
   clean = await main()
 } catch (error) {
   process.stderr.write(`\n${error.stack}\n`)
+  // An early throw never reached the summary, so it must not report a green
+  // exit code by leaving `run_failed` where the summary never set it.
+  run_failed = true
   // The teardown runs even on an unexpected throw. Rows left on the mirror put
   // a league ten managers hold a team in into live mode on a wall clock.
   //
@@ -1846,4 +2061,4 @@ server.close()
 // separate unhandled rejection that crashes the process AFTER the report has
 // printed and every write has committed -- a green run that exits looking red.
 // `process.exit` drops them with the process.
-process.exit(clean ? 0 : 1)
+process.exit(clean && !run_failed ? 0 : 1)

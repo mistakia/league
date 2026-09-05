@@ -181,6 +181,23 @@ describe('libs-server draftkings market types', function () {
     })
   })
 
+  // Position-group season leaders signalled 2026-09-05 (128447): DraftKings
+  // splits the stat-leader products by position group. Same metric as the
+  // league-wide leaders, narrower field, so one existing type each.
+  describe('offer category 1595 position-group season leaders', function () {
+    it('maps 15816 (QB rushing lead) to the existing rushing-leader type', function () {
+      expect(
+        get_market_type({ offerCategoryId: 1595, subcategoryId: 15816 })
+      ).to.equal(player_prop_types.SEASON_LEADER_RUSHING_YARDS)
+    })
+
+    it('maps 20232 (RB/TE receiving lead) to the existing receiving-leader type', function () {
+      expect(
+        get_market_type({ offerCategoryId: 1595, subcategoryId: 20232 })
+      ).to.equal(player_prop_types.SEASON_LEADER_RECEIVING_YARDS)
+    })
+  })
+
   // The seeded sets are what keep the importer's signal readable: the collector
   // records everything, and without a gate the subcategory arm names the same
   // 221 ids and the category arm the same 42 on every run.
@@ -216,7 +233,10 @@ describe('libs-server draftkings market types', function () {
         15008,
         15948,
         16924,
-        18525
+        18525,
+        // Position-group season leaders under 1595 (2026-09-05).
+        15816,
+        20232
       ]) {
         expect(
           known_unmapped_subcategory_ids.has(Number(subcategory_id)),

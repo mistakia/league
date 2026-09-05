@@ -436,6 +436,16 @@ export const get_market_type_offer_1595 = (subcategoryId) => {
     case 15820:
       return player_prop_types.SEASON_LEADER_INTERCEPTIONS
 
+    // DraftKings publishes season-leader props per position group: 15816 is
+    // the QB-scoped most-rushing-yards leader and 20232 the RB/TE most-
+    // receiving-yards leader. Same metric as the league-wide cases above with
+    // a narrower field; first signalled 2026-09-05 (signal 128447).
+    case 15816:
+      return player_prop_types.SEASON_LEADER_RUSHING_YARDS
+
+    case 20232:
+      return player_prop_types.SEASON_LEADER_RECEIVING_YARDS
+
     default:
       return unmapped_subcategory(1595, subcategoryId)
   }

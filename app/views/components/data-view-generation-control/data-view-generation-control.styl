@@ -1,12 +1,15 @@
 // One panel, two resting sizes. Closed it is a single quiet button in the
 // controls strip; open it is the widest thing on an empty page, because a
 // prompt the user cannot read back is a prompt they cannot correct.
+//
+// Closed, the element is shrink-to-fit so the controls strip around it -- which
+// is itself `width: fit-content` -- stays the width of its own buttons.
 .data-view-generation
   display flex
   flex-direction column
   gap 6px
-  width 100%
-  max-width 640px
+  width fit-content
+  max-width 100%
   font 400 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 
 .data-view-generation__open
@@ -31,6 +34,13 @@
     outline 2px solid $accentColor
     outline-offset 2px
 
+// A run that is still going while the panel is hidden. Ink border and weight
+// rather than a colour or a spinner: the accent is spent on hover, focus and
+// error, and a run in progress is none of the three.
+.data-view-generation__open--live
+  border-color $textColor
+  font-weight 600
+
 .data-view-generation--open
   // Paper, not ground: the panel is a control the user is working inside, and
   // it has to separate from the page it floats over.
@@ -38,6 +48,27 @@
   background white
   border 1px solid $borderColor
   border-radius $button_border_radius
+
+  // ONE DECLARED WIDTH, HELD THROUGH EVERY STATE, and this is the rule the
+  // panel is laid out around rather than a preference about size.
+  //
+  // The controls strip that hosts it is `width: fit-content`, so a panel sized
+  // by its contents made the strip -- and the panel with it -- resize on every
+  // step of a run: the status row appearing, an instruction line of a different
+  // length, a timeline entry with a long tool name, the explanation arriving at
+  // the end. The user watches the box breathe while trying to read what is
+  // inside it. A declared px width is what stops that, and it has to sit on the
+  // OPEN modifier so the closed button is still shrink-to-fit.
+  //
+  // 880px against the old 640: the panel holds three things that are all
+  // measured in characters -- a prompt being proofread before it is sent, an
+  // agent timeline whose rows are tool names and arguments, and an explanation
+  // paragraph -- and at 640 all three wrapped hard enough to be read as a
+  // column rather than as sentences.
+  width 880px
+  // The one thing allowed to move it, because a panel wider than the window
+  // scrolls the page sideways. The strip's own bound is `100vw - 60px`.
+  max-width calc(100vw - 80px)
 
 .data-view-generation__form
   display flex
@@ -77,6 +108,14 @@
     // Deliberately not greyed to a fill: while a run is live this is the only
     // copy of the instruction on screen and it still has to read as text.
     -webkit-text-fill-color rgba(0, 0, 0, 0.5)
+
+// Once a run exists the box is a record of the prompt, and it takes exactly the
+// height of that prompt. The floor above is a WRITING affordance -- it tells
+// someone facing an empty panel that a sentence or three will fit -- and it has
+// no job once the sentence has been sent, where it only pushes the status row
+// and the timeline down behind two blank lines.
+.data-view-generation__input--compact
+  min-height 0
 
 .data-view-generation__actions
   display flex
@@ -162,7 +201,7 @@
   // element: the component is presentational and owns no layout, which is what
   // lets base and league frame it differently.
   min-width 0
-  max-height 260px
+  max-height 320px
   overflow-y auto
   margin-top 8px
   padding 6px 8px
@@ -170,6 +209,9 @@
   border-radius $button_border_radius
   background $backgroundColor
   font-size 12px
+  // Tool arguments and file paths are the timeline's own vocabulary and none of
+  // them break at a space.
+  overflow-wrap anywhere
 
   // Collapsed, the box is a single row and a scrollbar or a fixed height would
   // both be wrong. :has is what lets the frame follow the component's own
@@ -194,6 +236,11 @@
   border-radius $button_border_radius
   font-size 12px
   line-height 1.5
+  // The panel's width is declared and these three hold arbitrary agent prose,
+  // which can carry a column id or a SQL fragment longer than the line. Without
+  // this the unbreakable token overflows the fixed box instead of wrapping in
+  // it, which is the failure a fixed width trades for.
+  overflow-wrap anywhere
 
 .data-view-generation__explanation,
 .data-view-generation__refusal

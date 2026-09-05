@@ -111,7 +111,12 @@ export default function DataViewGenerationControl({
     if (!element) return
     element.style.height = 'auto'
     element.style.height = `${element.scrollHeight}px`
-  }, [instruction, is_open])
+    // `status` participates because scrollHeight is floored by the element's
+    // own min-height, and the compact class that drops that floor is keyed on
+    // status. Without it the box keeps the three-line height it measured before
+    // the class landed, and the rule that removes the floor does nothing
+    // visible.
+  }, [instruction, is_open, generation.status])
 
   // Re-attach to a run this browser started before a reload. Runs once: the
   // stored id is read at mount and the server answers with an UPDATE frame that
@@ -151,8 +156,23 @@ export default function DataViewGenerationControl({
   // not perform.
   const dismiss_label = is_live ? 'Hide' : status ? 'Close' : 'Cancel'
 
+  // HIDE AND CLOSE ARE DIFFERENT OPERATIONS, and running one code path for both
+  // is what made `Hide` unreadable. Dismissing resets the store slice AND
+  // deletes the pending id from localStorage, which is the only thing that
+  // re-attaches this browser to a run after a reload -- so hiding a LIVE run
+  // through it orphaned the run permanently, and reopening showed an empty
+  // panel holding the old prompt text, which reads exactly like a cancel.
+  //
+  // Hiding now collapses the panel and touches nothing else. The run keeps its
+  // id, keeps streaming, and the collapsed button says so.
+  const hide_panel = () => set_is_open(false)
+
+  // Closing is for a run that is OVER, so it clears both halves: the store
+  // slice and the prompt that produced it. Leaving the instruction behind gave
+  // the next open a box pre-filled with a question already answered.
   const close_panel = () => {
     set_is_open(false)
+    set_instruction('')
     dismiss_data_view_generation()
   }
 
@@ -169,14 +189,24 @@ export default function DataViewGenerationControl({
   }
 
   if (!is_open) {
+    // A HIDDEN LIVE RUN HAS TO SAY IT IS STILL RUNNING. Collapsing to the same
+    // `Describe a view` button the panel wears when nothing has been submitted
+    // is what made `Hide` read as a cancel: the one piece of evidence the run
+    // survived was on the screen the user just dismissed.
     return (
       <div className='data-view-generation'>
         <button
           type='button'
-          className='data-view-generation__open'
+          className={
+            is_live
+              ? 'data-view-generation__open data-view-generation__open--live'
+              : 'data-view-generation__open'
+          }
           onClick={() => set_is_open(true)}
         >
-          Describe a view
+          {is_live
+            ? `${STATUS_LABEL[status]} — show progress`
+            : 'Describe a view'}
         </button>
       </div>
     )
@@ -187,7 +217,16 @@ export default function DataViewGenerationControl({
       <form className='data-view-generation__form' onSubmit={on_submit}>
         <textarea
           ref={input_ref}
-          className='data-view-generation__input'
+          // Once a run exists the box is a RECORD of what was asked, not an
+          // invitation to write. Its three-line floor is there to say "there is
+          // room for a sentence or three" to someone facing an empty panel, and
+          // holding that floor under a one-line prompt leaves two blank lines
+          // above a status row that is the thing being read.
+          className={
+            status
+              ? 'data-view-generation__input data-view-generation__input--compact'
+              : 'data-view-generation__input'
+          }
           rows={3}
           value={instruction}
           disabled={is_live}
@@ -203,7 +242,10 @@ export default function DataViewGenerationControl({
               on_submit(event)
               return
             }
-            if (event.key === 'Escape' && !is_live) close_panel()
+            if (event.key === 'Escape') {
+              if (is_live) hide_panel()
+              else close_panel()
+            }
           }}
         />
         {/* Actions appear only once they do something. An always-present
@@ -212,8 +254,11 @@ export default function DataViewGenerationControl({
             place until there is a prompt to send. */}
         <div className='data-view-generation__actions'>
           <span className='data-view-generation__hint'>
+            {/* Over a live run the hint's job changes: it is the only place
+                that answers what `Hide` does, and the answer a user assumes
+                without it is "cancelled". */}
             {is_live
-              ? ''
+              ? 'Hiding keeps the run going — reopen any time'
               : can_submit
                 ? 'Enter to build'
                 : 'Shift-Enter for a new line'}
@@ -221,7 +266,7 @@ export default function DataViewGenerationControl({
           <button
             type='button'
             className='data-view-generation__cancel'
-            onClick={close_panel}
+            onClick={is_live ? hide_panel : close_panel}
           >
             {dismiss_label}
           </button>
@@ -243,7 +288,7 @@ export default function DataViewGenerationControl({
               {generation.instruction}
             </span>
           )}
-          {generation.tool_call_count !== null && (
+          {generation.tool_call_count != null && (
             <span className='data-view-generation__trajectory'>
               {generation.tool_call_count} tool calls
               {generation.duration_milliseconds

@@ -62,16 +62,23 @@ export const data_views_actions = {
     payload: { view_id, table_state, view_name }
   }),
 
-  // Step ONE entry back through the browser-local edit history.
+  // Step ONE entry through the browser-local edit history, in either
+  // direction. Backward and forward are the same operation over the same
+  // derived position, so they share an action type and differ by payload --
+  // two types would be two places for the position rule to drift.
   //
   // Deliberately NOT routed through REVERT_DATA_VIEW below, which calls
-  // clear_view and deletes the whole history rather than stepping back through
-  // it -- a revert throws the history away, and an undo is the one operation
-  // that needs it kept.
-  STEP_DATA_VIEW_HISTORY_BACK: 'STEP_DATA_VIEW_HISTORY_BACK',
+  // clear_view and deletes the whole history rather than stepping through it --
+  // a revert throws the history away, and history navigation is the one
+  // operation that needs it kept.
+  STEP_DATA_VIEW_HISTORY: 'STEP_DATA_VIEW_HISTORY',
   step_data_view_history_back: () => ({
-    type: data_views_actions.STEP_DATA_VIEW_HISTORY_BACK,
-    payload: {}
+    type: data_views_actions.STEP_DATA_VIEW_HISTORY,
+    payload: { direction: 'back' }
+  }),
+  step_data_view_history_forward: () => ({
+    type: data_views_actions.STEP_DATA_VIEW_HISTORY,
+    payload: { direction: 'forward' }
   }),
 
   REVERT_DATA_VIEW: 'REVERT_DATA_VIEW',

@@ -56,6 +56,7 @@ import {
 } from '#libs-shared/data-view-storage/storage.mjs'
 import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
 import { resolve_view_to_restore } from '@core/data-view-generation/view-authority'
+import { resolve_history_step } from '@core/data-views/history-position.mjs'
 import deep_equal from '@core/utils/deep_equal'
 
 // nfl_plays_column_params is 51 KiB of static metadata used only inside the
@@ -782,46 +783,30 @@ export function* cleanup_browser_state_on_delete({ payload }) {
 }
 
 /**
- * Step one entry back through the browser-local edit history.
+ * Step one entry through the browser-local edit history, backward or forward.
  *
- * THE POSITION IS DERIVED, NOT TRACKED. There is no cursor in the store, and
- * deliberately: a cursor has to be reset on a new edit, on a view change, on a
- * restore and on a save, and every one of those is a rule that can be missed —
- * a stale cursor then steps into a different view's history. Instead the
- * current table_state is located IN the history and the step is to the entry
- * before it, which is correct by construction after any of those events.
- *
- * Skipping backwards over entries equal to the current state matters because
- * consecutive snapshots can be identical (a save writes a `server_save` entry
- * for a state a `user_edit` entry already holds). Landing on a twin would look
- * like the control doing nothing.
- *
- * When the current state is in the history not at all — an edit the debounced
- * writer has not persisted yet, or a generated view just applied — the loop
- * does not advance and the step lands on the newest entry, which is the right
- * answer: go back from an unrecorded state means return to the last recorded
- * one.
+ * The position rule and the reason it is derived rather than tracked live in
+ * `history-position.mjs`, which the control also reads so the button that is
+ * offered and the step that runs cannot disagree.
  */
-export function* step_data_view_history_back() {
+export function* step_data_view_history({ payload }) {
+  const direction = payload?.direction === 'forward' ? 'forward' : 'back'
   try {
     const data_view = yield select(get_selected_data_view)
     if (!data_view || !data_view.view_id) return
 
     const history = yield call(load_history, data_view.view_id)
-    if (history.length < 2) return
-
-    let index = history.length - 1
-    while (
-      index >= 0 &&
-      deep_equal(history[index].table_state, data_view.table_state)
-    ) {
-      index -= 1
-    }
-    if (index < 0) return
+    const index = resolve_history_step({
+      history,
+      table_state: data_view.table_state,
+      direction
+    })
+    if (index === -1) return
 
     // change_type `history_step` is what stops persist_table_state_to_browser
-    // appending this state as a new entry. Without it, going back would GROW
-    // the history and a second step would return to where the user started.
+    // appending this state as a new entry. Without it, stepping would GROW the
+    // history on every press and the entries ahead of the position — the ones
+    // forward navigation exists to reach — would be pushed out of the window.
     yield put(
       data_views_actions.data_view_changed(
         { ...data_view, table_state: history[index].table_state },
@@ -829,7 +814,7 @@ export function* step_data_view_history_back() {
       )
     )
   } catch (error) {
-    console.error('Error stepping data view history back:', error)
+    console.error(`Error stepping data view history ${direction}:`, error)
   }
 }
 
@@ -1023,10 +1008,10 @@ export function* watch_revert_data_view() {
   yield takeLatest(data_views_actions.REVERT_DATA_VIEW, handle_revert_data_view)
 }
 
-export function* watch_step_data_view_history_back() {
+export function* watch_step_data_view_history() {
   yield takeLatest(
-    data_views_actions.STEP_DATA_VIEW_HISTORY_BACK,
-    step_data_view_history_back
+    data_views_actions.STEP_DATA_VIEW_HISTORY,
+    step_data_view_history
   )
 }
 
@@ -1182,7 +1167,7 @@ export const data_views_sagas = [
   fork(watch_delete_data_view_fulfilled_for_browser_cleanup),
   fork(watch_set_selected_data_view_for_browser_persist),
   fork(watch_revert_data_view),
-  fork(watch_step_data_view_history_back),
+  fork(watch_step_data_view_history),
   fork(watch_clear_local_view_cache),
   fork(watch_get_data_views_fulfilled_load_organization),
   fork(watch_post_data_view_favorite_failed),

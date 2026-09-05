@@ -15,7 +15,9 @@ const map_state_to_props = createSelector(
 )
 
 const map_dispatch_to_props = {
-  step_data_view_history_back: data_views_actions.step_data_view_history_back
+  step_data_view_history_back: data_views_actions.step_data_view_history_back,
+  step_data_view_history_forward:
+    data_views_actions.step_data_view_history_forward
 }
 
 export default connect(

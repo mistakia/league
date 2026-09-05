@@ -17,6 +17,15 @@
 
 $prose_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 $prose_mono = 'IBM Plex Mono', monospace
+// THE PAINT FACE, and the only third face on the site. It exists for the
+// landing page's field markings — the yard numbers and the end zone wordmark —
+// and it is loaded at 900 alone, which is the weight that makes it paint rather
+// than a text face. See the font comment in app/index.html for what it was
+// chosen against and why the condensed candidates lost.
+//
+// The fallback is the sans stack rather than a bare `sans-serif`, so a failed
+// webfont lands on the face the rest of the page is already set in.
+$prose_paint = 'Chivo', $prose_sans
 
 // THE PROSE INK PALETTE IS ITS OWN, and deliberately not the app's. The app is
 // chrome around a table: mid-grey ink, which is right for a dense surface read

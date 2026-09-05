@@ -184,5 +184,11 @@ export const known_unmapped_offer_category_ids = new Set([
   638, 786, 862, 863, 982, 994, 998, 999, 1054, 1098, 1112, 1185, 1226, 1228,
   1237, 1287, 1303, 1304, 1529, 1547, 1552, 1559, 1627, 1643, 1644, 1645, 1653,
   1680, 1702, 1719, 1723, 1736, 1743, 1744, 1801, 1803, 1844, 1872, 1873, 1900,
-  1908, 1920
+  1908, 1920,
+  // 1972 (Drive Props) and 1974 (No Brainer) ruled out 2026-09-05, signals
+  // 128477/128469. The taxonomy has no drive granularity, so the five Drive
+  // Props subcategories have no settlement-correct type short of coining one;
+  // 1974's single "Either Team to Score 1+ Point" is a novelty with no fitting
+  // type either. Deleting either id makes the family reportable again.
+  1972, 1974
 ])
