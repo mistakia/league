@@ -17,6 +17,8 @@
 //   aggregate            avg | sum | bool_count | passthrough; omit for none.
 //                        Any of the first three also makes the column filter
 //                        through HAVING in aggregate mode.
+//   justify_content      CSS justify-content for the cell, e.g. 'flex-start' to
+//                        left-align the text. Cells center by default.
 
 export default {
   play_film_url: {
@@ -66,6 +68,7 @@ export default {
     table: 'nfl_plays',
     column: 'play_description',
     kind: 'text',
+    justify_content: 'flex-start',
     group: 'CORE',
     header_label: 'DESC',
     size: 300,
