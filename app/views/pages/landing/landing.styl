@@ -41,6 +41,13 @@
 // directory top to bottom is a drive. The direction is also what makes the
 // sequence survive an edit — a fifth section becomes the 10 and the drive still
 // lands, where counting up would run off the field.
+// The hash row hangs in the page's own left gutter, so its offset is that
+// gutter's width negated — prose_page() sets 32px, and 22px on a phone. Stated
+// as its own variable because `-$var` does not negate inside a property, and
+// kept beside the numbers it is derived from so the two cannot drift.
+$sideline_offset = -32px
+$sideline_offset_phone = -22px
+
 .landing-surface
   prose_surface()
 
@@ -212,7 +219,7 @@
   prose_section_band()
   position relative
   margin-top 32px
-  padding-right 72px
+  padding-right 56px
 
   &:first-of-type
     prose_section_band(2px)
@@ -227,40 +234,45 @@
   // fives rather than as an undifferentiated comb. Two repeating gradients on
   // one pseudo-element, each sized to its own tick length.
   //
-  // ONE ROW, IN THE NUMBER'S BAND, and that placement is forced rather than
-  // chosen. A field carries two inbound rows out in the middle of the field,
-  // and the middle of this page is running prose — a row of ticks there was
-  // tried in the rail's gutter and every tick read as a hyphen belonging to the
-  // sentence beside it. The band the number already reserves is the one
-  // corridor on the page with no text in it.
+  // ALONG THE LEFT EDGE, WHICH IS THE SIDELINE. The rules all begin there, so
+  // it is the one edge every yard line already answers to, and a row of ticks
+  // running down it is what a sideline looks like from above.
+  //
+  // IN THE PAGE'S OWN GUTTER, out past the left end of the rules. That is the
+  // only reason it can be there at all: the left edge INSIDE the measure is the
+  // most spoken-for column on the page — the lede, every section head and every
+  // entry label stand on it — and a tick column there lands on the first letter
+  // of every label. Hung in the padding it touches nothing, and the marks sit
+  // just outside the lines they measure, which is where a sideline is.
+  //
+  // It was in the number's band on the right, sharing the one corridor the page
+  // had. Moving it here frees that band down to the number's own width, which
+  // gives the prose column back the difference.
   //
   // NOT THE TICKS THAT WERE REMOVED FROM THE BAR. Those were a row ALONG a band
   // rule, decorating the rule. These run down the field between the rules and
   // cross none of them.
-  &::after
+  &::before
     content ''
     position absolute
     top 0
     bottom 0
-    right 52px
+    left $sideline_offset
     width 12px
     background-image repeating-linear-gradient(to bottom, $prose_rule 0 1px, transparent 1px 90px), repeating-linear-gradient(to bottom, $prose_rule 0 1px, transparent 1px 18px)
     background-size 12px 100%, 7px 100%
     background-repeat no-repeat, no-repeat
+    background-position right top, right top
 
-  // The phone band is 54px and not 44px, because 44px is what the number alone
-  // needs and the hash row has to fit beside it. Measured at 390px wide, the
-  // widest description reached the strip's left edge EXACTLY — zero clearance,
-  // which is a collision one glyph away and reads as text running into the
-  // ticks. The band is now built from its three parts rather than guessed:
-  // 30px of turned numeral, a 4px gap, the 12px strip, and 8px before the
-  // prose, which is the desktop proportion at the phone's sizes.
+  // The right band is now the numeral and its clearance and nothing else: 48px
+  // of turned numeral plus the 8px before the prose. It was 72px when the hash
+  // row shared it.
   @media (max-width 640px)
     margin-top 26px
-    padding-right 54px
+    padding-right 38px
 
-    &::after
-      right 34px
+    &::before
+      left $sideline_offset_phone
 
 // THE YARD NUMBER. Large, and painted the colour of a rule rather than of text
 // — it is a mark on the ground, not something to read, and at ink weight it
@@ -476,9 +488,30 @@
 // that is what says the directory ended rather than ran out, and it is what
 // makes the space between it and the frame below an end zone rather than
 // trailing whitespace. It carries nothing, which is why it is a bare div.
+// THE END ZONE, and it is a bounded, painted band rather than the space that
+// happened to be left under the last rule.
+//
+// TWO BOUNDARIES, BOTH AT THE GOAL LINE'S WEIGHT. The rule above is the goal
+// line the directory closes on; the rule below is the end line, and an end zone
+// with only one of them is an edge with space under it. This is not the border
+// that was tried and removed — that one enclosed the whole page and read as a
+// container. This encloses the six inches of field that a boundary is FOR, and
+// the thing it bounds is the only part of the page with no content in it.
+//
+// THE SIDELINES ARE WHERE THE PAINT STOPS. The stripes run to the measure's
+// edges and end, so the zone is closed left and right without two more rules.
+//
+// DIAGONAL STRIPES, WHICH IS THE OLD DESIGN. Before end zones were solid colour
+// with a wordmark dropped in, they were hatched — and hatching is also the one
+// pattern that survives this palette, because it is made of the page's own
+// hairline repeated rather than of a second surface colour. 45 degrees and a
+// 14px pitch: coarser reads as a barber pole, finer turns to grey mush at the
+// sizes a phone renders it.
 .landing__end
   margin-top 32px
   border-top 2px solid $prose_rule_heavy
+  border-bottom 2px solid $prose_rule_heavy
+  background-image repeating-linear-gradient(45deg, $prose_rule 0 1px, transparent 1px 14px)
 
   @media (max-width 640px)
     margin-top 26px
@@ -496,7 +529,7 @@
 // still fills its zone without a 52px line breaking in two.
 .landing__end-mark
   display block
-  padding-top 38px
+  padding 44px 0
   text-align center
   text-indent 0.22em
   font-family $prose_paint
@@ -505,8 +538,12 @@
   line-height 1
   letter-spacing 0.22em
   text-transform uppercase
-  color $prose_rule
+  // A STEP DARKER THAN THE STRIPES IT SITS ON, which is the one place the
+  // one-paint rule bends and has to. Everything else painted on this page sits
+  // on the bare ground; this sits on hatching in the same grey, and at the same
+  // value the letters and the stripes dissolve into each other.
+  color $prose_rule_strong
   user-select none
 
   @media (max-width 640px)
-    padding-top 28px
+    padding 30px 0

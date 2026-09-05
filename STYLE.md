@@ -9,15 +9,16 @@ the wordmark.
 
 **On the landing page the worksheet is read as a field.** Most of the marks were already there:
 
-| On the page                                        | On the field                     |
-| -------------------------------------------------- | -------------------------------- |
-| The two 2px ink rules                              | The goal lines                   |
-| The hero above the first, the space below the last | The end zones                    |
-| The 1px ink band rule opening a section            | A ten-yard line                  |
-| The hairline between two entries                   | The yard lines between           |
-| `.landing__yard`                                   | The yard numbers                 |
-| `.landing__section::after`                         | The hash marks                   |
-| `.landing__end-mark`                               | The name painted in the end zone |
+| On the page                                        | On the field                                      |
+| -------------------------------------------------- | ------------------------------------------------- |
+| The two 2px ink rules                              | The goal lines                                    |
+| The hero above the first, the space below the last | The end zones                                     |
+| The 1px ink band rule opening a section            | A ten-yard line                                   |
+| The hairline between two entries                   | The yard lines between                            |
+| `.landing__yard`                                   | The yard numbers                                  |
+| `.landing__section::before`                        | The hash marks, down the left sideline            |
+| `.landing__end`                                    | The end zone: two boundaries, old-school hatching |
+| `.landing__end-mark`                               | The name painted in it                            |
 
 **The field is marked from the inside, and this is the constraint, not a detail.** Sidelines and
 end lines drawn as a hairline rectangle around `.landing` were tried and removed: whatever it is
@@ -87,8 +88,11 @@ pages actually sit on — under the floor, for text set at normal size in every 
 `$prose_action` is deliberately not ink: at near-black a several-hundred-pixel block reads as a
 hole punched in the page.
 
-**One paint for every field marking.** The yard numbers, the hash marks and the end zone wordmark
-are all `$prose_rule`, the faintest grey in the palette — and paint is the one thing on the page
+**One paint for every field marking.** The yard numbers, the hash marks and the end zone hatching
+are all `$prose_rule`, the faintest grey in the palette. The end zone WORDMARK is the one step off
+it, at `$prose_rule_strong`, and it has to be: everything else painted here sits on the bare ground,
+while the wordmark sits on hatching in the same grey, and at the same value the letters and the
+stripes dissolve into each other — and paint is the one thing on the page
 that can afford it. A mark at 48px is legible at a contrast a line of prose would vanish at, and
 every one of these is decorative by construction, carrying nothing a reader has to make out. The
 yard number was a step darker at first, which is the value for a LINE a reader is meant to notice,
@@ -199,18 +203,21 @@ three type sizes, so a hardcoded nudge is wrong the moment any of the five input
 | 1px ink           | `prose_section_band()`                                   | A new section begins        |
 | 1px `$prose_rule` | Between entries                                          | Two things of the same kind |
 
-**The hash marks are one row, in the number's band, and that is forced rather than chosen.** A
-field carries two inbound rows out in the middle of the field; the middle of this page is running
-prose. A row in the rail's gutter was tried and every tick read as a hyphen belonging to the
-sentence beside it. The band the number already reserves is the one corridor with no text in it.
-Two tick lengths on one pseudo-element — the short mark at every yard, the long one where a
-five-yard line would fall — so the row reads in fives rather than as a comb. These are not the
-ticks that were removed from the bar: those ran ALONG a band rule and decorated it, and these run
-down the field between the rules and cross none of them.
+**The hash marks run down the LEFT edge, which is the sideline**, hung in the page's own gutter
+(`-32px`, `-22px` on a phone) out past the left end of the rules. Every rule begins at that edge, so
+it is the one the whole page already answers to, and the marks sit just outside the lines they
+measure. The gutter is the only place they can be: inside the measure that edge is the most
+spoken-for column on the page — lede, section heads and entry labels all stand on it — and a tick
+column there lands on the first letter of every label. Two tick lengths on one pseudo-element, the
+short mark at every yard and the long one where a five-yard line would fall, so the row reads in
+fives rather than as a comb. These are still not the ticks that were removed from the bar: those
+ran ALONG a band rule and decorated it, and these run down the field between the rules and cross
+none of them.
 
-**The band is built from its parts, not guessed.** Numeral, 4px, strip, 8px, prose. Guessing it
-gave the phone a band that fit the number alone, and the widest description reached the strip's
-left edge exactly — a collision one glyph away.
+**The right band is the numeral and its clearance and nothing else** — 56px, 38px on a phone, being
+48px and 30px of turned numeral plus the 8px before the prose. Build a band from its parts rather
+than guessing: guessed at the number's own width, back when the hash row shared it, the phone's
+widest description reached the strip's left edge exactly — a collision one glyph away.
 
 **Every rule runs the full measure, including behind the yard numbers.** The number band is a
 `padding-right` on `.landing__section` — 72px, 44px on a phone — and a border spans the padding
@@ -224,10 +231,19 @@ description.
 section closes the last one too, so a reader reaching the end sees the directory finish rather than
 run out.
 
-**On the landing page that closing rule is the second goal line, and the site's name is painted
-below it**, across the width, in the paint face (`.landing__end-mark`). Until it was there the space
-under the rule was the page's bottom padding: the reader could see the directory had ended, but
-nothing said the field had. It is still not a footer — the name is the one the masthead carries at
+**On the landing page that closing rule is the second goal line, and below it is a real end zone.**
+It has two boundaries at the goal line's own weight — the rule above and an end line below — because
+a zone with only one of them is an edge with space under it. Its sidelines are where the paint
+stops: the hatching runs to the measure's edges and ends, closing it left and right without two more
+rules. It is **hatched at 45 degrees on a 14px pitch**, which is the old end zone design from before
+they were solid colour with a wordmark dropped in, and the one pattern this palette can draw — the
+page's own hairline repeated, not a second surface colour. Coarser reads as a barber pole; finer
+turns to grey mush at the size a phone renders it. The site's name is painted across it in the paint
+face (`.landing__end-mark`).
+
+This is not the border that was tried and removed. That one enclosed the whole page and read as a
+container; this bounds the one band on the page with no content in it, which is what a boundary is
+for. It is still not a footer — the name is the one the masthead carries at
 the top of the same page, so it repeats a wordmark rather than adding one, and it is `aria-hidden`
 because a screen reader reaching that name twice learns nothing the second time. A footer of links
 there would repeat the directory it is closing.
@@ -277,7 +293,9 @@ symbol in it renders **nothing** rather than erroring.
 - **No filled button on a reading page.** A filled button is the register of something being sold,
   and neither reading page sells anything. Their next steps are text links. `prose_action_fill()`
   is for real form submits.
-- **No boxes or cards on a prose page**, and **that includes one box around everything.** A
+- **No boxes or cards on a prose page**, and **that includes one box around everything.** A band
+  with a rule above and below it is not that object — the end zone has two boundaries and no
+  verticals, and what it encloses is the only part of the page carrying no content. A
   directory drawn as a grid of cards becomes a marketing page the moment there are three of them,
   and a hairline rectangle around the whole page is the same object drawn once — it was tried on
   the landing page, argued for as a sideline rather than a container, and read as a container
