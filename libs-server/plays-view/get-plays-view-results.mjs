@@ -28,16 +28,31 @@ const GROUP_BY_COLUMNS = {
 const CACHE_TTL_CURRENT_SEASON = 60 * 60 // 1 hour (seconds)
 const CACHE_TTL_HISTORICAL = 7 * 24 * 60 * 60 // 7 days (seconds)
 
+// Only these two operators name an exact set of years. Every other operator a
+// play_year clause can carry -- a range, a negation, a null test -- can still
+// match the current season, so reading its `value` as the year set understates
+// what the query covers.
+const EXACT_YEAR_OPERATORS = new Set(['=', 'IN'])
+
 // Read off the resolved WHERE clauses rather than a param, because the plays
 // view has no params. apply_default_season_scope guarantees a play_year clause
 // exists by the time this runs, so there is no no-year branch to get wrong.
+//
+// A clause that does not pin an exact year set takes the SHORT TTL. The two
+// errors are not symmetric: caching current-season plays for seven days serves
+// a stale answer with no way for the caller to tell, while re-querying a purely
+// historical view every hour costs only a query. `play_year >= 2025` is the
+// case that reaches production -- it covers the current season, and reading its
+// value alone would say 2025.
 function get_cache_info({ where }) {
-  const year_clause = where.find((clause) => clause.column_id === 'play_year')
-  const value = year_clause ? year_clause.value : null
-  const years = Array.isArray(value) ? value : [value]
-  const includes_current_season = years.some(
-    (y) => Number(y) === current_season.year
+  const year_clauses = where.filter(
+    (clause) => clause.column_id === 'play_year'
   )
+  const includes_current_season = year_clauses.some((clause) => {
+    if (!EXACT_YEAR_OPERATORS.has(clause.operator)) return true
+    const values = Array.isArray(clause.value) ? clause.value : [clause.value]
+    return values.some((year) => Number(year) === current_season.year)
+  })
   const cache_ttl = includes_current_season
     ? CACHE_TTL_CURRENT_SEASON
     : CACHE_TTL_HISTORICAL
@@ -59,9 +74,17 @@ function resolve_column_id(column) {
 //
 // Two rules, and the asymmetry between them is the point.
 //
-// A year is ALWAYS synthesized when absent, because it is the only thing
-// standing between an unscoped request and a full scan of every nfl_plays
-// partition (1.5M rows).
+// A year is ALWAYS synthesized when absent, because a request naming no year
+// at all scans every nfl_plays partition (1.5M rows), and that request is
+// reachable from the socket, the search route and the export route.
+//
+// The synthesis fires on the ABSENCE of a play_year clause, not on whether the
+// clause present actually bounds anything: `play_year IS NOT NULL` and
+// `play_year != 2020` both suppress it and both scan every partition. That is
+// deliberate. Narrowing an explicit filter the caller wrote would silently
+// return a different answer than the one asked for, which is worse than a slow
+// one. A caller who wants the whole table can still have it; what they cannot
+// do is get it by accident.
 //
 // The regular-season default is synthesized ONLY when the request names no
 // season scope at all. A caller who names a year gets exactly the seasons they
@@ -152,13 +175,11 @@ export async function get_plays_view_results_query({
   // and no param layer.
   const query = db('nfl_plays')
 
-  // Track which joins have been added
-  const join_state = {
-    player_passer: false,
-    player_rusher: false,
-    player_target: false,
-    nfl_games: false
-  }
+  // Which joins this query has already added, keyed by the joining column's
+  // own name for the join -- a player role, or nfl_games. Deliberately empty
+  // rather than pre-declaring the keys: a join owns its key, and a fixed list
+  // here would silently go stale every time a column adds a new role.
+  const join_state = {}
 
   // Resolve all columns (prefix + main + where + sort)
   const all_column_ids = new Set()

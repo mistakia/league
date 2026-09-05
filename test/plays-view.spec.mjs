@@ -4,7 +4,7 @@ import * as chai from 'chai'
 
 import { get_plays_view_results_query } from '#libs-server'
 import plays_view_column_definitions from '#libs-server/plays-view/column-definitions/index.mjs'
-import plays_view_fields_index from '#libs-shared/plays-view-fields-index.mjs'
+import { plays_view_columns } from '#libs-shared'
 import { current_season } from '#constants'
 import { compare_queries } from './utils/index.mjs'
 import { enable_debug_namespaces } from '#libs-shared/enable-debug-namespaces.mjs'
@@ -312,6 +312,45 @@ describe('Plays View', () => {
 
       expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
     })
+
+    it('should return 1 hour cache TTL for a range covering the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [
+          {
+            column_id: 'play_year',
+            operator: '>=',
+            value: current_season.year - 1
+          }
+        ],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
+    })
+
+    it('should return 1 hour cache TTL for a negation that cannot exclude the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [{ column_id: 'play_year', operator: '!=', value: 2020 }],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(60 * 60)
+    })
+
+    it('should still return 7 day cache TTL for a range that ends before the current season', async () => {
+      const { plays_view_metadata } = await get_plays_view_results_query({
+        where: [
+          {
+            column_id: 'play_year',
+            operator: 'IN',
+            value: [2020, 2021]
+          }
+        ],
+        columns: ['play_type']
+      })
+
+      expect(plays_view_metadata.cache_ttl).to.equal(7 * 24 * 60 * 60)
+    })
   })
 
   describe('validation', () => {
@@ -498,23 +537,26 @@ describe('Plays View', () => {
     })
   })
 
-  // A plays column is three separate declarations -- the server definition, the
-  // shared description, and the client field -- and nothing made them agree.
-  // The failure is silent in both directions: a column with no description
-  // renders a header with an empty tooltip, and a description for a column that
-  // no longer exists is prose nobody can reach. The client field list cannot be
-  // imported here (it carries JSX), so this asserts the two registries a server
-  // test can see; the client list is covered by the column controls rendering
-  // nothing for an id it does not know.
-  describe('column registry parity', () => {
-    it('gives every column a description and every description a column', () => {
-      const column_ids = Object.keys(plays_view_column_definitions)
-      const described_ids = Object.keys(plays_view_fields_index)
+  // A plays column used to be three separate declarations -- the server
+  // definition, the shared description, and the client field -- with a parity
+  // test standing in for a single source. They now derive from one declaration,
+  // so set parity is true by construction and there is nothing left to assert
+  // about it. Both directions of the old check are enforced at import instead:
+  // column-definitions/index.mjs throws on an override for an undeclared column
+  // and on a declaration that would select nothing.
+  //
+  // What a single source does NOT give you is a description, which stays easy
+  // to forget on a new column and fails silently as an empty tooltip.
+  describe('column declaration', () => {
+    it('gives every column a non-empty description', () => {
+      const missing = Object.entries(plays_view_columns)
+        .filter(([, declaration]) => !declaration.description?.trim())
+        .map(([column_id]) => column_id)
 
-      expect(column_ids.filter((id) => !plays_view_fields_index[id])).to.eql([])
-      expect(
-        described_ids.filter((id) => !plays_view_column_definitions[id])
-      ).to.eql([])
+      expect(missing).to.eql([])
+      expect(Object.keys(plays_view_columns).length).to.equal(
+        Object.keys(plays_view_column_definitions).length
+      )
     })
   })
 })

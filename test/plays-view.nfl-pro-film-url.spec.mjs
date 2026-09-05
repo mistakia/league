@@ -5,7 +5,7 @@ import db from '#db'
 import { nfl_pro_film_url_sql } from '#libs-server/plays-view/nfl-pro-film-url.mjs'
 import plays_view_column_definitions from '#libs-server/plays-view/column-definitions/index.mjs'
 import get_plays_view_results from '#libs-server/plays-view/get-plays-view-results.mjs'
-import { plays_view_fields_index } from '#libs-shared'
+import { plays_view_columns } from '#libs-shared'
 
 const expect = chai.expect
 
@@ -80,7 +80,7 @@ describe('plays view / nfl pro film url', function () {
   describe('registration', function () {
     it('is defined on the server and described for the client', function () {
       expect(plays_view_column_definitions.play_film_url).to.be.an('object')
-      expect(plays_view_fields_index.play_film_url).to.be.a('string')
+      expect(plays_view_columns.play_film_url.description).to.be.a('string')
     })
 
     it('carries no bind parameters', function () {

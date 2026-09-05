@@ -2,21 +2,31 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { plays_view_fields_index } from '#libs-shared'
+import plays_view_columns from '#libs-shared/plays-view-columns.mjs'
 import PlayFilmLink from '@components/play-film-link'
 import TeamCodeColumn from '@components/team-code-column'
 
-// Optional keys a field may carry, beyond the data_type/size/header_label the
-// factories below supply:
+// The plays-view client fields, built from the shared column declaration in
+// libs-shared/plays-view-columns.mjs. A column's id, group, label, size and
+// data type are stated once there and read here; the only thing this file owns
+// is what cannot cross into libs-shared -- the React components that render a
+// cell.
 //
-//   component            - React component rendering the cell, in place of the
-//                          plain-text path (react-table's table-cell.js
-//                          dispatches on it)
-//   reverse_percentiles  - bool, or a function of the column's params. Marks a
-//                          column where a LOWER value is the better one, so the
-//                          percentile shading colors it in the other direction
+// Optional keys a declaration may carry, beyond the kind/size/header_label
+// resolved below:
+//
+//   cell                 - names an entry in CELL_COMPONENTS, rendering the
+//                          cell in place of the plain-text path (react-table's
+//                          table-cell.js dispatches on `component`)
 //   disable_percentiles  - bool. Suppresses shading on a numeric column. See
 //                          the rule below for which ones
+//
+// react-table also reads `reverse_percentiles` on a cell to pick the shading
+// direction, for a column where a LOWER value is the better one. NOTHING sets
+// it, because every column that still shades is one where higher is better for
+// the offense -- but a column that set it and was not honored here would get a
+// flipped color over unflipped percentile points, which is worse than either
+// consistent answer. Add it to the declaration if such a column ever arrives.
 //
 // Percentile shading is implicit: every NUMBER column gets it unless it opts
 // out. See app/core/plays-view/derive-plays-percentile-stats.mjs.
@@ -33,13 +43,6 @@ import TeamCodeColumn from '@components/team-code-column'
 // and XPASS sit in OUTCOME and are opted out individually, because they are
 // inputs to EPA and WPA rather than results.
 //
-// NOTHING currently sets reverse_percentiles, because every column that still
-// shades is one where higher is better for the offense. The support stays
-// because react-table's cell reads the flag on its own to pick the color
-// direction: a future column that sets it and is NOT honored here would get a
-// flipped color over unflipped percentile points, which is worse than either
-// consistent answer.
-//
 // Only `columns` shade, never `prefix_columns` -- the selector walks the one
 // list, the same way the data-views page does. So the default view's numeric
 // prefix columns (play_year, play_week, play_quarter) render unshaded no matter
@@ -53,6 +56,12 @@ PlayFilmLinkCell.propTypes = {
   value: PropTypes.string
 }
 
+// The one thing a shared declaration cannot hold: a React component.
+const CELL_COMPONENTS = {
+  PlayFilmLinkCell: React.memo(PlayFilmLinkCell),
+  TeamCodeColumn: React.memo(TeamCodeColumn)
+}
+
 const PLAYS_COLUMN_GROUPS = {
   CORE: { column_group_id: 'CORE', priority: 1 },
   OUTCOME: { column_group_id: 'OUTCOME', priority: 2 },
@@ -64,632 +73,66 @@ const PLAYS_COLUMN_GROUPS = {
   SITUATIONAL: { column_group_id: 'SITUATIONAL', priority: 5 }
 }
 
-const play_field = (field) => ({
-  data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-  size: 70,
-  ...field
-})
-
-const play_text_field = (field) => ({
-  data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-  size: 100,
-  ...field
-})
-
-const play_boolean_field = (field) => ({
-  data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
-  size: 60,
-  ...field
-})
-
-const plays_view_fields = {
-  // Core play fields
-  play_film_url: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'FILM',
-    size: 50,
-    component: React.memo(PlayFilmLinkCell)
-  }),
-  play_esbid: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'ESBID',
-    size: 90,
-    // A game identifier, not a magnitude.
-    disable_percentiles: true
-  }),
-  play_timestamp: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'TIME',
-    size: 70
-  }),
-  play_game_timestamp: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'GTIME',
-    size: 90,
-    // nfl_games.kickoff_at is timestamptz, so this arrives as an ISO string,
-    // not the epoch number the play_field default assumes.
-    data_type: table_constants.TABLE_DATA_TYPES.DATE
-  }),
-  play_desc: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'DESC',
-    size: 300
-  }),
-  play_type: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'TYPE',
-    size: 60,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: [
-      { value: 'PASS', label: 'PASS', group: 'Pass' },
-      { value: 'RUSH', label: 'RUSH', group: 'Run' },
-      { value: 'PUNT', label: 'PUNT', group: 'Special' },
-      { value: 'KICK', label: 'KICK', group: 'Special' },
-      { value: 'FGXP', label: 'FGXP', group: 'Special' },
-      { value: 'NOPL', label: 'NOPL', group: 'Special' },
-      { value: 'KOFF', label: 'KOFF', group: 'Special' },
-      { value: 'ONSD', label: 'ONSD', group: 'Special' },
-      { value: 'CONV', label: 'CONV', group: 'Special' }
-    ]
-  }),
-  play_off_team: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'OFF',
-    size: 60,
-    component: React.memo(TeamCodeColumn)
-  }),
-  play_def_team: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'DEF',
-    size: 60,
-    component: React.memo(TeamCodeColumn)
-  }),
-  play_down: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'DWN',
-    size: 40,
-    disable_percentiles: true
-  }),
-  play_yards_to_go: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'YTG',
-    size: 40,
-    disable_percentiles: true
-  }),
-  play_ydl_100: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'YDL',
-    size: 40,
-    disable_percentiles: true
-  }),
-  play_quarter: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'QTR',
-    size: 40,
-    disable_percentiles: true
-  }),
-  play_game_clock: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'CLOCK',
-    size: 60
-  }),
-  play_sequence: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'SEQ',
-    size: 50,
-    // Play ordering within a game, not a magnitude.
-    disable_percentiles: true
-  }),
-  play_year: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'YEAR',
-    size: 60,
-    // A calendar ordinal, not a magnitude.
-    disable_percentiles: true
-  }),
-  play_seas_type: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'TYPE',
-    size: 60,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['PRE', 'REG', 'POST']
-  }),
-  play_week: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'WK',
-    size: 40,
-    // A calendar ordinal, not a magnitude.
-    disable_percentiles: true
-  }),
-  play_game_id: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
-    header_label: 'GID',
-    size: 80
-  }),
-
-  // Outcome fields
-  play_yds_gained: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'YDS'
-  }),
-  play_yds_gained_avg: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'AVG',
-    fixed: 1
-  }),
-  play_first_down: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: '1D'
-  }),
-  play_td: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'TD'
-  }),
-  play_int: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'INT'
-  }),
-  play_penalty: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'PEN'
-  }),
-  play_penalty_type: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'PENTYPE',
-    size: 180
-  }),
-  play_successful: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'SUCC'
-  }),
-  play_epa: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'EPA',
-    fixed: 2
-  }),
-  play_epa_total: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'EPA TOT',
-    fixed: 1,
-    size: 80
-  }),
-  play_wpa: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'WPA',
-    fixed: 3
-  }),
-  play_ep: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'EP',
-    fixed: 2,
-    // The situation's expected points BEFORE the snap -- an input to EPA, not a
-    // result. EPA itself is the outcome and does shade.
-    disable_percentiles: true
-  }),
-  play_wp: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'WP',
-    fixed: 3,
-    // Pre-snap win probability, same as EP above; WPA is the outcome.
-    disable_percentiles: true
-  }),
-  play_cpoe: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'CPOE',
-    fixed: 1
-  }),
-  play_xpass_prob: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'XPASS',
-    fixed: 2,
-    size: 60,
-    // How likely a pass WAS in this situation -- the expectation, not the call.
-    // play_pass_oe is the offense's deviation from it and does shade.
-    disable_percentiles: true
-  }),
-  play_pass_oe: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.OUTCOME],
-    header_label: 'POE',
-    fixed: 2
-  }),
-
-  // Passing fields
-  play_passer: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'PASSER',
-    size: 120
-  }),
-  play_passer_pid: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'PSR PID',
-    size: 80
-  }),
-  play_pass_yds: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'PYD'
-  }),
-  play_air_yards: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'AY'
-  }),
-  play_true_air_yards: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'TAY'
-  }),
-  play_comp: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'CMP'
-  }),
-  play_time_to_throw: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'TTT',
-    fixed: 2
-  }),
-  play_dot: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'DOT',
-    fixed: 1
-  }),
-  play_highlight_pass: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'BT'
-  }),
-  play_int_worthy: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'IW'
-  }),
-  play_dropped_pass: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'DRP'
-  }),
-  play_qb_pressure: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'PRSS'
-  }),
-  play_qb_hit: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'HIT'
-  }),
-  play_sk: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'SK'
-  }),
-  play_qb_hurry: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'HRY'
-  }),
-  play_pocket_time: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'PCKT',
-    fixed: 2
-  }),
-  play_dropback_depth: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'DEPTH',
-    fixed: 1
-  }),
-  play_throw_away: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'TAWAY'
-  }),
-  play_pass_location: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'LOC',
-    size: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['LEFT', 'MIDDLE', 'RIGHT']
-  }),
-  play_read_thrown: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'READ',
-    size: 120,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: [
-      'FIRST',
-      'SECOND',
-      'CHECKDOWN',
-      'DESIGNED',
-      'SCRAMBLE_DRILL'
-    ]
-  }),
-  play_qb_alignment: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PASSING],
-    header_label: 'QBALN',
-    size: 120,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['SHOTGUN', 'UNDER_CENTER', 'PISTOL']
-  }),
-
-  // Rushing fields
-  play_rusher: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'RUSHER',
-    size: 120
-  }),
-  play_rusher_pid: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'RB PID',
-    size: 80
-  }),
-  play_rush_yds: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'RYD'
-  }),
-  play_yards_after_contact: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'YAC',
-    fixed: 1
-  }),
-  play_broken_tackles: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'BT'
-  }),
-  play_run_location: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'LOC',
-    size: 70,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['left', 'middle', 'right']
-  }),
-  play_run_gap: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
-    header_label: 'GAP',
-    size: 70,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['guard', 'tackle', 'end']
-  }),
-
-  // Receiving fields
-  play_target: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'TARGET',
-    size: 120
-  }),
-  play_target_pid: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'TGT PID',
-    size: 80
-  }),
-  play_recv_yds: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'RECY'
-  }),
-  play_yards_after_catch: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'YAC',
-    fixed: 1
-  }),
-  play_route: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'ROUTE',
-    size: 80
-  }),
-  play_receiver_separation: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'SEP',
-    size: 130,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: [
-      'WIDE_OPEN',
-      'OPEN',
-      'ONE_STEP_OPEN',
-      'CLOSING_COVERAGE',
-      'TIGHT_COVERAGE'
-    ]
-  }),
-  play_pass_breakup: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'PBU'
-  }),
-  play_contested_ball: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'CNTST'
-  }),
-  play_catchable_ball: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'CTCH'
-  }),
-  play_endzone_target: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.RECEIVING],
-    header_label: 'EZ'
-  }),
-
-  // Context fields
-  play_score_diff: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'SDIFF',
-    disable_percentiles: true
-  }),
-  play_home_score: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'HSCR',
-    disable_percentiles: true
-  }),
-  play_away_score: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'ASCR',
-    disable_percentiles: true
-  }),
-  play_sec_rem_half: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'SRH',
-    size: 60,
-    disable_percentiles: true
-  }),
-  play_sec_rem_gm: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'SRG',
-    size: 60,
-    disable_percentiles: true
-  }),
-  play_home_team: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'HOME',
-    size: 60,
-    component: React.memo(TeamCodeColumn)
-  }),
-  play_away_team: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'AWAY',
-    size: 60,
-    component: React.memo(TeamCodeColumn)
-  }),
-  play_goal_to_go: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
-    header_label: 'GTG'
-  }),
-
-  // Personnel fields
-  play_off_formation: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'FORM',
-    size: 130,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: [
-      'SHOTGUN',
-      'UNDER_CENTER',
-      'PISTOL',
-      'EMPTY',
-      'WILDCAT',
-      'JUMBO',
-      'I_FORM',
-      'SINGLEBACK'
-    ]
-  }),
-  play_off_personnel: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'O PERS',
-    size: 100
-  }),
-  play_def_personnel: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'D PERS',
-    size: 100
-  }),
-  play_box_defenders: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'BOX',
-    fixed: 1,
-    disable_percentiles: true
-  }),
-  play_pass_rushers: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'RUSH',
-    fixed: 1,
-    disable_percentiles: true
-  }),
-  play_blitzers: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
-    header_label: 'BLTZ',
-    fixed: 1,
-    disable_percentiles: true
-  }),
-
-  // Situational fields
-  play_is_play_action: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'PA'
-  }),
-  play_is_no_huddle: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'NHUD'
-  }),
-  play_is_screen: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'SCRN'
-  }),
-  play_is_qb_scramble: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'SCMB'
-  }),
-  play_is_qb_rush: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'QBR'
-  }),
-  play_is_qb_dropback: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'DRPB'
-  }),
-  // The union of both feeds' vocabularies, because the column is the union of
-  // both feeds. COVER_5, COVER_9 and COMBINATION come only from our charting,
-  // PREVENT only from Next Gen Stats, and two-man arrives already normalized to
-  // COVER_2_MAN, so `2_MAN` is deliberately not offered -- a filter option that
-  // can never match is worse than a missing one.
-  play_coverage_type: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'COV',
-    size: 110,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: [
-      'COVER_0',
-      'COVER_1',
-      'COVER_2',
-      'COVER_2_MAN',
-      'COVER_3',
-      'COVER_4',
-      'COVER_5',
-      'COVER_6',
-      'COVER_9',
-      'COMBINATION',
-      'PREVENT'
-    ]
-  }),
-  play_coverage_source: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'COVSRC',
-    size: 110,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['charted', 'next_gen_stats']
-  }),
-  play_man_zone: play_text_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'MN/ZN',
-    size: 120,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    // Only the normalized spellings, for the same reason: the column rewrites
-    // MAN and ZONE, so offering them here would be two options that match
-    // nothing while looking like the ones a 2025 view needs.
-    column_values: ['MAN_COVERAGE', 'ZONE_COVERAGE', 'SITUATIONAL', 'MISC']
-  }),
-  play_is_blitz: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'BLZ'
-  }),
-  play_is_zero_blitz: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: '0BLZ'
-  }),
-  play_is_stunt: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'STNT'
-  }),
-  play_coverage_defenders: play_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'COVDEF',
-    fixed: 1,
-    // A defensive alignment count, the same circumstance-not-outcome case as
-    // the box and blitzer counts above.
-    disable_percentiles: true
-  }),
-  play_is_motion: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'MOT'
-  }),
-  play_is_trick_play: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'TRCK'
-  }),
-  play_is_out_of_pocket: play_boolean_field({
-    column_groups: [PLAYS_COLUMN_GROUPS.SITUATIONAL],
-    header_label: 'OOP'
-  })
+const DEFAULT_DATA_TYPE_BY_KIND = {
+  number: table_constants.TABLE_DATA_TYPES.NUMBER,
+  text: table_constants.TABLE_DATA_TYPES.TEXT,
+  boolean: table_constants.TABLE_DATA_TYPES.BOOLEAN
 }
 
-// Add column_id, accessorKey, and description from shared index
-for (const [key, value] of Object.entries(plays_view_fields)) {
-  value.column_id = key
-  value.accessorKey = key
-  value.description = plays_view_fields_index[key] || null
+const DEFAULT_SIZE_BY_KIND = { number: 70, text: 100, boolean: 60 }
+
+const build_field = (column_id, declaration) => {
+  const {
+    kind,
+    group,
+    header_label,
+    size,
+    data_type,
+    column_values,
+    fixed,
+    disable_percentiles,
+    cell,
+    description
+  } = declaration
+
+  const column_group = PLAYS_COLUMN_GROUPS[group]
+  if (!column_group) {
+    throw new Error(`${column_id}: unknown column group ${group}`)
+  }
+
+  const resolved_data_type = data_type
+    ? table_constants.TABLE_DATA_TYPES[data_type]
+    : DEFAULT_DATA_TYPE_BY_KIND[kind]
+  if (!resolved_data_type) {
+    throw new Error(`${column_id}: unknown data type ${data_type || kind}`)
+  }
+
+  const field = {
+    column_id,
+    accessorKey: column_id,
+    data_type: resolved_data_type,
+    size: size ?? DEFAULT_SIZE_BY_KIND[kind],
+    column_groups: [column_group],
+    header_label,
+    description: description || null
+  }
+
+  if (column_values) field.column_values = column_values
+  if (fixed !== undefined) field.fixed = fixed
+  if (disable_percentiles) field.disable_percentiles = true
+  if (cell) {
+    const component = CELL_COMPONENTS[cell]
+    if (!component) throw new Error(`${column_id}: unknown cell ${cell}`)
+    field.component = component
+  }
+
+  return field
+}
+
+const plays_view_fields = {}
+
+for (const [column_id, declaration] of Object.entries(plays_view_columns)) {
+  plays_view_fields[column_id] = build_field(column_id, declaration)
 }
 
 export default plays_view_fields
