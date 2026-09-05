@@ -97,15 +97,22 @@ export const read_generation_timeline = async ({
 
   const limit = Math.min(Math.max(1, take_last), MAX_PAGE_SIZE)
 
+  // POSITION-BASED SLICING ONLY, and never `timeline_limit`. Base sorts its
+  // slice parameters into three mutually exclusive groups -- pagination
+  // (`limit`/`offset`, which `timeline_limit` feeds), position-based
+  // (`take_last` and friends) and index-based -- and refuses any request
+  // touching two of them with a 500 (`timeline-filter-utils.mjs`). Sending
+  // `timeline_limit` alongside `take_last` was that refusal on EVERY attach,
+  // and pairing it with `before_index` is rejected by a separate branch, so
+  // both halves of this read were broken against real base.
+  //
+  // `take_last` is also the only one that answers the question an attach is
+  // asking. `timeline_limit` alone returns the HEAD of the timeline, so the
+  // collapsed row would show a run's FIRST event under the label "latest".
   const params = new URLSearchParams()
-  // NON-ZERO BY CONSTRUCTION. A `timeline_limit` of 0 is what the collector
-  // sends, and it returns a structurally valid response with an empty timeline
-  // -- which is indistinguishable from a run that did nothing.
-  params.set('timeline_limit', String(limit))
+  params.set('take_last', String(limit))
   if (Number.isFinite(before_index)) {
     params.set('before_index', String(before_index))
-  } else {
-    params.set('take_last', String(limit))
   }
 
   const url = `${base_url.replace(/\/$/, '')}/api/threads/${thread_id}?${params}`

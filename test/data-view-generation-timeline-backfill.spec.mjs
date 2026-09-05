@@ -65,12 +65,21 @@ describe('data view generation timeline backfill', function () {
   })
 
   describe('the request', function () {
-    it('asks for a NON-ZERO timeline_limit', async function () {
-      // The defect this pins: the collector reads the same endpoint with
-      // `timeline_limit=0`, which returns a structurally valid response holding
-      // an empty timeline -- indistinguishable from a run that did nothing.
-      // Reusing that call for the backfill is the single most likely way for
-      // this surface to ship looking correct and showing nothing.
+    it('takes a TAIL with take_last and never sends timeline_limit', async function () {
+      // The defect this pins, measured against real base 2026-09-04: base
+      // sorts slice parameters into three mutually exclusive groups and
+      // refuses any request touching two with a 500. `timeline_limit` is
+      // pagination and `take_last` is position-based, so sending both -- which
+      // this reader did -- broke EVERY attach.
+      //
+      // The earlier version of this test asserted a non-zero `timeline_limit`,
+      // which is why the breakage shipped: it pinned league's own request
+      // against league's own fetch stub and never asked base whether the pair
+      // was legal.
+      //
+      // `take_last` is also the only parameter that answers an attach's
+      // question. `timeline_limit` alone returns the HEAD, so the collapsed
+      // row would show a run's FIRST event labelled as its latest.
       let requested_url = null
       await read_generation_timeline({
         thread_id: 't1',
@@ -82,9 +91,8 @@ describe('data view generation timeline backfill', function () {
       })
 
       const params = new URL(requested_url).searchParams
-      expect(params.get('timeline_limit')).to.not.equal('0')
-      expect(Number(params.get('timeline_limit'))).to.be.greaterThan(0)
       expect(params.get('take_last')).to.equal(String(DEFAULT_TAKE_LAST))
+      expect(params.get('timeline_limit')).to.equal(null)
     })
 
     it('pages BACKWARD with before_index instead of taking a tail', async function () {
@@ -101,9 +109,12 @@ describe('data view generation timeline backfill', function () {
 
       const params = new URL(requested_url).searchParams
       expect(params.get('before_index')).to.equal('40')
-      // take_last and before_index are different questions; sending both would
-      // let base pick.
-      expect(params.get('take_last')).to.equal(null)
+      // before_index is a QUALIFIER on position-based slicing, not a slicing
+      // method of its own, so it must arrive WITH take_last and never with
+      // timeline_limit -- base rejects the latter pair on its own branch.
+      // Verified against real base: `before_index=30&take_last=10` returns 200.
+      expect(params.get('take_last')).to.equal(String(DEFAULT_TAKE_LAST))
+      expect(params.get('timeline_limit')).to.equal(null)
     })
 
     it('caps a page at MAX_PAGE_SIZE rather than asking for everything', async function () {
@@ -119,7 +130,8 @@ describe('data view generation timeline backfill', function () {
       })
 
       const params = new URL(requested_url).searchParams
-      expect(params.get('timeline_limit')).to.equal(String(MAX_PAGE_SIZE))
+      expect(params.get('take_last')).to.equal(String(MAX_PAGE_SIZE))
+      expect(params.get('timeline_limit')).to.equal(null)
     })
   })
 
