@@ -10,6 +10,15 @@ export const get_where_string = ({
   row_axes,
   data_view_options = {}
 }) => {
+  // Derived here rather than accepted as a parameter: query_context is a
+  // field on data_view_options (get-data-view-results.mjs assigns it before
+  // any column hook can fire), so threading it separately only creates
+  // places to forget one. This was such a place -- team-identity columns
+  // read query_context in main_where and is_where_column_array to tell a
+  // player-grain request from a team-grain one, and with it undefined they
+  // silently took the team branch and emitted a column the player-grain
+  // bridge CTE does not have.
+  const query_context = data_view_options?.query_context ?? null
   const use_select_as =
     column_definition.select_as && is_main_select && column_definition.with
   const column_name = use_select_as
@@ -41,7 +50,8 @@ export const get_where_string = ({
         column_id: where_clause.column_id,
         column_index,
         row_axes,
-        data_view_options
+        data_view_options,
+        query_context
       })
     : has_output
       ? aggregator_expr
@@ -56,7 +66,8 @@ export const get_where_string = ({
     column_definition.is_where_column_array &&
     column_definition.is_where_column_array({
       params,
-      row_axes
+      row_axes,
+      query_context
     })
 
   if (where_clause.operator === 'IS NULL') {

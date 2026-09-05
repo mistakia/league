@@ -1151,7 +1151,8 @@ const add_clauses_for_table = async ({
         query: players_query,
         params: column_params,
         row_axes,
-        data_view_options
+        data_view_options,
+        query_context: data_view_options.query_context
       })
     }
     const main_select_result = get_main_select_string({
@@ -1162,8 +1163,7 @@ const add_clauses_for_table = async ({
       table_name,
       output_select_mapping,
       row_axes,
-      data_view_options,
-      query_context: data_view_options.query_context
+      data_view_options
     })
 
     select_strings.push(...main_select_result.select)
@@ -1197,8 +1197,7 @@ const add_clauses_for_table = async ({
         column_definition,
         table_name,
         row_axes,
-        data_view_options,
-        query_context: data_view_options.query_context
+        data_view_options
       })
       with_select_strings.push(...with_select_result.select)
       group_by_strings.push(...with_select_result.group_by)
@@ -1224,7 +1223,8 @@ const add_clauses_for_table = async ({
         query: players_query,
         params: where_clause.params,
         row_axes,
-        data_view_options
+        data_view_options,
+        query_context: data_view_options.query_context
       })
     }
 
@@ -1276,8 +1276,7 @@ const add_clauses_for_table = async ({
           column_definition,
           table_name,
           row_axes,
-          data_view_options,
-          query_context: data_view_options.query_context
+          data_view_options
         })
         with_select_strings.push(...with_select_result.select)
         group_by_strings.push(...with_select_result.group_by)
@@ -1475,7 +1474,8 @@ const add_clauses_for_table = async ({
         params: group_column_params,
         join_type: where_clauses.length ? 'INNER' : 'LEFT',
         row_axes,
-        data_view_options
+        data_view_options,
+        query_context: data_view_options.query_context
       })
     } else if (
       !skip_join_for_offset_range &&

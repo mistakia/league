@@ -69,9 +69,12 @@ const get_select_string = ({
   output_select_mapping = {},
   row_axes,
   is_main_select = false,
-  data_view_options = {},
-  query_context = null
+  data_view_options = {}
 }) => {
+  // Derived, never accepted as a parameter -- see the note in where-string.mjs.
+  // data_view_options.query_context is assigned before any column hook fires,
+  // so a caller-supplied copy can only ever disagree with it by being absent.
+  const query_context = data_view_options?.query_context ?? null
   // Output-aggregator dispatch (Phase C step 1): when a retrofitted column
   // is invoked with `params.output`, the dispatcher pre-resolved the outer
   // SELECT via the aggregator plugin. Return its raw SQL here so the main
@@ -166,7 +169,7 @@ const get_select_string = ({
       : 'pid'
     const correlation_ref = is_team_grain
       ? resolve_team_join_target({
-          query_context: query_context || { data_view_options },
+          query_context,
           params: column_params
         })
       : data_view_options.pid_reference

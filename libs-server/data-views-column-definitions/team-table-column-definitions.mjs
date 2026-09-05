@@ -27,8 +27,20 @@ const get_player_bridge = ({ row_axes = [] } = {}) => {
   return PLAYER_TEAMS_CTE
 }
 
-const is_player_row_grain = (query_context) =>
-  query_context && query_context.row_grain_id !== 'team'
+// Throws rather than defaulting on a missing context. A falsy query_context
+// used to fall through to the team-grain branch, which is a VALID branch --
+// so a caller that forgot to pass it got well-formed SQL for the wrong grain
+// instead of an error. That is exactly how the WHERE emitter shipped broken:
+// it emitted `<player_bridge_cte>.team_code` against a CTE whose only team
+// column is the `teams` array.
+const is_player_row_grain = (query_context) => {
+  if (!query_context) {
+    throw new Error(
+      'team-table column hook invoked without query_context -- cannot tell player row_grain from team row_grain'
+    )
+  }
+  return query_context.row_grain_id !== 'team'
+}
 
 const ensure_team_values_cte = ({ query, query_context }) => {
   if (!query_context.registered_ctes) query_context.registered_ctes = new Set()
@@ -110,8 +122,12 @@ const make_column = ({ column_name }) => ({
   source: { grain: 'team', supports_row_axes: ['year', 'week'] },
   get_cache_info: team_table_get_cache_info,
 
+  // Tolerates a missing query_context where the SQL-emitting hooks below do
+  // not: get_table_name is also called during FROM resolution, before
+  // build_query_context has run, and there the answer is only used to name a
+  // candidate from-table. Absence means "not yet known", not "team grain".
   table_alias: ({ row_axes = [], query_context = null } = {}) => {
-    if (is_player_row_grain(query_context)) {
+    if (query_context && is_player_row_grain(query_context)) {
       return get_player_bridge({ row_axes })
     }
     return 'team'
@@ -159,8 +175,7 @@ const make_column = ({ column_name }) => ({
     return `${table_name}.${column_name}`
   },
 
-  register_ctes: async ({ query, row_axes, data_view_options }) => {
-    const query_context = data_view_options?.query_context
+  register_ctes: async ({ query, row_axes, query_context }) => {
     if (!is_player_row_grain(query_context)) return
     ensure_player_bridge_cte({ query, query_context, row_axes })
     if (column_name !== 'team_code') {
@@ -168,8 +183,7 @@ const make_column = ({ column_name }) => ({
     }
   },
 
-  join: async ({ query, row_axes, data_view_options, join_type }) => {
-    const query_context = data_view_options?.query_context
+  join: async ({ query, row_axes, query_context, join_type }) => {
     if (!is_player_row_grain(query_context)) return
     ensure_player_bridge_cte({ query, query_context, row_axes })
     if (column_name !== 'team_code') {
