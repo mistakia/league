@@ -50,8 +50,11 @@ export const base_url = 'https://base.tint.space'
 // is a claim a reader cannot check; three named sources and the two things
 // he can do with them are the same statement in a form he can go verify, in
 // one click, from the entry directly below.
+// PRESENT TENSE, NOT A ROADMAP. "are next" filed two shipped capabilities
+// under future work, which undersells them and dates the sentence the moment
+// either lands properly.
 export const hero_deck =
-  'Projections, betting markets and play-by-play, in tables you build and save. Agent-built views and league import are next.'
+  'Projections, betting markets and play-by-play, in tables you build and save — or an agent builds for you. Leagues import from Sleeper and ESPN.'
 
 // The hero's two actions. The primary is the strongest thing the platform
 // ships and the one that needs no account; the secondary is the claim the

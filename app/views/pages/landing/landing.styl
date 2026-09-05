@@ -168,13 +168,13 @@
 // the two lines of an entry closer still.
 .landing__section
   prose_section_band()
-  margin-top 64px
+  margin-top 44px
 
   &:first-of-type
     prose_section_band(2px)
 
   @media (max-width 640px)
-    margin-top 48px
+    margin-top 36px
 
 // A standing label under the band rule, not a headline. The entries below are
 // set larger than it and that is the newspaper order — a section head names
@@ -187,8 +187,27 @@
 // colour, tracking) while leaving font-size to come through, so an unqualified
 // rule here renders at the new SIZE in the old FACE and reads as a change that
 // landed.
+// RIGHT-ALIGNED IN THE RAIL, and that is what separates it from the entry
+// labels below it. The section head and the entry labels sat in the same 208px
+// column on the same left edge, so a head read as one more item in the list
+// rather than as the thing naming them — face and size were carrying that
+// distinction alone and were losing.
+//
+// Aligning it to the gutter instead puts the head against the prose it
+// introduces and leaves the entry labels alone on the left edge, so the column
+// reads as a list with a standing head rather than as a list with an odd first
+// row. The entry labels do not move; this is the one element that leaves the
+// left edge, which is why it can afford to.
+//
+// LEFT AGAIN ON A PHONE, where the rail is `display block`: with no column to
+// sit at the right of, the head would go to the far edge of the screen and the
+// alignment would read as an accident.
 .landing h2.landing__section-title
   prose_section_label()
+  text-align right
+
+  @media (max-width 640px)
+    text-align left
 
 // One line under the heading saying what the group is for, so a reader can
 // skip a whole section without reading its entries. Muted, because it is
@@ -200,10 +219,10 @@
 
 .landing__section-head
   prose_rail()
-  margin-bottom 40px
+  margin-bottom 26px
 
   @media (max-width 640px)
-    margin-bottom 32px
+    margin-bottom 22px
 
     .landing__section-title
       margin-bottom 0.6em
@@ -218,8 +237,8 @@
 // entry takes none, so the rule never doubles up under the band above it.
 .landing__link
   prose_rail()
-  padding-top 20px
-  margin-top 20px
+  padding-top 14px
+  margin-top 14px
   border-top 1px solid $prose_rule
 
   &:first-child
@@ -284,8 +303,8 @@
 // is why it is a bare div: the closing gesture is the rule, and the page's own
 // bottom padding is the space under it.
 .landing__end
-  margin-top 64px
+  margin-top 44px
   border-top 2px solid $prose_rule_heavy
 
   @media (max-width 640px)
-    margin-top 48px
+    margin-top 36px

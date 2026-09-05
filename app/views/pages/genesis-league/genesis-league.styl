@@ -93,13 +93,13 @@
 // closer than the sections.
 .genesis-league__section
   prose_section_band()
-  margin-top 64px
+  margin-top 44px
 
   &:first-of-type
     prose_section_band(2px)
 
   @media (max-width 640px)
-    margin-top 48px
+    margin-top 36px
 
 // The section is the parent of the groups inside it, and what separates them is
 // the FACE: the section head is sans under a band rule, a group label is mono
@@ -109,12 +109,20 @@
 // `.genesis-league h2, h3` block above is (0,1,1) and beats a bare class on
 // family, weight and tracking while letting font-size through, which renders as
 // a half-applied label.
+// RIGHT-ALIGNED AT THE RAIL'S LABEL WIDTH, matching the landing page's section
+// head. This one is not inside a rail — it is a full-width child of the section
+// — so it takes the column's width explicitly from the shared token rather
+// than reproducing 208px as a second literal.
 .genesis-league h2.genesis-league__section-title
   prose_section_label()
-  margin-bottom 40px
+  width $prose_rail_label
+  text-align right
+  margin-bottom 26px
 
   @media (max-width 640px)
-    margin-bottom 32px
+    width auto
+    text-align left
+    margin-bottom 22px
 
 // Each group is a rail row: its label in the left column, its prose beside it.
 // A hairline above each one separates them without drawing a box around
@@ -124,8 +132,8 @@
 // rule never doubles up under the band above it.
 .genesis-league__group
   prose_rail()
-  padding-top 24px
-  margin-top 24px
+  padding-top 18px
+  margin-top 18px
   border-top 1px solid $prose_rule
 
   &:first-of-type
@@ -177,8 +185,8 @@
 // closes the page the way the first one opened it.
 .genesis-league__closing
   display flex
-  margin-top 64px
-  padding-top 36px
+  margin-top 44px
+  padding-top 26px
   border-top 2px solid $prose_rule_heavy
   font-family $prose_mono
   font-weight $prose_bold
@@ -186,4 +194,4 @@
   letter-spacing -0.01em
 
   @media (max-width 640px)
-    margin-top 48px
+    margin-top 36px

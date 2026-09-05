@@ -179,7 +179,7 @@ prose_section_title()
 // as two levels of break — the header is separated from the page by the same
 // rule that opens the first section.
 prose_section_band(weight = 1px)
-  padding-top 20px
+  padding-top 16px
   border-top weight solid $prose_rule_heavy
 
 // THE LABEL RAIL — the worksheet half of the language, and the one structure
@@ -214,9 +214,15 @@ prose_section_band(weight = 1px)
 //
 // Inert below 640px, where the rail is `display block` and the label sits above
 // its own paragraph rather than beside it.
+// One token for the label column, because the section head on the Genesis page
+// is NOT inside a rail — it is a full-width child that has to reproduce the
+// column's width to sit in the same place as the landing page's. Two literals
+// would drift the moment either moved.
+$prose_rail_label = 208px
+
 prose_rail()
   display grid
-  grid-template-columns 208px 1fr
+  grid-template-columns $prose_rail_label 1fr
   column-gap 28px
   align-items baseline
 

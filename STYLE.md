@@ -13,7 +13,9 @@ the wordmark.
 - **Rules, not boxes** — three rule weights do the work a card would otherwise do
 - **One ground** — every surface is `$backgroundColor`; paper is for controls, not for pages
 - **One accent** — a single deep red, spent on hover, focus and error and nothing else
-- **One left edge** — every label and every headline aligns to it; nothing indents for decoration
+- **One left edge, with one exception** — every headline and every entry label aligns to it. The
+  section head is the exception: it is right-aligned in the rail's label column, so it reads as the
+  thing naming the list rather than as its first row
 - **Restraint at rest** — colour and emphasis arrive on interaction, not on load
 
 ## Two Languages, One Ground
@@ -110,6 +112,15 @@ rules are the same object — a short mono label naming a thing, and prose about
 the labels form a column that can be read down without reading any of the prose beside them.
 Because they are the same object they take the same treatment on both pages: a mono label in the
 rail, prose beside it, and a hairline above each row but the first.
+
+The label column's width is `$prose_rail_label`, one token rather than a literal, because the
+Genesis section head is not inside a rail — it is a full-width child that reproduces the column's
+width to sit where the landing page's does.
+
+**The section head is right-aligned in that column**, and the entry labels are not. Both sat on the
+same left edge, so a head read as one more item in the list; face and size were carrying that
+distinction alone and losing. It goes back to the left below 640px, where the rail is `display
+block` and there is no column for it to sit at the right of.
 
 **The two cells sit on one baseline**, via `align-items: baseline` on the grid. The label is
 smaller than the prose and in a different face, so aligning the boxes left their first baselines
