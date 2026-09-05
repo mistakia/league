@@ -40,8 +40,18 @@ export const base_url = 'https://base.tint.space'
 // NO COUNTS OR SEASON NUMBERS HERE. test/libs-shared.social-meta-copy.spec.mjs
 // scans the landing copy for a hardcoded season count, since a number typed
 // into a sentence goes stale in September and nothing reports it.
+// LEADS WITH THE DATA AND NOT WITH THE HOSTED LEAGUE. The league this was
+// built for is one of the things the platform runs, not the subject — a
+// visitor arriving cold is doing NFL research far more often than he is
+// shopping for a league to join, and a deck that opens on a dynasty league
+// speaks to the rarer of the two.
+//
+// It NAMES the sources rather than characterising them. "Comprehensive data"
+// is a claim a reader cannot check; three named sources and the two things
+// he can do with them are the same statement in a form he can go verify, in
+// one click, from the entry directly below.
 export const hero_deck =
-  'Dynasty leagues with a salary cap. NFL projections, betting markets and play-by-play, open to anyone.'
+  'Projections, betting markets and play-by-play, in tables you build and save. Agent-built views and league import are next.'
 
 // The hero's two actions. The primary is the strongest thing the platform
 // ships and the one that needs no account; the secondary is the claim the
@@ -143,20 +153,33 @@ export const landing_sections = [
   },
   {
     title: 'Leagues',
+    // NAMES WHAT THE SOFTWARE DOES, NOT WHAT THE OPERATOR HOSTS. This said
+    // "The platform hosts dynasty leagues — …", which made the section an
+    // offer of a service and put the one league that exists at the centre of
+    // the front door. The same list of mechanisms reads as a feature set
+    // instead, and every one of them is checkable in the live league linked
+    // below — which is the point of naming them rather than calling the
+    // ruleset deep.
     blurb:
-      'The platform hosts dynasty leagues — auctions, rookie drafts, waivers, restricted free agency and a salary cap.',
+      'Auctions, rookie drafts, waivers, restricted free agency, franchise tags and a salary cap.',
     links: [
-      {
-        label: 'Genesis League',
-        to: '/genesis-league',
-        description:
-          'The dynasty league this was built for. Published constitution, public transaction record.'
-      },
+      // THE SOFTWARE FIRST, THE ONE LEAGUE SECOND. These were the other way
+      // round, which put the hosted league at the top of the section and made
+      // the front office read as a detail of it. The front office is the
+      // functionality; Genesis is one league running on it, and the reason it
+      // stays on the page at all is that it is the thing a reader can open to
+      // check that any of the above is real.
       {
         label: 'League front office',
         to: '/leagues/1',
         description:
           'Rosters, standings, matchups, trades and the live auction, as a manager sees them.'
+      },
+      {
+        label: 'Genesis League',
+        to: '/genesis-league',
+        description:
+          'The dynasty league this was built for. Published constitution, public transaction record.'
       }
       // League import used to sit here. It moved to `Accounts` above, where it
       // belongs beside the other capability that runs work on a reader's
