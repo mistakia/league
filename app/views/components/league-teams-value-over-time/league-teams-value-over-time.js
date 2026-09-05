@@ -145,10 +145,6 @@ export default function LeagueTeamsValueOverTime({
       enabled: false
     },
 
-    exporting: {
-      enabled: true
-    },
-
     plotOptions: {
       series: {
         label: {
